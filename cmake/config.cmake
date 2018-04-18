@@ -56,6 +56,15 @@ set(OMR_THREAD_LIB "j9thrstatic" CACHE STRING "Name of the thread library to lin
 set(OMR_TRACE_LIB "omrtrace" CACHE STRING "Name of the trace library to link against")
 
 ###
+### Glue library names
+###
+
+set(OMR_GC_GLUE_TARGET "NOTFOUND" CACHE STRING "The gc glue target, must be interface library")
+set(OMR_UTIL_GLUE_TARGET "NOTFOUND" CACHE STRING "The util glue target, must be interface library")
+set(OMR_RAS_GLUE_TARGET "NOTFOUND" CACHE STRING "The ras glue target, must be interface library")
+set(OMR_CORE_GLUE_TARGET "NOTFOUND" CACHE STRING "The core glue target, must be and interface library")
+
+###
 ### Boolean Feature Flags
 ###
 

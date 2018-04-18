@@ -4359,8 +4359,9 @@ esac
 $as_echo "$OMR_TOOLCHAIN" >&6; }
 
 # Default OMRGLUE to example/glue if it was not specified
-OMRGLUE=${OMRGLUE:-"./example/glue"}
 
+OMRGLUE=${OMRGLUE:-"./example/glue"}
+OMRGLUE_INCLUDES=${OMRGLUE_INCLUDES:-"./example/include"}
 
 ## Default Variables
 

@@ -1,5 +1,5 @@
 ###############################################################################
-# Copyright (c) 2015, 2017 IBM Corp. and others
+# Copyright (c) 2015, 2018 IBM Corp. and others
 # 
 # This program and the accompanying materials are made available under
 # the terms of the Eclipse Public License 2.0 which accompanies this
@@ -210,8 +210,9 @@ AS_CASE([$OMR_TOOLCHAIN],
 AC_MSG_RESULT([$OMR_TOOLCHAIN])
 
 # Default OMRGLUE to example/glue if it was not specified
-OMRGLUE=${OMRGLUE:-"./example/glue"}
 
+OMRGLUE=${OMRGLUE:-"./example/glue"}
+OMRGLUE_INCLUDES=${OMRGLUE_INCLUDES:-"./example/include"}
 
 ## Default Variables
 

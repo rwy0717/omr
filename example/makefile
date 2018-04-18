@@ -67,7 +67,8 @@ MODULE_INCLUDES += \
   $(OMRGC_IPATH) \
   $(top_srcdir)/fvtest/util \
   $(OMR_GTEST_INCLUDES) \
-  ./glue
+  ./glue \
+  ./include
 
 # Specify the search path for argmain.cpp.
 # OMR_GTEST_DIR is a special variable defined by configure.mk. It contains the

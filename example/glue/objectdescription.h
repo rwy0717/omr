@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2016 IBM Corp. and others
+ * Copyright (c) 2014, 2018 IBM Corp. and others
  *
  * This program and the accompanying materials are made available under
  * the terms of the Eclipse Public License 2.0 which accompanies this
@@ -28,8 +28,17 @@
 /**
  * Object token definitions to be used by OMR components.
  */
-typedef uintptr_t* languageobjectptr_t;
-typedef uintptr_t* omrobjectptr_t;
+
+namespace OMR {
+namespace App {
+
+class Object;
+
+}  /* namespace App */
+}  /* namespace OMR */
+
+typedef OMR::App::Object* languageobjectptr_t;
+typedef OMR::App::Object* omrobjectptr_t;
 typedef uintptr_t* omrarrayptr_t;
 
 #if defined (OMR_GC_COMPRESSED_POINTERS)
