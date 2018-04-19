@@ -34,7 +34,7 @@
 class GC_SlotObject : public OMR::GC::CompressedSlotHandle
 {
 public:
-	GC_SlotObject(void* vm, OMR::GC::CompressedSlot* slot) : OMR::GC::CompressedSlotHandle(slot, (OMR_VM *)omrVM)->_compressedPointersShift)
+	GC_SlotObject(void* vm, OMR::GC::CompressedSlot* slot) : OMR::GC::CompressedSlotHandle(slot, (OMR_VM *)vm)->_compressedPointersShift)
 	{
 	}
 };
