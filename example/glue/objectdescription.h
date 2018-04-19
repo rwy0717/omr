@@ -19,8 +19,10 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-#if !defined(OBJECTDESCRIPTION_H_)
-#define OBJECTDESCRIPTION_H_
+#if !defined(OMR_APP_OBJECTDESCRIPTION_H_)
+#define OMR_APP_OBJECTDESCRIPTION_H_
+
+#include "omrcfg.h"
 
 #include "omrcomp.h"
 #include "omr.h"
@@ -39,7 +41,7 @@ class Object;
 
 typedef OMR::App::Object* languageobjectptr_t;
 typedef OMR::App::Object* omrobjectptr_t;
-typedef uintptr_t* omrarrayptr_t;
+typedef void* omrarrayptr_t;
 
 #if defined (OMR_GC_COMPRESSED_POINTERS)
 typedef uint32_t fomrobject_t;
@@ -49,4 +51,4 @@ typedef uintptr_t fomrobject_t;
 typedef uintptr_t fomrarray_t;
 #endif
 
-#endif /* OBJECTDESCRIPTION_H_ */
+#endif /* OMR_APP_OBJECTDESCRIPTION_H_ */
