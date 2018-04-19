@@ -23,6 +23,8 @@
 #if !defined(OMR_APP_OBJECT_HPP_)
 #define OMR_APP_OBJECT_HPP_
 
+#include <OMR/App/SlotHandle.hpp>
+
 #include <omrcfg.h>
 #include <cstdlib>
 #include <stdint.h>
@@ -56,14 +58,14 @@ public:
 
 	void assign(size_t sizeInBytes, ObjectFlags flags) { _value = (sizeInBytes << SIZE_SHIFT) | flags; }
 
-	fomrobject_t raw() const { return _value; }
+	Slot raw() const { return _value; }
 
-	void raw(fomrobject_t raw) { _value = raw; }
+	void raw(Slot raw) { _value = raw; }
 
 private:
 	static const size_t SIZE_SHIFT = sizeof(ObjectFlags)*8;
 
-	fomrobject_t _value;
+	Slot _value;
 };
 
 class Object
@@ -75,15 +77,15 @@ public:
 
 	size_t sizeOfSlotsInBytes() const { return header.sizeInBytes() - sizeof(ObjectHeader); }
 
-	size_t slotCount() const { return sizeOfSlotsInBytes() / sizeof(fomrobject_t); }
+	size_t slotCount() const { return sizeOfSlotsInBytes() / sizeof(Slot); }
 
-	fomrobject_t* slots() { return (fomrobject_t*)(this + 1); }
+	Slot* slots() { return (Slot*)(this + 1); }
 
-	const fomrobject_t* slots() const { return (fomrobject_t*)(this + 1); }
+	const Slot* slots() const { return (Slot*)(this + 1); }
 
-	fomrobject_t* begin() { return slots(); }
+	Slot* begin() { return slots(); }
 
-	fomrobject_t* end() { return begin() + slotCount(); }
+	Slot* end() { return begin() + slotCount(); }
 };
 
 } /* namespace App */
