@@ -77,5 +77,4 @@ target_sources(omr_example_core_glue INTERFACE
 target_link_libraries(omr_example_core_glue
 	INTERFACE
 		omr_example_base
-		omrgc
 )

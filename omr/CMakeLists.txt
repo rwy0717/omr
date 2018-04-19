@@ -70,6 +70,8 @@ if(OMR_GC)
 	)
 
 	target_link_libraries(omrcore
+		PUBLIC
+			omrgc
 		PRIVATE
 			${OMR_CORE_GLUE_TARGET}
 	)
