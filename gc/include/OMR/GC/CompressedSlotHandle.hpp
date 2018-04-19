@@ -51,13 +51,13 @@ public:
 	 * Read reference from slot
 	 * @return address of object slot reference to.
 	 */
-	MMINLINE omrobjectptr_t readReferenceFromSlot() { return convertPointerFromToken(*_slot); }
+	MMINLINE omrobjectptr_t readReferenceFromSlot() const { return convertPointerFromToken(*_slot); }
 
 	/**
 	 * Write reference to slot if it was changed only.
 	 * @param reference address of object should be written to slot
 	 */
-	MMINLINE void writeReferenceToSlot(omrobjectptr_t reference)
+	MMINLINE void writeReferenceToSlot(omrobjectptr_t reference) const
 	{
 		CompressedSlot compressed = convertTokenFromPointer(reference);
 		if (compressed != *_slot) {
@@ -66,18 +66,11 @@ public:
 	}
 
 	/**
-	 * Return slot address. This address must be used as read only
-	 * Created for compatibility with existing code
-	 * @return slot address
-	 */
-	MMINLINE CompressedSlot* readAddressFromSlot() { return (CompressedSlot*)_slot; }
-
-	/**
 	 * Atomically replace heap reference. It is accepted to fail - some other thread
 	 * might have raced us and put a more up to date value.
 	 * @return true if write succeeded
 	 */
-	MMINLINE bool atomicWriteReferenceToSlot(omrobjectptr_t oldReference, omrobjectptr_t newReference)
+	MMINLINE bool atomicWriteReferenceToSlot(omrobjectptr_t oldReference, omrobjectptr_t newReference) const
 	{
 		/* Caller should ensure oldReference != newReference */
 		CompressedSlot compressedOld = convertTokenFromPointer(oldReference);
@@ -91,6 +84,18 @@ public:
 	}
 
 	/**
+	 * Returns true if the referrent is a leaf object. Used as a hint to speed up some operations.
+	 */
+	bool isReferentLeafObject() const { return false; }
+
+	/**
+	 * Return slot address. This address must be used as read only
+	 * Created for compatibility with existing code
+	 * @return slot address
+	 */
+	MMINLINE CompressedSlot* readAddressFromSlot() const { return (CompressedSlot*)_slot; }
+
+	/**
 	 *	Update of slot address.
 	 *	Must be used by friends only for fast address replacement
 	 *	@param slot slot address
@@ -98,12 +103,12 @@ public:
 	MMINLINE void writeAddressToSlot(CompressedSlot* slot) { _slot = slot; }
 
 protected:
-	MMINLINE omrobjectptr_t convertPointerFromToken(CompressedSlot token)
+	MMINLINE omrobjectptr_t convertPointerFromToken(CompressedSlot token) const
 	{
 		return (omrobjectptr_t)((uintptr_t)token << _shift);
 	}
 
-	MMINLINE CompressedSlot convertTokenFromPointer(omrobjectptr_t pointer)
+	MMINLINE CompressedSlot convertTokenFromPointer(omrobjectptr_t pointer) const
 	{
 		return (CompressedSlot)((uintptr_t)pointer >> _shift);
 	}

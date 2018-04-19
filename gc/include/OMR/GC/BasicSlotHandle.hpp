@@ -55,13 +55,13 @@ public:
 	 * Read reference from slot
 	 * @return address of object slot reference to.
 	 */
-	MMINLINE omrobjectptr_t readReferenceFromSlot() { return (omrobjectptr_t)*_slot; }
+	MMINLINE omrobjectptr_t readReferenceFromSlot() const { return (omrobjectptr_t)*_slot; }
 
 	/**
 	 * Write reference to slot if it was changed only.
 	 * @param reference address of object should be written to slot
 	 */
-	MMINLINE void writeReferenceToSlot(omrobjectptr_t reference)
+	MMINLINE void writeReferenceToSlot(omrobjectptr_t reference) const
 	{
 		BasicSlot value = (BasicSlot)reference;
 		if (value != *_slot) {
@@ -74,7 +74,7 @@ public:
 	 * might have raced us and put a more up to date value.
 	 * @return true if write succeeded
 	 */
-	MMINLINE bool atomicWriteReferenceToSlot(omrobjectptr_t oldReference, omrobjectptr_t newReference)
+	MMINLINE bool atomicWriteReferenceToSlot(omrobjectptr_t oldReference, omrobjectptr_t newReference) const
 	{
 		return ((uintptr_t)oldReference ==
 			MM_AtomicOperations::lockCompareExchange(
@@ -82,11 +82,16 @@ public:
 	}
 
 	/**
+	 * Returns true if the referrent is a leaf object. Used as a hint to speed up some operations.
+	 */
+	bool isReferentLeafObject() const { return false; }
+
+	/**
 	 * Return slot address. This address must be used as read only
 	 * Created for compatibility with existing code
 	 * @return slot address
 	 */
-	MMINLINE BasicSlot* readAddressFromSlot() { return (BasicSlot*)_slot; }
+	MMINLINE BasicSlot* readAddressFromSlot() const { return (BasicSlot*)_slot; }
 
 	/**
 	 *	Update of slot address.
