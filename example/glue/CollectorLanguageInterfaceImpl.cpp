@@ -49,7 +49,8 @@
 #include "OMRVMInterface.hpp"
 #include "ParallelGlobalGC.hpp"
 #include "Scavenger.hpp"
-#include "SlotObject.hpp"
+
+#include <OMR/App/ObjectTraversal.hpp>
 
 /**
  * Initialization
