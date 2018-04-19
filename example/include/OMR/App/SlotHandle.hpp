@@ -32,7 +32,7 @@ namespace OMR
 namespace App
 {
 
-#if OMR_GC_COMPRESSED_POINTERS
+#if defined(OMR_GC_COMPRESSED_POINTERS)
 typedef OMR::GC::CompressedSlot Slot;
 typedef OMR::GC::CompressedSlotHandle SlotHandle;
 #else

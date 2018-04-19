@@ -207,6 +207,7 @@ protected:
 #if defined(OMR_GC_OBJECT_MAP)
 	MM_ObjectMap *_objectMap;
 #endif /* defined(OMR_GC_OBJECT_MAP) */
+	OMR::App::ObjectTraversal* _objectTraversal;
 
 public:
 	bool _lazyCollectorInit; /**< Are we initializing without a collector? */
@@ -779,6 +780,16 @@ public:
 
 	MMINLINE OMR_VM* getOmrVM() { return _omrVM; }
 	MMINLINE void setOmrVM(OMR_VM* omrVM) { _omrVM = omrVM; }
+
+	MMINLINE OMR::App::ObjectTraversal*
+	getObjectTraversal() const {
+		return _objectTraversal;
+	}
+
+	MMINLINE void
+	setObjectTraversal(OMR::App::ObjectTraversal* objectTraversal) const {
+		_objectTraversal = objectTraversal;
+	}
 
 	/**
 	 * Gets a pointer to the memory forge

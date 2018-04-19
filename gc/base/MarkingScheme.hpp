@@ -38,6 +38,25 @@
 #include "ObjectScannerState.hpp"
 #include "WorkStack.hpp"
 
+#include <OMR/App/ObjectTraversal.hpp>
+
+class MM_MarkingScheme;
+
+class MarkingObjectVisitor
+{
+public:
+	MarkingObjectVisitor(MM_EnvironmentBase* env, MM_MarkingScheme* markingScheme) : _env(env), _markingScheme(markingScheme) {}
+
+	/**
+	 * A callback that marks the referrent. The refferent is determined by reading from the slot handle.
+	 */
+	void edge(omrobjectptr_t object, const OMR::App::SlotHandle& handle) const;
+
+private:
+	MM_EnvironmentBase* _env;
+	MM_MarkingScheme* _markingScheme;
+};
+
 /**
  * @todo Provide class documentation
  */
@@ -250,32 +269,12 @@ public:
 	MMINLINE uintptr_t
 	scanObject(MM_EnvironmentBase *env, omrobjectptr_t objectPtr, MM_MarkingSchemeScanReason reason, uintptr_t sizeToDo = UDATA_MAX)
 	{
-		GC_ObjectScannerState objectScannerState;
-		GC_ObjectScanner *objectScanner = _delegate.getObjectScanner(env, objectPtr, &objectScannerState, reason, &sizeToDo);
-		if (NULL != objectScanner) {
-			bool isLeafSlot = false;
-			GC_SlotObject *slotObject;
-#if defined(OMR_GC_LEAF_BITS)
-			while (NULL != (slotObject = objectScanner->getNextSlot(isLeafSlot))) {
-#else /* OMR_GC_LEAF_BITS */
-			while (NULL != (slotObject = objectScanner->getNextSlot())) {
-#endif /* OMR_GC_LEAF_BITS */
-				fixupForwardedSlot(slotObject);
-
-				/* with concurrentMark mutator may NULL the slot so must fetch and check here */
-				inlineMarkObject(env, slotObject->readReferenceFromSlot(), isLeafSlot);
-			}
-		}
-
-		/* Due to concurrent marking and packet overflow _bytesScanned may be much larger than the total live set
-		 * because objects may be scanned multiple times.
-		 */
-		env->_markStats._bytesScanned += sizeToDo;
+		MarkingObjectVisitor visitor(env, this);
+		_extensions->_traversal->visit(objectPtr, visitor);
 		if (SCAN_REASON_PACKET == reason) {
 			env->_markStats._objectsScanned += 1;
 		}
-
-		return sizeToDo;
+		return 0; // TODO: return something?
 	}
 
 	MM_MarkingDelegate *getMarkingDelegate() { return &_delegate; }
@@ -305,21 +304,21 @@ public:
 	 * in the final phase of Concurrent GC when we scan Nursery. 
 	 */
 	
-	void fixupForwardedSlot(GC_SlotObject *slotObject) {
+	void fixupForwardedSlot(const OMR::App::SlotHandle& slotHandle) {
 #if defined(OMR_GC_CONCURRENT_SCAVENGER)
 		if (_extensions->isConcurrentScavengerEnabled() && _extensions->isScavengerBackOutFlagRaised()) {
-			MM_ForwardedHeader forwardHeader(slotObject->readReferenceFromSlot());
+			MM_ForwardedHeader forwardHeader(slotHandle->readReferenceFromSlot());
 			omrobjectptr_t forwardPtr = forwardHeader.getNonStrictForwardedObject();
 	
 			if ((NULL != forwardPtr) && !isConcurrentMarkInProgress()) {
 				if (forwardHeader.isSelfForwardedPointer()) {
 					forwardHeader.restoreSelfForwardedPointer();
 				} else {
-					slotObject->writeReferenceToSlot(forwardPtr);
+					slotHandle->writeReferenceToSlot(forwardPtr);
 				}
 			}
 		}
-#endif /* OMR_GC_CONCURRENT_SCAVENGER */ 			
+#endif /* OMR_GC_CONCURRENT_SCAVENGER */
 	}
 
 	/**
@@ -339,5 +338,11 @@ public:
 	}
 };
 
-#endif /* MARKINGSCHEME_HPP_ */
+inline void MarkingObjectVisitor::edge(omrobjectptr_t object, const OMR::App::SlotHandle& handle) const
+{
+	_markingScheme->fixupForwardedSlot(handle);
+	_markingScheme->inlineMarkObject(_env, handle.readReferenceFromSlot(), handle.isReferentLeafObject());
+	_env->_markStats._bytesScanned += 0; // TODO RWY: Stats and incremental scanning.
+}
 
+#endif /* MARKINGSCHEME_HPP_ */

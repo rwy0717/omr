@@ -23,6 +23,8 @@
 #if !defined(OBJECTMODELBASE_HPP_)
 #define OBJECTMODELBASE_HPP_
 
+#include <OMR/App/ObjectTraversal.hpp>
+
 #if defined(OMR_EXAMPLE)
 #define OBJECT_MODEL_MODRON_ASSERTIONS
 #endif /* defined(OMR_EXAMPLE) */
@@ -87,6 +89,7 @@ class GC_ObjectModelBase : public MM_BaseVirtual
  */
 private:
 	GC_ObjectModelDelegate _delegate;	/**< instance of object model delegate class */
+	OMR::App::ObjectTraversal _traversal;
 
 protected:
 	uintptr_t _objectAlignmentInBytes; 	/**< cached copy of heap object alignment factor, in bytes */
@@ -778,7 +781,7 @@ public:
 	 * Constructor.
 	 */
 	GC_ObjectModelBase()
-		: _delegate((fomrobject_t)OMR_OBJECT_METADATA_FLAGS_MASK)
+		: _delegate((fomrobject_t)OMR_OBJECT_METADATA_FLAGS_MASK),
 	{
 		_typeId = __FUNCTION__;
 #if defined(OBJECT_MODEL_MODRON_ASSERTIONS)

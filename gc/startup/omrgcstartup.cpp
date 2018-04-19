@@ -114,6 +114,8 @@ heapCreationHelper(OMR_VM *omrVM, MM_StartupManager *startupManager, bool create
 		goto done;
 	}
 
+	extensions->setObjectTraversal(startupManager->getObjectTraversal());
+
 	extensions->heap = extensions->configuration->createHeap(&envBase, extensions->memoryMax);
 	if (NULL == extensions->heap) {
 		omrtty_printf("Failed to create heap.\n");
