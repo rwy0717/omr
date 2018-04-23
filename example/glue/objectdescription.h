@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2016 IBM Corp. and others
+ * Copyright (c) 2014, 2018 IBM Corp. and others
  *
  * This program and the accompanying materials are made available under
  * the terms of the Eclipse Public License 2.0 which accompanies this
@@ -19,8 +19,10 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-#if !defined(OBJECTDESCRIPTION_H_)
-#define OBJECTDESCRIPTION_H_
+#if !defined(OMRAPP_OBJECTDESCRIPTION_H_)
+#define OMRAPP_OBJECTDESCRIPTION_H_
+
+#include "omrcfg.h"
 
 #include "omrcomp.h"
 #include "omr.h"
@@ -28,8 +30,15 @@
 /**
  * Object token definitions to be used by OMR components.
  */
-typedef uintptr_t* languageobjectptr_t;
-typedef uintptr_t* omrobjectptr_t;
+
+namespace OMRApp {
+
+class Object;
+
+}  /* namespace OMRApp */
+
+typedef OMRApp::Object* languageobjectptr_t;
+typedef OMRApp::Object* omrobjectptr_t;
 typedef uintptr_t* omrarrayptr_t;
 
 #if defined (OMR_GC_COMPRESSED_POINTERS)
@@ -40,4 +49,4 @@ typedef uintptr_t fomrobject_t;
 typedef uintptr_t fomrarray_t;
 #endif
 
-#endif /* OBJECTDESCRIPTION_H_ */
+#endif /* OMRAPP_OBJECTDESCRIPTION_H_ */

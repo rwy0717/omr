@@ -23,8 +23,8 @@
 #define OBJECTMODELDELEGATE_HPP_
 
 #include "objectdescription.h"
-
 #include "ForwardedHeader.hpp"
+#include "Object.hpp"
 
 class MM_AllocateInitialization;
 class MM_EnvironmentBase;
@@ -66,14 +66,6 @@ public:
  * Member functions
  */
 private:
-	/**
-	 * Get the total size (including header slot) of the object from the object header slot.
-	 */
-	uintptr_t
-	extractSizeFromObjectHeaderSlot(fomrobject_t headerSlot)
-	{
-		return headerSlot >> _objectHeaderSlotSizeShift;
-	}
 
 protected:
 public:
@@ -116,7 +108,7 @@ public:
 	MMINLINE uintptr_t
 	getObjectHeaderSizeInBytes(omrobjectptr_t objectPtr)
 	{
-		return sizeof(fomrobject_t);
+		return sizeof(OMRApp::ObjectHeader);
 	}
 
 	/**
@@ -144,8 +136,7 @@ public:
 	MMINLINE uintptr_t
 	getObjectSizeInBytesWithHeader(omrobjectptr_t objectPtr)
 	{
-		fomrobject_t *headerSlotAddress = (fomrobject_t *)objectPtr + _objectHeaderSlotOffset;
-		return extractSizeFromObjectHeaderSlot(*headerSlotAddress);
+		return objectPtr->header.sizeInBytes();
 	}
 
 	/**
@@ -220,7 +211,9 @@ public:
 	MMINLINE uintptr_t
 	getForwardedObjectSizeInBytes(MM_ForwardedHeader *forwardedHeader)
 	{
-		return extractSizeFromObjectHeaderSlot(forwardedHeader->getPreservedSlot());
+		OMRApp::ObjectHeader header;
+		header.raw(forwardedHeader->getPreservedSlot());
+		return header.sizeInBytes();
 	}
 
 	/**
