@@ -1,7 +1,7 @@
 #if !defined(OMR_OM_ID_HPP_)
 #define OMR_OM_ID_HPP_
 
-#include <OMR/Infra/HashUtilities.hpp>
+#include <OMR/Om/HashUtilities.hpp>
 #include <cstddef>
 #include <functional>
 
@@ -27,7 +27,7 @@ public:
 
 	constexpr RawId raw() const { return data_; }
 
-	constexpr std::size_t hash() const { return Infra::Hash::hash(data_); }
+	constexpr std::size_t hash() const { return Hash::hash(data_); }
 
 private:
 	static constexpr RawId HASH_SHIFT = 0x2;

@@ -3,7 +3,7 @@
 
 #include <OMR/Om/SlotDescriptor.hpp>
 
-#include <OMR/Infra/Span.hpp>
+#include <OMR/Om/Span.hpp>
 
 namespace OMR {
 namespace Om {
@@ -58,18 +58,18 @@ public:
 
 	Iterator end() const { return Iterator(attributes_.end(), offset_ + width_); }
 
-	Infra::Span<const SlotAttr> attributes() const { return attributes_; }
+	Span<const SlotAttr> attributes() const { return attributes_; }
 
 protected:
 	friend class Shape;
 
-	SlotDescriptorRange(Infra::Span<const SlotAttr> attributes,
+	SlotDescriptorRange(Span<const SlotAttr> attributes,
 	                    std::size_t offset,
 	                    std::size_t width)
 	        : attributes_(attributes), offset_(offset), width_(width) {}
 
 private:
-	const Infra::Span<const SlotAttr> attributes_;
+	const Span<const SlotAttr> attributes_;
 	std::size_t offset_;
 	std::size_t width_;
 };

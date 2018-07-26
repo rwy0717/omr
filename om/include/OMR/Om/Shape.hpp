@@ -9,7 +9,7 @@
 #include <OMR/Om/SlotDescriptorRange.hpp>
 #include <OMR/Om/TransitionSet.hpp>
 #include <OMR/Om/ValueSlotHandle.hpp>
-#include <OMR/Infra/Span.hpp>
+#include <OMR/Om/Span.hpp>
 
 namespace OMR {
 namespace Om {
@@ -61,12 +61,12 @@ public:
 	}
 
 	/// Get the Span of `SlotAttr` described by this shape.
-	Infra::Span<SlotAttr> instanceSlotAttrs() noexcept {
-		return Infra::Span<SlotAttr>(instanceSlotAttrs_, instanceSlotCount_);
+	Span<SlotAttr> instanceSlotAttrs() noexcept {
+		return Span<SlotAttr>(instanceSlotAttrs_, instanceSlotCount_);
 	}
 
-	Infra::Span<const SlotAttr> instanceSlotAttrs() const noexcept {
-		return Infra::Span<const SlotAttr>(instanceSlotAttrs_, instanceSlotCount_);
+	Span<const SlotAttr> instanceSlotAttrs() const noexcept {
+		return Span<const SlotAttr>(instanceSlotAttrs_, instanceSlotCount_);
 	}
 
 #if 0

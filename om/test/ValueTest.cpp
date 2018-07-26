@@ -80,13 +80,13 @@ TEST(ValueTest, setUnsignedIntegerRoundTrip) {
 }
 
 TEST(ValueTest, canonicalNan) {
-	EXPECT_TRUE(std::isnan(Infra::Double::fromRaw(Value::CANONICAL_NAN)));
-	EXPECT_FALSE(std::signbit(Infra::Double::fromRaw(Value::CANONICAL_NAN)));
-	EXPECT_TRUE(Infra::Double::isNaN(Value::CANONICAL_NAN));
-	EXPECT_TRUE(Infra::Double::isQNaN(Value::CANONICAL_NAN));
-	EXPECT_FALSE(Infra::Double::isSNaN(Value::CANONICAL_NAN));
-	EXPECT_NE(Infra::Double::fromRaw(Value::CANONICAL_NAN),
-	          Infra::Double::fromRaw(Value::CANONICAL_NAN));
+	EXPECT_TRUE(std::isnan(Double::fromRaw(Value::CANONICAL_NAN)));
+	EXPECT_FALSE(std::signbit(Double::fromRaw(Value::CANONICAL_NAN)));
+	EXPECT_TRUE(Double::isNaN(Value::CANONICAL_NAN));
+	EXPECT_TRUE(Double::isQNaN(Value::CANONICAL_NAN));
+	EXPECT_FALSE(Double::isSNaN(Value::CANONICAL_NAN));
+	EXPECT_NE(Double::fromRaw(Value::CANONICAL_NAN),
+	          Double::fromRaw(Value::CANONICAL_NAN));
 }
 
 TEST(ValueTest, doubleRoundTrip) {
@@ -113,7 +113,7 @@ TEST(ValueTest, signalingNanDouble) {
 	Value value(AS_DOUBLE, std::numeric_limits<double>::signaling_NaN());
 	EXPECT_TRUE(std::isnan(value.getDouble()));
 	EXPECT_FALSE(value.isBoxedValue());
-	EXPECT_NE(value.getDouble(), Infra::Double::fromRaw(Value::CANONICAL_NAN));
+	EXPECT_NE(value.getDouble(), Double::fromRaw(Value::CANONICAL_NAN));
 	EXPECT_EQ(value.raw(), Value::CANONICAL_NAN);
 }
 
@@ -121,7 +121,7 @@ TEST(ValueTest, quietNanDouble) {
 	Value value(AS_DOUBLE, std::numeric_limits<double>::quiet_NaN());
 	EXPECT_TRUE(std::isnan(value.getDouble()));
 	EXPECT_FALSE(value.isBoxedValue());
-	EXPECT_NE(value.getDouble(), Infra::Double::fromRaw(Value::CANONICAL_NAN));
+	EXPECT_NE(value.getDouble(), Double::fromRaw(Value::CANONICAL_NAN));
 	EXPECT_EQ(value.raw(), Value::CANONICAL_NAN);
 }
 

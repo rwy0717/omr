@@ -25,7 +25,7 @@ public:
 	}
 
 	constexpr std::size_t hash() const noexcept {
-		return Infra::Hash::mix(id_.hash(), std::size_t(coreType()));
+		return Hash::mix(id_.hash(), std::size_t(coreType()));
 	}
 
 	constexpr bool operator==(const SlotType& rhs) const noexcept { return id_ == rhs.id_; }

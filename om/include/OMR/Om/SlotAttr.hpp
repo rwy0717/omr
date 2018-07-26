@@ -5,8 +5,8 @@
 #include <OMR/Om/SlotType.hpp>
 #include <OMR/Om/Value.hpp>
 
-#include <OMR/Infra/HashUtilities.hpp>
-#include <OMR/Infra/Span.hpp>
+#include <OMR/Om/HashUtilities.hpp>
+#include <OMR/Om/Span.hpp>
 #include <cstddef>
 #include <functional>
 
@@ -39,7 +39,7 @@ public:
 	}
 
 	constexpr std::size_t hash() const noexcept {
-		return Infra::Hash::mix(id().hash(), type().hash());
+		return Hash::mix(id().hash(), type().hash());
 	}
 
 	constexpr bool operator==(const SlotAttr& rhs) const noexcept {
@@ -71,10 +71,10 @@ static_assert(std::is_standard_layout<SlotAttr>::value,
 /// @{
 
 /// Deep hash of a Span of SlotAttrs.
-inline std::size_t hash(const Infra::Span<const SlotAttr>& ds) {
+inline std::size_t hash(const Span<const SlotAttr>& ds) {
 	std::size_t h = 7;
 	for (const SlotAttr& d : ds) {
-		Infra::Hash::mix(h, d.hash());
+		Hash::mix(h, d.hash());
 	}
 	return h;
 }
@@ -82,7 +82,7 @@ inline std::size_t hash(const Infra::Span<const SlotAttr>& ds) {
 /// Deep compare of two spans of SlotAttrs.
 /// The two spans must have the same length and data.
 inline bool
-operator==(const Infra::Span<const SlotAttr>& lhs, const Infra::Span<const SlotAttr>& rhs) {
+operator==(const Span<const SlotAttr>& lhs, const Span<const SlotAttr>& rhs) {
 	if (lhs.length() != rhs.length()) {
 		return true;
 	}
@@ -102,7 +102,7 @@ operator==(const Infra::Span<const SlotAttr>& lhs, const Infra::Span<const SlotA
 }
 
 inline bool
-operator!=(const Infra::Span<const SlotAttr>& lhs, const Infra::Span<const SlotAttr>& rhs) {
+operator!=(const Span<const SlotAttr>& lhs, const Span<const SlotAttr>& rhs) {
 	return !(lhs == rhs);
 }
 

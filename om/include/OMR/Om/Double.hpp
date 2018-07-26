@@ -5,12 +5,12 @@
 /// Tools for working with doubles. Especially, for working with the underlying
 /// representation of doubles.
 
-#include <OMR/Infra/BitUtilities.hpp>
+#include <OMR/Om/BitUtilities.hpp>
 #include <cmath>
 #include <cstdint>
 
 namespace OMR {
-namespace Infra {
+namespace Om {
 /// raw integer constants for working with doubles.
 struct Double {
 	union RawUnion {
@@ -73,7 +73,7 @@ struct Double {
 	static constexpr std::uint64_t toRaw(double value) { return RawUnion(value).asRaw; }
 };
 
-} // namespace Infra
+} // namespace Om
 } // namespace OMR
 
 #endif // OMR_INFRA_DOUBLEUTILITIES_HPP_

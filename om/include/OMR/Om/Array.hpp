@@ -4,7 +4,7 @@
 #include <OMR/Om/CellHeader.hpp>
 #include <OMR/Om/Handle.hpp>
 
-#include <OMR/Infra/HashUtilities.hpp>
+#include <OMR/Om/HashUtilities.hpp>
 #include <cassert>
 #include <type_traits>
 
@@ -28,7 +28,7 @@ public:
 	std::size_t hash() const noexcept {
 		std::size_t hash = size_ + 7;
 		for (std::size_t i = 0; i < size_; i++) {
-			hash = Infra::Hash::mix(hash, data_[i]);
+			hash = Hash::mix(hash, data_[i]);
 		}
 		return hash;
 	}

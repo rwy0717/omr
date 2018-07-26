@@ -4,7 +4,7 @@
 #include <cstddef>
 
 namespace OMR {
-namespace Infra {
+namespace Om {
 using HashNumber = std::size_t;
 
 namespace Hash {
@@ -18,7 +18,7 @@ constexpr HashNumber hash(const T& x) {
 }
 
 } // namespace Hash
-} // namespace Infra
+} // namespace Om
 } // namespace OMR
 
 #endif // OMR_INFRA_HASHING_HPP_

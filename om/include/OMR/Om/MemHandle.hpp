@@ -3,7 +3,7 @@
 
 #include <OMR/Om/Handle.hpp>
 
-#include <OMR/Infra/PointerUtilities.hpp>
+#include <OMR/Om/PointerUtilities.hpp>
 
 namespace OMR {
 namespace Om {
@@ -19,7 +19,7 @@ class MemHandle {
 public:
 	template<typename U = C>
 	MemHandle(Handle<U> base, T U::*p)
-	        : base_(base), offset_(Infra::ptrdiff(base.ptr(), &(base.ptr()->*p))) {}
+	        : base_(base), offset_(ptrdiff(base.ptr(), &(base.ptr()->*p))) {}
 
 	/// Construct a memb
 	template<typename U = C>
@@ -38,9 +38,9 @@ public:
 	template<typename U>
 	MemHandle(const MemHandle<U>& inner, T U::*member)
 	        : base_(inner.base()),
-	          offset_(Infra::ptrdiff(inner.base().ptr(), &(inner.get()->*member))) {}
+	          offset_(ptrdiff(inner.base().ptr(), &(inner.get()->*member))) {}
 
-	T* get() const noexcept { return Infra::ptradd<T>(base_, offset_); }
+	T* get() const noexcept { return ptradd<T>(base_, offset_); }
 
 	T* operator->() const { return get(); }
 
@@ -60,7 +60,7 @@ public:
 
 	constexpr std::ptrdiff_t offset() const noexcept { return offset_; }
 
-	constexpr operator T*() const { return Infra::ptradd<C, T>(base_.ptr(), offset_); }
+	constexpr operator T*() const { return ptradd<C, T>(base_.ptr(), offset_); }
 
 protected:
 	template<typename X, typename Y>

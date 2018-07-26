@@ -1,8 +1,8 @@
 #if !defined(OMR_OM_VALUE_HPP_)
 #define OMR_OM_VALUE_HPP_
 
-#include <OMR/Infra/BitUtilities.hpp>
-#include <OMR/Infra/Double.hpp>
+#include <OMR/Om/BitUtilities.hpp>
+#include <OMR/Om/Double.hpp>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
@@ -91,9 +91,9 @@ public:
 	/// must be canonicalized before being stored.
 	///
 	/// The Tags in this namespace indicate that a RawValue is a boxed immediate.
-	static constexpr RawValue NAN_TAG = Infra::Double::SPECIAL_TAG;
-	static constexpr RawValue NAN_MASK = Infra::Double::SPECIAL_TAG
-	                                     | Infra::Double::NAN_QUIET_TAG;
+	static constexpr RawValue NAN_TAG = Double::SPECIAL_TAG;
+	static constexpr RawValue NAN_MASK = Double::SPECIAL_TAG
+	                                     | Double::NAN_QUIET_TAG;
 
 	/// The complete tag of a NaN-boxed value.
 	/// The Tag is the NaN box plus a type tag. The type tag is stored in the top
@@ -122,20 +122,20 @@ public:
 	/// stored into a Value, the NaN is canonicalized.  Doing so ensures that the
 	/// NaN is made quiet and unsigned. This is to prevent us from reading true
 	/// NaNs that look like NaN-boxed values.
-	static constexpr RawValue CANONICAL_NAN = Infra::Double::SPECIAL_TAG
-	                                          | Infra::Double::NAN_QUIET_TAG
-	                                          | Infra::Double::NAN_EXTRA_BITS_MASK;
+	static constexpr RawValue CANONICAL_NAN = Double::SPECIAL_TAG
+	                                          | Double::NAN_QUIET_TAG
+	                                          | Double::NAN_EXTRA_BITS_MASK;
 
 	/// if value is a NaN, return the canonical NaN.
 	static RawValue canonicalizeNaN(RawValue value) {
-		if (Infra::Double::isNaN(value)) {
+		if (Double::isNaN(value)) {
 			return CANONICAL_NAN;
 		}
 		return value;
 	}
 
 	static double canonicalizeNaN(double value) {
-		return Infra::Double::fromRaw(canonicalizeNaN(Infra::Double::toRaw(value)));
+		return Double::fromRaw(canonicalizeNaN(Double::toRaw(value)));
 	}
 
 	Value() = default;
@@ -175,7 +175,7 @@ public:
 		return *this;
 	}
 
-	bool constexpr isBoxedValue() const noexcept { return Infra::Double::isSNaN(raw()); }
+	bool constexpr isBoxedValue() const noexcept { return Double::isSNaN(raw()); }
 
 	constexpr bool isDouble() const noexcept { return !isBoxedValue(); }
 
@@ -202,7 +202,7 @@ public:
 
 	template<typename T>
 	Value& setRef(T* ref) noexcept {
-		assert(Infra::areNoBitsSet(RawValue(ref), ~PAYLOAD_MASK));
+		assert(areNoBitsSet(RawValue(ref), ~PAYLOAD_MASK));
 		return raw(Tag::REF | (RawValue(ref) & PAYLOAD_MASK));
 	}
 
@@ -216,7 +216,7 @@ public:
 
 	template<typename T>
 	Value& setPtr(T* ptr) noexcept {
-		assert(Infra::areNoBitsSet(RawValue(ptr), ~PAYLOAD_MASK));
+		assert(areNoBitsSet(RawValue(ptr), ~PAYLOAD_MASK));
 		return raw(Tag::PTR | (RawValue(ptr) & PAYLOAD_MASK));
 	}
 

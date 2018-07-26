@@ -34,7 +34,7 @@ storeTransition(Context& cx, Handle<Shape> shape, TransitionSetEntry entry, std:
 /// A helper to copy a span of slot attributes into a shape.
 /// Also calculates the total width of the slot attributes.
 /// @internal
-inline void assignSlotAttrIntoShape(Shape* shape, Infra::Span<const SlotAttr> attributes) {
+inline void assignSlotAttrIntoShape(Shape* shape, Span<const SlotAttr> attributes) {
 	assert(shape->instanceSlotCount() == attributes.length());
 	std::size_t instanceSlotWidth = 0;
 	for (std::size_t i = 0; i < attributes.length(); i++) {
@@ -60,13 +60,13 @@ struct RootObjectLayoutInitializer : public Initializer {
 		return reinterpret_cast<Cell*>(shape);
 	}
 
-	Infra::Span<const SlotAttr> attrs;
+	Span<const SlotAttr> attrs;
 	std::size_t instanceInlineSlotsSize = 0;
 };
 
 /// Allocate a shape that lays out an empty object. Starts a new ShapeTree.
 inline Shape* allocateRootObjectLayout(Context& cx,
-                                       Infra::Span<const SlotAttr> attrs,
+                                       Span<const SlotAttr> attrs,
                                        std::size_t instanceInlineSlotsSize) {
 	RootObjectLayoutInitializer init;
 	init.attrs = attrs;
@@ -77,11 +77,11 @@ inline Shape* allocateRootObjectLayout(Context& cx,
 }
 
 inline Shape* allocateRootObjectLayout(Context& cx, std::size_t instanceInlineSlotsSize) {
-	return allocateRootObjectLayout(cx, Infra::Span<const SlotAttr>(), instanceInlineSlotsSize);
+	return allocateRootObjectLayout(cx, Span<const SlotAttr>(), instanceInlineSlotsSize);
 }
 
 inline Shape* allocateRootObjectLayout(Context& cx) {
-	return allocateRootObjectLayout(cx, Infra::Span<const SlotAttr>(), DEFAULT_INLINE_DATA_SIZE);
+	return allocateRootObjectLayout(cx, Span<const SlotAttr>(), DEFAULT_INLINE_DATA_SIZE);
 }
 
 /// A functor that performs basic initialization of an Shape that lays out an object.
@@ -99,13 +99,13 @@ struct ObjectLayoutInitializer : public Initializer {
 	}
 
 	Handle<Shape> parentLayout;
-	Infra::Span<const SlotAttr> attributes;
+	Span<const SlotAttr> attributes;
 };
 
 /// Allocate a shape that lays out zero or more slots in an Object.
 inline Shape* allocateObjectLayout(Context& cx,
                                    Handle<Shape> parentLayout,
-                                   Infra::Span<const SlotAttr> attributes) {
+                                   Span<const SlotAttr> attributes) {
 	ObjectLayoutInitializer init;
 	init.parentLayout = parentLayout;
 	init.attributes = attributes;
@@ -157,7 +157,7 @@ inline Shape* allocateArrayLayout(Context& cx) {
 /// known transistions from base.
 inline Shape* deriveObjectLayout(Context& cx,
                                  Handle<Shape> base,
-                                 const Infra::Span<const SlotAttr>& attr,
+                                 const Span<const SlotAttr>& attr,
                                  std::size_t hash) {
 	if (!base->transitions_.initialized()) {
 		initializeTransitionSet(cx, {base, &Shape::transitions_});
@@ -174,7 +174,7 @@ inline Shape* deriveObjectLayout(Context& cx,
 /// Look up a transition to a derived shape.
 inline Shape* lookUpTransition(Context& cx,
                                Shape* shape,
-                               const Infra::Span<const SlotAttr>& attrs,
+                               const Span<const SlotAttr>& attrs,
                                std::size_t hash) {
 	return lookUpTransition(shape->transitions_, attrs, hash);
 }

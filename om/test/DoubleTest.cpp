@@ -1,9 +1,9 @@
-#include <OMR/Infra/BitUtilities.hpp>
-#include <OMR/Infra/Double.hpp>
+#include <OMR/Om/BitUtilities.hpp>
+#include <OMR/Om/Double.hpp>
 #include <gtest/gtest.h>
 
 namespace OMR {
-namespace Infra {
+namespace Om {
 namespace Test {
 TEST(DoubleTest, signBit) {
 	EXPECT_TRUE(std::signbit(Double::fromRaw(Double::SIGN_MASK)));
@@ -47,5 +47,5 @@ TEST(DoubleTest, NaN) {
 }
 
 } // namespace Test
-} // namespace Infra
+} // namespace Om
 } // namespace OMR

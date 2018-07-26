@@ -12,7 +12,7 @@
 #include <OMR/Om/Shape.hpp>
 #include <OMR/Om/ShapeOperations.hpp>
 
-#include <OMR/Infra/Span.hpp>
+#include <OMR/Om/Span.hpp>
 #include <gtest/gtest.h>
 #include <omrgc.h>
 
@@ -107,7 +107,7 @@ TEST(MemorySystemTest, objectTransition) {
 	const std::array<const SlotAttr, 1> attributes{
 	        {SlotAttr(SlotType(Id(0), CoreType::VALUE), Id(0))}};
 
-	const Infra::Span<const Om::SlotAttr> span(attributes);
+	const Span<const Om::SlotAttr> span(attributes);
 	transitionLayout(cx, obj1, span);
 
 	// check

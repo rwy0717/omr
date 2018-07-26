@@ -3,7 +3,7 @@
 
 #include <OMR/Om/Ref.hpp>
 
-#include <OMR/Infra/PointerUtilities.hpp>
+#include <OMR/Om/PointerUtilities.hpp>
 #include <cstddef>
 
 namespace OMR {

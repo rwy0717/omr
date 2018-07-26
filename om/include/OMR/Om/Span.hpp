@@ -5,7 +5,7 @@
 #include <cstddef>
 
 namespace OMR {
-namespace Infra {
+namespace Om {
 /// A span of memory. Pointer and length pair.
 template<typename Type>
 class Span {
@@ -88,7 +88,7 @@ protected:
 	std::size_t length_;
 };
 
-} // namespace Infra
+} // namespace Om
 } // namespace OMR
 
 #endif // OMR_INFRA_SPAN_HPP_

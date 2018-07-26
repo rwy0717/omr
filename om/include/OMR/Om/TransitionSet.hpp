@@ -7,7 +7,7 @@
 #include <OMR/Om/MemHandle.hpp>
 #include <OMR/Om/SlotAttr.hpp>
 
-#include <OMR/Infra/Span.hpp>
+#include <OMR/Om/Span.hpp>
 #include <cstddef>
 #include <type_traits>
 
@@ -33,7 +33,7 @@ public:
 
 	std::size_t size() const { return table.size(); }
 
-	Shape* lookup(Infra::Span<const SlotAttr> desc, std::size_t hash) const;
+	Shape* lookup(Span<const SlotAttr> desc, std::size_t hash) const;
 
 	// try to store object in the table. if the table is full, fail.
 	bool tryStore(Shape* shape, std::size_t hash);

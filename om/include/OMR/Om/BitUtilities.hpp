@@ -5,7 +5,7 @@
 /// Bit Utilities
 
 namespace OMR {
-namespace Infra {
+namespace Om {
 template<typename T>
 constexpr bool areAllBitsSet(T value, T mask) {
 	return (value & mask) == mask;
@@ -26,7 +26,7 @@ constexpr bool isTagged(T value, T tag, T mask) {
 	return (value & mask) == tag;
 }
 
-} // namespace Infra
+} // namespace Om
 } // namespace OMR
 
 #endif // OMR_INFRA_BITUTILITIES_HPP_

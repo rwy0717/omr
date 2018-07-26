@@ -54,7 +54,7 @@ inline bool storeTransition(Context& cx,
 
 /// Lookup a transition in the set, using a precalculated hash. Returns nullptr on failure.
 inline Shape*
-lookUpTransition(TransitionSet& set, Infra::Span<const SlotAttr> attributes, std::size_t hash) {
+lookUpTransition(TransitionSet& set, Span<const SlotAttr> attributes, std::size_t hash) {
 	if (!set.initialized()) {
 		return nullptr;
 	}
@@ -76,7 +76,7 @@ lookUpTransition(TransitionSet& set, Infra::Span<const SlotAttr> attributes, std
 }
 
 /// Lookup a transition. Returns nullptr on failure.
-inline Shape* lookUpTransition(TransitionSet& set, Infra::Span<const SlotAttr> attributes) {
+inline Shape* lookUpTransition(TransitionSet& set, Span<const SlotAttr> attributes) {
 	return lookUpTransition(set, attributes, hash(attributes));
 }
 

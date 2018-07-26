@@ -49,7 +49,7 @@ inline void setValueToInlineSlot(Context& cx, Object* self, SlotIndex index) noe
 /// Look up a layout, using a precomputed hash of the slots. Does not GC.
 inline Shape* lookUpTransition(Context& cx,
                                const Object* object,
-                               Infra::Span<const SlotAttr> attributes,
+                               Span<const SlotAttr> attributes,
                                std::size_t hash) noexcept {
 	return lookUpTransition(cx, object->layout(), attributes, hash);
 }
@@ -57,7 +57,7 @@ inline Shape* lookUpTransition(Context& cx,
 /// Look up a layout from the slots to append. Does not GC.
 inline Shape* lookUpTransition(Context& cx,
                                const Object* object,
-                               Infra::Span<const SlotAttr> attributes) noexcept {
+                               Span<const SlotAttr> attributes) noexcept {
 	return lookUpTransition(cx, object, attributes, hash(attributes));
 }
 
@@ -69,7 +69,7 @@ inline void setLayout(Context& cx, Object* object, Shape* layout) noexcept {
 /// Take an existing transition, without allocating. Barriered.
 inline Shape* takeExistingTransition(Context& cx,
                                      Object* object,
-                                     Infra::Span<const SlotAttr> attributes,
+                                     Span<const SlotAttr> attributes,
                                      std::size_t hash) {
 	Shape* derivation = lookUpTransition(cx, object, attributes, hash);
 	if (derivation != nullptr) {
@@ -80,7 +80,7 @@ inline Shape* takeExistingTransition(Context& cx,
 
 /// Take an existing transition, without allocating. Barriered.
 inline Shape*
-takeExistingTransition(Context& cx, Object* object, Infra::Span<const SlotAttr> attributes) {
+takeExistingTransition(Context& cx, Object* object, Span<const SlotAttr> attributes) {
 	return takeExistingTransition(cx, object, attributes, hash(attributes));
 }
 
@@ -97,7 +97,7 @@ inline Index Object::takeNewTransistion(Context& cx, Handle<Object> self, const 
 // transitioning across object layouts. Barriered.
 inline Shape* takeNewTransition(Context& cx,
                                 Handle<Object> object,
-                                Infra::Span<const SlotAttr> attributes,
+                                Span<const SlotAttr> attributes,
                                 std::size_t hash) {
 	RootRef<Shape> base(cx, object->layout());
 	Shape* derivation = deriveObjectLayout(cx, base, attributes, hash);
@@ -109,7 +109,7 @@ inline Shape* takeNewTransition(Context& cx,
 /// This function will reuse cached transitions. Uses a precomputed hash for the attributes.
 inline Shape* transitionLayout(Context& cx,
                                Handle<Object> object,
-                               Infra::Span<const SlotAttr> attributes,
+                               Span<const SlotAttr> attributes,
                                std::size_t hash) {
 	Shape* derivation = takeExistingTransition(cx, object, attributes, hash);
 	if (!derivation) {
@@ -121,7 +121,7 @@ inline Shape* transitionLayout(Context& cx,
 /// Transition the object's shape by adding a set of new slots.
 /// This function will reuse cached transitions.
 inline Shape*
-transitionLayout(Context& cx, Handle<Object> object, Infra::Span<const SlotAttr> attributes) {
+transitionLayout(Context& cx, Handle<Object> object, Span<const SlotAttr> attributes) {
 	return transitionLayout(cx, object, attributes, hash(attributes));
 }
 
@@ -129,7 +129,7 @@ transitionLayout(Context& cx, Handle<Object> object, Infra::Span<const SlotAttr>
 /// TODO: allocate overflow slot storage?
 inline Shape*
 transitionLayout(Context& cx, Handle<Object> object, std::initializer_list<SlotAttr> list) {
-	return transitionLayout(cx, object, Infra::Span<const SlotAttr>(list.begin(), list.size()));
+	return transitionLayout(cx, object, Span<const SlotAttr>(list.begin(), list.size()));
 }
 
 struct ObjectInitializer : public Initializer {
