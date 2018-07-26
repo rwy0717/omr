@@ -42,16 +42,16 @@ public:
 	template<typename U>
 	constexpr Ref(Ref<U> other) : value_(other.get()) {}
 
-	inline Ref<T> operator=(std::nullptr_t) noexcept { value_ = nullptr; }
+	Ref<T> operator=(std::nullptr_t) noexcept { value_ = nullptr; }
 
 	template<typename U>
-	inline Ref<T>& operator=(U* rhs) noexcept {
+	Ref<T>& operator=(U* rhs) noexcept {
 		value_ = rhs;
 	}
 
 	template<typename U>
-	inline Ref<T> operator=(const Ref<U>& rhs) noexcept {
-		value_ = rhs.template get<T>();
+	Ref<T> operator=(const Ref<U>& rhs) noexcept {
+		value_ = rhs.get();
 	}
 
 	/// The address of the referrent.
