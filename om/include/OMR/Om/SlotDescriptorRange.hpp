@@ -2,7 +2,6 @@
 #define OMR_OM_SLOTDESCRIPTORRANGE_HPP_
 
 #include <OMR/Om/SlotDescriptor.hpp>
-
 #include <OMR/Om/Span.hpp>
 
 namespace OMR {
@@ -20,7 +19,6 @@ public:
 	/// slot's type and offset.
 	class Iterator {
 	public:
-
 		Iterator() = default;
 
 		Iterator(const Iterator&) = default;
@@ -49,10 +47,13 @@ public:
 			return SlotDescriptor{SlotIndex{offset_}, current_};
 		}
 
+		
 	private:
 		const SlotAttr* current_;
 		std::size_t offset_;
 	};
+
+	SlotDescriptorRange(const SlotDescriptorRange&) = default;
 
 	Iterator begin() const { return Iterator(attributes_.begin(), offset_); }
 
@@ -63,9 +64,9 @@ public:
 protected:
 	friend class Shape;
 
-	SlotDescriptorRange(Span<const SlotAttr> attributes,
-	                    std::size_t offset,
-	                    std::size_t width)
+	constexpr SlotDescriptorRange(Span<const SlotAttr> attributes,
+	                              std::size_t offset,
+	                              std::size_t width)
 	        : attributes_(attributes), offset_(offset), width_(width) {}
 
 private:

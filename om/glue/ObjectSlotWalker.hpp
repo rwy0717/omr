@@ -1,11 +1,11 @@
 #if !defined(OMRAPP_OBJECTSLOTWALKER_HPP_)
 #define OMRAPP_OBJECTSLOTWALKER_HPP_
 
-#include <OMR/Om/CellSlotWalker.hpp>
+#include <OMR/Om/AnyScanner.hpp>
 
 namespace OMRApp {
 
-using ObjectSlotWalker = OMR::Om::CellSlotWalker;
+using ObjectScanner = OMR::Om::AnyScanner;
 
 } // namespace OMRApp
 

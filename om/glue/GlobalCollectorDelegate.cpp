@@ -37,25 +37,25 @@ using namespace OMR::Om;
 
 constexpr std::uint8_t POISON = 0x5E;
 
-void poison(Cell* cell, std::size_t size) {
+void poisonMemory(void* cell, std::size_t size) {
 #if defined(OMR_OM_TRACE) || 1
-		std::cerr << "(poison " << cell << ":size " << size << ")" << std::endl;
+		std::cerr << "(poison " << cell << " :size " << size << ")" << std::endl;
 #endif
 	memset(cell, POISON, size);
 	MM_HeapLinkedFreeHeader::fillWithHoles(cell, size);
 }
 
-void MM_GlobalCollectorDelegate::poison(Cell* cell) {
+void MM_GlobalCollectorDelegate::poison(Any* cell) {
 	std::size_t size = _extensions->objectModel.getConsumedSizeInBytesWithHeader(cell);
-	::poison(cell, size);
+	poisonMemory(cell, size);
 }
 
 void MM_GlobalCollectorDelegate::poisonUnmarkedObjectsInRegion(GC_ObjectHeapIterator& iter) {
-	for (Cell* cell = iter.nextObject(); cell != nullptr; cell = iter.nextObject()) {
+	for (Any* cell = iter.nextObject(); cell != nullptr; cell = iter.nextObject()) {
 		bool marked = _markingScheme->isMarked(cell);
 		// Shapes cannot be painted. In order for the heap walk to work, we need to know
 		// object sizes, which comes from shapes.
-		if (cellKind(cell) == CellKind::SHAPE) {
+		if (cell->kind() == CellKind::SHAPE) {
 			continue;
 		}
 		if (!marked) {

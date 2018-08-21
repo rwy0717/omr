@@ -6,6 +6,8 @@
 namespace OMR {
 namespace Om {
 
+class Any;
+
 /// A handle to an object's slot. Slot constains a Value.
 class ValueSlotHandle {
 public:
@@ -19,8 +21,8 @@ public:
 
 	void atomicWriteReference(void* ref) const { assert(0); }
 
-	template<typename T = Cell>
-	T* readReference() const {
+	template<typename T = Any>
+	Any* readReference() const {
 		return slot_->getRef<T>();
 	}
 

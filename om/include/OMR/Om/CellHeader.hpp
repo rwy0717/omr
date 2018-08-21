@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <iostream>
 #include <type_traits>
 
 namespace OMR {
@@ -12,6 +13,7 @@ namespace Om {
 
 class Cell;
 class Shape;
+class Any;
 
 /// Encodes a pointer to the shape that lays out this cell, and GC flags.
 class CellHeader {
@@ -68,15 +70,15 @@ public:
 	/// TODO: Implement atomics
 	void atomicWriteReference(void* ref) const noexcept { assert(0); }
 
-	Cell* readReference() const noexcept { return reinterpret_cast<Cell*>(header_->layout()); }
+	Any* readReference() const noexcept { return reinterpret_cast<Any*>(header_->layout()); }
 
 private:
 	CellHeader* header_;
 };
 
 template<typename VisitorT>
-void visitHeader(CellHeader& header, VisitorT& visitor) {
-	visitor.edge(&header, CellHeaderLayoutHandle(&header));
+bool visitHeader(CellHeader& header, VisitorT& visitor) {
+	return visitor.edge(&header, CellHeaderLayoutHandle(&header));
 }
 
 } // namespace Om

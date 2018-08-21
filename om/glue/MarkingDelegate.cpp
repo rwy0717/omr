@@ -44,9 +44,8 @@ void MarkingDelegate::scanRoots(MM_EnvironmentBase* env) {
 	MM_MarkingScheme::MarkingVisitor marker(env, _markingScheme);
 	system.visit(marker);
 
-	for (ConstRootListIterator it = cx.stackRoots().cbegin(); it != cx.stackRoots().cend();
-	     ++it) {
-		_markingScheme->markObject(env, (Cell*)(*it).ref);
+	for (const RootListNode& node : cx.stackRoots()) {
+		_markingScheme->markObject(env, (Any*)node.ref);
 	}
 
 	for (auto& fn : cx.userMarkingFns()) {

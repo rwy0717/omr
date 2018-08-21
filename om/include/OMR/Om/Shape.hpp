@@ -7,9 +7,9 @@
 #include <OMR/Om/Initializer.hpp>
 #include <OMR/Om/SlotAttr.hpp>
 #include <OMR/Om/SlotDescriptorRange.hpp>
+#include <OMR/Om/Span.hpp>
 #include <OMR/Om/TransitionSet.hpp>
 #include <OMR/Om/ValueSlotHandle.hpp>
-#include <OMR/Om/Span.hpp>
 
 namespace OMR {
 namespace Om {
@@ -85,6 +85,8 @@ public:
 		        instanceSlotAttrs(), instanceSlotOffset(), instanceSlotWidth());
 	}
 
+	SlotDescriptorRange instanceSlots() const noexcept { return instanceSlotDescriptorRange(); }
+
 	/// Number of slots described by this shape.
 	std::size_t instanceSlotCount() const noexcept { return instanceSlotCount_; }
 
@@ -111,16 +113,6 @@ public:
 
 	/// @group GC support
 	/// @{
-
-	template<typename VisitorT>
-	inline void visit(VisitorT& visitor) {
-		visitHeader(header(), visitor);
-		if (parentLayout_ != nullptr)
-			visitor.edge(this, BasicSlotHandle(&parentLayout_));
-
-		transitions_.visit(visitor);
-		// visitor.edge(this, BasicSlotHandle(&shapeTreeData_));
-	}
 
 	/// Size of this GC cell.
 	std::size_t cellSize() const { return calculateCellSize(instanceSlotCount()); }

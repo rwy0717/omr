@@ -68,25 +68,7 @@ public:
 	}
 
 	template<typename VisitorT>
-	void visitSlot(SlotDescriptor descriptor, VisitorT& visitor) {
-		switch (descriptor.attr().type().coreType()) {
-		case CoreType::VALUE: {
-			Value* slot = reinterpret_cast<Value*>(inlineSlots_ + descriptor.offset());
-			if (slot->isRef()) {
-				ValueSlotHandle handle(slot);
-				visitor.edge(this, handle);
-			}
-		} break;
-		case CoreType::REF: {
-			void** slot = reinterpret_cast<void**>(inlineSlots_ + descriptor.offset());
-			visitor.edge(this, BasicSlotHandle(slot));
-		} break;
-		default: break;
-		}
-	}
-
-	template<typename VisitorT>
-	bool visitSlotB(SlotDescriptor descriptor, VisitorT& visitor) {
+	bool visitSlot(SlotDescriptor descriptor, VisitorT& visitor) {
 		switch (descriptor.attr().type().coreType()) {
 		case CoreType::VALUE: {
 			Value* slot = reinterpret_cast<Value*>(inlineSlots_ + descriptor.offset());
@@ -99,7 +81,8 @@ public:
 			void** slot = reinterpret_cast<void**>(inlineSlots_ + descriptor.offset());
 			return visitor.edge(this, BasicSlotHandle(slot));
 		} break;
-		default: return true;
+		default:
+			break;
 		}
 		return true;
 	}
@@ -153,6 +136,7 @@ private:
 };
 
 static_assert(std::is_standard_layout<Object>::value, "Object must be a StandardLayoutType.");
+
 
 } // namespace Om
 } // namespace OMR

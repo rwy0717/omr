@@ -4,6 +4,7 @@
 #include <OMR/Om/Array.hpp>
 #include <OMR/Om/Context.hpp>
 #include <OMR/Om/Initializer.hpp>
+#include <OMR/Om/Shape.hpp>
 
 namespace OMR {
 namespace Om {

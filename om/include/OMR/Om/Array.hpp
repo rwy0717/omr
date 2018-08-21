@@ -44,12 +44,6 @@ public:
 	/// The size of the data buffer, in bytes.
 	std::size_t dataSize() const noexcept { return size_; }
 
-	/// @group GC Support
-	template<typename VisitorT>
-	void visit(VisitorT& visitor) {
-		visitHeader(header_, visitor);
-	}
-
 protected:
 	friend class ArrayInitializer;
 	friend class ArrayOffsets;

@@ -12,8 +12,6 @@ namespace Om {
 /// the Shape that lays out this Cell.
 inline CellKind cellKind(const Cell& cell) noexcept { return cell.layout()->instanceKind(); }
 
-inline CellKind cellKind(const Cell* cell) noexcept { return cellKind(*cell); }
-
 } // namespace Om
 } // namespace OMR
 

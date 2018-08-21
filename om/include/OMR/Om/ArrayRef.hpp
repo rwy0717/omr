@@ -29,7 +29,8 @@ public:
 
 	template<typename Visitor>
 
-	private : Array* buffer_;
+private:
+	Array* buffer_;	
 };
 
 } // namespace Om

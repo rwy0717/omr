@@ -6,29 +6,27 @@
 namespace OMR {
 namespace Om {
 
-class Cell;
+class Any;
 
 /// A pointer into a object's slot.
 class BasicSlotHandle {
 public:
-	template<typename T>
-	BasicSlotHandle(T** slot) : slot_(reinterpret_cast<void**>(slot)) {
-		static_assert(sizeof(T*) == sizeof(void*),
-		              "pointers must be a universally fixed width.");
-		static_assert(sizeof(T**) == sizeof(void**),
-		              "pointers must be a universally fixed width.");
-	}
+	BasicSlotHandle() noexcept = default;
 
-	template <typename T = Cell>
-	void writeReference(T* ref) const { *slot_ = reinterpret_cast<void*>(ref); }
+	constexpr BasicSlotHandle(const BasicSlotHandle&) = default;
 
-	void atomicWriteReference(void* ref) const { assert(0); }
+	constexpr BasicSlotHandle(void* slot) noexcept : slot_((Any**)slot) {}
 
-	template <typename T = Cell>
-	T* readReference() const { return *reinterpret_cast<T**>(slot_); }
+	constexpr BasicSlotHandle(Any** slot) noexcept : slot_(slot) {}
+
+	void writeReference(Any* ref) const noexcept { *slot_ = ref; }
+
+	void atomicWriteReference(Any* ref) const noexcept { assert(0); }
+
+	constexpr Any* readReference() const noexcept { return *slot_; }
 
 private:
-	void** slot_;
+	Any** slot_;
 };
 
 } // namespace Om

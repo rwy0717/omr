@@ -410,7 +410,7 @@ public:
 	MMINLINE uintptr_t
 	getSizeInBytesMultiSlotDeadObject(omrobjectptr_t objectPtr)
 	{
-		return MM_HeapLinkedFreeHeader::getHeapLinkedFreeHeader(objectPtr)->getSize();
+		return MM_HeapLinkedFreeHeader::getHeapLinkedFreeHeader((void*)objectPtr)->getSize();
 	}
 
 	/**

@@ -1,8 +1,7 @@
 
-
 #include <OMR/Om/Allocation.hpp>
 #include <OMR/Om/Allocator.hpp>
-#include <OMR/Om/AnySlotWalker.hpp>
+#include <OMR/Om/AnyScanner.hpp>
 #include <OMR/Om/Array.hpp>
 #include <OMR/Om/Context.inl.hpp>
 #include <OMR/Om/MemorySystem.hpp>
@@ -11,8 +10,8 @@
 #include <OMR/Om/Runtime.hpp>
 #include <OMR/Om/Shape.hpp>
 #include <OMR/Om/ShapeOperations.hpp>
-
 #include <OMR/Om/Span.hpp>
+
 #include <gtest/gtest.h>
 #include <omrgc.h>
 
@@ -63,8 +62,9 @@ class PrintVisitor {
 public:
 	template<typename SlotHandleT>
 	bool edge(void* cell, SlotHandleT slot) const {
-		std::cerr << slot.readReference() << std::endl;
-		return true; // continue
+		std::cerr << "(ref :cell " << cell << " :target " << slot.readReference() << ")"
+		          << std::endl;
+		return false; // pause
 	}
 };
 
@@ -89,8 +89,18 @@ TEST(MemorySystemTest, print) {
 
 	Om::setValue(cx, object.get(), descriptor, {AS_REF, object.get()});
 
-	AnySlotWalker walker(object.get<Cell>());
-	walker.traverse(PrintVisitor());
+	std::cerr << "object: " << object.get() << std::endl;
+	std::cerr << "obj-map:" << object->layout() << std::endl;
+	std::cerr << "map1:   " << shape.get() << std::endl;
+	std::cerr << "map2:   " << map << std::endl;
+
+	AnyScanner scanner;
+	PrintVisitor printer;
+
+	bool cont = scanner.scan(printer, (Any*)object.get());
+	while (cont) {
+		cont = scanner.scan(printer);
+	}
 
 	// EXPECT_EQ(object->layout(), shape.get());
 	// OMR_GC_SystemCollect(cx.vmContext(), 0);

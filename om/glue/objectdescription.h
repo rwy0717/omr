@@ -22,24 +22,23 @@
 #if !defined(OMR_OM_OBJECTDESCRIPTION_H_)
 #define OMR_OM_OBJECTDESCRIPTION_H_
 
-#include <OMR/Om/Cell.hpp>
+#include <OMR/Om/Address.hpp>
+#include <OMR/Om/Any.hpp>
 
 #include "omr.h"
 #include "omrcomp.h"
 
+#if defined(OMR_GC_COMPRESSED_POINTERS)
+#error "Om does not support compressed references"
+#endif
+
 /**
  * Object token definitions to be used by OMR components.
  */
-using languageobjectptr_t = OMR::Om::Cell*;
+using languageobjectptr_t = OMR::Om::Any*;
 using omrobjectptr_t = languageobjectptr_t;
 using omrarrayptr_t = languageobjectptr_t;
-
-#if defined(OMR_GC_COMPRESSED_POINTERS)
-typedef uint32_t fomrobject_t;
-typedef uint32_t fomrarray_t;
-#else
-typedef uintptr_t fomrobject_t;
-typedef uintptr_t fomrarray_t;
-#endif
+using fomrobject_t = OMR::Om::Address;
+using fomrarray_t = OMR::Om::Address;
 
 #endif /* OMR_OM_OBJECTDESCRIPTION_H_ */

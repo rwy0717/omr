@@ -41,8 +41,9 @@ public:
 
 	template<typename VisitorT>
 	void visit(VisitorT visitor) {
-		if (buffer_ != nullptr)
+		if (buffer_ != nullptr) {
 			visitor.edge(this, BasicSlotHandle(&buffer_));
+		}
 	}
 
 	Array* buffer_;

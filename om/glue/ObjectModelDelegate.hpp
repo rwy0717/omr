@@ -22,10 +22,8 @@
 #ifndef OMR_OM_OBJECTMODELDELEGATE_HPP_
 #define OMR_OM_OBJECTMODELDELEGATE_HPP_
 
-#include <OMR/Om/Array.hpp>
+#include <OMR/Om/Any.hpp>
 #include <OMR/Om/CellOperations.hpp>
-#include <OMR/Om/Object.hpp>
-#include <OMR/Om/Shape.hpp>
 
 #include "ForwardedHeader.hpp"
 #include "objectdescription.h"
@@ -50,7 +48,7 @@ public:
 	 * @param objectPtr the object to botain indirct reference from
 	 * @return a pointer to the indirect object, or NULL if none
 	 */
-	MMINLINE Cell* getIndirectObject(const Cell* cell) const { return nullptr; }
+	MMINLINE Any* getIndirectObject(const Any* any) const { return nullptr; }
 
 	/**
 	 * Get the fomrobjectptr_t offset of the slot containing the object header.
@@ -66,7 +64,7 @@ public:
 	 * Get the exact size of the object header, in bytes. This includes the size
 	 * of the metadata slot.
 	 */
-	constexpr uintptr_t getObjectHeaderSizeInBytes(Cell* cell) const { return 0; }
+	constexpr uintptr_t getObjectHeaderSizeInBytes(const Any* cell) const { return 0; }
 
 	/**
 	 * Get the exact size of the object data, in bytes. This excludes the size of
@@ -78,7 +76,7 @@ public:
 	 * @return the exact size of an object, in bytes, excluding padding bytes and
 	 * header bytes
 	 */
-	MMINLINE uintptr_t getObjectSizeInBytesWithoutHeader(Cell* objectPtr) {
+	MMINLINE uintptr_t getObjectSizeInBytesWithoutHeader(const Any* objectPtr) {
 		return getObjectSizeInBytesWithHeader(objectPtr)
 		       - getObjectHeaderSizeInBytes(objectPtr);
 	}
@@ -92,11 +90,11 @@ public:
 	 * @param[in] objectPtr points to the object to determine size for
 	 * @return the exact size of an object, in bytes, excluding padding bytes
 	 */
-	MMINLINE uintptr_t getObjectSizeInBytesWithHeader(const Cell* cell) {
-		switch (cellKind(cell)) {
-		case CellKind::OBJECT: return reinterpret_cast<const Object*>(cell)->cellSize();
-		case CellKind::SHAPE: return reinterpret_cast<const Shape*>(cell)->cellSize();
-		case CellKind::ARRAY: return reinterpret_cast<const Array*>(cell)->cellSize();
+	MMINLINE uintptr_t getObjectSizeInBytesWithHeader(const Any* any) {
+		switch (cellKind(*any)) {
+		case CellKind::OBJECT: return any->as.object.cellSize();
+		case CellKind::SHAPE: return any->as.shape.cellSize();
+		case CellKind::ARRAY: return any->as.array.cellSize();
 		default: throw std::runtime_error("Unrecognized cell type");
 		}
 	}

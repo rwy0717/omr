@@ -163,7 +163,7 @@ void MM_EnvironmentDelegate::releaseExclusiveVMAccess() {
  * @return the exclusive count of the current thread before relinquishing
  * @see assumeExclusiveVMAccess(uintptr_t)
  */
-uintptr_t MM_EnvironmentDelegate::relinquishExclusiveVMAccess(bool* deferredVMAccessRelease) {
+uintptr_t MM_EnvironmentDelegate::relinquishExclusiveVMAccess() {
 	assert(false);
 	return 0;
 #if 0

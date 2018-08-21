@@ -13,6 +13,8 @@ class SlotType {
 public:
 	constexpr SlotType(const SlotType&) = default;
 
+	constexpr SlotType(CoreType coreType) noexcept : SlotType(Id(0), coreType) {}
+
 	constexpr SlotType(Id id, CoreType coreType) noexcept : id_(id), coreType_(coreType) {}
 
 	constexpr CoreType coreType() const noexcept { return coreType_; }
@@ -40,6 +42,6 @@ private:
 };
 
 } // namespace Om
-} // namespace OMR
+} // namespace OMR	
 
 #endif // OMR_OM_SLOTTYPE_HPP_

@@ -106,6 +106,7 @@ operator!=(const Span<const SlotAttr>& lhs, const Span<const SlotAttr>& rhs) {
 	return !(lhs == rhs);
 }
 
+
 } // namespace Om
 } // namespace OMR
 

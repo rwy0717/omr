@@ -4,7 +4,8 @@
 namespace OMR {
 namespace Om {
 
-enum class CellKind { UNINITIALIZED = 0, OBJECT = 1, SHAPE, ARRAY };
+/// 0 indicates uninitialized.
+enum class CellKind { OBJECT = 1, SHAPE, ARRAY };
 
 } // namespace Om
 } // namespace OMR

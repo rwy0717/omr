@@ -10,33 +10,25 @@
 namespace OMR {
 namespace Om {
 
-union Any {
-	Cell cell;
-	Object object;
-	Shape shape;
-	Array array;
+class Any {
+public:
+	Any() = delete;
+
+	CellKind kind() {
+		return cellKind(as.cell);
+	}
+
+	union {
+		Cell cell;
+		Object object;
+		Shape shape;
+		Array array;
+	} as;
 };
-
-/// @group Casting and Reinterpreting Any types.
-/// @{
-
-inline Cell* asCell(Any* any) { return &any->cell; }
-
-inline const Cell* asCell(const Any* any) { return &any->cell; }
-
-inline Object* asObject(Any* any) { return &any->object; }
-
-inline const Object* asObject(Any* any) { return &any->object; }
-
-inline Shape* asShape(const Any* any) { return &any->shape; }
-
-inline const Shape* asShape(const Any* any) { return &any->shape; }
 
 /// @}
 
-inline CellKind cellKind(const Any& any) const { return cellKind(asCell(any)); }
-
-inline CellKind cellKind(const Any* any) const { return cellKind(*any); }
+inline CellKind cellKind(const Any& any) { return cellKind(any.as.cell); }
 
 } // namespace Om
 } // namespace OMR

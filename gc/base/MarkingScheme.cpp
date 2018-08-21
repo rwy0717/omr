@@ -289,8 +289,9 @@ MM_MarkingScheme::setMarkBitsInRange(MM_EnvironmentBase *env, void *heapBase, vo
 uintptr_t
 MM_MarkingScheme::scanObject(MM_EnvironmentBase *env, omrobjectptr_t objectPtr)
 {
-	OMRApp::ObjectSlotWalker walker;
-	walker.traverse(objectPtr, MarkingVisitor(env, this));
+	OMRApp::ObjectScanner scanner;
+	bool more = scanner.scan(MarkingVisitor(env, this), objectPtr);
+	assert(more == false);
 	return 0;
 }
 

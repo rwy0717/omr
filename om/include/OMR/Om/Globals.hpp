@@ -20,10 +20,10 @@ public:
 	template<typename VisitorT>
 	void visit(VisitorT& visitor) {
 		if (metaShape_ != nullptr)
-			visitor.edge(this, BasicSlotHandle((Cell**)&metaShape_));
+			visitor.edge(this, BasicSlotHandle(&metaShape_));
 
 		if (arrayBufferShape_ != nullptr)
-			visitor.edge(this, BasicSlotHandle((Cell**)&arrayBufferShape_));
+			visitor.edge(this, BasicSlotHandle(&arrayBufferShape_));
 	}
 
 protected:

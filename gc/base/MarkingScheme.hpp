@@ -98,8 +98,9 @@ public:
 		MM_MarkingScheme* markingScheme;
 
 		template <class SlotHandleT>
-		void edge(void* referee, SlotHandleT slot) {
+		bool edge(void* object, SlotHandleT slot) {
 			markingScheme->inlineMarkObjectNoCheck(env, slot.readReference());
+			return true;
 		}
 	};
 
@@ -187,7 +188,7 @@ public:
 	{
 		bool objectMarked = false;
 
-		if (NULL != objectPtr) {
+		if (NULL != (void*)objectPtr) {
 			objectMarked = inlineMarkObjectNoCheck(env, objectPtr, leafType);
 		}
 
@@ -253,8 +254,8 @@ public:
 	MMINLINE uintptr_t
 	scanObject(MM_EnvironmentBase *env, omrobjectptr_t objectPtr, MM_MarkingSchemeScanReason reason, uintptr_t sizeToDo = UDATA_MAX)
 	{
-		OMRApp::ObjectSlotWalker walker;
-		walker.traverse(objectPtr, MarkingVisitor(env, this));
+		OMRApp::ObjectScanner scanner;
+		scanner.scan(MarkingVisitor(env, this), objectPtr);
 		return 0;
 	}
 

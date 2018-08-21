@@ -29,7 +29,7 @@
 
 namespace OMR {
 namespace Om {
-class Cell;
+class Any;
 }
 }
 
@@ -114,7 +114,7 @@ public:
 
 	/// Corrupt the memory of a GC cell.
 	/// Note: Be careful about overwriting shapes, shape data is needed for heap walking.
-	void poison(OMR::Om::Cell* cell);
+	void poison(OMR::Om::Any* cell);
 
 	/**
 	 * Poison the unmarked objects in a particular region.

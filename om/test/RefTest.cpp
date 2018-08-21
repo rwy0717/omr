@@ -11,7 +11,6 @@ TEST(RefTest, nullVoidReferent) {
 	EXPECT_EQ(ref, nullptr);
 	EXPECT_EQ(ref, Ref<int>(nullptr));
 	EXPECT_EQ(ref, ref);
-	EXPECT_FALSE(ref);
 }
 
 TEST(RefTest, nullIntReferent) {
@@ -19,7 +18,6 @@ TEST(RefTest, nullIntReferent) {
 	EXPECT_EQ(ref, nullptr);
 	EXPECT_EQ(ref, Ref<void>(nullptr));
 	EXPECT_EQ(ref, ref);
-	EXPECT_FALSE(ref);
 }
 
 TEST(RefTest, intReferent) {

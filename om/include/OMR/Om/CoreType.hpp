@@ -1,7 +1,6 @@
 #if !defined(OMR_OM_CORETYPE_HPP_)
 #define OMR_OM_CORETYPE_HPP_
 
-#include <OMR/Om/Ref.hpp>
 #include <OMR/Om/Value.hpp>
 
 #include <cstdint>
@@ -41,7 +40,7 @@ inline std::size_t coreTypeWidth(CoreType t) noexcept {
 	case CoreType::FLOAT32: return 4;
 	case CoreType::FLOAT64: return 8;
 	case CoreType::VALUE: return sizeof(Value);
-	case CoreType::REF: return sizeof(Ref<void>);
+	case CoreType::REF: return sizeof(void*);
 	default: break;
 	}
 	return -1;
