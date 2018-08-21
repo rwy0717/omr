@@ -85,8 +85,7 @@ TEST(ValueTest, canonicalNan) {
 	EXPECT_TRUE(Double::isNaN(Value::CANONICAL_NAN));
 	EXPECT_TRUE(Double::isQNaN(Value::CANONICAL_NAN));
 	EXPECT_FALSE(Double::isSNaN(Value::CANONICAL_NAN));
-	EXPECT_NE(Double::fromRaw(Value::CANONICAL_NAN),
-	          Double::fromRaw(Value::CANONICAL_NAN));
+	EXPECT_NE(Double::fromRaw(Value::CANONICAL_NAN), Double::fromRaw(Value::CANONICAL_NAN));
 }
 
 TEST(ValueTest, doubleRoundTrip) {

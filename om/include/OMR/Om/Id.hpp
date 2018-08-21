@@ -2,6 +2,7 @@
 #define OMR_OM_ID_HPP_
 
 #include <OMR/Om/HashUtilities.hpp>
+
 #include <cstddef>
 #include <functional>
 

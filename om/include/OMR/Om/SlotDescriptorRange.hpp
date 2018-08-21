@@ -47,7 +47,6 @@ public:
 			return SlotDescriptor{SlotIndex{offset_}, current_};
 		}
 
-		
 	private:
 		const SlotAttr* current_;
 		std::size_t offset_;

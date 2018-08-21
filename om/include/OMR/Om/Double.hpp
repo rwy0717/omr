@@ -6,6 +6,7 @@
 /// representation of doubles.
 
 #include <OMR/Om/BitUtilities.hpp>
+
 #include <cmath>
 #include <cstdint>
 

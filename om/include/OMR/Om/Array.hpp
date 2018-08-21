@@ -3,8 +3,8 @@
 
 #include <OMR/Om/CellHeader.hpp>
 #include <OMR/Om/Handle.hpp>
-
 #include <OMR/Om/HashUtilities.hpp>
+
 #include <cassert>
 #include <type_traits>
 

@@ -39,7 +39,7 @@ constexpr std::uint8_t POISON = 0x5E;
 
 void poisonMemory(void* cell, std::size_t size) {
 #if defined(OMR_OM_TRACE) || 1
-		std::cerr << "(poison " << cell << " :size " << size << ")" << std::endl;
+	std::cerr << "(poison " << cell << " :size " << size << ")" << std::endl;
 #endif
 	memset(cell, POISON, size);
 	MM_HeapLinkedFreeHeader::fillWithHoles(cell, size);

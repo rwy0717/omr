@@ -1,8 +1,8 @@
 #if !defined(OMR_OM_JITHELPERS_HPP_)
 #define OMR_OM_JITHELPERS_HPP_
 
-#include <OMR/Om/Object.hpp>
 #include <OMR/Om/Context.hpp>
+#include <OMR/Om/Object.hpp>
 
 extern "C" {
 

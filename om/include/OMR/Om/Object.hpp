@@ -81,8 +81,7 @@ public:
 			void** slot = reinterpret_cast<void**>(inlineSlots_ + descriptor.offset());
 			return visitor.edge(this, BasicSlotHandle(slot));
 		} break;
-		default:
-			break;
+		default: break;
 		}
 		return true;
 	}
@@ -136,7 +135,6 @@ private:
 };
 
 static_assert(std::is_standard_layout<Object>::value, "Object must be a StandardLayoutType.");
-
 
 } // namespace Om
 } // namespace OMR

@@ -24,7 +24,7 @@ public:
 		if (!cont) {
 			return true;
 		}
-	
+
 		return scan(visitor);
 	}
 

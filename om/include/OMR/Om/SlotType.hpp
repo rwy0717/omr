@@ -42,6 +42,6 @@ private:
 };
 
 } // namespace Om
-} // namespace OMR	
+} // namespace OMR
 
 #endif // OMR_OM_SLOTTYPE_HPP_

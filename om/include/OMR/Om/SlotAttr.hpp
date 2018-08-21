@@ -1,12 +1,12 @@
 #if !defined(OMR_OM_SLOTATTR_HPP_)
 #define OMR_OM_SLOTATTR_HPP_
 
+#include <OMR/Om/HashUtilities.hpp>
 #include <OMR/Om/Id.hpp>
 #include <OMR/Om/SlotType.hpp>
+#include <OMR/Om/Span.hpp>
 #include <OMR/Om/Value.hpp>
 
-#include <OMR/Om/HashUtilities.hpp>
-#include <OMR/Om/Span.hpp>
 #include <cstddef>
 #include <functional>
 
@@ -81,8 +81,7 @@ inline std::size_t hash(const Span<const SlotAttr>& ds) {
 
 /// Deep compare of two spans of SlotAttrs.
 /// The two spans must have the same length and data.
-inline bool
-operator==(const Span<const SlotAttr>& lhs, const Span<const SlotAttr>& rhs) {
+inline bool operator==(const Span<const SlotAttr>& lhs, const Span<const SlotAttr>& rhs) {
 	if (lhs.length() != rhs.length()) {
 		return true;
 	}
@@ -101,11 +100,9 @@ operator==(const Span<const SlotAttr>& lhs, const Span<const SlotAttr>& rhs) {
 	return true;
 }
 
-inline bool
-operator!=(const Span<const SlotAttr>& lhs, const Span<const SlotAttr>& rhs) {
+inline bool operator!=(const Span<const SlotAttr>& lhs, const Span<const SlotAttr>& rhs) {
 	return !(lhs == rhs);
 }
-
 
 } // namespace Om
 } // namespace OMR

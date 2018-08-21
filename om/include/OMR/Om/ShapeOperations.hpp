@@ -8,15 +8,13 @@
 #include <OMR/Om/Shape.hpp>
 #include <OMR/Om/TransitionSetOperations.hpp>
 
-#include <iostream>
 #include <cstddef>
+#include <iostream>
 
 namespace OMR {
 namespace Om {
 
-struct InstanceDescription {
-
-};
+struct InstanceDescription {};
 
 static constexpr std::size_t DEFAULT_INLINE_DATA_SIZE = 32 * sizeof(void*);
 
@@ -103,9 +101,8 @@ struct ObjectLayoutInitializer : public Initializer {
 };
 
 /// Allocate a shape that lays out zero or more slots in an Object.
-inline Shape* allocateObjectLayout(Context& cx,
-                                   Handle<Shape> parentLayout,
-                                   Span<const SlotAttr> attributes) {
+inline Shape*
+allocateObjectLayout(Context& cx, Handle<Shape> parentLayout, Span<const SlotAttr> attributes) {
 	ObjectLayoutInitializer init;
 	init.parentLayout = parentLayout;
 	init.attributes = attributes;
@@ -172,10 +169,8 @@ inline Shape* deriveObjectLayout(Context& cx,
 }
 
 /// Look up a transition to a derived shape.
-inline Shape* lookUpTransition(Context& cx,
-                               Shape* shape,
-                               const Span<const SlotAttr>& attrs,
-                               std::size_t hash) {
+inline Shape*
+lookUpTransition(Context& cx, Shape* shape, const Span<const SlotAttr>& attrs, std::size_t hash) {
 	return lookUpTransition(shape->transitions_, attrs, hash);
 }
 

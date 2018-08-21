@@ -76,6 +76,6 @@ TEST(RefTest, referentInheritsFromType) {
 	}
 }
 
-}  // namespace Test
-}  // namespace Om
-}  // namespace OMR
+} // namespace Test
+} // namespace Om
+} // namespace OMR

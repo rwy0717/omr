@@ -3,6 +3,7 @@
 
 #include <OMR/Om/BitUtilities.hpp>
 #include <OMR/Om/Double.hpp>
+
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
@@ -92,8 +93,7 @@ public:
 	///
 	/// The Tags in this namespace indicate that a RawValue is a boxed immediate.
 	static constexpr RawValue NAN_TAG = Double::SPECIAL_TAG;
-	static constexpr RawValue NAN_MASK = Double::SPECIAL_TAG
-	                                     | Double::NAN_QUIET_TAG;
+	static constexpr RawValue NAN_MASK = Double::SPECIAL_TAG | Double::NAN_QUIET_TAG;
 
 	/// The complete tag of a NaN-boxed value.
 	/// The Tag is the NaN box plus a type tag. The type tag is stored in the top
@@ -122,8 +122,7 @@ public:
 	/// stored into a Value, the NaN is canonicalized.  Doing so ensures that the
 	/// NaN is made quiet and unsigned. This is to prevent us from reading true
 	/// NaNs that look like NaN-boxed values.
-	static constexpr RawValue CANONICAL_NAN = Double::SPECIAL_TAG
-	                                          | Double::NAN_QUIET_TAG
+	static constexpr RawValue CANONICAL_NAN = Double::SPECIAL_TAG | Double::NAN_QUIET_TAG
 	                                          | Double::NAN_EXTRA_BITS_MASK;
 
 	/// if value is a NaN, return the canonical NaN.

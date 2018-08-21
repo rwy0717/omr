@@ -2,7 +2,6 @@
 #define OMR_OM_MEMHANDLE_HPP_
 
 #include <OMR/Om/Handle.hpp>
-
 #include <OMR/Om/PointerUtilities.hpp>
 
 namespace OMR {

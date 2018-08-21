@@ -1,5 +1,6 @@
 #include <OMR/Om/BitUtilities.hpp>
 #include <OMR/Om/Double.hpp>
+
 #include <gtest/gtest.h>
 
 namespace OMR {

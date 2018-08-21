@@ -15,10 +15,8 @@ protected:
 template<>
 class Mixin<void> {};
 
-template <>
-class Underlayed {
-
-};
+template<>
+class Underlayed {};
 
 } // namespace Om
 } // namespace OMR

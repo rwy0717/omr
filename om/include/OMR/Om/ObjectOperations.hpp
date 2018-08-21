@@ -37,7 +37,8 @@ inline Value getValue(Context& cx, Object* object, SlotIndex index) noexcept {
 inline void setValue(Context& cx, Object* object, SlotIndex index, Value value) noexcept {
 	auto slotAddr = slotAddress<Value*>(cx, object, index);
 	if (value.isRef()) {
-		Barrier<ValueSlotHandle>::writeReference(cx, object, ValueSlotHandle(slotAddr), value.getRef());
+		Barrier<ValueSlotHandle>::writeReference(
+		        cx, object, ValueSlotHandle(slotAddr), value.getRef());
 	} else {
 		*slotAddr = value;
 	}
@@ -55,15 +56,15 @@ inline Shape* lookUpTransition(Context& cx,
 }
 
 /// Look up a layout from the slots to append. Does not GC.
-inline Shape* lookUpTransition(Context& cx,
-                               const Object* object,
-                               Span<const SlotAttr> attributes) noexcept {
+inline Shape*
+lookUpTransition(Context& cx, const Object* object, Span<const SlotAttr> attributes) noexcept {
 	return lookUpTransition(cx, object, attributes, hash(attributes));
 }
 
 /// Force set the layout of an object. Barriered.
 inline void setLayout(Context& cx, Object* object, Shape* layout) noexcept {
-	Barrier<CellHeaderLayoutHandle>::writeReference(cx, object, CellHeaderLayoutHandle(&object->header()), layout);
+	Barrier<CellHeaderLayoutHandle>::writeReference(
+	        cx, object, CellHeaderLayoutHandle(&object->header()), layout);
 }
 
 /// Take an existing transition, without allocating. Barriered.
@@ -79,8 +80,7 @@ inline Shape* takeExistingTransition(Context& cx,
 }
 
 /// Take an existing transition, without allocating. Barriered.
-inline Shape*
-takeExistingTransition(Context& cx, Object* object, Span<const SlotAttr> attributes) {
+inline Shape* takeExistingTransition(Context& cx, Object* object, Span<const SlotAttr> attributes) {
 	return takeExistingTransition(cx, object, attributes, hash(attributes));
 }
 

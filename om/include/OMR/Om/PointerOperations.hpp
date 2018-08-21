@@ -19,10 +19,10 @@ public:
 	constexpr T
 };
 
-template <typename BaseT>
+template<typename BaseT>
 class PointerOperations<void, BaseT> : public CRTP<BaseT> {};
 
-}  // namespace GC
-}  // namespace OMR
+} // namespace GC
+} // namespace OMR
 
 #endif // OMR_GC_POINTEROPERATIONS_HPP_

@@ -11,7 +11,6 @@ namespace Om {
 
 class ArrayScanner : public BaseScanner<Array> {
 public:
-
 	/// Construct without a target.
 	ArrayScanner() = default;
 
@@ -26,7 +25,7 @@ public:
 	}
 
 	/// Continue scanning the target.
-	template <typename VisitorT>
+	template<typename VisitorT>
 	bool scan(VisitorT& visitor) {
 		visitHeader(target_->header(), visitor);
 		return false;

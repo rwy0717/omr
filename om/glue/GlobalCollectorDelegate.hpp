@@ -31,7 +31,7 @@ namespace OMR {
 namespace Om {
 class Any;
 }
-}
+} // namespace OMR
 
 class MM_GCExtensionsBase;
 class MM_GlobalCollector;
@@ -109,8 +109,6 @@ public:
 #define OMR_GC_PAINT_HEAP 1
 
 #if defined(OMR_GC_PAINT_HEAP)
-
-
 
 	/// Corrupt the memory of a GC cell.
 	/// Note: Be careful about overwriting shapes, shape data is needed for heap walking.

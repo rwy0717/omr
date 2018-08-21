@@ -6,8 +6,8 @@
 #include <OMR/Om/MemArray.hpp>
 #include <OMR/Om/MemHandle.hpp>
 #include <OMR/Om/SlotAttr.hpp>
-
 #include <OMR/Om/Span.hpp>
+
 #include <cstddef>
 #include <type_traits>
 
