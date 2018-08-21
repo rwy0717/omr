@@ -10,25 +10,21 @@
 namespace OMR {
 namespace Om {
 
+union AnyUnion {
+	Cell cell;
+	Object object;
+	Shape shape;
+	Array array;
+};
+
 class Any {
 public:
 	Any() = delete;
 
-	CellKind kind() {
-		return cellKind(as.cell);
-	}
+	CellKind kind() { return cellKind(as.cell); }
 
-	union {
-		Cell cell;
-		Object object;
-		Shape shape;
-		Array array;
-	} as;
+	AnyUnion as;
 };
-
-/// @}
-
-inline CellKind cellKind(const Any& any) { return cellKind(any.as.cell); }
 
 } // namespace Om
 } // namespace OMR
