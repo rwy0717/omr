@@ -30,6 +30,13 @@ target_include_directories(omr_example_base
 		glue
 )
 
+if (OMR_GC_EXTENDED_API)
+	target_include_directories(omr_example_base
+		INTERFACE
+			./include
+	)
+endif()
+
 # The GC example shows how to use OMR's GC component
 if(OMR_GC)
 	add_executable(gcexample

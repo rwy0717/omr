@@ -1,15 +1,21 @@
-#if !defined(OMR_OM_HANDLE_HPP_)
-#define OMR_OM_HANDLE_HPP_
+#if !defined(OMR_GC_HANDLE_HPP_)
+#define OMR_GC_HANDLE_HPP_
 
 namespace OMR {
-namespace Om {
+namespace GC {
+
+template <typename T>
+class HandlePtrOps {};
+
+template <>
+class HandlePtrOps<void> {};
 
 /// The Handle is an indirect reference to an object through some kind of root object.
 /// The classic way to construct a Handle is via a RootRef. The RootRef contains a bare pointer to a
 /// Cell. This reference slot will be kept up-to-date through GC safepoints. A Handle can be
 /// constructed to indirect through the RootRef. Other rooting mechanisms exist as well.
 template<typename T>
-class Handle {
+class Handle : public HandlePtrOps<T> {
 public:
 	constexpr Handle() : root_(nullptr) {}
 
@@ -64,7 +70,7 @@ private:
 	T* const* root_;
 };
 
-} // namespace Om
+} // namespace GC
 } // namespace OMR
 
-#endif // OMR_OM_HANDLE_HPP_
+#endif // OMR_GC_HANDLE_HPP_

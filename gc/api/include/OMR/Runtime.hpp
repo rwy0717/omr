@@ -1,5 +1,5 @@
-#if !defined(OMR_OM_RUNTIME_HPP_)
-#define OMR_OM_RUNTIME_HPP_
+#ifndef OMR_RUNTIME_HPP_
+#define OMR_RUNTIME_HPP_
 
 #include "StartupManagerImpl.hpp"
 #include "mminitcore.h"
@@ -21,7 +21,7 @@
 #include <thread_api.h>
 
 namespace OMR {
-namespace Om {
+
 class PlatformError : public std::exception {
 public:
 	PlatformError(int error) : error_(error) {}
@@ -73,7 +73,7 @@ private:
 class PlatformInterface {
 public:
 	PlatformInterface() {
-		Thread self(threadInterface_);
+		Thread self(_thread);
 
 		auto e = omrport_init_library(&library(), sizeof(OMRPortLibrary));
 		if (e != 0) {
@@ -82,51 +82,53 @@ public:
 	}
 
 	~PlatformInterface() noexcept {
-		Thread self(threadInterface_);
+		Thread self(_thread);
 		library().port_shutdown_library(&library());
 	}
 
-	OMRPortLibrary& library() noexcept { return portLibrary_; }
+	OMRPortLibrary& library() noexcept { return _library; }
 
-	const OMRPortLibrary& library() const noexcept { return portLibrary_; }
+	const OMRPortLibrary& library() const noexcept { return _library; }
 
-	const ThreadInterface& thread() const noexcept { return threadInterface_; }
+	const ThreadInterface& thread() const noexcept { return _thread; }
 
 private:
-	ThreadInterface threadInterface_;
-	OMRPortLibrary portLibrary_;
+	ThreadInterface _thread;
+	OMRPortLibrary _library;
 };
 
 /// Process-wide initialization and tear down.
+/// RAII wrapper for OMR_Runtime init and teardown.
 class Runtime {
 public:
 	/// Initialize the process runtime.
-	ProcessRuntime() {
-		memset(&omrRuntime_, 0, sizeof(OMR_Runtime));
-		omrRuntime_._configuration._maximum_vm_count = 0;
-		omrRuntime_._vmCount = 0;
-		omrRuntime_._vmList = nullptr;
-		omrRuntime_._portLibrary = &platform().library();
-		auto e = omr_initialize_runtime(&omrRuntime_);
+	Runtime() {
+		memset(&_data, 0, sizeof(OMR_Runtime));
+		_data._configuration._maximum_vm_count = 0;
+		_data._vmCount = 0;
+		_data._vmList = nullptr;
+		_data._portLibrary = &platform().library();
+		auto e = omr_initialize_runtime(&_data);
 		if (e != 0) {
 			throw PlatformError(e);
 		}
 	}
 
-	~ProcessRuntime() noexcept { omr_destroy_runtime(&omrRuntime_); }
+	~Runtime() noexcept { omr_destroy_runtime(&_data); }
 
-	PlatformInterface& platform() { return platform_; }
+	PlatformInterface& platform() { return _platform; }
 
-	const PlatformInterface& platform() const { return platform_; }
+	const PlatformInterface& platform() const { return _platform; }
 
-	OMR_Runtime& omrRuntime() { return omrRuntime_; }
+	OMR_Runtime& data() { return _data; }
+
+	const OMR_Runtime& data() const { return _data; }
 
 private:
-	PlatformInterface platform_;
-	OMR_Runtime omrRuntime_;
+	PlatformInterface _platform;
+	OMR_Runtime _data;
 };
 
-} // namespace GC
 } // namespace OMR
 
 #endif // OMR_RUNTIME_HPP_

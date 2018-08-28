@@ -1,12 +1,12 @@
-#if !defined(OMR_OM_MARKINGFN_HPP_)
-#define OMR_OM_MARKINGFN_HPP_
+#if !defined(OMR_GC_MARKINGFN_HPP_)
+#define OMR_GC_MARKINGFN_HPP_
 
 #include <MarkingScheme.hpp>
 #include <functional>
 #include <vector>
 
 namespace OMR {
-namespace Om {
+namespace GC {
 
 class Visitor;
 
@@ -16,7 +16,7 @@ using MarkingFn = std::function<void(MarkingVisitor&)>;
 
 using MarkingFnVector = std::vector<MarkingFn>;
 
-} // namespace Om
+} // namespace GC
 } // namespace OMR
 
-#endif // OMR_OM_MARKINGFN_HPP_
+#endif // OMR_GC_MARKINGFN_HPP_

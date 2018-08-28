@@ -19,6 +19,16 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
+#include <omrcfg.h>
+
+#if defined(OMR_GC_EXTENDED_API)
+
+#include <OMR/Runtime.hpp>
+#include <OMR/GC/System.hpp>
+#include <OMR/GC/StackRoot.hpp>
+
+#else // OMR_GC_EXTENDED_API
+
 #include <string.h>
 
 #include "omrport.h"
@@ -40,11 +50,25 @@
 #include "StartupManagerImpl.hpp"
 #include "omrExampleVM.hpp"
 
+#endif // OMR_GC_EXTENDED_API
+
 extern "C" {
 
 int
 omr_main_entry(int argc, char ** argv, char **envp)
 {
+#if defined OMR_GC_EXTENDED_API
+
+	OMR::Runtime runtime;
+	OMR::GC::System system(runtime);
+	OMR::GC::RunContext cx(system);
+
+	OMR::GC::StackRoot<void> root(cx, nullptr);
+
+	return 0;
+
+#else // OMR_GC_EXTENDED_API
+
 	/* Start up */
 	OMR_VM_Example exampleVM;
 	OMR_VMThread *omrVMThread = NULL;
@@ -146,6 +170,9 @@ omr_main_entry(int argc, char ** argv, char **envp)
 	/* Can not assert the value of rc since the portlibrary and trace engine have been shutdown */
 
 	return rc;
+
+#endif // OMR_GC_EXTENDED_API
+
 }
 
 }

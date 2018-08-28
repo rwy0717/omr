@@ -1,13 +1,13 @@
-#if !defined(OMR_OM_REF_HPP_)
-#define OMR_OM_REF_HPP_
+#if !defined(OMR_GC_REF_HPP_)
+#define OMR_GC_REF_HPP_
 
-#include <OMR/Om/Address.hpp>
+#include <OMR/GC/Address.hpp>
 
 #include <cstdint>
 #include <type_traits>
 
 namespace OMR {
-namespace Om {
+namespace GC {
 
 template<typename T>
 class Ref;

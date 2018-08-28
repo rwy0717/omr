@@ -94,9 +94,7 @@ target_sources(omr_om_gc_glue
 		${CMAKE_CURRENT_SOURCE_DIR}/glue/Profiling.c
 		${CMAKE_CURRENT_SOURCE_DIR}/glue/StartupManagerImpl.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/glue/VerboseManagerImpl.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/src/MemorySystem.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/src/Value.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/src/Context.cpp
 )
 
 target_link_libraries(omr_om_gc_glue

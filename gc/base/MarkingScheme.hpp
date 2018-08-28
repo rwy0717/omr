@@ -35,10 +35,13 @@
 #include "MarkMap.hpp"
 #include "ModronAssertions.h"
 #include "ObjectModel.hpp"
-#include "ObjectScannerState.hpp"
 #include "WorkStack.hpp"
 
-#include "ObjectSlotWalker.hpp"
+#if defined(OMR_GC_EXTENDED_API)
+#include "OMRClient/GC/ObjectScanner.hpp"
+#else // OMR_GC_EXTENDED_API
+#include "ObjectScannerState.hpp"
+#endif // OMR_GC_EXTENDED_API
 
 /**
  * @todo Provide class documentation
@@ -237,8 +240,6 @@ public:
 	 */
 	void completeScan(MM_EnvironmentBase *env);
 	
-
-
 	/**
 	 * Public object scanning method. Called from external context, eg concurrent GC. Scans object slots
 	 * and marks objects referenfced from specified object.
@@ -254,9 +255,38 @@ public:
 	MMINLINE uintptr_t
 	scanObject(MM_EnvironmentBase *env, omrobjectptr_t objectPtr, MM_MarkingSchemeScanReason reason, uintptr_t sizeToDo = UDATA_MAX)
 	{
-		OMRApp::ObjectScanner scanner;
+#if defined(OMR_GC_EXTENDED_API)
+		OMRClient::GC::ObjectScanner scanner;
 		scanner.scan(MarkingVisitor(env, this), objectPtr);
 		return 0;
+#else // OMR_GC_EXTENDED_API
+		GC_ObjectScannerState objectScannerState;
+		GC_ObjectScanner *objectScanner = _delegate.getObjectScanner(env, objectPtr, &objectScannerState, reason, &sizeToDo);
+		if (NULL != objectScanner) {
+			bool isLeafSlot = false;
+			GC_SlotObject *slotObject;
+#if defined(OMR_GC_LEAF_BITS)
+			while (NULL != (slotObject = objectScanner->getNextSlot(isLeafSlot))) {
+#else /* OMR_GC_LEAF_BITS */
+			while (NULL != (slotObject = objectScanner->getNextSlot())) {
+#endif /* OMR_GC_LEAF_BITS */
+				fixupForwardedSlot(slotObject);
+
+				/* with concurrentMark mutator may NULL the slot so must fetch and check here */
+				inlineMarkObject(env, slotObject->readReferenceFromSlot(), isLeafSlot);
+			}
+		}
+
+		/* Due to concurrent marking and packet overflow _bytesScanned may be much larger than the total live set
+		 * because objects may be scanned multiple times.
+		 */
+		env->_markStats._bytesScanned += sizeToDo;
+		if (SCAN_REASON_PACKET == reason) {
+			env->_markStats._objectsScanned += 1;
+		}
+
+		return sizeToDo;
+#endif // OMR_GC_EXTENDED_API
 	}
 
 	MM_MarkingDelegate *getMarkingDelegate() { return &_delegate; }

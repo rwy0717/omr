@@ -289,10 +289,30 @@ MM_MarkingScheme::setMarkBitsInRange(MM_EnvironmentBase *env, void *heapBase, vo
 uintptr_t
 MM_MarkingScheme::scanObject(MM_EnvironmentBase *env, omrobjectptr_t objectPtr)
 {
-	OMRApp::ObjectScanner scanner;
+#if defined(OMR_GC_EXTENDED_API)
+	OMRClient::GC::ObjectScanner scanner;
 	bool more = scanner.scan(MarkingVisitor(env, this), objectPtr);
 	assert(more == false);
 	return 0;
+#else
+	uintptr_t sizeToDo = UDATA_MAX;
+	GC_ObjectScannerState objectScannerState;
+	GC_ObjectScanner *objectScanner = _delegate.getObjectScanner(env, objectPtr, &objectScannerState, SCAN_REASON_PACKET, &sizeToDo);
+	if (NULL != objectScanner) {
+		bool isLeafSlot = false;
+		GC_SlotObject *slotObject;
+#if defined(OMR_GC_LEAF_BITS)
+		while (NULL != (slotObject = objectScanner->getNextSlot(isLeafSlot))) {
+#else /* OMR_GC_LEAF_BITS */
+		while (NULL != (slotObject = objectScanner->getNextSlot())) {
+#endif /* OMR_GC_LEAF_BITS */
+			fixupForwardedSlot(slotObject);
+
+			inlineMarkObjectNoCheck(env, slotObject->readReferenceFromSlot(), isLeafSlot);
+		}
+	}
+	return sizeToDo;
+#endif // OMR_GC_EXTENDED_API
 }
 
 

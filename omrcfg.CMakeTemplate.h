@@ -48,6 +48,7 @@
 #cmakedefine OMR_GC_COMBINATION_SPEC
 #cmakedefine OMR_GC_CONCURRENT_SWEEP
 #cmakedefine OMR_GC_DEBUG_ASSERTS
+#cmakedefine OMR_GC_EXTENDED_API
 #cmakedefine OMR_GC_HEAP_CARD_TABLE
 #cmakedefine OMR_GC_IDLE_HEAP_MANAGER
 #cmakedefine OMR_GC_LARGE_OBJECT_AREA
