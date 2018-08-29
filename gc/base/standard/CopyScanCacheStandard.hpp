@@ -33,7 +33,12 @@
 #include "modronbase.h"
 
 #include "CopyScanCache.hpp"
+
+#if defined(OMR_GC_EXTENDED_API)
+#include <OMRClient/GC/ObjectScanner.hpp>
+#else
 #include "ObjectScannerState.hpp"
+#endif
 
 class GC_ObjectScanner;
 
@@ -47,7 +52,11 @@ class MM_CopyScanCacheStandard : public MM_CopyScanCache
 private:
 protected:
 public:
+#if defined(OMR_GC_EXTENDED_API)
+	OMRClient::GC::ObjectScanner _objectScanner;
+#else
 	GC_ObjectScannerState _objectScannerState; /**< Space reserved for instantiation of object scanner for current object */
+#endif
 	bool _shouldBeRemembered; /**< whether current object being scanned should be remembered */
 	uintptr_t _arraySplitIndex; /**< The index within a split array to start scanning from (meaningful if OMR_SCAVENGER_CACHE_TYPE_SPLIT_ARRAY is set) */
 	uintptr_t _arraySplitAmountToScan; /**< The amount of elements that should be scanned by split array scanning. */
@@ -57,11 +66,15 @@ public:
 private:
 protected:
 public:
+#if defined(OMR_GC_EXTENDED_API)
+	MMINLINE OMRClient::GC::ObjectScanner *getObjectScanner() { return &_objectScanner; }
+#else
 	MMINLINE GC_ObjectScanner *
 	getObjectScanner()
 	{
 		return (GC_ObjectScanner *)(&_objectScannerState);
 	}
+#endif
 
 	/**
 	 * Determine whether the receiver represents a split array.

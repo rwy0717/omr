@@ -316,6 +316,7 @@ public:
 	 * in the final phase of Concurrent GC when we scan Nursery. 
 	 */
 
+#if !defined(OMR_GC_EXTENDED_API)
 	void fixupForwardedSlot(GC_SlotObject *slotObject) {
 #if defined(OMR_GC_CONCURRENT_SCAVENGER)
 		if (_extensions->isConcurrentScavengerEnabled() && _extensions->isScavengerBackOutFlagRaised()) {
@@ -325,6 +326,7 @@ public:
 	}
 	
 	void fixupForwardedSlotOutline(GC_SlotObject *slotObject);
+#endif // OMR_GC_EXTENDED_API
 
 	/**
 	 * Create a MarkingScheme object.

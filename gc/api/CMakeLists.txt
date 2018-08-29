@@ -5,11 +5,14 @@ omr_assert(TEST OMR_GC_EXTENDED_API)
 target_sources(omrgc
 	PRIVATE
 		${CMAKE_CURRENT_SOURCE_DIR}/src/OMR_GC_System.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/glue/MarkingDelegate.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/glue/EnvironmentDelegate.cpp
 )
 
 target_include_directories(omrgc
 	PUBLIC
 		include/
+		glue/
 )
 
 # https://cmake.org/cmake/help/v3.6/prop_gbl/CMAKE_CXX_KNOWN_FEATURES.html#prop_gbl:CMAKE_CXX_KNOWN_FEATURES

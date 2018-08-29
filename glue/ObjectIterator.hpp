@@ -34,6 +34,9 @@
 #include "ObjectModel.hpp"
 #include "SlotObject.hpp"
 
+#if defined(OMR_GC_EXTENDED_API)
+#error "ObjectIterator is not compatible with the extended glue"
+#endif
 
 class GC_ObjectIterator
 {

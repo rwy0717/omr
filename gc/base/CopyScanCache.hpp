@@ -55,7 +55,6 @@
 #include "modronbase.h"
 
 #include "Base.hpp"
-#include "ObjectIteratorState.hpp"
 
 /**
  * @todo Provide class documentation

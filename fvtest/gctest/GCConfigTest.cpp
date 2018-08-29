@@ -26,9 +26,13 @@
 #include "ObjectModel.hpp"
 #include "omrExampleVM.hpp"
 #include "omrgc.h"
-#include "SlotObject.hpp"
 #include "StandardWriteBarrier.hpp"
+#include "SlotObject.hpp"
 #include "VerboseWriterChain.hpp"
+
+#if defined(OMR_GC_EXTENDED_API)
+#error "Incompatible with the extended GC APIs"
+#endif
 
 //#define OMRGCTEST_PRINTFILE
 

@@ -423,6 +423,7 @@ MM_MarkingScheme::assertNotForwardedPointer(MM_EnvironmentBase *env, omrobjectpt
 	}
 }
 
+#if !defined(OMR_GC_EXTENDED_API)
 void
 MM_MarkingScheme::fixupForwardedSlotOutline(GC_SlotObject *slotObject) {
 #if defined(OMR_GC_CONCURRENT_SCAVENGER)
@@ -440,3 +441,4 @@ MM_MarkingScheme::fixupForwardedSlotOutline(GC_SlotObject *slotObject) {
 	}
 #endif /* OMR_GC_CONCURRENT_SCAVENGER */
 }
+#endif // OMR_GC_EXTENDED_API

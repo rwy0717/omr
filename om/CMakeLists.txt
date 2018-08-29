@@ -85,10 +85,8 @@ target_sources(omr_om_gc_glue
 		${CMAKE_CURRENT_SOURCE_DIR}/glue/CollectorLanguageInterfaceImpl.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/glue/CompactSchemeFixupObject.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/glue/ConcurrentMarkingDelegate.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/glue/EnvironmentDelegate.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/glue/FrequentObjectsStats.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/glue/GlobalCollectorDelegate.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/glue/MarkingDelegate.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/glue/ObjectIterator.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/glue/ObjectModelDelegate.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/glue/Profiling.c

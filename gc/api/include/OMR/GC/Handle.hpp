@@ -1,6 +1,8 @@
 #if !defined(OMR_GC_HANDLE_HPP_)
 #define OMR_GC_HANDLE_HPP_
 
+#include <cstddef>
+
 namespace OMR {
 namespace GC {
 

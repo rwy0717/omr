@@ -220,6 +220,13 @@ if(OMR_GC_MODRON_STANDARD)
 			base/standard/SweepHeapSectioningSegmented.cpp
 			base/standard/WorkPacketsStandard.cpp
 	)
+	if(!OMR_GC_EXTENDED_API)
+		# The following sources are disabled, because they implement utilities or APIs deprecated by the extended APIs
+		target_sources(omrgc
+			PRIVATE
+
+		)
+	endif()
 	if (OMR_GC_MODRON_COMPACTION)
 		target_sources(omrgc
 			PRIVATE
