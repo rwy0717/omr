@@ -37,6 +37,16 @@ target_sources(omr_example_gc_glue INTERFACE
 	${CMAKE_CURRENT_SOURCE_DIR}/VerboseManagerImpl.cpp
 )
 
+# When the extended API is on, the GC provides the following pieces of glue.
+# Without the OMR_GC_EXTENDED_API flag, we must implement this glue ourselves.
+if(NOT OMR_GC_EXTENDED)
+	target_sources(omr_example_gc_glue INTERFACE
+		${CMAKE_CURRENT_SOURCE_DIR}/EnvironmentDelegate.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/MarkingDelegate.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/ObjectIterator.cpp
+	)
+endif(NOT OMR_GC_EXTENDED)
+
 target_link_libraries(omr_example_gc_glue
 	INTERFACE
 		omr_example_base
