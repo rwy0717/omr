@@ -1,6 +1,6 @@
 include(OmrAssert)
 
-omr_assert(TEST !OMR_GC_EXTENDED_API)
+omr_assert(TEST NOT OMR_GC_EXTENDED_API)
 
 # When the extended API is on, the GC provides the following pieces of glue.
 # Without the OMR_GC_EXTENDED_API flag, we must implement this glue ourselves.

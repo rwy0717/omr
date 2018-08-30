@@ -60,6 +60,6 @@ endif(OMR_GC)
 
 add_subdirectory(glue)
 
-if(!OMR_GC_EXTENDED_API)
+if(NOT OMR_GC_EXTENDED_API)
 	add_subdirectory(glue_extended)
 endif()
