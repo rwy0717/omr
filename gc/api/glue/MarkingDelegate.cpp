@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2016 IBM Corp. and others
+ * Copyright (c) 2017, 2017 IBM Corp. and others
  *
  * This program and the accompanying materials are made available under
  * the terms of the Eclipse Public License 2.0 which accompanies this
@@ -18,27 +18,49 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
+#include "omrcfg.h"
 
-#if !defined(OMR_OM_OBJECTDESCRIPTION_H_)
-#define OMR_OM_OBJECTDESCRIPTION_H_
-
-#include <OMR/GC/Address.hpp>
-#include <OMR/Om/Any.hpp>
-
-#include "omr.h"
-#include "omrcomp.h"
-
-#if defined(OMR_GC_COMPRESSED_POINTERS)
-#error "Om does not support compressed references"
+#if !defined(OMR_GC_EXTENDED_API)
+#error "This glue is provided by the extended GC API"
 #endif
 
-/**
- * Object token definitions to be used by OMR components.
- */
-using languageobjectptr_t = OMR::Om::Any*;
-using omrobjectptr_t = languageobjectptr_t;
-using omrarrayptr_t = languageobjectptr_t;
-using fomrobject_t = OMR::GC::Address;
-using fomrarray_t = OMR::GC::Address;
+#include <OMR/GC/StackRoot.hpp>
+#include <OMR/GC/System.hpp>
 
-#endif /* OMR_OM_OBJECTDESCRIPTION_H_ */
+#include "EnvironmentBase.hpp"
+#include "MarkingDelegate.hpp"
+#include "MarkingScheme.hpp"
+#include "omr.h"
+#include "omrhashtable.h"
+
+#include <iostream>
+
+namespace OMR {
+namespace GC {
+
+void MarkingDelegate::scanRoots(MM_EnvironmentBase* env) {
+	auto& cx = getContext(env);
+	MM_MarkingScheme::MarkingVisitor marker(env, _markingScheme);
+
+	/// System-wide roots
+
+	for (auto& fn : cx.system().markingFns()) {
+		fn(marker);
+	}
+
+	/// Per-context roots
+
+	// Note: only scanning the stack roots for *one* context.
+	for (const StackRootListNode& node : cx.stackRoots()) {
+		_markingScheme->markObject(env, omrobjectptr_t(node.ref));
+	}
+
+	for (auto& fn : cx.markingFns()) {
+		fn(marker);
+	}
+}
+
+void MarkingDelegate::masterCleanupAfterGC(MM_EnvironmentBase* env) {}
+
+} // namespace GC
+} // namespace OMR

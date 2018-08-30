@@ -87,12 +87,12 @@ target_sources(omr_om_gc_glue
 		${CMAKE_CURRENT_SOURCE_DIR}/glue/ConcurrentMarkingDelegate.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/glue/FrequentObjectsStats.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/glue/GlobalCollectorDelegate.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/glue/ObjectIterator.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/glue/ObjectModelDelegate.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/glue/Profiling.c
 		${CMAKE_CURRENT_SOURCE_DIR}/glue/StartupManagerImpl.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/glue/VerboseManagerImpl.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/src/Value.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/src/Globals.cpp
 )
 
 target_link_libraries(omr_om_gc_glue
@@ -104,10 +104,8 @@ target_link_libraries(omr_om_gc_glue
 
 set(OMR_UTIL_GLUE_TARGET "omr_om_util_glue" CACHE INTERNAL "Om's util glue")
 
-add_library(omr_om_util_glue INTERFACE)
-
-target_sources(omr_om_util_glue INTERFACE
-	${CMAKE_CURRENT_SOURCE_DIR}/glue/UtilGlue.c
+add_library(omr_om_util_glue INTERFACE
+	# no sources. Provided by OMR_GC_EXTENDED_API
 )
 
 target_link_libraries(omr_om_util_glue

@@ -1,9 +1,9 @@
-#include <OMR/Om/Ref.hpp>
+#include <OMR/GC/Ref.hpp>
 
 #include <gtest/gtest.h>
 
 namespace OMR {
-namespace Om {
+namespace GC {
 namespace Test {
 
 TEST(RefTest, nullVoidReferent) {

@@ -16,29 +16,9 @@
  * [1] https://www.gnu.org/software/classpath/license.html
  * [2] http://openjdk.java.net/legal/assembly-exception.html
  *
- * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+ * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-#if !defined(OMR_OM_OBJECTDESCRIPTION_H_)
-#define OMR_OM_OBJECTDESCRIPTION_H_
+#include "omrcfg.h"
 
-#include <OMR/GC/Address.hpp>
-#include <OMR/Om/Any.hpp>
-
-#include "omr.h"
-#include "omrcomp.h"
-
-#if defined(OMR_GC_COMPRESSED_POINTERS)
-#error "Om does not support compressed references"
-#endif
-
-/**
- * Object token definitions to be used by OMR components.
- */
-using languageobjectptr_t = OMR::Om::Any*;
-using omrobjectptr_t = languageobjectptr_t;
-using omrarrayptr_t = languageobjectptr_t;
-using fomrobject_t = OMR::GC::Address;
-using fomrarray_t = OMR::GC::Address;
-
-#endif /* OMR_OM_OBJECTDESCRIPTION_H_ */
+#include "ObjectIterator.hpp"

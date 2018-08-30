@@ -4,7 +4,7 @@
 #include <OMR/Om/Array.hpp>
 #include <OMR/Om/BasicSlotHandle.hpp>
 #include <OMR/Om/CellHeader.hpp>
-#include <OMR/Om/Handle.hpp>
+#include <OMR/GC/Handle.hpp>
 #include <OMR/Om/LayoutTree.hpp>
 #include <OMR/Om/Shape.hpp>
 #include <OMR/Om/SlotIndex.hpp>
@@ -131,7 +131,7 @@ protected:
 	std::uint8_t inlineSlots_[0];
 
 private:
-	static void construct(Context& cx, Handle<Object> self, Handle<Shape> shape);
+	static void construct(Context& cx, GC::Handle<Object> self, GC::Handle<Shape> shape);
 };
 
 static_assert(std::is_standard_layout<Object>::value, "Object must be a StandardLayoutType.");

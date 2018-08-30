@@ -21,7 +21,7 @@ class Any {
 public:
 	Any() = delete;
 
-	CellKind kind() { return cellKind(as.cell); }
+	CellKind kind() const { return cellKind(as.cell); }
 
 	AnyUnion as;
 };

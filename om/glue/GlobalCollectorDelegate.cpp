@@ -22,13 +22,13 @@
 #include "GlobalCollectorDelegate.hpp"
 
 #include <OMR/Om/CellOperations.hpp>
-#include <OMR/Om/RootRef.hpp>
 
 #include "Heap.hpp"
 #include "HeapRegionIterator.hpp"
 #include "MarkingScheme.hpp"
 #include "ObjectHeapIterator.hpp"
 #include "ObjectHeapIteratorAddressOrderedList.hpp"
+#include <OMR/GC/StackRoot.hpp>
 #include <iostream>
 
 using namespace OMR::Om;

@@ -20,8 +20,8 @@
  *******************************************************************************/
 
 #include <OMR/Om/Allocator.hpp>
-#include <OMR/Om/Context.inl.hpp>
-#include <OMR/Om/RootRef.hpp>
+#include <OMR/Om/Context.hpp>
+#include <OMR/GC/StackRoot.hpp>
 
 #include "EnvironmentBase.hpp"
 #include "GCExtensionsBase.hpp"

@@ -2,9 +2,8 @@
 #include <OMR/Om/Allocation.hpp>
 #include <OMR/Om/Allocator.hpp>
 #include <OMR/Om/Context.hpp>
-#include <OMR/Om/MemorySystem.hpp>
 #include <OMR/Om/Object.hpp>
-#include <OMR/Om/RootRef.hpp>
+#include <OMR/GC/StackRoot.hpp>
 #include <OMR/Om/Runtime.hpp>
 
 #include <gtest/gtest.h>

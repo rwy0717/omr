@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
 
+#include "omrcfg.h"
+
+#if !defined(OMR_GC_EXTENDED_API)
+#error "OMR Om depends on the extended GC API"
+#endif
+
 #include "j9nongenerated.h"
 #include "modronbase.h"
 
@@ -38,13 +44,10 @@
 #include "HeapLinkedFreeHeader.hpp"
 #include "MarkingScheme.hpp"
 #include "MemorySubSpaceSemiSpace.hpp"
-#include "MixedObjectScanner.hpp"
 #include "OMRVMInterface.hpp"
-#include "ObjectIterator.hpp"
 #include "ObjectModel.hpp"
 #include "ParallelGlobalGC.hpp"
 #include "Scavenger.hpp"
-#include "SlotObject.hpp"
 #include "mminitcore.h"
 #include "objectdescription.h"
 #include "omr.h"

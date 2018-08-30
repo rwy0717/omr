@@ -85,7 +85,7 @@ inline Shape* takeExistingTransition(Context& cx, Object* object, Span<const Slo
 }
 
 #if 0
-inline Index Object::takeNewTransistion(Context& cx, Handle<Object> self, const SlotAttr& desc) {
+inline Index Object::takeNewTransistion(Context& cx, GC::Handle<Object> self, const SlotAttr& desc) {
   auto hash = desc.hash();
   return takeNewTransistion(cx, self, desc, hash);
 }
@@ -96,10 +96,10 @@ inline Index Object::takeNewTransistion(Context& cx, Handle<Object> self, const 
 // hasn't been taken before. See also `transition`, a higher level call for
 // transitioning across object layouts. Barriered.
 inline Shape* takeNewTransition(Context& cx,
-                                Handle<Object> object,
+                                GC::Handle<Object> object,
                                 Span<const SlotAttr> attributes,
                                 std::size_t hash) {
-	RootRef<Shape> base(cx, object->layout());
+	GC::StackRoot<Shape> base(cx.gc(), object->layout());
 	Shape* derivation = deriveObjectLayout(cx, base, attributes, hash);
 	setLayout(cx, object, derivation); // barrier
 	return derivation;
@@ -108,7 +108,7 @@ inline Shape* takeNewTransition(Context& cx,
 /// Transition the object's shape by adding a set of new slots
 /// This function will reuse cached transitions. Uses a precomputed hash for the attributes.
 inline Shape* transitionLayout(Context& cx,
-                               Handle<Object> object,
+                               GC::Handle<Object> object,
                                Span<const SlotAttr> attributes,
                                std::size_t hash) {
 	Shape* derivation = takeExistingTransition(cx, object, attributes, hash);
@@ -121,14 +121,14 @@ inline Shape* transitionLayout(Context& cx,
 /// Transition the object's shape by adding a set of new slots.
 /// This function will reuse cached transitions.
 inline Shape*
-transitionLayout(Context& cx, Handle<Object> object, Span<const SlotAttr> attributes) {
+transitionLayout(Context& cx, GC::Handle<Object> object, Span<const SlotAttr> attributes) {
 	return transitionLayout(cx, object, attributes, hash(attributes));
 }
 
 /// Transition an object to a new layout. Barriered. Can GC.
 /// TODO: allocate overflow slot storage?
 inline Shape*
-transitionLayout(Context& cx, Handle<Object> object, std::initializer_list<SlotAttr> list) {
+transitionLayout(Context& cx, GC::Handle<Object> object, std::initializer_list<SlotAttr> list) {
 	return transitionLayout(cx, object, Span<const SlotAttr>(list.begin(), list.size()));
 }
 
@@ -139,11 +139,11 @@ struct ObjectInitializer : public Initializer {
 		return reinterpret_cast<Cell*>(o);
 	}
 
-	Handle<Shape> layout;
+	GC::Handle<Shape> layout;
 };
 
 /// Allocate object with corresponding slot shape;
-inline Object* allocateObject(Context& cx, Handle<Shape> layout) {
+inline Object* allocateObject(Context& cx, GC::Handle<Shape> layout) {
 	ObjectInitializer init;
 	init.layout = layout;
 	return BaseAllocator::allocate<Object>(
@@ -152,12 +152,12 @@ inline Object* allocateObject(Context& cx, Handle<Shape> layout) {
 
 /// Allocate an object with no slots.
 inline Object* allocateEmptyObject(Context& cx, std::size_t inlineSlotsSize = 32 * sizeof(void*)) {
-	RootRef<Shape> shape(cx, allocateRootObjectLayout(cx, {}, inlineSlotsSize));
+	GC::StackRoot<Shape> shape(cx.gc(), allocateRootObjectLayout(cx, {}, inlineSlotsSize));
 	return allocateObject(cx, shape);
 }
 
 /// TODO: Implement cloneObject
-inline Object* cloneObject(Context& cx, Handle<Object> base) { assert(0); }
+inline Object* cloneObject(Context& cx, GC::Handle<Object> base) { assert(0); }
 
 } // namespace Om
 } // namespace OMR

@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
 	OMR::Om::Object* object = OMR::Om::allocateObject(cx);
 
 	// Root the object
-	OMR::Om::RootRef<OMR::Om::Object> root(cx, object);
+	OMR::Om::GC::StackRoot<OMR::Om::Object> root(cx, object);
 
 	// Run a complete system collection
 	OMR::Om::systemCollect(cx);

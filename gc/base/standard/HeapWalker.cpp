@@ -61,7 +61,7 @@ struct SlotObjectDoUserData {
 
 struct HeapWalkerObjectVisitor {
 	template <typename SlotHandleT>
-	bool edge(SlotHandleT&& slot) {
+	bool edge(void* object, SlotHandleT&& slot) {
 		omrobjectptr_t value = slot.readReference();
 		func(vm, &value, data, 0);
 		slot.writeReference(value);

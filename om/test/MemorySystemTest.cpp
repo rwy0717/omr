@@ -3,10 +3,9 @@
 #include <OMR/Om/Allocator.hpp>
 #include <OMR/Om/AnyScanner.hpp>
 #include <OMR/Om/Array.hpp>
-#include <OMR/Om/Context.inl.hpp>
-#include <OMR/Om/MemorySystem.hpp>
+#include <OMR/Om/Context.hpp>
 #include <OMR/Om/ObjectOperations.hpp>
-#include <OMR/Om/RootRef.hpp>
+#include <OMR/GC/StackRoot.hpp>
 #include <OMR/Om/Runtime.hpp>
 #include <OMR/Om/Shape.hpp>
 #include <OMR/Om/ShapeOperations.hpp>
@@ -19,42 +18,42 @@ namespace OMR {
 namespace Om {
 namespace Test {
 
-ProcessRuntime runtime;
+Runtime runtime;
 
-TEST(MemorySystemTest, StartUpAMemorySystem) {
-	MemorySystem system(runtime);
+TEST(OmSystemTest, StartUpAMemorySystem) {
+	System system(runtime);
 	EXPECT_NE(system.globals().metaShape(), nullptr);
 	EXPECT_NE(system.globals().arrayBufferShape(), nullptr);
 }
 
-TEST(MemorySystemTest, StartUpAContext) {
-	MemorySystem system(runtime);
-	Context cx(system);
+TEST(OmSystemTest, StartUpAContext) {
+	System system(runtime);
+	RunContext cx(system);
 	EXPECT_NE(cx.globals().metaShape(), nullptr);
 	EXPECT_NE(cx.globals().arrayBufferShape(), nullptr);
 }
 
-TEST(MemorySystemTest, loseAnObjects) {
-	MemorySystem system(runtime);
-	Context cx(system);
+TEST(OmSystemTest, loseAnObjects) {
+	System system(runtime);
+	RunContext cx(system);
 
-	RootRef<Shape> shape(cx, allocateRootObjectLayout(cx, {}));
+	GC::StackRoot<Shape> shape(cx.gc(), allocateRootObjectLayout(cx, {}));
 	Object* object = allocateObject(cx, shape);
 
 	EXPECT_NE(object->layout(), nullptr);
 	// EXPECT_EQ(object->layout(), shape);
-	OMR_GC_SystemCollect(cx.vmContext(), 0);
+	OMR_GC_SystemCollect(cx.gc().vm(), 0);
 	// EXPECT_EQ(object->layout(), (Shape*)0x5e5e5e5e5e5e5e5eul);
 }
 
-TEST(MemorySystemTest, keepAnObject) {
-	MemorySystem system(runtime);
-	Context cx(system);
+TEST(OmSystemTest, keepAnObject) {
+	System system(runtime);
+	RunContext cx(system);
 
-	RootRef<Shape> shape(cx, allocateRootObjectLayout(cx, {}));
-	RootRef<Object> object(cx, allocateObject(cx, shape));
+	GC::StackRoot<Shape> shape(cx.gc(), allocateRootObjectLayout(cx, {}));
+	GC::StackRoot<Object> object(cx.gc(), allocateObject(cx, shape));
 	EXPECT_EQ(object->layout(), shape.get());
-	OMR_GC_SystemCollect(cx.vmContext(), 0);
+	OMR_GC_SystemCollect(cx.gc().vm(), 0);
 	EXPECT_EQ(object->layout(), shape.get());
 }
 
@@ -68,15 +67,15 @@ public:
 	}
 };
 
-TEST(MemorySystemTest, print) {
-	MemorySystem system(runtime);
-	Context cx(system);
+TEST(OmSystemTest, print) {
+	System system(runtime);
+	RunContext cx(system);
 
-	RootRef<Shape> shape(cx, allocateRootObjectLayout(cx, {}, DEFAULT_INLINE_DATA_SIZE));
+	GC::StackRoot<Shape> shape(cx.gc(), allocateRootObjectLayout(cx, {}, DEFAULT_INLINE_DATA_SIZE));
 
 	ASSERT_NE(shape->shapeTreeData()->instanceInlineSlotsSize, 0);
 
-	RootRef<Object> object(cx, allocateObject(cx, shape));
+	GC::StackRoot<Object> object(cx.gc(), allocateObject(cx, shape));
 
 	Om::Id id(1);
 	Om::SlotType type(Om::Id(0), Om::CoreType::VALUE);
@@ -107,12 +106,12 @@ TEST(MemorySystemTest, print) {
 	// EXPECT_EQ(object->layout(), shape.get());
 }
 
-TEST(MemorySystemTest, objectTransition) {
-	MemorySystem system(runtime);
-	Context cx(system);
+TEST(OmSystemTest, objectTransition) {
+	System system(runtime);
+	RunContext cx(system);
 
-	RootRef<Shape> emptyObjectMap(cx, allocateRootObjectLayout(cx, {}));
-	RootRef<Object> obj1(cx, allocateObject(cx, emptyObjectMap));
+	GC::StackRoot<Shape> emptyObjectMap(cx.gc(), allocateRootObjectLayout(cx, {}));
+	GC::StackRoot<Object> obj1(cx.gc(), allocateObject(cx, emptyObjectMap));
 
 	const std::array<const SlotAttr, 1> attributes{
 	        {SlotAttr(SlotType(Id(0), CoreType::VALUE), Id(0))}};
@@ -131,7 +130,7 @@ TEST(MemorySystemTest, objectTransition) {
 
 	// second object
 	{
-		RootRef<Object> obj2(cx, allocateObject(cx, emptyObjectMap));
+		GC::StackRoot<Object> obj2(cx.gc(), allocateObject(cx, emptyObjectMap));
 		auto m = takeExistingTransition(cx, obj2, attributes);
 		EXPECT_NE(m, nullptr);
 		EXPECT_EQ(m, obj1->layout());
@@ -139,9 +138,9 @@ TEST(MemorySystemTest, objectTransition) {
 	}
 }
 
-TEST(MemorySystemTest, objectTransitionReuse) {
-	MemorySystem system(runtime);
-	Context cx(system);
+TEST(OmSystemTest, objectTransitionReuse) {
+	System system(runtime);
+	RunContext cx(system);
 }
 
 } // namespace Test

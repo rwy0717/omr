@@ -15,19 +15,20 @@ public:
 
 	/// Start scanning a cell. Returns true if there are more slots to scan.
 	template<typename VisitorT>
-	bool scan(VisitorT&& visitor, Any* target) {
-		switch (target->kind()) {
+	bool scan(VisitorT&& visitor, Any* tgt) {
+		switch (tgt->kind()) {
 		case CellKind::OBJECT:
 			new (&subscanner_.as.object) ObjectScanner();
-			return subscanner_.as.object.scan(visitor, &target->as.object);
+			return subscanner_.as.object.scan(visitor, &tgt->as.object);
 		case CellKind::ARRAY:
 			new (&subscanner_.as.array) ArrayScanner();
-			return subscanner_.as.array.scan(visitor, &target->as.array);
+			return subscanner_.as.array.scan(visitor, &tgt->as.array);
 		case CellKind::SHAPE:
 			new (&subscanner_.as.shape) ShapeScanner();
-			return subscanner_.as.shape.scan(visitor, &target->as.shape);
+			return subscanner_.as.shape.scan(visitor, &tgt->as.shape);
+		default:
+			assert(0); // unreachable.
 		}
-		return scan(visitor, target);
 	}
 
 	/// Continue scanning an existing cell. Returns true if there are more slots to

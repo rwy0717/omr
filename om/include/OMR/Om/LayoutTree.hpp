@@ -2,7 +2,7 @@
 #define OMR_OM_LAYOUTTREE_HPP_
 
 #include <OMR/Om/Cell.hpp>
-#include <OMR/Om/Handle.hpp>
+#include <OMR/GC/Handle.hpp>
 #include <OMR/Om/Shape.hpp>
 #include <OMR/Om/Value.hpp>
 

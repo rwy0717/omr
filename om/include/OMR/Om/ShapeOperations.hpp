@@ -3,11 +3,11 @@
 
 #include <OMR/Om/Allocator.hpp>
 #include <OMR/Om/Context.hpp>
-#include <OMR/Om/Handle.hpp>
 #include <OMR/Om/Initializer.hpp>
 #include <OMR/Om/Shape.hpp>
 #include <OMR/Om/TransitionSetOperations.hpp>
 
+#include <OMR/GC/Handle.hpp>
 #include <cstddef>
 #include <iostream>
 
@@ -19,13 +19,13 @@ struct InstanceDescription {};
 static constexpr std::size_t DEFAULT_INLINE_DATA_SIZE = 32 * sizeof(void*);
 
 inline bool
-initializeTransitionSet(Context& cx, Handle<Shape> shape, std::size_t initialSetSize = 32) {
+initializeTransitionSet(Context& cx, GC::Handle<Shape> shape, std::size_t initialSetSize = 32) {
 	assert(!shape->transitions_.initialized());
 	return initializeTransitionSet(cx, {shape, &Shape::transitions_}, initialSetSize);
 }
 
 inline bool
-storeTransition(Context& cx, Handle<Shape> shape, TransitionSetEntry entry, std::size_t hash) {
+storeTransition(Context& cx, GC::Handle<Shape> shape, TransitionSetEntry entry, std::size_t hash) {
 	return storeTransition(cx, {shape, &Shape::transitions_}, entry, hash);
 }
 
@@ -96,13 +96,13 @@ struct ObjectLayoutInitializer : public Initializer {
 		return reinterpret_cast<Cell*>(shape);
 	}
 
-	Handle<Shape> parentLayout;
+	GC::Handle<Shape> parentLayout;
 	Span<const SlotAttr> attributes;
 };
 
 /// Allocate a shape that lays out zero or more slots in an Object.
 inline Shape*
-allocateObjectLayout(Context& cx, Handle<Shape> parentLayout, Span<const SlotAttr> attributes) {
+allocateObjectLayout(Context& cx, GC::Handle<Shape> parentLayout, Span<const SlotAttr> attributes) {
 	ObjectLayoutInitializer init;
 	init.parentLayout = parentLayout;
 	init.attributes = attributes;
@@ -118,7 +118,7 @@ struct ShapeLayoutInitializer : public Initializer {
 		Shape* shape = reinterpret_cast<Shape*>(cell);
 		shape->instanceKind(CellKind::SHAPE);
 		shape->layout(shape);
-		shape->parentLayout_ = cx.globals().metaShape();
+		shape->parentLayout_ = nullptr;
 		shape->instanceSlotOffset_ = 0;
 		shape->instanceSlotCount_ = 0;
 		shape->instanceSlotWidth_ = 0;
@@ -139,6 +139,10 @@ struct ArrayLayoutInitializer : public Initializer {
 		Shape* shape = reinterpret_cast<Shape*>(cell);
 		shape->instanceKind(CellKind::ARRAY);
 		shape->layout(cx.globals().metaShape());
+		shape->parentLayout_ = nullptr;
+		shape->instanceSlotOffset_ = 0;
+		shape->instanceSlotCount_ = 0;
+		shape->instanceSlotWidth_ = 0;
 		return reinterpret_cast<Cell*>(shape);
 	}
 };
@@ -153,7 +157,7 @@ inline Shape* allocateArrayLayout(Context& cx) {
 /// Create a slot shape that derives base. Add the new slot shape to the set of
 /// known transistions from base.
 inline Shape* deriveObjectLayout(Context& cx,
-                                 Handle<Shape> base,
+                                 GC::Handle<Shape> base,
                                  const Span<const SlotAttr>& attr,
                                  std::size_t hash) {
 	if (!base->transitions_.initialized()) {

@@ -3,15 +3,16 @@
 
 #include <OMR/Om/Allocation.hpp>
 #include <OMR/Om/Context.hpp>
-#include <OMR/Om/Handle.hpp>
+#include <OMR/GC/Handle.hpp>
 #include <OMR/Om/Id.hpp>
-#include <OMR/Om/RootRef.hpp>
+#include <OMR/GC/StackRoot.hpp>
 
 #include <cstdlib>
 #include <omrgc.h>
 
 namespace OMR {
 namespace Om {
+
 class Cell;
 class Context;
 
@@ -22,11 +23,11 @@ struct BaseAllocator {
 	static ResultT*
 	allocate(Context& cx, InitializerT& init, std::size_t size = sizeof(ResultT)) {
 		Allocation allocation(cx, init, size);
-		ResultT* result = (ResultT*)allocation.allocateAndInitializeObject(cx.vmContext());
+		ResultT* result = (ResultT*)allocation.allocateAndInitializeObject(cx.gc().vm());
 
 		if (DEBUG_SLOW) {
-			RootRef<ResultT> root(cx, result);
-			OMR_GC_SystemCollect(cx.vmContext(), 0);
+			GC::StackRoot<ResultT> root(cx.gc(), result);
+			OMR_GC_SystemCollect(cx.gc().vm(), 0);
 			result = root.get();
 		}
 

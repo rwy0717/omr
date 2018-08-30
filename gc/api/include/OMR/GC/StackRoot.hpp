@@ -25,6 +25,8 @@ private:
 	StackRootPtrOps() = default;
 
 	StackRoot<T>* self() { return static_cast<StackRoot<T>*>(this); }
+
+	const StackRoot<T>* self() const { return static_cast<const StackRoot<T>*>(this); }
 };
 
 /// This specialization removes pointer operations for void referents.

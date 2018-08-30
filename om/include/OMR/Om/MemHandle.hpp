@@ -1,7 +1,7 @@
 #if !defined(OMR_OM_MEMHANDLE_HPP_)
 #define OMR_OM_MEMHANDLE_HPP_
 
-#include <OMR/Om/Handle.hpp>
+#include <OMR/GC/Handle.hpp>
 #include <OMR/Om/PointerUtilities.hpp>
 
 namespace OMR {
@@ -17,12 +17,12 @@ template<typename T, typename C = Cell>
 class MemHandle {
 public:
 	template<typename U = C>
-	MemHandle(Handle<U> base, T U::*p)
+	MemHandle(GC::Handle<U> base, T U::*p)
 	        : base_(base), offset_(ptrdiff(base.ptr(), &(base.ptr()->*p))) {}
 
 	/// Construct a memb
 	template<typename U = C>
-	MemHandle(const Handle<U>& base, std::uintptr_t offset) : base_(base), offset_(offset) {}
+	MemHandle(const GC::Handle<U>& base, std::uintptr_t offset) : base_(base), offset_(offset) {}
 
 	/// Copy a Member Handle
 	template<typename U>
@@ -50,9 +50,9 @@ public:
 		return get()->*mptr;
 	}
 
-	constexpr Handle<C> base() const { return base_; }
+	constexpr GC::Handle<C> base() const { return base_; }
 
-	MemHandle<T, C>& base(Handle<C>& base) {
+	MemHandle<T, C>& base(GC::Handle<C>& base) {
 		base_ = &base_;
 		return *this;
 	}
@@ -65,7 +65,7 @@ protected:
 	template<typename X, typename Y>
 	friend class MemHandle;
 
-	Handle<C> base_;
+	GC::Handle<C> base_;
 	std::ptrdiff_t offset_;
 };
 

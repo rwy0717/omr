@@ -2,7 +2,12 @@
 #define OMR_OM_GLOBALS_HPP_
 
 #include <OMR/Om/Shape.hpp>
-#include <OMR/Om/StartupError.hpp>
+
+#include <OMR/GC/MarkingFn.hpp>
+
+#include <MarkingScheme.hpp>
+
+#include <iostream>
 
 namespace OMR {
 namespace Om {
@@ -17,20 +22,20 @@ public:
 
 	Shape* arrayBufferShape() const noexcept { return arrayBufferShape_; }
 
-	template<typename VisitorT>
-	void visit(VisitorT& visitor) {
+	void scan(GC::MarkingVisitor& visitor) {
 		if (metaShape_ != nullptr)
 			visitor.edge(this, BasicSlotHandle(&metaShape_));
 
-		if (arrayBufferShape_ != nullptr)
+		if (arrayBufferShape_ != nullptr) {
 			visitor.edge(this, BasicSlotHandle(&arrayBufferShape_));
+		}
 	}
 
 protected:
-	friend class MemorySystem;
+	friend class System;
 
 	/// Allocate the globals. Throws StartupError if any allocation fails.
-	void init(StartupContext& cx);
+	bool init(StartupContext& cx);
 
 private:
 	Shape* metaShape_ = nullptr;

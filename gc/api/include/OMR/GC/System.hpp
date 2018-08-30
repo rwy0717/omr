@@ -1,5 +1,5 @@
-#if !defined(OMR_GC_CONTEXT_HPP_)
-#define OMR_GC_CONTEXT_HPP_
+#if !defined(OMR_GC_SYSTEM_HPP_)
+#define OMR_GC_SYSTEM_HPP_
 
 #include <OMR/GC/MarkingFn.hpp>
 #include <OMR/GC/StackRootList.hpp>
@@ -55,9 +55,9 @@ public:
 
 	Runtime& runtime() { return *_runtime; }
 
-	MarkingFnVector userRoots() noexcept { return _userRoots; }
+	MarkingFnVector& markingFns() noexcept { return _userRoots; }
 
-	const MarkingFnVector userRoots() const noexcept { return _userRoots; }
+	const MarkingFnVector& markingFns() const noexcept { return _userRoots; }
 
 	ContextSet& contexts() { return _contexts; }
 
@@ -97,7 +97,7 @@ public:
 
 	inline MM_EnvironmentBase* env() const noexcept;
 
-	inline OMR_VMThread* vmContext() const noexcept { return _vmContext; }
+	inline OMR_VMThread* vm() const noexcept { return _vmContext; }
 
 	StackRootList& stackRoots() noexcept { return _stackRoots; }
 
@@ -138,7 +138,7 @@ inline Context::~Context() noexcept {
 }
 
 inline MM_EnvironmentBase* Context::env() const noexcept {
-	return MM_EnvironmentBase::getEnvironment(vmContext());
+	return MM_EnvironmentBase::getEnvironment(vm());
 }
 
 /// A special limited context that is only used during startup or shutdown.
@@ -172,4 +172,4 @@ inline Context& getContext(MM_EnvironmentBase* env) { return getContext(env->get
 } // namespace GC
 } // namespace OMR
 
-#endif // OMR_GC_CONTEXT_HPP_
+#endif // OMR_GC_SYSTEM_HPP_

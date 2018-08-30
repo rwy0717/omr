@@ -91,7 +91,7 @@ public:
 	 * @return the exact size of an object, in bytes, excluding padding bytes
 	 */
 	MMINLINE uintptr_t getObjectSizeInBytesWithHeader(const Any* any) {
-		switch (cellKind(*any)) {
+		switch (any->kind()) {
 		case CellKind::OBJECT: return any->as.object.cellSize();
 		case CellKind::SHAPE: return any->as.shape.cellSize();
 		case CellKind::ARRAY: return any->as.array.cellSize();

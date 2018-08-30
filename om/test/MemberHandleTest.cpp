@@ -10,8 +10,8 @@ TEST(MemberHandleTest, constructor) {
 	Root<Cell> root;
 	auto handle = root.handle();
 
-	RootRef<Cell> root;
-	Handle<Cell> handle(root);
+	GC::StackRoot<Cell> root;
+	GC::Handle<Cell> handle(root);
 	MemberHandle<CellHeader> cellHeaderHandle(handle, &Cell::header_);
 }
 

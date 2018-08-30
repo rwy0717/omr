@@ -36,12 +36,13 @@
 
 namespace OMR {
 namespace Om {
+
 class Allocation : public MM_AllocateInitialization {
 public:
 	Cell* initializeObject(Context& cx, Cell* p) { return init_(cx, p); }
 
 	Allocation(Context& cx, Initializer& init, std::size_t size, uintptr_t flags = 0)
-	        : MM_AllocateInitialization(cx.gcContext(), 0, size, flags), init_(init) {}
+	        : MM_AllocateInitialization(cx.gc().env(), 0, size, flags), init_(init) {}
 
 private:
 	Initializer& init_;

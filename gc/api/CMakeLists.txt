@@ -2,6 +2,10 @@ include(OmrAssert)
 
 omr_assert(TEST OMR_GC_EXTENDED_API)
 
+###
+### OMR GC
+###
+
 target_sources(omrgc
 	PRIVATE
 		${CMAKE_CURRENT_SOURCE_DIR}/src/OMR_GC_System.cpp
@@ -29,3 +33,13 @@ target_compile_features(omrgc
 		cxx_variadic_templates
 		cxx_template_template_parameters
 )
+
+###
+### OMR Util
+###
+
+target_sources(omrutil_obj
+	PRIVATE
+		${CMAKE_CURRENT_SOURCE_DIR}/glue/UtilGlue.c
+)
+

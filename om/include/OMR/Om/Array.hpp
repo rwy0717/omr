@@ -2,7 +2,7 @@
 #define OMR_OM_ARRAY_HPP_
 
 #include <OMR/Om/CellHeader.hpp>
-#include <OMR/Om/Handle.hpp>
+#include <OMR/GC/Handle.hpp>
 #include <OMR/Om/HashUtilities.hpp>
 
 #include <cassert>
