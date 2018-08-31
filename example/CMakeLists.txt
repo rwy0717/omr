@@ -27,13 +27,20 @@ add_library(omr_example_base INTERFACE)
 
 target_include_directories(omr_example_base
 	INTERFACE
-		glue
+		./include
 )
 
 target_link_libraries(omr_example_base
 	INTERFACE
 		omr_base
 )
+
+if (NOT OMR_GC_EXPERIMENTAL_CONTEXT)
+	target_include_directories(omr_example_base
+		INTERFACE
+			./include_extended
+	)
+endif(NOT OMR_GC_EXPERIMENTAL_CONTEXT)
 
 # The GC example shows how to use OMR's GC component
 if(OMR_GC)
@@ -57,3 +64,4 @@ if(OMR_GC)
 endif(OMR_GC)
 
 add_subdirectory(glue)
+
