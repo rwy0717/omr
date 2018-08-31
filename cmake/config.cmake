@@ -47,6 +47,7 @@ set(OMR_TEST_COMPILER OFF CACHE BOOL "Enable building the test compiler")
 
 set(OMR_GC ON CACHE BOOL "Enable the GC")
 set(OMR_GC_TEST ${OMR_GC} CACHE BOOL "Enable the GC tests.")
+set(OMR_OM OFF CACHE BOOL "Enable the Om GC object library")
 
 ## OMR_COMPILER is required for OMR_JITBUILDER and OMR_TEST_COMPILER
 if(NOT OMR_COMPILER)
