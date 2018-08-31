@@ -19,24 +19,21 @@
 # SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
 #############################################################################
 
-# A cache for enabling Om in OMR.
-# For more information, see :/om/README.md
-
-set(OMR_JIT  ON CACHE BOOL "")
-set(OMR_JITBUILDER ON CACHE BOOL "")
-set(OMR_GC ON CACHE BOOL "")
-set(OMR_OM ON CACHE BOOL "")
-set(OMR_PORT ON CACHE BOOL "")
-set(OMR_THREAD ON CACHE BOOL "")
-set(OMR_FVTEST ON CACHE BOOL "")
-
-# Om uses the extended GC APIs
+# A cache for enabling the extended GC APIs
 
 set(OMR_GC_EXTENDED_API ON CACHE BOOL "")
 
+set(OMR_EXAMPLE ON CACHE BOOL "")
+set(OMR_PORT    ON CACHE BOOL "")
+set(OMR_THREAD  ON CACHE BOOL "")
+set(OMR_FVTEST  ON CACHE BOOL "")
+set(OMR_GC      ON CACHE BOOL "")
+
+# Disable unrelated OMR Components
+
 # Disable incompatible GC tests
 
-set(OMR_EXAMPLE OFF CACHE BOOL "")
+set(OMR_FVTEST OFF CACHE BOOL "")
 set(OMR_GC_TEST OFF CACHE BOOL "")
 
 # TODO: fork support requires linking the trace library?
@@ -60,8 +57,9 @@ set(OMR_WARNINGS_AS_ERRORS ON CACHE BOOL "")
 
 # Disable unrelated OMR elements
 
+set(OMR_JIT  OFF CACHE BOOL "")
+set(OMR_JITBUILDER OFF CACHE BOOL "")
+set(OMR_OM OFF CACHE BOOL "")
 set(OMR_DDR OFF CACHE BOOL "Enable DDR")
 set(OMR_OMRSIG OFF CACHE BOOL "")
-set(OMR_FVTEST OFF CACHE BOOL "")
-set(OMR_EXAMPLE OFF CACHE BOOL "")
 set(OMR_TEST_COMPILER OFF CACHE BOOL "")

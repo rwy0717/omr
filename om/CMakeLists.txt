@@ -27,6 +27,11 @@ omr_assert(FATAL_ERROR
 )
 
 omr_assert(FATAL_ERROR
+	TEST OMR_GC_EXTENDED_API
+	MESSAGE "Om requires the OMR_GC_EXTENDED_API flag to be enabled"
+)
+
+omr_assert(FATAL_ERROR
 	TEST NOT OMR_EXAMPLE
 	MESSAGE "The OMR example code is temporarily incompatible with Om"
 )
