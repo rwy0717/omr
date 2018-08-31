@@ -29,8 +29,6 @@ set(OMR_THREAD  ON CACHE BOOL "")
 set(OMR_FVTEST  ON CACHE BOOL "")
 set(OMR_GC      ON CACHE BOOL "")
 
-# Disable unrelated OMR Components
-
 # Disable incompatible GC tests
 
 set(OMR_FVTEST OFF CACHE BOOL "")
