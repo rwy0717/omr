@@ -39,3 +39,5 @@ function(omr_add_gc_test testname)
 		COMMAND "${testname}"
 	)
 endfunction(omr_add_gc_test)
+
+omr_add_gc_test(TestIntrusiveList)
