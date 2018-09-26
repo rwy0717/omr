@@ -24,6 +24,7 @@
 #define OMR_GC_SYSTEM_HPP_
 
 #include <OMR/GC/MarkingFn.hpp>
+#include <OMR/GC/ScavengingFn.hpp>
 #include <OMR/GC/StackRootList.hpp>
 #include <OMR/GC/LocalHeapCache.hpp>
 #include <EnvironmentBase.hpp>
@@ -86,6 +87,10 @@ public:
 
 	const MarkingFnVector &markingFns() const noexcept { return _userRoots; }
 
+	ScavengingFnVector &scavengingFns() noexcept { return _scavengingFns; }
+
+	const ScavengingFnVector &scavengingFns() const noexcept { return _scavengingFns; }
+
 private:
 	friend class BaseContext;
 	friend class Context;
@@ -104,12 +109,13 @@ private:
 	OMR_VM _vm;
 	ContextList _contexts;
 	MarkingFnVector _userRoots;
+	ScavengingFnVector _scavengingFns;
 };
 
 static_assert(std::is_standard_layout<System>::value,
               "OMR::GC::System must be a standard layout type.");
 
-/// A GC context. Base class. GC users should create Contexts.
+/// A GC context. Base class. GC users should create RunContexts.
 class BaseContext
 {
 public:
@@ -169,6 +175,10 @@ public:
 
 	const MarkingFnVector &markingFns() const noexcept { return _userMarkingFns; }
 
+	ScavengingFnVector &scavengingFns() noexcept { return _scavengingFns; }
+
+	const ScavengingFnVector &scavengingFns() const noexcept { return _scavengingFns; }
+
 	LocalHeapCache& heapCache() noexcept { return _heapCache; }
 
 	const LocalHeapCache& heapCache() const noexcept { return _heapCache; }
@@ -183,6 +193,7 @@ private:
 	ContextListNode _node;
 	StackRootList _stackRoots;
 	MarkingFnVector _userMarkingFns;
+	ScavengingFnVector _scavengingFns;
 };
 
 // static_assert(std::is_standard_layout<Context>::value,
