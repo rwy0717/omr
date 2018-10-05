@@ -36,6 +36,13 @@ target_sources(omrgc
 		${CMAKE_CURRENT_SOURCE_DIR}/glue/EnvironmentDelegate.cpp
 )
 
+if(OMR_GC_EXPERIMENTAL_ALLOCATOR)
+	target_sources(omrgc
+		PRIVATE
+			${CMAKE_CURRENT_SOURCE_DIR}/src/OMR_GC_Allocator.cpp
+	)
+endif()
+
 target_include_directories(omrgc
 	PUBLIC
 		glue/
