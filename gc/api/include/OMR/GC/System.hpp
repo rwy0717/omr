@@ -23,6 +23,7 @@
 #if !defined(OMR_GC_SYSTEM_HPP_)
 #define OMR_GC_SYSTEM_HPP_
 
+#include <OMR/GC/CompactingFn.hpp>
 #include <OMR/GC/MarkingFn.hpp>
 #include <OMR/GC/ScavengingFn.hpp>
 #include <OMR/GC/StackRootList.hpp>
@@ -91,6 +92,10 @@ public:
 
 	const ScavengingFnVector &scavengingFns() const noexcept { return _scavengingFns; }
 
+	CompactingFnVector &compactingFns() noexcept { return _compactingFns; }
+
+	const CompactingFnVector &compactingFns() const noexcept { return _compactingFns; }
+
 private:
 	friend class BaseContext;
 	friend class Context;
@@ -104,12 +109,12 @@ private:
 
 	void initGcSlaveThreads(StartupContext &cx);
 
-
 	Runtime *_runtime;
 	OMR_VM _vm;
 	ContextList _contexts;
 	MarkingFnVector _userRoots;
 	ScavengingFnVector _scavengingFns;
+	CompactingFnVector _compactingFns;
 };
 
 static_assert(std::is_standard_layout<System>::value,
@@ -175,6 +180,10 @@ public:
 
 	const MarkingFnVector &markingFns() const noexcept { return _userMarkingFns; }
 
+	CompactingFnVector &compactingFns() noexcept { return _compactingFns; }
+
+	const CompactingFnVector &compactingFns() const noexcept { return _compactingFns; }
+
 	ScavengingFnVector &scavengingFns() noexcept { return _scavengingFns; }
 
 	const ScavengingFnVector &scavengingFns() const noexcept { return _scavengingFns; }
@@ -194,6 +203,7 @@ private:
 	StackRootList _stackRoots;
 	MarkingFnVector _userMarkingFns;
 	ScavengingFnVector _scavengingFns;
+	CompactingFnVector _compactingFns;
 };
 
 // static_assert(std::is_standard_layout<Context>::value,
