@@ -69,6 +69,7 @@ bool
 MM_EnvironmentDelegate::isExclusiveAccessRequestWaiting()
 {
 	assert(0);
+	return false;
 }
 
 /**
