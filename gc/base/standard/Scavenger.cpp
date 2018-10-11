@@ -2249,78 +2249,88 @@ void MM_Scavenger::endScan(MM_EnvironmentStandard* env, MM_CopyScanCacheStandard
 	flushCache(env, cache);
 }
 
+/**
+ * Scan caches until there are no more to be scanned. Will incrementally scan each cache, jumping to new scan caches as
+ * better copying opportunities are found.
+ */
 void
-MM_Scavenger::incrementalScanCacheBySlot(MM_EnvironmentStandard *env, MM_CopyScanCacheStandard* firstScanCache)
+MM_Scavenger::scanCaches(MM_EnvironmentStandard* env, MM_CopyScanCacheStandard* const first) {
+
+	MM_CopyScanCacheStandard* cache = first;
+	do {
+		cache = incrementallyScanSingleCache(env, cache);
+	}
+	while (cache != nullptr);
+}
+
+MM_CopyScanCacheStandard*
+MM_Scavenger::incrementallyScanSingleCache(MM_EnvironmentStandard* env, MM_CopyScanCacheStandard* scanCache)
 {
-	for (MM_CopyScanCacheStandard* nextScanCache = firstScanCache; nextScanCache != nullptr;) {
-		MM_CopyScanCacheStandard* const scanCache = nextScanCache;
-		nextScanCache = nullptr;
+	startScan(scanCache);
 
-		startScan(scanCache);
+	/* Finish scanning a partially scanned object */
+	if (scanCache->_hasPartiallyScannedObject) {
+		ScavengingObjectVisitor visitor(env, this, scanCache);
+		OMR::GC::ScanResult result = scanCache->_scanner.resume(visitor);
+		updateCopyScanCounts(env, visitor._result.slotsScanned, visitor._result.slotsCopied);
 
-		/* Finish scanning a partially scanned object */
-		if (scanCache->_hasPartiallyScannedObject) {
+		if (visitor._result.nextScanCache) {
+			/* we are aliasing! */
+			interruptScan(env, scanCache, (omrobjectptr_t) scanCache->scanCurrent, !result.complete);
+			return visitor._result.nextScanCache;
+		} else {
+			if (!result.complete) {
+				/* we are in backout?? */
+				assert(isBackOutFlagRaised());
+				scanCache->_hasPartiallyScannedObject = false; // we're going to start this object from the beginning.
+			} else {
+				assert(result.complete);
+				scanCache->_hasPartiallyScannedObject = false;
+			}
+		}
+	}
+
+	/* Complete scanning of the cache. */
+
+	while (isWorkAvailableInCache(scanCache)) {
+
+		scanCache->_hasPartiallyScannedObject = false;
+		omrobjectptr_t scanEnd = (omrobjectptr_t)scanCache->cacheAlloc;
+	
+		GC_ObjectHeapIteratorAddressOrderedList heapChunkIterator(
+			_extensions,
+			(omrobjectptr_t)scanCache->scanCurrent,
+			(omrobjectptr_t)scanEnd,
+			false);
+
+		omrobjectptr_t object;
+
+		while ((object = heapChunkIterator.nextObjectNoAdvance()) != NULL) {
+
 			ScavengingObjectVisitor visitor(env, this, scanCache);
-			OMR::GC::ScanResult result = scanCache->_scanner.resume(visitor);
+			OMR::GC::ScanResult result = scanCache->_scanner.start(visitor, object);
 			updateCopyScanCounts(env, visitor._result.slotsScanned, visitor._result.slotsCopied);
 
 			if (visitor._result.nextScanCache) {
 				/* we are aliasing! */
-				interruptScan(env, scanCache, (omrobjectptr_t) scanCache->scanCurrent, !result.complete);
-				nextScanCache = visitor._result.nextScanCache;
-				continue;
+				interruptScan(env, scanCache, object, !result.complete);
+				return visitor._result.nextScanCache;
 			} else {
 				if (!result.complete) {
 					/* we are in backout?? */
 					assert(isBackOutFlagRaised());
-					scanCache->_hasPartiallyScannedObject = false; // we're going to start this object from the beginning.
 				} else {
 					assert(result.complete);
 					scanCache->_hasPartiallyScannedObject = false;
-					
 				}
 			}
+
+			scanCache->scanCurrent = scanEnd;
 		}
-
-		while (isWorkAvailableInCache(scanCache)) {
-
-			scanCache->_hasPartiallyScannedObject = false;
-			omrobjectptr_t scanEnd = (omrobjectptr_t)scanCache->cacheAlloc;
-		
-			/* Complete scanning of the cache. */
-			GC_ObjectHeapIteratorAddressOrderedList heapChunkIterator(
-				_extensions,
-				(omrobjectptr_t)scanCache->scanCurrent,
-				(omrobjectptr_t)scanEnd,
-				false);
-
-			omrobjectptr_t object;
-
-			while ((object = heapChunkIterator.nextObjectNoAdvance()) != NULL) {
-
-				ScavengingObjectVisitor visitor(env, this, scanCache);
-				OMR::GC::ScanResult result = scanCache->_scanner.start(visitor, object);
-				updateCopyScanCounts(env, visitor._result.slotsScanned, visitor._result.slotsCopied);
-
-				if (visitor._result.nextScanCache) {
-					interruptScan(env, scanCache, object, !result.complete);
-					nextScanCache = visitor._result.nextScanCache;
-					break;
-				} else {
-					if (!result.complete) {
-						/* we are in backout?? */
-						assert(isBackOutFlagRaised());
-					} else {
-						assert(result.complete);
-						scanCache->_hasPartiallyScannedObject = false;
-					}
-				}
-
-				scanCache->scanCurrent = scanEnd;
-			}
-		}
-		endScan(env, scanCache);
 	}
+	endScan(env, scanCache);
+
+	return nullptr;
 }
 
 #endif /* !defined(OMR_GC_EXPERIMENTAL_OBJECT_SCANNER) */
@@ -2367,7 +2377,7 @@ MM_Scavenger::completeScan(MM_EnvironmentStandard *env)
 			break;
 		}
 #else // !defined(OMR_GC_EXPERIMENTAL_OBJECT_SCANNER)
-	incrementalScanCacheBySlot(env, scanCache);
+		scanCaches(env, scanCache);
 #endif // else !defined(OMR_GC_EXPERIMENTAL_OBJECT_SCANNER)
 	}
 
@@ -3123,7 +3133,7 @@ MM_Scavenger::copyAndForwardThreadSlot(MM_EnvironmentStandard *env, omrobjectptr
 	if(NULL != objectPtr) {
 		if (isObjectInEvacuateMemory(objectPtr)) {
 #if defined(OMR_GC_EXPERIMENTAL_OBJECT_SCANNER)
-			bool isInNewSpace = scavengeSlot(env, OMR::GC::RefSlotHandle((fomrobject_t*)objectPtrIndirect)).isDestinationInNewSpace;
+			bool isInNewSpace = scavengeSlot(env, OMR::GC::RefSlotHandle(objectPtrIndirect)).isDestinationInNewSpace;
 #else
 			bool isInNewSpace = copyAndForward(env, objectPtrIndirect);
 #endif

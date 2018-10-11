@@ -417,7 +417,18 @@ public:
 	MMINLINE bool failedTenureThresholdReached() { return _failedTenureThresholdReached; };
 
 	void completeScanCache(MM_EnvironmentStandard *env, MM_CopyScanCacheStandard* scanCache);
+
+#if defined(OMR_GC_EXPERIMENTAL_OBJECT_SCANNER)
+	void
+	scanCaches(MM_EnvironmentStandard* env, MM_CopyScanCacheStandard* const first);
+
+	/* Incrementally scan a cache until a better scan cache is found. Returns the next cache to scan. */
+	MM_CopyScanCacheStandard*
+	incrementallyScanSingleCache(MM_EnvironmentStandard* env, MM_CopyScanCacheStandard* scanCache);
+
+#else
 	void incrementalScanCacheBySlot(MM_EnvironmentStandard *env, MM_CopyScanCacheStandard* scanCache);
+#endif
 
 #if !defined(OMR_GC_EXPERIMENTAL_OBJECT_SCANNER)
 
