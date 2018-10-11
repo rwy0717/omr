@@ -107,19 +107,39 @@ System::initGcSlaveThreads(StartupContext &cx)
 void
 Context::attachVmContext(OMR_VM &vm, Context &cx)
 {
-	omrthread_t self;
+	omrthread_t self = nullptr;
 
 	// assert(nullptr == omr_vmthread_getCurrent(&vm));
 
-	assert(omrthread_attach_ex(&self, J9THREAD_ATTR_DEFAULT) == 0);
+	{
+		auto error = omrthread_attach_ex(&self, J9THREAD_ATTR_DEFAULT);
+		if (error) {
+			throw StartupError("failed to attach thread");
+		}
+	}
+
 	omrthread_monitor_enter(vm._vmThreadListMutex);
 
 	///////// FIRSTATTACH
 
-	assert(omr_vmthread_firstAttach(&vm, &cx._vmContext) == 0);
+	{
+		omr_error_t error = omr_vmthread_firstAttach(&vm, &cx._vmContext);
+		if (error) {
+			throw StartupError("failed to attach thread");
+		}
+	}
+
+
 	setOMRVMThreadNameWithFlag(nullptr, cx._vmContext, (char *)"OMR::Om::Context", TRUE);
 	cx._vmContext->_language_vmthread = &cx;
-	assert(initializeMutatorModel(cx._vmContext) == 0);
+
+	{
+		intptr_t error = initializeMutatorModel(cx._vmContext);
+		if (error) {
+			throw StartupError("Failed to initialize mutator model");
+		}
+	}
+
 	omrthread_monitor_exit(vm._vmThreadListMutex);
 	omrthread_detach(self);
 }
