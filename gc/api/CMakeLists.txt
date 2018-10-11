@@ -31,9 +31,15 @@ target_sources(omrgc
 	PRIVATE
 		${CMAKE_CURRENT_SOURCE_DIR}/src/OMR_GC_System.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/glue/MarkingDelegate.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/glue/CompactDelegate.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/glue/EnvironmentDelegate.cpp
 )
+
+if(OMR_GC_MODRON_COMPACTION)
+	target_sources(omrgc
+		PRIVATE
+			${CMAKE_CURRENT_SOURCE_DIR}/glue/CompactDelegate.cpp
+	)
+endif()
 
 if(OMR_GC_EXPERIMENTAL_ALLOCATOR)
 	target_sources(omrgc
