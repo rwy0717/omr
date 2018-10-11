@@ -1,3 +1,7 @@
+include(OmrAssert)
+
+omr_assert(TEST OMR_FVTEST))
+
 function(omr_add_gc_test testname)
 	add_executable("${testname}"
 		"${testname}.cpp"

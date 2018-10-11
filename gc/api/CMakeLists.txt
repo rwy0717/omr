@@ -78,4 +78,6 @@ target_sources(omrutil_obj
 		${CMAKE_CURRENT_SOURCE_DIR}/glue/UtilGlue.c
 )
 
-add_subdirectory(test)
+if (OMR_FVTEST)
+	add_subdirectory(test)
+endif()
