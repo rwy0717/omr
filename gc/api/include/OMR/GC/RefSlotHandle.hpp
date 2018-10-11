@@ -38,18 +38,18 @@ namespace GC
 class RefSlotHandle
 {
 public:
-	RefSlotHandle(fomrobject_t *slot) : _slot(slot) {}
+	RefSlotHandle(omrobjectptr_t *slot) : _slot(slot) {}
 
 	void *toAddress() const noexcept { return _slot; }
 
-	omrobjectptr_t readReference() const noexcept { return omrobjectptr_t(*_slot); }
+	omrobjectptr_t readReference() const noexcept { return *_slot; }
 
-	void writeReference(omrobjectptr_t value) const noexcept { *_slot = fomrobject_t(value); }
+	void writeReference(omrobjectptr_t value) const noexcept { *_slot = value; }
 
 	void atomicWriteReference(omrobjectptr_t value) const noexcept { assert(0); }
 
 private:
-	fomrobject_t *_slot;
+	omrobjectptr_t *_slot;
 };
 
 } // namespace GC
