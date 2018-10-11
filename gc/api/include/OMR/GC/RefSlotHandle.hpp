@@ -26,6 +26,8 @@
 #include "objectdescription.h"
 #include "omrcfg.h"
 
+#include <cassert>
+
 #if defined(OMR_GC_COMPRESSED_POINTERS)
 #error "RefSlotHandle is incompatible with compressed pointers, use CompressedRefSlotHandle"
 #endif // OMR_GC_COMPRESSED_POINTERS
