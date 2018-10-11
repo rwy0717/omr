@@ -259,7 +259,7 @@ public:
 		OMRClient::GC::ObjectScanner scanner = env->getExtensions()->objectModel.makeObjectScanner();
 		OMR::GC::ScanResult result = scanner.start(MarkingVisitor(env, this), objectPtr, sizeToDo);
 		assert(result.complete);
-		return 0;
+		return result.bytesScanned;
 #else // OMR_GC_EXPERIMENTAL_OBJECT_SCANNER
 		GC_ObjectScannerState objectScannerState;
 		GC_ObjectScanner *objectScanner = _delegate.getObjectScanner(env, objectPtr, &objectScannerState, reason, &sizeToDo);
