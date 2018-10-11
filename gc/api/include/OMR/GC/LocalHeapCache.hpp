@@ -60,8 +60,8 @@ protected:
 
 	/// Size of the TLH on refresh.
 	std::size_t _refreshSize = DEFAULT_HEAP_CACHE_SIZE;
-	void* _memorySubSpace;
-	void* _memoryPool;
+	void* _memorySubSpace = nullptr;
+	void* _memoryPool = nullptr;
 };
 
 /// Thread-local heap cache. A pool of memory owned by a single thread.
