@@ -32,6 +32,10 @@
 #include "omrhashtable.h"
 #include <iostream>
 
+#if !defined(OMR_GC_MODRON_COMPACTION)
+#error "This file requires OMR_GC_MODRON_COMPACTION"
+#endif
+
 namespace OMR
 {
 namespace GC
