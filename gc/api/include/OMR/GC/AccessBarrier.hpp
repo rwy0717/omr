@@ -24,7 +24,6 @@
 #include <OMR/GC/System.hpp>
 #include "EnvironmentStandard.hpp"
 #include "GCExtensionsBase.hpp"
-#include "ObjectAllocationModel.hpp"
 #include "Scavenger.hpp"
 #include "omrgc.h"
 
