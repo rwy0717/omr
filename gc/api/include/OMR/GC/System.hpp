@@ -113,7 +113,6 @@ private:
 
 	void initGcSlaveThreads(StartupContext &cx);
 
-
 	Runtime *_runtime;
 	OMR_VM _vm;
 	MarkingFnVector _userRoots;
@@ -127,6 +126,8 @@ class Context
 {
 public:
 	static constexpr const char *THREAD_NAME = "OMR::GC::Context";
+
+	explicit inline Context(System &system);
 
 	Context(const Context &other) = delete;
 
@@ -163,8 +164,6 @@ public:
 private:
 	friend class RunContext;
 	friend class StartupContext;
-
-	inline Context(System &system);
 
 	static void attachVmContext(OMR_VM &vm, Context &cx);
 
