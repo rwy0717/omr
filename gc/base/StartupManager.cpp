@@ -212,7 +212,7 @@ MM_StartupManager::loadGcOptions(MM_GCExtensionsBase *extensions)
 
 	extensions->heapAlignment = HEAP_ALIGNMENT;
 
-	defaultMinHeapSize = defaultMinHeapSize = pageSizes[0];
+	//defaultMinHeapSize = defaultMinHeapSize = pageSizes[0];
 
 	assert(0 != defaultMinHeapSize);
 	assert(0 != defaultMaxHeapSize);
@@ -220,12 +220,12 @@ MM_StartupManager::loadGcOptions(MM_GCExtensionsBase *extensions)
 
 	/* Set defaults to support Standard GC in OMR */
 	extensions->initialMemorySize = defaultMinHeapSize;
-	extensions->minNewSpaceSize = defaultMinHeapSize / 8;
-	extensions->newSpaceSize = defaultMinHeapSize / 4;
-	extensions->maxNewSpaceSize = defaultMaxHeapSize / 2;
-	extensions->minOldSpaceSize = defaultMinHeapSize;
-	extensions->oldSpaceSize = defaultMinHeapSize;
-	extensions->maxOldSpaceSize = defaultMaxHeapSize;
+	extensions->minNewSpaceSize = defaultMinHeapSize / 4;
+	extensions->newSpaceSize = extensions->minNewSpaceSize;
+	extensions->maxNewSpaceSize = defaultMaxHeapSize / 4;
+	extensions->minOldSpaceSize = defaultMinHeapSize - extensions->minNewSpaceSize;
+	extensions->oldSpaceSize = extensions->minOldSpaceSize;
+	extensions->maxOldSpaceSize = defaultMaxHeapSize - extensions->maxNewSpaceSize;
 	extensions->memoryMax = defaultMaxHeapSize;
 	extensions->maxSizeDefaultMemorySpace = defaultMaxHeapSize;
 
@@ -267,9 +267,9 @@ MM_StartupManager::handleOption(MM_GCExtensionsBase *extensions, char *option)
 #if defined(OMR_GC_MODRON_COMPACTION)
 	else if (0 == strncmp(option, OMR_XCOMPACTGC, OMR_XCOMPACTGC_LENGTH)) {
 		extensions->noCompactOnGlobalGC = 0;
-		extensions->compactOnGlobalGC = 0;
+		extensions->compactOnGlobalGC = 1;
 		extensions->nocompactOnSystemGC = 0;
-		extensions->compactOnSystemGC = 0;
+		extensions->compactOnSystemGC = 1;
 	}
 #endif /* OMR_GC_MODRON_COMPACTION */
 	else if (0 == strncmp(option, OMR_XVERBOSEGCLOG, OMR_XVERBOSEGCLOG_LENGTH)) {

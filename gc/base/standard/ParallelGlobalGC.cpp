@@ -763,8 +763,8 @@ MM_ParallelGlobalGC::sweep(MM_EnvironmentBase *env, MM_AllocateDescription *allo
 	bool isExplicitGC = env->_cycleState->_gcCode.isExplicitGC();
 #if defined(OMR_GC_MODRON_COMPACTION)
 	/* Decide is a compaction is required - this decision must be made after we sweep since we use the largestFreeEntrySize, as changed by sweep, to determine if a compaction should be done */
-	//_compactThisCycle = shouldCompactThisCycle(env, allocDescription, activeSubSpace->maxExpansionInSpace(env), env->_cycleState->_gcCode);
-	_compactThisCycle = true;
+	_compactThisCycle = shouldCompactThisCycle(env, allocDescription, activeSubSpace->maxExpansionInSpace(env), env->_cycleState->_gcCode);
+	// _compactThisCycle = true;
 
 	if (!_compactThisCycle)  
 #endif /* OMR_GC_MODRON_COMPACTION */		

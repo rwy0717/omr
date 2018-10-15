@@ -79,11 +79,17 @@ public:
 		return true;
 	}
 
+
 	void
 	verifyHeap(MM_EnvironmentBase *env, MM_MarkMap *markMap) { }
 
 	void
 	fixupRoots(MM_EnvironmentBase *env, MM_CompactScheme *compactScheme);
+
+#if defined(OMR_GC_MODRON_SCAVENGER)
+	void
+	fixupRememberedSet(MM_EnvironmentBase* env, MM_CompactScheme* compactScheme);
+#endif
 
 	void
 	workerCleanupAfterGC(MM_EnvironmentBase *env) { }

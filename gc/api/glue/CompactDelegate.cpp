@@ -47,8 +47,8 @@ namespace GC
 void
 CompactDelegate::fixupRoots(MM_EnvironmentBase *env, MM_CompactScheme *compactScheme) {
     auto &cx = getContext(env);
-    MM_GCExtensionsBase *extensions = env->getExtensions();
-    CompactingVisitor visitor((MM_EnvironmentStandard *) env, _compactScheme);
+
+    CompactingVisitor visitor(_compactScheme);
 
     /// System-wide roots
 
@@ -74,25 +74,26 @@ CompactDelegate::fixupRoots(MM_EnvironmentBase *env, MM_CompactScheme *compactSc
 }
 
 #if defined(OMR_GC_MODRON_SCAVENGER)
+/// Fixup the remembered set.
+/// The remembered set contains objects
 void
-CompactDelegate::fixupRememberedSet(MM_EnvironmentBase* env, MM_CompactScheme* c)
-    // Remembered set
-    MM_SublistPuddle *puddle;
+CompactDelegate::fixupRememberedSet(MM_EnvironmentBase* env, MM_CompactScheme* compactScheme) {
+    CompactingVisitor visitor(compactScheme);
 
-    // typedef GC_SublistIterator GC_RememberedSetIterator;
-    // typedef GC_SublistSlotIterator GC_RememberedSetSlotIterator;
-
-    // J9Object **slotPtr;
-    omrobjectptr_t *slot;
-    GC_SublistIterator rememberedSetIterator(&extensions->rememberedSet);
-    fprintf(stderr, "!!! Compacting Remembered Set\n");
+    GC_SublistIterator rememberedSetIterator(&env->getExtensions()->rememberedSet);
+    MM_SublistPuddle *puddle = nullptr;
 
     while((puddle = rememberedSetIterator.nextList()) != NULL) {
+
         GC_SublistSlotIterator rememberedSetSlotIterator(puddle);
+        omrobjectptr_t *slot;
+
         while((slot = (omrobjectptr_t *)rememberedSetSlotIterator.nextSlot()) != NULL) {
             // doRememberedSetSlot(slot, &rememberedSetSlotIterator);
-            fprintf(stderr, "!!! Compact Rem Set: %p %p old-value\n", slot, *slot);
-            visitor.edge(NULL, RefSlotHandle((fomrobject_t *)slot));
+            // fprintf(stderr, "!!! Compact Rem Set: %p %p old-value\n", slot, *slot);
+            if (*slot) {
+                visitor.edge(NULL, RefSlotHandle(slot));
+            }
         }
     }
 }
@@ -100,16 +101,3 @@ CompactDelegate::fixupRememberedSet(MM_EnvironmentBase* env, MM_CompactScheme* c
 
 } // namespace GC
 } // namespace OMR
-
-
-class RememberedSetIterator {
-public:
-    RememberedSetIterator()
-
-    operator++() noexcept {
-
-    };
-
-private:
-
-};

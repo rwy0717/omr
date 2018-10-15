@@ -57,8 +57,7 @@ class MM_MemorySubSpace;
 
 class CompactingVisitor {
 public:
-	CompactingVisitor(MM_EnvironmentStandard* env, MM_CompactScheme *compactScheme) :
-		_env(env),
+	constexpr explicit CompactingVisitor(MM_CompactScheme *compactScheme) :
 		_compactScheme(compactScheme)
 		{}
 
@@ -67,7 +66,6 @@ public:
 	template <class SlotHandleT>
 	bool edge(void* object, SlotHandleT slot) noexcept;
 
-	MM_EnvironmentStandard *_env;
     MM_CompactScheme * _compactScheme;
 };
 
@@ -387,9 +385,9 @@ public:
 
 template <class SlotHandleT>
 bool CompactingVisitor::edge(void* object, SlotHandleT slot) noexcept {
-    fprintf(stderr, "!!! -- CompactVisitor %p %p %p", object, slot.toAddress(), slot.readReference());
+    // fprintf(stderr, "!!! -- CompactVisitor %p %p %p", object, slot.toAddress(), slot.readReference());
     _compactScheme->fixupObjectSlot(slot);
-    fprintf(stderr, " to: %p\n", slot.readReference());
+    // fprintf(stderr, " to: %p\n", slot.readReference());
     return true;
 }
 

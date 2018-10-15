@@ -2247,6 +2247,7 @@ void MM_Scavenger::endScan(MM_EnvironmentStandard* env, MM_CopyScanCacheStandard
 
 	/* Done with the cache - build a free list entry in the hole, release the cache to the free list (if not used), and continue */
 	flushCache(env, cache);
+
 }
 
 /**
@@ -2398,6 +2399,8 @@ MM_Scavenger::completeScan(MM_EnvironmentStandard *env)
 void
 MM_Scavenger::workThreadGarbageCollect(MM_EnvironmentStandard *env)
 {
+	// fprintf(stderr, "************************* workThreadGarbageCollect\n");
+
 	Assert_MM_false(IS_CONCURRENT_ENABLED);
 
 	/* GC init (set up per-invocation values) */
@@ -3499,6 +3502,8 @@ void
 MM_Scavenger::addCopyCachesToFreeList(MM_EnvironmentStandard *env)
 {
 	/* Should be already handled at this point */
+	// fprintf(stderr, "********************** addCopyCachesToFreeList\n");
+
 	Assert_MM_true(NULL == env->_deferredScanCache);
 
 	if(NULL != env->_survivorCopyScanCache) {

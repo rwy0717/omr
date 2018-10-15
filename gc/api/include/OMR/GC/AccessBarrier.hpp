@@ -33,7 +33,11 @@ namespace GC {
 template <typename SlotHandleT, typename ValueT>
 void
 preWriteBarrier(OMR::GC::RunContext &cx, omrobjectptr_t object, SlotHandleT slot, ValueT value) {
+}
 
+template <typename SlotHandleT, typename ValueT>
+void
+postWriteBarrier(OMR::GC::RunContext &cx, omrobjectptr_t object, SlotHandleT slot, ValueT value) {
 #if defined(OMR_GC_MODRON_SCAVENGER) || defined(OMR_GC_MODRON_CONCURRENT_MARK)
 	MM_EnvironmentBase *env = cx.env();
 	MM_GCExtensionsBase *extensions = env->getExtensions();
@@ -55,11 +59,6 @@ preWriteBarrier(OMR::GC::RunContext &cx, omrobjectptr_t object, SlotHandleT slot
 	}
 #endif /* defined(OMR_GC_MODRON_CONCURRENT_MARK) */
 #endif /* defined(OMR_GC_MODRON_SCAVENGER) || defined(OMR_GC_MODRON_CONCURRENT_MARK) */
-}
-
-template <typename SlotHandleT, typename ValueT>
-void
-postWriteBarrier(OMR::GC::RunContext &cx, omrobjectptr_t object, SlotHandleT slot, ValueT value) {
 }
 
 template <typename SlotHandleT, typename ValueT>

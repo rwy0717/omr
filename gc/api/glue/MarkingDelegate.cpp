@@ -28,6 +28,8 @@
 #include "omr.h"
 #include "omrcfg.h"
 #include "omrhashtable.h"
+#include "SublistSlotIterator.hpp"
+#include "SublistIterator.hpp"
 #include <iostream>
 
 namespace OMR
@@ -56,6 +58,28 @@ MarkingDelegate::scanRoots(MM_EnvironmentBase *env)
 
 	for (auto &fn : cx.markingFns()) {
 		fn(marker);
+	}
+
+	// gc builtins
+
+	{
+		   MM_SublistPuddle *puddle;
+		omrobjectptr_t *slot;
+		GC_SublistIterator rememberedSetIterator(&env->getExtensions()->rememberedSet);
+		// fprintf(stderr, "!!! Compacting Remembered Set\n");
+
+		while((puddle = rememberedSetIterator.nextList()) != NULL) {
+			GC_SublistSlotIterator rememberedSetSlotIterator(puddle);
+			while((slot = (omrobjectptr_t *)rememberedSetSlotIterator.nextSlot()) != NULL) {
+				omrobjectptr_t object = *slot;
+				if (object == NULL) {
+					rememberedSetSlotIterator.removeSlot();
+				} else if (!_markingScheme->isMarked(object)) {
+					env->getExtensions()->objectModel.clearRemembered(object);
+					rememberedSetSlotIterator.removeSlot();
+				}
+			}
+    	}
 	}
 }
 

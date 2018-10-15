@@ -48,7 +48,7 @@ public:
 	 */
 	void fixupObject(MM_EnvironmentStandard *env, omrobjectptr_t objectPtr)
 	{
-		CompactingVisitor visitor(env, _compactScheme);
+		CompactingVisitor visitor(_compactScheme);
 		OMRClient::GC::ObjectScanner scanner = _extensions->objectModel.makeObjectScanner();
 		scanner.start(visitor, objectPtr);
 	}
