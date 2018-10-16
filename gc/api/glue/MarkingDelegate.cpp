@@ -62,6 +62,7 @@ MarkingDelegate::scanRoots(MM_EnvironmentBase *env)
 
 	// gc builtins
 
+#if defined (OMR_GC_MODRON_SCAVENGER)
 	{
 		   MM_SublistPuddle *puddle;
 		omrobjectptr_t *slot;
@@ -81,6 +82,8 @@ MarkingDelegate::scanRoots(MM_EnvironmentBase *env)
 			}
     	}
 	}
+#endif
+
 }
 
 void
