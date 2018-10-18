@@ -75,8 +75,10 @@ public:
 	/// Fast bump allocator for thread-owned region of memory. Will not GC.
 	void* tryAllocateRaw(std::size_t nbytes) noexcept
 	{
+		assert(_heapAlloc <= _heapTop);
+		assert(nbytes < PTRDIFF_MAX);
 		void* result = nullptr;
-		if (nbytes <= _heapTop - _heapAlloc) {
+		if (nbytes <= std::size_t(_heapTop - _heapAlloc)) {
 			result = _heapAlloc;
 			_heapAlloc += nbytes;
 		}
