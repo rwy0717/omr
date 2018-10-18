@@ -282,19 +282,10 @@ public:
 
 	MM_CopyScanCacheStandard *getNextScanCache(MM_EnvironmentStandard *env);
 
-
 #if !defined(OMR_GC_EXPERIMENTAL_OBJECT_SCANNER)
 
 	MMINLINE bool copyAndForward(MM_EnvironmentStandard *env, volatile omrobjectptr_t *objectPtrIndirect);
 
-	/**
-	void completeScanCache(MM_EnvironmentStandard *env, MM_Copy
-	 * 
-	void completeScanCache(MM_EnvironmentStandard *env, MM_Copy
-	 * 
-	void completeScanCache(MM_EnvironmentStandard *env, MM_Copy
-	 */
-	void completeScanCache(MM_EnvironmentStandard *env, MM_Copy
 	MMINLINE bool copyAndForward(MM_EnvironmentStandard *env, GC_SlotObject *slotObject);
 
 #endif /* !defined(OMR_GC_EXPERIMENTAL_OBJECT_SCANNER) */
