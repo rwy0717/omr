@@ -192,8 +192,9 @@ add_library(omrgc STATIC
 
 if (NOT OMR_GC_EXPERIMENTAL_CONTEXT)
 	target_sources(omrgc
-		base/AllocationContext.cpp
-		base/AllocationInterfaceGeneric.cpp
+		PRIVATE
+			base/AllocationContext.cpp
+			base/AllocationInterfaceGeneric.cpp
 	)
 endif()
 
