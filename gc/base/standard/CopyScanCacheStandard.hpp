@@ -93,12 +93,19 @@ public:
 		return (OMR_SCAVENGER_CACHE_TYPE_SPLIT_ARRAY == (flags & OMR_SCAVENGER_CACHE_TYPE_SPLIT_ARRAY));
 	}
 
+
 	/**
 	 * Create a CopyScanCacheStandard object.
-	 */	
+	 */
+#if defined(OMR_GC_EXPERIMENTAL_OBJECT_SCANNER)
 	MM_CopyScanCacheStandard(uintptr_t givenFlags, const OMRClient::GC::ObjectScanner &scanner)
+#else
+	MM_CopyScanCacheStandard(uintptr_t givenFlags)
+#endif
 		: MM_CopyScanCache(givenFlags)
+#if defined(OMR_GC_EXPERIMENTAL_OBJECT_SCANNER)
 		, _scanner(scanner)
+#endif
 		, _shouldBeRemembered(false)
 		, _arraySplitIndex(0)
 		, _arraySplitAmountToScan(0)
