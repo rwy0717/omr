@@ -52,6 +52,7 @@
 #include "omrExampleVM.hpp"
 #endif /* OMR_GC_EXPERIMENTAL_CONTEXT */
 
+#if defined(OMR_GC_EXPERIMENTAL_CONTEXT)
 void
 store(OMR::GC::RunContext &cx, Object *object, std::size_t index, Object *value) {
 	OMR::GC::store(cx, object, OMR::GC::RefSlotHandle(&object->slots()[index]), value);
@@ -64,6 +65,7 @@ allocate(OMR::GC::Context& cx, std::size_t nslots) {
 			new(obj) Object(size);
 	});
 }
+#endif /* OMR_GC_EXPERIMENTAL_CONTEXT */
 
 extern "C" {
 
