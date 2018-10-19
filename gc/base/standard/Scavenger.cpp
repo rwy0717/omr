@@ -1213,7 +1213,7 @@ MM_Scavenger::copyAndForward(MM_EnvironmentStandard* env, omrobjectptr_t object)
 
 	return result;
 }
-#endif
+#endif /* OMR_GC_EXPERIMENTAL_OBJECT_SCANNER */
 
 #if !defined(OMR_GC_EXPERIMENTAL_OBJECT_SCANNER)
 /**
@@ -1331,10 +1331,6 @@ MM_Scavenger::copyAndForward(MM_EnvironmentStandard *env, GC_SlotObject *slotObj
 #endif /* OMR_SCAVENGER_TRACK_COPY_DISTANCE */
 	return result;
 }
-
-#endif
-
-#if !defined(OMR_GC_EXPERIMENTAL_OBJECT_SCANNER)
 
 bool
 MM_Scavenger::copyObjectSlot(MM_EnvironmentStandard *env, volatile omrobjectptr_t *slotPtr)
@@ -1769,7 +1765,6 @@ MM_Scavenger::scavengeObjectSlots(MM_EnvironmentStandard *env, MM_CopyScanCacheS
 	}
 #endif /* defined(OMR_GC_MODRON_SCAVENGER_STRICT) */
 
-#if !defined(OMR_GC_EXPERIMENTAL_OBJECT_SCANNER)
 	if (objectScanner->isIndexableObject()) {
 		/* set scanning bounds for this scanner; if non-empty tail, clone scanner into split array cache and add cache to worklist */
 		uintptr_t splitIndex = (NULL != scanCache) ? scanCache->_arraySplitIndex : 0;
@@ -1778,7 +1773,6 @@ MM_Scavenger::scavengeObjectSlots(MM_EnvironmentStandard *env, MM_CopyScanCacheS
 			((GC_IndexableObjectScanner *)objectScanner)->scanToLimit();
 		}
 	}
-#endif /* !defined(OMR_GC_EXPERIMENTAL_OBJECT_SCANNER) */
 
 	uint64_t slotsCopied = 0;
 	uint64_t slotsScanned = 0;
@@ -1813,9 +1807,8 @@ MM_Scavenger::scavengeObjectSlots(MM_EnvironmentStandard *env, MM_CopyScanCacheS
 
 	return shouldRemember;
 }
-#endif // !defined(OMR_GC_EXPERIMENTAL_OBJECT_SCANNER)
+#endif /* !defined(OMR_GC_EXPERIMENTAL_OBJECT_SCANNER) */
 
-#if !defined(OMR_GC_EXPERIMENTAL_OBJECT_SCANNER)
 /**
  * Scans the slots of a non-indexable object, remembering objects as required. Scanning is interrupted
  * as soon as there is a copy cache that is preferred to the current scan cache. This is returned
@@ -1909,9 +1902,6 @@ MM_Scavenger::incrementalScavengeObjectSlots(MM_EnvironmentStandard *env, omrobj
 		scanCache->_shouldBeRemembered = false;
 	}
 
-
-#endif /* defined(OMR_GC_MODRON_SCAVENGER_STRICT) */
-
 #if defined(OMR_GC_MODRON_CONCURRENT_MARK)
 	if (_extensions->shouldScavengeNotifyGlobalGCOfOldToOldReference() && IS_CONCURRENT_ENABLED && !isParentInNewSpace && !scanCache->_shouldBeRemembered) {
 		/* Old object that has only references to old objects. If parent object has already been scanned (in Marking sense)
@@ -1922,8 +1912,6 @@ MM_Scavenger::incrementalScavengeObjectSlots(MM_EnvironmentStandard *env, omrobj
 
 	return NULL;
 }
-
-#endif //  !defined(OMR_GC_EXPERIMENTAL_OBJECT_SCANNER)
 
 /****************************************
  * Scan completion routines
