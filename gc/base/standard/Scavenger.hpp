@@ -288,14 +288,16 @@ public:
 
 	MMINLINE bool copyAndForward(MM_EnvironmentStandard *env, GC_SlotObject *slotObject);
 
+	bool splitIndexableObjectScanner(MM_EnvironmentStandard *env, GC_ObjectScanner *objectScanner, uintptr_t startIndex, omrobjectptr_t *rememberedSetSlot);
+
 #endif /* !defined(OMR_GC_EXPERIMENTAL_OBJECT_SCANNER) */
 
 	MMINLINE omrobjectptr_t copy(MM_EnvironmentStandard *env, MM_ForwardedHeader* forwardedHeader);
 
 	MMINLINE void updateCopyScanCounts(MM_EnvironmentBase* env, uint64_t slotsScanned, uint64_t slotsCopied);
-	// bool splitIndexableObjectScanner(MM_EnvironmentStandard *env, GC_ObjectScanner *objectScanner, uintptr_t startIndex, omrobjectptr_t *rememberedSetSlot);
 
 #if defined(OMR_GC_EXPERIMENTAL_OBJECT_SCANNER)
+
 	/**
 	 * Scavenge the contents of an object. This is a non-incremental, non-aliasing scan.
 	 */
