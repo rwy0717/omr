@@ -1471,7 +1471,7 @@ MM_Scavenger::copy(MM_EnvironmentStandard *env, MM_ForwardedHeader* forwardedHea
 
 	/* Memory has been reserved */
 	destinationObjectPtr = (omrobjectptr_t)copyCache->cacheAlloc;
-	
+
 	/* now correct for the hot field alignment */
 #if defined(J9VM_INTERP_NATIVE_SUPPORT)
 	if (0 != hotFieldsAlignment) {
@@ -1780,8 +1780,8 @@ MM_Scavenger::scavengeObjectSlots(MM_EnvironmentStandard *env, MM_CopyScanCacheS
 	}
 #endif /* !defined(OMR_GC_EXPERIMENTAL_OBJECT_SCANNER) */
 
-	uint64_t slotsScanned = 0;
 	uint64_t slotsCopied = 0;
+	uint64_t slotsScanned = 0;
 	bool shouldRemember = false;
 	GC_SlotObject *slotObject = NULL;
 	bool isParentInNewSpace = isObjectInNewSpace(objectPtr);
@@ -1868,6 +1868,7 @@ MM_Scavenger::incrementalScavengeObjectSlots(MM_EnvironmentStandard *env, omrobj
 		Assert_MM_true(0 == scanCache->_arraySplitIndex);
 		Assert_MM_true(NULL == scanCache->_arraySplitRememberedSlot);
 	}
+#endif /* defined(OMR_GC_MODRON_SCAVENGER_STRICT) */
 
 	GC_SlotObject *slotObject;
 	uint64_t slotsCopied = 0;
@@ -2297,7 +2298,7 @@ MM_Scavenger::incrementallyScanSingleCache(MM_EnvironmentStandard* env, MM_CopyS
 
 		scanCache->_hasPartiallyScannedObject = false;
 		omrobjectptr_t scanEnd = (omrobjectptr_t)scanCache->cacheAlloc;
-	
+
 		GC_ObjectHeapIteratorAddressOrderedList heapChunkIterator(
 			_extensions,
 			(omrobjectptr_t)scanCache->scanCurrent,
@@ -2399,8 +2400,6 @@ MM_Scavenger::completeScan(MM_EnvironmentStandard *env)
 void
 MM_Scavenger::workThreadGarbageCollect(MM_EnvironmentStandard *env)
 {
-	// fprintf(stderr, "************************* workThreadGarbageCollect\n");
-
 	Assert_MM_false(IS_CONCURRENT_ENABLED);
 
 	/* GC init (set up per-invocation values) */
@@ -2639,7 +2638,7 @@ MM_Scavenger::shouldRememberObject(MM_EnvironmentStandard *env, omrobjectptr_t o
 	Assert_MM_true((NULL != objectPtr) && (!isObjectInNewSpace(objectPtr)));
 
 #if defined(OMR_GC_EXPERIMENTAL_OBJECT_SCANNER)
-	
+
 	HasReferentsInNewSpaceVisitor visitor(this);
 	OMRClient::GC::ObjectScanner scanner = _extensions->objectModel.makeObjectScanner();
 	scanner.start(visitor, objectPtr);
@@ -3502,7 +3501,6 @@ void
 MM_Scavenger::addCopyCachesToFreeList(MM_EnvironmentStandard *env)
 {
 	/* Should be already handled at this point */
-	// fprintf(stderr, "********************** addCopyCachesToFreeList\n");
 
 	Assert_MM_true(NULL == env->_deferredScanCache);
 
@@ -3538,12 +3536,21 @@ MM_Scavenger::addCacheEntryToScanListAndNotify(MM_EnvironmentStandard *env, MM_C
 	}
 }
 
+#if defined(OMR_GC_EXPERIMENTAL_OBJECT_SCANNER)
 MMINLINE uintptr_t
 MM_Scavenger::scanCacheDistanceMetric(MM_CopyScanCacheStandard* scanCache, void *scanSlot)
 {
 	/* distance from referring slot to prospective referent copy location */
 	return ((uintptr_t)scanCache->cacheAlloc - (uintptr_t)scanSlot);
 }
+#else /* OMR_GC_EXPERIMENTAL_OBJECT_SCANNER */
+MMINLINE uintptr_t
+MM_Scavenger::scanCacheDistanceMetric(MM_CopyScanCacheStandard* scanCache, GC_SlotObject *scanSlot)
+{
+	/* distance from referring slot to prospective referent copy location */
+	return ((uintptr_t)scanCache->cacheAlloc - (uintptr_t)scanSlot->readAddressFromSlot());
+}
+#endif /* OMR_GC_EXPERIMENTAL_OBJECT_SCANNER */
 
 MMINLINE uintptr_t
 MM_Scavenger::copyCacheDistanceMetric(MM_CopyScanCacheStandard* copyCache)
