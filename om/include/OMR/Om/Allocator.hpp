@@ -45,11 +45,11 @@ struct BaseAllocator {
 	static ResultT*
 	allocate(Context& cx, InitializerT& init, std::size_t size = sizeof(ResultT)) {
 		Allocation allocation(cx, init, size);
-		ResultT* result = (ResultT*)allocation.allocateAndInitializeObject(cx.gc().vm());
+		ResultT* result = (ResultT*)allocation.allocateAndInitializeObject(cx.gc().vmContext());
 
 		if (DEBUG_SLOW) {
 			GC::StackRoot<ResultT> root(cx.gc(), result);
-			OMR_GC_SystemCollect(cx.gc().vm(), 0);
+			OMR_GC_SystemCollect(cx.gc().vmContext(), 0);
 			result = root.get();
 		}
 
