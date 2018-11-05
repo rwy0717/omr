@@ -28,6 +28,7 @@
 #include <OMR/Om/CellOperations.hpp>
 #include <OMR/Om/Object.hpp>
 #include <OMR/Om/Shape.hpp>
+#include <OMR/Om/PolymapCell.hpp>
 
 namespace OMR {
 namespace Om {
@@ -37,6 +38,8 @@ union AnyUnion {
 	Object object;
 	Shape shape;
 	Array array;
+	PolymapCell polymap;
+	PolymapDataCell polymapData;
 };
 
 class Any {

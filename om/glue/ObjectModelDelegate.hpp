@@ -100,6 +100,8 @@ public:
 		case CellKind::OBJECT: return any->as.object.cellSize();
 		case CellKind::SHAPE: return any->as.shape.cellSize();
 		case CellKind::ARRAY: return any->as.array.cellSize();
+		case CellKind::POLYMAP: return any->as.polymap.cellSize();
+		case CellKind::POLYMAP_DATA: return any->as.polymapData.cellSize();
 		default: throw std::runtime_error("Unrecognized cell type");
 		}
 	}

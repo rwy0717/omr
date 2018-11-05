@@ -301,6 +301,8 @@ static_assert(sizeof(std::uintptr_t) == sizeof(Value),
 
 static_assert(std::is_standard_layout<Value>::value, "A value must be simple.");
 
+constexpr Value GARBAGE_VALUE(AS_UINT48, 0xabababababab);
+
 } // namespace Om
 } // namespace OMR
 

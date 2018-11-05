@@ -25,6 +25,7 @@ endfunction(omr_add_om_test)
 
 omr_add_om_test(DoubleTest)
 omr_add_om_test(MemorySystemTest)
+omr_add_om_test(PolymapTest)
 omr_add_om_test(PrintingTest)
 omr_add_om_test(RootTest)
 omr_add_om_test(RuntimeTest)

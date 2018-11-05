@@ -23,6 +23,8 @@
 #if !defined(OMR_OM_CELLHEADER_HPP_)
 #define OMR_OM_CELLHEADER_HPP_
 
+#include <OMR/Om/CellKind.hpp>
+
 #include <cassert> // for broken atomicWriteReference
 #include <cstddef>
 #include <cstdint>
@@ -37,35 +39,62 @@ class Cell;
 class Shape;
 class Any;
 
+using LayoutId = std::uint64_t;
+
 /// Encodes a pointer to the shape that lays out this cell, and GC flags.
+/// 
+/// Encoding:
+///
+/// | Range   | Size | Property    |
+/// |---------|------|-------------|
+/// | 15 - 47 |   48 | layout ptr  |
+/// | 12 - 14 |   03 | layout xtra |
+/// | 08 - 11 |   04 | cell kind   |
+/// | 00 - 07 |   08 | gc flags    |
+///
+/// | Layout ID                   |
+/// |-----------------------------|
+/// | Layout      | Xtra | Kind   |
+/// |-------------|---------------|
 class CellHeader {
 public:
-	static constexpr std::uintptr_t FLAGS_MASK = 0xFF;
-	static constexpr std::size_t LAYOUT_REF_SHIFT = 8;
+	static constexpr std::size_t LAYOUT_SHIFT = 15;
+	static constexpr std::size_t LAYOUT_MASK = 0x00;  // 0x0000'0000'7FFF'FFFF'FFFF'FFFF'FFFF'FFFF;
+	static constexpr std::size_t KIND_SHIFT = 8;
+	static constexpr std::size_t KIND_MASK = 0xF;
+	static constexpr std::size_t FLAGS_MASK = 0xFF;
+
+	static std::uintptr_t encode(CellKind kind, Shape* layout, std::uint8_t flags = 0) {
+		return std::uintptr_t(layout) << LAYOUT_SHIFT | std::uintptr_t(kind) << KIND_SHIFT | std::uintptr_t(flags);
+	}
 
 	CellHeader() = default;
 
-	explicit CellHeader(Shape* shape, std::uint8_t flags = 0)
-	        : data_((std::uintptr_t(shape) << LAYOUT_REF_SHIFT) | (flags & FLAGS_MASK)) {}
+	explicit CellHeader(CellKind kind, Shape* layout = nullptr, std::uint8_t flags = 0)
+	        : data_(encode(kind, layout, flags)) {}
 
 	/// Set the shape and the flags.
-	CellHeader& set(Shape* shape, std::uint8_t flags) noexcept {
-		data_ = (std::uintptr_t(shape) << LAYOUT_REF_SHIFT) | (flags & FLAGS_MASK);
+	CellHeader& set( CellKind kind, Shape* layout, std::uint8_t flags) noexcept {
+		data_ = encode(kind, layout, flags);
 		return *this;
 	}
 
+	CellKind kind() const noexcept { return CellKind((data_ >> KIND_SHIFT) & KIND_MASK); }
+
+	CellHeader& kind(CellKind& kind) noexcept { return set(kind, layout(), flags()); }
+
 	/// Get the shape that describes this cell's layout.
 	Shape* layout() const noexcept {
-		return reinterpret_cast<Shape*>(data_ >> LAYOUT_REF_SHIFT);
+		return reinterpret_cast<Shape*>(data_ >> LAYOUT_SHIFT);
 	}
 
 	/// Set the shape reference. No write barrier.
-	CellHeader& layout(Shape* shape) noexcept { return set(shape, flags()); }
+	CellHeader& layout(Shape* shape) noexcept { return set(kind(), shape, flags()); }
 
 	/// The flags are a byte of reserved data for the OMR GC. Undefined value.
 	std::uint8_t flags() const noexcept { return std::uint8_t(data_ & FLAGS_MASK); }
 
-	CellHeader& flags(std::uint8_t flags) noexcept { return set(layout(), flags); }
+	CellHeader& flags(std::uint8_t flags) noexcept { return set(kind(), layout(), flags); }
 
 protected:
 	friend struct CellHeaderOffsets;

@@ -61,6 +61,8 @@ private:
 	RawId data_;
 };
 
+constexpr Id HOLE_ID(RawId(-1));
+
 class IdGenerator {
 public:
 	Id newId() { return Id(next_++); }

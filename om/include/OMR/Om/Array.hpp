@@ -76,7 +76,7 @@ protected:
 
 	inline Array() = default;
 
-	inline Array(Shape* shape, std::size_t size) : header_(shape), size_(size) {}
+	inline Array(Shape* shape, std::size_t size) : header_(CellKind::ARRAY, shape), size_(size) {}
 
 	CellHeader header_;
 	std::size_t size_; //< size in bytes of the data array.

@@ -26,6 +26,7 @@
 #include <OMR/Om/Any.hpp>
 #include <OMR/Om/ArrayScanner.hpp>
 #include <OMR/Om/ObjectScanner.hpp>
+#include <OMR/Om/PolymapScanner.hpp>
 #include <OMR/Om/ShapeScanner.hpp>
 
 #include <OMR/GC/ScanResult.hpp>
@@ -33,58 +34,118 @@
 namespace OMR {
 namespace Om {
 
+union SubscannerUnion {
+
+	SubscannerUnion() : base() {}
+
+	BaseScanner<Any> base;
+	ObjectScanner objectScanner;
+	ArrayScanner arrayScanner;
+	ShapeScanner shapeScanner;
+	PolymapScanner polymapScanner;
+	PolymapDataScanner polymapDataScanner;
+};
+
+struct Subscanner {
+public:
+	Any* target() const noexcept { return as.base.target(); }
+
+	template<typename VisitorT>
+	GC::ScanResult startObject(VisitorT& visitor, Object* target, std::size_t todo) {
+		new (&as.objectScanner) ObjectScanner();
+		return as.objectScanner.start(visitor, target, todo);
+	}
+
+	template<typename VisitorT>
+	GC::ScanResult resumeObject(VisitorT& visitor, std::size_t todo) {
+		return as.objectScanner.resume(visitor);
+	}
+
+	template<typename VisitorT>
+	GC::ScanResult startArray(VisitorT& visitor, Array* tgt, std::size_t todo) {
+		new (&as.arrayScanner) ArrayScanner();
+		return as.arrayScanner.start(visitor, tgt, todo);
+	}
+
+	template<typename VisitorT>
+	GC::ScanResult resumeArray(VisitorT& visitor, std::size_t todo) {
+		return as.arrayScanner.resume(visitor, todo);
+	}
+
+	template<typename VisitorT>
+	GC::ScanResult startShape(VisitorT& visitor, Shape* tgt, std::size_t todo) {
+		new (&as.shapeScanner) ShapeScanner();
+		return as.shapeScanner.start(visitor, tgt, todo);
+	}
+
+	template<typename VisitorT>
+	GC::ScanResult resumeShape(VisitorT& visitor, std::size_t todo) {
+		return as.shapeScanner.resume(visitor, todo);
+	}
+
+	template<typename VisitorT>
+	GC::ScanResult startPolymap(VisitorT& visitor, PolymapCell* tgt, std::size_t todo) {
+		new (&as.polymapScanner) PolymapScanner();
+		return as.polymapScanner.start(visitor, tgt, todo);
+	}
+
+	template<typename VisitorT>
+	GC::ScanResult resumePolymap(VisitorT& visitor, std::size_t todo) {
+		return as.polymapScanner.resume(visitor, todo);
+	}
+
+	template<typename VisitorT>
+	GC::ScanResult startPolymapData(VisitorT& visitor, PolymapDataCell* tgt, std::size_t todo) {
+		new (&as.polymapDataScanner) PolymapDataScanner();
+		return as.polymapDataScanner.start(visitor, tgt, todo);
+	}
+
+	template<typename VisitorT>
+	GC::ScanResult resumePolymapData(VisitorT& visitor, std::size_t todo) {
+		return as.polymapDataScanner.resume(visitor, todo);
+	}
+
+private:
+	SubscannerUnion as;
+};
+
 class AnyScanner {
 public:
 	AnyScanner() = default;
 
 	/// Start scanning a cell. Returns true if there are more slots to scan.
 	template<typename VisitorT>
-	OMR::GC::ScanResult
-	start(VisitorT&& visitor, Any* tgt, std::size_t bytesToScan = std::size_t(-1)) {
+	OMR::GC::ScanResult start(VisitorT&& visitor, Any* tgt, std::size_t todo = SIZE_MAX) {
 		switch (tgt->kind()) {
-		case CellKind::OBJECT:
-			new (&subscanner_.as.object) ObjectScanner();
-			return subscanner_.as.object.start(visitor, &tgt->as.object, bytesToScan);
-		case CellKind::ARRAY:
-			new (&subscanner_.as.array) ArrayScanner();
-			return subscanner_.as.array.start(visitor, &tgt->as.array, bytesToScan);
-		case CellKind::SHAPE:
-			new (&subscanner_.as.shape) ShapeScanner();
-			return subscanner_.as.shape.start(visitor, &tgt->as.shape, bytesToScan);
-		default: assert(0); // unreachable.
+		case CellKind::OBJECT: return sub_.startObject(visitor, &tgt->as.object, todo);
+		case CellKind::ARRAY: return sub_.startArray(visitor, &tgt->as.array, todo);
+		case CellKind::SHAPE: return sub_.startShape(visitor, &tgt->as.shape, todo);
+		case CellKind::POLYMAP: return sub_.startPolymap(visitor, &tgt->as.polymap, todo);
+		case CellKind::POLYMAP_DATA:
+			return sub_.startPolymapData(visitor, &tgt->as.polymapData, todo);
+		default:
+			assert(0); // unreachable
+			return {0, true};
 		}
 	}
 
 	/// Continue scanning an existing cell.
 	template<typename VisitorT>
-	OMR::GC::ScanResult resume(VisitorT&& visitor, std::size_t bytesToScan = std::size_t(-1)) {
+	OMR::GC::ScanResult resume(VisitorT&& visitor, std::size_t todo = SIZE_MAX) {
 		assert(target() != nullptr);
 		switch (target()->kind()) {
-		case CellKind::OBJECT: return subscanner_.as.object.resume(visitor, bytesToScan);
-		case CellKind::ARRAY: return subscanner_.as.array.resume(visitor, bytesToScan);
-		case CellKind::SHAPE: return subscanner_.as.shape.resume(visitor, bytesToScan);
+		case CellKind::OBJECT: return sub_.resumeObject(visitor, todo);
+		case CellKind::ARRAY: return sub_.resumeArray(visitor, todo);
+		case CellKind::SHAPE: return sub_.resumeShape(visitor, todo);
+		case CellKind::POLYMAP: return sub_.resumePolymap(visitor, todo);
+		case CellKind::POLYMAP_DATA: return sub_.resumePolymapData(visitor, todo);
 		}
 	}
 
-	constexpr Any* target() const { return subscanner_.as.base.target(); }
+	constexpr Any* target() const { return sub_.target(); }
 
 private:
-	union SubscannerUnion {
-		SubscannerUnion() : base() {}
-
-		SubscannerUnion(Any* target) : base(target) {}
-
-		BaseScanner<Any> base;
-		ObjectScanner object;
-		ArrayScanner array;
-		ShapeScanner shape;
-	};
-
-	struct Subscanner {
-		SubscannerUnion as;
-	};
-
-	Subscanner subscanner_;
+	Subscanner sub_;
 };
 
 } // namespace Om

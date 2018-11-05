@@ -32,7 +32,9 @@ namespace Om {
 
 /// Obtain the type of thing this cell is. The type can be found by looking at the instance data in
 /// the Shape that lays out this Cell.
-inline CellKind cellKind(const Cell& cell) noexcept { return cell.layout()->instanceKind(); }
+inline CellKind cellKind(const Cell& cell) noexcept {
+	return cell.header().kind();
+}
 
 } // namespace Om
 } // namespace OMR

@@ -69,7 +69,7 @@ inline void assignSlotAttrIntoShape(Shape* shape, Span<const SlotAttr> attribute
 struct RootObjectLayoutInitializer : public Initializer {
 	virtual Cell* operator()(Context& cx, Cell* cell) noexcept override {
 		Shape* shape = reinterpret_cast<Shape*>(cell);
-		shape->layout(cx.globals().metaShape()); // TODO: Remove the MetaShape global
+		shape->header_.set(CellKind::SHAPE, cx.globals().metaShape(), 0); // TODO: Remove the MetaShape global
 		shape->parentLayout_ = nullptr;
 		shape->instanceSlotOffset_ = 0;
 		shape->instanceSlotWidth_ = 0;
@@ -108,7 +108,7 @@ inline Shape* allocateRootObjectLayout(Context& cx) {
 struct ObjectLayoutInitializer : public Initializer {
 	virtual Cell* operator()(Context& cx, Cell* cell) noexcept override {
 		Shape* shape = reinterpret_cast<Shape*>(cell);
-		shape->layout(cx.globals().metaShape());
+		shape->header_.set(CellKind::SHAPE, cx.globals().metaShape(), 0);
 		shape->parentLayout_ = parentLayout.get();
 		shape->instanceSlotOffset_ = parentLayout->instanceSlotOffset_
 		                             + parentLayout->instanceSlotWidth_;
@@ -139,7 +139,7 @@ struct ShapeLayoutInitializer : public Initializer {
 	virtual Cell* operator()(Context& cx, Cell* cell) noexcept override {
 		Shape* shape = reinterpret_cast<Shape*>(cell);
 		shape->instanceKind(CellKind::SHAPE);
-		shape->layout(shape);
+		shape->header_.set(CellKind::SHAPE, shape, 0);
 		shape->parentLayout_ = nullptr;
 		shape->instanceSlotOffset_ = 0;
 		shape->instanceSlotCount_ = 0;
@@ -160,7 +160,7 @@ struct ArrayLayoutInitializer : public Initializer {
 	virtual Cell* operator()(Context& cx, Cell* cell) noexcept override {
 		Shape* shape = reinterpret_cast<Shape*>(cell);
 		shape->instanceKind(CellKind::ARRAY);
-		shape->layout(cx.globals().metaShape());
+		shape->header_ = CellHeader(CellKind::SHAPE, cx.globals().metaShape(), 0);
 		shape->parentLayout_ = nullptr;
 		shape->instanceSlotOffset_ = 0;
 		shape->instanceSlotCount_ = 0;

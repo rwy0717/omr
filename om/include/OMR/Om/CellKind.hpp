@@ -27,7 +27,7 @@ namespace OMR {
 namespace Om {
 
 /// 0 indicates uninitialized.
-enum class CellKind { OBJECT = 1, SHAPE, ARRAY };
+enum class CellKind { OBJECT = 1, SHAPE, ARRAY, POLYMAP, POLYMAP_DATA };
 
 } // namespace Om
 } // namespace OMR

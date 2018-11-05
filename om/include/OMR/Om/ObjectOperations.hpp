@@ -157,7 +157,7 @@ transitionLayout(Context& cx, GC::Handle<Object> object, std::initializer_list<S
 struct ObjectInitializer : public Initializer {
 	virtual Cell* operator()(Context& cx, Cell* cell) override {
 		auto o = reinterpret_cast<Object*>(cell);
-		o->layout(layout);
+		o->header_.set(CellKind::OBJECT, layout, 0);
 		return reinterpret_cast<Cell*>(o);
 	}
 
