@@ -39,7 +39,7 @@ public:
 
 	template<typename VisitorT>
 	OMR::GC::ScanResult
-	start(VisitorT& visitor, Shape* target, std::size_t bytesToScan = std::size_t(-1)) {
+	start(VisitorT&& visitor, Shape* target, std::size_t bytesToScan = SIZE_MAX) {
 		target_ = target;
 
 		visitHeader(target_->header(), visitor);
@@ -54,7 +54,7 @@ public:
 	/// Visit the references from the shape. For simplicity, scanning is non-interruptible for
 	/// shapes.
 	template<typename VisitorT>
-	OMR::GC::ScanResult resume(VisitorT& visitor, std::size_t bytesToScan = std::size_t(-1)) {
+	OMR::GC::ScanResult resume(VisitorT&& visitor, std::size_t bytesToScan = SIZE_MAX) {
 		assert(0); // unreachable
 		return {0, true};
 	}

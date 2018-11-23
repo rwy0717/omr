@@ -17,7 +17,8 @@
  *  [1] https://www.gnu.org/software/classpath/license.html
  *  [2] http://openjdk.java.net/legal/assembly-exception.html
  *
- *  SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
+ *  SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR
+ *LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
 #ifndef OMR_OM_ARRAYSCANNER_HPP_
@@ -42,15 +43,16 @@ public:
 
 	/// Returns true if there's more to scan.
 	template<typename VisitorT>
-	OMR::GC::ScanResult start(VisitorT& visitor, Array* target, std::size_t bytesToScan = std::size_t(-1)) {
-		target_ = target;
-		visitHeader(target_->header(), visitor);
+	OMR::GC::ScanResult
+	start(VisitorT&& visitor, Array* tgt, std::size_t bytesToScan = SIZE_MAX) {
+		target(tgt);
+		visitHeader(tgt->header(), visitor);
 		return {0, true};
 	}
 
 	/// Continue scanning the target.
 	template<typename VisitorT>
-	OMR::GC::ScanResult resume(VisitorT& visitor, std::size_t bytesToScan = std::size_t(-1)) {
+	OMR::GC::ScanResult resume(VisitorT&& visitor, std::size_t bytesToScan = SIZE_MAX) {
 		assert(0);
 		return {0, true};
 	}

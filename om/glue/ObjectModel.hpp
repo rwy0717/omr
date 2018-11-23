@@ -94,4 +94,5 @@ public:
 	 */
 	GC_ObjectModel() : GC_ObjectModelBase() {}
 };
+
 #endif /* OBJECTMODEL_HPP_ */

@@ -15,14 +15,14 @@ public:
 	PolymapDataScanner() : BaseScanner(nullptr), index_(0) {}
 
 	template <typename VisitorT>
-	GC::ScanResult start(VisitorT&& visitor, PolymapDataCell* tgt, std::size_t todo) {
+	GC::ScanResult start(VisitorT&& visitor, PolymapDataCell* tgt, std::size_t todo = SIZE_MAX) {
 		target(tgt);
 		index_ = 0;
 		return resume(visitor, todo);
 	}
 
 	template <typename VisitorT>
-	GC::ScanResult resume(VisitorT&& visitor, std::size_t todo) {
+	GC::ScanResult resume(VisitorT&& visitor, std::size_t todo = SIZE_MAX) {
 		bool cont = true;
 		std::size_t nbytes = 0;
 		std::size_t length = target()->length();

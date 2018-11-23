@@ -28,8 +28,8 @@
 
 using namespace OMR::Om;
 
-Object* omr_om_allocate_empty_object(Context* cx) {
+DynObject* omr_om_allocate_empty_object(Context* cx) {
 }
 
-Object* omr_om_allocate_instance(Context* cx, Shape* shape) {
+DynObject* omr_om_allocate_instance(Context* cx, Shape* shape) {
 }

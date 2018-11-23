@@ -24,13 +24,13 @@
 #define OMR_OM_JITHELPERS_HPP_
 
 #include <OMR/Om/Context.hpp>
-#include <OMR/Om/Object.hpp>
+#include <OMR/Om/DynObject.hpp>
 
 extern "C" {
 
-OMR::Om::Object* omr_om_allocate_empty_object(Context* cx);
+OMR::Om::DynObject* omr_om_allocate_empty_object(Context* cx);
 
-OMR::Om::Object* omr_om_allocate_instance(Context* cx, Shape* shape);
+OMR::Om::DynObject* omr_om_allocate_instance(Context* cx, Shape* shape);
 
 } // extern "C"
 

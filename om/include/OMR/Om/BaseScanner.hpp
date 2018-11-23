@@ -43,7 +43,10 @@ protected:
 	/// Set the target.
 	void target(T* target) noexcept { target_ = target; }
 
-	T* target_;
+	union {
+		T* target_;
+		Any* xtarget_;
+	};
 };
 
 } // namespace Om

@@ -40,10 +40,10 @@ int main(int argc, char** argv) {
 	OMR::Om::RunContext cx(system);
 
 	// Allocate an empty object
-	OMR::Om::Object* object = OMR::Om::allocateObject(cx);
+	OMR::Om::DynObject* object = OMR::Om::allocateObject(cx);
 
 	// Root the object
-	OMR::GC::StackRoot<OMR::Om::Object> root(cx, object);
+	OMR::GC::StackRoot<OMR::Om::DynObject> root(cx, object);
 
 	// Run a complete system collection
 	OMR::Om::systemCollect(cx);
@@ -58,9 +58,9 @@ and link with:
 gcc ./om-example.cpp -o om-example -lomrgc
 ```
 
-## The Object Model
+## The DynObject Model
 
-Objects provide a mix of strongly typed and untyped slots. Object layouts can
+Objects provide a mix of strongly typed and untyped slots. DynObject layouts can
 be modified during execution.
 
 Objects are untyped, and grow slots dynamically during execution. Om supports

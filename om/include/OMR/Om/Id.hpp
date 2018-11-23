@@ -30,6 +30,7 @@
 
 namespace OMR {
 namespace Om {
+
 using RawId = std::uint32_t;
 
 class Id {
@@ -74,12 +75,9 @@ private:
 } // namespace Om
 } // namespace OMR
 
-namespace std {
 template<>
-struct hash<OMR::Om::Id> {
+struct ::std::hash<OMR::Om::Id> {
 	constexpr size_t operator()(const OMR::Om::Id& id) const noexcept { return id.raw(); }
 };
-
-} // namespace std
 
 #endif // OMR_OM_ID_HPP_

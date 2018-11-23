@@ -2,7 +2,6 @@
 #define OMR_OM_POLYMAP_HPP_
 
 #include <OMR/Om/Context.hpp>
-#include <OMR/Om/PolymapAllocator.hpp>
 #include <OMR/Om/PolymapCell.hpp>
 #include <OMR/Om/PolymapScanner.hpp>
 

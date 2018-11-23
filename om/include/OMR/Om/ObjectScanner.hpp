@@ -24,7 +24,7 @@
 #define OMR_OM_OBJECTSCANNER_HPP_
 
 #include <OMR/Om/BaseScanner.hpp>
-#include <OMR/Om/Object.hpp>
+#include <OMR/Om/DynObjectCell.hpp>
 
 #include <OMR/GC/ScanResult.hpp>
 #include <iostream>
@@ -32,14 +32,14 @@
 namespace OMR {
 namespace Om {
 
-class ObjectScanner : public BaseScanner<Object> {
+class ObjectScanner : public BaseScanner<DynObjectCell> {
 public:
 	ObjectScanner() noexcept : BaseScanner() {}
 
 	/// Scan the target. Target returns true if complete.
 	template<typename VisitorT>
 	OMR::GC::ScanResult
-	start(VisitorT& visitor, Object* target, std::size_t bytesToScan = std::size_t(-1)) {
+	start(VisitorT&& visitor, DynObjectCell* target, std::size_t bytesToScan = SIZE_MAX) {
 		target_ = target;
 		layout_ = target_->layout();
 		iter_ = layout_->instanceSlots().begin();
@@ -54,7 +54,7 @@ public:
 
 	/// Continue scanning. Returns true if there is more to do, false if more to do.
 	template<typename VisitorT>
-	OMR::GC::ScanResult resume(VisitorT& visitor, std::size_t bytesToScan = std::size_t(-1)) {
+	OMR::GC::ScanResult resume(VisitorT&& visitor, std::size_t bytesToScan = SIZE_MAX) {
 	
 		if (layout_ == nullptr) {
 			return {0, true}; // already complete.

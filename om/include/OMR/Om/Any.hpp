@@ -26,7 +26,7 @@
 #include <OMR/Om/Array.hpp>
 #include <OMR/Om/Cell.hpp>
 #include <OMR/Om/CellOperations.hpp>
-#include <OMR/Om/Object.hpp>
+#include <OMR/Om/DynObjectCell.hpp>
 #include <OMR/Om/Shape.hpp>
 #include <OMR/Om/PolymapCell.hpp>
 
@@ -35,7 +35,7 @@ namespace Om {
 
 union AnyUnion {
 	Cell cell;
-	Object object;
+	DynObjectCell object;
 	Shape shape;
 	Array array;
 	PolymapCell polymap;

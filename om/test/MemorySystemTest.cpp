@@ -25,13 +25,13 @@
 #include <OMR/Om/AnyScanner.hpp>
 #include <OMR/Om/Array.hpp>
 #include <OMR/Om/Context.hpp>
-#include <OMR/Om/ObjectOperations.hpp>
-#include <OMR/GC/StackRoot.hpp>
+#include <OMR/Om/DynObject.hpp>
 #include <OMR/Om/Runtime.hpp>
 #include <OMR/Om/Shape.hpp>
 #include <OMR/Om/ShapeOperations.hpp>
 #include <OMR/Om/Span.hpp>
 
+#include <OMR/GC/StackRoot.hpp>
 #include <gtest/gtest.h>
 #include <omrgc.h>
 
@@ -59,7 +59,7 @@ TEST(OmSystemTest, loseAnObjects) {
 	RunContext cx(system);
 
 	GC::StackRoot<Shape> shape(cx.gc(), allocateRootObjectLayout(cx, {}));
-	Object* object = allocateObject(cx, shape);
+	DynObject* object = DynObject::allocate(cx, shape);
 
 	EXPECT_NE(object->layout(), nullptr);
 	// EXPECT_EQ(object->layout(), shape);
@@ -72,7 +72,7 @@ TEST(OmSystemTest, keepAnObject) {
 	RunContext cx(system);
 
 	GC::StackRoot<Shape> shape(cx.gc(), allocateRootObjectLayout(cx, {}));
-	GC::StackRoot<Object> object(cx.gc(), allocateObject(cx, shape));
+	GC::StackRoot<DynObject> object(cx.gc(), DynObject::allocate(cx, shape));
 	EXPECT_EQ(object->layout(), shape.get());
 	OMR_GC_SystemCollect(cx.gc().vmContext(), 0);
 	EXPECT_EQ(object->layout(), shape.get());
@@ -92,22 +92,23 @@ TEST(OmSystemTest, print) {
 	System system(runtime);
 	RunContext cx(system);
 
-	GC::StackRoot<Shape> shape(cx.gc(), allocateRootObjectLayout(cx, {}, DEFAULT_INLINE_DATA_SIZE));
+	GC::StackRoot<Shape> shape(cx.gc(),
+	                           allocateRootObjectLayout(cx, {}, DEFAULT_INLINE_DATA_SIZE));
 
 	ASSERT_NE(shape->shapeTreeData()->instanceInlineSlotsSize, 0);
 
-	GC::StackRoot<Object> object(cx.gc(), allocateObject(cx, shape));
+	GC::StackRoot<DynObject> object(cx.gc(), DynObject::allocate(cx, shape));
 
 	Om::Id id(1);
 	Om::SlotType type(Om::Id(0), Om::CoreType::VALUE);
 
-	auto map = Om::transitionLayout(cx, object, {{type, id}});
+	auto map = Om::DynObject::transitionLayout(cx, object, {{type, id}});
 	assert(map != nullptr);
 
 	Om::SlotDescriptor descriptor;
-	Om::lookupSlot(cx, object, id, descriptor);
+	DynObject::lookupSlot(cx, object, id, descriptor);
 
-	Om::setValue(cx, object.get(), descriptor, {AS_REF, object.get()});
+	DynObject::setValue(cx, object.get(), descriptor, {AS_REF, object.get()});
 
 	std::cerr << "object: " << object.get() << std::endl;
 	std::cerr << "obj-map:" << object->layout() << std::endl;
@@ -130,13 +131,13 @@ TEST(OmSystemTest, objectTransition) {
 	RunContext cx(system);
 
 	GC::StackRoot<Shape> emptyObjectMap(cx.gc(), allocateRootObjectLayout(cx, {}));
-	GC::StackRoot<Object> obj1(cx.gc(), allocateObject(cx, emptyObjectMap));
+	GC::StackRoot<DynObject> obj1(cx.gc(), DynObject::allocate(cx, emptyObjectMap));
 
 	const std::array<const SlotAttr, 1> attributes{
 	        {SlotAttr(SlotType(Id(0), CoreType::VALUE), Id(0))}};
 
 	const Span<const Om::SlotAttr> span(attributes);
-	transitionLayout(cx, obj1, span);
+	DynObject::transitionLayout(cx, obj1, span);
 
 	// check
 	{
@@ -149,8 +150,8 @@ TEST(OmSystemTest, objectTransition) {
 
 	// second object
 	{
-		GC::StackRoot<Object> obj2(cx.gc(), allocateObject(cx, emptyObjectMap));
-		auto m = takeExistingTransition(cx, obj2, attributes);
+		GC::StackRoot<DynObject> obj2(cx.gc(), DynObject::allocate(cx, emptyObjectMap));
+		auto m = DynObject::takeExistingTransition(cx, obj2, attributes);
 		EXPECT_NE(m, nullptr);
 		EXPECT_EQ(m, obj1->layout());
 		EXPECT_EQ(m, obj2->layout());

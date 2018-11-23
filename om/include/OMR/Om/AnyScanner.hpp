@@ -17,7 +17,8 @@
  *  [1] https://www.gnu.org/software/classpath/license.html
  *  [2] http://openjdk.java.net/legal/assembly-exception.html
  *
- *  SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
+ *  SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR
+ *LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
 #ifndef OMR_OM_ANYSCANNER_HPP_
@@ -51,7 +52,7 @@ public:
 	Any* target() const noexcept { return as.base.target(); }
 
 	template<typename VisitorT>
-	GC::ScanResult startObject(VisitorT& visitor, Object* target, std::size_t todo) {
+	GC::ScanResult startObject(VisitorT& visitor, DynObjectCell* target, std::size_t todo) {
 		new (&as.objectScanner) ObjectScanner();
 		return as.objectScanner.start(visitor, target, todo);
 	}
@@ -109,6 +110,8 @@ private:
 	SubscannerUnion as;
 };
 
+/// A scannner capable of scanning any cell type.
+/// Dispatches on the base type
 class AnyScanner {
 public:
 	AnyScanner() = default;
@@ -121,8 +124,7 @@ public:
 		case CellKind::ARRAY: return sub_.startArray(visitor, &tgt->as.array, todo);
 		case CellKind::SHAPE: return sub_.startShape(visitor, &tgt->as.shape, todo);
 		case CellKind::POLYMAP: return sub_.startPolymap(visitor, &tgt->as.polymap, todo);
-		case CellKind::POLYMAP_DATA:
-			return sub_.startPolymapData(visitor, &tgt->as.polymapData, todo);
+		case CellKind::POLYMAP_DATA: return sub_.startPolymapData(visitor, &tgt->as.polymapData, todo);
 		default:
 			assert(0); // unreachable
 			return {0, true};

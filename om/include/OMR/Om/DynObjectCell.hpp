@@ -17,21 +17,22 @@
  *  [1] https://www.gnu.org/software/classpath/license.html
  *  [2] http://openjdk.java.net/legal/assembly-exception.html
  *
- *  SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
+ *  SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR
+ *LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-#ifndef OMR_OM_OBJECT_HPP_
-#define OMR_OM_OBJECT_HPP_
+#ifndef OMR_OM_DYNOBJECTCELL_HPP_
+#define OMR_OM_DYNOBJECTCELL_HPP_
 
 #include <OMR/Om/Array.hpp>
 #include <OMR/Om/BasicSlotHandle.hpp>
 #include <OMR/Om/CellHeader.hpp>
-#include <OMR/GC/Handle.hpp>
 #include <OMR/Om/LayoutTree.hpp>
 #include <OMR/Om/Shape.hpp>
 #include <OMR/Om/SlotIndex.hpp>
 #include <OMR/Om/Value.hpp>
 
+#include <OMR/GC/Handle.hpp>
 #include <type_traits>
 
 namespace OMR {
@@ -39,14 +40,12 @@ namespace Om {
 
 class Context;
 
-/// A Cell with dynamically allocated slots.
-class Object {
+/// Basic structure of a DynObject.
+class DynObjectCell {
 public:
-	static constexpr std::size_t MAX_SLOTS = 32;
-
 	/// Calculate the allocation size of an object cell,
 	static std::size_t cellSize(std::size_t inlineSlotSize) {
-		return sizeof(Object) + inlineSlotSize;
+		return sizeof(DynObjectCell) + inlineSlotSize;
 	}
 
 	CellHeader& header() { return header_; }
@@ -57,7 +56,7 @@ public:
 
 	void layout(Shape* shape) { header().layout(shape); }
 
-	/// Construct an iterable view of the tree of shapes that lay out this Object.
+	/// Construct an iterable view of the tree of shapes that lay out this DynObject.
 	LayoutTree layoutTree() const { return LayoutTree(layout()); }
 
 	/// True if this object has no slots.
@@ -151,14 +150,12 @@ protected:
 	CellHeader header_;
 	Array* overflowSlots_;
 	std::uint8_t inlineSlots_[0];
-
-private:
-	static void construct(Context& cx, GC::Handle<Object> self, GC::Handle<Shape> shape);
 };
 
-static_assert(std::is_standard_layout<Object>::value, "Object must be a StandardLayoutType.");
+static_assert(std::is_standard_layout<DynObjectCell>::value,
+              "DynObject must be a StandardLayoutType.");
 
 } // namespace Om
 } // namespace OMR
 
-#endif // OMR_OM_OBJECT_HPP_
+#endif // OMR_OM_DYNOBJECTCELL_HPP_

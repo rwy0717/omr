@@ -122,7 +122,7 @@ struct ObjectLayoutInitializer : public Initializer {
 	Span<const SlotAttr> attributes;
 };
 
-/// Allocate a shape that lays out zero or more slots in an Object.
+/// Allocate a shape that lays out zero or more slots in an DynObject.
 inline Shape*
 allocateObjectLayout(Context& cx, GC::Handle<Shape> parentLayout, Span<const SlotAttr> attributes) {
 	ObjectLayoutInitializer init;

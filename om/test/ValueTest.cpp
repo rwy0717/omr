@@ -23,7 +23,7 @@
 #include <OMR/Om/Allocation.hpp>
 #include <OMR/Om/Allocator.hpp>
 #include <OMR/Om/Context.hpp>
-#include <OMR/Om/Object.hpp>
+#include <OMR/Om/DynObject.hpp>
 #include <OMR/GC/StackRoot.hpp>
 #include <OMR/Om/Runtime.hpp>
 

@@ -27,7 +27,7 @@
 #include <OMR/Om/Cell.hpp>
 #include <OMR/Om/CellKind.hpp>
 #include <OMR/Om/CellOperations.hpp>
-#include <OMR/Om/Object.hpp>
+#include <OMR/Om/DynObject.hpp>
 #include <OMR/Om/Shape.hpp>
 
 #include <cassert>
@@ -39,7 +39,7 @@ namespace Om {
 template<typename FunctionT>
 void dispatch(Cell* cell, FunctionT function) {
 	switch (cellKind(cell)) {
-	case CellKind::OBJECT: function(reinterpret_cast<Object*>(cell)); break;
+	case CellKind::OBJECT: function(reinterpret_cast<DynObject*>(cell)); break;
 	case CellKind::SHAPE: function(reinterpret_cast<Shape*>(cell)); break;
 	case CellKind::ARRAY: function(reinterpret_cast<Array*>(cell)); break;
 	default: assert(0);
