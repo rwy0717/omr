@@ -46,6 +46,8 @@ add_tracegen(utilcore.tdf j9utilcore)
 
 add_library(omrutil_obj OBJECT
 	ut_j9utilcore.c
+	omr-GenericErrorCategory.cpp
+	omr-PlatformErrorCategory.cpp
 )
 
 target_include_directories(omrutil_obj
