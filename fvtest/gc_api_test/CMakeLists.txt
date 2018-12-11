@@ -39,3 +39,7 @@ function(omr_add_gc_test testname)
 		COMMAND "${testname}"
 	)
 endfunction(omr_add_gc_test)
+
+omr_add_gc_test(TestPlatformInterface)
+omr_add_gc_test(TestRuntime)
+omr_add_gc_test(TestThreadingInterface)
