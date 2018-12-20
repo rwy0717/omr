@@ -22,15 +22,15 @@
 #ifndef INLINING_RECURSIVEFIB_INCL
 #define INLINING_RECURSIVEFIB_INCL
 #include "JitBuilder.hpp"
-typedef int32_t (RecursiveFibFunctionType)(int32_t);
-class InliningRecursiveFibonacciMethod : public OMR::JitBuilder::MethodBuilder
-   {
-   public:
-   InliningRecursiveFibonacciMethod(OMR::JitBuilder::TypeDictionary *types, int32_t inlineDepth);
-   InliningRecursiveFibonacciMethod(InliningRecursiveFibonacciMethod *callerMB);
-   virtual bool buildIL();
-   private:
-   void defineStuff();
-   int32_t _inlineDepth;
-   };
+typedef int32_t(RecursiveFibFunctionType)(int32_t);
+class InliningRecursiveFibonacciMethod : public OMR::JitBuilder::MethodBuilder {
+public:
+    InliningRecursiveFibonacciMethod(OMR::JitBuilder::TypeDictionary* types, int32_t inlineDepth);
+    InliningRecursiveFibonacciMethod(InliningRecursiveFibonacciMethod* callerMB);
+    virtual bool buildIL();
+
+private:
+    void defineStuff();
+    int32_t _inlineDepth;
+};
 #endif // !defined(INLINING_RECURSIVEFIB_INCL)

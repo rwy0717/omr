@@ -27,27 +27,36 @@
 #include "codegen/RegisterDependencyStruct.hpp"
 
 class TR_Memory;
-namespace TR { class CodeGenerator; }
-namespace TR { class Node; }
-namespace TR { class Register; }
-template <typename ListKind> class List;
-
-namespace TR
-{
-
-class RegisterDependencyConditions : public OMR::RegisterDependencyConditionsConnector
-   {
-   public:
-
-   RegisterDependencyConditions() : OMR::RegisterDependencyConditionsConnector () {}
-
-   RegisterDependencyConditions(TR_X86RegisterDependencyIndex numPreConds, TR_X86RegisterDependencyIndex numPostConds, TR_Memory * m) :
-      OMR::RegisterDependencyConditionsConnector(numPreConds, numPostConds, m) {}
-
-   RegisterDependencyConditions(TR::Node *node, TR::CodeGenerator *cg, TR_X86RegisterDependencyIndex additionalRegDeps = 0, List<TR::Register> *reglist = 0) :
-      OMR::RegisterDependencyConditionsConnector(node, cg, additionalRegDeps, reglist) {}
-
-   };
+namespace TR {
+class CodeGenerator;
 }
+namespace TR {
+class Node;
+}
+namespace TR {
+class Register;
+}
+template <typename ListKind>
+class List;
+
+namespace TR {
+
+class RegisterDependencyConditions : public OMR::RegisterDependencyConditionsConnector {
+public:
+    RegisterDependencyConditions()
+        : OMR::RegisterDependencyConditionsConnector()
+    {}
+
+    RegisterDependencyConditions(
+        TR_X86RegisterDependencyIndex numPreConds, TR_X86RegisterDependencyIndex numPostConds, TR_Memory* m)
+        : OMR::RegisterDependencyConditionsConnector(numPreConds, numPostConds, m)
+    {}
+
+    RegisterDependencyConditions(TR::Node* node, TR::CodeGenerator* cg,
+        TR_X86RegisterDependencyIndex additionalRegDeps = 0, List<TR::Register>* reglist = 0)
+        : OMR::RegisterDependencyConditionsConnector(node, cg, additionalRegDeps, reglist)
+    {}
+};
+} // namespace TR
 
 #endif

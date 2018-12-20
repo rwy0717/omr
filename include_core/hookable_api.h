@@ -24,13 +24,13 @@
 #define hookable_api_h
 
 /**
-* @file hookable_api.h
-* @brief Public API for the HOOKABLE module.
-*
-* This file contains public function prototypes and
-* type definitions for the HOOKABLE module.
-*
-*/
+ * @file hookable_api.h
+ * @brief Public API for the HOOKABLE module.
+ *
+ * This file contains public function prototypes and
+ * type definitions for the HOOKABLE module.
+ *
+ */
 
 #include "omrcomp.h"
 
@@ -43,18 +43,17 @@ extern "C" {
 struct OMRPortLibrary;
 struct J9HookInterface;
 /**
-* @brief
-* @param hookInterface
-* @param portLib
-* @param interfaceSize
-* @return intptr_t
-*/
-intptr_t
-J9HookInitializeInterface(struct J9HookInterface **hookInterface, OMRPortLibrary *portLib, size_t interfaceSize);
+ * @brief
+ * @param hookInterface
+ * @param portLib
+ * @param interfaceSize
+ * @return intptr_t
+ */
+intptr_t J9HookInitializeInterface(
+    struct J9HookInterface** hookInterface, OMRPortLibrary* portLib, size_t interfaceSize);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* hookable_api_h */
-

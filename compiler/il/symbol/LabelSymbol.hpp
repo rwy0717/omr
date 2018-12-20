@@ -24,32 +24,35 @@
 
 #include "il/symbol/OMRLabelSymbol.hpp"
 
-namespace TR { class Block; }
-namespace TR { class CodeGenerator; }
+namespace TR {
+class Block;
+}
+namespace TR {
+class CodeGenerator;
+}
 
 namespace TR {
 
-class OMR_EXTENSIBLE LabelSymbol : public OMR::LabelSymbolConnector
-   {
+class OMR_EXTENSIBLE LabelSymbol : public OMR::LabelSymbolConnector {
 
 protected:
+    LabelSymbol()
+        : OMR::LabelSymbolConnector()
+    {}
 
-   LabelSymbol() :
-      OMR::LabelSymbolConnector() { }
+    LabelSymbol(TR::CodeGenerator* codeGen)
+        : OMR::LabelSymbolConnector(codeGen)
+    {}
 
-   LabelSymbol(TR::CodeGenerator *codeGen) :
-      OMR::LabelSymbolConnector(codeGen) { }
-
-   LabelSymbol(TR::CodeGenerator *codeGen, TR::Block *labb):
-      OMR::LabelSymbolConnector(codeGen, labb) { }
+    LabelSymbol(TR::CodeGenerator* codeGen, TR::Block* labb)
+        : OMR::LabelSymbolConnector(codeGen, labb)
+    {}
 
 private:
+    // When adding another class to the heirarchy, add it as a friend here
+    friend class OMR::LabelSymbol;
+};
 
-   // When adding another class to the heirarchy, add it as a friend here
-   friend class OMR::LabelSymbol;
-
-   };
-
-}
+} // namespace TR
 
 #endif

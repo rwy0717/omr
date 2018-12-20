@@ -28,33 +28,33 @@
 
 TEST(RASMemoryCategoriesTest, Agent)
 {
-	/* OMR VM data structures */
-	OMRTestVM testVM;
-	OMR_VMThread *vmthread = NULL;
+    /* OMR VM data structures */
+    OMRTestVM testVM;
+    OMR_VMThread* vmthread = NULL;
 
-	const char *agentName = "memorycategoriesagent";
-	struct OMR_Agent *agent = NULL;
+    const char* agentName = "memorycategoriesagent";
+    struct OMR_Agent* agent = NULL;
 
-	OMRTEST_ASSERT_ERROR_NONE(omrTestVMInit(&testVM, rasTestEnv->getPortLibrary()));
+    OMRTEST_ASSERT_ERROR_NONE(omrTestVMInit(&testVM, rasTestEnv->getPortLibrary()));
 
-	OMRTEST_ASSERT_ERROR_NONE(OMR_Thread_Init(&testVM.omrVM, NULL, &vmthread, "memoryCategoriesTest"));
+    OMRTEST_ASSERT_ERROR_NONE(OMR_Thread_Init(&testVM.omrVM, NULL, &vmthread, "memoryCategoriesTest"));
 
-	/* load memorycategoriesagent */
-	agent = omr_agent_create(&testVM.omrVM, agentName);
-	ASSERT_FALSE(NULL == agent) << "createAgent(" << agentName << ") failed";
+    /* load memorycategoriesagent */
+    agent = omr_agent_create(&testVM.omrVM, agentName);
+    ASSERT_FALSE(NULL == agent) << "createAgent(" << agentName << ") failed";
 
-	OMRTEST_ASSERT_ERROR_NONE(omr_agent_openLibrary(agent));
+    OMRTEST_ASSERT_ERROR_NONE(omr_agent_openLibrary(agent));
 
-	OMRTEST_ASSERT_ERROR_NONE(omr_agent_callOnLoad(agent));
+    OMRTEST_ASSERT_ERROR_NONE(omr_agent_callOnLoad(agent));
 
-	/** The test code is actually in the OnLoadFunction **/
+    /** The test code is actually in the OnLoadFunction **/
 
-	/* Unload the agent */
-	omr_agent_callOnUnload(agent);
-	omr_agent_destroy(agent);
+    /* Unload the agent */
+    omr_agent_callOnUnload(agent);
+    omr_agent_destroy(agent);
 
-	OMRTEST_ASSERT_ERROR_NONE(OMR_Thread_Free(vmthread));
+    OMRTEST_ASSERT_ERROR_NONE(OMR_Thread_Free(vmthread));
 
-	/* Now clear up the VM we started for this test case. */
-	OMRTEST_ASSERT_ERROR_NONE(omrTestVMFini(&testVM));
+    /* Now clear up the VM we started for this test case. */
+    OMRTEST_ASSERT_ERROR_NONE(omrTestVMFini(&testVM));
 }

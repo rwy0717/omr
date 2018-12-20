@@ -27,43 +27,36 @@ extern bool internal_initializeJit();
 extern void internal_shutdownJit();
 
 int main(int argc, char** argv)
-   { 
+{
 
-   FILE* out = stdout; 
-   FILE* in = stdin;
+    FILE* out = stdout;
+    FILE* in = stdin;
 
-   std::string program_name = argv[0];
+    std::string program_name = argv[0];
 
-   bool isDumper = program_name.find("tril_dumper") != std::string::npos;  
+    bool isDumper = program_name.find("tril_dumper") != std::string::npos;
 
-   if (2 == argc)
-      {
-      in = fopen(argv[1], "r"); 
-      }
+    if (2 == argc) {
+        in = fopen(argv[1], "r");
+    }
 
-   auto trees = parseFile(in);
+    auto trees = parseFile(in);
 
-   if (trees)
-      {
-      printTrees(out, trees, 1); 
-      if (!isDumper) 
-         {
-         internal_initializeJit();
-         Tril::DefaultCompiler compiler{trees}; 
-         if (compiler.compile() != 0) { 
-            fprintf(out, "Error compiling trees!"); 
-         }
-         internal_shutdownJit();
-         }
-      }
-   else
-      { 
-      fprintf(out, "Parse error\n");
-      }
+    if (trees) {
+        printTrees(out, trees, 1);
+        if (!isDumper) {
+            internal_initializeJit();
+            Tril::DefaultCompiler compiler { trees };
+            if (compiler.compile() != 0) {
+                fprintf(out, "Error compiling trees!");
+            }
+            internal_shutdownJit();
+        }
+    } else {
+        fprintf(out, "Parse error\n");
+    }
 
-
-   if (2 == argc)
-      {
-      fclose(in);
-      }
-   }
+    if (2 == argc) {
+        fclose(in);
+    }
+}

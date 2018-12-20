@@ -35,6 +35,6 @@
  *
  * @return 0 on success, size of required buffer on failure.
  */
-uintptr_t omrget_jobid(struct OMRPortLibrary *portLibrary, char *jobid, uintptr_t length);
+uintptr_t omrget_jobid(struct OMRPortLibrary* portLibrary, char* jobid, uintptr_t length);
 
-#endif     /* omrgetjobid_h */
+#endif /* omrgetjobid_h */

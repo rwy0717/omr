@@ -50,19 +50,19 @@
  * is too small to contain even the context without stack trace. Errors are reported in the error,
  * and error_detail fields of the state structure. A brief textual description is in error_string.
  */
-J9PlatformThread *
-omrintrospect_threads_startDo_with_signal(struct OMRPortLibrary *portLibrary, J9Heap *heap, J9ThreadWalkState *state, void *signal_info)
+J9PlatformThread* omrintrospect_threads_startDo_with_signal(
+    struct OMRPortLibrary* portLibrary, J9Heap* heap, J9ThreadWalkState* state, void* signal_info)
 {
-	return NULL;
+    return NULL;
 }
 
 /* This function is identical to omrintrospect_threads_startDo_with_signal but omits the signal argument
  * and instead uses a live context for the calling thread.
  */
-J9PlatformThread *
-omrintrospect_threads_startDo(struct OMRPortLibrary *portLibrary, J9Heap *heap, J9ThreadWalkState *state)
+J9PlatformThread* omrintrospect_threads_startDo(
+    struct OMRPortLibrary* portLibrary, J9Heap* heap, J9ThreadWalkState* state)
 {
-	return NULL;
+    return NULL;
 }
 
 /* This function is called repeatedly to get subsequent threads in the iteration. The only way to
@@ -73,22 +73,18 @@ omrintrospect_threads_startDo(struct OMRPortLibrary *portLibrary, J9Heap *heap, 
  * @return NULL if there is an error or if no more threads are available. Sets the error fields as
  * listed detailed for omrintrospect_threads_startDo_with_signal.
  */
-J9PlatformThread *
-omrintrospect_threads_nextDo(J9ThreadWalkState *state)
-{
-	return NULL;
-}
+J9PlatformThread* omrintrospect_threads_nextDo(J9ThreadWalkState* state) { return NULL; }
 
 /**
  * Adjust which signal is used to suspend threads. The signal used is SIGRTMIN+signalOffset.
  * @param portLibrary port library
  * @param signalOffset value in the range 0 to (SIGRTMAX-SIGRTMIN).
- * @return 0 if successful, OMRPORT_ERROR_NOT_SUPPORTED_ON_THIS_PLATFORM on non-Linux systems, OMRPORT_ERROR_INVALID if the signal is reserved or out of range.
+ * @return 0 if successful, OMRPORT_ERROR_NOT_SUPPORTED_ON_THIS_PLATFORM on non-Linux systems, OMRPORT_ERROR_INVALID if
+ * the signal is reserved or out of range.
  */
-int32_t
-omrintrospect_set_suspend_signal_offset(struct OMRPortLibrary *portLibrary, int32_t signalOffset)
+int32_t omrintrospect_set_suspend_signal_offset(struct OMRPortLibrary* portLibrary, int32_t signalOffset)
 {
-	return OMRPORT_ERROR_NOT_SUPPORTED_ON_THIS_PLATFORM;
+    return OMRPORT_ERROR_NOT_SUPPORTED_ON_THIS_PLATFORM;
 }
 
 /**
@@ -96,19 +92,10 @@ omrintrospect_set_suspend_signal_offset(struct OMRPortLibrary *portLibrary, int3
  * @param portLibrary port library
  * @return 0 on success, negative value on failure
  */
-int32_t
-omrintrospect_startup(struct OMRPortLibrary *portLibrary)
-{
-	return 0;
-}
+int32_t omrintrospect_startup(struct OMRPortLibrary* portLibrary) { return 0; }
 
 /**
  * Close down the component.
  * @param portLibrary port library
  */
-void
-omrintrospect_shutdown(struct OMRPortLibrary *portLibrary)
-{
-	return;
-}
-
+void omrintrospect_shutdown(struct OMRPortLibrary* portLibrary) { return; }

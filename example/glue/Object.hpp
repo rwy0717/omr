@@ -42,66 +42,68 @@ typedef uintptr_t ObjectSize;
  * A header containing basic information about an object. Contains the object's size and an 8 bit object flag.
  * The size and flags are masked together into a single fomrobjectptr_t.
  */
-class ObjectHeader
-{
+class ObjectHeader {
 public:
+    ObjectHeader() {}
 
-	ObjectHeader() {}
+    explicit ObjectHeader(RawObjectHeader value)
+        : _value(value)
+    {}
 
-	explicit ObjectHeader(RawObjectHeader value) : _value(value) {}
+    explicit ObjectHeader(ObjectSize sizeInBytes, ObjectFlags flags) { assign(sizeInBytes, flags); }
 
-	explicit ObjectHeader(ObjectSize sizeInBytes, ObjectFlags flags) { assign(sizeInBytes, flags); }
+    ObjectSize sizeInBytes() const { return _value >> SIZE_SHIFT; }
 
-	ObjectSize sizeInBytes() const { return _value >> SIZE_SHIFT; }
+    void sizeInBytes(ObjectSize value) { assign(value, flags()); }
 
-	void sizeInBytes(ObjectSize value) { assign(value, flags()); }
+    ObjectFlags flags() const { return (ObjectFlags)_value; }
 
-	ObjectFlags flags() const { return (ObjectFlags)_value; }
+    void flags(ObjectFlags value) { assign(sizeInBytes(), value); }
 
-	void flags(ObjectFlags value) { assign(sizeInBytes(), value); }
+    void assign(ObjectSize sizeInBytes, ObjectFlags flags) { _value = (sizeInBytes << SIZE_SHIFT) | flags; }
 
-	void assign(ObjectSize sizeInBytes, ObjectFlags flags) { _value = (sizeInBytes << SIZE_SHIFT) | flags; }
+    RawObjectHeader raw() const { return _value; }
 
-	RawObjectHeader raw() const { return _value; }
-
-	void raw(RawObjectHeader raw) { _value = raw; }
+    void raw(RawObjectHeader raw) { _value = raw; }
 
 private:
-	static const size_t SIZE_SHIFT = sizeof(ObjectFlags)*8;
+    static const size_t SIZE_SHIFT = sizeof(ObjectFlags) * 8;
 
-	RawObjectHeader _value;
+    RawObjectHeader _value;
 };
 
-class Object
-{
+class Object {
 public:
-	static ObjectSize allocSize(ObjectSize nslots) {
-		return ObjectSize(sizeof(ObjectHeader) + sizeof(fomrobject_t) * nslots);
-	}
+    static ObjectSize allocSize(ObjectSize nslots)
+    {
+        return ObjectSize(sizeof(ObjectHeader) + sizeof(fomrobject_t) * nslots);
+    }
 
-	explicit Object(ObjectSize sizeInBytes, ObjectFlags flags = 0) : header(sizeInBytes, flags) {}
+    explicit Object(ObjectSize sizeInBytes, ObjectFlags flags = 0)
+        : header(sizeInBytes, flags)
+    {}
 
-	size_t sizeOfSlotsInBytes() const { return header.sizeInBytes() - sizeof(ObjectHeader); }
+    size_t sizeOfSlotsInBytes() const { return header.sizeInBytes() - sizeof(ObjectHeader); }
 
-	size_t slotCount() const { return sizeOfSlotsInBytes() / sizeof(Slot); }
+    size_t slotCount() const { return sizeOfSlotsInBytes() / sizeof(Slot); }
 
-	Slot* slots() { return (Slot*)(this + 1); }
+    Slot* slots() { return (Slot*)(this + 1); }
 
-	const Slot* slots() const { return (Slot*)(this + 1); }
+    const Slot* slots() const { return (Slot*)(this + 1); }
 
-	Slot* begin() { return slots(); }
+    Slot* begin() { return slots(); }
 
-	const Slot* begin() const { return slots(); }
+    const Slot* begin() const { return slots(); }
 
-	Slot* end() { return begin() + slotCount(); }
+    Slot* end() { return begin() + slotCount(); }
 
-	const Slot* end() const { return begin() + slotCount(); }
+    const Slot* end() const { return begin() + slotCount(); }
 
-	const Slot* cbegin() const { return begin(); }
+    const Slot* cbegin() const { return begin(); }
 
-	const Slot* cend() const { return end(); }
+    const Slot* cend() const { return end(); }
 
-	ObjectHeader header;
+    ObjectHeader header;
 };
 
 #endif /* OBJECT_HPP_ */

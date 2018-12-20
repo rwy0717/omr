@@ -25,22 +25,20 @@
 #include "ilgen/TypeDictionary.hpp"
 #include "tests/injectors/StoreOpIlInjector.hpp"
 
-namespace TestCompiler
+namespace TestCompiler {
+
+bool StoreOpIlInjector::injectIL()
 {
+    if (!isOpCodeSupported())
+        return false;
 
-bool
-StoreOpIlInjector::injectIL()
-   {
-   if (!isOpCodeSupported())
-      return false;
+    createBlocks(1);
 
-   createBlocks(1);
+    TR::SymbolReference* newStoreSymRef = newTemp(_types->PrimitiveType(_dataType));
+    storeToTemp(newStoreSymRef, parm(1));
+    returnValue(loadTemp(newStoreSymRef));
 
-   TR::SymbolReference *newStoreSymRef = newTemp(_types->PrimitiveType(_dataType));
-   storeToTemp(newStoreSymRef, parm(1));
-   returnValue(loadTemp(newStoreSymRef));
-
-   return true;
-   }
+    return true;
+}
 
 } // namespace TestCompiler

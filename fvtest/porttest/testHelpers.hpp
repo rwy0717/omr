@@ -68,25 +68,28 @@ extern "C" {
 /*
  * Forward declarations, not under doxygen control
  */
-void operationNotSupported(OMRPortLibrary *portLibrary, const char *operationName);
-void reportTestEntry(OMRPortLibrary *portLibrary, const char *testName);
-int reportTestExit(OMRPortLibrary *portLibrary, const char *testName);
-void outputErrorMessage(OMRPortLibrary *portLibrary, const char *fileName, int32_t lineNumber, const char *testName, const char *format, ...);
-void HEADING(OMRPortLibrary *portLibrary, const char *string);
-uintptr_t verifyFileExists(struct OMRPortLibrary *portLibrary, const char *pltestFileName, int32_t lineNumber, const char *testName, const char *fileName);
-void dumpTestFailuresToConsole(struct OMRPortLibrary *portLibrary);
-void deleteControlDirectory(struct OMRPortLibrary *portLibrary, char *baseDir);
-void getPortLibraryMemoryCategoryData(struct OMRPortLibrary *portLibrary, uintptr_t *blocks, uintptr_t *bytes);
-int startsWith(const char *s, const char *prefix);
-uintptr_t raiseSEGV(OMRPortLibrary *portLibrary, void *arg);
-intptr_t omrfile_create_status_file(OMRPortLibrary *portLibrary, const char *filename, const char *testName);
-intptr_t omrfile_status_file_exists(OMRPortLibrary *portLibrary, const char *filename, const char *testName);
+void operationNotSupported(OMRPortLibrary* portLibrary, const char* operationName);
+void reportTestEntry(OMRPortLibrary* portLibrary, const char* testName);
+int reportTestExit(OMRPortLibrary* portLibrary, const char* testName);
+void outputErrorMessage(OMRPortLibrary* portLibrary, const char* fileName, int32_t lineNumber, const char* testName,
+    const char* format, ...);
+void HEADING(OMRPortLibrary* portLibrary, const char* string);
+uintptr_t verifyFileExists(struct OMRPortLibrary* portLibrary, const char* pltestFileName, int32_t lineNumber,
+    const char* testName, const char* fileName);
+void dumpTestFailuresToConsole(struct OMRPortLibrary* portLibrary);
+void deleteControlDirectory(struct OMRPortLibrary* portLibrary, char* baseDir);
+void getPortLibraryMemoryCategoryData(struct OMRPortLibrary* portLibrary, uintptr_t* blocks, uintptr_t* bytes);
+int startsWith(const char* s, const char* prefix);
+uintptr_t raiseSEGV(OMRPortLibrary* portLibrary, void* arg);
+intptr_t omrfile_create_status_file(OMRPortLibrary* portLibrary, const char* filename, const char* testName);
+intptr_t omrfile_status_file_exists(OMRPortLibrary* portLibrary, const char* filename, const char* testName);
 void testFileCleanUp(const char* filePrefix);
 
 /**
  * @see omrsignalTest.c::validateGPInfo
  */
-void validateGPInfo(struct OMRPortLibrary *portLibrary, uint32_t gpType, omrsig_handler_fn handler, void *gpInfo, const char *testName);
+void validateGPInfo(
+    struct OMRPortLibrary* portLibrary, uint32_t gpType, omrsig_handler_fn handler, void* gpInfo, const char* testName);
 
 #ifdef __cplusplus
 }

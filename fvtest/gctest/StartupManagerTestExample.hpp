@@ -24,35 +24,32 @@
 
 #include "gcTestHelpers.hpp"
 
-class MM_StartupManagerTestExample : public MM_StartupManagerImpl
-{
-	/*
-	 * Data members
-	 */
+class MM_StartupManagerTestExample : public MM_StartupManagerImpl {
+    /*
+     * Data members
+     */
 private:
-	const char *_configFile;
+    const char* _configFile;
+
 protected:
-
 public:
-
-	/*
-	 * Function members
-	 */
+    /*
+     * Function members
+     */
 private:
 protected:
-	/**
-	 * parse gc options in test configuration file
-	 * @param extensions GCExtensions
-	 * @return true if parsing completed, false otherwise
-	 */
-	virtual bool parseLanguageOptions(MM_GCExtensionsBase *extensions);
+    /**
+     * parse gc options in test configuration file
+     * @param extensions GCExtensions
+     * @return true if parsing completed, false otherwise
+     */
+    virtual bool parseLanguageOptions(MM_GCExtensionsBase* extensions);
 
 public:
-	MM_StartupManagerTestExample(OMR_VM *omrVM, const char *configFile)
-		: MM_StartupManagerImpl(omrVM)
-		, _configFile(configFile)
-	{
-	}
+    MM_StartupManagerTestExample(OMR_VM* omrVM, const char* configFile)
+        : MM_StartupManagerImpl(omrVM)
+        , _configFile(configFile)
+    {}
 };
 
 #endif /* MM_STARTUPMANAGERTESTEXAMPLE_HPP_ */

@@ -41,72 +41,62 @@ class MM_MemorySubSpace;
 class MM_GlobalCollector : public MM_Collector {
 private:
 protected:
-	MM_GlobalCollectorDelegate _delegate; /**< Language specific delegate -- subclass must initialize */
+    MM_GlobalCollectorDelegate _delegate; /**< Language specific delegate -- subclass must initialize */
 
 public:
-
 private:
 protected:
-	virtual void internalPostCollect(MM_EnvironmentBase *env, MM_MemorySubSpace *subSpace);
+    virtual void internalPostCollect(MM_EnvironmentBase* env, MM_MemorySubSpace* subSpace);
 
 public:
-	MM_GlobalCollectorDelegate *getGlobalCollectorDelegate() { return &_delegate; }
+    MM_GlobalCollectorDelegate* getGlobalCollectorDelegate() { return &_delegate; }
 
-	virtual bool isTimeForGlobalGCKickoff();
+    virtual bool isTimeForGlobalGCKickoff();
 
-	virtual bool condYield(MM_EnvironmentBase *env, uint64_t timeSlackNanoSec)
-	{
-		return false;
-	}
+    virtual bool condYield(MM_EnvironmentBase* env, uint64_t timeSlackNanoSec) { return false; }
 
-	virtual bool shouldYield(MM_EnvironmentBase *env)
-	{
-		return false;
-	}
+    virtual bool shouldYield(MM_EnvironmentBase* env) { return false; }
 
-	virtual void yield(MM_EnvironmentBase *env) {};
-	
-	virtual bool isStwCollectionInProgress()
-	{
-		return false;
-	}
+    virtual void yield(MM_EnvironmentBase* env) {};
 
-	/**
- 	 * Perform any collector-specific initialization.
- 	 * @return TRUE if startup completes OK, FALSE otherwise
- 	 */
-	virtual bool collectorStartup(MM_GCExtensionsBase* extensions) = 0;
+    virtual bool isStwCollectionInProgress() { return false; }
 
-	/**
-	 * Perform any collector-specific shutdown actions.
-	 */
-	virtual void collectorShutdown(MM_GCExtensionsBase* extensions) = 0;
+    /**
+     * Perform any collector-specific initialization.
+     * @return TRUE if startup completes OK, FALSE otherwise
+     */
+    virtual bool collectorStartup(MM_GCExtensionsBase* extensions) = 0;
 
-	/**
-	 * Abort any currently active garbage collection activity.
-	 */
-	virtual void abortCollection(MM_EnvironmentBase* env, CollectionAbortReason reason);
+    /**
+     * Perform any collector-specific shutdown actions.
+     */
+    virtual void collectorShutdown(MM_GCExtensionsBase* extensions) = 0;
 
-	/**
- 	* Abstract for request to create sweepPoolState class for pool
- 	* @param  memoryPool memory pool to attach sweep state to
- 	* @return pointer to created class
- 	*/
-	virtual void* createSweepPoolState(MM_EnvironmentBase* env, MM_MemoryPool* memoryPool) = 0;
+    /**
+     * Abort any currently active garbage collection activity.
+     */
+    virtual void abortCollection(MM_EnvironmentBase* env, CollectionAbortReason reason);
 
-	/**
- 	* Abstract for request to destroy sweepPoolState class for pool
- 	* @param  sweepPoolState class to destroy
- 	*/
-	virtual void deleteSweepPoolState(MM_EnvironmentBase* env, void* sweepPoolState) = 0;
+    /**
+     * Abstract for request to create sweepPoolState class for pool
+     * @param  memoryPool memory pool to attach sweep state to
+     * @return pointer to created class
+     */
+    virtual void* createSweepPoolState(MM_EnvironmentBase* env, MM_MemoryPool* memoryPool) = 0;
 
-	MM_GlobalCollector()
-		: MM_Collector()
-		, _delegate()
-	{
-		_typeId = __FUNCTION__;
-		_cycleType = OMR_GC_CYCLE_TYPE_GLOBAL;
-	}
+    /**
+     * Abstract for request to destroy sweepPoolState class for pool
+     * @param  sweepPoolState class to destroy
+     */
+    virtual void deleteSweepPoolState(MM_EnvironmentBase* env, void* sweepPoolState) = 0;
+
+    MM_GlobalCollector()
+        : MM_Collector()
+        , _delegate()
+    {
+        _typeId = __FUNCTION__;
+        _cycleType = OMR_GC_CYCLE_TYPE_GLOBAL;
+    }
 };
 
 #endif /* GLOBALCOLLECTOR_HPP_ */

@@ -33,44 +33,45 @@
  * ===========================================================================
  */
 
-#if __TARGET_LIB__ == 0X22080000                                   /*ibm@28725*/
-#include <//'PP.ADLE370.OS39028.SCEEH.H(netdb)'>                   /*ibm@28725*/
-#else                                                              /*ibm@28725*/
+#if __TARGET_LIB__ == 0X22080000 /*ibm@28725*/
+#include < //'PP.ADLE370.OS39028.SCEEH.H(netdb)'>                   /*ibm@28725*/
+#else /*ibm@28725*/
 #include "prefixpath.h"
-#include PREFIXPATH(netdb.h)                                    /*ibm@28725*/
-#endif                                                             /*ibm@28725*/
+#include PREFIXPATH(netdb.h) /*ibm@28725*/
+#endif /*ibm@28725*/
 
 #if defined(IBM_ATOE)
 
-	#if !defined(IBM_ATOE_NETDB)
-		#define IBM_ATOE_NETDB
+#if !defined(IBM_ATOE_NETDB)
+#define IBM_ATOE_NETDB
 
-		#ifdef __cplusplus
-            extern "C" {
-		#endif
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-        struct hostent*  atoe_gethostbyname(const char *);                                     /*ibm@38180.1*/
-        struct hostent*  atoe_gethostbyname_r(char *, struct hostent *, char *, int, int *);   /*ibm@38180.1*/
-        struct hostent*  atoe_gethostbyaddr(const void *, int, int, struct hostent *, char *, int, int *);
-        struct protoent* atoe_getprotobyname(const char *name);
-        int atoe_getaddrinfo( const char *, const char *, const struct addrinfo *, struct addrinfo **);
-        int atoe_getnameinfo(const struct sockaddr *sa, socklen_t salen, char *host, socklen_t hostlen, char *serv, socklen_t servlen, int flags);
-		#ifdef __cplusplus
-            }
-		#endif
+struct hostent* atoe_gethostbyname(const char*); /*ibm@38180.1*/
+struct hostent* atoe_gethostbyname_r(char*, struct hostent*, char*, int, int*); /*ibm@38180.1*/
+struct hostent* atoe_gethostbyaddr(const void*, int, int, struct hostent*, char*, int, int*);
+struct protoent* atoe_getprotobyname(const char* name);
+int atoe_getaddrinfo(const char*, const char*, const struct addrinfo*, struct addrinfo**);
+int atoe_getnameinfo(const struct sockaddr* sa, socklen_t salen, char* host, socklen_t hostlen, char* serv,
+    socklen_t servlen, int flags);
+#ifdef __cplusplus
+}
+#endif
 
-		#undef getprotobyname
-		#undef getaddrinfo
-		#undef getnameinfo
+#undef getprotobyname
+#undef getaddrinfo
+#undef getnameinfo
 
-		#define gethostbyname   atoe_gethostbyname         /*ibm@38180.1*/
-		#define gethostbyname_r atoe_gethostbyname_r       /*ibm@38180.1*/
-		#define gethostbyaddr_r atoe_gethostbyaddr
-		#define getprotobyname  atoe_getprotobyname
-		#define getaddrinfo atoe_getaddrinfo
-		#define getnameinfo atoe_getnameinfo
+#define gethostbyname atoe_gethostbyname /*ibm@38180.1*/
+#define gethostbyname_r atoe_gethostbyname_r /*ibm@38180.1*/
+#define gethostbyaddr_r atoe_gethostbyaddr
+#define getprotobyname atoe_getprotobyname
+#define getaddrinfo atoe_getaddrinfo
+#define getnameinfo atoe_getnameinfo
 
-	#endif
+#endif
 
 #endif
 

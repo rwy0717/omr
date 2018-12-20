@@ -21,52 +21,42 @@
 
 #include "il/symbol/OMRMethodSymbol.hpp"
 
-#include "compile/Method.hpp"                  // for TR_Method
+#include "compile/Method.hpp" // for TR_Method
 #include "env/TRMemory.hpp"
-#include "il/symbol/MethodSymbol.hpp"          // for MethodSymbol, etc
-#include "infra/Flags.hpp"                     // for flags32_t
+#include "il/symbol/MethodSymbol.hpp" // for MethodSymbol, etc
+#include "infra/Flags.hpp" // for flags32_t
 
-OMR::MethodSymbol::MethodSymbol(TR_LinkageConventions lc, TR_Method * m) :
-   TR::Symbol(),
-   _methodAddress(NULL),
-   _method(m),
-   _linkageConvention(lc)
-   {
-   _flags.setValue(KindMask, IsMethod);
-   }
+OMR::MethodSymbol::MethodSymbol(TR_LinkageConventions lc, TR_Method* m)
+    : TR::Symbol()
+    , _methodAddress(NULL)
+    , _method(m)
+    , _linkageConvention(lc)
+{
+    _flags.setValue(KindMask, IsMethod);
+}
 
-bool
-OMR::MethodSymbol::firstArgumentIsReceiver()
-   {
-   if (self()->isSpecial() || self()->isVirtual() || self()->isInterface() || self()->isComputedVirtual())
-      return true;
+bool OMR::MethodSymbol::firstArgumentIsReceiver()
+{
+    if (self()->isSpecial() || self()->isVirtual() || self()->isInterface() || self()->isComputedVirtual())
+        return true;
 
-   return false;
-   }
+    return false;
+}
 
+TR::MethodSymbol* OMR::MethodSymbol::self() { return static_cast<TR::MethodSymbol*>(this); }
 
-TR::MethodSymbol *
-OMR::MethodSymbol::self()
-   {
-   return static_cast<TR::MethodSymbol *>(this);
-   }
-
-bool
-OMR::MethodSymbol::isComputed()
-   {
-   return self()->isComputedStatic() || self()->isComputedVirtual();
-   }
+bool OMR::MethodSymbol::isComputed() { return self()->isComputedStatic() || self()->isComputedVirtual(); }
 
 /**
  * Method Symbol Factory.
  */
 template <typename AllocatorType>
-TR::MethodSymbol * OMR::MethodSymbol::create(AllocatorType t, TR_LinkageConventions lc, TR_Method * m)
-   {
-   return new (t) TR::MethodSymbol(lc, m);
-   }
+TR::MethodSymbol* OMR::MethodSymbol::create(AllocatorType t, TR_LinkageConventions lc, TR_Method* m)
+{
+    return new (t) TR::MethodSymbol(lc, m);
+}
 
-//Explicit instantiations
-template TR::MethodSymbol * OMR::MethodSymbol::create(TR_HeapMemory t,          TR_LinkageConventions lc, TR_Method * m);
-template TR::MethodSymbol * OMR::MethodSymbol::create(TR_StackMemory t,         TR_LinkageConventions lc, TR_Method * m);
-template TR::MethodSymbol * OMR::MethodSymbol::create(PERSISTENT_NEW_DECLARE t, TR_LinkageConventions lc, TR_Method * m);
+// Explicit instantiations
+template TR::MethodSymbol* OMR::MethodSymbol::create(TR_HeapMemory t, TR_LinkageConventions lc, TR_Method* m);
+template TR::MethodSymbol* OMR::MethodSymbol::create(TR_StackMemory t, TR_LinkageConventions lc, TR_Method* m);
+template TR::MethodSymbol* OMR::MethodSymbol::create(PERSISTENT_NEW_DECLARE t, TR_LinkageConventions lc, TR_Method* m);

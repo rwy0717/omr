@@ -24,28 +24,27 @@
 
 #include "il/OMRBlock.hpp"
 
-#include "infra/Annotations.hpp"  // for OMR_EXTENSIBLE
+#include "infra/Annotations.hpp" // for OMR_EXTENSIBLE
 
 class TR_Memory;
-namespace TR { class TreeTop; }
+namespace TR {
+class TreeTop;
+}
 
-namespace TR
-{
+namespace TR {
 
-class OMR_EXTENSIBLE Block : public OMR::BlockConnector
-{
-   public:
-   Block(TR_Memory * m) :
-      OMR::BlockConnector(m) {};
+class OMR_EXTENSIBLE Block : public OMR::BlockConnector {
+public:
+    Block(TR_Memory* m)
+        : OMR::BlockConnector(m) {};
 
-   Block(TR::TreeTop *entry, TR::TreeTop *exit, TR_Memory * m) :
-      OMR::BlockConnector(entry,exit,m) {};
+    Block(TR::TreeTop* entry, TR::TreeTop* exit, TR_Memory* m)
+        : OMR::BlockConnector(entry, exit, m) {};
 
-   Block(Block &other, TR::TreeTop *entry, TR::TreeTop *exit) :
-      OMR::BlockConnector(other,entry,exit) {};
-
+    Block(Block& other, TR::TreeTop* entry, TR::TreeTop* exit)
+        : OMR::BlockConnector(other, entry, exit) {};
 };
 
-}
+} // namespace TR
 
 #endif

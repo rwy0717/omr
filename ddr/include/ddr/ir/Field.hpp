@@ -27,19 +27,18 @@
 
 class Type;
 
-class Field : public Members
-{
+class Field : public Members {
 public:
-	Type *_fieldType;
-	size_t _offset;
-	Modifiers _modifiers;
-	size_t _bitField;
-	bool _isStatic;
+    Type* _fieldType;
+    size_t _offset;
+    Modifiers _modifiers;
+    size_t _bitField;
+    bool _isStatic;
 
-	Field();
-	virtual ~Field();
+    Field();
+    virtual ~Field();
 
-	const std::string &getTypeName() const;
+    const std::string& getTypeName() const;
 };
 
 #endif /* FIELD_HPP */

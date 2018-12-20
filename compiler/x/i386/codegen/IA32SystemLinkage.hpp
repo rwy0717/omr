@@ -24,34 +24,46 @@
 
 #include "x/codegen/X86SystemLinkage.hpp"
 
-#include <stdint.h>                        // for int32_t, uint16_t, etc
-#include "codegen/Register.hpp"            // for Register
-#include "il/DataTypes.hpp"                // for DataTypes
+#include <stdint.h> // for int32_t, uint16_t, etc
+#include "codegen/Register.hpp" // for Register
+#include "il/DataTypes.hpp" // for DataTypes
 
-namespace TR { class CodeGenerator; }
-namespace TR { class Node; }
-namespace TR { class ParameterSymbol; }
-namespace TR { class RegisterDependencyConditions; }
+namespace TR {
+class CodeGenerator;
+}
+namespace TR {
+class Node;
+}
+namespace TR {
+class ParameterSymbol;
+}
+namespace TR {
+class RegisterDependencyConditions;
+}
 
 namespace TR {
 
-class IA32SystemLinkage : public TR::X86SystemLinkage
-   {
-   public:
+class IA32SystemLinkage : public TR::X86SystemLinkage {
+public:
+    IA32SystemLinkage(TR::CodeGenerator* cg);
+    void setUpStackSizeForCallNode(TR::Node*);
 
-   IA32SystemLinkage(TR::CodeGenerator *cg);
-   void setUpStackSizeForCallNode(TR::Node*);
-   protected:
-   virtual int32_t buildArgs(TR::Node *callNode, TR::RegisterDependencyConditions *deps);
-   virtual TR::Register *buildIndirectDispatch(TR::Node *callNode);
-   virtual TR::Register *buildDirectDispatch(TR::Node *callNode, bool spillFPRegs);
-   int32_t layoutParm(TR::Node*, int32_t&, uint16_t&, uint16_t&, TR::parmLayoutResult&);
-   int32_t layoutParm(TR::ParameterSymbol*, int32_t&, uint16_t&, uint16_t&, TR::parmLayoutResult&);
-   virtual TR::Register *buildVolatileAndReturnDependencies(TR::Node *callNode, TR::RegisterDependencyConditions *deps);
-   virtual TR::RealRegister* getSingleWordFrameAllocationRegister() { return machine()->getRealRegister(TR::RealRegister::ecx); }
-   private:
-   virtual uint32_t getAlignment(TR::DataType);
-   };
+protected:
+    virtual int32_t buildArgs(TR::Node* callNode, TR::RegisterDependencyConditions* deps);
+    virtual TR::Register* buildIndirectDispatch(TR::Node* callNode);
+    virtual TR::Register* buildDirectDispatch(TR::Node* callNode, bool spillFPRegs);
+    int32_t layoutParm(TR::Node*, int32_t&, uint16_t&, uint16_t&, TR::parmLayoutResult&);
+    int32_t layoutParm(TR::ParameterSymbol*, int32_t&, uint16_t&, uint16_t&, TR::parmLayoutResult&);
+    virtual TR::Register* buildVolatileAndReturnDependencies(
+        TR::Node* callNode, TR::RegisterDependencyConditions* deps);
+    virtual TR::RealRegister* getSingleWordFrameAllocationRegister()
+    {
+        return machine()->getRealRegister(TR::RealRegister::ecx);
+    }
+
+private:
+    virtual uint32_t getAlignment(TR::DataType);
+};
 
 #if 0
 class IA32SystemLinkage : public TR::IA32PrivateLinkage
@@ -73,6 +85,6 @@ class IA32SystemLinkage : public TR::IA32PrivateLinkage
    };
 #endif
 
-}
+} // namespace TR
 
 #endif

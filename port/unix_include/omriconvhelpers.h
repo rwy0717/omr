@@ -54,33 +54,34 @@
 
 typedef enum {
 #if defined(J9ZOS390)
-	J9NLS_ICONV_DESCRIPTOR,
+    J9NLS_ICONV_DESCRIPTOR,
 #endif /* J9ZOS390 */
-	J9FILETEXT_ICONV_DESCRIPTOR,
-	J9SL_ICONV_DESCRIPTOR,
-	OMRPORT_UTF16_TO_LANG_ICONV_DESCRIPTOR,
-	OMRPORT_LANG_TO_UTF16_ICONV_DESCRIPTOR,
+    J9FILETEXT_ICONV_DESCRIPTOR,
+    J9SL_ICONV_DESCRIPTOR,
+    OMRPORT_UTF16_TO_LANG_ICONV_DESCRIPTOR,
+    OMRPORT_LANG_TO_UTF16_ICONV_DESCRIPTOR,
 #if defined(J9VM_CACHE_ICONV_DESC)
-	/* These converters ARE redundant to the converters above,
-	 * however, it only takes a few extra bytes of memory.
-	 * These are useless if -Xipt is defined.
-	 */
-	OMRPORT_FIRST_ICONV_DESCRIPTOR, /* declare starting point for iteration */
-	OMRPORT_UTF8_TO_EBCDIC_ICONV_DESCRIPTOR = OMRPORT_FIRST_ICONV_DESCRIPTOR,
-	OMRPORT_UTF8_TO_LANG_ICONV_DESCRIPTOR,
-	OMRPORT_EBCDIC_TO_UTF8_ICONV_DESCRIPTOR,
+    /* These converters ARE redundant to the converters above,
+     * however, it only takes a few extra bytes of memory.
+     * These are useless if -Xipt is defined.
+     */
+    OMRPORT_FIRST_ICONV_DESCRIPTOR, /* declare starting point for iteration */
+    OMRPORT_UTF8_TO_EBCDIC_ICONV_DESCRIPTOR = OMRPORT_FIRST_ICONV_DESCRIPTOR,
+    OMRPORT_UTF8_TO_LANG_ICONV_DESCRIPTOR,
+    OMRPORT_EBCDIC_TO_UTF8_ICONV_DESCRIPTOR,
 #endif
-	OMRPORT_LANG_TO_UTF8_ICONV_DESCRIPTOR,
-	/* Add iconv descriptors that should be cached here. */
-	UNCACHED_ICONV_DESCRIPTOR,
-	/* Add iconv descriptors that should not be cached here. */
-	J9SYSINFO_ICONV_DESCRIPTOR
+    OMRPORT_LANG_TO_UTF8_ICONV_DESCRIPTOR,
+    /* Add iconv descriptors that should be cached here. */
+    UNCACHED_ICONV_DESCRIPTOR,
+    /* Add iconv descriptors that should not be cached here. */
+    J9SYSINFO_ICONV_DESCRIPTOR
 } J9IconvName;
 
-int32_t iconv_global_init(struct OMRPortLibrary *portLibrary);
-void iconv_global_destroy(struct OMRPortLibrary *portLibrary);
-iconv_t iconv_get(struct OMRPortLibrary *portLibrary, J9IconvName converterName, const char *toCode, const char *fromCode);
+int32_t iconv_global_init(struct OMRPortLibrary* portLibrary);
+void iconv_global_destroy(struct OMRPortLibrary* portLibrary);
+iconv_t iconv_get(
+    struct OMRPortLibrary* portLibrary, J9IconvName converterName, const char* toCode, const char* fromCode);
 
-void iconv_free(struct OMRPortLibrary *portLibrary, J9IconvName converterName, iconv_t converter);
+void iconv_free(struct OMRPortLibrary* portLibrary, J9IconvName converterName, iconv_t converter);
 
 #endif /*omriconvhelpers_h_*/

@@ -24,19 +24,18 @@
 #include "testEnvironment.hpp"
 
 extern "C" {
-int omr_main_entry(int argc, char **argv, char **envp);
+int omr_main_entry(int argc, char** argv, char** envp);
 }
 
-PortEnvironment *vmTestEnv;
+PortEnvironment* vmTestEnv;
 
-int
-omr_main_entry(int argc, char **argv, char **envp)
+int omr_main_entry(int argc, char** argv, char** envp)
 {
-	::testing::InitGoogleTest(&argc, argv);
-	OMREventListener::setDefaultTestListener();
-	INITIALIZE_THREADLIBRARY_AND_ATTACH();
-	vmTestEnv = (PortEnvironment *)testing::AddGlobalTestEnvironment(new PortEnvironment(argc, argv));
-	int result = RUN_ALL_TESTS();
-	DETACH_AND_DESTROY_THREADLIBRARY();
-	return result;
+    ::testing::InitGoogleTest(&argc, argv);
+    OMREventListener::setDefaultTestListener();
+    INITIALIZE_THREADLIBRARY_AND_ATTACH();
+    vmTestEnv = (PortEnvironment*)testing::AddGlobalTestEnvironment(new PortEnvironment(argc, argv));
+    int result = RUN_ALL_TESTS();
+    DETACH_AND_DESTROY_THREADLIBRARY();
+    return result;
 }

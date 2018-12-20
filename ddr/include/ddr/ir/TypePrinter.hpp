@@ -29,50 +29,46 @@ class Field;
 
 #include <vector>
 
-class TypePrinter : public TypeVisitor
-{
+class TypePrinter : public TypeVisitor {
 private:
-	OMRPortLibrary * const _portLibrary;
-	const int32_t _flags;
-	const int32_t _indent;
+    OMRPortLibrary* const _portLibrary;
+    const int32_t _flags;
+    const int32_t _indent;
 
-	void printIndent() const;
-	void printFields(const std::vector<Field *> &fields) const;
-	void printLiterals(const std::vector<EnumMember *> &literals) const;
-	void printMacros(const std::vector<Macro> &macros) const;
+    void printIndent() const;
+    void printFields(const std::vector<Field*>& fields) const;
+    void printLiterals(const std::vector<EnumMember*>& literals) const;
+    void printMacros(const std::vector<Macro>& macros) const;
 
-	explicit TypePrinter(const TypePrinter *outer)
-		: TypeVisitor()
-		, _portLibrary(outer->_portLibrary)
-		, _flags(outer->_flags)
-		, _indent(outer->_indent + 1)
-	{
-	}
+    explicit TypePrinter(const TypePrinter* outer)
+        : TypeVisitor()
+        , _portLibrary(outer->_portLibrary)
+        , _flags(outer->_flags)
+        , _indent(outer->_indent + 1)
+    {}
 
 public:
-	enum { FIELDS = 1, LITERALS = 2, MACROS = 4 };
+    enum { FIELDS = 1, LITERALS = 2, MACROS = 4 };
 
-	TypePrinter(OMRPortLibrary * portLibrary, int32_t flags)
-		: TypeVisitor()
-		, _portLibrary(portLibrary)
-		, _flags(flags)
-		, _indent(0)
-	{
-	}
+    TypePrinter(OMRPortLibrary* portLibrary, int32_t flags)
+        : TypeVisitor()
+        , _portLibrary(portLibrary)
+        , _flags(flags)
+        , _indent(0)
+    {}
 
-	template<typename TypeVector>
-	void
-	printUDTs(const TypeVector &types) const
-	{
-		for (typename TypeVector::const_iterator it = types.begin(); it != types.end(); ++it) {
-			(*it)->acceptVisitor(*this);
-		}
-	}
+    template <typename TypeVector>
+    void printUDTs(const TypeVector& types) const
+    {
+        for (typename TypeVector::const_iterator it = types.begin(); it != types.end(); ++it) {
+            (*it)->acceptVisitor(*this);
+        }
+    }
 
-	virtual DDR_RC visitType(Type *type) const;
-	virtual DDR_RC visitClass(ClassUDT *type) const;
-	virtual DDR_RC visitEnum(EnumUDT *type) const;
-	virtual DDR_RC visitNamespace(NamespaceUDT *type) const;
-	virtual DDR_RC visitTypedef(TypedefUDT *type) const;
-	virtual DDR_RC visitUnion(UnionUDT *type) const;
+    virtual DDR_RC visitType(Type* type) const;
+    virtual DDR_RC visitClass(ClassUDT* type) const;
+    virtual DDR_RC visitEnum(EnumUDT* type) const;
+    virtual DDR_RC visitNamespace(NamespaceUDT* type) const;
+    virtual DDR_RC visitTypedef(TypedefUDT* type) const;
+    virtual DDR_RC visitUnion(UnionUDT* type) const;
 };

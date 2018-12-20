@@ -35,37 +35,34 @@
 #include "atoe.h"
 #endif
 
-void
-twFprintf(const char *formatStr, ...)
+void twFprintf(const char* formatStr, ...)
 {
-	OMRPORT_ACCESS_FROM_OMRPORT(OMR_TRACEGLOBAL(portLibrary));
-	va_list arg_ptr;
+    OMRPORT_ACCESS_FROM_OMRPORT(OMR_TRACEGLOBAL(portLibrary));
+    va_list arg_ptr;
 
-	va_start(arg_ptr, formatStr);
-	omrtty_err_vprintf(formatStr, arg_ptr);
-	va_end(arg_ptr);
+    va_start(arg_ptr, formatStr);
+    omrtty_err_vprintf(formatStr, arg_ptr);
+    va_end(arg_ptr);
 }
 
-OMR_TraceThread *
-twThreadSelf(void)
+OMR_TraceThread* twThreadSelf(void)
 {
-	omrthread_t self = omrthread_self();
-	return (OMR_TraceThread *)(self? omrthread_tls_get(self, j9uteTLSKey) : NULL);
+    omrthread_t self = omrthread_self();
+    return (OMR_TraceThread*)(self ? omrthread_tls_get(self, j9uteTLSKey) : NULL);
 }
 
-omr_error_t
-twE2A(char *str)
+omr_error_t twE2A(char* str)
 {
 #if defined(J9ZOS390)
-	long length = (long)strlen(str);
-	if (length > 0) {
-		char *abuf;
-		abuf = e2a(str, length);
-		if (abuf) {
-			strcpy(str, abuf);
-			free(abuf);
-		}
-	}
+    long length = (long)strlen(str);
+    if (length > 0) {
+        char* abuf;
+        abuf = e2a(str, length);
+        if (abuf) {
+            strcpy(str, abuf);
+            free(abuf);
+        }
+    }
 #endif /* defined(J9ZOS390) */
-	return OMR_ERROR_NONE;
+    return OMR_ERROR_NONE;
 }

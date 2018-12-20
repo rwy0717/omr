@@ -26,17 +26,19 @@
 #include "env/FEBase.hpp"
 #include "env/JitConfig.hpp"
 
-namespace TestCompiler { class FrontEnd; }
+namespace TestCompiler {
+class FrontEnd;
+}
 
 // Singleton JitConfig. The only instance of this is TestCompiler::FrontEnd::_jitConfig
-namespace TestCompiler
-{
-struct JitConfig : public TR::JitConfig
-   {
-   private:
-   friend class TR::FEBase<FrontEnd>;
-   JitConfig() : TR::JitConfig() {}
-   };
+namespace TestCompiler {
+struct JitConfig : public TR::JitConfig {
+private:
+    friend class TR::FEBase<FrontEnd>;
+    JitConfig()
+        : TR::JitConfig()
+    {}
+};
 } // namespace TestCompiler
 
 #endif

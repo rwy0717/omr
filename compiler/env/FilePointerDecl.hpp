@@ -22,11 +22,10 @@
 #ifndef TR_FILE_POINTER_DECL_INCL
 #define TR_FILE_POINTER_DECL_INCL
 
-#include <stdio.h>  // for FILE
+#include <stdio.h> // for FILE
 
-namespace TR
-{
-   typedef ::FILE FILE;
+namespace TR {
+typedef ::FILE FILE;
 }
 
 #endif

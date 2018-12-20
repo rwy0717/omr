@@ -28,27 +28,15 @@
 #include <time.h>
 
 #ifdef _LP64
-        void BPX4GTH(
-		unsigned int    *InputArea_length,
-		unsigned char   **InputArea,
-		unsigned int    *OuputArea_length,
-		unsigned char   **OuputArea,
-		unsigned int    *Return_value,
-		unsigned int    *Return_code,
-		unsigned int    *Reason_code);
+void BPX4GTH(unsigned int* InputArea_length, unsigned char** InputArea, unsigned int* OuputArea_length,
+    unsigned char** OuputArea, unsigned int* Return_value, unsigned int* Return_code, unsigned int* Reason_code);
 
-        #pragma linkage(BPX4GTH,OS)
+#pragma linkage(BPX4GTH, OS)
 #else
-     	void BPX1GTH(
-		unsigned int    *InputArea_length,
-		unsigned char   **InputArea,
-		unsigned int    *OuputArea_length,
-		unsigned char   **OuputArea,
-		unsigned int    *Return_value,
-		unsigned int    *Return_code,
-		unsigned int    *Reason_code);
+void BPX1GTH(unsigned int* InputArea_length, unsigned char** InputArea, unsigned int* OuputArea_length,
+    unsigned char** OuputArea, unsigned int* Return_value, unsigned int* Return_code, unsigned int* Reason_code);
 
-	#pragma linkage(BPX1GTH,OS)
+#pragma linkage(BPX1GTH, OS)
 #endif /* _LP64 */
 
 #pragma pack(packed)
@@ -86,34 +74,33 @@ PGTHAPTAG             EQU   X'02'      PGTHK, PTAG (NEEDS PGTHJ)
                       DS    FL1
 PGTHA#LEN             EQU   *-PGTHA
 */
-#define PGTHA_ACCESS_FIRST		0
-#define PGTHA_ACCESS_CURRENT	1
-#define PGTHA_ACCESS_NEXT		2
-#define PGTHA_ACCESS_LAST		3
+#define PGTHA_ACCESS_FIRST 0
+#define PGTHA_ACCESS_CURRENT 1
+#define PGTHA_ACCESS_NEXT 2
+#define PGTHA_ACCESS_LAST 3
 
-#define PGTHA_FLAG_PROCESS_DATA		0x80
-#define PGTHA_FLAG_CONTTY			0x40
-#define PGTHA_FLAG_PATH				0x20
-#define PGTHA_FLAG_CMD_AND_ARGS		0x10
-#define PGTHA_FLAG_FILE_DATA		0x8
-#define PGTHA_FLAG_THREAD_DATA		0x4
-#define PGTHA_FLAG_PTAG				0x2 /* needs thread data */
+#define PGTHA_FLAG_PROCESS_DATA 0x80
+#define PGTHA_FLAG_CONTTY 0x40
+#define PGTHA_FLAG_PATH 0x20
+#define PGTHA_FLAG_CMD_AND_ARGS 0x10
+#define PGTHA_FLAG_FILE_DATA 0x8
+#define PGTHA_FLAG_THREAD_DATA 0x4
+#define PGTHA_FLAG_PTAG 0x2 /* needs thread data */
 
 struct pgtha {
-	/* start of PGTHACONTINUE group */
-	pid_t pid;
-	pthread_t thid;
-	unsigned char accesspid; /* FIRST, CURRENT or NEXT */
-	unsigned char accessthid; /* FIRST, CURRENT, NEXT or LAST */
-	/* end of PGTHACONTINUE group */
+    /* start of PGTHACONTINUE group */
+    pid_t pid;
+    pthread_t thid;
+    unsigned char accesspid; /* FIRST, CURRENT or NEXT */
+    unsigned char accessthid; /* FIRST, CURRENT, NEXT or LAST */
+    /* end of PGTHACONTINUE group */
 
-	unsigned short asid;
-	unsigned char loginname[8];
-	unsigned char flag1; /* ONLY THREAD and PTAG checked if ACCESSPID==CURRENT & ACCESSTHID==NEXT */
+    unsigned short asid;
+    unsigned char loginname[8];
+    unsigned char flag1; /* ONLY THREAD and PTAG checked if ACCESSPID==CURRENT & ACCESSTHID==NEXT */
 
-	char _padding;
+    char _padding;
 };
-
 
 /*
 PGTHB                 DSECT ,        O U T P U T - - - - - - - - - -
@@ -140,29 +127,29 @@ PGTHBOFFJ             DS    FL3      OFFSET OF THREAD AREA
 PGTHB#LEN             EQU   *-PGTHB
 */
 struct pgthb {
-	char id[4];	/* "gthb" eyecatcher */
-	/* start of PGTHBCONTINUE */
-	int pid;
-	char thid[8];
-	char accesspid;
-	char accessthid;
-	/* end of PGTHBCONTINUE */
+    char id[4]; /* "gthb" eyecatcher */
+    /* start of PGTHBCONTINUE */
+    int pid;
+    char thid[8];
+    char accesspid;
+    char accessthid;
+    /* end of PGTHBCONTINUE */
 
-	char _padding[2];
+    char _padding[2];
 
-	int lenused;
-	char limitc;
-	char offc[3];
-	char limitd;
-	char offd[3];
-	char limite;
-	char offe[3];
-	char limitf;
-	char offf[3];
-	char limitg;
-	char offg[3];
-	char limitj;
-	char offj[3];
+    int lenused;
+    char limitc;
+    char offc[3];
+    char limitd;
+    char offd[3];
+    char limite;
+    char offe[3];
+    char limitf;
+    char offf[3];
+    char limitg;
+    char offg[3];
+    char limitj;
+    char offj[3];
 };
 
 /*
@@ -174,11 +161,11 @@ PGTH#STORAGE          EQU   C'S'     output buffer exhausted
 PGTH#VAGUE            EQU   C'V'     Changed out from under us
 PGTH#NOTCONNECTED     EQU   C'X'     Need data not connected
 */
-#define PGTH_NOTREQUESTED	0xD5
-#define PGTH_OK				0xC1
-#define PGTH_STORAGE		0xE2
-#define PGTH_VAGUE			0xE5
-#define PGTH_NOTCONNECTED	0xE7
+#define PGTH_NOTREQUESTED 0xD5
+#define PGTH_OK 0xC1
+#define PGTH_STORAGE 0xE2
+#define PGTH_VAGUE 0xE5
+#define PGTH_NOTCONNECTED 0xE7
 
 /*
 * USING PGTHC,Rx where Rx = ADDRESS of PGTHB + PGTHBOFFC
@@ -255,74 +242,74 @@ PGTHC#LEN EQU   *-PGTHC
 *
 */
 
-#define PGTHC_FLAG1_MULTIPLE_PROCESSES		0x80
-#define PGTHC_FLAG1_TCBOUT					0x40
-#define PGTHC_FLAG1_THREAD_BEING_TRACED		0x20
-#define PGTHC_FLAG1_STOPPED					0x10
-#define PGTHC_FLAG1_NOT_ALL_BLOCKS_PRESENT	0x08
-#define PGTHC_FLAG1_PROCESS_IS_ZOMBIE		0x04
-#define PGTHC_FLAG1_SHUTDOWN_BLOCKING		0x02
-#define PGTHC_FLAG1_SHUTDOWN_PERMENANT		0x01
+#define PGTHC_FLAG1_MULTIPLE_PROCESSES 0x80
+#define PGTHC_FLAG1_TCBOUT 0x40
+#define PGTHC_FLAG1_THREAD_BEING_TRACED 0x20
+#define PGTHC_FLAG1_STOPPED 0x10
+#define PGTHC_FLAG1_NOT_ALL_BLOCKS_PRESENT 0x08
+#define PGTHC_FLAG1_PROCESS_IS_ZOMBIE 0x04
+#define PGTHC_FLAG1_SHUTDOWN_BLOCKING 0x02
+#define PGTHC_FLAG1_SHUTDOWN_PERMENANT 0x01
 
-#define PGTHC_FLAG2_MEM_LIMIT_TYPE			0x80 /* On - MemLimit is a BinMult */
-#define PGTHC_FLAG2_RESPAWNABLE_PROCESS		0x40
+#define PGTHC_FLAG2_MEM_LIMIT_TYPE 0x80 /* On - MemLimit is a BinMult */
+#define PGTHC_FLAG2_RESPAWNABLE_PROCESS 0x40
 
-#define PGTHC_FLAG3_MEM_USAGE_TYPE			0x80 /* On - MemUsage is a BinMult */
+#define PGTHC_FLAG3_MEM_USAGE_TYPE 0x80 /* On - MemUsage is a BinMult */
 
-#define PGTHC_MEM_DENOMINATION_KILOBYTE		0xD2
-#define PGTHC_MEM_DENOMINATION_MEGABYTE		0xD4
-#define PGTHC_MEM_DENOMINATION_GIGABYTE		0xC7
-#define PGTHC_MEM_DENOMINATION_TERABYTE		0xE3
-#define PGTHC_MEM_DENOMINATION_PETABYTE		0xD7
+#define PGTHC_MEM_DENOMINATION_KILOBYTE 0xD2
+#define PGTHC_MEM_DENOMINATION_MEGABYTE 0xD4
+#define PGTHC_MEM_DENOMINATION_GIGABYTE 0xC7
+#define PGTHC_MEM_DENOMINATION_TERABYTE 0xE3
+#define PGTHC_MEM_DENOMINATION_PETABYTE 0xD7
 
 struct pgthc {
-	char id[4]; /* "gthc" eyecatcher */
-	char flag1;
-	char flag2;
-	char flag3;
+    char id[4]; /* "gthc" eyecatcher */
+    char flag1;
+    char flag2;
+    char flag3;
 
-	char _padding;
+    char _padding;
 
-	int pid;
-	int ppid;
-	int pgpid;
-	int sid;
-	int fgpid;
-	int euid;
-	int ruid;
-	int suid;
-	int egid;
-	int rgid;
-	int sgid;
-	int tsize;
-	int syscallcount;
-	int usertime;
-	int systime;
-	int starttime;
+    int pid;
+    int ppid;
+    int pgpid;
+    int sid;
+    int fgpid;
+    int euid;
+    int ruid;
+    int suid;
+    int egid;
+    int rgid;
+    int sgid;
+    int tsize;
+    int syscallcount;
+    int usertime;
+    int systime;
+    int starttime;
 
-	short cntoe;
-	short cntptcreated;
-	short cntthreads;
-	short asid;
+    short cntoe;
+    short cntptcreated;
+    short cntthreads;
+    short asid;
 
-	char jobname[8];
-	char loginname[8];
+    char jobname[8];
+    char loginname[8];
 
-	union {
-		int value;
-		struct {
-			char value[3];
-			char demonination;
-		} tuple;
-	} memlimit;
+    union {
+        int value;
+        struct {
+            char value[3];
+            char demonination;
+        } tuple;
+    } memlimit;
 
-	union {
-		int value;
-		struct {
-			char value[3];
-			char demonination;
-		} tuple;
-	} memusage;
+    union {
+        int value;
+        struct {
+            char value[3];
+            char demonination;
+        } tuple;
+    } memusage;
 };
 
 /*
@@ -333,9 +320,9 @@ PGTHDLEN              DS    FL2      Length of ConTty
 PGTHDCONTTY           DS    CL1024   1024 = max ConTty
 */
 struct pgthd {
-	char id[4]; /* "gthd" eyecatcher */
-	short len;
-	char contty[1024];
+    char id[4]; /* "gthd" eyecatcher */
+    short len;
+    char contty[1024];
 };
 
 /*
@@ -346,9 +333,9 @@ PGTHELEN              DS    FL2      Length of Path
 PGTHEPATH             DS    CL1024   1024 = max path
 */
 struct pgthe {
-	char id[4]; /* "gthe" eyecatcher */
-	short len;
-	char path[1024];
+    char id[4]; /* "gthe" eyecatcher */
+    short len;
+    char path[1024];
 };
 
 /*
@@ -359,9 +346,9 @@ PGTHFLEN              DS    FL2      Length of command and arguments
 PGTHFCOMMAND          DS    CL1024   1024 = max command
 */
 struct pgthf {
-	char id[4]; /* "gthf" eyecatcher */
-	short len;
-	char command[1024];
+    char id[4]; /* "gthf" eyecatcher */
+    short len;
+    char command[1024];
 };
 
 /*
@@ -383,16 +370,16 @@ PGTHG#LEN             EQU   *-PGTHG
 PGTHGARRAY            DS    0C       first PGTHH
 */
 struct pgthg {
-	char id[4]; /* "gthg" eyecatcher */
-	char limith;
-	char offh[3];
-	int count;
-	int maxvnodetokens;
-	int vnodetokencount;
-	int serverflags;
-	char servername[32];
-	int activefiles;
-	int servertype;
+    char id[4]; /* "gthg" eyecatcher */
+    char limith;
+    char offh[3];
+    int count;
+    int maxvnodetokens;
+    int vnodetokencount;
+    int serverflags;
+    char servername[32];
+    int activefiles;
+    int servertype;
 };
 
 /*
@@ -411,11 +398,12 @@ PGTHHDEVNO            DS    F        DEVICE NUMBER see stat()
 PGTHH#LEN             EQU   *-PGTHH
 */
 struct pgthh {
-	char id[2]; /* rd = root directory (fist), cd = current directory (second), fd = file directory, vd = vnode directory */
-	char type;
-	char open;
-	int inode;
-	int devno;
+    char id[2]; /* rd = root directory (fist), cd = current directory (second), fd = file directory, vd = vnode
+                   directory */
+    char type;
+    char open;
+    int inode;
+    int devno;
 };
 
 /*
@@ -476,58 +464,56 @@ PGTHJ#FREEZE          EQU   C'E'       quiesce freeze
 PGTHJ#LEN             EQU   *-PGTHJ
 */
 
-#define PGTHJ_STATUS1_THDCREATED	0xD1
+#define PGTHJ_STATUS1_THDCREATED 0xD1
 
-#define PGTHJ_STATUS2_MSGRCV		0xC1
-#define PGTHJ_STATUS2_MSGSND		0xC2
-#define PGTHJ_STATUS2_WAITC			0xC3
-#define PGTHJ_STATUS2_SEMOP			0xC4
-#define PGTHJ_STATUS2_WAITF			0xC6
-#define PGTHJ_STATUS2_MVSPAUSE		0xC7
-#define PGTHJ_STATUS2_WAITO			0xD2
-#define PGTHJ_STATUS2_WAITP			0xD7
-#define PGTHJ_STATUS2_RUN			0xD9
-#define PGTHJ_STATUS2_SLEEP			0xE2
-#define PGTHJ_STATUS2_CHILD			0xE6
-#define PGTHJ_STATUS2_FORK			0xE7
-#define PGTHJ_STATUS2_MVSWAIT		0xE8
+#define PGTHJ_STATUS2_MSGRCV 0xC1
+#define PGTHJ_STATUS2_MSGSND 0xC2
+#define PGTHJ_STATUS2_WAITC 0xC3
+#define PGTHJ_STATUS2_SEMOP 0xC4
+#define PGTHJ_STATUS2_WAITF 0xC6
+#define PGTHJ_STATUS2_MVSPAUSE 0xC7
+#define PGTHJ_STATUS2_WAITO 0xD2
+#define PGTHJ_STATUS2_WAITP 0xD7
+#define PGTHJ_STATUS2_RUN 0xD9
+#define PGTHJ_STATUS2_SLEEP 0xE2
+#define PGTHJ_STATUS2_CHILD 0xE6
+#define PGTHJ_STATUS2_FORK 0xE7
+#define PGTHJ_STATUS2_MVSWAIT 0xE8
 
-#define PGTHJ_STATUS3_MEDIUMWGHT	0xD5
-#define PGTHJ_STATUS3_ASYNC			0xD6
-#define PGTHJ_STATUS3_IPT			0xE4
-#define PGTHJ_STATUS3_ZOMBIE		0xE9
+#define PGTHJ_STATUS3_MEDIUMWGHT 0xD5
+#define PGTHJ_STATUS3_ASYNC 0xD6
+#define PGTHJ_STATUS3_IPT 0xE4
+#define PGTHJ_STATUS3_ZOMBIE 0xE9
 
-#define PGTHJ_STATUS4_DETACHED		0xE5
+#define PGTHJ_STATUS4_DETACHED 0xE5
 
-#define PGTHJ_STATUS5_FREEZE		0xC5
+#define PGTHJ_STATUS5_FREEZE 0xC5
 struct pgthj {
-	char id[4]; /* "gthj" eyecatcher */
-	unsigned int limitj:8,
-  		     	 offj:24;
-	unsigned int limitk:8,
-	             offk:24;
-	unsigned int thid[2];
-	char syscall[4];
-	int tcb_ptr;
-	int ttime;
-	int wtime;
+    char id[4]; /* "gthj" eyecatcher */
+    unsigned int limitj : 8, offj : 24;
+    unsigned int limitk : 8, offk : 24;
+    unsigned int thid[2];
+    char syscall[4];
+    int tcb_ptr;
+    int ttime;
+    int wtime;
 
-	int _padding;
+    int _padding;
 
-	short semnum; /* if status2==D */
-	short semval; /* if status2==D */
-	int latchwaitpid;
-	char penmask[8];
-	char loginname[8];
-	char prevsc[5][4]; /* last 5 syscalls */
+    short semnum; /* if status2==D */
+    short semval; /* if status2==D */
+    int latchwaitpid;
+    char penmask[8];
+    char loginname[8];
+    char prevsc[5][4]; /* last 5 syscalls */
 
-	/* start of PGTHJSTATUSCHARS group */
-	char status1;
-	char status2;
-	char status3;
-	char status4;
-	char status5;
-	/* end of PGTHJSTATUSCHARS group */
+    /* start of PGTHJSTATUSCHARS group */
+    char status1;
+    char status2;
+    char status3;
+    char status4;
+    char status5;
+    /* end of PGTHJSTATUSCHARS group */
 };
 
 /*
@@ -538,19 +524,19 @@ PGTHKDATA             DS    CL68     SEE pthread_tag_np
 PGTHK#LEN             EQU   *-PGTHH
 */
 struct pgthk {
-	int datalen;
-	char data[68];
+    int datalen;
+    char data[68];
 };
 
 /* Use this structure to get thread info, no need to malloc */
 struct j9pg_thread_data {
-	struct pgthb pgthb;
-	struct pgthj pgthj;
-	/* Minimum padding of 128 bytes as per
-	 * http://pic.dhe.ibm.com/infocenter/zos/v1r11/index.jsp?topic=/com.ibm.zos.r11.bpxb100/gth.htm
-	 * However, some machines require a larger buffer.
-	 */
-	char padding[256];
+    struct pgthb pgthb;
+    struct pgthj pgthj;
+    /* Minimum padding of 128 bytes as per
+     * http://pic.dhe.ibm.com/infocenter/zos/v1r11/index.jsp?topic=/com.ibm.zos.r11.bpxb100/gth.htm
+     * However, some machines require a larger buffer.
+     */
+    char padding[256];
 };
 
 #pragma pack(reset)

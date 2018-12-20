@@ -27,17 +27,19 @@
 #include "env/FEBase.hpp"
 #include "env/JitConfig.hpp"
 
-namespace JitBuilder { class FrontEnd; }
+namespace JitBuilder {
+class FrontEnd;
+}
 
 // Singleton JitConfig. The only instance of this is JitBuilder::FrontEnd::_jitConfig
-namespace JitBuilder
-{
-struct JitConfig : public TR::JitConfig
-   {
-   private:
-   friend class TR::FEBase<FrontEnd>;
-   JitConfig() : TR::JitConfig() {}
-   };
+namespace JitBuilder {
+struct JitConfig : public TR::JitConfig {
+private:
+    friend class TR::FEBase<FrontEnd>;
+    JitConfig()
+        : TR::JitConfig()
+    {}
+};
 } // namespace JitBuilder
 
 #endif // !defined(JITBUILDER_JITCONFIG_HPP)

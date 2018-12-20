@@ -32,26 +32,25 @@
 #include "ObjectModel.hpp"
 #include "ParallelGlobalGC.hpp"
 
-void
-MM_RSOverflow::initialize(MM_EnvironmentBase *env)
+void MM_RSOverflow::initialize(MM_EnvironmentBase* env)
 {
-	MM_Collector *globalCollector = _extensions->getGlobalCollector();
-	Assert_MM_true(NULL != globalCollector);
+    MM_Collector* globalCollector = _extensions->getGlobalCollector();
+    Assert_MM_true(NULL != globalCollector);
 
-	/*
-	 * Abort Global Collector if necessary to steal Mark Map from it
-	 */
-	globalCollector->abortCollection(env, ABORT_COLLECTION_SCAVENGE_REMEMBEREDSET_OVERFLOW);
+    /*
+     * Abort Global Collector if necessary to steal Mark Map from it
+     */
+    globalCollector->abortCollection(env, ABORT_COLLECTION_SCAVENGE_REMEMBEREDSET_OVERFLOW);
 
-	/* to get Mark Map need Marking Scheme first */
-	MM_MarkingScheme *markingScheme = ((MM_ParallelGlobalGC *)globalCollector)->getMarkingScheme();
-	Assert_MM_true(NULL != markingScheme);
+    /* to get Mark Map need Marking Scheme first */
+    MM_MarkingScheme* markingScheme = ((MM_ParallelGlobalGC*)globalCollector)->getMarkingScheme();
+    Assert_MM_true(NULL != markingScheme);
 
-	/* get Mark Map */
-	_markMap = markingScheme->getMarkMap();
-	Assert_MM_true(NULL != _markMap);
+    /* get Mark Map */
+    _markMap = markingScheme->getMarkMap();
+    Assert_MM_true(NULL != _markMap);
 
-	/* Clean stolen Mark Map */
-	_markMap->initializeMarkMap(env);
+    /* Clean stolen Mark Map */
+    _markMap->initializeMarkMap(env);
 }
 #endif /* defined(OMR_GC_MODRON_SCAVENGER) */

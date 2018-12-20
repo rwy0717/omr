@@ -36,6 +36,6 @@
  *
  * @return 0 on success, size of required buffer on failure.
  */
-uintptr_t omrget_asid(struct OMRPortLibrary *portLibrary, char *asid, uintptr_t length);
+uintptr_t omrget_asid(struct OMRPortLibrary* portLibrary, char* asid, uintptr_t length);
 
-#endif     /* omrgetasid_h */
+#endif /* omrgetasid_h */

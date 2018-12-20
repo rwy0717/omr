@@ -26,26 +26,27 @@
 #include "ilgen/TestIlGeneratorMethodDetails.hpp"
 
 class TR_ResolvedMethod;
-namespace TR { class ResolvedMethod; }
+namespace TR {
+class ResolvedMethod;
+}
 
-namespace TR
-{
+namespace TR {
 
-class OMR_EXTENSIBLE IlGeneratorMethodDetails : public TestCompiler::IlGeneratorMethodDetailsConnector
-   {
+class OMR_EXTENSIBLE IlGeneratorMethodDetails : public TestCompiler::IlGeneratorMethodDetailsConnector {
 
 public:
+    IlGeneratorMethodDetails()
+        : TestCompiler::IlGeneratorMethodDetailsConnector()
+    {}
 
-   IlGeneratorMethodDetails() :
-      TestCompiler::IlGeneratorMethodDetailsConnector() {}
+    IlGeneratorMethodDetails(TR::ResolvedMethod* method)
+        : TestCompiler::IlGeneratorMethodDetailsConnector(method)
+    {}
 
-   IlGeneratorMethodDetails(TR::ResolvedMethod *method) :
-      TestCompiler::IlGeneratorMethodDetailsConnector(method) {}
-
-   IlGeneratorMethodDetails(TR_ResolvedMethod *method) :
-      TestCompiler::IlGeneratorMethodDetailsConnector(method) {}
-
-   };
-}
+    IlGeneratorMethodDetails(TR_ResolvedMethod* method)
+        : TestCompiler::IlGeneratorMethodDetailsConnector(method)
+    {}
+};
+} // namespace TR
 
 #endif

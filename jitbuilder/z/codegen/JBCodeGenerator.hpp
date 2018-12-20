@@ -29,30 +29,29 @@
 #ifndef JITBUILDER_CODEGENERATORBASE_CONNECTOR
 #define JITBUILDER_CODEGENERATORBASE_CONNECTOR
 
-namespace JitBuilder { namespace Z { class CodeGenerator; } }
-namespace JitBuilder { typedef Z::CodeGenerator CodeGeneratorConnector; }
+namespace JitBuilder {
+namespace Z {
+class CodeGenerator;
+}
+} // namespace JitBuilder
+namespace JitBuilder {
+typedef Z::CodeGenerator CodeGeneratorConnector;
+}
 
 #else
 #error JitBuilder::Z::CodeGenerator expected to be a primary connector, but a JitBuilder connector is already defined
 #endif
 
-
 #include "jitbuilder/codegen/JBCodeGenerator.hpp"
 #include "codegen/LinkageConventionsEnum.hpp"
 
+namespace JitBuilder {
+namespace Z {
 
-namespace JitBuilder
-{
-namespace Z
-{
-
-class OMR_EXTENSIBLE CodeGenerator : public JitBuilder::CodeGenerator
-   {
-   public:
-
-   CodeGenerator();
-
-   };
+class OMR_EXTENSIBLE CodeGenerator : public JitBuilder::CodeGenerator {
+public:
+    CodeGenerator();
+};
 
 } // namespace Z
 } // namespace JitBuilder

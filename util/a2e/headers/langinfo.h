@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 /*
  * ===========================================================================
  * Module Information:
@@ -34,36 +33,35 @@
  * ===========================================================================
  */
 
-#if __TARGET_LIB__ == 0X22080000                                   /*ibm@28725*/
-#include <//'PP.ADLE370.OS39028.SCEEH.H(langinfo)'>                /*ibm@28725*/
-#else                                                              /*ibm@28725*/
+#if __TARGET_LIB__ == 0X22080000 /*ibm@28725*/
+#include < //'PP.ADLE370.OS39028.SCEEH.H(langinfo)'>                /*ibm@28725*/
+#else /*ibm@28725*/
 #include "prefixpath.h"
-#include PREFIXPATH(langinfo.h)                                 /*ibm@28725*/
-#endif                                                             /*ibm@28725*/
+#include PREFIXPATH(langinfo.h) /*ibm@28725*/
+#endif /*ibm@28725*/
 
 #if defined(IBM_ATOE)
 
-	#if !defined(IBM_ATOE_LANGINFO)
-	    #define IBM_ATOE_LANGINFO
+#if !defined(IBM_ATOE_LANGINFO)
+#define IBM_ATOE_LANGINFO
 
-	#ifdef __cplusplus
-            extern "C" {
-	#endif
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-            char * etoa_nl_langinfo(int);
+char* etoa_nl_langinfo(int);
 
-	#ifdef __cplusplus
-            }
-	#endif
+#ifdef __cplusplus
+}
+#endif
 
-	#if !defined(J9_USE_ORIG_EBCDIC_LANGINFO)
-		#undef nl_langinfo
-		#define nl_langinfo(a)    etoa_nl_langinfo(a)
-	#endif
+#if !defined(J9_USE_ORIG_EBCDIC_LANGINFO)
+#undef nl_langinfo
+#define nl_langinfo(a) etoa_nl_langinfo(a)
+#endif
 
-	#endif
+#endif
 
 #endif
 
 /* END OF FILE */
-

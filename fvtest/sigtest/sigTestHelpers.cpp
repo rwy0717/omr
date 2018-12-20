@@ -21,48 +21,42 @@
 
 #include "sigTestHelpers.hpp"
 
-bool
-handlerIsFunction(sighandler_t handler)
+bool handlerIsFunction(sighandler_t handler)
 {
-	return (SIG_DFL != handler) && (SIG_IGN != handler) && (NULL != handler);
+    return (SIG_DFL != handler) && (SIG_IGN != handler) && (NULL != handler);
 }
 
 #if !defined(OMR_OS_WINDOWS)
-bool
-handlerIsFunction(const struct sigaction *act)
+bool handlerIsFunction(const struct sigaction* act)
 {
-	return handlerIsFunction(act->sa_handler)
-		   || ((act->sa_flags & SA_SIGINFO)
-			   && (SIG_DFL != (sighandler_t)act->sa_sigaction)
-			   && (SIG_IGN != (sighandler_t)act->sa_sigaction));
+    return handlerIsFunction(act->sa_handler)
+        || ((act->sa_flags & SA_SIGINFO) && (SIG_DFL != (sighandler_t)act->sa_sigaction)
+               && (SIG_IGN != (sighandler_t)act->sa_sigaction));
 }
 #endif /* !defined(OMR_OS_WINDOWS) */
 
-void
-createThread(omrthread_t *newThread, uintptr_t suspend, omrthread_detachstate_t detachstate,
-			 omrthread_entrypoint_t entryProc, void *entryArg)
+void createThread(omrthread_t* newThread, uintptr_t suspend, omrthread_detachstate_t detachstate,
+    omrthread_entrypoint_t entryProc, void* entryArg)
 {
-	omrthread_attr_t attr = NULL;
-	intptr_t rc = 0;
+    omrthread_attr_t attr = NULL;
+    intptr_t rc = 0;
 
-	ASSERT_EQ(J9THREAD_SUCCESS, omrthread_attr_init(&attr));
-	ASSERT_EQ(J9THREAD_SUCCESS, omrthread_attr_set_detachstate(&attr, detachstate));
-	EXPECT_EQ(J9THREAD_SUCCESS,
-			  rc = omrthread_create_ex(newThread, &attr, suspend, entryProc, entryArg));
-	if (rc & J9THREAD_ERR_OS_ERRNO_SET) {
-		printf("omrthread_create_ex() returned os_errno=%d\n", (int)omrthread_get_os_errno());
-	}
-	ASSERT_EQ(J9THREAD_SUCCESS, omrthread_attr_destroy(&attr));
+    ASSERT_EQ(J9THREAD_SUCCESS, omrthread_attr_init(&attr));
+    ASSERT_EQ(J9THREAD_SUCCESS, omrthread_attr_set_detachstate(&attr, detachstate));
+    EXPECT_EQ(J9THREAD_SUCCESS, rc = omrthread_create_ex(newThread, &attr, suspend, entryProc, entryArg));
+    if (rc & J9THREAD_ERR_OS_ERRNO_SET) {
+        printf("omrthread_create_ex() returned os_errno=%d\n", (int)omrthread_get_os_errno());
+    }
+    ASSERT_EQ(J9THREAD_SUCCESS, omrthread_attr_destroy(&attr));
 }
 
-intptr_t
-joinThread(omrthread_t threadToJoin)
+intptr_t joinThread(omrthread_t threadToJoin)
 {
-	intptr_t rc = J9THREAD_SUCCESS;
+    intptr_t rc = J9THREAD_SUCCESS;
 
-	EXPECT_EQ(J9THREAD_SUCCESS, rc = omrthread_join(threadToJoin));
-	if (rc & J9THREAD_ERR_OS_ERRNO_SET) {
-		printf("omrthread_join() returned os_errno=%d\n", (int)omrthread_get_os_errno());
-	}
-	return rc;
+    EXPECT_EQ(J9THREAD_SUCCESS, rc = omrthread_join(threadToJoin));
+    if (rc & J9THREAD_ERR_OS_ERRNO_SET) {
+        printf("omrthread_join() returned os_errno=%d\n", (int)omrthread_get_os_errno());
+    }
+    return rc;
 }

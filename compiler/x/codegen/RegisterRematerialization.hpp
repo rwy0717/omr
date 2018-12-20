@@ -22,18 +22,33 @@
 #ifndef REGISTERREMATERIALIZATION_INCL
 #define REGISTERREMATERIALIZATION_INCL
 
-#include "codegen/RegisterConstants.hpp"  // for TR_RematerializableTypes
-#include "env/jittypes.h"                 // for intptrj_t
+#include "codegen/RegisterConstants.hpp" // for TR_RematerializableTypes
+#include "env/jittypes.h" // for intptrj_t
 
-namespace TR { class CodeGenerator; }
-namespace TR { class Instruction; }
-namespace TR { class MemoryReference; }
-namespace TR { class Node; }
-namespace TR { class Register; }
-namespace TR { class SymbolReference; }
+namespace TR {
+class CodeGenerator;
+}
+namespace TR {
+class Instruction;
+}
+namespace TR {
+class MemoryReference;
+}
+namespace TR {
+class Node;
+}
+namespace TR {
+class Register;
+}
+namespace TR {
+class SymbolReference;
+}
 
-void setDiscardableIfPossible(TR_RematerializableTypes, TR::Register *, TR::Node *, TR::Instruction *, TR::MemoryReference  *, TR::CodeGenerator *);
-void setDiscardableIfPossible(TR_RematerializableTypes, TR::Register *, TR::Node *, TR::Instruction *, intptrj_t, TR::CodeGenerator *);
-void setDiscardableIfPossible(TR_RematerializableTypes, TR::Register *, TR::Node *, TR::Instruction *, TR::SymbolReference*, TR::CodeGenerator *);
+void setDiscardableIfPossible(
+    TR_RematerializableTypes, TR::Register*, TR::Node*, TR::Instruction*, TR::MemoryReference*, TR::CodeGenerator*);
+void setDiscardableIfPossible(
+    TR_RematerializableTypes, TR::Register*, TR::Node*, TR::Instruction*, intptrj_t, TR::CodeGenerator*);
+void setDiscardableIfPossible(
+    TR_RematerializableTypes, TR::Register*, TR::Node*, TR::Instruction*, TR::SymbolReference*, TR::CodeGenerator*);
 
 #endif

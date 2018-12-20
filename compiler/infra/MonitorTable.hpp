@@ -22,17 +22,15 @@
 #ifndef TR_MONITORTABLE_INCL
 #define TR_MONITORTABLE_INCL
 
-#include "infra/OMRMonitorTable.hpp"  // for MonitorTableConnector
+#include "infra/OMRMonitorTable.hpp" // for MonitorTableConnector
 
-namespace TR
-{
-class OMR_EXTENSIBLE MonitorTable : public OMR::MonitorTableConnector
-   {
-   public:
-
-   MonitorTable() :
-      OMR::MonitorTableConnector() {}
-   };
-}
+namespace TR {
+class OMR_EXTENSIBLE MonitorTable : public OMR::MonitorTableConnector {
+public:
+    MonitorTable()
+        : OMR::MonitorTableConnector()
+    {}
+};
+} // namespace TR
 
 #endif

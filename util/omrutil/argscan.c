@@ -26,20 +26,19 @@
 
 /* Answer non-zero on success
  */
-uintptr_t
-try_scan(char **scan_start, const char *search_string)
+uintptr_t try_scan(char** scan_start, const char* search_string)
 {
-	char *scan_string = *scan_start;
-	size_t search_length = strlen(search_string);
+    char* scan_string = *scan_start;
+    size_t search_length = strlen(search_string);
 
-	if (strlen(scan_string) < search_length) {
-		return 0;
-	}
+    if (strlen(scan_string) < search_length) {
+        return 0;
+    }
 
-	if (0 == j9_cmdla_strnicmp(scan_string, search_string, search_length)) {
-		*scan_start = &scan_string[search_length];
-		return 1;
-	}
+    if (0 == j9_cmdla_strnicmp(scan_string, search_string, search_length)) {
+        *scan_start = &scan_string[search_length];
+        return 1;
+    }
 
-	return 0;
+    return 0;
 }

@@ -26,55 +26,51 @@
 #define __TPF_DO_NOT_MAP_ATOE_REMOVE
 #endif
 
-#include "infra/BitVector.hpp"         // for TR_BitVector
+#include "infra/BitVector.hpp" // for TR_BitVector
 
 class TR_BitVector;
 
-namespace TR
-{
+namespace TR {
 
 class Block;
 class Compilation;
 class Node;
 
-class Checklist
-   {
-   protected :
-   TR_BitVector* _v;
-   TR::Compilation* _comp;
+class Checklist {
+protected:
+    TR_BitVector* _v;
+    TR::Compilation* _comp;
 
-   public :
-   Checklist(TR::Compilation* c);
-   ~Checklist();
-   bool isEmpty(){ return _v->isEmpty(); }
-   };
+public:
+    Checklist(TR::Compilation* c);
+    ~Checklist();
+    bool isEmpty() { return _v->isEmpty(); }
+};
 
-class NodeChecklist: public Checklist
-   {
-   public:
-   NodeChecklist(TR::Compilation* c);
-   bool contains(TR::Node* n);
-   void add(TR::Node* n);
-   void remove(TR::Node* n);
-   void add(NodeChecklist &other);
-   void remove(NodeChecklist &other);
-   bool operator==(const NodeChecklist &other) const;
-   bool operator!=(const NodeChecklist &other) const { return !operator==(other); }
-   };
+class NodeChecklist : public Checklist {
+public:
+    NodeChecklist(TR::Compilation* c);
+    bool contains(TR::Node* n);
+    void add(TR::Node* n);
+    void remove(TR::Node* n);
+    void add(NodeChecklist& other);
+    void remove(NodeChecklist& other);
+    bool operator==(const NodeChecklist& other) const;
+    bool operator!=(const NodeChecklist& other) const { return !operator==(other); }
+};
 
-class BlockChecklist: public Checklist
-   {
-   public:
-   BlockChecklist(TR::Compilation* c);
-   bool contains(TR::Block* b);
-   void add(TR::Block* b);
-   void remove(TR::Block* b);
-   void add(BlockChecklist &other);
-   void remove(BlockChecklist &other);
-   bool operator==(const BlockChecklist &other) const;
-   bool operator!=(const BlockChecklist &other) const { return !operator==(other); }
-   };
+class BlockChecklist : public Checklist {
+public:
+    BlockChecklist(TR::Compilation* c);
+    bool contains(TR::Block* b);
+    void add(TR::Block* b);
+    void remove(TR::Block* b);
+    void add(BlockChecklist& other);
+    void remove(BlockChecklist& other);
+    bool operator==(const BlockChecklist& other) const;
+    bool operator!=(const BlockChecklist& other) const { return !operator==(other); }
+};
 
-}
+} // namespace TR
 
 #endif

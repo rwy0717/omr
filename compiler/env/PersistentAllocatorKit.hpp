@@ -25,27 +25,27 @@
 #ifndef TR_PERSISTENT_ALLOCATOR_KIT
 #define TR_PERSISTENT_ALLOCATOR_KIT
 
-namespace OMR { class PersistentAllocatorKit; }
-namespace TR { using OMR::PersistentAllocatorKit; }
+namespace OMR {
+class PersistentAllocatorKit;
+}
+namespace TR {
+using OMR::PersistentAllocatorKit;
+}
 
 #endif // TR_PERSISTENT_ALLOCATOR_KIT
 
 #include "env/RawAllocator.hpp"
 
+namespace OMR {
 
-namespace OMR
-{
+struct PersistentAllocatorKit {
+    PersistentAllocatorKit(TR::RawAllocator rawAllocator)
+        : rawAllocator(rawAllocator)
+    {}
 
-struct PersistentAllocatorKit
-   {
-   PersistentAllocatorKit(TR::RawAllocator rawAllocator) :
-      rawAllocator(rawAllocator)
-      {
-      }
+    TR::RawAllocator rawAllocator;
+};
 
-   TR::RawAllocator rawAllocator;
-   };
-
-}
+} // namespace OMR
 
 #endif // PERSISTENTALLOCATORKIT_HPP

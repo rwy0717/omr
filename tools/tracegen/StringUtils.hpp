@@ -25,44 +25,42 @@
 
 #include "Port.hpp"
 
-class StringUtils
-{
-	/*
-	 * Data members
-	 */
+class StringUtils {
+    /*
+     * Data members
+     */
 private:
 protected:
 public:
-
-	/*
-	 * Function members
-	 */
+    /*
+     * Function members
+     */
 private:
 protected:
 public:
-	/**
-	 * Find an integer value delimited by white space associated
-	 * with the given key.
-	 * @param line Format "prefix space number"
-	 * @param key String prefix
-	 * @return Value after the key. RC_FAILED if not found
-	 */
-	static RCType getPositiveIntValue(const char *line, const char *key, unsigned int *result);
+    /**
+     * Find an integer value delimited by white space associated
+     * with the given key.
+     * @param line Format "prefix space number"
+     * @param key String prefix
+     * @return Value after the key. RC_FAILED if not found
+     */
+    static RCType getPositiveIntValue(const char* line, const char* key, unsigned int* result);
 
-	/**
-	 * Check if text starts with prefix (case insensitive)
-	 * @param text
-	 * @param prefix
-	 * @return true if the text starts with prefix, otherwise false.
-	 */
-	static bool startsWithUpperLower(const char *text, const char *prefix);
+    /**
+     * Check if text starts with prefix (case insensitive)
+     * @param text
+     * @param prefix
+     * @return true if the text starts with prefix, otherwise false.
+     */
+    static bool startsWithUpperLower(const char* text, const char* prefix);
 
-	/**
-	 * Check if text contains toFind (case insensitive)
-	 * @param text
-	 * @param toFind
-	 * @return Pointer to location in text that contains toFind, otherwise NULL
-	 */
-	static const char *containsUpperLower(const char *text, const char *toFind);
+    /**
+     * Check if text contains toFind (case insensitive)
+     * @param text
+     * @param toFind
+     * @return Pointer to location in text that contains toFind, otherwise NULL
+     */
+    static const char* containsUpperLower(const char* text, const char* toFind);
 };
 #endif /* STRINGUTILS_HPP_ */

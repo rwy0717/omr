@@ -24,13 +24,13 @@
 #define hookable_internal_h
 
 /**
-* @file hookable_internal.h
-* @brief Internal prototypes used within the HOOKABLE module.
-*
-* This file contains implementation-private function prototypes and
-* type definitions for the HOOKABLE module.
-*
-*/
+ * @file hookable_internal.h
+ * @brief Internal prototypes used within the HOOKABLE module.
+ *
+ * This file contains implementation-private function prototypes and
+ * type definitions for the HOOKABLE module.
+ *
+ */
 
 #include "hookable_api.h"
 
@@ -38,10 +38,8 @@
 extern "C" {
 #endif
 
-
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* hookable_internal_h */
-

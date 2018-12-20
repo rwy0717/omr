@@ -19,23 +19,22 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-#include <stddef.h>                   // for NULL
-#include <stdint.h>                   // for int32_t, int64_t, uint32_t
+#include <stddef.h> // for NULL
+#include <stdint.h> // for int32_t, int64_t, uint32_t
 #include "env/DebugEnv.hpp"
 #include "env/CompilerEnv.hpp"
-#include "env/jittypes.h"             // for uintptrj_t, intptrj_t
-#include "infra/Assert.hpp"           // for TR_ASSERT
+#include "env/jittypes.h" // for uintptrj_t, intptrj_t
+#include "infra/Assert.hpp" // for TR_ASSERT
 
 #if defined(LINUX) || defined(AIXPPC)
 #include <signal.h>
 #endif
 
-void
-OMR::DebugEnv::breakPoint()
-   {
+void OMR::DebugEnv::breakPoint()
+{
 #if defined(LINUX) || defined(AIXPPC)
-   raise(SIGTRAP);
+    raise(SIGTRAP);
 #else
-   TR_ASSERT(0, "Not implemented yet: OMR::DebugEnv::breakPoint");
+    TR_ASSERT(0, "Not implemented yet: OMR::DebugEnv::breakPoint");
 #endif
-   }
+}

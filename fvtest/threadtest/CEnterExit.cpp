@@ -24,20 +24,19 @@
 /*
  * Thread that acquires and holds a monitor for a time.
  */
-CEnterExit::CEnterExit(CMonitor& monitor, int sleep) :
-	m_monitor(monitor), m_sleep(sleep)
-{
-}
+CEnterExit::CEnterExit(CMonitor& monitor, int sleep)
+    : m_monitor(monitor)
+    , m_sleep(sleep)
+{}
 
-intptr_t
-CEnterExit::Run(void)
+intptr_t CEnterExit::Run(void)
 {
-	omrTestEnv->log(LEVEL_VERBOSE, "ENTERING\n");
-	m_monitor.Enter();
-	omrTestEnv->log(LEVEL_VERBOSE, "ENTERED\n");
-	omrthread_sleep(m_sleep);
-	omrTestEnv->log(LEVEL_VERBOSE, "EXITING\n");
-	m_monitor.Exit();
-	omrTestEnv->log(LEVEL_VERBOSE, "EXITED\n");
-	return 0;
+    omrTestEnv->log(LEVEL_VERBOSE, "ENTERING\n");
+    m_monitor.Enter();
+    omrTestEnv->log(LEVEL_VERBOSE, "ENTERED\n");
+    omrthread_sleep(m_sleep);
+    omrTestEnv->log(LEVEL_VERBOSE, "EXITING\n");
+    m_monitor.Exit();
+    omrTestEnv->log(LEVEL_VERBOSE, "EXITED\n");
+    return 0;
 }

@@ -25,7 +25,7 @@
 /* windows.h defined UDATA.  Ignore its definition */
 #define UDATA UDATA_win32_
 #include <windows.h>
-#undef UDATA	/* this is safe because our UDATA is a typedef, not a macro */
+#undef UDATA /* this is safe because our UDATA is a typedef, not a macro */
 #endif /* defined(OMR_OS_WINDOWS) */
 
 #ifdef __cplusplus
@@ -46,7 +46,7 @@ typedef void (*sighandler_t)(int sig);
 #elif defined(OMR_OS_WINDOWS)
 /* Use sig_handler_t instead of sighandler_t for Windows. Define it for compatibility. */
 #define sig_handler_t sighandler_t
-typedef void (__cdecl *sighandler_t)(int signum);
+typedef void(__cdecl* sighandler_t)(int signum);
 #define __THROW
 #endif /* defined(OMR_OS_WINDOWS) */
 
@@ -67,7 +67,7 @@ typedef void (__cdecl *sighandler_t)(int signum);
  *		SIGNAL_HANDLED - If caller should not continue to do any more signal handling.
  *		DEFAULT_ACTION_REQUIRED - If caller needs to call default action (SIG_DFL) for this signal.
  */
-int omrsig_handler(int sig, void *siginfo, void *uc);
+int omrsig_handler(int sig, void* siginfo, void* uc);
 
 /**
  * Register a primary signal handler function, emulating the behavior, parameters, and return of signal().
@@ -82,7 +82,7 @@ sighandler_t omrsig_primary_signal(int signum, sighandler_t handler);
 
 #if defined(OMR_OS_WINDOWS)
 
-_CRTIMP void (__cdecl * __cdecl signal(_In_ int _SigNum, _In_opt_ void (__cdecl * _Func)(int)))(int);
+_CRTIMP void(__cdecl* __cdecl signal(_In_ int _SigNum, _In_opt_ void(__cdecl* _Func)(int)))(int);
 
 #else /* defined(OMR_OS_WINDOWS) */
 
@@ -95,11 +95,12 @@ _CRTIMP void (__cdecl * __cdecl signal(_In_ int _SigNum, _In_opt_ void (__cdecl 
  * @param[out] oldact Previously registered signal handler struct
  * @return an int error code
  *		0 on success
- *		-1 on failure, with errno set to EINVAL if the sig argument is not a valid signal number or an attempt is made to catch a signal that cannot be caught or ignore a signal that cannot be ignored.
+ *		-1 on failure, with errno set to EINVAL if the sig argument is not a valid signal number or an attempt is
+ *made to catch a signal that cannot be caught or ignore a signal that cannot be ignored.
  */
-int omrsig_primary_sigaction(int signum, const struct sigaction *act, struct sigaction *oldact);
+int omrsig_primary_sigaction(int signum, const struct sigaction* act, struct sigaction* oldact);
 
-int sigaction(int signum, const struct sigaction *act, struct sigaction *oldact) __THROW;
+int sigaction(int signum, const struct sigaction* act, struct sigaction* oldact) __THROW;
 sighandler_t signal(int signum, sighandler_t handler) __THROW;
 
 sighandler_t sigset(int sig, sighandler_t disp) __THROW;
@@ -113,13 +114,13 @@ __sighandler_t __sysv_signal(int sig, __sighandler_t handler) __THROW;
 sighandler_t ssignal(int sig, sighandler_t handler) __THROW;
 #endif /* defined(LINUX) */
 
-
 #endif /* !defined(OMR_OS_WINDOWS) */
 
 #if defined(J9ZOS390)
-int __sigactionset(size_t newct, const __sigactionset_t newsets[], size_t *oldct, __sigactionset_t oldsets[], int options);
+int __sigactionset(
+    size_t newct, const __sigactionset_t newsets[], size_t* oldct, __sigactionset_t oldsets[], int options);
 #endif /* defined(J9ZOS390) */
 
 #ifdef __cplusplus
 } /* extern "C" { */
-#endif  /* __cplusplus */
+#endif /* __cplusplus */

@@ -46,74 +46,73 @@
  *
  * @internal @note corepath should be a buffer of at least EsMaxPath
  */
-void
-appendCoreName(OMRPortLibrary *portLibrary, char *corepath, intptr_t pid)
+void appendCoreName(OMRPortLibrary* portLibrary, char* corepath, intptr_t pid)
 {
-	/* Name will be appended to the end of the path... */
-	char *base = corepath + strlen(corepath);
-	char corename[64] = "core";
-	time_t lastModTime = 0;
+    /* Name will be appended to the end of the path... */
+    char* base = corepath + strlen(corepath);
+    char corename[64] = "core";
+    time_t lastModTime = 0;
 
-	struct stat attrBuf;
-	char pidFilter[24];
-	uintptr_t pidLen;
+    struct stat attrBuf;
+    char pidFilter[24];
+    uintptr_t pidLen;
 
-	DIR *folder = opendir(corepath);
+    DIR* folder = opendir(corepath);
 
-	struct dirent *entry = NULL;
+    struct dirent* entry = NULL;
 
-	/* Failsafe name */
-	strcpy(base, "core");
+    /* Failsafe name */
+    strcpy(base, "core");
 
-	if (!folder) {
-		return;
-	}
+    if (!folder) {
+        return;
+    }
 
-	pidLen = portLibrary->str_printf(portLibrary, pidFilter, sizeof(pidFilter), ".%d", pid);
+    pidLen = portLibrary->str_printf(portLibrary, pidFilter, sizeof(pidFilter), ".%d", pid);
 
-	while ((entry = readdir(folder))) {
-		char *s = entry->d_name;
+    while ((entry = readdir(folder))) {
+        char* s = entry->d_name;
 
-		/* Files beginning with "core." must contain ".<pid>",
-		 * unless we're on AIX, in which case if core compression is enabled, they can be of the form:
-		 * 		1. start with "core.<pid>" or
-		 * 		2. "core.Z"
-		 * Otherwise, we're interested in only files named "core".
-		 */
+        /* Files beginning with "core." must contain ".<pid>",
+         * unless we're on AIX, in which case if core compression is enabled, they can be of the form:
+         * 		1. start with "core.<pid>" or
+         * 		2. "core.Z"
+         * Otherwise, we're interested in only files named "core".
+         */
 
-		if (strcmp(s, "core.Z") == 0) {
-			/* don't continue */
-		} else if (strstr(s, "core.") == s) {
-			do {
-				s = strstr(s + 1, pidFilter);
-			} while ((s != NULL) && (s[pidLen] != '.') && (s[pidLen] != '\0'));
+        if (strcmp(s, "core.Z") == 0) {
+            /* don't continue */
+        } else if (strstr(s, "core.") == s) {
+            do {
+                s = strstr(s + 1, pidFilter);
+            } while ((s != NULL) && (s[pidLen] != '.') && (s[pidLen] != '\0'));
 
-			/* No such match */
-			if (s == NULL) {
-				continue;
-			}
-		} else if (strcmp(s, "core") != 0) {
-			/* Otherwise we're only interested in plain "core" files */
-			continue;
-		}
+            /* No such match */
+            if (s == NULL) {
+                continue;
+            }
+        } else if (strcmp(s, "core") != 0) {
+            /* Otherwise we're only interested in plain "core" files */
+            continue;
+        }
 
-		/* Temporarily append current name */
-		strcpy(base, entry->d_name);
+        /* Temporarily append current name */
+        strcpy(base, entry->d_name);
 
-		/* Valid file? - need to use full path */
-		if (stat(corepath, &attrBuf) == 0) {
-			if (S_ISREG(attrBuf.st_mode) && attrBuf.st_mtime >= lastModTime) {
-				/* Keep track of most recent regular matching file */
-				strncpy(corename, entry->d_name, 63);
-				corename[63] = '\0';
-				lastModTime = attrBuf.st_mtime;
-			}
-		}
-	}
-	closedir(folder);
+        /* Valid file? - need to use full path */
+        if (stat(corepath, &attrBuf) == 0) {
+            if (S_ISREG(attrBuf.st_mode) && attrBuf.st_mtime >= lastModTime) {
+                /* Keep track of most recent regular matching file */
+                strncpy(corename, entry->d_name, 63);
+                corename[63] = '\0';
+                lastModTime = attrBuf.st_mtime;
+            }
+        }
+    }
+    closedir(folder);
 
-	/* Append most likely name */
-	strcpy(base, corename);
+    /* Append most likely name */
+    strcpy(base, corename);
 }
 
 /*
@@ -126,82 +125,81 @@ appendCoreName(OMRPortLibrary *portLibrary, char *corepath, intptr_t pid)
  * @return 0 on success, non-zero otherwise
  *
  */
-intptr_t
-genSystemCoreUsingGencore(struct OMRPortLibrary *portLibrary, char *filename)
+intptr_t genSystemCoreUsingGencore(struct OMRPortLibrary* portLibrary, char* filename)
 {
-	BOOLEAN filenameWasEmpty = FALSE;
-	struct coredumpinfo coreDumpInfo;
-	int rc = -1;
+    BOOLEAN filenameWasEmpty = FALSE;
+    struct coredumpinfo coreDumpInfo;
+    int rc = -1;
 
-	if (*filename == '\0') {
-		filenameWasEmpty = TRUE;
-	}
+    if (*filename == '\0') {
+        filenameWasEmpty = TRUE;
+    }
 
-	if (*filename != '/') {
-		/* filename is not an absolute path, get the cwd to prepend the filename with */
-		char cwd[EsMaxPath];
+    if (*filename != '/') {
+        /* filename is not an absolute path, get the cwd to prepend the filename with */
+        char cwd[EsMaxPath];
 
-		if (NULL != getcwd(cwd, EsMaxPath)) {
+        if (NULL != getcwd(cwd, EsMaxPath)) {
 
-			/* append cwd with '/' if none is present */
-			if (cwd[strlen(cwd) - 1] != '/') {
-				strncat(cwd, "/", EsMaxPath);
-			}
+            /* append cwd with '/' if none is present */
+            if (cwd[strlen(cwd) - 1] != '/') {
+                strncat(cwd, "/", EsMaxPath);
+            }
 
-			if (*filename == '\0') {
-				/* empty filename was passed in, use the default */
-				strncpy(filename, DEFAULT_CORE_FILE_NAME, EsMaxPath);
-			}
+            if (*filename == '\0') {
+                /* empty filename was passed in, use the default */
+                strncpy(filename, DEFAULT_CORE_FILE_NAME, EsMaxPath);
+            }
 
-			/*  append cwd with the filename, then copy the resulting absolute path back into filename */
-			strncat(cwd, filename, EsMaxPath);
-			strncpy(filename, cwd, EsMaxPath);
-		}
-	}
+            /*  append cwd with the filename, then copy the resulting absolute path back into filename */
+            strncat(cwd, filename, EsMaxPath);
+            strncpy(filename, cwd, EsMaxPath);
+        }
+    }
 
-	/* we now have a filename that's an absolute path, generate the core file */
-	coreDumpInfo.name = filename;
-	coreDumpInfo.length = (unsigned int) strlen(filename);
-
-#if defined(DUMP_DBG)
-	portLibrary->tty_printf(portLibrary, "\tomrdump_create: attempting to generate corefile, filename: %s\n", coreDumpInfo.name);
-	fflush(stdout);
-#endif
-
-	coreDumpInfo.pid = getpid();
-	coreDumpInfo.flags = GENCORE_VERSION_1;
-	rc = gencore(&coreDumpInfo);
+    /* we now have a filename that's an absolute path, generate the core file */
+    coreDumpInfo.name = filename;
+    coreDumpInfo.length = (unsigned int)strlen(filename);
 
 #if defined(DUMP_DBG)
-	portLibrary->tty_printf(portLibrary, "\tomrdump_create: gencore/coredump returned: %i\n", rc);
-	if (rc == -1) {
-		portLibrary->tty_printf(portLibrary, "\tomrdump_create: errno: %u %s\n", errno, portLibrary->error_last_error_message(portLibrary));
-	}
-	fflush(stdout);
+    portLibrary->tty_printf(
+        portLibrary, "\tomrdump_create: attempting to generate corefile, filename: %s\n", coreDumpInfo.name);
+    fflush(stdout);
 #endif
 
+    coreDumpInfo.pid = getpid();
+    coreDumpInfo.flags = GENCORE_VERSION_1;
+    rc = gencore(&coreDumpInfo);
 
-	if (rc == 0) {
-		/* check to see if core compression is enabled */
-		char value[EsMaxPath];
-		value[0] = '\0';
+#if defined(DUMP_DBG)
+    portLibrary->tty_printf(portLibrary, "\tomrdump_create: gencore/coredump returned: %i\n", rc);
+    if (rc == -1) {
+        portLibrary->tty_printf(
+            portLibrary, "\tomrdump_create: errno: %u %s\n", errno, portLibrary->error_last_error_message(portLibrary));
+    }
+    fflush(stdout);
+#endif
 
-		getPEnvValue(portLibrary, "CORE_COMPRESS", value);
-		if (0 == strncmp(value, "on", strlen("on"))) {
-			/* the core file will have been compressed and the name will have been appended with ".Z" */
-			strncat(filename, ".Z", EsMaxPath - strlen(filename));
-		}
+    if (rc == 0) {
+        /* check to see if core compression is enabled */
+        char value[EsMaxPath];
+        value[0] = '\0';
 
-	} else {
-		/* gencore failed, revert to old mechanism after resetting filename */
-		if (filenameWasEmpty == TRUE) {
-			*filename = '\0';
-		}
-	}
+        getPEnvValue(portLibrary, "CORE_COMPRESS", value);
+        if (0 == strncmp(value, "on", strlen("on"))) {
+            /* the core file will have been compressed and the name will have been appended with ".Z" */
+            strncat(filename, ".Z", EsMaxPath - strlen(filename));
+        }
 
-	return rc;
+    } else {
+        /* gencore failed, revert to old mechanism after resetting filename */
+        if (filenameWasEmpty == TRUE) {
+            *filename = '\0';
+        }
+    }
+
+    return rc;
 }
-
 
 /*
  * Determines the OS's preferred directory for writing core files.
@@ -211,44 +209,43 @@ genSystemCoreUsingGencore(struct OMRPortLibrary *portLibrary, char *filename)
  * @note buffer is not modified if a preferred desitination was not found
  * @note buffer length is platform dependent, assumed to be EsMaxPath/MAX_PATH
  */
-void
-findOSPreferredCoreDir(struct OMRPortLibrary *portLibrary, char *coreFilePath)
+void findOSPreferredCoreDir(struct OMRPortLibrary* portLibrary, char* coreFilePath)
 {
-	int i, bufferLen;
-	char buffer[EsMaxPath];
-	char **penv;
+    int i, bufferLen;
+    char buffer[EsMaxPath];
+    char** penv;
 
-	buffer[0] = '\0';
+    buffer[0] = '\0';
 
-	getPEnvValue(portLibrary, CORE_PATH_ENV_STRING, buffer);
+    getPEnvValue(portLibrary, CORE_PATH_ENV_STRING, buffer);
 
-	/* path via the chcore command takes precedence, if it was not set, check the path set via the syscorepath command*/
-	if (buffer[0] == '\0') {
-		sysconfig(GET_COREPATH, buffer, MAXPATHLEN);
+    /* path via the chcore command takes precedence, if it was not set, check the path set via the syscorepath command*/
+    if (buffer[0] == '\0') {
+        sysconfig(GET_COREPATH, buffer, MAXPATHLEN);
 #if defined(DUMP_DBG)
-		portLibrary->tty_printf(portLibrary, "\tsysconfig corepath: %s\n", buffer);
+        portLibrary->tty_printf(portLibrary, "\tsysconfig corepath: %s\n", buffer);
 #endif
-	}
+    }
 
-	bufferLen = strlen(buffer);
+    bufferLen = strlen(buffer);
 
-	/* make sure there's a '/' at the end of any dir name */
-	if ((buffer[0] != '\0') && (buffer[bufferLen - 1] != '/')) {
-		buffer[bufferLen] = '/';
-		buffer[bufferLen + 1] = '\0';
-		bufferLen++;
-	}
+    /* make sure there's a '/' at the end of any dir name */
+    if ((buffer[0] != '\0') && (buffer[bufferLen - 1] != '/')) {
+        buffer[bufferLen] = '/';
+        buffer[bufferLen + 1] = '\0';
+        bufferLen++;
+    }
 
-	/* only overwrite coreFilePath if we did find a preferred directory */
-	if (buffer[0] != '\0') {
-		strncpy(coreFilePath, buffer, EsMaxPath);
-	}
+    /* only overwrite coreFilePath if we did find a preferred directory */
+    if (buffer[0] != '\0') {
+        strncpy(coreFilePath, buffer, EsMaxPath);
+    }
 
 #if defined(DUMP_DBG)
-	portLibrary->tty_printf(portLibrary, "\tcorepath set to: %s\n", buffer);
+    portLibrary->tty_printf(portLibrary, "\tcorepath set to: %s\n", buffer);
 #endif
 
-	return;
+    return;
 }
 
 /*
@@ -262,30 +259,26 @@ findOSPreferredCoreDir(struct OMRPortLibrary *portLibrary, char *coreFilePath)
  *
  * @note envVar and value are assumed to be EsMaxPath in length
  */
-uintptr_t
-getPEnvValue(struct OMRPortLibrary *portLibrary, char *envVar, char *value)
+uintptr_t getPEnvValue(struct OMRPortLibrary* portLibrary, char* envVar, char* value)
 {
-	char **penv;
-	int i;
-	char scanFor[EsMaxPath];
+    char** penv;
+    int i;
+    char scanFor[EsMaxPath];
 
-	portLibrary->str_printf(portLibrary, scanFor, EsMaxPath, "%s=", envVar);
+    portLibrary->str_printf(portLibrary, scanFor, EsMaxPath, "%s=", envVar);
 
-	penv = getpenv(PENV_SYS);
+    penv = getpenv(PENV_SYS);
 
-	/* search the list of env vars returned by getpenv() */
-	for (i = 0; penv[i] != NULL; i++) {
-		if (!strncmp(penv[i], scanFor, strlen(scanFor))) {
+    /* search the list of env vars returned by getpenv() */
+    for (i = 0; penv[i] != NULL; i++) {
+        if (!strncmp(penv[i], scanFor, strlen(scanFor))) {
 #if defined(DUMP_DBG)
-			portLibrary->tty_printf(portLibrary, "\tfound: %s\n", penv[i]);
+            portLibrary->tty_printf(portLibrary, "\tfound: %s\n", penv[i]);
 #endif
-			strncpy(value, penv[i] + strlen(scanFor), EsMaxPath);
-			return 0;
-		}
-	}
+            strncpy(value, penv[i] + strlen(scanFor), EsMaxPath);
+            return 0;
+        }
+    }
 
-	return -1;
+    return -1;
 }
-
-
-

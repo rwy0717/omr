@@ -22,14 +22,15 @@
 #include "codegen/ARMInstruction.hpp"
 
 extern uint32_t encodeBranchDistance(uint32_t from, uint32_t to);
-extern void armCodeSync(uint8_t *, uint32_t);
+extern void armCodeSync(uint8_t*, uint32_t);
 
-extern "C" void _patchVirtualGuard(uint8_t *locationAddr, uint8_t *destinationAddr, int32_t smpFlag)
-   {
-   int32_t newInstr;
-   int32_t distance = (int32_t)destinationAddr - (int32_t)locationAddr;
-   TR_ASSERT(distance <= BRANCH_FORWARD_LIMIT && distance >= BRANCH_BACKWARD_LIMIT, "_patchVirtualGuard: Destination too far.\n");
-   newInstr = 0xEA000000 | encodeBranchDistance((uint32_t)locationAddr, (uint32_t)destinationAddr);
-   *(int32_t *)locationAddr = newInstr;
-   armCodeSync((uint8_t *)locationAddr, ARM_INSTRUCTION_LENGTH);
-   }
+extern "C" void _patchVirtualGuard(uint8_t* locationAddr, uint8_t* destinationAddr, int32_t smpFlag)
+{
+    int32_t newInstr;
+    int32_t distance = (int32_t)destinationAddr - (int32_t)locationAddr;
+    TR_ASSERT(distance <= BRANCH_FORWARD_LIMIT && distance >= BRANCH_BACKWARD_LIMIT,
+        "_patchVirtualGuard: Destination too far.\n");
+    newInstr = 0xEA000000 | encodeBranchDistance((uint32_t)locationAddr, (uint32_t)destinationAddr);
+    *(int32_t*)locationAddr = newInstr;
+    armCodeSync((uint8_t*)locationAddr, ARM_INSTRUCTION_LENGTH);
+}

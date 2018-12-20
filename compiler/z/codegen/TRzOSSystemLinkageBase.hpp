@@ -27,18 +27,26 @@
  */
 #ifndef TR_ZOSSYSTEMLINKAGE_BASE_CONNECTOR
 #define TR_ZOSSYSTEMLINKAGE_BASE_CONNECTOR
-namespace TR { namespace Z {class ZOSBaseSystemLinkage; } }
-namespace TR { typedef TR::Z::ZOSBaseSystemLinkage ZOSBaseSystemLinkageConnector; }
+namespace TR {
+namespace Z {
+class ZOSBaseSystemLinkage;
+}
+} // namespace TR
+namespace TR {
+typedef TR::Z::ZOSBaseSystemLinkage ZOSBaseSystemLinkageConnector;
+}
 #endif
 
-#include <stdint.h>                            // for int32_t
+#include <stdint.h> // for int32_t
 #include "codegen/Linkage.hpp"
-#include "codegen/LinkageConventionsEnum.hpp"  // for TR_LinkageConventions, etc
+#include "codegen/LinkageConventionsEnum.hpp" // for TR_LinkageConventions, etc
 #include "codegen/RealRegister.hpp"
-#include "codegen/SystemLinkage.hpp"           // for SystemLinkage
+#include "codegen/SystemLinkage.hpp" // for SystemLinkage
 
 class TR_zOSGlobalCompilationInfo;
-namespace TR { class CodeGenerator; }
+namespace TR {
+class CodeGenerator;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 //  TR::Z::ZOSBaseSystemLinkage Definition
@@ -46,50 +54,51 @@ namespace TR { class CodeGenerator; }
 //  Intention for common zOS behavior across multiple zOS system linkages
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace TR
-{
+namespace TR {
 
-namespace Z
-{
+namespace Z {
 
-class ZOSBaseSystemLinkage : public TR::SystemLinkage
-   {
+class ZOSBaseSystemLinkage : public TR::SystemLinkage {
 protected:
-   TR::RealRegister::RegNum _CAAPointerRegister;
-   TR::RealRegister::RegNum _parentDSAPointerRegister;
+    TR::RealRegister::RegNum _CAAPointerRegister;
+    TR::RealRegister::RegNum _parentDSAPointerRegister;
 
-   TR_zOSGlobalCompilationInfo* _globalCompilationInfo;
+    TR_zOSGlobalCompilationInfo* _globalCompilationInfo;
 
 public:
-   enum
-      {
-      CEECAAPLILWS    = 640,
-      CEECAAAESS      = 788,
-      CEECAAOGETS     = 796,
-      CEECAAAGTS      = 944,
+    enum {
+        CEECAAPLILWS = 640,
+        CEECAAAESS = 788,
+        CEECAAOGETS = 796,
+        CEECAAAGTS = 944,
 
-      CEEDSAType1Size = 0x80,
-      };
+        CEEDSAType1Size = 0x80,
+    };
 
-   ZOSBaseSystemLinkage(TR::CodeGenerator * cg, TR_S390LinkageConventions elc=TR_S390LinkageDefault, TR_LinkageConventions lc=TR_System)
-      : TR::SystemLinkage(cg, elc,lc)
-      {
-      }
+    ZOSBaseSystemLinkage(TR::CodeGenerator* cg, TR_S390LinkageConventions elc = TR_S390LinkageDefault,
+        TR_LinkageConventions lc = TR_System)
+        : TR::SystemLinkage(cg, elc, lc)
+    {}
 
-   virtual TR::RealRegister::RegNum setCAAPointerRegister (TR::RealRegister::RegNum r)         { return _CAAPointerRegister = r; }
-   virtual TR::RealRegister::RegNum getCAAPointerRegister()         { return _CAAPointerRegister; }
-   virtual TR::RealRegister *getCAAPointerRealRegister() {return getRealRegister(_CAAPointerRegister);}
+    virtual TR::RealRegister::RegNum setCAAPointerRegister(TR::RealRegister::RegNum r)
+    {
+        return _CAAPointerRegister = r;
+    }
+    virtual TR::RealRegister::RegNum getCAAPointerRegister() { return _CAAPointerRegister; }
+    virtual TR::RealRegister* getCAAPointerRealRegister() { return getRealRegister(_CAAPointerRegister); }
 
-   virtual TR::RealRegister::RegNum setParentDSAPointerRegister (TR::RealRegister::RegNum r)         { return _parentDSAPointerRegister = r; }
-   virtual TR::RealRegister::RegNum getParentDSAPointerRegister()         { return _parentDSAPointerRegister; }
-   virtual TR::RealRegister *getParentDSAPointerRealRegister() {return getRealRegister(_parentDSAPointerRegister);}
+    virtual TR::RealRegister::RegNum setParentDSAPointerRegister(TR::RealRegister::RegNum r)
+    {
+        return _parentDSAPointerRegister = r;
+    }
+    virtual TR::RealRegister::RegNum getParentDSAPointerRegister() { return _parentDSAPointerRegister; }
+    virtual TR::RealRegister* getParentDSAPointerRealRegister() { return getRealRegister(_parentDSAPointerRegister); }
 
-   // === Fastlink specific
-   virtual bool isAggregateReturnedInIntRegisters(int32_t aggregateLenth)   { return isFastLinkLinkageType(); }
-   virtual bool isAggregateReturnedInIntRegistersAndMemory(int32_t aggregateLenth);
+    // === Fastlink specific
+    virtual bool isAggregateReturnedInIntRegisters(int32_t aggregateLenth) { return isFastLinkLinkageType(); }
+    virtual bool isAggregateReturnedInIntRegistersAndMemory(int32_t aggregateLenth);
+};
 
-   };
-
-}
-}
+} // namespace Z
+} // namespace TR
 #endif

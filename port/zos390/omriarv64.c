@@ -51,10 +51,10 @@
 
 #include "omriarv64.h"
 
-#pragma prolog(omrallocate_1M_fixed_pages,"MYPROLOG")
-#pragma epilog(omrallocate_1M_fixed_pages,"MYEPILOG")
+#pragma prolog(omrallocate_1M_fixed_pages, "MYPROLOG")
+#pragma epilog(omrallocate_1M_fixed_pages, "MYEPILOG")
 
-__asm(" IARV64 PLISTVER=MAX,MF=(L,LGETSTOR)":"DS"(lgetstor));
+__asm(" IARV64 PLISTVER=MAX,MF=(L,LGETSTOR)" : "DS"(lgetstor));
 
 /*
  * Allocate 1MB fixed pages using IARV64 system macro.
@@ -65,46 +65,47 @@ __asm(" IARV64 PLISTVER=MAX,MF=(L,LGETSTOR)":"DS"(lgetstor));
  *
  * @return pointer to memory allocated, NULL on failure.
  */
-void * omrallocate_1M_fixed_pages(int *numMBSegments, int *userExtendedPrivateAreaMemoryType, const char * ttkn) {
-	long segments;
-	long origin;
-	long useMemoryType = *userExtendedPrivateAreaMemoryType;
-	int  iarv64_rc = 0;
-	__asm(" IARV64 PLISTVER=MAX,MF=(L,LGETSTOR)":"DS"(wgetstor));
+void* omrallocate_1M_fixed_pages(int* numMBSegments, int* userExtendedPrivateAreaMemoryType, const char* ttkn)
+{
+    long segments;
+    long origin;
+    long useMemoryType = *userExtendedPrivateAreaMemoryType;
+    int iarv64_rc = 0;
+    __asm(" IARV64 PLISTVER=MAX,MF=(L,LGETSTOR)" : "DS"(wgetstor));
 
-	segments = *numMBSegments;
-	wgetstor = lgetstor;
+    segments = *numMBSegments;
+    wgetstor = lgetstor;
 
-	switch (useMemoryType) {
-	case ZOS64_VMEM_ABOVE_BAR_GENERAL:
-		__asm(" IARV64 REQUEST=GETSTOR,COND=YES,SADMP=NO,CONTROL=UNAUTH,PAGEFRAMESIZE=1MEG,"\
-				"SEGMENTS=(%2),ORIGIN=(%1),TTOKEN=(%4),RETCODE=%0,MF=(E,(%3))"\
-				::"m"(iarv64_rc),"r"(&origin),"r"(&segments),"r"(&wgetstor),"r"(ttkn));
-		break;
-	case ZOS64_VMEM_2_TO_32G:
-		__asm(" IARV64 REQUEST=GETSTOR,COND=YES,SADMP=NO,USE2GTO32G=YES,"\
-				"CONTROL=UNAUTH,PAGEFRAMESIZE=1MEG,"\
-				"SEGMENTS=(%2),ORIGIN=(%1),TTOKEN=(%4),RETCODE=%0,MF=(E,(%3))"\
-				::"m"(iarv64_rc),"r"(&origin),"r"(&segments),"r"(&wgetstor),"r"(ttkn));
-		break;
-	case ZOS64_VMEM_2_TO_64G:
-		__asm(" IARV64 REQUEST=GETSTOR,COND=YES,SADMP=NO,USE2GTO64G=YES,"\
-				"CONTROL=UNAUTH,PAGEFRAMESIZE=1MEG,"\
-				"SEGMENTS=(%2),ORIGIN=(%1),TTOKEN=(%4),RETCODE=%0,MF=(E,(%3))"\
-				::"m"(iarv64_rc),"r"(&origin),"r"(&segments),"r"(&wgetstor),"r"(ttkn));
-		break;
-	}
+    switch (useMemoryType) {
+    case ZOS64_VMEM_ABOVE_BAR_GENERAL:
+        __asm(" IARV64 REQUEST=GETSTOR,COND=YES,SADMP=NO,CONTROL=UNAUTH,PAGEFRAMESIZE=1MEG,"
+              "SEGMENTS=(%2),ORIGIN=(%1),TTOKEN=(%4),RETCODE=%0,MF=(E,(%3))" ::"m"(iarv64_rc),
+            "r"(&origin), "r"(&segments), "r"(&wgetstor), "r"(ttkn));
+        break;
+    case ZOS64_VMEM_2_TO_32G:
+        __asm(" IARV64 REQUEST=GETSTOR,COND=YES,SADMP=NO,USE2GTO32G=YES,"
+              "CONTROL=UNAUTH,PAGEFRAMESIZE=1MEG,"
+              "SEGMENTS=(%2),ORIGIN=(%1),TTOKEN=(%4),RETCODE=%0,MF=(E,(%3))" ::"m"(iarv64_rc),
+            "r"(&origin), "r"(&segments), "r"(&wgetstor), "r"(ttkn));
+        break;
+    case ZOS64_VMEM_2_TO_64G:
+        __asm(" IARV64 REQUEST=GETSTOR,COND=YES,SADMP=NO,USE2GTO64G=YES,"
+              "CONTROL=UNAUTH,PAGEFRAMESIZE=1MEG,"
+              "SEGMENTS=(%2),ORIGIN=(%1),TTOKEN=(%4),RETCODE=%0,MF=(E,(%3))" ::"m"(iarv64_rc),
+            "r"(&origin), "r"(&segments), "r"(&wgetstor), "r"(ttkn));
+        break;
+    }
 
-	if (0 != iarv64_rc) {
-		return (void *)0;
-	}
-	return (void *)origin;
+    if (0 != iarv64_rc) {
+        return (void*)0;
+    }
+    return (void*)origin;
 }
 
-#pragma prolog(omrallocate_1M_pageable_pages_above_bar,"MYPROLOG")
-#pragma epilog(omrallocate_1M_pageable_pages_above_bar,"MYEPILOG")
+#pragma prolog(omrallocate_1M_pageable_pages_above_bar, "MYPROLOG")
+#pragma epilog(omrallocate_1M_pageable_pages_above_bar, "MYEPILOG")
 
-__asm(" IARV64 PLISTVER=MAX,MF=(L,NGETSTOR)":"DS"(ngetstor));
+__asm(" IARV64 PLISTVER=MAX,MF=(L,NGETSTOR)" : "DS"(ngetstor));
 
 /*
  * Allocate 1MB pageable pages above 2GB bar using IARV64 system macro.
@@ -115,48 +116,50 @@ __asm(" IARV64 PLISTVER=MAX,MF=(L,NGETSTOR)":"DS"(ngetstor));
  *
  * @return pointer to memory allocated, NULL on failure.
  */
-void * omrallocate_1M_pageable_pages_above_bar(int *numMBSegments, int *userExtendedPrivateAreaMemoryType, const char * ttkn) {
-	long segments;
-	long origin;
-	long useMemoryType = *userExtendedPrivateAreaMemoryType;
-	int  iarv64_rc = 0;
+void* omrallocate_1M_pageable_pages_above_bar(
+    int* numMBSegments, int* userExtendedPrivateAreaMemoryType, const char* ttkn)
+{
+    long segments;
+    long origin;
+    long useMemoryType = *userExtendedPrivateAreaMemoryType;
+    int iarv64_rc = 0;
 
-	__asm(" IARV64 PLISTVER=MAX,MF=(L,NGETSTOR)":"DS"(wgetstor));
+    __asm(" IARV64 PLISTVER=MAX,MF=(L,NGETSTOR)" : "DS"(wgetstor));
 
-	segments = *numMBSegments;
-	wgetstor = ngetstor;
+    segments = *numMBSegments;
+    wgetstor = ngetstor;
 
-	switch (useMemoryType) {
-	case ZOS64_VMEM_ABOVE_BAR_GENERAL:
-		__asm(" IARV64 REQUEST=GETSTOR,COND=YES,SADMP=NO,CONTROL=UNAUTH,"\
-				"PAGEFRAMESIZE=PAGEABLE1MEG,TYPE=PAGEABLE,SEGMENTS=(%2),"\
-				"ORIGIN=(%1),TTOKEN=(%4),RETCODE=%0,MF=(E,(%3))"\
-				::"m"(iarv64_rc),"r"(&origin),"r"(&segments),"r"(&wgetstor),"r"(ttkn));
-		break;
-	case ZOS64_VMEM_2_TO_32G:
-		__asm(" IARV64 REQUEST=GETSTOR,COND=YES,SADMP=NO,CONTROL=UNAUTH,USE2GTO32G=YES,"\
-				"PAGEFRAMESIZE=PAGEABLE1MEG,TYPE=PAGEABLE,SEGMENTS=(%2),"\
-				"ORIGIN=(%1),TTOKEN=(%4),RETCODE=%0,MF=(E,(%3))"\
-				::"m"(iarv64_rc),"r"(&origin),"r"(&segments),"r"(&wgetstor),"r"(ttkn));
-		break;
-	case ZOS64_VMEM_2_TO_64G:
-		__asm(" IARV64 REQUEST=GETSTOR,COND=YES,SADMP=NO,CONTROL=UNAUTH,USE2GTO64G=YES,"\
-				"PAGEFRAMESIZE=PAGEABLE1MEG,TYPE=PAGEABLE,SEGMENTS=(%2),"\
-				"ORIGIN=(%1),TTOKEN=(%4),RETCODE=%0,MF=(E,(%3))"\
-				::"m"(iarv64_rc),"r"(&origin),"r"(&segments),"r"(&wgetstor),"r"(ttkn));
-		break;
-	}
+    switch (useMemoryType) {
+    case ZOS64_VMEM_ABOVE_BAR_GENERAL:
+        __asm(" IARV64 REQUEST=GETSTOR,COND=YES,SADMP=NO,CONTROL=UNAUTH,"
+              "PAGEFRAMESIZE=PAGEABLE1MEG,TYPE=PAGEABLE,SEGMENTS=(%2),"
+              "ORIGIN=(%1),TTOKEN=(%4),RETCODE=%0,MF=(E,(%3))" ::"m"(iarv64_rc),
+            "r"(&origin), "r"(&segments), "r"(&wgetstor), "r"(ttkn));
+        break;
+    case ZOS64_VMEM_2_TO_32G:
+        __asm(" IARV64 REQUEST=GETSTOR,COND=YES,SADMP=NO,CONTROL=UNAUTH,USE2GTO32G=YES,"
+              "PAGEFRAMESIZE=PAGEABLE1MEG,TYPE=PAGEABLE,SEGMENTS=(%2),"
+              "ORIGIN=(%1),TTOKEN=(%4),RETCODE=%0,MF=(E,(%3))" ::"m"(iarv64_rc),
+            "r"(&origin), "r"(&segments), "r"(&wgetstor), "r"(ttkn));
+        break;
+    case ZOS64_VMEM_2_TO_64G:
+        __asm(" IARV64 REQUEST=GETSTOR,COND=YES,SADMP=NO,CONTROL=UNAUTH,USE2GTO64G=YES,"
+              "PAGEFRAMESIZE=PAGEABLE1MEG,TYPE=PAGEABLE,SEGMENTS=(%2),"
+              "ORIGIN=(%1),TTOKEN=(%4),RETCODE=%0,MF=(E,(%3))" ::"m"(iarv64_rc),
+            "r"(&origin), "r"(&segments), "r"(&wgetstor), "r"(ttkn));
+        break;
+    }
 
-	if (0 != iarv64_rc) {
-		return (void *)0;
-	}
-	return (void *)origin;
+    if (0 != iarv64_rc) {
+        return (void*)0;
+    }
+    return (void*)origin;
 }
 
-#pragma prolog(omrallocate_2G_pages,"MYPROLOG")
-#pragma epilog(omrallocate_2G_pages,"MYEPILOG")
+#pragma prolog(omrallocate_2G_pages, "MYPROLOG")
+#pragma epilog(omrallocate_2G_pages, "MYEPILOG")
 
-__asm(" IARV64 PLISTVER=MAX,MF=(L,OGETSTOR)":"DS"(ogetstor));
+__asm(" IARV64 PLISTVER=MAX,MF=(L,OGETSTOR)" : "DS"(ogetstor));
 
 /*
  * Allocate 2GB fixed pages using IARV64 system macro.
@@ -167,48 +170,49 @@ __asm(" IARV64 PLISTVER=MAX,MF=(L,OGETSTOR)":"DS"(ogetstor));
  *
  * @return pointer to memory allocated, NULL on failure.
  */
-void * omrallocate_2G_pages(int *num2GBUnits, int *userExtendedPrivateAreaMemoryType, const char * ttkn) {
-	long units;
-	long origin;
-	long useMemoryType = *userExtendedPrivateAreaMemoryType;
-	int  iarv64_rc = 0;
+void* omrallocate_2G_pages(int* num2GBUnits, int* userExtendedPrivateAreaMemoryType, const char* ttkn)
+{
+    long units;
+    long origin;
+    long useMemoryType = *userExtendedPrivateAreaMemoryType;
+    int iarv64_rc = 0;
 
-	__asm(" IARV64 PLISTVER=MAX,MF=(L,OGETSTOR)":"DS"(wgetstor));
+    __asm(" IARV64 PLISTVER=MAX,MF=(L,OGETSTOR)" : "DS"(wgetstor));
 
-	units = *num2GBUnits;
-	wgetstor = ogetstor;
+    units = *num2GBUnits;
+    wgetstor = ogetstor;
 
-	switch (useMemoryType) {
-	case ZOS64_VMEM_ABOVE_BAR_GENERAL:
-		__asm(" IARV64 REQUEST=GETSTOR,COND=YES,SADMP=NO,CONTROL=UNAUTH,"\
-				"PAGEFRAMESIZE=2G,TYPE=FIXED,UNITSIZE=2G,UNITS=(%2),"\
-				"ORIGIN=(%1),TTOKEN=(%4),RETCODE=%0,MF=(E,(%3))"\
-				::"m"(iarv64_rc),"r"(&origin),"r"(&units),"r"(&wgetstor),"r"(ttkn));
-		break;
-	case ZOS64_VMEM_2_TO_32G:
-		__asm(" IARV64 REQUEST=GETSTOR,COND=YES,SADMP=NO,CONTROL=UNAUTH,USE2GTO32G=YES,"\
-				"PAGEFRAMESIZE=2G,TYPE=FIXED,UNITSIZE=2G,UNITS=(%2),"\
-				"ORIGIN=(%1),TTOKEN=(%4),RETCODE=%0,MF=(E,(%3))"\
-				::"m"(iarv64_rc),"r"(&origin),"r"(&units),"r"(&wgetstor),"r"(ttkn));
-		break;
-	case ZOS64_VMEM_2_TO_64G:
-		__asm(" IARV64 REQUEST=GETSTOR,COND=YES,SADMP=NO,CONTROL=UNAUTH,USE2GTO64G=YES,"\
-				"PAGEFRAMESIZE=2G,TYPE=FIXED,UNITSIZE=2G,UNITS=(%2),"\
-				"ORIGIN=(%1),TTOKEN=(%4),RETCODE=%0,MF=(E,(%3))"\
-				::"m"(iarv64_rc),"r"(&origin),"r"(&units),"r"(&wgetstor),"r"(ttkn));
-		break;
-	}
+    switch (useMemoryType) {
+    case ZOS64_VMEM_ABOVE_BAR_GENERAL:
+        __asm(" IARV64 REQUEST=GETSTOR,COND=YES,SADMP=NO,CONTROL=UNAUTH,"
+              "PAGEFRAMESIZE=2G,TYPE=FIXED,UNITSIZE=2G,UNITS=(%2),"
+              "ORIGIN=(%1),TTOKEN=(%4),RETCODE=%0,MF=(E,(%3))" ::"m"(iarv64_rc),
+            "r"(&origin), "r"(&units), "r"(&wgetstor), "r"(ttkn));
+        break;
+    case ZOS64_VMEM_2_TO_32G:
+        __asm(" IARV64 REQUEST=GETSTOR,COND=YES,SADMP=NO,CONTROL=UNAUTH,USE2GTO32G=YES,"
+              "PAGEFRAMESIZE=2G,TYPE=FIXED,UNITSIZE=2G,UNITS=(%2),"
+              "ORIGIN=(%1),TTOKEN=(%4),RETCODE=%0,MF=(E,(%3))" ::"m"(iarv64_rc),
+            "r"(&origin), "r"(&units), "r"(&wgetstor), "r"(ttkn));
+        break;
+    case ZOS64_VMEM_2_TO_64G:
+        __asm(" IARV64 REQUEST=GETSTOR,COND=YES,SADMP=NO,CONTROL=UNAUTH,USE2GTO64G=YES,"
+              "PAGEFRAMESIZE=2G,TYPE=FIXED,UNITSIZE=2G,UNITS=(%2),"
+              "ORIGIN=(%1),TTOKEN=(%4),RETCODE=%0,MF=(E,(%3))" ::"m"(iarv64_rc),
+            "r"(&origin), "r"(&units), "r"(&wgetstor), "r"(ttkn));
+        break;
+    }
 
-	if (0 != iarv64_rc) {
-		return (void *)0;
-	}
-	return (void *)origin;
+    if (0 != iarv64_rc) {
+        return (void*)0;
+    }
+    return (void*)origin;
 }
 
-#pragma prolog(omrallocate_4K_pages_in_userExtendedPrivateArea,"MYPROLOG")
-#pragma epilog(omrallocate_4K_pages_in_userExtendedPrivateArea,"MYEPILOG")
+#pragma prolog(omrallocate_4K_pages_in_userExtendedPrivateArea, "MYPROLOG")
+#pragma epilog(omrallocate_4K_pages_in_userExtendedPrivateArea, "MYEPILOG")
 
-__asm(" IARV64 PLISTVER=MAX,MF=(L,MGETSTOR)":"DS"(mgetstor));
+__asm(" IARV64 PLISTVER=MAX,MF=(L,MGETSTOR)" : "DS"(mgetstor));
 
 /*
  * Allocate 4KB pages in 2G-32G range using IARV64 system macro.
@@ -219,44 +223,46 @@ __asm(" IARV64 PLISTVER=MAX,MF=(L,MGETSTOR)":"DS"(mgetstor));
  *
  * @return pointer to memory allocated, NULL on failure.
  */
-void * omrallocate_4K_pages_in_userExtendedPrivateArea(int *numMBSegments, int *userExtendedPrivateAreaMemoryType, const char * ttkn) {
-	long segments;
-	long origin;
-	long useMemoryType = *userExtendedPrivateAreaMemoryType;
-	int  iarv64_rc = 0;
+void* omrallocate_4K_pages_in_userExtendedPrivateArea(
+    int* numMBSegments, int* userExtendedPrivateAreaMemoryType, const char* ttkn)
+{
+    long segments;
+    long origin;
+    long useMemoryType = *userExtendedPrivateAreaMemoryType;
+    int iarv64_rc = 0;
 
-	__asm(" IARV64 PLISTVER=MAX,MF=(L,MGETSTOR)":"DS"(wgetstor));
+    __asm(" IARV64 PLISTVER=MAX,MF=(L,MGETSTOR)" : "DS"(wgetstor));
 
-	segments = *numMBSegments;
-	wgetstor = mgetstor;
+    segments = *numMBSegments;
+    wgetstor = mgetstor;
 
-	switch (useMemoryType) {
-	case ZOS64_VMEM_ABOVE_BAR_GENERAL:
-		break;
-	case ZOS64_VMEM_2_TO_32G:
-		__asm(" IARV64 REQUEST=GETSTOR,COND=YES,SADMP=NO,USE2GTO32G=YES,"\
-				"CONTROL=UNAUTH,PAGEFRAMESIZE=4K,"\
-				"SEGMENTS=(%2),ORIGIN=(%1),TTOKEN=(%4),RETCODE=%0,MF=(E,(%3))"\
-				::"m"(iarv64_rc),"r"(&origin),"r"(&segments),"r"(&wgetstor),"r"(ttkn));
-		break;
-	case ZOS64_VMEM_2_TO_64G:
-		__asm(" IARV64 REQUEST=GETSTOR,COND=YES,SADMP=NO,USE2GTO64G=YES,"\
-				"CONTROL=UNAUTH,PAGEFRAMESIZE=4K,"\
-				"SEGMENTS=(%2),ORIGIN=(%1),TTOKEN=(%4),RETCODE=%0,MF=(E,(%3))"\
-				::"m"(iarv64_rc),"r"(&origin),"r"(&segments),"r"(&wgetstor),"r"(ttkn));
-		break;
-	}
+    switch (useMemoryType) {
+    case ZOS64_VMEM_ABOVE_BAR_GENERAL:
+        break;
+    case ZOS64_VMEM_2_TO_32G:
+        __asm(" IARV64 REQUEST=GETSTOR,COND=YES,SADMP=NO,USE2GTO32G=YES,"
+              "CONTROL=UNAUTH,PAGEFRAMESIZE=4K,"
+              "SEGMENTS=(%2),ORIGIN=(%1),TTOKEN=(%4),RETCODE=%0,MF=(E,(%3))" ::"m"(iarv64_rc),
+            "r"(&origin), "r"(&segments), "r"(&wgetstor), "r"(ttkn));
+        break;
+    case ZOS64_VMEM_2_TO_64G:
+        __asm(" IARV64 REQUEST=GETSTOR,COND=YES,SADMP=NO,USE2GTO64G=YES,"
+              "CONTROL=UNAUTH,PAGEFRAMESIZE=4K,"
+              "SEGMENTS=(%2),ORIGIN=(%1),TTOKEN=(%4),RETCODE=%0,MF=(E,(%3))" ::"m"(iarv64_rc),
+            "r"(&origin), "r"(&segments), "r"(&wgetstor), "r"(ttkn));
+        break;
+    }
 
-	if (0 != iarv64_rc) {
-		return (void *)0;
-	}
-	return (void *)origin;
+    if (0 != iarv64_rc) {
+        return (void*)0;
+    }
+    return (void*)origin;
 }
 
-#pragma prolog(omrallocate_4K_pages_above_bar,"MYPROLOG")
-#pragma epilog(omrallocate_4K_pages_above_bar,"MYEPILOG")
+#pragma prolog(omrallocate_4K_pages_above_bar, "MYPROLOG")
+#pragma epilog(omrallocate_4K_pages_above_bar, "MYEPILOG")
 
-__asm(" IARV64 PLISTVER=MAX,MF=(L,RGETSTOR)":"DS"(rgetstor));
+__asm(" IARV64 PLISTVER=MAX,MF=(L,RGETSTOR)" : "DS"(rgetstor));
 
 /*
  * Allocate 4KB pages using IARV64 system macro.
@@ -266,31 +272,32 @@ __asm(" IARV64 PLISTVER=MAX,MF=(L,RGETSTOR)":"DS"(rgetstor));
  *
  * @return pointer to memory allocated, NULL on failure.
  */
-void * omrallocate_4K_pages_above_bar(int *numMBSegments, const char * ttkn) {
-	long segments;
-	long origin;
-	int  iarv64_rc = 0;
+void* omrallocate_4K_pages_above_bar(int* numMBSegments, const char* ttkn)
+{
+    long segments;
+    long origin;
+    int iarv64_rc = 0;
 
-	__asm(" IARV64 PLISTVER=MAX,MF=(L,RGETSTOR)":"DS"(wgetstor));
+    __asm(" IARV64 PLISTVER=MAX,MF=(L,RGETSTOR)" : "DS"(wgetstor));
 
-	segments = *numMBSegments;
-	wgetstor = rgetstor;
+    segments = *numMBSegments;
+    wgetstor = rgetstor;
 
-	__asm(" IARV64 REQUEST=GETSTOR,COND=YES,SADMP=NO,"\
-			"CONTROL=UNAUTH,PAGEFRAMESIZE=4K,"\
-			"SEGMENTS=(%2),ORIGIN=(%1),TTOKEN=(%4),RETCODE=%0,MF=(E,(%3))"\
-			::"m"(iarv64_rc),"r"(&origin),"r"(&segments),"r"(&wgetstor),"r"(ttkn));
+    __asm(" IARV64 REQUEST=GETSTOR,COND=YES,SADMP=NO,"
+          "CONTROL=UNAUTH,PAGEFRAMESIZE=4K,"
+          "SEGMENTS=(%2),ORIGIN=(%1),TTOKEN=(%4),RETCODE=%0,MF=(E,(%3))" ::"m"(iarv64_rc),
+        "r"(&origin), "r"(&segments), "r"(&wgetstor), "r"(ttkn));
 
-	if (0 != iarv64_rc) {
-		return (void *)0;
-	}
-	return (void *)origin;
+    if (0 != iarv64_rc) {
+        return (void*)0;
+    }
+    return (void*)origin;
 }
 
-#pragma prolog(omrfree_memory_above_bar,"MYPROLOG")
-#pragma epilog(omrfree_memory_above_bar,"MYEPILOG")
+#pragma prolog(omrfree_memory_above_bar, "MYPROLOG")
+#pragma epilog(omrfree_memory_above_bar, "MYEPILOG")
 
-__asm(" IARV64 PLISTVER=MAX,MF=(L,PGETSTOR)":"DS"(pgetstor));
+__asm(" IARV64 PLISTVER=MAX,MF=(L,PGETSTOR)" : "DS"(pgetstor));
 
 /*
  * Free memory allocated using IARV64 system macro.
@@ -299,29 +306,30 @@ __asm(" IARV64 PLISTVER=MAX,MF=(L,PGETSTOR)":"DS"(pgetstor));
  *
  * @return non-zero if memory is not freed successfully, 0 otherwise.
  */
-int omrfree_memory_above_bar(void *address, const char * ttkn){
-	void * xmemobjstart;
-	int  iarv64_rc = 0;
+int omrfree_memory_above_bar(void* address, const char* ttkn)
+{
+    void* xmemobjstart;
+    int iarv64_rc = 0;
 
-	__asm(" IARV64 PLISTVER=MAX,MF=(L,PGETSTOR)":"DS"(wgetstor));
+    __asm(" IARV64 PLISTVER=MAX,MF=(L,PGETSTOR)" : "DS"(wgetstor));
 
-	xmemobjstart = address;
-	wgetstor = pgetstor;
+    xmemobjstart = address;
+    wgetstor = pgetstor;
 
-	__asm(" IARV64 REQUEST=DETACH,COND=YES,MEMOBJSTART=(%2),TTOKEN=(%3),RETCODE=%0,MF=(E,(%1))"\
-			::"m"(iarv64_rc),"r"(&wgetstor),"r"(&xmemobjstart),"r"(ttkn));
-	return iarv64_rc;
+    __asm(" IARV64 REQUEST=DETACH,COND=YES,MEMOBJSTART=(%2),TTOKEN=(%3),RETCODE=%0,MF=(E,(%1))" ::"m"(iarv64_rc),
+        "r"(&wgetstor), "r"(&xmemobjstart), "r"(ttkn));
+    return iarv64_rc;
 }
 
-#pragma prolog(omrdiscard_data,"MYPROLOG")
-#pragma epilog(omrdiscard_data,"MYEPILOG")
+#pragma prolog(omrdiscard_data, "MYPROLOG")
+#pragma epilog(omrdiscard_data, "MYEPILOG")
 
-__asm(" IARV64 PLISTVER=MAX,MF=(L,QGETSTOR)":"DS"(qgetstor));
+__asm(" IARV64 PLISTVER=MAX,MF=(L,QGETSTOR)" : "DS"(qgetstor));
 
 /* Used to pass parameters to IARV64 DISCARDDATA in omrdiscard_data(). */
 struct rangeList {
-	void *startAddr;
-	long pageCount;
+    void* startAddr;
+    long pageCount;
 };
 
 /*
@@ -332,21 +340,22 @@ struct rangeList {
  *
  * @return non-zero if memory is not discarded successfully, 0 otherwise.
  */
-int omrdiscard_data(void *address, int *numFrames) {
-	struct rangeList range;
-	void *rangePtr;
-	int iarv64_rc = 0;
+int omrdiscard_data(void* address, int* numFrames)
+{
+    struct rangeList range;
+    void* rangePtr;
+    int iarv64_rc = 0;
 
-	__asm(" IARV64 PLISTVER=MAX,MF=(L,MGETSTOR)":"DS"(wgetstor));
+    __asm(" IARV64 PLISTVER=MAX,MF=(L,MGETSTOR)" : "DS"(wgetstor));
 
-	range.startAddr = address;
-	range.pageCount = *numFrames;
-	rangePtr = (void *)&range;
-	wgetstor = qgetstor;
+    range.startAddr = address;
+    range.pageCount = *numFrames;
+    rangePtr = (void*)&range;
+    wgetstor = qgetstor;
 
-	__asm(" IARV64 REQUEST=DISCARDDATA,KEEPREAL=NO,"\
-			"RANGLIST=(%1),RETCODE=%0,MF=(E,(%2))"\
-			::"m"(iarv64_rc),"r"(&rangePtr),"r"(&wgetstor));
+    __asm(" IARV64 REQUEST=DISCARDDATA,KEEPREAL=NO,"
+          "RANGLIST=(%1),RETCODE=%0,MF=(E,(%2))" ::"m"(iarv64_rc),
+        "r"(&rangePtr), "r"(&wgetstor));
 
-	return iarv64_rc;
+    return iarv64_rc;
 }

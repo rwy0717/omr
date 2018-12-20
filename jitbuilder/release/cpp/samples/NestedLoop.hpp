@@ -25,13 +25,12 @@
 
 #include "JitBuilder.hpp"
 
-typedef int32_t (NestedLoopFunctionType)(int32_t);
+typedef int32_t(NestedLoopFunctionType)(int32_t);
 
-class NestedLoopMethod : public OMR::JitBuilder::MethodBuilder
-   {
-   public:
-   NestedLoopMethod(OMR::JitBuilder::TypeDictionary *types);
-   virtual bool buildIL();
-   };
+class NestedLoopMethod : public OMR::JitBuilder::MethodBuilder {
+public:
+    NestedLoopMethod(OMR::JitBuilder::TypeDictionary* types);
+    virtual bool buildIL();
+};
 
 #endif // !defined(NESTEDLOOP_INCL)

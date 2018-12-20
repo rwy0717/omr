@@ -19,75 +19,60 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-#include <stddef.h>                   // for NULL
-#include "il/symbol/LabelSymbol.hpp"  // for LabelSymbol
+#include <stddef.h> // for NULL
+#include "il/symbol/LabelSymbol.hpp" // for LabelSymbol
 #include "codegen/Snippet.hpp"
 #include "codegen/CodeGenerator.hpp"
 
-OMR::Snippet::Snippet(
-      TR::CodeGenerator *cg,
-      TR::Node *node,
-      TR::LabelSymbol *label,
-      bool isGCSafePoint) :
-   _cg(cg), _node(node), _snippetLabel(label), _block(0), _flags(0)
-   {
-   self()->setSnippetLabel(label);
+OMR::Snippet::Snippet(TR::CodeGenerator* cg, TR::Node* node, TR::LabelSymbol* label, bool isGCSafePoint)
+    : _cg(cg)
+    , _node(node)
+    , _snippetLabel(label)
+    , _block(0)
+    , _flags(0)
+{
+    self()->setSnippetLabel(label);
 
-   if (isGCSafePoint)
-      {
-      self()->prepareSnippetForGCSafePoint();
-      }
+    if (isGCSafePoint) {
+        self()->prepareSnippetForGCSafePoint();
+    }
 
-   self()->gcMap().setGCRegisterMask(0xFF00FFFF);
-   }
+    self()->gcMap().setGCRegisterMask(0xFF00FFFF);
+}
 
+OMR::Snippet::Snippet(TR::CodeGenerator* cg, TR::Node* node, TR::LabelSymbol* label)
+    : _cg(cg)
+    , _node(node)
+    , _snippetLabel(label)
+    , _block(0)
+    , _flags(0)
+{
+    self()->setSnippetLabel(label);
+    self()->gcMap().setGCRegisterMask(0xFF00FFFF);
+}
 
-OMR::Snippet::Snippet(
-      TR::CodeGenerator *cg,
-      TR::Node *node,
-      TR::LabelSymbol *label) :
-   _cg(cg), _node(node), _snippetLabel(label), _block(0), _flags(0)
-   {
-   self()->setSnippetLabel(label);
-   self()->gcMap().setGCRegisterMask(0xFF00FFFF);
-   }
+TR::Snippet* OMR::Snippet::self() { return static_cast<TR::Snippet*>(this); }
 
-TR::Snippet *
-OMR::Snippet::self()
-   {
-   return static_cast<TR::Snippet *>(this);
-   }
+void OMR::Snippet::setSnippetLabel(TR::LabelSymbol* label)
+{
+    if (_snippetLabel) {
+        _snippetLabel->setSnippet(NULL);
+    }
 
-void
-OMR::Snippet::setSnippetLabel(TR::LabelSymbol *label)
-   {
-   if (_snippetLabel)
-      {
-      _snippetLabel->setSnippet(NULL);
-      }
+    label->setSnippet(static_cast<TR::Snippet*>(this));
+    _snippetLabel = label;
+}
 
-   label->setSnippet(static_cast<TR::Snippet *>(this));
-   _snippetLabel = label;
-   }
+int32_t OMR::Snippet::setEstimatedCodeLocation(int32_t p)
+{
+    return self()->getSnippetLabel()->setEstimatedCodeLocation(p);
+}
 
+uint8_t* OMR::Snippet::emitSnippet() { return self()->emitSnippetBody(); }
 
-int32_t
-OMR::Snippet::setEstimatedCodeLocation(int32_t p)
-   {
-   return self()->getSnippetLabel()->setEstimatedCodeLocation(p);
-   }
-
-
-uint8_t *
-OMR::Snippet::emitSnippet()
-   {
-   return self()->emitSnippetBody();
-   }
-
-void
-OMR::Snippet::prepareSnippetForGCSafePoint()
-   {
-   self()->gcMap().setGCSafePoint();
-   self()->setBlock(self()->cg()->getCurrentEvaluationBlock());
-   self()->setNeedsExceptionTableEntry();
-   }
+void OMR::Snippet::prepareSnippetForGCSafePoint()
+{
+    self()->gcMap().setGCSafePoint();
+    self()->setBlock(self()->cg()->getCurrentEvaluationBlock());
+    self()->setNeedsExceptionTableEntry();
+}

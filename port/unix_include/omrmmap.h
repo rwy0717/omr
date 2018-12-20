@@ -23,13 +23,12 @@
 #ifndef omrmmap_h
 #define omrmmap_h
 
-void omrmmap_unmap_file(struct OMRPortLibrary *portLibrary, J9MmapHandle *handle);
-J9MmapHandle *omrmmap_map_file(struct OMRPortLibrary *portLibrary, intptr_t file, uint64_t offset, uintptr_t size, const char *mappingName, uint32_t flags);
-int32_t omrmmap_startup(struct OMRPortLibrary *portLibrary);
-int32_t omrmmap_capabilities(struct OMRPortLibrary *portLibrary);
-void omrmmap_shutdown(struct OMRPortLibrary *portLibrary);
-intptr_t omrmmap_msync(struct OMRPortLibrary *portLibrary, void *start, uintptr_t length, uint32_t flags);
+void omrmmap_unmap_file(struct OMRPortLibrary* portLibrary, J9MmapHandle* handle);
+J9MmapHandle* omrmmap_map_file(struct OMRPortLibrary* portLibrary, intptr_t file, uint64_t offset, uintptr_t size,
+    const char* mappingName, uint32_t flags);
+int32_t omrmmap_startup(struct OMRPortLibrary* portLibrary);
+int32_t omrmmap_capabilities(struct OMRPortLibrary* portLibrary);
+void omrmmap_shutdown(struct OMRPortLibrary* portLibrary);
+intptr_t omrmmap_msync(struct OMRPortLibrary* portLibrary, void* start, uintptr_t length, uint32_t flags);
 
-#endif     /* omrmmap_h */
-
-
+#endif /* omrmmap_h */

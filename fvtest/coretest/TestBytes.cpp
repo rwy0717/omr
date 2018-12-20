@@ -22,30 +22,29 @@
 #include <OMR/Bytes.hpp>
 #include <gtest/gtest.h>
 
-namespace OMR
-{
+namespace OMR {
 
 TEST(TestBytes, CompareZeroToZero)
 {
-	EXPECT_EQ(0, bytes(0));
-	EXPECT_EQ(0, kibibytes(0));
-	EXPECT_EQ(0, mebibytes(0));
-	EXPECT_EQ(0, gibibytes(0));
+    EXPECT_EQ(0, bytes(0));
+    EXPECT_EQ(0, kibibytes(0));
+    EXPECT_EQ(0, mebibytes(0));
+    EXPECT_EQ(0, gibibytes(0));
 }
 
 TEST(TestBytes, CompareOneUnitToBytes)
 {
-	EXPECT_EQ(1, bytes(1));
-	EXPECT_EQ(1024, kibibytes(1));
-	EXPECT_EQ(1024 * 1024, mebibytes(1));
-	EXPECT_EQ(1024 * 1024 * 1024, gibibytes(1));
+    EXPECT_EQ(1, bytes(1));
+    EXPECT_EQ(1024, kibibytes(1));
+    EXPECT_EQ(1024 * 1024, mebibytes(1));
+    EXPECT_EQ(1024 * 1024 * 1024, gibibytes(1));
 }
 
 TEST(TestBytes, CompareOneUnitToSmallerUnit)
 {
-	EXPECT_EQ(bytes(1024), kibibytes(1));
-	EXPECT_EQ(kibibytes(1024), mebibytes(1));
-	EXPECT_EQ(mebibytes(1024), gibibytes(1));
+    EXPECT_EQ(bytes(1024), kibibytes(1));
+    EXPECT_EQ(kibibytes(1024), mebibytes(1));
+    EXPECT_EQ(mebibytes(1024), gibibytes(1));
 }
 
-}  // namespace OMR
+} // namespace OMR

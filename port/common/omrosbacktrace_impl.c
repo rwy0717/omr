@@ -42,17 +42,18 @@
  *
  * @return the number of frames in the backtrace.
  */
-uintptr_t
-omrintrospect_backtrace_thread_raw(struct OMRPortLibrary *portLibrary, J9PlatformThread *threadInfo, J9Heap *heap, void *signalInfo)
+uintptr_t omrintrospect_backtrace_thread_raw(
+    struct OMRPortLibrary* portLibrary, J9PlatformThread* threadInfo, J9Heap* heap, void* signalInfo)
 {
-	return 0;
+    return 0;
 }
 
 /* This function takes a thread structure already populated with a backtrace by omrintrospect_backtrace_thread
  * and looks up the symbols for the frames. The format of the string generated is:
  * 		symbol_name (statement_id instruction_pointer [module+offset])
  * If it isn't possible to determine any of the items in the string then they are omitted. If no heap is specified
- * then this function will use malloc to allocate the memory necessary for the symbols which must be freed by the caller.
+ * then this function will use malloc to allocate the memory necessary for the symbols which must be freed by the
+ * caller.
  *
  * This function is called via the omrintrospect_backtrace_symbols function that provides signal protection
  *
@@ -62,9 +63,8 @@ omrintrospect_backtrace_thread_raw(struct OMRPortLibrary *portLibrary, J9Platfor
  *
  * @return the number of frames for which a symbol was constructed.
  */
-uintptr_t
-omrintrospect_backtrace_symbols_raw(struct OMRPortLibrary *portLibrary, J9PlatformThread *threadInfo, J9Heap *heap)
+uintptr_t omrintrospect_backtrace_symbols_raw(
+    struct OMRPortLibrary* portLibrary, J9PlatformThread* threadInfo, J9Heap* heap)
 {
-	return 0;
+    return 0;
 }
-

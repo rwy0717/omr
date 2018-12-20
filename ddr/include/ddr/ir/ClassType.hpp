@@ -28,19 +28,18 @@ class Field;
 
 using std::vector;
 
-class ClassType : public NamespaceUDT
-{
+class ClassType : public NamespaceUDT {
 public:
-	bool _isComplete; /* as opposed to just a forward declaration */
-	vector<Field *> _fieldMembers;
+    bool _isComplete; /* as opposed to just a forward declaration */
+    vector<Field*> _fieldMembers;
 
-	explicit ClassType(size_t size, unsigned int lineNumber = 0);
-	virtual ~ClassType();
+    explicit ClassType(size_t size, unsigned int lineNumber = 0);
+    virtual ~ClassType();
 
-	virtual void renameFieldsAndMacros(const FieldOverride &fieldOverride, Type *replacementType);
+    virtual void renameFieldsAndMacros(const FieldOverride& fieldOverride, Type* replacementType);
 
-	bool operator==(const Type & rhs) const;
-	virtual bool compareToClasstype(const ClassType &) const;
+    bool operator==(const Type& rhs) const;
+    virtual bool compareToClasstype(const ClassType&) const;
 };
 
 #endif /* CLASSTYPE_HPP */

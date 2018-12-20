@@ -33,28 +33,26 @@ class GC_MemorySubSpaceRegionIteratorStandard : public GC_MemorySubSpaceRegionIt
 public:
 protected:
 private:
-	
 public:
+    /**
+     * Construct a MemorySubSpaceRegionIterator for the regions which belong to the specified subspace.
+     *
+     * @param subspace the memory subspace whose regions should be walked
+     */
+    GC_MemorySubSpaceRegionIteratorStandard(MM_MemorySubSpace* subspace)
+        : GC_MemorySubSpaceRegionIterator(subspace)
+    {}
 
-	/**
-	 * Construct a MemorySubSpaceRegionIterator for the regions which belong to the specified subspace.
-	 * 
-	 * @param subspace the memory subspace whose regions should be walked
-	 */
-	GC_MemorySubSpaceRegionIteratorStandard(MM_MemorySubSpace* subspace)
-		: GC_MemorySubSpaceRegionIterator(subspace)
-		{ }
-	
-	/**
-	 * @return the next region in the heap, or NULL if there are no more regions
-	 */
-	MM_HeapRegionDescriptorStandard *nextRegion() 
-	{
-		return (MM_HeapRegionDescriptorStandard*)GC_MemorySubSpaceRegionIterator::nextRegion();
-	}
+    /**
+     * @return the next region in the heap, or NULL if there are no more regions
+     */
+    MM_HeapRegionDescriptorStandard* nextRegion()
+    {
+        return (MM_HeapRegionDescriptorStandard*)GC_MemorySubSpaceRegionIterator::nextRegion();
+    }
+
 protected:
 private:
 };
-
 
 #endif /* MEMORYSUBSPACEITERATORSTANDARD_HPP_ */

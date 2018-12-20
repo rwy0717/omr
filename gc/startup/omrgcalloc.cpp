@@ -30,40 +30,39 @@
 #include "Heap.hpp"
 #include "omrgcstartup.hpp"
 
-omrobjectptr_t
-OMR_GC_AllocateObject(OMR_VMThread * omrVMThread, MM_AllocateInitialization *allocator)
+omrobjectptr_t OMR_GC_AllocateObject(OMR_VMThread* omrVMThread, MM_AllocateInitialization* allocator)
 {
-	MM_EnvironmentBase *env = MM_EnvironmentBase::getEnvironment(omrVMThread);
+    MM_EnvironmentBase* env = MM_EnvironmentBase::getEnvironment(omrVMThread);
 
-	/* TODO: Deprecate this -- required for early versions of ruby/omr integration */
-	if (allocator->isGCAllowed() && (NULL == env->getExtensions()->getGlobalCollector())) {
-		/* Lazily create the collector before attempting to allocate. */
-		if (OMR_ERROR_NONE != OMR_GC_InitializeCollector(omrVMThread)) {
-			return NULL;
-		}
-	}
+    /* TODO: Deprecate this -- required for early versions of ruby/omr integration */
+    if (allocator->isGCAllowed() && (NULL == env->getExtensions()->getGlobalCollector())) {
+        /* Lazily create the collector before attempting to allocate. */
+        if (OMR_ERROR_NONE != OMR_GC_InitializeCollector(omrVMThread)) {
+            return NULL;
+        }
+    }
 
-	return allocator->allocateAndInitializeObject(omrVMThread);
+    return allocator->allocateAndInitializeObject(omrVMThread);
 }
 
-omrobjectptr_t
-OMR_GC_AllocateObject(OMR_VMThread * omrVMThread, uintptr_t allocationCategory, uintptr_t requiredSizeInBytes, uintptr_t allocationFlags)
+omrobjectptr_t OMR_GC_AllocateObject(
+    OMR_VMThread* omrVMThread, uintptr_t allocationCategory, uintptr_t requiredSizeInBytes, uintptr_t allocationFlags)
 {
-	MM_AllocateInitialization allocator(MM_EnvironmentBase::getEnvironment(omrVMThread), allocationCategory, requiredSizeInBytes, allocationFlags);
-	return OMR_GC_AllocateObject(omrVMThread, &allocator);
+    MM_AllocateInitialization allocator(
+        MM_EnvironmentBase::getEnvironment(omrVMThread), allocationCategory, requiredSizeInBytes, allocationFlags);
+    return OMR_GC_AllocateObject(omrVMThread, &allocator);
 }
 
-omr_error_t
-OMR_GC_SystemCollect(OMR_VMThread* omrVMThread, uint32_t gcCode)
+omr_error_t OMR_GC_SystemCollect(OMR_VMThread* omrVMThread, uint32_t gcCode)
 {
-	omr_error_t result = OMR_ERROR_NONE;
-	MM_EnvironmentBase *env = MM_EnvironmentBase::getEnvironment(omrVMThread);
-	MM_GCExtensionsBase *extensions = env->getExtensions();
-	if (NULL == extensions->getGlobalCollector()) {
-		result = OMR_GC_InitializeCollector(omrVMThread);
-	}
-	if (OMR_ERROR_NONE == result) {
-		extensions->heap->systemGarbageCollect(env, gcCode);
-	}
-	return result;
+    omr_error_t result = OMR_ERROR_NONE;
+    MM_EnvironmentBase* env = MM_EnvironmentBase::getEnvironment(omrVMThread);
+    MM_GCExtensionsBase* extensions = env->getExtensions();
+    if (NULL == extensions->getGlobalCollector()) {
+        result = OMR_GC_InitializeCollector(omrVMThread);
+    }
+    if (OMR_ERROR_NONE == result) {
+        extensions->heap->systemGarbageCollect(env, gcCode);
+    }
+    return result;
 }

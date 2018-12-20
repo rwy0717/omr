@@ -29,18 +29,16 @@
  * @return the next VM Thread in the list
  * @return NULL if there are no more threads in the list
  */
-OMR_VMThread *
-GC_OMRVMThreadListIterator::nextOMRVMThread()
+OMR_VMThread* GC_OMRVMThreadListIterator::nextOMRVMThread()
 {
-	if(_omrVMThread) {
-		OMR_VMThread *currentOMRVMThread;
-		currentOMRVMThread = _omrVMThread;
-		_omrVMThread = _omrVMThread->_linkNext;
-		if(_omrVMThread == _initialOMRVMThread) {
-			_omrVMThread = NULL;
-		}
-		return currentOMRVMThread;
-	}
-	return NULL;
+    if (_omrVMThread) {
+        OMR_VMThread* currentOMRVMThread;
+        currentOMRVMThread = _omrVMThread;
+        _omrVMThread = _omrVMThread->_linkNext;
+        if (_omrVMThread == _initialOMRVMThread) {
+            _omrVMThread = NULL;
+        }
+        return currentOMRVMThread;
+    }
+    return NULL;
 }
-

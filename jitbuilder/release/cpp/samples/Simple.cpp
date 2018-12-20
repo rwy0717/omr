@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #include <iostream>
 #include <stdlib.h>
 #include <stdint.h>
@@ -28,72 +27,66 @@
 
 #include "Simple.hpp"
 
-using std::cout;
 using std::cerr;
+using std::cout;
 
-#define TOSTR(x)     #x
+#define TOSTR(x) #x
 #define LINETOSTR(x) TOSTR(x)
 
+int main(int argc, char* argv[])
+{
+    cout << "Step 1: initialize JIT\n";
+    bool initialized = initializeJit();
+    if (!initialized) {
+        cerr << "FAIL: could not initialize JIT\n";
+        exit(-1);
+    }
 
-int
-main(int argc, char *argv[])
-   {
-   cout << "Step 1: initialize JIT\n";
-   bool initialized = initializeJit();
-   if (!initialized)
-      {
-      cerr << "FAIL: could not initialize JIT\n";
-      exit(-1);
-      }
+    cout << "Step 2: define type dictionary\n";
+    OMR::JitBuilder::TypeDictionary types;
 
-   cout << "Step 2: define type dictionary\n";
-   OMR::JitBuilder::TypeDictionary types;
+    cout << "Step 3: compile method builder\n";
+    SimpleMethod method(&types);
+    void* entry = 0;
+    int32_t rc = compileMethodBuilder(&method, &entry);
+    if (rc != 0) {
+        cerr << "FAIL: compilation error " << rc << "\n";
+        exit(-2);
+    }
 
-   cout << "Step 3: compile method builder\n";
-   SimpleMethod method(&types);
-   void *entry = 0;
-   int32_t rc = compileMethodBuilder(&method, &entry);
-   if (rc != 0)
-      {
-      cerr << "FAIL: compilation error " << rc << "\n";
-      exit(-2);
-      }
+    cout << "Step 4: invoke compiled code and print results\n";
+    typedef int32_t(SimpleMethodFunction)(int32_t);
+    SimpleMethodFunction* increment = (SimpleMethodFunction*)entry;
 
-   cout << "Step 4: invoke compiled code and print results\n";
-   typedef int32_t (SimpleMethodFunction)(int32_t);
-   SimpleMethodFunction *increment = (SimpleMethodFunction *) entry;
+    int32_t v;
+    v = 0;
+    cout << "increment(" << v << ") == " << increment(v) << "\n";
+    v = 1;
+    cout << "increment(" << v << ") == " << increment(v) << "\n";
+    v = 10;
+    cout << "increment(" << v << ") == " << increment(v) << "\n";
+    v = -15;
+    cout << "increment(" << v << ") == " << increment(v) << "\n";
 
-   int32_t v;
-   v=0;   cout << "increment(" << v << ") == " << increment(v) << "\n";
-   v=1;   cout << "increment(" << v << ") == " << increment(v) << "\n";
-   v=10;  cout << "increment(" << v << ") == " << increment(v) << "\n";
-   v=-15; cout << "increment(" << v << ") == " << increment(v) << "\n";
+    cout << "Step 5: shutdown JIT\n";
+    shutdownJit();
+}
 
-   cout << "Step 5: shutdown JIT\n";
-   shutdownJit();
-   }
+SimpleMethod::SimpleMethod(OMR::JitBuilder::TypeDictionary* d)
+    : OMR::JitBuilder::MethodBuilder(d, (OMR::JitBuilder::VirtualMachineState*)NULL)
+{
+    DefineLine(LINETOSTR(__LINE__));
+    DefineFile(__FILE__);
 
+    DefineName("increment");
+    DefineParameter("value", Int32);
+    DefineReturnType(Int32);
+}
 
+bool SimpleMethod::buildIL()
+{
+    cout << "SimpleMethod::buildIL() running!\n";
+    Return(Add(Load("value"), ConstInt32(1)));
 
-SimpleMethod::SimpleMethod(OMR::JitBuilder::TypeDictionary *d)
-   : OMR::JitBuilder::MethodBuilder(d, (OMR::JitBuilder::VirtualMachineState *) NULL)
-   {
-   DefineLine(LINETOSTR(__LINE__));
-   DefineFile(__FILE__);
-
-   DefineName("increment");
-   DefineParameter("value", Int32);
-   DefineReturnType(Int32);
-   }
-
-bool
-SimpleMethod::buildIL()
-   {
-   cout << "SimpleMethod::buildIL() running!\n";
-   Return(
-      Add(
-         Load("value"),
-         ConstInt32(1)));
-
-   return true;
-   }
+    return true;
+}

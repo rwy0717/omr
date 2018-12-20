@@ -18,7 +18,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #ifndef TYPEDICTIONARY_EXTRAS_OUTSIDE_CLASS_INCL
 #define TYPEDICTIONARY_EXTRAS_OUTSIDE_CLASS_INCL
 
@@ -63,11 +62,9 @@
  * d.CloseStruct("MyStruct", sizeof(MyStruct));
  * ```
  */
-#define DEFINE_STRUCT(structName) \
-   DefineStruct(#structName)
+#define DEFINE_STRUCT(structName) DefineStruct(#structName)
 #define DEFINE_FIELD(structName, fieldName, filedIlType) \
-   DefineField(#structName, #fieldName, filedIlType, offsetof(structName, fieldName))
-#define CLOSE_STRUCT(structName) \
-   CloseStruct(#structName, sizeof(structName))
+    DefineField(#structName, #fieldName, filedIlType, offsetof(structName, fieldName))
+#define CLOSE_STRUCT(structName) CloseStruct(#structName, sizeof(structName))
 
 #endif // !defined(TYPEDICTIONARY_EXTRAS_OUTSIDE_CLASS_INCL)

@@ -21,86 +21,97 @@
 
 #include "JBTestUtil.hpp"
 
-struct MyStruct
-   {
-   uint8_t field;
-   uint16_t field11;
-   uint32_t field1;
-   uint64_t f;
-   };
+struct MyStruct {
+    uint8_t field;
+    uint16_t field11;
+    uint32_t field1;
+    uint64_t f;
+};
 
-union Union
-   {
-   uint8_t field;
-   uint16_t field11;
-   uint32_t field1;
-   uint64_t f;
-   };
+union Union {
+    uint8_t field;
+    uint16_t field11;
+    uint32_t field1;
+    uint64_t f;
+};
 
-typedef void (TestStructFieldNameFunction)();
-typedef void (TestUnionFieldNameFunction)();
+typedef void(TestStructFieldNameFunction)();
+typedef void(TestUnionFieldNameFunction)();
 
-DEFINE_BUILDER( TestStructFieldNameBuilder,
-                NoType )
-   {
-   EXPECT_EQ(toIlType<uint8_t>(), GetFieldType("MyStruct", "field")) << "Expected " << toIlType<uint8_t>()->getName() << " and " << GetFieldType("MyStruct", "field")->getName() << " was returned";
-   EXPECT_EQ(toIlType<uint16_t>(), GetFieldType("MyStruct", "field11")) << "Expected " << toIlType<uint16_t>()->getName() << " and " << GetFieldType("MyStruct", "field11")->getName() << " was returned";
-   EXPECT_EQ(toIlType<uint32_t>(), GetFieldType("MyStruct", "field1")) << "Expected " << toIlType<uint32_t>()->getName() << " and " << GetFieldType("MyStruct", "field1")->getName() << " was returned";
-   EXPECT_EQ(toIlType<uint64_t>(), GetFieldType("MyStruct", "f")) << "Expected " << toIlType<uint64_t>()->getName() << " and " << GetFieldType("MyStruct", "f")->getName() << " was returned";
+DEFINE_BUILDER(TestStructFieldNameBuilder, NoType)
+{
+    EXPECT_EQ(toIlType<uint8_t>(), GetFieldType("MyStruct", "field"))
+        << "Expected " << toIlType<uint8_t>()->getName() << " and " << GetFieldType("MyStruct", "field")->getName()
+        << " was returned";
+    EXPECT_EQ(toIlType<uint16_t>(), GetFieldType("MyStruct", "field11"))
+        << "Expected " << toIlType<uint16_t>()->getName() << " and " << GetFieldType("MyStruct", "field11")->getName()
+        << " was returned";
+    EXPECT_EQ(toIlType<uint32_t>(), GetFieldType("MyStruct", "field1"))
+        << "Expected " << toIlType<uint32_t>()->getName() << " and " << GetFieldType("MyStruct", "field1")->getName()
+        << " was returned";
+    EXPECT_EQ(toIlType<uint64_t>(), GetFieldType("MyStruct", "f"))
+        << "Expected " << toIlType<uint64_t>()->getName() << " and " << GetFieldType("MyStruct", "f")->getName()
+        << " was returned";
 
-   Return();
+    Return();
 
-   return true;
-   }
+    return true;
+}
 
-DEFINE_BUILDER( TestUnionFieldNameBuilder,
-                NoType )
-   {
-   EXPECT_EQ(toIlType<uint8_t>(), UnionFieldType("MyUnion", "field")) << "Expected " << toIlType<uint8_t>()->getName() << " and " << UnionFieldType("MyUnion", "field")->getName() << " was returned";
-   EXPECT_EQ(toIlType<uint16_t>(), UnionFieldType("MyUnion", "field11")) << "Expected " << toIlType<uint16_t>()->getName() << " and " << UnionFieldType("MyUnion", "field11")->getName() << " was returned";
-   EXPECT_EQ(toIlType<uint32_t>(), UnionFieldType("MyUnion", "field1")) << "Expected " << toIlType<uint32_t>()->getName() << " and " << UnionFieldType("MyUnion", "field1")->getName() << " was returned";
-   EXPECT_EQ(toIlType<uint64_t>(), UnionFieldType("MyUnion", "f")) << "Expected " << toIlType<uint64_t>()->getName() << " and " << UnionFieldType("MyUnion", "f")->getName() << " was returned";
+DEFINE_BUILDER(TestUnionFieldNameBuilder, NoType)
+{
+    EXPECT_EQ(toIlType<uint8_t>(), UnionFieldType("MyUnion", "field"))
+        << "Expected " << toIlType<uint8_t>()->getName() << " and " << UnionFieldType("MyUnion", "field")->getName()
+        << " was returned";
+    EXPECT_EQ(toIlType<uint16_t>(), UnionFieldType("MyUnion", "field11"))
+        << "Expected " << toIlType<uint16_t>()->getName() << " and " << UnionFieldType("MyUnion", "field11")->getName()
+        << " was returned";
+    EXPECT_EQ(toIlType<uint32_t>(), UnionFieldType("MyUnion", "field1"))
+        << "Expected " << toIlType<uint32_t>()->getName() << " and " << UnionFieldType("MyUnion", "field1")->getName()
+        << " was returned";
+    EXPECT_EQ(toIlType<uint64_t>(), UnionFieldType("MyUnion", "f"))
+        << "Expected " << toIlType<uint64_t>()->getName() << " and " << UnionFieldType("MyUnion", "f")->getName()
+        << " was returned";
 
-   Return();
+    Return();
 
-   return true;
-   }
+    return true;
+}
 
 DEFINE_TYPES(MyStructTypeDictionary)
-   {
-   DefineStruct("MyStruct");
-   DefineField("MyStruct", "field", toIlType<uint8_t>());
-   DefineField("MyStruct", "field11", toIlType<uint16_t>());
-   DefineField("MyStruct", "field1", toIlType<uint32_t>());
-   DefineField("MyStruct", "f", toIlType<uint64_t>());
-   CloseStruct("MyStruct");
-   }
+{
+    DefineStruct("MyStruct");
+    DefineField("MyStruct", "field", toIlType<uint8_t>());
+    DefineField("MyStruct", "field11", toIlType<uint16_t>());
+    DefineField("MyStruct", "field1", toIlType<uint32_t>());
+    DefineField("MyStruct", "f", toIlType<uint64_t>());
+    CloseStruct("MyStruct");
+}
 
 DEFINE_TYPES(MyUnionTypeDictionary)
-   {
-   DefineUnion("MyUnion");
-   UnionField("MyUnion", "field", toIlType<uint8_t>());
-   UnionField("MyUnion", "field11", toIlType<uint16_t>());
-   UnionField("MyUnion", "field1", toIlType<uint32_t>());
-   UnionField("MyUnion", "f", toIlType<uint64_t>());
-   CloseUnion("MyUnion");
-   }
+{
+    DefineUnion("MyUnion");
+    UnionField("MyUnion", "field", toIlType<uint8_t>());
+    UnionField("MyUnion", "field11", toIlType<uint16_t>());
+    UnionField("MyUnion", "field1", toIlType<uint32_t>());
+    UnionField("MyUnion", "f", toIlType<uint64_t>());
+    CloseUnion("MyUnion");
+}
 
 class FieldNameTest : public JitBuilderTest {};
 
 TEST_F(FieldNameTest, StructField)
-   {
-   TestStructFieldNameFunction *testStructNameAddress;
-   ASSERT_COMPILE(MyStructTypeDictionary,TestStructFieldNameBuilder,testStructNameAddress);
+{
+    TestStructFieldNameFunction* testStructNameAddress;
+    ASSERT_COMPILE(MyStructTypeDictionary, TestStructFieldNameBuilder, testStructNameAddress);
 
-   testStructNameAddress();
-   }
+    testStructNameAddress();
+}
 
 TEST_F(FieldNameTest, UnionField)
-   {
-   TestUnionFieldNameFunction *testUnionNameAddress;
-   ASSERT_COMPILE(MyUnionTypeDictionary,TestUnionFieldNameBuilder,testUnionNameAddress);
+{
+    TestUnionFieldNameFunction* testUnionNameAddress;
+    ASSERT_COMPILE(MyUnionTypeDictionary, TestUnionFieldNameBuilder, testUnionNameAddress);
 
-   testUnionNameAddress();
-   }
-
+    testUnionNameAddress();
+}

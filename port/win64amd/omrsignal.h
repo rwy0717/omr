@@ -26,19 +26,17 @@
 #include "omrcomp.h"
 
 typedef struct J9Win32SignalInfo {
-	uint32_t systemType;
-	uint32_t portLibType;
-	void *handlerAddress;
-	void *handlerAddress2;
-	struct _EXCEPTION_RECORD *ExceptionRecord;
-	struct _CONTEXT *ContextRecord;
-	void *moduleBaseAddress;
-	uintptr_t offsetInDLL;
-	char moduleName[_MAX_PATH];
-	BOOLEAN deferToTryExcept;
-	BOOLEAN tryExceptHandlerIgnore;
+    uint32_t systemType;
+    uint32_t portLibType;
+    void* handlerAddress;
+    void* handlerAddress2;
+    struct _EXCEPTION_RECORD* ExceptionRecord;
+    struct _CONTEXT* ContextRecord;
+    void* moduleBaseAddress;
+    uintptr_t offsetInDLL;
+    char moduleName[_MAX_PATH];
+    BOOLEAN deferToTryExcept;
+    BOOLEAN tryExceptHandlerIgnore;
 } J9Win32SignalInfo;
 
-#endif     /* omrsignal_h */
-
-
+#endif /* omrsignal_h */

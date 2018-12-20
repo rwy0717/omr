@@ -30,26 +30,25 @@ class MM_EnvironmentBase;
 
 /**
  * Support for sectioning the heap into chunks useable by sweep (and compact).
- * 
+ *
  * @ingroup GC_Modron_Standard
  */
-class MM_SweepHeapSectioningSegmented : public MM_SweepHeapSectioning
-{
+class MM_SweepHeapSectioningSegmented : public MM_SweepHeapSectioning {
 private:
 protected:
-	virtual uintptr_t estimateTotalChunkCount(MM_EnvironmentBase *env);
-	virtual uintptr_t calculateActualChunkNumbers() const;
+    virtual uintptr_t estimateTotalChunkCount(MM_EnvironmentBase* env);
+    virtual uintptr_t calculateActualChunkNumbers() const;
 
 public:
-	static MM_SweepHeapSectioningSegmented *newInstance(MM_EnvironmentBase *env);
+    static MM_SweepHeapSectioningSegmented* newInstance(MM_EnvironmentBase* env);
 
-	virtual uintptr_t reassignChunks(MM_EnvironmentBase *env);
+    virtual uintptr_t reassignChunks(MM_EnvironmentBase* env);
 
-	MM_SweepHeapSectioningSegmented(MM_EnvironmentBase *env)
-		: MM_SweepHeapSectioning(env)
-	{
-		_typeId = __FUNCTION__;
-	}
+    MM_SweepHeapSectioningSegmented(MM_EnvironmentBase* env)
+        : MM_SweepHeapSectioning(env)
+    {
+        _typeId = __FUNCTION__;
+    }
 };
 
 #endif /* SWEEPSCHEMESECTIONINGSEGMENTED_HPP_ */

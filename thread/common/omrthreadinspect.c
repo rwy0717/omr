@@ -50,7 +50,6 @@
 
 static omrthread_library_t get_default_library(void);
 
-
 /**
  * Initialize a omrthread_monitor_walk_state_t structure used to walk the monitor pools.
  *
@@ -61,16 +60,15 @@ static omrthread_library_t get_default_library(void);
  * @see omrthread_monitor_walk
  *
  */
-void
-omrthread_monitor_init_walk(omrthread_monitor_walk_state_t *walkState)
+void omrthread_monitor_init_walk(omrthread_monitor_walk_state_t* walkState)
 {
-	omrthread_library_t lib = get_default_library();
-	ASSERT(lib);
-	ASSERT(lib->monitor_pool);
-	ASSERT(lib->monitor_pool->entries);
-	walkState->pool = lib->monitor_pool;
-	walkState->monitorIndex = 0;
-	walkState->lockTaken = FALSE;
+    omrthread_library_t lib = get_default_library();
+    ASSERT(lib);
+    ASSERT(lib->monitor_pool);
+    ASSERT(lib->monitor_pool->entries);
+    walkState->pool = lib->monitor_pool;
+    walkState->monitorIndex = 0;
+    walkState->lockTaken = FALSE;
 }
 
 /**
@@ -83,9 +81,11 @@ omrthread_monitor_init_walk(omrthread_monitor_walk_state_t *walkState)
  * these GLOBAL_* macros become nops, so no call is made to MACRO_SELF(),
  * and therefore there's no required reference to 'default_library'.
  *
- * @param[in] walkState This is a pointer to a omrthread_monitor_walk_state_t. It should be initialized using omrthread_monitor_init_walk
- * before calling omrthread_monitor_walk to start a new walk. (thread lib will be globally locked on the first call)
- * @return a pointer to a monitor, or NULL if all monitors walked (thread lib will be globally unlocked when NULL is returned).
+ * @param[in] walkState This is a pointer to a omrthread_monitor_walk_state_t. It should be initialized using
+ * omrthread_monitor_init_walk before calling omrthread_monitor_walk to start a new walk. (thread lib will be globally
+ * locked on the first call)
+ * @return a pointer to a monitor, or NULL if all monitors walked (thread lib will be globally unlocked when NULL is
+ * returned).
  *
  * @note As this is currently implemented, this must be called to walk ALL monitors. It can't
  * be used to look for a specific monitor and then quit because the GLOBAL_LOCK be taken when
@@ -95,27 +95,26 @@ omrthread_monitor_init_walk(omrthread_monitor_walk_state_t *walkState)
  * @see omrthread_monitor_walk_no_locking
  *
  */
-omrthread_monitor_t
-omrthread_monitor_walk(omrthread_monitor_walk_state_t *walkState)
+omrthread_monitor_t omrthread_monitor_walk(omrthread_monitor_walk_state_t* walkState)
 {
 
-	omrthread_monitor_t monitor = NULL;
+    omrthread_monitor_t monitor = NULL;
 
-	if (FALSE == walkState->lockTaken) {
-		/* Take the lock if we are starting the walk */
-		GLOBAL_LOCK(MACRO_SELF(), CALLER_MONITOR_WALK);
-		walkState->lockTaken = TRUE;
-	}
+    if (FALSE == walkState->lockTaken) {
+        /* Take the lock if we are starting the walk */
+        GLOBAL_LOCK(MACRO_SELF(), CALLER_MONITOR_WALK);
+        walkState->lockTaken = TRUE;
+    }
 
-	monitor = omrthread_monitor_walk_no_locking(walkState);
+    monitor = omrthread_monitor_walk_no_locking(walkState);
 
-	if (NULL == monitor) {
-		/* Release the lock if we have finished the walk */
-		walkState->lockTaken = FALSE;
-		GLOBAL_UNLOCK(MACRO_SELF());
-	}
+    if (NULL == monitor) {
+        /* Release the lock if we have finished the walk */
+        walkState->lockTaken = FALSE;
+        GLOBAL_UNLOCK(MACRO_SELF());
+    }
 
-	return monitor;
+    return monitor;
 }
 
 /**
@@ -132,34 +131,33 @@ omrthread_monitor_walk(omrthread_monitor_walk_state_t *walkState)
  * @see omrthread_monitor_walk
  *
  */
-omrthread_monitor_t
-omrthread_monitor_walk_no_locking(omrthread_monitor_walk_state_t *walkState)
+omrthread_monitor_t omrthread_monitor_walk_no_locking(omrthread_monitor_walk_state_t* walkState)
 {
-	omrthread_monitor_t monitor = NULL;
+    omrthread_monitor_t monitor = NULL;
 
-	if (walkState->monitorIndex >= MONITOR_POOL_SIZE) {
-		if (NULL == (walkState->pool = walkState->pool->next)) {
-			/* we've walked all the monitors, final monitor was in use */
-			return NULL;
-		}
-		walkState->monitorIndex = 0;
-	}
+    if (walkState->monitorIndex >= MONITOR_POOL_SIZE) {
+        if (NULL == (walkState->pool = walkState->pool->next)) {
+            /* we've walked all the monitors, final monitor was in use */
+            return NULL;
+        }
+        walkState->monitorIndex = 0;
+    }
 
-	monitor = &(walkState->pool->entries[walkState->monitorIndex]);
+    monitor = &(walkState->pool->entries[walkState->monitorIndex]);
 
-	while (FREE_TAG == monitor->count) {
-		walkState->monitorIndex++;
-		if (walkState->monitorIndex >= MONITOR_POOL_SIZE) {
-			if (NULL == (walkState->pool = walkState->pool->next)) {
-				/* we've walked all the monitors, final monitor was free */
-				return NULL;
-			}
-			walkState->monitorIndex = 0;
-		}
-		monitor = &(walkState->pool->entries[walkState->monitorIndex]);
-	}
-	walkState->monitorIndex++;
-	return monitor;
+    while (FREE_TAG == monitor->count) {
+        walkState->monitorIndex++;
+        if (walkState->monitorIndex >= MONITOR_POOL_SIZE) {
+            if (NULL == (walkState->pool = walkState->pool->next)) {
+                /* we've walked all the monitors, final monitor was free */
+                return NULL;
+            }
+            walkState->monitorIndex = 0;
+        }
+        monitor = &(walkState->pool->entries[walkState->monitorIndex]);
+    }
+    walkState->monitorIndex++;
+    return monitor;
 }
 
 /**
@@ -170,11 +168,7 @@ omrthread_monitor_walk_no_locking(omrthread_monitor_walk_state_t *walkState)
  * @return pointer to location of TLS or NULL on failure.
  *
  */
-void *
-omrthread_tls_get(omrthread_t thread, omrthread_tls_key_t key)
-{
-	return (void *)READU(thread->tls[key - 1]);
-}
+void* omrthread_tls_get(omrthread_t thread, omrthread_tls_key_t key) { return (void*)READU(thread->tls[key - 1]); }
 
 /**
  * Return a thread's scheduling priority.
@@ -184,13 +178,11 @@ omrthread_tls_get(omrthread_t thread, omrthread_tls_key_t key)
  * @see omrthread_create, omrthread_set_priority
  *
  */
-uintptr_t
-omrthread_get_priority(omrthread_t thread)
+uintptr_t omrthread_get_priority(omrthread_t thread)
 {
-	ASSERT(thread);
-	return READU(thread->priority);
+    ASSERT(thread);
+    return READU(thread->priority);
 }
-
 
 /**
  * Return a thread's flags.
@@ -200,23 +192,22 @@ omrthread_get_priority(omrthread_t thread)
  * @return flags
  *
  */
-uintptr_t
-omrthread_get_flags(omrthread_t thread, omrthread_monitor_t *blocker)
+uintptr_t omrthread_get_flags(omrthread_t thread, omrthread_monitor_t* blocker)
 {
-	uintptr_t flags;
+    uintptr_t flags;
 
-	ASSERT(thread);
+    ASSERT(thread);
 
-	OMROSMUTEX_ENTER(thread->mutex);
+    OMROSMUTEX_ENTER(thread->mutex);
 
-	if (blocker) {
-		*blocker = READP(thread->monitor);
-	}
-	flags = READU(thread->flags);
+    if (blocker) {
+        *blocker = READP(thread->monitor);
+    }
+    flags = READU(thread->flags);
 
-	OMROSMUTEX_EXIT(thread->mutex);
+    OMROSMUTEX_EXIT(thread->mutex);
 
-	return flags;
+    return flags;
 }
 
 /**
@@ -229,28 +220,27 @@ omrthread_get_flags(omrthread_t thread, omrthread_monitor_t *blocker)
  * @param[out] state
  * @return void
  */
-void
-omrthread_get_state(omrthread_t thread, omrthread_state_t *const state)
+void omrthread_get_state(omrthread_t thread, omrthread_state_t* const state)
 {
-	if (!thread) {
-		return;
-	}
+    if (!thread) {
+        return;
+    }
 
-	if (!state) {
-		return;
-	}
+    if (!state) {
+        return;
+    }
 
-	OMROSMUTEX_ENTER(thread->mutex);
-	state->flags = READU(thread->flags);
-	state->blocker = READP(thread->monitor);
-	if (state->blocker) {
-		state->owner = READP(state->blocker->owner);
-		state->count = READU(state->blocker->count);
-	} else {
-		state->owner = 0;
-		state->count = 0;
-	}
-	OMROSMUTEX_EXIT(thread->mutex);
+    OMROSMUTEX_ENTER(thread->mutex);
+    state->flags = READU(thread->flags);
+    state->blocker = READP(thread->monitor);
+    if (state->blocker) {
+        state->owner = READP(state->blocker->owner);
+        state->count = READU(state->blocker->count);
+    } else {
+        state->owner = 0;
+        state->count = 0;
+    }
+    OMROSMUTEX_EXIT(thread->mutex);
 }
 
 /**
@@ -260,13 +250,11 @@ omrthread_get_state(omrthread_t thread, omrthread_state_t *const state)
  * @return OS id
  * @see omrthread_get_ras_tid
  */
-uintptr_t
-omrthread_get_osId(omrthread_t thread)
+uintptr_t omrthread_get_osId(omrthread_t thread)
 {
-	ASSERT(thread);
-	return READU(thread->tid);
+    ASSERT(thread);
+    return READU(thread->tid);
 }
-
 
 /**
  * Return a monitor's name.
@@ -277,11 +265,10 @@ omrthread_get_osId(omrthread_t thread)
  * @see omrthread_monitor_init_with_name
  *
  */
-char *
-omrthread_monitor_get_name(omrthread_monitor_t monitor)
+char* omrthread_monitor_get_name(omrthread_monitor_t monitor)
 {
-	ASSERT(monitor);
-	return READP(monitor->name);
+    ASSERT(monitor);
+    return READP(monitor->name);
 }
 
 /**
@@ -296,58 +283,57 @@ omrthread_monitor_get_name(omrthread_monitor_t monitor)
  * @retval J9THREAD_ERR_GETSTACK for stack range retrieval failure. thread->errno set
  * @retval J9THREAD_ERR_UNSUPPORTED_PLAT for unsupported platform
  */
-uintptr_t
-omrthread_get_stack_range(omrthread_t thread, void **stackStart, void **stackEnd)
+uintptr_t omrthread_get_stack_range(omrthread_t thread, void** stackStart, void** stackEnd)
 {
 
 #if defined(LINUX)
-	pthread_attr_t attr;
-	OSTHREAD osTid = thread->handle;
-	uintptr_t rc = 0;
-	size_t stackSize;
+    pthread_attr_t attr;
+    OSTHREAD osTid = thread->handle;
+    uintptr_t rc = 0;
+    size_t stackSize;
 
-	if (!thread) {
-		return J9THREAD_ERR_INVALID_THREAD;
-	}
+    if (!thread) {
+        return J9THREAD_ERR_INVALID_THREAD;
+    }
 
-	/* Retrieve the pthread_attr_t from the thread */
-	if ((rc = pthread_getattr_np(osTid, &attr)) != 0) {
-		thread->os_errno = rc;
-		return (J9THREAD_ERR_GETATTR_NP | J9THREAD_ERR_OS_ERRNO_SET);
-	}
+    /* Retrieve the pthread_attr_t from the thread */
+    if ((rc = pthread_getattr_np(osTid, &attr)) != 0) {
+        thread->os_errno = rc;
+        return (J9THREAD_ERR_GETATTR_NP | J9THREAD_ERR_OS_ERRNO_SET);
+    }
 
-	/* Retrieve base stack address and stack size from pthread_attr_t */
+    /* Retrieve base stack address and stack size from pthread_attr_t */
 #if (_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600)
-	if ((rc = pthread_attr_getstack(&attr, stackStart, &stackSize)) != 0) {
-		thread->os_errno = rc;
-		return (J9THREAD_ERR_GETSTACK | J9THREAD_ERR_OS_ERRNO_SET);
-	}
+    if ((rc = pthread_attr_getstack(&attr, stackStart, &stackSize)) != 0) {
+        thread->os_errno = rc;
+        return (J9THREAD_ERR_GETSTACK | J9THREAD_ERR_OS_ERRNO_SET);
+    }
 #else
-	if ((rc = pthread_attr_getstackaddr(&attr, stackStart)) != 0) {
-		thread->os_errno = rc;
-		return (J9THREAD_ERR_GETSTACK | J9THREAD_ERR_OS_ERRNO_SET);
-	}
+    if ((rc = pthread_attr_getstackaddr(&attr, stackStart)) != 0) {
+        thread->os_errno = rc;
+        return (J9THREAD_ERR_GETSTACK | J9THREAD_ERR_OS_ERRNO_SET);
+    }
 
-	if ((rc = pthread_attr_getstacksize(&attr, &stackSize)) != 0) {
-		thread->os_errno = rc;
-		return (J9THREAD_ERR_GETSTACK | J9THREAD_ERR_OS_ERRNO_SET);
-	}
+    if ((rc = pthread_attr_getstacksize(&attr, &stackSize)) != 0) {
+        thread->os_errno = rc;
+        return (J9THREAD_ERR_GETSTACK | J9THREAD_ERR_OS_ERRNO_SET);
+    }
 #endif /* #if (_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) */
-	pthread_attr_destroy(&attr);
+    pthread_attr_destroy(&attr);
 
-	/* On Linux, native stack grows from high to low memory */
-	*stackEnd = (void *)((uintptr_t)*stackStart + stackSize);
-	return J9THREAD_SUCCESS;
+    /* On Linux, native stack grows from high to low memory */
+    *stackEnd = (void*)((uintptr_t)*stackStart + stackSize);
+    return J9THREAD_SUCCESS;
 #elif defined(OSX)
-	OSTHREAD osTid = thread->handle;
-	size_t stackSize = 0;
+    OSTHREAD osTid = thread->handle;
+    size_t stackSize = 0;
 
-	*stackStart = pthread_get_stackaddr_np(osTid);
-	stackSize = pthread_get_stacksize_np(osTid);
-	*stackEnd = (void *)((uintptr_t)*stackStart + stackSize);
-	return J9THREAD_SUCCESS;
+    *stackStart = pthread_get_stackaddr_np(osTid);
+    stackSize = pthread_get_stacksize_np(osTid);
+    *stackEnd = (void*)((uintptr_t)*stackStart + stackSize);
+    return J9THREAD_SUCCESS;
 #else /* defined(OSX) */
-	return J9THREAD_ERR_UNSUPPORTED_PLAT;
+    return J9THREAD_ERR_UNSUPPORTED_PLAT;
 #endif /* defined(LINUX) */
 }
 
@@ -359,16 +345,14 @@ omrthread_get_stack_range(omrthread_t thread, void **stackStart, void **stackEnd
  * @return pointer to the monitor's tracing information (may be NULL)
  *
  */
-J9ThreadMonitorTracing *
-omrthread_monitor_get_tracing(omrthread_monitor_t monitor)
+J9ThreadMonitorTracing* omrthread_monitor_get_tracing(omrthread_monitor_t monitor)
 {
-	ASSERT(monitor);
+    ASSERT(monitor);
 
-	return READP(monitor->tracing);
+    return READP(monitor->tracing);
 }
 
 #endif /* OMR_THR_JLM */
-
 
 /**
  * Return the default threading library.
@@ -376,12 +360,11 @@ omrthread_monitor_get_tracing(omrthread_monitor_t monitor)
  * @return pointer to the default threading library
  *
  */
-static omrthread_library_t
-get_default_library(void)
+static omrthread_library_t get_default_library(void)
 {
-#if defined (J9VM_OUT_OF_PROCESS)
-	return dbgGetThreadLibrary();
+#if defined(J9VM_OUT_OF_PROCESS)
+    return dbgGetThreadLibrary();
 #else
-	return GLOBAL_DATA(default_library);
+    return GLOBAL_DATA(default_library);
 #endif
 }

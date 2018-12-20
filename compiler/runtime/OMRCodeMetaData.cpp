@@ -21,26 +21,20 @@
 
 #include "runtime/OMRCodeMetaData.hpp"
 
-#include "compile/Compilation.hpp"              // for Compilation, comp
-#include "compile/ResolvedMethod.hpp"           // for TR_ResolvedMethod
+#include "compile/Compilation.hpp" // for Compilation, comp
+#include "compile/ResolvedMethod.hpp" // for TR_ResolvedMethod
 
+TR::CodeMetaData* OMR::CodeMetaData::self() { return static_cast<TR::CodeMetaData*>(this); }
 
-TR::CodeMetaData *
-OMR::CodeMetaData::self()
-   {
-   return static_cast<TR::CodeMetaData *>(this);
-   }
+OMR::CodeMetaData::CodeMetaData(TR::Compilation* comp)
+{
+    _codeAllocStart = comp->cg()->getBinaryBufferStart();
+    _codeAllocSize = comp->cg()->getEstimatedCodeLength();
 
-OMR::CodeMetaData::CodeMetaData(TR::Compilation *comp)
-   {
-   _codeAllocStart = comp->cg()->getBinaryBufferStart();
-   _codeAllocSize = comp->cg()->getEstimatedCodeLength();
+    _interpreterEntryPC = comp->cg()->getCodeStart();
 
-   _interpreterEntryPC = comp->cg()->getCodeStart();
-   
-   _compiledEntryPC = _interpreterEntryPC;
-   _compiledEndPC = comp->cg()->getCodeEnd();
+    _compiledEntryPC = _interpreterEntryPC;
+    _compiledEndPC = comp->cg()->getCodeEnd();
 
-   _hotness = comp->cg()->getMethodHotness();
-   }
-
+    _hotness = comp->cg()->getMethodHotness();
+}

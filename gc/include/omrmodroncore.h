@@ -49,19 +49,28 @@ typedef U_8 Card;
  * Both versions of each definition must match exactly.
  */
 
-/* means that this card requires no special handling in the next collection as a result of previous collection or mutator activity */
+/* means that this card requires no special handling in the next collection as a result of previous collection or
+ * mutator activity */
 #define CARD_CLEAN 0x00
 /* means that this card has been changed by the mutator since the collector last processed it */
 #define CARD_DIRTY 0x01
-/* means that a PGC has viewed the card but the next GMP increment (or SYS/OOM fall-back) must also process the card (since it could have hidden objects) */
+/* means that a PGC has viewed the card but the next GMP increment (or SYS/OOM fall-back) must also process the card
+ * (since it could have hidden objects) */
 #define CARD_GMP_MUST_SCAN 0x02
-/* means that a GMP has viewed the card but the next PGC increment must also process the card (since it might have unseen inter-region references - the GMP has a smaller live set so it wouldn't see them nor does it update the RSLists) */
+/* means that a GMP has viewed the card but the next PGC increment must also process the card (since it might have
+ * unseen inter-region references - the GMP has a smaller live set so it wouldn't see them nor does it update the
+ * RSLists) */
 #define CARD_PGC_MUST_SCAN 0x03
-/* largely equivalent to CARD_PGC_MUST_SCAN but can only exist between RSCL flushing and the end of PGC mark and has the special connotation that the only objects, in this card, which refer to other regions have their remembered bit set */
+/* largely equivalent to CARD_PGC_MUST_SCAN but can only exist between RSCL flushing and the end of PGC mark and has the
+ * special connotation that the only objects, in this card, which refer to other regions have their remembered bit set
+ */
 #define CARD_REMEMBERED 0x04
-/* largely equivalent to CARD_DIRTY but can only exist between RSCL flushing and the end of PGC mark and has the special connotation that the only objects, in this card, which refer to other regions have their remembered bit set */
+/* largely equivalent to CARD_DIRTY but can only exist between RSCL flushing and the end of PGC mark and has the special
+ * connotation that the only objects, in this card, which refer to other regions have their remembered bit set */
 #define CARD_REMEMBERED_AND_GMP_SCAN 0x05
-/* used to state that this card contains objects which refer to other regions but all of those who do have their remembered bit set and are not yet in the region's RSCL - the compact treats this much like PGC_MUST_SCAN in that it may promote it to GMP_MUST_SCAN if a GMP is active */
+/* used to state that this card contains objects which refer to other regions but all of those who do have their
+ * remembered bit set and are not yet in the region's RSCL - the compact treats this much like PGC_MUST_SCAN in that it
+ * may promote it to GMP_MUST_SCAN if a GMP is active */
 #define CARD_MARK_COMPACT_TRANSITION 0x06
 /* used when a value must be passed which is considered uninitialized or otherwise invalid */
 #define CARD_INVALID 0xFF

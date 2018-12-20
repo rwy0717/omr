@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #if !defined(OBJECTMAP_HPP_)
 #define OBJECTMAP_HPP_
 
@@ -46,144 +45,139 @@ class MM_CollectorLanguageInterface;
  * Tracks the location of valid objects.  This is primarily used along side a
  * conservative object scanner, which may try to scan invalid objects.
  */
-class MM_ObjectMap : public MM_BaseVirtual
-{
-	/*
-	 * Data members
-	 */
+class MM_ObjectMap : public MM_BaseVirtual {
+    /*
+     * Data members
+     */
 private:
-	MM_GCExtensionsBase *_extensions;
-	MM_MarkMap *_objectMap;
-	void *_heapBase;
-	void *_heapTop;
-	void *_committedHeapBase;
-	void *_committedHeapTop;
+    MM_GCExtensionsBase* _extensions;
+    MM_MarkMap* _objectMap;
+    void* _heapBase;
+    void* _heapTop;
+    void* _committedHeapBase;
+    void* _committedHeapTop;
+
 protected:
 public:
-
-	/*
-	 * Function members
-	 */
+    /*
+     * Function members
+     */
 private:
-	MMINLINE void
-	assertSaneObjectPtr(MM_EnvironmentBase *env, omrobjectptr_t objectPtr)
-	{
-		Assert_GC_true_with_message(env, objectPtr != J9_INVALID_OBJECT, "Invalid object pointer %p\n", objectPtr);
-		Assert_MM_objectAligned(env, objectPtr);
-		Assert_GC_true_with_message3(env, isHeapObject(objectPtr), "Object %p not in heap range [%p,%p)\n", objectPtr, _heapBase, _heapTop);
-	}
+    MMINLINE void assertSaneObjectPtr(MM_EnvironmentBase* env, omrobjectptr_t objectPtr)
+    {
+        Assert_GC_true_with_message(env, objectPtr != J9_INVALID_OBJECT, "Invalid object pointer %p\n", objectPtr);
+        Assert_MM_objectAligned(env, objectPtr);
+        Assert_GC_true_with_message3(
+            env, isHeapObject(objectPtr), "Object %p not in heap range [%p,%p)\n", objectPtr, _heapBase, _heapTop);
+    }
 
 protected:
-	virtual bool initialize(MM_EnvironmentBase *env);
-	virtual void tearDown(MM_EnvironmentBase *env);
+    virtual bool initialize(MM_EnvironmentBase* env);
+    virtual void tearDown(MM_EnvironmentBase* env);
 
 public:
-	static MM_ObjectMap *newInstance(MM_EnvironmentBase *env);
-	virtual void kill(MM_EnvironmentBase *env);
+    static MM_ObjectMap* newInstance(MM_EnvironmentBase* env);
+    virtual void kill(MM_EnvironmentBase* env);
 
-	uintptr_t numMarkBitsInRange(MM_EnvironmentBase *env, void *heapBase, void *heapTop);
-	uintptr_t setMarkBitsInRange(MM_EnvironmentBase *env, void *heapBase, void *heapTop, bool clear);
-	uintptr_t numHeapBytesPerMarkMapByte() { return (_objectMap->getObjectGrain() * BITS_PER_BYTE); };
+    uintptr_t numMarkBitsInRange(MM_EnvironmentBase* env, void* heapBase, void* heapTop);
+    uintptr_t setMarkBitsInRange(MM_EnvironmentBase* env, void* heapBase, void* heapTop, bool clear);
+    uintptr_t numHeapBytesPerMarkMapByte() { return (_objectMap->getObjectGrain() * BITS_PER_BYTE); };
 
-	MMINLINE MM_MarkMap *getMarkMap() { return _objectMap; };
-	MMINLINE void setMarkMap(MM_MarkMap *markMap) { _objectMap = markMap; };
-	
-	bool heapAddRange(MM_EnvironmentBase *env, MM_MemorySubSpace *subspace, uintptr_t size, void *lowAddress, void *highAddress);
-	bool heapRemoveRange(MM_EnvironmentBase *env, MM_MemorySubSpace *subspace, uintptr_t size, void *lowAddress, void *highAddress, void *lowValidAddress, void *highValidAddress);
+    MMINLINE MM_MarkMap* getMarkMap() { return _objectMap; };
+    MMINLINE void setMarkMap(MM_MarkMap* markMap) { _objectMap = markMap; };
 
-	MMINLINE bool
-	isHeapObject(omrobjectptr_t objectPtr)
-	{
-		return ((_heapBase <= (uint8_t *)objectPtr) && (_heapTop > (uint8_t *)objectPtr));
-	}
+    bool heapAddRange(
+        MM_EnvironmentBase* env, MM_MemorySubSpace* subspace, uintptr_t size, void* lowAddress, void* highAddress);
+    bool heapRemoveRange(MM_EnvironmentBase* env, MM_MemorySubSpace* subspace, uintptr_t size, void* lowAddress,
+        void* highAddress, void* lowValidAddress, void* highValidAddress);
 
-	MMINLINE MM_MarkMap * getObjectMap() { return _objectMap; }
+    MMINLINE bool isHeapObject(omrobjectptr_t objectPtr)
+    {
+        return ((_heapBase <= (uint8_t*)objectPtr) && (_heapTop > (uint8_t*)objectPtr));
+    }
 
-	MMINLINE bool
-	isCommittedHeapObject(omrobjectptr_t objectPtr)
-	{
-		return ((_committedHeapBase <= (uint8_t *)objectPtr) && (_committedHeapTop > (uint8_t *)objectPtr));
-	}
+    MMINLINE MM_MarkMap* getObjectMap() { return _objectMap; }
 
-	MMINLINE bool
-	inlineMarkValidObjectNoCheckNoAtomic(MM_EnvironmentBase *env, omrobjectptr_t objectPtr)
-	{
-		assertSaneObjectPtr(env, objectPtr);
+    MMINLINE bool isCommittedHeapObject(omrobjectptr_t objectPtr)
+    {
+        return ((_committedHeapBase <= (uint8_t*)objectPtr) && (_committedHeapTop > (uint8_t*)objectPtr));
+    }
 
-		if (!_objectMap->setBit(objectPtr)) {
-			return false;
-		}
+    MMINLINE bool inlineMarkValidObjectNoCheckNoAtomic(MM_EnvironmentBase* env, omrobjectptr_t objectPtr)
+    {
+        assertSaneObjectPtr(env, objectPtr);
 
-		return true;
-	}
+        if (!_objectMap->setBit(objectPtr)) {
+            return false;
+        }
 
-	MMINLINE bool
-	inlineMarkValidObjectNoAtomic(MM_EnvironmentBase *env, omrobjectptr_t objectPtr)
-	{
-		bool didMark = false;
+        return true;
+    }
 
-		if (NULL != objectPtr) {
-			didMark = inlineMarkValidObjectNoCheckNoAtomic(env, objectPtr);
-		}
+    MMINLINE bool inlineMarkValidObjectNoAtomic(MM_EnvironmentBase* env, omrobjectptr_t objectPtr)
+    {
+        bool didMark = false;
 
-		return didMark;
-	}
+        if (NULL != objectPtr) {
+            didMark = inlineMarkValidObjectNoCheckNoAtomic(env, objectPtr);
+        }
 
-	bool markValidObjectNoAtomic(MM_EnvironmentBase *env, omrobjectptr_t objectPtr);
+        return didMark;
+    }
 
-	MMINLINE bool
-	inlineMarkValidObjectNoCheck(MM_EnvironmentBase *env, omrobjectptr_t objectPtr)
-	{
-		assertSaneObjectPtr(env, objectPtr);
+    bool markValidObjectNoAtomic(MM_EnvironmentBase* env, omrobjectptr_t objectPtr);
 
-		if (!_objectMap->atomicSetBit(objectPtr)) {
-			return false;
-		}
+    MMINLINE bool inlineMarkValidObjectNoCheck(MM_EnvironmentBase* env, omrobjectptr_t objectPtr)
+    {
+        assertSaneObjectPtr(env, objectPtr);
 
-		return true;
-	}
+        if (!_objectMap->atomicSetBit(objectPtr)) {
+            return false;
+        }
 
-	MMINLINE bool
-	inlineMarkValidObject(MM_EnvironmentBase *env, omrobjectptr_t objectPtr)
-	{
-		bool didMark = false;
+        return true;
+    }
 
-		if (NULL != objectPtr) {
-			didMark = inlineMarkValidObjectNoCheck(env, objectPtr);
-		}
+    MMINLINE bool inlineMarkValidObject(MM_EnvironmentBase* env, omrobjectptr_t objectPtr)
+    {
+        bool didMark = false;
 
-		return didMark;
-	}
+        if (NULL != objectPtr) {
+            didMark = inlineMarkValidObjectNoCheck(env, objectPtr);
+        }
 
-	bool markValidObject(MM_EnvironmentBase *env, omrobjectptr_t objectPtr);
+        return didMark;
+    }
 
-	MMINLINE bool
-	isValidObject(omrobjectptr_t objectPtr)
-	{
-		bool shouldCheck = isCommittedHeapObject(objectPtr) && OMR_ARE_NO_BITS_SET((uintptr_t)objectPtr, _extensions->getObjectAlignmentInBytes() - 1);
-		if (shouldCheck) {
-			return _objectMap->isBitSet(objectPtr);
-		}
-		/* Everything else is not a valid object. */
-		return false;
-	}
+    bool markValidObject(MM_EnvironmentBase* env, omrobjectptr_t objectPtr);
 
-	/**
-	 * Walk the TLH, marking all allocated objects in the object map.
-	 */
-	void markValidObjectForRange(MM_EnvironmentBase *env, void *heapBase, void *heapTop);
+    MMINLINE bool isValidObject(omrobjectptr_t objectPtr)
+    {
+        bool shouldCheck = isCommittedHeapObject(objectPtr)
+            && OMR_ARE_NO_BITS_SET((uintptr_t)objectPtr, _extensions->getObjectAlignmentInBytes() - 1);
+        if (shouldCheck) {
+            return _objectMap->isBitSet(objectPtr);
+        }
+        /* Everything else is not a valid object. */
+        return false;
+    }
 
-	MM_ObjectMap(MM_EnvironmentBase *env)
-		: MM_BaseVirtual()
-		, _extensions(env->getExtensions())
-		, _objectMap(NULL)
-		, _heapBase(NULL)
-		, _heapTop(NULL)
-		, _committedHeapBase(NULL)
-		, _committedHeapTop(NULL)
-	{
-		_typeId = __FUNCTION__;
-	}
+    /**
+     * Walk the TLH, marking all allocated objects in the object map.
+     */
+    void markValidObjectForRange(MM_EnvironmentBase* env, void* heapBase, void* heapTop);
+
+    MM_ObjectMap(MM_EnvironmentBase* env)
+        : MM_BaseVirtual()
+        , _extensions(env->getExtensions())
+        , _objectMap(NULL)
+        , _heapBase(NULL)
+        , _heapTop(NULL)
+        , _committedHeapBase(NULL)
+        , _committedHeapTop(NULL)
+    {
+        _typeId = __FUNCTION__;
+    }
 };
 
 #endif /* defined(OMR_GC_OBJECT_MAP) */

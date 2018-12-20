@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #ifndef ATOMICOPS_INCL
 #define ATOMICOPS_INCL
 
@@ -31,24 +30,22 @@
  * Int32 / Int64 atomicadd() respectively
  */
 
-class AtomicInt32Add : public OMR::JitBuilder::MethodBuilder
-   {
-   private:
-   OMR::JitBuilder::IlType *pInt32;
+class AtomicInt32Add : public OMR::JitBuilder::MethodBuilder {
+private:
+    OMR::JitBuilder::IlType* pInt32;
 
-   public:
-   AtomicInt32Add(OMR::JitBuilder::TypeDictionary *);
-   virtual bool buildIL();
-   };
+public:
+    AtomicInt32Add(OMR::JitBuilder::TypeDictionary*);
+    virtual bool buildIL();
+};
 
-class AtomicInt64Add : public OMR::JitBuilder::MethodBuilder
-   {   
-   private:
-   OMR::JitBuilder::IlType *pInt64;
+class AtomicInt64Add : public OMR::JitBuilder::MethodBuilder {
+private:
+    OMR::JitBuilder::IlType* pInt64;
 
-   public:
-   AtomicInt64Add(OMR::JitBuilder::TypeDictionary *);
-   virtual bool buildIL();
-   };
+public:
+    AtomicInt64Add(OMR::JitBuilder::TypeDictionary*);
+    virtual bool buildIL();
+};
 
 #endif // !defined(ATOMICOPS_INCL)

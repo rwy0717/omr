@@ -30,24 +30,19 @@
  */
 #include "omrcomp.h"
 
+uintptr_t omrsl_close_shared_library(struct OMRPortLibrary* portLibrary, uintptr_t descriptor);
 
+uintptr_t omrsl_lookup_name(
+    struct OMRPortLibrary* portLibrary, uintptr_t descriptor, char* name, uintptr_t* func, const char* argSignature);
 
-uintptr_t
-omrsl_close_shared_library(struct OMRPortLibrary *portLibrary, uintptr_t descriptor);
+uintptr_t omrsl_open_system_library(
+    struct OMRPortLibrary* portLibrary, char* name, uintptr_t* descriptor, uintptr_t flags);
 
-uintptr_t
-omrsl_lookup_name(struct OMRPortLibrary *portLibrary, uintptr_t descriptor, char *name, uintptr_t *func, const char *argSignature);
+uintptr_t omrsl_open_shared_library(
+    struct OMRPortLibrary* portLibrary, char* name, uintptr_t* descriptor, uintptr_t flags);
 
-uintptr_t
-omrsl_open_system_library(struct OMRPortLibrary *portLibrary, char *name, uintptr_t *descriptor, uintptr_t flags);
+void omrsl_shutdown(struct OMRPortLibrary* portLibrary);
 
-uintptr_t
-omrsl_open_shared_library(struct OMRPortLibrary *portLibrary, char *name, uintptr_t *descriptor, uintptr_t flags);
-
-void
-omrsl_shutdown(struct OMRPortLibrary *portLibrary);
-
-int32_t
-omrsl_startup(struct OMRPortLibrary *portLibrary);
+int32_t omrsl_startup(struct OMRPortLibrary* portLibrary);
 
 #endif /* omrsl_h */

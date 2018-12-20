@@ -31,28 +31,27 @@ extern "C" {
 
 #if defined(OMR_GC_DEBUG_ASSERTS)
 
-#define ASSERTION_MESSAGE_BUFFER_SIZE	((uintptr_t)256)
+#define ASSERTION_MESSAGE_BUFFER_SIZE ((uintptr_t)256)
 
 /*
  * The purpose of moving of the body of macros GC Assertions with message to separate function is to prevent inlining
  * on fast path to keep stack frames small
  */
 
-void
-omrGcDebugAssertionOutput(OMRPortLibrary *portLibrary, OMR_VMThread *omrVMThread, const char *format, ...)
+void omrGcDebugAssertionOutput(OMRPortLibrary* portLibrary, OMR_VMThread* omrVMThread, const char* format, ...)
 {
-	char buffer[ASSERTION_MESSAGE_BUFFER_SIZE];
+    char buffer[ASSERTION_MESSAGE_BUFFER_SIZE];
 
-	va_list args;
-	va_start(args, format);
-	portLibrary->str_vprintf(portLibrary, buffer, ASSERTION_MESSAGE_BUFFER_SIZE, format, args);
-	va_end(args);
+    va_list args;
+    va_start(args, format);
+    portLibrary->str_vprintf(portLibrary, buffer, ASSERTION_MESSAGE_BUFFER_SIZE, format, args);
+    va_end(args);
 
-	if (NULL != omrVMThread) {
-		/* omrVMThread might be NULL if Environment is partially initialized at startup time */
-		Trc_MM_AssertionWithMessage_outputMessage(omrVMThread->_language_vmthread, buffer);
-	}
-	portLibrary->tty_printf(portLibrary, "%s", buffer);
+    if (NULL != omrVMThread) {
+        /* omrVMThread might be NULL if Environment is partially initialized at startup time */
+        Trc_MM_AssertionWithMessage_outputMessage(omrVMThread->_language_vmthread, buffer);
+    }
+    portLibrary->tty_printf(portLibrary, "%s", buffer);
 }
 
 #endif /* defined(OMR_GC_DEBUG_ASSERTS) */

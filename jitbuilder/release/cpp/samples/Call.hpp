@@ -20,26 +20,23 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #ifndef CALL_INCL
 #define CALL_INCL
 
 #include "JitBuilder.hpp"
 
-typedef int32_t (CallFunctionType)(int32_t);
+typedef int32_t(CallFunctionType)(int32_t);
 
-class CallMethod : public OMR::JitBuilder::MethodBuilder
-   {
-   public:
-   CallMethod(OMR::JitBuilder::TypeDictionary *types);
-   virtual bool buildIL();
-   };
+class CallMethod : public OMR::JitBuilder::MethodBuilder {
+public:
+    CallMethod(OMR::JitBuilder::TypeDictionary* types);
+    virtual bool buildIL();
+};
 
-class ComputedCallMethod : public OMR::JitBuilder::MethodBuilder
-   {
-   public:
-   ComputedCallMethod(OMR::JitBuilder::TypeDictionary *types);
-   virtual bool buildIL();
-   };
+class ComputedCallMethod : public OMR::JitBuilder::MethodBuilder {
+public:
+    ComputedCallMethod(OMR::JitBuilder::TypeDictionary* types);
+    virtual bool buildIL();
+};
 
 #endif // !defined(CALL_INCL)

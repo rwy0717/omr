@@ -39,12 +39,11 @@
  *       jobname.
  *
  */
-void
-omrget_jobname(struct OMRPortLibrary *portLibrary, char *jobname, uintptr_t length)
+void omrget_jobname(struct OMRPortLibrary* portLibrary, char* jobname, uintptr_t length)
 {
-	if (jobname != NULL) {
-		if (length >= 5) {
-			strcpy(jobname, "%job");
-		}
-	}
+    if (jobname != NULL) {
+        if (length >= 5) {
+            strcpy(jobname, "%job");
+        }
+    }
 }

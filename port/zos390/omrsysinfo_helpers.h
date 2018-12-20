@@ -25,15 +25,15 @@
 
 #include "omrport.h"
 
-#define J9BYTES_PER_PAGE            4096		/* Size of main storage frame/virtual storage page/auxiliary storage slot */
+#define J9BYTES_PER_PAGE 4096 /* Size of main storage frame/virtual storage page/auxiliary storage slot */
 
 #if defined(__cplusplus)
 extern "C" {
 #endif /* __cplusplus */
 
 /**
-* End of portion extracted from the header "//'SYS1.SIEAHDR.H(IWMQVSH)'".
-*/
+ * End of portion extracted from the header "//'SYS1.SIEAHDR.H(IWMQVSH)'".
+ */
 
 /**
  * Function retrieves and populates memory usage statistics on a z/OS platform.
@@ -41,8 +41,7 @@ extern "C" {
  * @param[out] memInfo     Pointer to J9MemoryInfo struct which we populate with memory usage.
  * @return                 0 on success; negative value on failure.
  */
-int32_t
-retrieveZOSMemoryStats(struct OMRPortLibrary *portLibrary, struct J9MemoryInfo *memInfo);
+int32_t retrieveZOSMemoryStats(struct OMRPortLibrary* portLibrary, struct J9MemoryInfo* memInfo);
 
 /**
  * Function retrieves and populates processor usage statistics on a z/OS platform.
@@ -50,8 +49,7 @@ retrieveZOSMemoryStats(struct OMRPortLibrary *portLibrary, struct J9MemoryInfo *
  * @param[out] procInfo    Pointer to J9ProcessorInfos struct that we populate with processor usage.
  * @return                 0 on success; negative value on failure.
  */
-int32_t
-retrieveZOSProcessorStats(struct OMRPortLibrary *portLibrary, struct J9ProcessorInfos *procInfo);
+int32_t retrieveZOSProcessorStats(struct OMRPortLibrary* portLibrary, struct J9ProcessorInfos* procInfo);
 
 #if defined(__cplusplus)
 } /* extern "C" */

@@ -28,81 +28,77 @@
 #include <string.h>
 
 enum Symbol {
-	OR_OR,   /* || */
-	AND_AND, /* && */
-	OR,      /* |  */
-	XOR,     /* ^  */
-	AND,     /* &  */
-	EQ_EQ,   /* == */
-	NOT_EQ,  /* != */
-	GT,      /* >  */
-	LT,      /* <  */
-	GT_EQ,   /* >= */
-	LT_EQ,   /* <= */
-	GT_GT,   /* >> */
-	LT_LT,   /* << */
-	PLUS,    /* +  */
-	MINUS,   /* -  */
-	MULT,    /* *  */
-	DIV,     /* /  */
-	REM,     /* %  */
-	NOT,     /* !  */
-	TILDE,   /* ~  */
-	LPAREN,  /* (  */
-	RPAREN,  /* )  */
-	END      /* '\0' or null terminator */
+    OR_OR, /* || */
+    AND_AND, /* && */
+    OR, /* |  */
+    XOR, /* ^  */
+    AND, /* &  */
+    EQ_EQ, /* == */
+    NOT_EQ, /* != */
+    GT, /* >  */
+    LT, /* <  */
+    GT_EQ, /* >= */
+    LT_EQ, /* <= */
+    GT_GT, /* >> */
+    LT_LT, /* << */
+    PLUS, /* +  */
+    MINUS, /* -  */
+    MULT, /* *  */
+    DIV, /* /  */
+    REM, /* %  */
+    NOT, /* !  */
+    TILDE, /* ~  */
+    LPAREN, /* (  */
+    RPAREN, /* )  */
+    END /* '\0' or null terminator */
 };
 
-class MacroScanner
-{
+class MacroScanner {
 private:
-	char const *_cursor;
+    char const* _cursor;
 
-	static bool isDigit(char c, int32_t base);
-	static int32_t digitValue(char c);
+    static bool isDigit(char c, int32_t base);
+    static int32_t digitValue(char c);
 
-	void skipWhitespace();
+    void skipWhitespace();
 
 public:
-	MacroScanner(char const *cString)
-		: _cursor(cString)
-	{
-	}
+    MacroScanner(char const* cString)
+        : _cursor(cString)
+    {}
 
-	bool validTypeCast(bool *isSigned, size_t *bitWidth);
-	bool atSymbol(Symbol sym);
-	bool readNumber(int64_t *ret);
+    bool validTypeCast(bool* isSigned, size_t* bitWidth);
+    bool atSymbol(Symbol sym);
+    bool readNumber(int64_t* ret);
 };
 
-class MacroParser
-{
-/* data members */
+class MacroParser {
+    /* data members */
 private:
-	MacroScanner _scanner; /* handles reading characters from expression string */
+    MacroScanner _scanner; /* handles reading characters from expression string */
 
-/* function members */
+    /* function members */
 private:
-	bool logicalOr(int64_t *ret);
-	bool logicalAnd(int64_t *ret);
-	bool bitwiseOr(int64_t *ret);
-	bool bitwiseXor(int64_t *ret);
-	bool bitwiseAnd(int64_t *ret);
-	bool equalNeq(int64_t *ret);
-	bool comparison(int64_t *ret);
-	bool bitshift(int64_t *ret);
-	bool addSub(int64_t *ret);
-	bool multDivRem(int64_t *ret);
-	bool unaryExpression(int64_t *ret);
-	bool parentheses(int64_t *ret);
-	bool validSingleTerm(int64_t *ret);
+    bool logicalOr(int64_t* ret);
+    bool logicalAnd(int64_t* ret);
+    bool bitwiseOr(int64_t* ret);
+    bool bitwiseXor(int64_t* ret);
+    bool bitwiseAnd(int64_t* ret);
+    bool equalNeq(int64_t* ret);
+    bool comparison(int64_t* ret);
+    bool bitshift(int64_t* ret);
+    bool addSub(int64_t* ret);
+    bool multDivRem(int64_t* ret);
+    bool unaryExpression(int64_t* ret);
+    bool parentheses(int64_t* ret);
+    bool validSingleTerm(int64_t* ret);
 
 public:
-	MacroParser(char const *cExpression) :
-		_scanner(cExpression)
-	{
-	}
+    MacroParser(char const* cExpression)
+        : _scanner(cExpression)
+    {}
 
-	bool evaluate(int64_t *ret);
+    bool evaluate(int64_t* ret);
 };
 
 /**
@@ -113,16 +109,14 @@ public:
  *
  * @return: if the character is a valid digit in the specified base
  */
-bool
-MacroScanner::isDigit(char c, int32_t base)
+bool MacroScanner::isDigit(char c, int32_t base)
 {
-	if (base > 10) {
-		return (('0' <= c) && (c <= '9'))
-			|| (('a' <= c) && (c < ('a' + base - 10)))
-			|| (('A' <= c) && (c < ('A' + base - 10)));
-	} else {
-		return ('0' <= c) && (c < ('0' + base));
-	}
+    if (base > 10) {
+        return (('0' <= c) && (c <= '9')) || (('a' <= c) && (c < ('a' + base - 10)))
+            || (('A' <= c) && (c < ('A' + base - 10)));
+    } else {
+        return ('0' <= c) && (c < ('0' + base));
+    }
 }
 
 /**
@@ -134,24 +128,22 @@ MacroScanner::isDigit(char c, int32_t base)
  *
  * @return: integer value of the digit
  */
-int32_t
-MacroScanner::digitValue(char c)
+int32_t MacroScanner::digitValue(char c)
 {
-	if (('a' <= c) && (c <= 'z')) {
-		return 10 + c - 'a';
-	} else if (('A' <= c) && (c <= 'Z')) {
-		return 10 + c - 'A';
-	} else {
-		return c - '0';
-	}
+    if (('a' <= c) && (c <= 'z')) {
+        return 10 + c - 'a';
+    } else if (('A' <= c) && (c <= 'Z')) {
+        return 10 + c - 'A';
+    } else {
+        return c - '0';
+    }
 }
 
-void
-MacroScanner::skipWhitespace()
+void MacroScanner::skipWhitespace()
 {
-	while (isspace(*_cursor)) {
-		_cursor += 1;
-	}
+    while (isspace(*_cursor)) {
+        _cursor += 1;
+    }
 }
 
 /**
@@ -164,254 +156,251 @@ MacroScanner::skipWhitespace()
  *
  * @return: if the typecast expression is valid
  */
-bool
-MacroScanner::validTypeCast(bool *isSigned, size_t *bitWidth)
+bool MacroScanner::validTypeCast(bool* isSigned, size_t* bitWidth)
 {
-	char const *const savedCursor = _cursor;
+    char const* const savedCursor = _cursor;
 
-	if (!atSymbol(LPAREN)) {
-		return false;
-	}
+    if (!atSymbol(LPAREN)) {
+        return false;
+    }
 
-	skipWhitespace();
+    skipWhitespace();
 
-	const char *start = _cursor;
-	const char *end = start;
+    const char* start = _cursor;
+    const char* end = start;
 
-	while (isalpha(*_cursor)) {
-		do {
-			_cursor += 1;
-		} while (('_' == *_cursor) || isalnum(*_cursor));
+    while (isalpha(*_cursor)) {
+        do {
+            _cursor += 1;
+        } while (('_' == *_cursor) || isalnum(*_cursor));
 
-		end = _cursor;
+        end = _cursor;
 
-		skipWhitespace();
-	}
+        skipWhitespace();
+    }
 
-	if (!atSymbol(RPAREN)) {
-		_cursor = savedCursor;
-		return false;
-	}
+    if (!atSymbol(RPAREN)) {
+        _cursor = savedCursor;
+        return false;
+    }
 
-	return Type::isStandardType(start, (size_t)(end - start), isSigned, bitWidth);
+    return Type::isStandardType(start, (size_t)(end - start), isSigned, bitWidth);
 }
 
 /**
  * Check if the cursor is at a specific symbol, and if it is, consume the
  * symbol and move the cursor forward.
  */
-bool
-MacroScanner::atSymbol(Symbol sym)
+bool MacroScanner::atSymbol(Symbol sym)
 {
-	skipWhitespace();
+    skipWhitespace();
 
-	switch (sym) {
-	case OR_OR:
-		if (0 == strncmp(_cursor, "||", 2)) {
-			_cursor += 2;
-			return true;
-		}
-		break;
-	case AND_AND:
-		if (0 == strncmp(_cursor, "&&", 2)) {
-			_cursor += 2;
-			return true;
-		}
-		break;
-	case OR:
-		if (('|' == _cursor[0]) && ('|' != _cursor[1]) && ('=' != _cursor[1])) {
-			_cursor += 1;
-			return true;
-		}
-		break;
-	case XOR:
-		if ('^' == _cursor[0] && ('=' != _cursor[1])) {
-			_cursor += 1;
-			return true;
-		}
-		break;
-	case AND:
-		if (('&' == _cursor[0]) && ('&' != _cursor[1]) && ('=' != _cursor[1])) {
-			_cursor += 1;
-			return true;
-		}
-		break;
-	case EQ_EQ:
-		if (0 == strncmp(_cursor, "==", 2)) {
-			_cursor += 2;
-			return true;
-		}
-		break;
-	case NOT_EQ:
-		if (0 == strncmp(_cursor, "!=", 2)) {
-			_cursor += 2;
-			return true;
-		}
-		break;
-	case GT:
-		if (('>' == _cursor[0]) && ('>' != _cursor[1]) && ('=' != _cursor[1])) {
-			_cursor += 1;
-			return true;
-		}
-		break;
-	case LT:
-		if (('<' == _cursor[0]) && ('<' != _cursor[1]) && ('=' != _cursor[1])) {
-			_cursor += 1;
-			return true;
-		}
-		break;
-	case GT_EQ:
-		if (0 == strncmp(_cursor, ">=", 2)) {
-			_cursor += 2;
-			return true;
-		}
-		break;
-	case LT_EQ:
-		if (0 == strncmp(_cursor, "<=", 2)) {
-			_cursor += 2;
-			return true;
-		}
-		break;
-	case GT_GT:
-		if (0 == strncmp(_cursor, ">>", 2) && ('=' != _cursor[2])) {
-			_cursor += 2;
-			return true;
-		}
-		break;
-	case LT_LT:
-		if (0 == strncmp(_cursor, "<<", 2) && ('=' != _cursor[2])) {
-			_cursor += 2;
-			return true;
-		}
-		break;
-	case PLUS:
-		if (('+' == _cursor[0]) && ('+' != _cursor[1]) && ('=' != _cursor[1])) {
-			_cursor += 1;
-			return true;
-		}
-		break;
-	case MINUS:
-		if (('-' == _cursor[0]) && ('-' != _cursor[1]) && ('=' != _cursor[1])) {
-			_cursor += 1;
-			return true;
-		}
-		break;
-	case MULT:
-		if (('*' == _cursor[0]) && ('=' != _cursor[1])) {
-			_cursor += 1;
-			return true;
-		}
-		break;
-	case DIV:
-		if (('/' == _cursor[0]) && ('=' != _cursor[1])) {
-			_cursor += 1;
-			return true;
-		}
-		break;
-	case REM:
-		if (('%' == _cursor[0]) && ('=' != _cursor[1])) {
-			_cursor += 1;
-			return true;
-		}
-		break;
-	case NOT:
-		if (('!' == _cursor[0]) && ('=' != _cursor[1])) {
-			_cursor += 1;
-			return true;
-		}
-		break;
-	case TILDE:
-		if ('~' == _cursor[0]) {
-			_cursor += 1;
-			return true;
-		}
-		break;
-	case LPAREN:
-		if ('(' == _cursor[0]) {
-			_cursor += 1;
-			return true;
-		}
-		break;
-	case RPAREN:
-		if (')' == _cursor[0]) {
-			_cursor += 1;
-			return true;
-		}
-		break;
-	case END:
-		return '\0' == _cursor[0];
-	default:
-		break;
-	}
-	return false;
+    switch (sym) {
+    case OR_OR:
+        if (0 == strncmp(_cursor, "||", 2)) {
+            _cursor += 2;
+            return true;
+        }
+        break;
+    case AND_AND:
+        if (0 == strncmp(_cursor, "&&", 2)) {
+            _cursor += 2;
+            return true;
+        }
+        break;
+    case OR:
+        if (('|' == _cursor[0]) && ('|' != _cursor[1]) && ('=' != _cursor[1])) {
+            _cursor += 1;
+            return true;
+        }
+        break;
+    case XOR:
+        if ('^' == _cursor[0] && ('=' != _cursor[1])) {
+            _cursor += 1;
+            return true;
+        }
+        break;
+    case AND:
+        if (('&' == _cursor[0]) && ('&' != _cursor[1]) && ('=' != _cursor[1])) {
+            _cursor += 1;
+            return true;
+        }
+        break;
+    case EQ_EQ:
+        if (0 == strncmp(_cursor, "==", 2)) {
+            _cursor += 2;
+            return true;
+        }
+        break;
+    case NOT_EQ:
+        if (0 == strncmp(_cursor, "!=", 2)) {
+            _cursor += 2;
+            return true;
+        }
+        break;
+    case GT:
+        if (('>' == _cursor[0]) && ('>' != _cursor[1]) && ('=' != _cursor[1])) {
+            _cursor += 1;
+            return true;
+        }
+        break;
+    case LT:
+        if (('<' == _cursor[0]) && ('<' != _cursor[1]) && ('=' != _cursor[1])) {
+            _cursor += 1;
+            return true;
+        }
+        break;
+    case GT_EQ:
+        if (0 == strncmp(_cursor, ">=", 2)) {
+            _cursor += 2;
+            return true;
+        }
+        break;
+    case LT_EQ:
+        if (0 == strncmp(_cursor, "<=", 2)) {
+            _cursor += 2;
+            return true;
+        }
+        break;
+    case GT_GT:
+        if (0 == strncmp(_cursor, ">>", 2) && ('=' != _cursor[2])) {
+            _cursor += 2;
+            return true;
+        }
+        break;
+    case LT_LT:
+        if (0 == strncmp(_cursor, "<<", 2) && ('=' != _cursor[2])) {
+            _cursor += 2;
+            return true;
+        }
+        break;
+    case PLUS:
+        if (('+' == _cursor[0]) && ('+' != _cursor[1]) && ('=' != _cursor[1])) {
+            _cursor += 1;
+            return true;
+        }
+        break;
+    case MINUS:
+        if (('-' == _cursor[0]) && ('-' != _cursor[1]) && ('=' != _cursor[1])) {
+            _cursor += 1;
+            return true;
+        }
+        break;
+    case MULT:
+        if (('*' == _cursor[0]) && ('=' != _cursor[1])) {
+            _cursor += 1;
+            return true;
+        }
+        break;
+    case DIV:
+        if (('/' == _cursor[0]) && ('=' != _cursor[1])) {
+            _cursor += 1;
+            return true;
+        }
+        break;
+    case REM:
+        if (('%' == _cursor[0]) && ('=' != _cursor[1])) {
+            _cursor += 1;
+            return true;
+        }
+        break;
+    case NOT:
+        if (('!' == _cursor[0]) && ('=' != _cursor[1])) {
+            _cursor += 1;
+            return true;
+        }
+        break;
+    case TILDE:
+        if ('~' == _cursor[0]) {
+            _cursor += 1;
+            return true;
+        }
+        break;
+    case LPAREN:
+        if ('(' == _cursor[0]) {
+            _cursor += 1;
+            return true;
+        }
+        break;
+    case RPAREN:
+        if (')' == _cursor[0]) {
+            _cursor += 1;
+            return true;
+        }
+        break;
+    case END:
+        return '\0' == _cursor[0];
+    default:
+        break;
+    }
+    return false;
 }
 
 /**
  * Reads an integer number starting at the cursor in the expression string.
  * Number is read as a 64bit integer.
  */
-bool
-MacroScanner::readNumber(int64_t *ret)
+bool MacroScanner::readNumber(int64_t* ret)
 {
-	uint64_t retval = 0;
-	int32_t base = 0;
+    uint64_t retval = 0;
+    int32_t base = 0;
 
-	skipWhitespace();
+    skipWhitespace();
 
-	if (!(isdigit(_cursor[0]))) {
-		return false;
-	}
+    if (!(isdigit(_cursor[0]))) {
+        return false;
+    }
 
-	if ('0' == _cursor[0]) {
-		_cursor += 1;
-		if (('b' == _cursor[0]) || ('B' == _cursor[0])) {
-			base = 2;
-			_cursor += 1;
-		} else if (('x' == _cursor[0]) || ('X' == _cursor[0])) {
-			base = 16;
-			_cursor += 1;
-		} else {
-			base = 8;
-		}
-	} else {
-		base = 10;
-	}
+    if ('0' == _cursor[0]) {
+        _cursor += 1;
+        if (('b' == _cursor[0]) || ('B' == _cursor[0])) {
+            base = 2;
+            _cursor += 1;
+        } else if (('x' == _cursor[0]) || ('X' == _cursor[0])) {
+            base = 16;
+            _cursor += 1;
+        } else {
+            base = 8;
+        }
+    } else {
+        base = 10;
+    }
 
-	while (isDigit(_cursor[0], base)) {
-		retval *= base;
-		retval += digitValue(_cursor[0]);
-		_cursor += 1;
-	}
+    while (isDigit(_cursor[0], base)) {
+        retval *= base;
+        retval += digitValue(_cursor[0]);
+        _cursor += 1;
+    }
 
-	/* type suffixes do nothing since we treat each literal as an uint64_t.
-	 * so we just verify the suffix is correct
-	 */
-	bool seenL = false;
-	bool seenU = false;
-	for (int32_t i = 0; _cursor[0] && (i < 3); ++i, ++_cursor) {
-		if (('l' == _cursor[0]) || ('L' == _cursor[0])) {
-			if (seenL) {
-				return false;
-			}
-			seenL = true;
-			// case of 'L's must match
-			if (_cursor[0] == _cursor[1]) {
-				_cursor += 1;
-			} else if (('l' == _cursor[1]) || ('L' == _cursor[1])) {
-				return false;
-			}
-		} else if (('u' == _cursor[0]) || ('U' == _cursor[0])){
-			if (seenU) {
-				return false;
-			}
-			seenU = true;
-		} else {
-			break;
-		}
-	}
+    /* type suffixes do nothing since we treat each literal as an uint64_t.
+     * so we just verify the suffix is correct
+     */
+    bool seenL = false;
+    bool seenU = false;
+    for (int32_t i = 0; _cursor[0] && (i < 3); ++i, ++_cursor) {
+        if (('l' == _cursor[0]) || ('L' == _cursor[0])) {
+            if (seenL) {
+                return false;
+            }
+            seenL = true;
+            // case of 'L's must match
+            if (_cursor[0] == _cursor[1]) {
+                _cursor += 1;
+            } else if (('l' == _cursor[1]) || ('L' == _cursor[1])) {
+                return false;
+            }
+        } else if (('u' == _cursor[0]) || ('U' == _cursor[0])) {
+            if (seenU) {
+                return false;
+            }
+            seenU = true;
+        } else {
+            break;
+        }
+    }
 
-	*ret = retval;
-	return true;
+    *ret = retval;
+    return true;
 }
 
 /**
@@ -423,11 +412,7 @@ MacroScanner::readNumber(int64_t *ret)
  *
  * @return: whether the expression is valid or not
  */
-bool
-MacroParser::evaluate(int64_t *ret)
-{
-	return logicalOr(ret) && _scanner.atSymbol(END);
-}
+bool MacroParser::evaluate(int64_t* ret) { return logicalOr(ret) && _scanner.atSymbol(END); }
 
 /**
  * Evaluates a logical or expression (a || b) by recursively calling the
@@ -437,24 +422,23 @@ MacroParser::evaluate(int64_t *ret)
  *
  * @return: whether at the current location the expression can be evaluated
  */
-bool
-MacroParser::logicalOr(int64_t *ret)
+bool MacroParser::logicalOr(int64_t* ret)
 {
-	int64_t term2 = 0;
-	if (logicalAnd(ret)) {
-		for (;;) {
-			if (_scanner.atSymbol(OR_OR)) {
-				if (logicalAnd(&term2)) {
-					*ret = *ret || term2;
-				} else {
-					return false;
-				}
-			} else {
-				return true;
-			}
-		}
-	}
-	return false;
+    int64_t term2 = 0;
+    if (logicalAnd(ret)) {
+        for (;;) {
+            if (_scanner.atSymbol(OR_OR)) {
+                if (logicalAnd(&term2)) {
+                    *ret = *ret || term2;
+                } else {
+                    return false;
+                }
+            } else {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 /**
@@ -465,24 +449,23 @@ MacroParser::logicalOr(int64_t *ret)
  *
  * @return: whether at the current location the expression can be evaluated
  */
-bool
-MacroParser::logicalAnd(int64_t *ret)
+bool MacroParser::logicalAnd(int64_t* ret)
 {
-	int64_t term2 = 0;
-	if (bitwiseOr(ret)) {
-		for (;;) {
-			if (_scanner.atSymbol(AND_AND)) {
-				if (bitwiseOr(&term2)) {
-					*ret = *ret && term2;
-				} else {
-					return false;
-				}
-			} else {
-				return true;
-			}
-		}
-	}
-	return false;
+    int64_t term2 = 0;
+    if (bitwiseOr(ret)) {
+        for (;;) {
+            if (_scanner.atSymbol(AND_AND)) {
+                if (bitwiseOr(&term2)) {
+                    *ret = *ret && term2;
+                } else {
+                    return false;
+                }
+            } else {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 /**
@@ -493,24 +476,23 @@ MacroParser::logicalAnd(int64_t *ret)
  *
  * @return: whether at the current location the expression can be evaluated
  */
-bool
-MacroParser::bitwiseOr(int64_t *ret)
+bool MacroParser::bitwiseOr(int64_t* ret)
 {
-	int64_t term2 = 0;
-	if (bitwiseXor(ret)) {
-		for (;;) {
-			if (_scanner.atSymbol(OR)) {
-				if (bitwiseXor(&term2)) {
-					*ret = *ret | term2;
-				} else {
-					return false;
-				}
-			} else {
-				return true;
-			}
-		}
-	}
-	return false;
+    int64_t term2 = 0;
+    if (bitwiseXor(ret)) {
+        for (;;) {
+            if (_scanner.atSymbol(OR)) {
+                if (bitwiseXor(&term2)) {
+                    *ret = *ret | term2;
+                } else {
+                    return false;
+                }
+            } else {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 /**
@@ -521,24 +503,23 @@ MacroParser::bitwiseOr(int64_t *ret)
  *
  * @return: whether at the current location the expression can be evaluated
  */
-bool
-MacroParser::bitwiseXor(int64_t *ret)
+bool MacroParser::bitwiseXor(int64_t* ret)
 {
-	int64_t term2 = 0;
-	if (bitwiseAnd(ret)) {
-		for (;;) {
-			if (_scanner.atSymbol(XOR)) {
-				if (bitwiseAnd(&term2)) {
-					*ret = *ret ^ term2;
-				} else {
-					return false;
-				}
-			} else {
-				return true;
-			}
-		}
-	}
-	return false;
+    int64_t term2 = 0;
+    if (bitwiseAnd(ret)) {
+        for (;;) {
+            if (_scanner.atSymbol(XOR)) {
+                if (bitwiseAnd(&term2)) {
+                    *ret = *ret ^ term2;
+                } else {
+                    return false;
+                }
+            } else {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 /**
@@ -549,24 +530,23 @@ MacroParser::bitwiseXor(int64_t *ret)
  *
  * @return: whether at the current location the expression can be evaluated
  */
-bool
-MacroParser::bitwiseAnd(int64_t *ret)
+bool MacroParser::bitwiseAnd(int64_t* ret)
 {
-	int64_t term2 = 0;
-	if (equalNeq(ret)) {
-		for (;;) {
-			if (_scanner.atSymbol(AND)) {
-				if (equalNeq(&term2)) {
-					*ret = *ret & term2;
-				} else {
-					return false;
-				}
-			} else {
-				return true;
-			}
-		}
-	}
-	return false;
+    int64_t term2 = 0;
+    if (equalNeq(ret)) {
+        for (;;) {
+            if (_scanner.atSymbol(AND)) {
+                if (equalNeq(&term2)) {
+                    *ret = *ret & term2;
+                } else {
+                    return false;
+                }
+            } else {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 /**
@@ -578,30 +558,29 @@ MacroParser::bitwiseAnd(int64_t *ret)
  *
  * @return: whether at the current location the expression can be evaluated
  */
-bool
-MacroParser::equalNeq(int64_t *ret)
+bool MacroParser::equalNeq(int64_t* ret)
 {
-	int64_t term2 = 0;
-	if (comparison(ret)) {
-		for (;;) {
-			if (_scanner.atSymbol(EQ_EQ)) {
-				if (comparison(&term2)) {
-					*ret = *ret == term2;
-				} else {
-					return false;
-				}
-			} else if (_scanner.atSymbol(NOT_EQ)) {
-				if (comparison(&term2)) {
-					*ret = *ret != term2;
-				} else {
-					return false;
-				}
-			} else {
-				return true;
-			}
-		}
-	}
-	return false;
+    int64_t term2 = 0;
+    if (comparison(ret)) {
+        for (;;) {
+            if (_scanner.atSymbol(EQ_EQ)) {
+                if (comparison(&term2)) {
+                    *ret = *ret == term2;
+                } else {
+                    return false;
+                }
+            } else if (_scanner.atSymbol(NOT_EQ)) {
+                if (comparison(&term2)) {
+                    *ret = *ret != term2;
+                } else {
+                    return false;
+                }
+            } else {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 /**
@@ -614,42 +593,41 @@ MacroParser::equalNeq(int64_t *ret)
  *
  * @return: whether at the current location the expression can be evaluated
  */
-bool
-MacroParser::comparison(int64_t *ret)
+bool MacroParser::comparison(int64_t* ret)
 {
-	int64_t term2 = 0;
-	if (bitshift(ret)) {
-		for (;;) {
-			if (_scanner.atSymbol(GT_EQ)) {
-				if (bitshift(&term2)) {
-					*ret = *ret >= term2;
-				} else {
-					return false;
-				}
-			} else if (_scanner.atSymbol(LT_EQ)) {
-				if (bitshift(&term2)) {
-					*ret = *ret <= term2;
-				} else {
-					return false;
-				}
-			} else if (_scanner.atSymbol(GT)) {
-				if (bitshift(&term2)) {
-					*ret = *ret > term2;
-				} else {
-					return false;
-				}
-			} else if (_scanner.atSymbol(LT)) {
-				if (bitshift(&term2)) {
-					*ret = *ret < term2;
-				} else {
-					return false;
-				}
-			} else {
-				return true;
-			}
-		}
-	}
-	return false;
+    int64_t term2 = 0;
+    if (bitshift(ret)) {
+        for (;;) {
+            if (_scanner.atSymbol(GT_EQ)) {
+                if (bitshift(&term2)) {
+                    *ret = *ret >= term2;
+                } else {
+                    return false;
+                }
+            } else if (_scanner.atSymbol(LT_EQ)) {
+                if (bitshift(&term2)) {
+                    *ret = *ret <= term2;
+                } else {
+                    return false;
+                }
+            } else if (_scanner.atSymbol(GT)) {
+                if (bitshift(&term2)) {
+                    *ret = *ret > term2;
+                } else {
+                    return false;
+                }
+            } else if (_scanner.atSymbol(LT)) {
+                if (bitshift(&term2)) {
+                    *ret = *ret < term2;
+                } else {
+                    return false;
+                }
+            } else {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 /**
@@ -661,30 +639,29 @@ MacroParser::comparison(int64_t *ret)
  *
  * @return: whether at the current location the expression can be evaluated
  */
-bool
-MacroParser::bitshift(int64_t *ret)
+bool MacroParser::bitshift(int64_t* ret)
 {
-	int64_t term2 = 0;
-	if (addSub(ret)) {
-		for (;;) {
-			if (_scanner.atSymbol(GT_GT)) {
-				if (addSub(&term2)) {
-					*ret = *ret >> term2;
-				} else {
-					return false;
-				}
-			} else if (_scanner.atSymbol(LT_LT)) {
-				if (addSub(&term2)) {
-					*ret = *ret << term2;
-				} else {
-					return false;
-				}
-			} else {
-				return true;
-			}
-		}
-	}
-	return false;
+    int64_t term2 = 0;
+    if (addSub(ret)) {
+        for (;;) {
+            if (_scanner.atSymbol(GT_GT)) {
+                if (addSub(&term2)) {
+                    *ret = *ret >> term2;
+                } else {
+                    return false;
+                }
+            } else if (_scanner.atSymbol(LT_LT)) {
+                if (addSub(&term2)) {
+                    *ret = *ret << term2;
+                } else {
+                    return false;
+                }
+            } else {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 /**
@@ -696,30 +673,29 @@ MacroParser::bitshift(int64_t *ret)
  *
  * @return: whether at the current location the expression can be evaluated
  */
-bool
-MacroParser::addSub(int64_t *ret)
+bool MacroParser::addSub(int64_t* ret)
 {
-	int64_t term2 = 0;
-	if (multDivRem(ret)) {
-		for (;;) {
-			if (_scanner.atSymbol(PLUS)) {
-				if (multDivRem(&term2)) {
-					*ret = *ret + term2;
-				} else {
-					return false;
-				}
-			} else if (_scanner.atSymbol(MINUS)) {
-				if (multDivRem(&term2)) {
-					*ret = *ret - term2;
-				} else {
-					return false;
-				}
-			} else {
-				return true;
-			}
-		}
-	}
-	return false;
+    int64_t term2 = 0;
+    if (multDivRem(ret)) {
+        for (;;) {
+            if (_scanner.atSymbol(PLUS)) {
+                if (multDivRem(&term2)) {
+                    *ret = *ret + term2;
+                } else {
+                    return false;
+                }
+            } else if (_scanner.atSymbol(MINUS)) {
+                if (multDivRem(&term2)) {
+                    *ret = *ret - term2;
+                } else {
+                    return false;
+                }
+            } else {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 /**
@@ -734,36 +710,35 @@ MacroParser::addSub(int64_t *ret)
  *
  * @return: whether at the current location the expression can be evaluated
  */
-bool
-MacroParser::multDivRem(int64_t *ret)
+bool MacroParser::multDivRem(int64_t* ret)
 {
-	int64_t term2 = 0;
-	if (validSingleTerm(ret)) {
-		for (;;) {
-			if (_scanner.atSymbol(MULT)) {
-				if (validSingleTerm(&term2)) {
-					*ret = *ret * term2;
-				} else {
-					return false;
-				}
-			} else if (_scanner.atSymbol(DIV)) {
-				if (validSingleTerm(&term2)) {
-					*ret = *ret / term2;
-				} else {
-					return false;
-				}
-			} else if (_scanner.atSymbol(REM)) {
-				if (validSingleTerm(&term2)) {
-					*ret = *ret % term2;
-				} else {
-					return false;
-				}
-			} else {
-				return true;
-			}
-		}
-	}
-	return false;
+    int64_t term2 = 0;
+    if (validSingleTerm(ret)) {
+        for (;;) {
+            if (_scanner.atSymbol(MULT)) {
+                if (validSingleTerm(&term2)) {
+                    *ret = *ret * term2;
+                } else {
+                    return false;
+                }
+            } else if (_scanner.atSymbol(DIV)) {
+                if (validSingleTerm(&term2)) {
+                    *ret = *ret / term2;
+                } else {
+                    return false;
+                }
+            } else if (_scanner.atSymbol(REM)) {
+                if (validSingleTerm(&term2)) {
+                    *ret = *ret % term2;
+                } else {
+                    return false;
+                }
+            } else {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 /**
@@ -775,57 +750,56 @@ MacroParser::multDivRem(int64_t *ret)
  * @return: whether at the current location can be evaluated as a unary
  *          expression
  */
-bool
-MacroParser::unaryExpression(int64_t *ret)
+bool MacroParser::unaryExpression(int64_t* ret)
 {
-	int64_t operand = 0;
-	size_t bitWidth = 0;
-	bool isSigned = true;
-	if (_scanner.atSymbol(PLUS)) {
-		if (validSingleTerm(&operand)) {
-			*ret = +operand;
-			return true;
-		}
-	} else if (_scanner.atSymbol(MINUS)) {
-		if (validSingleTerm(&operand)) {
-			*ret = -operand;
-			return true;
-		}
-	} else if (_scanner.atSymbol(NOT)) {
-		if (validSingleTerm(&operand)) {
-			*ret = !operand;
-			return true;
-		}
-	} else if (_scanner.atSymbol(TILDE)) {
-		if (validSingleTerm(&operand)) {
-			*ret = ~operand;
-			return true;
-		}
-	} else if (_scanner.validTypeCast(&isSigned, &bitWidth)) {
-		if (validSingleTerm(&operand)) {
-			switch (bitWidth) {
-			case 8:
-				*ret = isSigned ? (int8_t) operand : (uint8_t) operand;
-				break;
-			case 16:
-				*ret = isSigned ? (int16_t) operand : (uint16_t) operand;
-				break;
-			case 32:
-				*ret = isSigned ? (int32_t) operand : (uint32_t) operand;
-				break;
-			default:
-				/*
-				 * If the bit-width is 64 it has no meaningful effect.
-				 * Ignore casts of unknown widths.
-				 */
-				*ret = operand;
-				break;
-			}
-			return true;
-		}
-	}
+    int64_t operand = 0;
+    size_t bitWidth = 0;
+    bool isSigned = true;
+    if (_scanner.atSymbol(PLUS)) {
+        if (validSingleTerm(&operand)) {
+            *ret = +operand;
+            return true;
+        }
+    } else if (_scanner.atSymbol(MINUS)) {
+        if (validSingleTerm(&operand)) {
+            *ret = -operand;
+            return true;
+        }
+    } else if (_scanner.atSymbol(NOT)) {
+        if (validSingleTerm(&operand)) {
+            *ret = !operand;
+            return true;
+        }
+    } else if (_scanner.atSymbol(TILDE)) {
+        if (validSingleTerm(&operand)) {
+            *ret = ~operand;
+            return true;
+        }
+    } else if (_scanner.validTypeCast(&isSigned, &bitWidth)) {
+        if (validSingleTerm(&operand)) {
+            switch (bitWidth) {
+            case 8:
+                *ret = isSigned ? (int8_t)operand : (uint8_t)operand;
+                break;
+            case 16:
+                *ret = isSigned ? (int16_t)operand : (uint16_t)operand;
+                break;
+            case 32:
+                *ret = isSigned ? (int32_t)operand : (uint32_t)operand;
+                break;
+            default:
+                /*
+                 * If the bit-width is 64 it has no meaningful effect.
+                 * Ignore casts of unknown widths.
+                 */
+                *ret = operand;
+                break;
+            }
+            return true;
+        }
+    }
 
-	return false;
+    return false;
 }
 
 /**
@@ -837,19 +811,18 @@ MacroParser::unaryExpression(int64_t *ret)
  * @return: whether at the current location can be evaluated as a parenthesized
  *          expression
  */
-bool
-MacroParser::parentheses(int64_t *ret)
+bool MacroParser::parentheses(int64_t* ret)
 {
-	int64_t innerValue = 0;
-	if (_scanner.atSymbol(LPAREN)) {
-		if (logicalOr(&innerValue)) {
-			if (_scanner.atSymbol(RPAREN)) {
-				*ret = innerValue;
-				return true;
-			}
-		}
-	}
-	return false;
+    int64_t innerValue = 0;
+    if (_scanner.atSymbol(LPAREN)) {
+        if (logicalOr(&innerValue)) {
+            if (_scanner.atSymbol(RPAREN)) {
+                *ret = innerValue;
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 /**
@@ -861,10 +834,9 @@ MacroParser::parentheses(int64_t *ret)
  * return: whether at the current location can be evaluated as one of the
  * expressions listed
  */
-bool
-MacroParser::validSingleTerm(int64_t *ret)
+bool MacroParser::validSingleTerm(int64_t* ret)
 {
-	return unaryExpression(ret) || parentheses(ret) || _scanner.readNumber(ret);
+    return unaryExpression(ret) || parentheses(ret) || _scanner.readNumber(ret);
 }
 
 /*
@@ -875,16 +847,16 @@ MacroParser::validSingleTerm(int64_t *ret)
  * return: DDR return code indicating success or error
  */
 DDR_RC
-Macro::getNumeric(long long *ret) const
+Macro::getNumeric(long long* ret) const
 {
-	DDR_RC rc = DDR_RC_ERROR;
-	int64_t retVal = 0;
-	MacroParser parser(_value.c_str());
-	if (parser.evaluate(&retVal)) {
-		if (NULL != ret) {
-			*ret = retVal;
-		}
-		rc = DDR_RC_OK;
-	}
-	return rc;
+    DDR_RC rc = DDR_RC_ERROR;
+    int64_t retVal = 0;
+    MacroParser parser(_value.c_str());
+    if (parser.evaluate(&retVal)) {
+        if (NULL != ret) {
+            *ret = retVal;
+        }
+        rc = DDR_RC_OK;
+    }
+    return rc;
 }

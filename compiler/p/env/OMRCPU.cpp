@@ -21,14 +21,13 @@
 
 #include "env/CPU.hpp"
 
-#include "env/Processors.hpp"  // for TR_Processor, etc
-#include "infra/Assert.hpp"    // for TR_ASSERT
+#include "env/Processors.hpp" // for TR_Processor, etc
+#include "infra/Assert.hpp" // for TR_ASSERT
 
-bool
-OMR::Power::CPU::getPPCis64bit()
-   {
-   TR_Processor p = id();
-   TR_ASSERT(p >= TR_FirstPPCProcessor && p <= TR_LastPPCProcessor, "Not a valid PPC Processor Type");
+bool OMR::Power::CPU::getPPCis64bit()
+{
+    TR_Processor p = id();
+    TR_ASSERT(p >= TR_FirstPPCProcessor && p <= TR_LastPPCProcessor, "Not a valid PPC Processor Type");
 
-   return (p >= TR_FirstPPC64BitProcessor)? true : false;
-   }
+    return (p >= TR_FirstPPC64BitProcessor) ? true : false;
+}

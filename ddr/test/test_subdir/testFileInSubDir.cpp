@@ -27,6 +27,6 @@
  */
 
 #define SEAHORSE 77
-#define TEST_FLAG	  // Comment test
+#define TEST_FLAG // Comment test
 #define TEST_FLAG2
 #undef TEST_FLAG_UNDEF /* Second comment test. */

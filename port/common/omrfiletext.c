@@ -27,8 +27,6 @@
  */
 #include "omrport.h"
 
-
-
 /**
  * Read a line of text from the file into buf.
  * Character conversion is only done on z/OS (from platform encoding to UTF-8)
@@ -41,48 +39,47 @@
  *
  * @return buf on success, NULL on failure.
  */
-char *
-omrfile_read_text(struct OMRPortLibrary *portLibrary, intptr_t fd, char *buf, intptr_t nbytes)
+char* omrfile_read_text(struct OMRPortLibrary* portLibrary, intptr_t fd, char* buf, intptr_t nbytes)
 {
-	char temp[64];
-	intptr_t count, i, result;
-	char *cursor = buf;
+    char temp[64];
+    intptr_t count, i, result;
+    char* cursor = buf;
 
-	if (nbytes <= 0) {
-		return 0;
-	}
+    if (nbytes <= 0) {
+        return 0;
+    }
 
-	/* discount 1 for the trailing NUL */
-	nbytes -= 1;
+    /* discount 1 for the trailing NUL */
+    nbytes -= 1;
 
-	while (nbytes) {
-		count = sizeof(temp) > nbytes ? nbytes : sizeof(temp);
-		count = portLibrary->file_read(portLibrary, fd, temp, count);
+    while (nbytes) {
+        count = sizeof(temp) > nbytes ? nbytes : sizeof(temp);
+        count = portLibrary->file_read(portLibrary, fd, temp, count);
 
-		/* ignore translation for now */
-		if (count < 0) {
-			if (cursor == buf) {
-				return NULL;
-			} else {
-				break;
-			}
-		}
+        /* ignore translation for now */
+        if (count < 0) {
+            if (cursor == buf) {
+                return NULL;
+            } else {
+                break;
+            }
+        }
 
-		for (i = 0; i < count; i++) {
-			char c = temp[i];
-			*cursor++ = c;
+        for (i = 0; i < count; i++) {
+            char c = temp[i];
+            *cursor++ = c;
 
-			if (c == '\n') { /* EOL */
-				portLibrary->file_seek(portLibrary, fd, i - count + 1, EsSeekCur);
-				*cursor = '\0';
-				return buf;
-			}
-		}
-		nbytes -= count;
-	}
+            if (c == '\n') { /* EOL */
+                portLibrary->file_seek(portLibrary, fd, i - count + 1, EsSeekCur);
+                *cursor = '\0';
+                return buf;
+            }
+        }
+        nbytes -= count;
+    }
 
-	*cursor = '\0';
-	return buf;
+    *cursor = '\0';
+    return buf;
 }
 
 /**
@@ -96,13 +93,11 @@ omrfile_read_text(struct OMRPortLibrary *portLibrary, intptr_t fd, char *buf, in
  *
  * @return 0 on success, negative error code on failure.
  */
-int32_t
-omrfile_write_text(struct OMRPortLibrary *portLibrary, intptr_t fd, const char *buf, uintptr_t nbytes)
+int32_t omrfile_write_text(struct OMRPortLibrary* portLibrary, intptr_t fd, const char* buf, uintptr_t nbytes)
 {
-	intptr_t result = portLibrary->file_write(portLibrary, fd, (void *)buf, nbytes);
-	return (result == nbytes) ? 0 : result;
+    intptr_t result = portLibrary->file_write(portLibrary, fd, (void*)buf, nbytes);
+    return (result == nbytes) ? 0 : result;
 }
-
 
 /**
  * Retrieve the character set name that file_write_text will encode strings into
@@ -117,21 +112,20 @@ omrfile_write_text(struct OMRPortLibrary *portLibrary, intptr_t fd, const char *
  * @return 0 on success, negative on failure, positive return code when character set is available but
  *               charsetName was too short to store. The required space is given by the return code.
  */
-int32_t
-omrfile_get_text_encoding(struct OMRPortLibrary *portLibrary, char *charsetName, uintptr_t nbytes)
+int32_t omrfile_get_text_encoding(struct OMRPortLibrary* portLibrary, char* charsetName, uintptr_t nbytes)
 {
-	if (buf == NULL) {
-		return -1;
-	}
+    if (buf == NULL) {
+        return -1;
+    }
 
-	/* CP850 unless overridden because:
-	 * 1. Anything in a valid Java identifier in CP437, ASCII, and ANSI X3.4-1986 maps directly into CP850
-	 * 2. *most* CP1252 characters in Java identifiers have the same code point in CP850
-	 * 3. If the current platform doesn't provide an override, code pages really aren't Problem #1.
-	 */
-	if (nbytes <= strlen("CP850")) {
-		return (int32_t)(strlen("CP850") + 1);
-	}
-	strcpy(charsetName, "CP850");
-	return 0;
+    /* CP850 unless overridden because:
+     * 1. Anything in a valid Java identifier in CP437, ASCII, and ANSI X3.4-1986 maps directly into CP850
+     * 2. *most* CP1252 characters in Java identifiers have the same code point in CP850
+     * 3. If the current platform doesn't provide an override, code pages really aren't Problem #1.
+     */
+    if (nbytes <= strlen("CP850")) {
+        return (int32_t)(strlen("CP850") + 1);
+    }
+    strcpy(charsetName, "CP850");
+    return 0;
 }

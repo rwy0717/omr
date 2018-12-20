@@ -27,20 +27,19 @@
 extern "C" {
 #endif
 
-
 /*		DO NOT DIRECTLY INCLUDE THIS FILE 	*/
 /*		Include pool_api.h instead					*/
 
 #include "omrcomp.h"
 #include "omrsrp.h"
 
-typedef void *(*omrmemAlloc_fptr_t)(void *, uint32_t, const char *, uint32_t, uint32_t, uint32_t *);
-typedef void (*omrmemFree_fptr_t)(void *, void *, uint32_t);
+typedef void* (*omrmemAlloc_fptr_t)(void*, uint32_t, const char*, uint32_t, uint32_t, uint32_t*);
+typedef void (*omrmemFree_fptr_t)(void*, void*, uint32_t);
 
 typedef struct J9PoolPuddleList {
-	uintptr_t numElements;
-	J9WSRP nextPuddle;
-	J9WSRP nextAvailablePuddle;
+    uintptr_t numElements;
+    J9WSRP nextPuddle;
+    J9WSRP nextAvailablePuddle;
 } J9PoolPuddleList;
 
 /*
@@ -48,62 +47,61 @@ typedef struct J9PoolPuddleList {
  */
 
 typedef struct J9PoolPuddle {
-	uintptr_t usedElements;
-	J9SRP firstElementAddress;
-	J9SRP firstFreeSlot;
-	J9WSRP prevPuddle;
-	J9WSRP nextPuddle;
-	J9WSRP prevAvailablePuddle;
-	J9WSRP nextAvailablePuddle;
-	uintptr_t userData;
-	uintptr_t flags;
+    uintptr_t usedElements;
+    J9SRP firstElementAddress;
+    J9SRP firstFreeSlot;
+    J9WSRP prevPuddle;
+    J9WSRP nextPuddle;
+    J9WSRP prevAvailablePuddle;
+    J9WSRP nextAvailablePuddle;
+    uintptr_t userData;
+    uintptr_t flags;
 } J9PoolPuddle;
 
-
-#define PUDDLE_KILLED  4
-#define PUDDLE_ACTIVE  2
+#define PUDDLE_KILLED 4
+#define PUDDLE_ACTIVE 2
 
 /*
  * @ddr_namespace: map_to_type=J9Pool
  */
 
 typedef struct J9Pool {
-	uintptr_t elementSize;
-	uintptr_t elementsPerPuddle;
-	uintptr_t puddleAllocSize;
-	J9WSRP puddleList;
-	void  *(*memAlloc)(void *userData, uint32_t byteAmount, const char *callsite, uint32_t memoryCategory, uint32_t type, uint32_t *doInit);
-	void (*memFree)(void *userData, void *ptr, uint32_t type);
-	const char *poolCreatorCallsite;
-	void *userData;
-	uint16_t alignment;
-	uint16_t flags;
-	uint32_t memoryCategory;
+    uintptr_t elementSize;
+    uintptr_t elementsPerPuddle;
+    uintptr_t puddleAllocSize;
+    J9WSRP puddleList;
+    void* (*memAlloc)(void* userData, uint32_t byteAmount, const char* callsite, uint32_t memoryCategory, uint32_t type,
+        uint32_t* doInit);
+    void (*memFree)(void* userData, void* ptr, uint32_t type);
+    const char* poolCreatorCallsite;
+    void* userData;
+    uint16_t alignment;
+    uint16_t flags;
+    uint32_t memoryCategory;
 } J9Pool;
 
-#define POOL_NO_ZERO  8
-#define POOL_ROUND_TO_PAGE_SIZE  16
-#define POOL_USES_HOLES  32
-#define POOL_NEVER_FREE_PUDDLES  2
-#define POOL_ALLOC_TYPE_PUDDLE  1
-#define POOL_ALWAYS_KEEP_SORTED  4
-#define POOL_ALLOC_TYPE_PUDDLE_LIST  2
-#define POOL_ALLOC_TYPE_POOL  0
+#define POOL_NO_ZERO 8
+#define POOL_ROUND_TO_PAGE_SIZE 16
+#define POOL_USES_HOLES 32
+#define POOL_NEVER_FREE_PUDDLES 2
+#define POOL_ALLOC_TYPE_PUDDLE 1
+#define POOL_ALWAYS_KEEP_SORTED 4
+#define POOL_ALLOC_TYPE_PUDDLE_LIST 2
+#define POOL_ALLOC_TYPE_POOL 0
 
 /*
  * @ddr_namespace: map_to_type=J9PoolState
  */
 
 typedef struct J9PoolState {
-	uintptr_t leftToDo;
-	struct J9Pool *thePool;
-	struct J9PoolPuddle *currentPuddle;
-	int32_t lastSlot;
-	uintptr_t flags;
+    uintptr_t leftToDo;
+    struct J9Pool* thePool;
+    struct J9PoolPuddle* currentPuddle;
+    int32_t lastSlot;
+    uintptr_t flags;
 } J9PoolState;
 
-
-#define POOLSTATE_FOLLOW_NEXT_POINTERS  1
+#define POOLSTATE_FOLLOW_NEXT_POINTERS 1
 
 #define pool_state J9PoolState
 

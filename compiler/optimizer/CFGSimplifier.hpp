@@ -22,55 +22,65 @@
 #ifndef CFGSIMPLIFIER_INCL
 #define CFGSIMPLIFIER_INCL
 
-#include <stdint.h>                           // for int32_t
-#include "optimizer/Optimization.hpp"         // for Optimization
-#include "optimizer/OptimizationManager.hpp"  // for OptimizationManager
+#include <stdint.h> // for int32_t
+#include "optimizer/Optimization.hpp" // for Optimization
+#include "optimizer/OptimizationManager.hpp" // for OptimizationManager
 
-namespace TR { class Block; }
-namespace TR { class CFG; }
-namespace TR { class CFGEdge; }
-namespace TR { class Node; }
-namespace TR { class TreeTop; }
-template <class T> class ListElement;
+namespace TR {
+class Block;
+}
+namespace TR {
+class CFG;
+}
+namespace TR {
+class CFGEdge;
+}
+namespace TR {
+class Node;
+}
+namespace TR {
+class TreeTop;
+}
+template <class T>
+class ListElement;
 
 // Control flow graph simplifier
 //
 // Look for opportunities to simplify control flow.
 //
-class TR_CFGSimplifier : public TR::Optimization
-   {
-   public:
-   TR_CFGSimplifier(TR::OptimizationManager *manager);
-   static TR::Optimization *create(TR::OptimizationManager *manager)
-      {
-      return new (manager->allocator()) TR_CFGSimplifier(manager);
-      }
+class TR_CFGSimplifier : public TR::Optimization {
+public:
+    TR_CFGSimplifier(TR::OptimizationManager* manager);
+    static TR::Optimization* create(TR::OptimizationManager* manager)
+    {
+        return new (manager->allocator()) TR_CFGSimplifier(manager);
+    }
 
-   virtual int32_t perform();
-   virtual const char * optDetailString() const throw();
+    virtual int32_t perform();
+    virtual const char* optDetailString() const throw();
 
-   private :
+private:
+    bool simplify();
+    bool simplifyBooleanStore();
+    bool simplifyCondCodeBooleanStore(
+        TR::Block* joinBlock, TR::Node* branchNode, TR::Node* store1Node, TR::Node* store2Node);
+    TR::TreeTop* getNextRealTreetop(TR::TreeTop* treeTop);
+    TR::TreeTop* getLastRealTreetop(TR::Block* block);
+    TR::Block* getFallThroughBlock(TR::Block* block);
+    bool canReverseBranchMask();
 
-   bool simplify();
-   bool simplifyBooleanStore();
-   bool simplifyCondCodeBooleanStore(TR::Block *joinBlock, TR::Node *branchNode, TR::Node *store1Node, TR::Node *store2Node);
-   TR::TreeTop *getNextRealTreetop(TR::TreeTop *treeTop);
-   TR::TreeTop *getLastRealTreetop(TR::Block *block);
-   TR::Block   *getFallThroughBlock(TR::Block *block);
-   bool canReverseBranchMask();
+    TR::CFG* _cfg;
 
-   TR::CFG                  *_cfg;
+    // Current block
+    TR::Block* _block;
 
-   // Current block
-   TR::Block                *_block;
+    // First successor to the current block
+    TR::CFGEdge* _succ1;
+    TR::Block* _next1;
 
-   // First successor to the current block
-   TR::CFGEdge              *_succ1;
-   TR::Block                *_next1;
-
-   // Second successor to the current block
-   TR::CFGEdge              *_succ2;
-   TR::Block                *_next2;
-   };
+    // Second successor to the current block
+    TR::CFGEdge* _succ2;
+    TR::Block* _next2;
+};
 
 #endif

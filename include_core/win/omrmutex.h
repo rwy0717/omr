@@ -25,7 +25,7 @@
 /* windows.h defined uintptr_t.  Ignore its definition */
 #define UDATA UDATA_win32_
 #include <windows.h>
-#undef UDATA	/* this is safe because our UDATA is a typedef, not a macro */
+#undef UDATA /* this is safe because our UDATA is a typedef, not a macro */
 
 typedef CRITICAL_SECTION MUTEX;
 
@@ -52,8 +52,4 @@ typedef CRITICAL_SECTION MUTEX;
 
 #define MUTEX_EXIT(mutex) LeaveCriticalSection(&(mutex))
 
-
-
-
 #endif /* omrmutex_h */
-

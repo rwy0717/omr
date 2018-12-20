@@ -22,9 +22,8 @@
 
 #include "thread_internal.h"
 
-intptr_t
-set_priority_spread(void)
+intptr_t set_priority_spread(void)
 {
-	/* This function should not be called on this platform */
-	return -1;
+    /* This function should not be called on this platform */
+    return -1;
 }

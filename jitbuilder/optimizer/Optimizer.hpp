@@ -27,18 +27,16 @@
 
 #include "optimizer/JBOptimizer.hpp"
 
-namespace TR
-{
+namespace TR {
 
-class Optimizer : public JitBuilder::OptimizerConnector
-   {
-   public:
+class Optimizer : public JitBuilder::OptimizerConnector {
+public:
+    Optimizer(TR::Compilation* comp, TR::ResolvedMethodSymbol* methodSymbol, bool isIlGen,
+        const OptimizationStrategy* strategy = NULL, uint16_t VNType = 0)
+        : JitBuilder::OptimizerConnector(comp, methodSymbol, isIlGen, strategy, VNType)
+    {}
+};
 
-   Optimizer(TR::Compilation *comp, TR::ResolvedMethodSymbol *methodSymbol, bool isIlGen,
-         const OptimizationStrategy *strategy = NULL, uint16_t VNType = 0) :
-      JitBuilder::OptimizerConnector(comp, methodSymbol, isIlGen, strategy, VNType) {}
-   };
-
-}
+} // namespace TR
 
 #endif

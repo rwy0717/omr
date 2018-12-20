@@ -33,115 +33,107 @@
 /* Used to add space for the null terminator. Adding a wchar in case the platform
  * locale uses wchar
  */
-#define NULL_TERM_SZ       sizeof(wchar_t)
+#define NULL_TERM_SZ sizeof(wchar_t)
 
-static uintptr_t get_conv_txt_num_bytes(struct OMRPortLibrary *portLibrary, const char *message);
-static void syslog_write(struct OMRPortLibrary *portLibrary, const char *buf, int priority);
+static uintptr_t get_conv_txt_num_bytes(struct OMRPortLibrary* portLibrary, const char* message);
+static void syslog_write(struct OMRPortLibrary* portLibrary, const char* buf, int priority);
 
-uintptr_t
-omrsyslog_write(struct OMRPortLibrary *portLibrary, uintptr_t flags, const char *message)
+uintptr_t omrsyslog_write(struct OMRPortLibrary* portLibrary, uintptr_t flags, const char* message)
 {
-	if (NULL != portLibrary->portGlobals && TRUE == PPG_syslog_enabled) {
-		int priority;
+    if (NULL != portLibrary->portGlobals && TRUE == PPG_syslog_enabled) {
+        int priority;
 
-		switch (flags) {
-		case J9NLS_ERROR:
-			priority = LOG_ERR;
-			break;
-		case J9NLS_WARNING:
-			priority = LOG_WARNING;
-			break;
-		case J9NLS_INFO:
-		default:
-			priority = LOG_INFO;
-			break;
-		}
+        switch (flags) {
+        case J9NLS_ERROR:
+            priority = LOG_ERR;
+            break;
+        case J9NLS_WARNING:
+            priority = LOG_WARNING;
+            break;
+        case J9NLS_INFO:
+        default:
+            priority = LOG_INFO;
+            break;
+        }
 
-		syslog_write(portLibrary, message, priority);
-		return TRUE;
-	}
-	return FALSE;
+        syslog_write(portLibrary, message, priority);
+        return TRUE;
+    }
+    return FALSE;
 }
 
-uintptr_t
-syslogOpen(struct OMRPortLibrary *portLibrary, uintptr_t flags)
+uintptr_t syslogOpen(struct OMRPortLibrary* portLibrary, uintptr_t flags)
 {
-	int logopt = LOG_PID | LOG_NOWAIT | LOG_ODELAY;
-	int facility = LOG_USER;
-	char *defaultEventSource = "IBM Java";
-	char *syslogEventSource;
+    int logopt = LOG_PID | LOG_NOWAIT | LOG_ODELAY;
+    int facility = LOG_USER;
+    char* defaultEventSource = "IBM Java";
+    char* syslogEventSource;
 
-	/* look for the name that will be used for logging (internal use only) */
-	syslogEventSource = getenv("IBM_JAVA_SYSLOG_NAME");
+    /* look for the name that will be used for logging (internal use only) */
+    syslogEventSource = getenv("IBM_JAVA_SYSLOG_NAME");
 
-	if (NULL == syslogEventSource) {
-		/* no name found so use the default one */
-		/* note: openlog returns void */
-		openlog(defaultEventSource, logopt, facility);
-	} else {
-		/* found the name, so use it */
-		/* note: openlog returns void */
-		openlog(syslogEventSource, logopt, facility);
-	}
+    if (NULL == syslogEventSource) {
+        /* no name found so use the default one */
+        /* note: openlog returns void */
+        openlog(defaultEventSource, logopt, facility);
+    } else {
+        /* found the name, so use it */
+        /* note: openlog returns void */
+        openlog(syslogEventSource, logopt, facility);
+    }
 
-	if (NULL != portLibrary->portGlobals) {
-		PPG_syslog_enabled = TRUE;
-		return TRUE;
-	}
-	return FALSE;
+    if (NULL != portLibrary->portGlobals) {
+        PPG_syslog_enabled = TRUE;
+        return TRUE;
+    }
+    return FALSE;
 }
 
-uintptr_t
-syslogClose(struct OMRPortLibrary *portLibrary)
+uintptr_t syslogClose(struct OMRPortLibrary* portLibrary)
 {
-	/* note: closelog returns void */
-	closelog();
-	if (NULL != portLibrary->portGlobals) {
-		PPG_syslog_enabled = FALSE;
-		return TRUE;
-	}
-	return FALSE;
+    /* note: closelog returns void */
+    closelog();
+    if (NULL != portLibrary->portGlobals) {
+        PPG_syslog_enabled = FALSE;
+        return TRUE;
+    }
+    return FALSE;
 }
 
-uintptr_t
-omrsyslog_query(struct OMRPortLibrary *portLibrary)
+uintptr_t omrsyslog_query(struct OMRPortLibrary* portLibrary)
 {
-	uintptr_t options;
+    uintptr_t options;
 
-	/* query the logging options here */
-	options = PPG_syslog_flags;
+    /* query the logging options here */
+    options = PPG_syslog_flags;
 
-	return options;
+    return options;
 }
 
-void
-omrsyslog_set(struct OMRPortLibrary *portLibrary, uintptr_t options)
+void omrsyslog_set(struct OMRPortLibrary* portLibrary, uintptr_t options)
 {
-	/* set the logging options here */
-	PPG_syslog_flags = options;
+    /* set the logging options here */
+    PPG_syslog_flags = options;
 }
 
 /**
  * @return Zero on error. Otherwise, the number of bytes required to hold the
  * converted text (including the null terminator char)
  */
-static uintptr_t
-get_conv_txt_num_bytes(struct OMRPortLibrary *portLibrary, const char *message)
+static uintptr_t get_conv_txt_num_bytes(struct OMRPortLibrary* portLibrary, const char* message)
 {
-	uintptr_t retval = 0U;
+    uintptr_t retval = 0U;
 
-	const int32_t convRes =
-		portLibrary->str_convert(portLibrary, J9STR_CODE_MUTF8,
-								 J9STR_CODE_PLATFORM_RAW, message, strlen(message),
-								 NULL, 0U);
+    const int32_t convRes = portLibrary->str_convert(
+        portLibrary, J9STR_CODE_MUTF8, J9STR_CODE_PLATFORM_RAW, message, strlen(message), NULL, 0U);
 
-	if (0 < convRes) {
-		retval = (uintptr_t) convRes + NULL_TERM_SZ;
-	} else {
-		Trc_PRT_omrsyslog_failed_str_convert(convRes);
-	}
+    if (0 < convRes) {
+        retval = (uintptr_t)convRes + NULL_TERM_SZ;
+    } else {
+        Trc_PRT_omrsyslog_failed_str_convert(convRes);
+    }
 
-	return retval;
+    return retval;
 }
 
 /**
@@ -154,53 +146,49 @@ get_conv_txt_num_bytes(struct OMRPortLibrary *portLibrary, const char *message)
  *
  * @return void
  */
-static void
-syslog_write(struct OMRPortLibrary *portLibrary, const char *buf, int priority)
+static void syslog_write(struct OMRPortLibrary* portLibrary, const char* buf, int priority)
 {
 #if defined(OMRZTPF)
-	sprintf(buf, "%s", buf);
-	syslog(priority, "%s", buf);
-	return;
+    sprintf(buf, "%s", buf);
+    syslog(priority, "%s", buf);
+    return;
 #else
-	const uintptr_t lclMsgLen = get_conv_txt_num_bytes(portLibrary, buf);
-	char *lclMsg = NULL;
-	BOOLEAN lclConvSuccess = FALSE;
+    const uintptr_t lclMsgLen = get_conv_txt_num_bytes(portLibrary, buf);
+    char* lclMsg = NULL;
+    BOOLEAN lclConvSuccess = FALSE;
 
-	if (NULL_TERM_SZ < lclMsgLen) {
-		lclMsg = portLibrary->mem_allocate_memory(portLibrary,
-				 lclMsgLen, OMR_GET_CALLSITE(),
-				 OMRMEM_CATEGORY_PORT_LIBRARY);
+    if (NULL_TERM_SZ < lclMsgLen) {
+        lclMsg = portLibrary->mem_allocate_memory(
+            portLibrary, lclMsgLen, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 
-		if (NULL != lclMsg) {
-			/* If we got here, we are guaranteed to have enough
-			 * space for the converted string and the null
-			 * terminator char. Under these circumstances,
-			 * str_convert routine guarantees that the resulting
-			 * string will be null terminated.
-			 */
-			const int32_t convRes =
-				portLibrary->str_convert(portLibrary,
-										 J9STR_CODE_MUTF8, J9STR_CODE_PLATFORM_RAW,
-										 buf, strlen(buf), lclMsg, lclMsgLen);
+        if (NULL != lclMsg) {
+            /* If we got here, we are guaranteed to have enough
+             * space for the converted string and the null
+             * terminator char. Under these circumstances,
+             * str_convert routine guarantees that the resulting
+             * string will be null terminated.
+             */
+            const int32_t convRes = portLibrary->str_convert(
+                portLibrary, J9STR_CODE_MUTF8, J9STR_CODE_PLATFORM_RAW, buf, strlen(buf), lclMsg, lclMsgLen);
 
-			lclConvSuccess = (BOOLEAN)(convRes >= 0);
+            lclConvSuccess = (BOOLEAN)(convRes >= 0);
 
-			if (! lclConvSuccess) {
-				Trc_PRT_omrsyslog_failed_str_convert(convRes);
-			}
-		}
-	}
+            if (!lclConvSuccess) {
+                Trc_PRT_omrsyslog_failed_str_convert(convRes);
+            }
+        }
+    }
 
-	if (lclConvSuccess) {
-		syslog(priority, "%s", lclMsg);
-	} else {
-		syslog(priority, "%s", buf);
-	}
+    if (lclConvSuccess) {
+        syslog(priority, "%s", lclMsg);
+    } else {
+        syslog(priority, "%s", buf);
+    }
 
-	if (NULL != lclMsg) {
-		portLibrary->mem_free_memory(portLibrary, lclMsg);
-	}
+    if (NULL != lclMsg) {
+        portLibrary->mem_free_memory(portLibrary, lclMsg);
+    }
 
-	return;
+    return;
 #endif
 }

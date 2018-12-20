@@ -20,15 +20,9 @@
  *******************************************************************************/
 
 #include "compile/TLSCompilationManager.hpp"
-#include "infra/ThreadLocal.h"                 // for tlsSet
-#include "compile/OMRCompilation.hpp"          // for OMR::compilation
+#include "infra/ThreadLocal.h" // for tlsSet
+#include "compile/OMRCompilation.hpp" // for OMR::compilation
 
-TR::TLSCompilationManager::TLSCompilationManager(TR::Compilation &comp)
-   {
-   tlsSet(OMR::compilation, &comp);
-   }
+TR::TLSCompilationManager::TLSCompilationManager(TR::Compilation& comp) { tlsSet(OMR::compilation, &comp); }
 
-TR::TLSCompilationManager::~TLSCompilationManager()
-   {
-   tlsSet(OMR::compilation, NULL);
-   }
+TR::TLSCompilationManager::~TLSCompilationManager() { tlsSet(OMR::compilation, NULL); }

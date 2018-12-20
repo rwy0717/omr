@@ -29,7 +29,7 @@
 
 #include "omrport.h"
 
-#define OMRPORT_ACCESS_FROM_OMRRUNTIME(omrRuntime) OMRPortLibrary *privateOmrPortLibrary = (omrRuntime)->_portLibrary
+#define OMRPORT_ACCESS_FROM_OMRRUNTIME(omrRuntime) OMRPortLibrary* privateOmrPortLibrary = (omrRuntime)->_portLibrary
 #define OMRPORT_ACCESS_FROM_OMRVM(omrVM) OMRPORT_ACCESS_FROM_OMRRUNTIME((omrVM)->_runtime)
 #define OMRPORT_ACCESS_FROM_OMRVMTHREAD(omrVMThread) OMRPORT_ACCESS_FROM_OMRVM((omrVMThread)->_vm)
 
@@ -45,23 +45,23 @@
 extern "C" {
 #endif
 
-#define OMR_OS_STACK_SIZE	256 * 1024 /* Corresponds to desktopBigStack in builder */
+#define OMR_OS_STACK_SIZE 256 * 1024 /* Corresponds to desktopBigStack in builder */
 
 typedef enum {
-	OMR_ERROR_NONE = 0,
-	OMR_ERROR_OUT_OF_NATIVE_MEMORY,
-	OMR_ERROR_FAILED_TO_ATTACH_NATIVE_THREAD,
-	OMR_ERROR_MAXIMUM_VM_COUNT_EXCEEDED,
-	OMR_ERROR_MAXIMUM_THREAD_COUNT_EXCEEDED,
-	OMR_THREAD_STILL_ATTACHED,
-	OMR_VM_STILL_ATTACHED,
-	OMR_ERROR_FAILED_TO_ALLOCATE_MONITOR,
-	OMR_ERROR_INTERNAL,
-	OMR_ERROR_ILLEGAL_ARGUMENT,
-	OMR_ERROR_NOT_AVAILABLE,
-	OMR_THREAD_NOT_ATTACHED,
-	OMR_ERROR_FILE_UNAVAILABLE,
-	OMR_ERROR_RETRY
+    OMR_ERROR_NONE = 0,
+    OMR_ERROR_OUT_OF_NATIVE_MEMORY,
+    OMR_ERROR_FAILED_TO_ATTACH_NATIVE_THREAD,
+    OMR_ERROR_MAXIMUM_VM_COUNT_EXCEEDED,
+    OMR_ERROR_MAXIMUM_THREAD_COUNT_EXCEEDED,
+    OMR_THREAD_STILL_ATTACHED,
+    OMR_VM_STILL_ATTACHED,
+    OMR_ERROR_FAILED_TO_ALLOCATE_MONITOR,
+    OMR_ERROR_INTERNAL,
+    OMR_ERROR_ILLEGAL_ARGUMENT,
+    OMR_ERROR_NOT_AVAILABLE,
+    OMR_THREAD_NOT_ATTACHED,
+    OMR_ERROR_FILE_UNAVAILABLE,
+    OMR_ERROR_RETRY
 } omr_error_t;
 
 struct OMR_Agent;
@@ -78,112 +78,114 @@ struct UtThreadData;
 struct OMR_TraceThread;
 
 typedef struct OMR_RuntimeConfiguration {
-	uintptr_t _maximum_vm_count;		/* 0 for unlimited */
+    uintptr_t _maximum_vm_count; /* 0 for unlimited */
 } OMR_RuntimeConfiguration;
 
 typedef struct OMR_Runtime {
-	uintptr_t _initialized;
-	OMRPortLibrary *_portLibrary;
-	struct OMR_VM *_vmList;
-	omrthread_monitor_t _vmListMutex;
-	struct OMR_VM *_rootVM;
-	struct OMR_RuntimeConfiguration _configuration;
-	uintptr_t _vmCount;
+    uintptr_t _initialized;
+    OMRPortLibrary* _portLibrary;
+    struct OMR_VM* _vmList;
+    omrthread_monitor_t _vmListMutex;
+    struct OMR_VM* _rootVM;
+    struct OMR_RuntimeConfiguration _configuration;
+    uintptr_t _vmCount;
 } OMR_Runtime;
 
 typedef struct OMR_VMConfiguration {
-	uintptr_t _maximum_thread_count;		/* 0 for unlimited */
+    uintptr_t _maximum_thread_count; /* 0 for unlimited */
 } OMR_VMConfiguration;
 
 typedef struct movedObjectHashCode {
-	uint32_t originalHashCode;
-	BOOLEAN hasBeenMoved;
-	BOOLEAN hasBeenHashed;
+    uint32_t originalHashCode;
+    BOOLEAN hasBeenMoved;
+    BOOLEAN hasBeenHashed;
 } movedObjectHashCode;
 
 typedef struct OMR_ExclusiveVMAccessStats {
-	U_64 startTime;
-	U_64 endTime;
-	U_64 totalResponseTime;
-	struct OMR_VMThread *requester;
-	struct OMR_VMThread *lastResponder;
-	UDATA haltedThreads;
+    U_64 startTime;
+    U_64 endTime;
+    U_64 totalResponseTime;
+    struct OMR_VMThread* requester;
+    struct OMR_VMThread* lastResponder;
+    UDATA haltedThreads;
 } OMR_ExclusiveVMAccessStats;
 
 typedef struct OMR_VM {
-	struct OMR_Runtime *_runtime;
-	void *_language_vm;
-	struct OMR_VM *_linkNext;
-	struct OMR_VM *_linkPrevious;
-	struct OMR_VMThread *_vmThreadList;
-	omrthread_monitor_t _vmThreadListMutex;
-	omrthread_tls_key_t _vmThreadKey;
-	uintptr_t _arrayletLeafSize;
-	uintptr_t _arrayletLeafLogSize;
-	uintptr_t _compressedPointersShift;
-	uintptr_t _objectAlignmentInBytes;
-	uintptr_t _objectAlignmentShift;
-	void *_gcOmrVMExtensions;
-	struct OMR_VMConfiguration _configuration;
-	uintptr_t _languageThreadCount;
-	uintptr_t _internalThreadCount;
-	struct OMR_ExclusiveVMAccessStats exclusiveVMAccessStats;
-	uintptr_t gcPolicy;
-	struct OMR_SysInfo *sysInfo;
-	struct OMR_SizeClasses *_sizeClasses;
+    struct OMR_Runtime* _runtime;
+    void* _language_vm;
+    struct OMR_VM* _linkNext;
+    struct OMR_VM* _linkPrevious;
+    struct OMR_VMThread* _vmThreadList;
+    omrthread_monitor_t _vmThreadListMutex;
+    omrthread_tls_key_t _vmThreadKey;
+    uintptr_t _arrayletLeafSize;
+    uintptr_t _arrayletLeafLogSize;
+    uintptr_t _compressedPointersShift;
+    uintptr_t _objectAlignmentInBytes;
+    uintptr_t _objectAlignmentShift;
+    void* _gcOmrVMExtensions;
+    struct OMR_VMConfiguration _configuration;
+    uintptr_t _languageThreadCount;
+    uintptr_t _internalThreadCount;
+    struct OMR_ExclusiveVMAccessStats exclusiveVMAccessStats;
+    uintptr_t gcPolicy;
+    struct OMR_SysInfo* sysInfo;
+    struct OMR_SizeClasses* _sizeClasses;
 #if defined(OMR_THR_FORK_SUPPORT)
-	uintptr_t forkGeneration;
-	uintptr_t parentPID;
+    uintptr_t forkGeneration;
+    uintptr_t parentPID;
 #endif /* defined(OMR_THR_FORK_SUPPORT) */
 
 #if defined(OMR_RAS_TDF_TRACE)
-	struct UtInterface *utIntf;
-	struct OMR_Agent *_hcAgent;
-	omrthread_monitor_t _omrTIAccessMutex;
-	struct OMRTraceEngine *_trcEngine;
-	void *_methodDictionary;
+    struct UtInterface* utIntf;
+    struct OMR_Agent* _hcAgent;
+    omrthread_monitor_t _omrTIAccessMutex;
+    struct OMRTraceEngine* _trcEngine;
+    void* _methodDictionary;
 #endif /* OMR_RAS_TDF_TRACE */
 } OMR_VM;
 
 typedef struct OMR_VMThread {
-	struct OMR_VM *_vm;
-	uint32_t _sampleStackBackoff;
-	void *_language_vmthread;
-	omrthread_t _os_thread;
-	struct OMR_VMThread *_linkNext;
-	struct OMR_VMThread *_linkPrevious;
-	uintptr_t _internal;
-	void *_gcOmrVMThreadExtensions;
+    struct OMR_VM* _vm;
+    uint32_t _sampleStackBackoff;
+    void* _language_vmthread;
+    omrthread_t _os_thread;
+    struct OMR_VMThread* _linkNext;
+    struct OMR_VMThread* _linkPrevious;
+    uintptr_t _internal;
+    void* _gcOmrVMThreadExtensions;
 
-	uintptr_t vmState;
-	uintptr_t exclusiveCount;
+    uintptr_t vmState;
+    uintptr_t exclusiveCount;
 
-	uint8_t *threadName;
-	BOOLEAN threadNameIsStatic; /**< threadName is managed externally; Don't free it. */
-	omrthread_monitor_t threadNameMutex; /**< Hold this mutex to read or modify threadName. */
+    uint8_t* threadName;
+    BOOLEAN threadNameIsStatic; /**< threadName is managed externally; Don't free it. */
+    omrthread_monitor_t threadNameMutex; /**< Hold this mutex to read or modify threadName. */
 
 #if defined(OMR_RAS_TDF_TRACE)
-	union {
-		struct UtThreadData *uteThread; /* used by JVM */
-		struct OMR_TraceThread *omrTraceThread; /* used by OMR */
-	} _trace;
+    union {
+        struct UtThreadData* uteThread; /* used by JVM */
+        struct OMR_TraceThread* omrTraceThread; /* used by OMR */
+    } _trace;
 #endif /* OMR_RAS_TDF_TRACE */
 
-	/* todo: dagar these are temporarily duplicated and should be removed from J9VMThread */
-	void *lowTenureAddress;
-	void *highTenureAddress;
+    /* todo: dagar these are temporarily duplicated and should be removed from J9VMThread */
+    void* lowTenureAddress;
+    void* highTenureAddress;
 
-	void *heapBaseForBarrierRange0;
-	uintptr_t heapSizeForBarrierRange0;
+    void* heapBaseForBarrierRange0;
+    uintptr_t heapSizeForBarrierRange0;
 
-	void *memorySpace;
+    void* memorySpace;
 
-	struct movedObjectHashCode movedObjectHashCodeCache;
+    struct movedObjectHashCode movedObjectHashCodeCache;
 
-	int32_t _attachCount;
+    int32_t _attachCount;
 
-	void *_savedObject1; /**< holds new object allocation until object can be attached to reference graph (see MM_AllocationDescription::save/restoreObjects()) */
-	void *_savedObject2; /**< holds new object allocation until object can be attached to reference graph (see MM_AllocationDescription::save/restoreObjects()) */
+    void* _savedObject1; /**< holds new object allocation until object can be attached to reference graph (see
+                            MM_AllocationDescription::save/restoreObjects()) */
+    void* _savedObject2; /**< holds new object allocation until object can be attached to reference graph (see
+                            MM_AllocationDescription::save/restoreObjects()) */
 } OMR_VMThread;
 
 /**
@@ -194,7 +196,7 @@ typedef struct OMR_VMThread {
  *
  * @return an OMR error code
  */
-omr_error_t omr_initialize_runtime(OMR_Runtime *runtime);
+omr_error_t omr_initialize_runtime(OMR_Runtime* runtime);
 
 /**
  * Perform final destruction of the OMR runtime.
@@ -204,7 +206,7 @@ omr_error_t omr_initialize_runtime(OMR_Runtime *runtime);
  *
  * @return an OMR error code
  */
-omr_error_t omr_destroy_runtime(OMR_Runtime *runtime);
+omr_error_t omr_destroy_runtime(OMR_Runtime* runtime);
 
 /**
  * Attach an OMR VM to the runtime.
@@ -213,7 +215,7 @@ omr_error_t omr_destroy_runtime(OMR_Runtime *runtime);
  *
  * @return an OMR error code
  */
-omr_error_t omr_attach_vm_to_runtime(OMR_VM *vm);
+omr_error_t omr_attach_vm_to_runtime(OMR_VM* vm);
 
 /**
  * Detach an OMR VM from the runtime.
@@ -223,7 +225,7 @@ omr_error_t omr_attach_vm_to_runtime(OMR_VM *vm);
  *
  * @return an OMR error code
  */
-omr_error_t omr_detach_vm_from_runtime(OMR_VM *vm);
+omr_error_t omr_detach_vm_from_runtime(OMR_VM* vm);
 
 /**
  * Attach an OMR VMThread to the VM.
@@ -235,7 +237,7 @@ omr_error_t omr_detach_vm_from_runtime(OMR_VM *vm);
  *
  * @return an OMR error code
  */
-omr_error_t omr_attach_vmthread_to_vm(OMR_VMThread *vmthread);
+omr_error_t omr_attach_vmthread_to_vm(OMR_VMThread* vmthread);
 
 /**
  * Detach a OMR VMThread from the VM.
@@ -246,7 +248,7 @@ omr_error_t omr_attach_vmthread_to_vm(OMR_VMThread *vmthread);
  *
  * @return an OMR error code
  */
-omr_error_t omr_detach_vmthread_from_vm(OMR_VMThread *vmthread);
+omr_error_t omr_detach_vmthread_from_vm(OMR_VMThread* vmthread);
 
 /**
  * Initialize an OMR VMThread.
@@ -256,7 +258,7 @@ omr_error_t omr_detach_vmthread_from_vm(OMR_VMThread *vmthread);
  * @param[in,out] vmthread a new vmthread
  * @return an OMR error code
  */
-omr_error_t omr_vmthread_init(OMR_VMThread *vmthread);
+omr_error_t omr_vmthread_init(OMR_VMThread* vmthread);
 
 /**
  * Destroy an OMR VMThread. Free associated data structures.
@@ -267,7 +269,7 @@ omr_error_t omr_vmthread_init(OMR_VMThread *vmthread);
  *
  * @param[in,out] vmthread the vmthread to cleanup
  */
-void omr_vmthread_destroy(OMR_VMThread *vmthread);
+void omr_vmthread_destroy(OMR_VMThread* vmthread);
 
 /**
  * @brief Attach the current thread to an OMR VM.
@@ -284,7 +286,7 @@ void omr_vmthread_destroy(OMR_VMThread *vmthread);
  * @param[out] vmThread A new OMR_VMThread for the current thread.
  * @return an OMR error code
  */
-omr_error_t omr_vmthread_firstAttach(OMR_VM *vm, OMR_VMThread **vmThread);
+omr_error_t omr_vmthread_firstAttach(OMR_VM* vm, OMR_VMThread** vmThread);
 
 /**
  * @brief Detach a thread from its OMR VM.
@@ -299,10 +301,11 @@ omr_error_t omr_vmthread_firstAttach(OMR_VM *vm, OMR_VMThread **vmThread);
  *
  * Not currently used by JVM.
  *
- * @param[in,out] vmThread The thread to detach. If the thread is already dead, it won't be the current thread. It will be freed.
+ * @param[in,out] vmThread The thread to detach. If the thread is already dead, it won't be the current thread. It will
+ * be freed.
  * @return an OMR error code
  */
-omr_error_t omr_vmthread_lastDetach(OMR_VMThread *vmThread);
+omr_error_t omr_vmthread_lastDetach(OMR_VMThread* vmThread);
 
 /**
  * @brief Re-attach a thread that is already attached to the OMR VM.
@@ -313,7 +316,7 @@ omr_error_t omr_vmthread_lastDetach(OMR_VMThread *vmThread);
  * @param[in,out] currentThread The current OMR_VMThread.
  * @param[in] threadName A new name for the thread.
  */
-void omr_vmthread_reattach(OMR_VMThread *currentThread, const char *threadName);
+void omr_vmthread_reattach(OMR_VMThread* currentThread, const char* threadName);
 
 /**
  * @brief Detach a thread that has been re-attached multiple times.
@@ -323,8 +326,7 @@ void omr_vmthread_reattach(OMR_VMThread *currentThread, const char *threadName);
  *
  * @param[in,out] omrVMThread An OMR_VMThread. It must have been re-attached at least once.
  */
-void omr_vmthread_redetach(OMR_VMThread *omrVMThread);
-
+void omr_vmthread_redetach(OMR_VMThread* omrVMThread);
 
 /**
  * Get the current OMR_VMThread, if the current thread is attached.
@@ -335,7 +337,7 @@ void omr_vmthread_redetach(OMR_VMThread *omrVMThread);
  * @param[in] vm The VM
  * @return A non-NULL OMR_VMThread if the current thread is already attached, NULL otherwise.
  */
-OMR_VMThread *omr_vmthread_getCurrent(OMR_VM *vm);
+OMR_VMThread* omr_vmthread_getCurrent(OMR_VM* vm);
 
 /*
  * C wrappers for OMR_Agent API
@@ -343,34 +345,34 @@ OMR_VMThread *omr_vmthread_getCurrent(OMR_VM *vm);
 /**
  * @see OMR_Agent::createAgent
  */
-struct OMR_Agent *omr_agent_create(OMR_VM *vm, char const *arg);
+struct OMR_Agent* omr_agent_create(OMR_VM* vm, char const* arg);
 
 /**
  * @see OMR_Agent::destroyAgent
  */
-void omr_agent_destroy(struct OMR_Agent *agent);
+void omr_agent_destroy(struct OMR_Agent* agent);
 
 /**
  * @see OMR_Agent::openLibrary
  */
-omr_error_t omr_agent_openLibrary(struct OMR_Agent *agent);
+omr_error_t omr_agent_openLibrary(struct OMR_Agent* agent);
 
 /**
  * @see OMR_Agent::callOnLoad
  */
-omr_error_t omr_agent_callOnLoad(struct OMR_Agent *agent);
+omr_error_t omr_agent_callOnLoad(struct OMR_Agent* agent);
 
 /**
  * @see OMR_Agent::callOnUnload
  */
-omr_error_t omr_agent_callOnUnload(struct OMR_Agent *agent);
+omr_error_t omr_agent_callOnUnload(struct OMR_Agent* agent);
 
 /**
  * Access the TI function table.
  *
  * @return the TI function table
  */
-struct OMR_TI const *omr_agent_getTI(void);
+struct OMR_TI const* omr_agent_getTI(void);
 
 #if defined(OMR_THR_FORK_SUPPORT)
 
@@ -380,7 +382,7 @@ struct OMR_TI const *omr_agent_getTI(void);
  *
  * @param[in] vm The OMR vm.
  */
-void omr_vm_postForkChild(OMR_VM *vm);
+void omr_vm_postForkChild(OMR_VM* vm);
 
 /**
  * To be called directly after a fork in the parent process, this function releases the
@@ -388,7 +390,7 @@ void omr_vm_postForkChild(OMR_VM *vm);
  *
  * @param[in] vm The OMR vm.
  */
-void omr_vm_postForkParent(OMR_VM *vm);
+void omr_vm_postForkParent(OMR_VM* vm);
 
 /**
  * To be called directly before a fork, this function will hold the _vmThreadListMutex to
@@ -396,12 +398,9 @@ void omr_vm_postForkParent(OMR_VM *vm);
  *
  * @param[in] vm The OMR vm.
  */
-void omr_vm_preFork(OMR_VM *vm);
+void omr_vm_preFork(OMR_VM* vm);
 
 #endif /* defined(OMR_THR_FORK_SUPPORT) */
-
-
-
 
 /*
  * LANGUAGE VM GLUE
@@ -420,7 +419,7 @@ void omr_vm_preFork(OMR_VM *vm);
  * @param[out] omrVMThread the current OMR VMThread
  * @return an OMR error code
  */
-omr_error_t OMR_Glue_BindCurrentThread(OMR_VM *omrVM, const char *threadName, OMR_VMThread **omrVMThread);
+omr_error_t OMR_Glue_BindCurrentThread(OMR_VM* omrVM, const char* threadName, OMR_VMThread** omrVMThread);
 
 /**
  * @brief Unbind the current thread from its language VM.
@@ -433,7 +432,7 @@ omr_error_t OMR_Glue_BindCurrentThread(OMR_VM *omrVM, const char *threadName, OM
  * @param[in,out] omrVMThread the current OMR VMThread
  * @return an OMR error code
  */
-omr_error_t OMR_Glue_UnbindCurrentThread(OMR_VMThread *omrVMThread);
+omr_error_t OMR_Glue_UnbindCurrentThread(OMR_VMThread* omrVMThread);
 
 /**
  * @brief Allocate and initialize a new language thread.
@@ -450,7 +449,7 @@ omr_error_t OMR_Glue_UnbindCurrentThread(OMR_VMThread *omrVMThread);
  * @param[out] languageThread A new language thread.
  * @return an OMR error code
  */
-omr_error_t OMR_Glue_AllocLanguageThread(void *languageVM, void **languageThread);
+omr_error_t OMR_Glue_AllocLanguageThread(void* languageVM, void** languageThread);
 
 /**
  * @brief Cleanup and free a language thread.
@@ -464,7 +463,7 @@ omr_error_t OMR_Glue_AllocLanguageThread(void *languageVM, void **languageThread
  * @param[in,out] languageThread The thread to be destroyed.
  * @return an OMR error code
  */
-omr_error_t OMR_Glue_FreeLanguageThread(void *languageThread);
+omr_error_t OMR_Glue_FreeLanguageThread(void* languageThread);
 
 /**
  * @brief Link an OMR VMThread to its corresponding language thread.
@@ -473,7 +472,7 @@ omr_error_t OMR_Glue_FreeLanguageThread(void *languageThread);
  * @param[in] omrVMThread The OMR_VMThread that corresponds to languageThread.
  * @return an OMR error code
  */
-omr_error_t OMR_Glue_LinkLanguageThreadToOMRThread(void *languageThread, OMR_VMThread *omrVMThread);
+omr_error_t OMR_Glue_LinkLanguageThreadToOMRThread(void* languageThread, OMR_VMThread* omrVMThread);
 
 #if defined(OMR_OS_WINDOWS)
 /**
@@ -492,10 +491,10 @@ omr_error_t OMR_Glue_LinkLanguageThreadToOMRThread(void *languageThread, OMR_VMT
  * @param[out] token A token.
  * @return an OMR error code
  */
-omr_error_t OMR_Glue_GetVMDirectoryToken(void **token);
+omr_error_t OMR_Glue_GetVMDirectoryToken(void** token);
 #endif /* defined(OMR_OS_WINDOWS) */
 
-char *OMR_Glue_GetThreadNameForUnamedThread(OMR_VMThread *vmThread);
+char* OMR_Glue_GetThreadNameForUnamedThread(OMR_VMThread* vmThread);
 
 /**
  * Get the number of method properties. This is the number of properties per method
@@ -512,7 +511,7 @@ int OMR_Glue_GetMethodDictionaryPropertyNum(void);
  *
  * @return Method property names
  */
-const char * const *OMR_Glue_GetMethodDictionaryPropertyNames(void);
+const char* const* OMR_Glue_GetMethodDictionaryPropertyNames(void);
 
 #ifdef __cplusplus
 }

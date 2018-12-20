@@ -29,49 +29,44 @@
 #include "omrTestHelpers.h"
 #include "testEnvironment.hpp"
 
-#define APPEND_ERRORINFO  "\tlastErrorNumber: " << omrerror_last_error_number() << "\n\tLastErrorMessage: " << (char *)omrerror_last_error_message() << "\n"
+#define APPEND_ERRORINFO                                  \
+    "\tlastErrorNumber: " << omrerror_last_error_number() \
+                          << "\n\tLastErrorMessage: " << (char*)omrerror_last_error_message() << "\n"
 
 /*Nonfatal assertion macros*/
-#define OMRTEST_EXPECT_NOT_NULL(funcPointer)	EXPECT_FALSE(NULL == funcPointer) << APPEND_ERRORINFO
-#define OMRTEST_EXPECT_FAILURE(info)	ADD_FAILURE() << info << APPEND_ERRORINFO
+#define OMRTEST_EXPECT_NOT_NULL(funcPointer) EXPECT_FALSE(NULL == funcPointer) << APPEND_ERRORINFO
+#define OMRTEST_EXPECT_FAILURE(info) ADD_FAILURE() << info << APPEND_ERRORINFO
 
 /*Fatal assertion macros*/
-#define OMRTEST_ASSERT_TRUE(condition, info)	ASSERT_TRUE(condition) << info << APPEND_ERRORINFO
+#define OMRTEST_ASSERT_TRUE(condition, info) ASSERT_TRUE(condition) << info << APPEND_ERRORINFO
 
-class PortTestEnvironment: public PortEnvironment
-{
+class PortTestEnvironment : public PortEnvironment {
 public:
-	char *hypervisor;
-	BOOLEAN negative;
+    char* hypervisor;
+    BOOLEAN negative;
 
-	PortTestEnvironment(int argc, char **argv)
-		: PortEnvironment(argc, argv)
-		, hypervisor(NULL)
-		, negative(FALSE)
-	{
-		for (int i = 1; i < argc; i++) {
-			if (strStartsWith(argv[i], "-hypervisor:")) {
-				hypervisor = &(argv[i][12]);
-			} else if (strcmp(argv[i], "-negative") == 0) {
-				/* Option "-negative" does /not/ take sub-options so we don't do startsWith() but an
-				 * exact match. Should this need sub-options, use startsWith instead.
-				 */
-				negative = TRUE;
-			}
-		}
-	}
+    PortTestEnvironment(int argc, char** argv)
+        : PortEnvironment(argc, argv)
+        , hypervisor(NULL)
+        , negative(FALSE)
+    {
+        for (int i = 1; i < argc; i++) {
+            if (strStartsWith(argv[i], "-hypervisor:")) {
+                hypervisor = &(argv[i][12]);
+            } else if (strcmp(argv[i], "-negative") == 0) {
+                /* Option "-negative" does /not/ take sub-options so we don't do startsWith() but an
+                 * exact match. Should this need sub-options, use startsWith instead.
+                 */
+                negative = TRUE;
+            }
+        }
+    }
 
-	void initPort()
-	{
-		SetUp();
-	}
+    void initPort() { SetUp(); }
 
-	void shutdownPort()
-	{
-		TearDown();
-	}
+    void shutdownPort() { TearDown(); }
 };
 
-extern PortTestEnvironment *portTestEnv;
+extern PortTestEnvironment* portTestEnv;
 
 #endif /* PORTTESTHELPERS_H_INCLUDED */

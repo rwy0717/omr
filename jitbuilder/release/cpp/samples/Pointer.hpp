@@ -20,28 +20,25 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #ifndef POINTER_INCL
 #define POINTER_INCL
 
 #include "JitBuilder.hpp"
 
-typedef void (PointerFunctionType)(int32_t *, float *, double **);
+typedef void(PointerFunctionType)(int32_t*, float*, double**);
 
-class PointerMethod : public OMR::JitBuilder::MethodBuilder
-   {
-   private:
+class PointerMethod : public OMR::JitBuilder::MethodBuilder {
+private:
+    void PrintString(OMR::JitBuilder::IlBuilder* bldr, const char* s);
+    OMR::JitBuilder::IlType* pInt32;
+    OMR::JitBuilder::IlType* pFloat;
+    OMR::JitBuilder::IlType* pDouble;
+    OMR::JitBuilder::IlType* ppDouble;
+    static int32_t staticInt32;
 
-   void PrintString (OMR::JitBuilder::IlBuilder *bldr, const char *s);
-   OMR::JitBuilder::IlType *pInt32;
-   OMR::JitBuilder::IlType *pFloat;
-   OMR::JitBuilder::IlType *pDouble;
-   OMR::JitBuilder::IlType *ppDouble;
-   static int32_t staticInt32;
-
-   public:
-   PointerMethod(OMR::JitBuilder::TypeDictionary *);
-   virtual bool buildIL();
-   };
+public:
+    PointerMethod(OMR::JitBuilder::TypeDictionary*);
+    virtual bool buildIL();
+};
 
 #endif // !defined(POINTER_INCL)

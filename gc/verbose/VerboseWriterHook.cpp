@@ -27,71 +27,55 @@
 #include "GCExtensionsBase.hpp"
 #include "VerboseWriterHook.hpp"
 
-
-
-MM_VerboseWriterHook::MM_VerboseWriterHook(MM_EnvironmentBase *env) :
-	MM_VerboseWriter(VERBOSE_WRITER_HOOK)
+MM_VerboseWriterHook::MM_VerboseWriterHook(MM_EnvironmentBase* env)
+    : MM_VerboseWriter(VERBOSE_WRITER_HOOK)
 {
-	/* no implementation */
+    /* no implementation */
 }
 
 /**
  * Create a new MM_VerboseWriterHook instance.
  * @return Pointer to the new MM_VerboseWriterHook.
  */
-MM_VerboseWriterHook *
-MM_VerboseWriterHook::newInstance(MM_EnvironmentBase *env)
+MM_VerboseWriterHook* MM_VerboseWriterHook::newInstance(MM_EnvironmentBase* env)
 {
-	MM_GCExtensionsBase *extensions = MM_GCExtensionsBase::getExtensions(env->getOmrVM());
-	
-	MM_VerboseWriterHook *agent = (MM_VerboseWriterHook *)extensions->getForge()->allocate(sizeof(MM_VerboseWriterHook), OMR::GC::AllocationCategory::DIAGNOSTIC, OMR_GET_CALLSITE());
-	if (agent) {
-		new(agent) MM_VerboseWriterHook(env);
-		if(!agent->initialize(env)){
-			agent->kill(env);
-			agent = NULL;
-		}
-	}
-	return agent;
+    MM_GCExtensionsBase* extensions = MM_GCExtensionsBase::getExtensions(env->getOmrVM());
+
+    MM_VerboseWriterHook* agent = (MM_VerboseWriterHook*)extensions->getForge()->allocate(
+        sizeof(MM_VerboseWriterHook), OMR::GC::AllocationCategory::DIAGNOSTIC, OMR_GET_CALLSITE());
+    if (agent) {
+        new (agent) MM_VerboseWriterHook(env);
+        if (!agent->initialize(env)) {
+            agent->kill(env);
+            agent = NULL;
+        }
+    }
+    return agent;
 }
 
 /**
  * Initializes the MM_VerboseWriterHook instance.
  */
-bool
-MM_VerboseWriterHook::initialize(MM_EnvironmentBase *env)
-{
-	return MM_VerboseWriter::initialize(env);
-}
+bool MM_VerboseWriterHook::initialize(MM_EnvironmentBase* env) { return MM_VerboseWriter::initialize(env); }
 
 /**
  */
-void
-MM_VerboseWriterHook::endOfCycle(MM_EnvironmentBase *env)
-{
-}
+void MM_VerboseWriterHook::endOfCycle(MM_EnvironmentBase* env) {}
 
 /**
  * Closes the agents output stream.
  */
-void
-MM_VerboseWriterHook::closeStream(MM_EnvironmentBase *env)
+void MM_VerboseWriterHook::closeStream(MM_EnvironmentBase* env)
 {
-	/* Should this force an event with "</verbosegc>"? */ 
+    /* Should this force an event with "</verbosegc>"? */
 }
 
-void
-MM_VerboseWriterHook::outputString(MM_EnvironmentBase *env, const char* string)
+void MM_VerboseWriterHook::outputString(MM_EnvironmentBase* env, const char* string)
 {
-	OMR_VMThread* vmThread = env->getOmrVMThread();
-	MM_GCExtensionsBase *extensions = MM_GCExtensionsBase::getExtensions(env->getOmrVM());
-	OMRPORT_ACCESS_FROM_ENVIRONMENT(env);
-	
-	/* Call the hook */
-	TRIGGER_J9HOOK_MM_OMR_VERBOSE_GC_OUTPUT(
-		extensions->omrHookInterface,
-		vmThread,
-		omrtime_hires_clock(),
-		string);
-}
+    OMR_VMThread* vmThread = env->getOmrVMThread();
+    MM_GCExtensionsBase* extensions = MM_GCExtensionsBase::getExtensions(env->getOmrVM());
+    OMRPORT_ACCESS_FROM_ENVIRONMENT(env);
 
+    /* Call the hook */
+    TRIGGER_J9HOOK_MM_OMR_VERBOSE_GC_OUTPUT(extensions->omrHookInterface, vmThread, omrtime_hires_clock(), string);
+}

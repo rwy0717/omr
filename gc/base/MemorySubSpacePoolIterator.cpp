@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #include "omrcfg.h"
 
 #include "Debug.hpp"
@@ -33,71 +32,68 @@
  * Iterator states to maintain preorder traversal.
  */
 enum {
-	mm_msspool_iterator_next_subspace,  	 /**< Get to next subspace	   */
-	mm_msspool_iterator_next_memory_pool	 /**< Get to next pool		   */
+    mm_msspool_iterator_next_subspace, /**< Get to next subspace	   */
+    mm_msspool_iterator_next_memory_pool /**< Get to next pool		   */
 };
 
 /**
  * Initialize the iterator to the beginning of the memory subspace list.
  */
-void
-MM_MemorySubSpacePoolIterator::reset()
+void MM_MemorySubSpacePoolIterator::reset()
 {
-	_memorySubSpace = _mssChildIterator.nextSubSpace();
-	_memoryPool = NULL;
-	_state = mm_msspool_iterator_next_subspace;
+    _memorySubSpace = _mssChildIterator.nextSubSpace();
+    _memoryPool = NULL;
+    _state = mm_msspool_iterator_next_subspace;
 }
-
 
 /**
  * Walk all memory pools for the memory subspace.
- * The list traversal is preorder, in that all parent nodes are visited before 
+ * The list traversal is preorder, in that all parent nodes are visited before
  * any of their children.
- * 
+ *
  * @return Next memory pool, or NULL if all pools have been processed.
  */
-MM_MemoryPool *
-MM_MemorySubSpacePoolIterator::nextPool()
+MM_MemoryPool* MM_MemorySubSpacePoolIterator::nextPool()
 {
-	MM_MemoryPool *nextPool;
-	
-	while(NULL != _memorySubSpace) { 
-		
-		switch(_state) {
-			
-		case mm_msspool_iterator_next_subspace:
-						
-			if(NULL != _memorySubSpace->getMemoryPool()) {
-				_memoryPool = _memorySubSpace->getMemoryPool();
-		
-				/* Does this Memory pool have children ? */		
-				if(NULL != _memoryPool->getChildren()) {
-					/* Yes ..So we only return details of its children */
-					_memoryPool = _memoryPool->getChildren();
-				}
-				
-				_state = mm_msspool_iterator_next_memory_pool;
-				break;
-			}
-			
-			_memorySubSpace = _mssChildIterator.nextSubSpace();
-			break;
-			
-		case mm_msspool_iterator_next_memory_pool:
-			assume0(_memoryPool);
-			nextPool = _memoryPool;
-			_memoryPool= _memoryPool->getNext(); 
-			
-			/* Any more children ? */
-			if (NULL == _memoryPool) {
-				_memorySubSpace = _mssChildIterator.nextSubSpace();
-				_state = mm_msspool_iterator_next_subspace;
-			}		 
-			
-			return nextPool;
-			break;
-		}	
-	}	
-	
-	return NULL;
+    MM_MemoryPool* nextPool;
+
+    while (NULL != _memorySubSpace) {
+
+        switch (_state) {
+
+        case mm_msspool_iterator_next_subspace:
+
+            if (NULL != _memorySubSpace->getMemoryPool()) {
+                _memoryPool = _memorySubSpace->getMemoryPool();
+
+                /* Does this Memory pool have children ? */
+                if (NULL != _memoryPool->getChildren()) {
+                    /* Yes ..So we only return details of its children */
+                    _memoryPool = _memoryPool->getChildren();
+                }
+
+                _state = mm_msspool_iterator_next_memory_pool;
+                break;
+            }
+
+            _memorySubSpace = _mssChildIterator.nextSubSpace();
+            break;
+
+        case mm_msspool_iterator_next_memory_pool:
+            assume0(_memoryPool);
+            nextPool = _memoryPool;
+            _memoryPool = _memoryPool->getNext();
+
+            /* Any more children ? */
+            if (NULL == _memoryPool) {
+                _memorySubSpace = _mssChildIterator.nextSubSpace();
+                _state = mm_msspool_iterator_next_subspace;
+            }
+
+            return nextPool;
+            break;
+        }
+    }
+
+    return NULL;
 }

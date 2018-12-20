@@ -24,7 +24,7 @@
 
 #include <gtest/gtest.h>
 #include <vector>
-#include <stdexcept> 
+#include <stdexcept>
 #include "control/Options.hpp"
 #include "optimizer/Optimizer.hpp"
 #include "ilgen/MethodBuilder.hpp"
@@ -37,12 +37,11 @@
 #define TRIL(code) #code
 
 bool initializeJit();
-bool initializeJitWithOptions(char *options);
-int32_t compileMethodBuilder(TR::MethodBuilder * methodBuilder, void ** entryPoint);
+bool initializeJitWithOptions(char* options);
+int32_t compileMethodBuilder(TR::MethodBuilder* methodBuilder, void** entryPoint);
 void shutdownJit();
 
-namespace TRTest
-{
+namespace TRTest {
 
 /**
  * @brief The JitBuilderTest class is a basic test fixture for JitBuilder test cases.
@@ -53,108 +52,100 @@ namespace TRTest
  *
  *    class MyTestCase : public JitBuilderTest {};
  */
-class JitTest : public ::testing::Test
-   {
-   public:
+class JitTest : public ::testing::Test {
+public:
+    JitTest()
+    {
+        auto initSuccess = initializeJitWithOptions(
+            (char*)"-Xjit:acceptHugeMethods,enableBasicBlockHoisting,omitFramePointer,useILValidator,paranoidoptcheck");
+        if (!initSuccess)
+            throw std::runtime_error("Failed to initialize jit");
+    }
 
-   JitTest()
-      {
-      auto initSuccess = initializeJitWithOptions((char*)"-Xjit:acceptHugeMethods,enableBasicBlockHoisting,omitFramePointer,useILValidator,paranoidoptcheck");
-      if (!initSuccess) 
-         throw std::runtime_error("Failed to initialize jit");
-      }
-
-   ~JitTest()
-      {
-      shutdownJit();
-      }
-   };
+    ~JitTest() { shutdownJit(); }
+};
 
 /**
- * @brief A fixture for testing with a customized optimization strategy. 
+ * @brief A fixture for testing with a customized optimization strategy.
  *
- * The design of this is such that it is expected sublasses will 
+ * The design of this is such that it is expected sublasses will
  * call addOptimization inside their constructor, so that SetUp will
  * know what opts to use.
  */
-class JitOptTest : public JitTest 
-   {
-   public:
+class JitOptTest : public JitTest {
+public:
+    JitOptTest()
+        : JitTest()
+        , _optimizations()
+        , _strategy(NULL)
+    {}
 
-   JitOptTest() :
-      JitTest(), _optimizations(), _strategy(NULL)
-      {
-      } 
+    virtual void SetUp()
+    {
+        JitTest::SetUp();
 
-   virtual void SetUp()
-      {
-      JitTest::SetUp();
+        // This is an allocated pointer because the strategy needs to
+        // live as long as this fixture
+        _strategy = new OptimizationStrategy[_optimizations.size() + 1];
 
-      // This is an allocated pointer because the strategy needs to 
-      // live as long as this fixture
-      _strategy = new OptimizationStrategy[_optimizations.size() + 1];
+        makeOptimizationStrategyArray(_strategy);
+        TR::Optimizer::setMockStrategy(_strategy);
+    }
 
-      makeOptimizationStrategyArray(_strategy);
-      TR::Optimizer::setMockStrategy(_strategy);
-      }
+    ~JitOptTest()
+    {
+        TR::Optimizer::setMockStrategy(NULL);
+        delete[] _strategy;
+    }
 
+    /**
+     * Append a single optimization to the list of optimizations to perform.
+     * The optimization is marked as `MustBeDone`.
+     *
+     * @param opt The optimization to perform.
+     */
+    void addOptimization(OMR::Optimizations opt)
+    {
+        OptimizationStrategy strategy = { opt, OMR::MustBeDone };
+        _optimizations.push_back(strategy);
+    }
 
-   ~JitOptTest() 
-      {
-      TR::Optimizer::setMockStrategy(NULL);
-      delete[] _strategy;
-      }
+    /**
+     * Append an optimization strategy to the list of optimizations to perform.
+     *
+     * @param opts An array of optimizations to perform. The last item in this
+     * array must be `endOpts` or `endGroup`.
+     */
+    void addOptimizations(const OptimizationStrategy* opts)
+    {
+        const OptimizationStrategy* end = opts;
+        while (end->_num != OMR::endOpts && end->_num != OMR::endGroup)
+            ++end;
 
-   /**
-    * Append a single optimization to the list of optimizations to perform.
-    * The optimization is marked as `MustBeDone`.
-    *
-    * @param opt The optimization to perform.
-    */
-   void addOptimization(OMR::Optimizations opt)
-      {
-      OptimizationStrategy strategy = {opt, OMR::MustBeDone};
-      _optimizations.push_back(strategy);
-      }
+        _optimizations.insert(_optimizations.end(), opts, end);
+    }
 
-   /**
-    * Append an optimization strategy to the list of optimizations to perform.
-    *
-    * @param opts An array of optimizations to perform. The last item in this
-    * array must be `endOpts` or `endGroup`.
-    */
-   void addOptimizations(const OptimizationStrategy *opts)
-      {
-      const OptimizationStrategy *end = opts;
-      while(end->_num != OMR::endOpts && end->_num != OMR::endGroup)
-         ++end;
+private:
+    /**
+     * Fill the array \p strategy with optimizations.
+     *
+     * @param[out] strategy An array with at least
+     * `_optimization.size() + 1` elements.
+     */
+    void makeOptimizationStrategyArray(OptimizationStrategy* strat)
+    {
+        for (unsigned int i = 0; i < _optimizations.size(); ++i) {
+            strat[i]._num = _optimizations[i]._num;
+            strat[i]._options = _optimizations[i]._options;
+        }
 
-      _optimizations.insert(_optimizations.end(), opts, end);
-      }
+        strat[_optimizations.size()]._num = OMR::endOpts;
+        strat[_optimizations.size()]._options = 0;
+    }
 
-
-   private:
-   /**
-    * Fill the array \p strategy with optimizations.
-    *
-    * @param[out] strategy An array with at least
-    * `_optimization.size() + 1` elements.
-    */
-   void makeOptimizationStrategyArray(OptimizationStrategy *strat)
-      {
-      for(unsigned int i = 0; i < _optimizations.size(); ++i)
-         {
-         strat[i]._num = _optimizations[i]._num;
-         strat[i]._options = _optimizations[i]._options;
-         }
-
-      strat[_optimizations.size()]._num = OMR::endOpts;
-      strat[_optimizations.size()]._options = 0;
-      }
-
-   OptimizationStrategy*             _strategy;
-   std::vector<OptimizationStrategy> _optimizations;
-   };
+    OptimizationStrategy* _strategy;
+    std::vector<OptimizationStrategy> _optimizations;
+};
 
 /**
  * @brief Returns the Cartesian product of two standard-conforming containers
@@ -169,15 +160,15 @@ class JitOptTest : public JitTest
  *    combine(std::vector<int>{1, 2, 3}, std::list<float>{4.0, 5.0, 6.0})
  */
 template <typename L, typename R>
-std::vector<std::tuple<typename L::value_type, typename R::value_type>> combine(L l, R r)
-   {
-   auto v = std::vector<std::tuple<typename L::value_type, typename R::value_type>>{};
-   v.reserve((l.end() - l.begin())*(r.end() - r.begin()));
-   for (auto i = l.begin(); i != l.end(); ++i)
-      for (auto j = r.begin(); j != r.end(); ++j)
-         v.push_back(std::make_tuple(*i, *j));
-   return v;
-   }
+std::vector<std::tuple<typename L::value_type, typename R::value_type> > combine(L l, R r)
+{
+    auto v = std::vector<std::tuple<typename L::value_type, typename R::value_type> > {};
+    v.reserve((l.end() - l.begin()) * (r.end() - r.begin()));
+    for (auto i = l.begin(); i != l.end(); ++i)
+        for (auto j = r.begin(); j != r.end(); ++j)
+            v.push_back(std::make_tuple(*i, *j));
+    return v;
+}
 
 /**
  * @brief Returns the Cartesian product of two initializer lists
@@ -197,22 +188,23 @@ std::vector<std::tuple<typename L::value_type, typename R::value_type>> combine(
  *
  */
 template <typename L, typename R>
-std::vector<std::tuple<L, R>> combine(std::initializer_list<L> l, std::initializer_list<R> r)
-   {
-   auto v = std::vector<std::tuple<L, R>>{};
-   v.reserve((l.end() - l.begin())*(r.end() - r.begin()));
-   for (auto i = l.begin(); i != l.end(); ++i)
-      for (auto j = r.begin(); j != r.end(); ++j)
-         v.push_back(std::make_tuple(*i, *j));
-   return v;
-   }
+std::vector<std::tuple<L, R> > combine(std::initializer_list<L> l, std::initializer_list<R> r)
+{
+    auto v = std::vector<std::tuple<L, R> > {};
+    v.reserve((l.end() - l.begin()) * (r.end() - r.begin()));
+    for (auto i = l.begin(); i != l.end(); ++i)
+        for (auto j = r.begin(); j != r.end(); ++j)
+            v.push_back(std::make_tuple(*i, *j));
+    return v;
+}
 
 /**
  * @brief Given standard container and a predicate, returns a copy of the
  *    container with the elements matching the predicate removed
  */
 template <typename C, typename Predicate>
-C filter(C range, Predicate pred) {
+C filter(C range, Predicate pred)
+{
     auto end = std::remove_if(range.begin(), range.end(), pred);
     range.erase(end, range.end());
     return range;
@@ -221,95 +213,99 @@ C filter(C range, Predicate pred) {
 /**
  * @brief A family of functions returning constants of the specified type
  */
-template <typename T> const T zero_value() { return static_cast<T>(0); }
-template <typename T> const T one_value() { return static_cast<T>(1); }
-template <typename T> const T negative_one_value() { return static_cast<T>(-1); }
-template <typename T> const T positive_value() { return static_cast<T>(42); }
-template <typename T> const T negative_value() { return static_cast<T>(-42); }
+template <typename T>
+const T zero_value()
+{
+    return static_cast<T>(0);
+}
+template <typename T>
+const T one_value()
+{
+    return static_cast<T>(1);
+}
+template <typename T>
+const T negative_one_value()
+{
+    return static_cast<T>(-1);
+}
+template <typename T>
+const T positive_value()
+{
+    return static_cast<T>(42);
+}
+template <typename T>
+const T negative_value()
+{
+    return static_cast<T>(-42);
+}
 
 /**
  * @brief Convenience function returning possible test inputs of the specified type
  */
 template <typename T>
 std::vector<T> const_values()
-   {
-   T inputArray[] = { zero_value<T>(),
-                      one_value<T>(),
-                      negative_one_value<T>(),
-                      positive_value<T>(),
-                      negative_value<T>(),
-                      std::numeric_limits<T>::min(),
-                      std::numeric_limits<T>::max(),
-                      static_cast<T>(std::numeric_limits<T>::min() + 1),
-                      static_cast<T>(std::numeric_limits<T>::max() - 1)
-                    };
-   
-   return std::vector<T>(inputArray, inputArray + sizeof(inputArray) / sizeof(T));
-   }
+{
+    T inputArray[] = { zero_value<T>(), one_value<T>(), negative_one_value<T>(), positive_value<T>(),
+        negative_value<T>(), std::numeric_limits<T>::min(), std::numeric_limits<T>::max(),
+        static_cast<T>(std::numeric_limits<T>::min() + 1), static_cast<T>(std::numeric_limits<T>::max() - 1) };
+
+    return std::vector<T>(inputArray, inputArray + sizeof(inputArray) / sizeof(T));
+}
 
 /**
  * @brief Convenience function returning possible test inputs of the specified type
  */
 template <>
 inline std::vector<int64_t> const_values<int64_t>()
-   {
-   int64_t inputArray[] = { zero_value<int64_t>(),
-                      one_value<int64_t>(),
-                      negative_one_value<int64_t>(),
-                      positive_value<int64_t>(),
-                      negative_value<int64_t>(),
-                      std::numeric_limits<int64_t>::min(),
-                      std::numeric_limits<int64_t>::max(),
-                      static_cast<int64_t>(std::numeric_limits<int64_t>::min() + 1),
-                      static_cast<int64_t>(std::numeric_limits<int64_t>::max() - 1),
-                      0x000000000000005FL,
-                      0x0000000000000088L,
-                      0x0000000080000000L,
-                      0x7FFFFFFF7FFFFFFFL,
-                      0x00000000FFFF0FF0L,
-                      static_cast<int64_t>(0x800000007FFFFFFFL),
-                      static_cast<int64_t>(0xFFFFFFF00FFFFFFFL),
-                      static_cast<int64_t>(0x08000FFFFFFFFFFFL),
-                    };
+{
+    int64_t inputArray[] = {
+        zero_value<int64_t>(),
+        one_value<int64_t>(),
+        negative_one_value<int64_t>(),
+        positive_value<int64_t>(),
+        negative_value<int64_t>(),
+        std::numeric_limits<int64_t>::min(),
+        std::numeric_limits<int64_t>::max(),
+        static_cast<int64_t>(std::numeric_limits<int64_t>::min() + 1),
+        static_cast<int64_t>(std::numeric_limits<int64_t>::max() - 1),
+        0x000000000000005FL,
+        0x0000000000000088L,
+        0x0000000080000000L,
+        0x7FFFFFFF7FFFFFFFL,
+        0x00000000FFFF0FF0L,
+        static_cast<int64_t>(0x800000007FFFFFFFL),
+        static_cast<int64_t>(0xFFFFFFF00FFFFFFFL),
+        static_cast<int64_t>(0x08000FFFFFFFFFFFL),
+    };
 
-   return std::vector<int64_t>(inputArray, inputArray + sizeof(inputArray) / sizeof(int64_t));
-   }
+    return std::vector<int64_t>(inputArray, inputArray + sizeof(inputArray) / sizeof(int64_t));
+}
 
 /**
  * @brief Convenience function returning possible test inputs of the specified type
  */
 template <>
 inline std::vector<int32_t> const_values<int32_t>()
-   {
-   int32_t inputArray[] = { zero_value<int32_t>(),
-                      one_value<int32_t>(),
-                      negative_one_value<int32_t>(),
-                      positive_value<int32_t>(),
-                      negative_value<int32_t>(),
-                      std::numeric_limits<int32_t>::min(),
-                      std::numeric_limits<int32_t>::max(),
-                      static_cast<int32_t>(std::numeric_limits<int32_t>::min() + 1),
-                      static_cast<int32_t>(std::numeric_limits<int32_t>::max() - 1),
-                      0x0000005F,
-                      0x00000088,
-                      static_cast<int32_t>(0x80FF0FF0),
-                      static_cast<int32_t>(0x80000000),
-                      static_cast<int32_t>(0xFF000FFF),
-                      static_cast<int32_t>(0xFFFFFF0F)
-                    };
+{
+    int32_t inputArray[] = { zero_value<int32_t>(), one_value<int32_t>(), negative_one_value<int32_t>(),
+        positive_value<int32_t>(), negative_value<int32_t>(), std::numeric_limits<int32_t>::min(),
+        std::numeric_limits<int32_t>::max(), static_cast<int32_t>(std::numeric_limits<int32_t>::min() + 1),
+        static_cast<int32_t>(std::numeric_limits<int32_t>::max() - 1), 0x0000005F, 0x00000088,
+        static_cast<int32_t>(0x80FF0FF0), static_cast<int32_t>(0x80000000), static_cast<int32_t>(0xFF000FFF),
+        static_cast<int32_t>(0xFFFFFF0F) };
 
-   return std::vector<int32_t>(inputArray, inputArray + sizeof(inputArray) / sizeof(int32_t));
-   }
+    return std::vector<int32_t>(inputArray, inputArray + sizeof(inputArray) / sizeof(int32_t));
+}
 
 /**
  * @brief Convenience function returning pairs of possible test inputs of the specified types
  */
 template <typename L, typename R>
-std::vector<std::tuple<L,R>> const_value_pairs()
-   {
-   return TRTest::combine(const_values<L>(), const_values<R>());
-   }
+std::vector<std::tuple<L, R> > const_value_pairs()
+{
+    return TRTest::combine(const_values<L>(), const_values<R>());
+}
 
-} // namespace CompTest
+} // namespace TRTest
 
 #endif // JITTEST_HPP

@@ -24,67 +24,56 @@
 
 #include "EnvironmentBase.hpp"
 
-bool 
-MM_SweepPoolState::initialize(MM_EnvironmentBase *env)
+bool MM_SweepPoolState::initialize(MM_EnvironmentBase* env) { return true; }
+
+void MM_SweepPoolState::create(MM_EnvironmentBase* env, void* memPtr, MM_MemoryPool* memoryPool)
 {
-	return true;
+    MM_SweepPoolState* poolState = (MM_SweepPoolState*)memPtr;
+    new (poolState) MM_SweepPoolState(memoryPool);
+    poolState->initialize(env);
 }
 
-
-void 
-MM_SweepPoolState::create(MM_EnvironmentBase *env, void *memPtr, MM_MemoryPool *memoryPool)
+void MM_SweepPoolState::kill(MM_EnvironmentBase* env, J9Pool* pool, omrthread_monitor_t mutex)
 {
-	MM_SweepPoolState *poolState = (MM_SweepPoolState *) memPtr;
-	new(poolState) MM_SweepPoolState(memoryPool);
-	poolState->initialize(env);
+    tearDown(env);
+
+    omrthread_monitor_enter(mutex);
+    pool_removeElement(pool, this);
+    omrthread_monitor_exit(mutex);
 }
 
-void 
-MM_SweepPoolState::kill(MM_EnvironmentBase *env, J9Pool *pool, omrthread_monitor_t mutex)
+MM_SweepPoolState* MM_SweepPoolState::newInstance(
+    MM_EnvironmentBase* env, J9Pool* pool, omrthread_monitor_t mutex, MM_MemoryPool* memoryPool)
 {
-	tearDown(env);
+    MM_SweepPoolState* sweepPoolState;
 
-	omrthread_monitor_enter(mutex);
-	pool_removeElement(pool, this);
-	omrthread_monitor_exit(mutex);
+    omrthread_monitor_enter(mutex);
+    sweepPoolState = (MM_SweepPoolState*)pool_newElement(pool);
+    omrthread_monitor_exit(mutex);
+
+    if (sweepPoolState) {
+        new (sweepPoolState) MM_SweepPoolState(memoryPool);
+        if (!sweepPoolState->initialize(env)) {
+            sweepPoolState->kill(env, pool, mutex);
+            sweepPoolState = NULL;
+        }
+    }
+
+    return sweepPoolState;
 }
 
-MM_SweepPoolState *
-MM_SweepPoolState::newInstance(MM_EnvironmentBase *env, J9Pool *pool, omrthread_monitor_t mutex, MM_MemoryPool *memoryPool)
+void MM_SweepPoolState::tearDown(MM_EnvironmentBase* env) { return; }
+
+MM_SweepPoolState::MM_SweepPoolState(MM_MemoryPool* memoryPool)
+    : _memoryPool(memoryPool)
+    , _connectPreviousFreeEntry(NULL)
+    , _connectPreviousFreeEntrySize(0)
+    , _connectPreviousPreviousFreeEntry(NULL)
+    , _connectPreviousChunk(NULL)
+    , _sweepFreeBytes(0)
+    , _sweepFreeHoles(0)
+    , _largestFreeEntry(0)
+    , _previousLargestFreeEntry(NULL)
 {
-	MM_SweepPoolState *sweepPoolState;
-	
-	omrthread_monitor_enter(mutex);
-	sweepPoolState = (MM_SweepPoolState *)pool_newElement(pool);
-	omrthread_monitor_exit(mutex);
-
-	if (sweepPoolState) {
-		new(sweepPoolState) MM_SweepPoolState(memoryPool);
-		if (!sweepPoolState->initialize(env)) { 
-			sweepPoolState->kill(env, pool, mutex);        
-			sweepPoolState = NULL;            
-		}                                       
-	}
-
-	return sweepPoolState;
-}
-
-void 
-MM_SweepPoolState::tearDown(MM_EnvironmentBase *env)
-{
-	return;
-}
-
-MM_SweepPoolState::MM_SweepPoolState(MM_MemoryPool *memoryPool) :
-	_memoryPool(memoryPool),
-	_connectPreviousFreeEntry(NULL),
-	_connectPreviousFreeEntrySize(0),
-	_connectPreviousPreviousFreeEntry(NULL),
-	_connectPreviousChunk(NULL),
-	_sweepFreeBytes(0),
-	_sweepFreeHoles(0),
-	_largestFreeEntry(0),
-	_previousLargestFreeEntry(NULL)
-{
-	_typeId = __FUNCTION__;
+    _typeId = __FUNCTION__;
 }

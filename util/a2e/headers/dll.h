@@ -36,51 +36,51 @@
  * ===========================================================================
  */
 
-#if __TARGET_LIB__ == 0X22080000                                   /*ibm@28725*/
-#include <//'PP.ADLE370.OS39028.SCEEH.H(dll)'>                     /*ibm@28725*/
-#else                                                              /*ibm@28725*/
+#if __TARGET_LIB__ == 0X22080000 /*ibm@28725*/
+#include < //'PP.ADLE370.OS39028.SCEEH.H(dll)'>                     /*ibm@28725*/
+#else /*ibm@28725*/
 #include "prefixpath.h"
-#include PREFIXPATH(dll.h)                                      /*ibm@28725*/
-#endif                                                             /*ibm@28725*/
+#include PREFIXPATH(dll.h) /*ibm@28725*/
+#endif /*ibm@28725*/
 
 #if defined(IBM_ATOE)
 
-	#if !defined(IBM_ATOE_DLL)
-		#define IBM_ATOE_DLL
+#if !defined(IBM_ATOE_DLL)
+#define IBM_ATOE_DLL
 
-		#ifdef __cplusplus
-                  extern "C" {
-		#endif
-	        dllhandle* atoe_dllload(char *);
-		#ifdef __cplusplus
-                  }
-		#endif
+#ifdef __cplusplus
+extern "C" {
+#endif
+dllhandle* atoe_dllload(char*);
+#ifdef __cplusplus
+}
+#endif
 
-                #ifdef __cplusplus
-                  extern "C" {
-                #endif
-                void *atoe_dllqueryvar(dllhandle* dllHandle, char* varName);
-                #ifdef __cplusplus
-                  }
-                #endif
+#ifdef __cplusplus
+extern "C" {
+#endif
+void* atoe_dllqueryvar(dllhandle* dllHandle, char* varName);
+#ifdef __cplusplus
+}
+#endif
 
-                #ifdef __cplusplus
-                  extern "C" {
-                #endif 
-                void (*atoe_dllqueryfn(dllhandle* dllHandle, char* funcName)) ();
-                #ifdef __cplusplus
-                  }
-                #endif
+#ifdef __cplusplus
+extern "C" {
+#endif
+void (*atoe_dllqueryfn(dllhandle* dllHandle, char* funcName))();
+#ifdef __cplusplus
+}
+#endif
 
-		#undef     dllload
-		#undef     dllqueryfn
-		#undef     dllqueryvar
+#undef dllload
+#undef dllqueryfn
+#undef dllqueryvar
 
-		#define    dllload     atoe_dllload
-		#define    dllqueryfn  atoe_dllqueryfn
-		#define    dllqueryvar  atoe_dllqueryvar
+#define dllload atoe_dllload
+#define dllqueryfn atoe_dllqueryfn
+#define dllqueryvar atoe_dllqueryvar
 
-	#endif
+#endif
 
 #endif
 

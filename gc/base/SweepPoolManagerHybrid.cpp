@@ -29,21 +29,21 @@
  * Allocate and initialize a new instance of the receiver.
  * @return a new instance of the receiver, or NULL on failure.
  */
-MM_SweepPoolManagerHybrid *
-MM_SweepPoolManagerHybrid::newInstance(MM_EnvironmentBase *env)
+MM_SweepPoolManagerHybrid* MM_SweepPoolManagerHybrid::newInstance(MM_EnvironmentBase* env)
 {
-	MM_SweepPoolManagerHybrid *sweepPoolManager;
-	
-	sweepPoolManager = (MM_SweepPoolManagerHybrid *)env->getForge()->allocate(sizeof(MM_SweepPoolManagerHybrid), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
-	if (sweepPoolManager) {
-		new(sweepPoolManager) MM_SweepPoolManagerHybrid(env);
-		if (!sweepPoolManager->initialize(env)) { 
-			sweepPoolManager->kill(env);        
-			sweepPoolManager = NULL;            
-		}                                       
-	}
+    MM_SweepPoolManagerHybrid* sweepPoolManager;
 
-	return sweepPoolManager;
+    sweepPoolManager = (MM_SweepPoolManagerHybrid*)env->getForge()->allocate(
+        sizeof(MM_SweepPoolManagerHybrid), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+    if (sweepPoolManager) {
+        new (sweepPoolManager) MM_SweepPoolManagerHybrid(env);
+        if (!sweepPoolManager->initialize(env)) {
+            sweepPoolManager->kill(env);
+            sweepPoolManager = NULL;
+        }
+    }
+
+    return sweepPoolManager;
 }
 
 #endif /* defined(OMR_GC_MODRON_STANDARD) */

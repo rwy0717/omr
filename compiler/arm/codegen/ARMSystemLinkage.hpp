@@ -26,50 +26,61 @@
 
 #include "infra/Assert.hpp"
 
-namespace TR { class AutomaticSymbol; }
-namespace TR { class CodeGenerator; }
-namespace TR { class Instruction; }
-namespace TR { class MemoryReference; }
-namespace TR { class Node; }
-namespace TR { class Register; }
-namespace TR { class RegisterDependencyConditions; }
-namespace TR { class ResolvedMethodSymbol; }
+namespace TR {
+class AutomaticSymbol;
+}
+namespace TR {
+class CodeGenerator;
+}
+namespace TR {
+class Instruction;
+}
+namespace TR {
+class MemoryReference;
+}
+namespace TR {
+class Node;
+}
+namespace TR {
+class Register;
+}
+namespace TR {
+class RegisterDependencyConditions;
+}
+namespace TR {
+class ResolvedMethodSymbol;
+}
 
 namespace TR {
 
-class ARMSystemLinkage : public TR::Linkage
-   {
-   static TR::ARMLinkageProperties properties;
+class ARMSystemLinkage : public TR::Linkage {
+    static TR::ARMLinkageProperties properties;
 
-   public:
+public:
+    ARMSystemLinkage(TR::CodeGenerator* codeGen)
+        : TR::Linkage(codeGen)
+    {}
 
-   ARMSystemLinkage(TR::CodeGenerator *codeGen) : TR::Linkage(codeGen) {}
+    virtual uint32_t getRightToLeft();
+    virtual void mapStack(TR::ResolvedMethodSymbol* method);
+    virtual void mapSingleAutomatic(TR::AutomaticSymbol* p, uint32_t& stackIndex);
+    virtual void initARMRealRegisterLinkage();
 
-   virtual uint32_t getRightToLeft();
-   virtual void mapStack(TR::ResolvedMethodSymbol *method);
-   virtual void mapSingleAutomatic(TR::AutomaticSymbol *p, uint32_t &stackIndex);
-   virtual void initARMRealRegisterLinkage();
+    virtual TR::MemoryReference* getOutgoingArgumentMemRef(int32_t totalParmAreaSize, int32_t argOffset,
+        TR::Register* argReg, TR_ARMOpCodes opCode, TR::ARMMemoryArgument& memArg);
 
-   virtual TR::MemoryReference *getOutgoingArgumentMemRef(int32_t               totalParmAreaSize,
-                                                            int32_t               argOffset,
-                                                            TR::Register          *argReg,
-                                                            TR_ARMOpCodes         opCode,
-                                                            TR::ARMMemoryArgument &memArg);
+    virtual TR::ARMLinkageProperties& getProperties();
 
-   virtual TR::ARMLinkageProperties& getProperties();
+    virtual void createPrologue(TR::Instruction* cursor);
+    virtual void createEpilogue(TR::Instruction* cursor);
 
-   virtual void createPrologue(TR::Instruction *cursor);
-   virtual void createEpilogue(TR::Instruction *cursor);
+    virtual int32_t buildArgs(
+        TR::Node* callNode, TR::RegisterDependencyConditions* dependencies, TR::Register*& vftReg, bool isJNI);
 
-   virtual int32_t buildArgs(TR::Node                            *callNode,
-                             TR::RegisterDependencyConditions *dependencies,
-                             TR::Register*                       &vftReg,
-                             bool                                isJNI);
+    virtual TR::Register* buildDirectDispatch(TR::Node* callNode);
+    virtual TR::Register* buildIndirectDispatch(TR::Node* callNode);
+};
 
-   virtual TR::Register *buildDirectDispatch(TR::Node *callNode);
-   virtual TR::Register *buildIndirectDispatch(TR::Node *callNode);
-   };
-
-}
+} // namespace TR
 
 #endif

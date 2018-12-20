@@ -24,24 +24,29 @@
 
 #include "codegen/OMRSnippet.hpp"
 
-namespace TR { class CodeGenerator; }
-namespace TR { class LabelSymbol; }
-namespace TR { class Node; }
-
-namespace TR
-{
-
-class OMR_EXTENSIBLE Snippet : public OMR::SnippetConnector
-   {
-   public:
-
-   Snippet(TR::CodeGenerator *cg, TR::Node *node, TR::LabelSymbol *label, bool isGCSafePoint) :
-      OMR::SnippetConnector(cg, node, label, isGCSafePoint) {}
-
-   Snippet(TR::CodeGenerator *cg, TR::Node *node, TR::LabelSymbol *label) :
-      OMR::SnippetConnector(cg, node, label) {}
-   };
-
+namespace TR {
+class CodeGenerator;
 }
+namespace TR {
+class LabelSymbol;
+}
+namespace TR {
+class Node;
+}
+
+namespace TR {
+
+class OMR_EXTENSIBLE Snippet : public OMR::SnippetConnector {
+public:
+    Snippet(TR::CodeGenerator* cg, TR::Node* node, TR::LabelSymbol* label, bool isGCSafePoint)
+        : OMR::SnippetConnector(cg, node, label, isGCSafePoint)
+    {}
+
+    Snippet(TR::CodeGenerator* cg, TR::Node* node, TR::LabelSymbol* label)
+        : OMR::SnippetConnector(cg, node, label)
+    {}
+};
+
+} // namespace TR
 
 #endif

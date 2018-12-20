@@ -26,27 +26,24 @@
 #include <list>
 #undef round
 #include "env/TypedAllocator.hpp"
-#include "env/TRMemory.hpp"  // for TR_Memory, etc
-namespace TR
-   {
-   template <class T, class Alloc = TR::Allocator> class list : public std::list<T, TR::typed_allocator<T, Alloc> >
-      {
-      public:
-      list(TR::typed_allocator<T, Alloc> ta) :
-         std::list<T, TR::typed_allocator<T, Alloc> > (ta)
-         {
-         }
+#include "env/TRMemory.hpp" // for TR_Memory, etc
+namespace TR {
+template <class T, class Alloc = TR::Allocator>
+class list : public std::list<T, TR::typed_allocator<T, Alloc> > {
+public:
+    list(TR::typed_allocator<T, Alloc> ta)
+        : std::list<T, TR::typed_allocator<T, Alloc> >(ta)
+    {}
 
 #if defined(_LIBCPP_VERSION) && _LIBCPP_VERSION < 4000
-      /* A bug in libc++ before 4.0 caused std::list::remove to call the
-       * default constructor of TR::typed_allocator, which is not implemented.
-       */
-      void remove(const T& value)
-         {
-         this->remove_if([value](const T& value2){return value == value2;});
-         }
+    /* A bug in libc++ before 4.0 caused std::list::remove to call the
+     * default constructor of TR::typed_allocator, which is not implemented.
+     */
+    void remove(const T& value)
+    {
+        this->remove_if([value](const T& value2) { return value == value2; });
+    }
 #endif
-
-      };
-   }
+};
+} // namespace TR
 #endif

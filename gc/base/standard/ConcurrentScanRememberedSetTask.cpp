@@ -30,36 +30,33 @@
 
 #include "ConcurrentScanRememberedSetTask.hpp"
 
-void
-MM_ConcurrentScanRememberedSetTask::run(MM_EnvironmentBase *envBase)
+void MM_ConcurrentScanRememberedSetTask::run(MM_EnvironmentBase* envBase)
 {
-	MM_EnvironmentStandard *env = MM_EnvironmentStandard::getEnvironment(envBase);
-	_collector->scanRememberedSet(env);
+    MM_EnvironmentStandard* env = MM_EnvironmentStandard::getEnvironment(envBase);
+    _collector->scanRememberedSet(env);
 }
 
-void
-MM_ConcurrentScanRememberedSetTask::setup(MM_EnvironmentBase *env)
+void MM_ConcurrentScanRememberedSetTask::setup(MM_EnvironmentBase* env)
 {
-	if (env->isMasterThread()) {
-		Assert_MM_true(_cycleState == env->_cycleState);
-	} else {
-		Assert_MM_true(NULL == env->_cycleState);
-		env->_cycleState = _cycleState;
-	}
-	env->_workPacketStats.clear();
+    if (env->isMasterThread()) {
+        Assert_MM_true(_cycleState == env->_cycleState);
+    } else {
+        Assert_MM_true(NULL == env->_cycleState);
+        env->_cycleState = _cycleState;
+    }
+    env->_workPacketStats.clear();
 }
 
-void
-MM_ConcurrentScanRememberedSetTask::cleanup(MM_EnvironmentBase *env)
+void MM_ConcurrentScanRememberedSetTask::cleanup(MM_EnvironmentBase* env)
 {
-	if (env->isMasterThread()) {
-		Assert_MM_true(_cycleState == env->_cycleState);
-	} else {
-		env->_cycleState = NULL;
-	}
-	/* take a snapshot of WorkPacket stats, since it will be overwritten with subsequent phases. The stats will be needed later (TGC parallel for example) */
-	env->_workPacketStatsRSScan = env->_workPacketStats;
+    if (env->isMasterThread()) {
+        Assert_MM_true(_cycleState == env->_cycleState);
+    } else {
+        env->_cycleState = NULL;
+    }
+    /* take a snapshot of WorkPacket stats, since it will be overwritten with subsequent phases. The stats will be
+     * needed later (TGC parallel for example) */
+    env->_workPacketStatsRSScan = env->_workPacketStats;
 }
 #endif /* OMR_GC_MODRON_SCAVENGER */
 #endif /* OMR_GC_MODRON_CONCURRENT_MARK */
- 

@@ -23,8 +23,7 @@
 #if !defined(OMR_TYPETRAITS_HPP_)
 #define OMR_TYPETRAITS_HPP_
 
-namespace OMR
-{
+namespace OMR {
 
 ///
 /// Basic constants
@@ -32,13 +31,12 @@ namespace OMR
 
 /// Define an integral constant.
 template <typename T, T value>
-struct IntegralConstant
-{
-	typedef T ValueType;
+struct IntegralConstant {
+    typedef T ValueType;
 
-	static const ValueType VALUE = value;
+    static const ValueType VALUE = value;
 
-	ValueType operator()() const { return VALUE; }
+    ValueType operator()() const { return VALUE; }
 };
 
 template <typename T, T value>
@@ -52,9 +50,8 @@ struct FalseConstant : BoolConstant<false> {};
 struct TrueConstant : BoolConstant<true> {};
 
 template <typename T>
-struct TypeAlias
-{
-	typedef T Type;
+struct TypeAlias {
+    typedef T Type;
 };
 
 ///
@@ -153,18 +150,30 @@ struct IsVoid : IsSame<typename RemoveCv<T>::Type, void> {};
 template <typename T>
 struct IsNonCvIntegral : FalseConstant {};
 
-template <> struct IsNonCvIntegral<bool> : TrueConstant {};
-template <> struct IsNonCvIntegral<char> : TrueConstant {};
-template <> struct IsNonCvIntegral<signed char> : TrueConstant {};
-template <> struct IsNonCvIntegral<unsigned char> : TrueConstant {};
-template <> struct IsNonCvIntegral<short> : TrueConstant {};
-template <> struct IsNonCvIntegral<int> : TrueConstant {};
-template <> struct IsNonCvIntegral<long> : TrueConstant {};
-template <> struct IsNonCvIntegral<long long> : TrueConstant {};
-template <> struct IsNonCvIntegral<unsigned short> : TrueConstant {};
-template <> struct IsNonCvIntegral<unsigned int> : TrueConstant {};
-template <> struct IsNonCvIntegral<unsigned long> : TrueConstant {};
-template <> struct IsNonCvIntegral<unsigned long long> : TrueConstant {};
+template <>
+struct IsNonCvIntegral<bool> : TrueConstant {};
+template <>
+struct IsNonCvIntegral<char> : TrueConstant {};
+template <>
+struct IsNonCvIntegral<signed char> : TrueConstant {};
+template <>
+struct IsNonCvIntegral<unsigned char> : TrueConstant {};
+template <>
+struct IsNonCvIntegral<short> : TrueConstant {};
+template <>
+struct IsNonCvIntegral<int> : TrueConstant {};
+template <>
+struct IsNonCvIntegral<long> : TrueConstant {};
+template <>
+struct IsNonCvIntegral<long long> : TrueConstant {};
+template <>
+struct IsNonCvIntegral<unsigned short> : TrueConstant {};
+template <>
+struct IsNonCvIntegral<unsigned int> : TrueConstant {};
+template <>
+struct IsNonCvIntegral<unsigned long> : TrueConstant {};
+template <>
+struct IsNonCvIntegral<unsigned long long> : TrueConstant {};
 
 /// IsIntegral<T>::VALUE is true if T is a (possibly cv-qualified) primitive integral type.
 ///
@@ -176,9 +185,12 @@ struct IsIntegral : IsNonCvIntegral<typename RemoveCv<T>::Type> {};
 template <typename T>
 struct IsNonCvFloatingPoint : FalseConstant {};
 
-template <> struct IsNonCvFloatingPoint<float> : TrueConstant {};
-template <> struct IsNonCvFloatingPoint<double> : TrueConstant {};
-template <> struct IsNonCvFloatingPoint<long double> : TrueConstant {};
+template <>
+struct IsNonCvFloatingPoint<float> : TrueConstant {};
+template <>
+struct IsNonCvFloatingPoint<double> : TrueConstant {};
+template <>
+struct IsNonCvFloatingPoint<long double> : TrueConstant {};
 
 /// IsFloatingPoint<T>::VALUE is tue if T is a (possibly cv-qualified) floating point type
 template <typename T>
@@ -197,10 +209,9 @@ template <bool B, typename T = void>
 struct EnableIf {};
 
 template <typename T>
-struct EnableIf<true, T>
-{
-	typedef T Type;
+struct EnableIf<true, T> {
+    typedef T Type;
 };
-}  // namespace OMR
+} // namespace OMR
 
 #endif // OMR_TYPETRAITS_HPP_

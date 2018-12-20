@@ -42,7 +42,7 @@ extern "C" {
  *
  * @return an OMR error code
  */
-omr_error_t attachThread(OMR_VM *vm, OMR_VMThread *vmthread);
+omr_error_t attachThread(OMR_VM* vm, OMR_VMThread* vmthread);
 
 /**
  * Internal: Detach a vmthread from the VM.
@@ -52,8 +52,7 @@ omr_error_t attachThread(OMR_VM *vm, OMR_VMThread *vmthread);
  *
  * @return an OMR error code
  */
-omr_error_t detachThread(OMR_VM *vm, OMR_VMThread *vmthread);
-
+omr_error_t detachThread(OMR_VM* vm, OMR_VMThread* vmthread);
 }
 
 #endif /* OMR_VM_HPP_ */

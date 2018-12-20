@@ -27,36 +27,41 @@
 #include <ctest.h>
 #include <signal.h>
 
-#define MAX_UNIX_SIGNAL_TYPES  65
+#define MAX_UNIX_SIGNAL_TYPES 65
 #define MAX_NAME 256
 #define NUM_REGS 16
 #define NUM_VECTOR_REGS 32
 
 typedef struct J9PlatformSignalInfo {
-	__mcontext_t_ *context;
-	uintptr_t breakingEventAddr;
+    __mcontext_t_* context;
+    uintptr_t breakingEventAddr;
 #if !defined(J9ZOS39064)
-	char program_unit_name[MAX_NAME];
-	_INT4 program_unit_address;
-	char entry_name[MAX_NAME];
-	_INT4 entry_address;
+    char program_unit_name[MAX_NAME];
+    _INT4 program_unit_address;
+    char entry_name[MAX_NAME];
+    _INT4 entry_address;
 #endif
 } J9PlatformSignalInfo;
 
 typedef struct OMRUnixSignalInfo {
-	uint32_t portLibrarySignalType;
-	void *handlerAddress;
-	void *handlerAddress2;
-	siginfo_t *sigInfo;
-	struct J9PlatformSignalInfo platformSignalInfo;
+    uint32_t portLibrarySignalType;
+    void* handlerAddress;
+    void* handlerAddress2;
+    siginfo_t* sigInfo;
+    struct J9PlatformSignalInfo platformSignalInfo;
 } OMRUnixSignalInfo;
 
-uint32_t infoForFPR(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *info, int32_t index, const char **name, void **value);
-uint32_t infoForGPR(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *info, int32_t index, const char **name, void **value);
-uint32_t infoForVR(struct OMRPortLibrary *portLibrary, OMRUnixSignalInfo *info, int32_t index, const char **name, void **value);
-uint32_t infoForModule(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *info, int32_t index, const char **name, void **value);
-uint32_t infoForControl(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *info, int32_t index, const char **name, void **value);
-uint32_t infoForSignal(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *info, int32_t index, const char **name, void **value);
-void fillInUnixSignalInfo(struct OMRPortLibrary *portLibrary, void *contextInfo, struct OMRUnixSignalInfo *j9Info);
-BOOLEAN checkIfResumableTrapsSupported(struct OMRPortLibrary *portLibrary);
-
+uint32_t infoForFPR(
+    struct OMRPortLibrary* portLibrary, struct OMRUnixSignalInfo* info, int32_t index, const char** name, void** value);
+uint32_t infoForGPR(
+    struct OMRPortLibrary* portLibrary, struct OMRUnixSignalInfo* info, int32_t index, const char** name, void** value);
+uint32_t infoForVR(
+    struct OMRPortLibrary* portLibrary, OMRUnixSignalInfo* info, int32_t index, const char** name, void** value);
+uint32_t infoForModule(
+    struct OMRPortLibrary* portLibrary, struct OMRUnixSignalInfo* info, int32_t index, const char** name, void** value);
+uint32_t infoForControl(
+    struct OMRPortLibrary* portLibrary, struct OMRUnixSignalInfo* info, int32_t index, const char** name, void** value);
+uint32_t infoForSignal(
+    struct OMRPortLibrary* portLibrary, struct OMRUnixSignalInfo* info, int32_t index, const char** name, void** value);
+void fillInUnixSignalInfo(struct OMRPortLibrary* portLibrary, void* contextInfo, struct OMRUnixSignalInfo* j9Info);
+BOOLEAN checkIfResumableTrapsSupported(struct OMRPortLibrary* portLibrary);

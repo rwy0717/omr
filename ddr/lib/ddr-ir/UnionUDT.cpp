@@ -22,36 +22,21 @@
 #include "ddr/ir/UnionUDT.hpp"
 
 UnionUDT::UnionUDT(size_t size, unsigned int lineNumber)
-	: ClassType(size, lineNumber)
-{
-}
+    : ClassType(size, lineNumber)
+{}
 
-UnionUDT::~UnionUDT()
-{
-}
+UnionUDT::~UnionUDT() {}
 
 DDR_RC
-UnionUDT::acceptVisitor(const TypeVisitor &visitor)
+UnionUDT::acceptVisitor(const TypeVisitor& visitor) { return visitor.visitUnion(this); }
+
+const string& UnionUDT::getSymbolKindName() const
 {
-	return visitor.visitUnion(this);
+    static const string unionKind("union");
+
+    return unionKind;
 }
 
-const string &
-UnionUDT::getSymbolKindName() const
-{
-	static const string unionKind("union");
+bool UnionUDT::operator==(const Type& rhs) const { return rhs.compareToUnion(*this); }
 
-	return unionKind;
-}
-
-bool
-UnionUDT::operator==(const Type & rhs) const
-{
-	return rhs.compareToUnion(*this);
-}
-
-bool
-UnionUDT::compareToUnion(const UnionUDT &other) const
-{
-	return compareToClasstype(other);
-}
+bool UnionUDT::compareToUnion(const UnionUDT& other) const { return compareToClasstype(other); }

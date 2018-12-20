@@ -44,11 +44,7 @@
  *
  * @note Most implementations will simply return success.
  */
-int32_t
-omrcpu_startup(struct OMRPortLibrary *portLibrary)
-{
-	return 0;
-}
+int32_t omrcpu_startup(struct OMRPortLibrary* portLibrary) { return 0; }
 
 /**
  * PortLibrary shutdown.
@@ -60,10 +56,7 @@ omrcpu_startup(struct OMRPortLibrary *portLibrary)
  *
  * @note Most implementations will be empty.
  */
-void
-omrcpu_shutdown(struct OMRPortLibrary *portLibrary)
-{
-}
+void omrcpu_shutdown(struct OMRPortLibrary* portLibrary) {}
 
 /**
  * @brief CPU Control operations.
@@ -74,10 +67,9 @@ omrcpu_shutdown(struct OMRPortLibrary *portLibrary)
  * @param[in] memoryPointer The base address of memory to flush.
  * @param[in] byteAmount Number of bytes to flush.
  */
-void
-omrcpu_flush_icache(struct OMRPortLibrary *portLibrary, void *memoryPointer, uintptr_t byteAmount)
+void omrcpu_flush_icache(struct OMRPortLibrary* portLibrary, void* memoryPointer, uintptr_t byteAmount)
 {
-	/* no-op by default */
+    /* no-op by default */
 }
 
 /**
@@ -90,8 +82,7 @@ omrcpu_flush_icache(struct OMRPortLibrary *portLibrary, void *memoryPointer, uin
  *
  * @note Most implementations will return OMRPORT_ERROR_NOT_SUPPORTED_ON_THIS_PLATFORM.
  */
-int32_t
-omrcpu_get_cache_line_size(struct OMRPortLibrary *portLibrary, int32_t *lineSize)
+int32_t omrcpu_get_cache_line_size(struct OMRPortLibrary* portLibrary, int32_t* lineSize)
 {
-	return OMRPORT_ERROR_NOT_SUPPORTED_ON_THIS_PLATFORM;
+    return OMRPORT_ERROR_NOT_SUPPORTED_ON_THIS_PLATFORM;
 }

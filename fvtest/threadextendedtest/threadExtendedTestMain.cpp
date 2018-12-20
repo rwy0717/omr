@@ -22,25 +22,25 @@
 #include "omrTest.h"
 #include "threadExtendedTestHelpers.hpp"
 
-ThreadExtendedTestEnvironment *omrTestEnv;
+ThreadExtendedTestEnvironment* omrTestEnv;
 
-extern "C" int
-omr_main_entry(int argc, char **argv, char **envp)
+extern "C" int omr_main_entry(int argc, char** argv, char** envp)
 {
-	::testing::InitGoogleTest(&argc, argv);
-	OMREventListener::setDefaultTestListener();
-	int result = 0;
-	OMRPortLibrary portLibrary;
-	thrExtendedTestSetUp(&portLibrary);
+    ::testing::InitGoogleTest(&argc, argv);
+    OMREventListener::setDefaultTestListener();
+    int result = 0;
+    OMRPortLibrary portLibrary;
+    thrExtendedTestSetUp(&portLibrary);
 
-	/*
-	 * check for fatal failures in sub-routine thrExtendedTestSetUp().
-	 */
-	if (!testing::Test::HasFatalFailure()) {
-		omrTestEnv = (ThreadExtendedTestEnvironment *)testing::AddGlobalTestEnvironment(new ThreadExtendedTestEnvironment(argc, argv, &portLibrary));
-		result = RUN_ALL_TESTS();
-	}
+    /*
+     * check for fatal failures in sub-routine thrExtendedTestSetUp().
+     */
+    if (!testing::Test::HasFatalFailure()) {
+        omrTestEnv = (ThreadExtendedTestEnvironment*)testing::AddGlobalTestEnvironment(
+            new ThreadExtendedTestEnvironment(argc, argv, &portLibrary));
+        result = RUN_ALL_TESTS();
+    }
 
-	thrExtendedTestTearDown(&portLibrary);
-	return result;
+    thrExtendedTestTearDown(&portLibrary);
+    return result;
 }

@@ -26,57 +26,59 @@
 #include "Port.hpp"
 #include "TDFTypes.hpp"
 
-class TraceHeaderWriter
-{
-	/*
-	 * Data members
-	 */
+class TraceHeaderWriter {
+    /*
+     * Data members
+     */
 private:
 protected:
 public:
-
-	/*
-	 * Function members
-	 */
+    /*
+     * Function members
+     */
 private:
-	/**
-	 * Output trace point
-	 * @param fd Output stream
-	 * @return RC_OK on success, RC_FAILED on failure
-	 */
-	RCType tpTemplate(FILE *fd, unsigned int overhead, unsigned int test, const char *name, const char *module, unsigned int id, unsigned int envparam, const char *format, unsigned int formatParamCount, unsigned int auxiliary);
+    /**
+     * Output trace point
+     * @param fd Output stream
+     * @return RC_OK on success, RC_FAILED on failure
+     */
+    RCType tpTemplate(FILE* fd, unsigned int overhead, unsigned int test, const char* name, const char* module,
+        unsigned int id, unsigned int envparam, const char* format, unsigned int formatParamCount,
+        unsigned int auxiliary);
 
-	/**
-	 *  Output assertion
-	 *  @param fd Output stream
-	 *  @return RC_OK on success, RC_FAILED on failure
-	 */
-	RCType tpAssert(FILE *fd, unsigned int overhead, unsigned int test, const char *name, const char *module, unsigned int id, unsigned int envparam, const char *format, unsigned int formatParamCount);
+    /**
+     *  Output assertion
+     *  @param fd Output stream
+     *  @return RC_OK on success, RC_FAILED on failure
+     */
+    RCType tpAssert(FILE* fd, unsigned int overhead, unsigned int test, const char* name, const char* module,
+        unsigned int id, unsigned int envparam, const char* format, unsigned int formatParamCount);
 
-	/**
-	 * Output file header
-	 * @param fd Output stream
-	 * @param moduleName
-	 * @return RC_OK on success, RC_FAILED on failure
-	 */
-	RCType headerTemplate(J9TDFOptions *options, FILE *fd, const char *moduleName);
+    /**
+     * Output file header
+     * @param fd Output stream
+     * @param moduleName
+     * @return RC_OK on success, RC_FAILED on failure
+     */
+    RCType headerTemplate(J9TDFOptions* options, FILE* fd, const char* moduleName);
 
-	/**
-	 * Output file footer
-	 * @param fd Output stream
-	 * @param moduleName
-	 * @return RC_OK on success, RC_FAILED on failure
-	 */
-	RCType footerTemplate(FILE *fd, const char *moduleName);
+    /**
+     * Output file footer
+     * @param fd Output stream
+     * @param moduleName
+     * @return RC_OK on success, RC_FAILED on failure
+     */
+    RCType footerTemplate(FILE* fd, const char* moduleName);
+
 protected:
 public:
-	/**
-	 * Output header file
-	 * @param options Command line options
-	 * @param tdf Parsed TDF data
-	 * @return RC_OK on success, RC_FAILED on failure
-	 */
-	RCType writeOutputFiles(J9TDFOptions *options, J9TDFFile *tdf);
+    /**
+     * Output header file
+     * @param options Command line options
+     * @param tdf Parsed TDF data
+     * @return RC_OK on success, RC_FAILED on failure
+     */
+    RCType writeOutputFiles(J9TDFOptions* options, J9TDFFile* tdf);
 };
 
 #endif /* TRACEHEADERWRITER_HPP_ */

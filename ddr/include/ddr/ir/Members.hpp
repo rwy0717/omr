@@ -25,13 +25,14 @@
 #include "ddr/config.hpp"
 #include "ddr/std/string.hpp"
 
-class Members
-{
+class Members {
 public:
-	std::string _name;
+    std::string _name;
 
-	Members() : _name() {}
-	virtual ~Members();
+    Members()
+        : _name()
+    {}
+    virtual ~Members();
 };
 
 #endif /* MEMBERS_HPP */

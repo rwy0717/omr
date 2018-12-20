@@ -30,33 +30,24 @@
 class MM_GCExtensionsBase;
 class MM_MemorySubSpace;
 
-class GC_ArrayletObjectModel
-{
-	/*
-	 * Function members
-	 */
+class GC_ArrayletObjectModel {
+    /*
+     * Function members
+     */
 private:
 protected:
 public:
-	bool
-	initialize(MM_GCExtensionsBase *extensions)
-	{
-		return true;
-	}
+    bool initialize(MM_GCExtensionsBase* extensions) { return true; }
 
-	void tearDown(MM_GCExtensionsBase *extensions) {}
+    void tearDown(MM_GCExtensionsBase* extensions) {}
 
-	MMINLINE fomrobject_t *
-	getArrayoidPointer(omrarrayptr_t arrayPtr)
-	{
-		return (fomrobject_t *) NULL;
-	}
+    MMINLINE fomrobject_t* getArrayoidPointer(omrarrayptr_t arrayPtr) { return (fomrobject_t*)NULL; }
 
-	MMINLINE void
-	expandArrayletSubSpaceRange(MM_MemorySubSpace * subSpace, void * rangeBase, void * rangeTop, uintptr_t largestDesirableArraySpineSize)
-	{
-		/* No-op */
-	}
+    MMINLINE void expandArrayletSubSpaceRange(
+        MM_MemorySubSpace* subSpace, void* rangeBase, void* rangeTop, uintptr_t largestDesirableArraySpineSize)
+    {
+        /* No-op */
+    }
 };
 
 #endif /*OMR_GC_ARRAYLETS */

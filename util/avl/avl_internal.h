@@ -24,13 +24,13 @@
 #define avl_internal_h
 
 /**
-* @file avl_internal.h
-* @brief Internal prototypes used within the AVL module.
-*
-* This file contains implementation-private function prototypes and
-* type definitions for the AVL module.
-*
-*/
+ * @file avl_internal.h
+ * @brief Internal prototypes used within the AVL module.
+ *
+ * This file contains implementation-private function prototypes and
+ * type definitions for the AVL module.
+ *
+ */
 
 #include "avl_api.h"
 
@@ -38,10 +38,8 @@
 extern "C" {
 #endif
 
-
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* avl_internal_h */
-

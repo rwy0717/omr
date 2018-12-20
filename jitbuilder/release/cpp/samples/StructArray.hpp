@@ -20,43 +20,38 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #ifndef STRUCTARRAY_INCL
 #define STRUCTARRAY_INCL
 
 #include "JitBuilder.hpp"
 
 struct Struct {
-   uint8_t type;
-   int32_t value;
+    uint8_t type;
+    int32_t value;
 };
 
-typedef Struct* (CreateStructArrayFunctionType)(int);
+typedef Struct*(CreateStructArrayFunctionType)(int);
 
-typedef void (ReadStructArrayFunctionType)(Struct*, int);
+typedef void(ReadStructArrayFunctionType)(Struct*, int);
 
-class CreateStructArrayMethod : public OMR::JitBuilder::MethodBuilder
-   {
-   private:
+class CreateStructArrayMethod : public OMR::JitBuilder::MethodBuilder {
+private:
+    OMR::JitBuilder::IlType* StructType;
+    OMR::JitBuilder::IlType* pStructType;
 
-   OMR::JitBuilder::IlType *StructType;
-   OMR::JitBuilder::IlType *pStructType;
+public:
+    CreateStructArrayMethod(OMR::JitBuilder::TypeDictionary*);
+    virtual bool buildIL();
+};
 
-   public:
-   CreateStructArrayMethod(OMR::JitBuilder::TypeDictionary *);
-   virtual bool buildIL();
-   };
+class ReadStructArrayMethod : public OMR::JitBuilder::MethodBuilder {
+private:
+    OMR::JitBuilder::IlType* StructType;
+    OMR::JitBuilder::IlType* pStructType;
 
-class ReadStructArrayMethod : public OMR::JitBuilder::MethodBuilder
-   {
-   private:
-
-   OMR::JitBuilder::IlType *StructType;
-   OMR::JitBuilder::IlType *pStructType;
-
-   public:
-   ReadStructArrayMethod(OMR::JitBuilder::TypeDictionary *);
-   virtual bool buildIL();
-   };
+public:
+    ReadStructArrayMethod(OMR::JitBuilder::TypeDictionary*);
+    virtual bool buildIL();
+};
 
 #endif // !defined(LOCALARRAY_INCL)

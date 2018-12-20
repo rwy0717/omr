@@ -27,8 +27,14 @@
  */
 #ifndef OMR_MEMREF_CONNECTOR
 #define OMR_MEMREF_CONNECTOR
-namespace OMR { namespace ARM64 { class MemoryReference; } }
-namespace OMR { typedef OMR::ARM64::MemoryReference MemoryReferenceConnector; }
+namespace OMR {
+namespace ARM64 {
+class MemoryReference;
+}
+} // namespace OMR
+namespace OMR {
+typedef OMR::ARM64::MemoryReference MemoryReferenceConnector;
+}
 #else
 #error OMR::ARM64::MemoryReference expected to be a primary connector, but a OMR connector is already defined
 #endif
@@ -42,373 +48,346 @@ namespace OMR { typedef OMR::ARM64::MemoryReference MemoryReferenceConnector; }
 #include "env/TRMemory.hpp"
 #include "il/SymbolReference.hpp"
 
-namespace TR { class CodeGenerator; }
-namespace TR { class Instruction; }
-namespace TR { class Node; }
-namespace TR { class UnresolvedDataSnippet; }
+namespace TR {
+class CodeGenerator;
+}
+namespace TR {
+class Instruction;
+}
+namespace TR {
+class Node;
+}
+namespace TR {
+class UnresolvedDataSnippet;
+}
 
-namespace OMR
-{
+namespace OMR {
 
-namespace ARM64
-{
+namespace ARM64 {
 
-class OMR_EXTENSIBLE MemoryReference : public OMR::MemoryReference
-   {
-   TR::Register *_baseRegister;
-   TR::Node *_baseNode;
-   TR::Register *_indexRegister;
-   TR::Node *_indexNode;
-   int32_t _offset;
+class OMR_EXTENSIBLE MemoryReference : public OMR::MemoryReference {
+    TR::Register* _baseRegister;
+    TR::Node* _baseNode;
+    TR::Register* _indexRegister;
+    TR::Node* _indexNode;
+    int32_t _offset;
 
-   TR::UnresolvedDataSnippet *_unresolvedSnippet;
-   TR::SymbolReference *_symbolReference;
+    TR::UnresolvedDataSnippet* _unresolvedSnippet;
+    TR::SymbolReference* _symbolReference;
 
-   uint8_t _flag;
-   uint8_t _length;
-   uint8_t _scale;
+    uint8_t _flag;
+    uint8_t _length;
+    uint8_t _scale;
 
-   public:
+public:
+    TR_ALLOC(TR_Memory::MemoryReference)
 
-   TR_ALLOC(TR_Memory::MemoryReference)
+    typedef enum {
+        TR_ARM64MemoryReferenceControl_Base_Modifiable = 0x01,
+        TR_ARM64MemoryReferenceControl_Index_Modifiable = 0x02,
+        /* To be added more if necessary */
+    } TR_ARM64MemoryReferenceControl;
 
-   typedef enum
-      {
-      TR_ARM64MemoryReferenceControl_Base_Modifiable  = 0x01,
-      TR_ARM64MemoryReferenceControl_Index_Modifiable = 0x02,
-      /* To be added more if necessary */
-      } TR_ARM64MemoryReferenceControl;
+    /**
+     * @brief Constructor
+     * @param[in] cg : CodeGenerator object
+     */
+    MemoryReference(TR::CodeGenerator* cg);
 
-   /**
-    * @brief Constructor
-    * @param[in] cg : CodeGenerator object
-    */
-   MemoryReference(TR::CodeGenerator *cg);
+    /**
+     * @brief Constructor
+     * @param[in] br : base register
+     * @param[in] ir : index register
+     * @param[in] cg : CodeGenerator object
+     */
+    MemoryReference(TR::Register* br, TR::Register* ir, TR::CodeGenerator* cg);
 
-   /**
-    * @brief Constructor
-    * @param[in] br : base register
-    * @param[in] ir : index register
-    * @param[in] cg : CodeGenerator object
-    */
-   MemoryReference(
-         TR::Register *br,
-         TR::Register *ir,
-         TR::CodeGenerator *cg);
+    /**
+     * @brief Constructor
+     * @param[in] br : base register
+     * @param[in] ir : index register
+     * @param[in] scale : scale of index
+     * @param[in] cg : CodeGenerator object
+     */
+    MemoryReference(TR::Register* br, TR::Register* ir, uint8_t scale, TR::CodeGenerator* cg);
 
-   /**
-    * @brief Constructor
-    * @param[in] br : base register
-    * @param[in] ir : index register
-    * @param[in] scale : scale of index
-    * @param[in] cg : CodeGenerator object
-    */
-   MemoryReference(
-         TR::Register *br,
-         TR::Register *ir,
-         uint8_t scale,
-         TR::CodeGenerator *cg);
+    /**
+     * @brief Constructor
+     * @param[in] br : base register
+     * @param[in] disp : displacement
+     * @param[in] cg : CodeGenerator object
+     */
+    MemoryReference(TR::Register* br, int32_t disp, TR::CodeGenerator* cg);
 
-   /**
-    * @brief Constructor
-    * @param[in] br : base register
-    * @param[in] disp : displacement
-    * @param[in] cg : CodeGenerator object
-    */
-   MemoryReference(
-         TR::Register *br,
-         int32_t disp,
-         TR::CodeGenerator *cg);
+    /**
+     * @brief Constructor
+     * @param[in] node : load or store node
+     * @param[in] len : length
+     * @param[in] cg : CodeGenerator object
+     */
+    MemoryReference(TR::Node* node, uint32_t len, TR::CodeGenerator* cg);
 
-   /**
-    * @brief Constructor
-    * @param[in] node : load or store node
-    * @param[in] len : length
-    * @param[in] cg : CodeGenerator object
-    */
-   MemoryReference(TR::Node *node, uint32_t len, TR::CodeGenerator *cg);
+    /**
+     * @brief Constructor
+     * @param[in] node : node
+     * @param[in] symRef : symbol reference
+     * @param[in] len : length
+     * @param[in] cg : CodeGenerator object
+     */
+    MemoryReference(TR::Node* node, TR::SymbolReference* symRef, uint32_t len, TR::CodeGenerator* cg);
 
-   /**
-    * @brief Constructor
-    * @param[in] node : node
-    * @param[in] symRef : symbol reference
-    * @param[in] len : length
-    * @param[in] cg : CodeGenerator object
-    */
-   MemoryReference(TR::Node *node, TR::SymbolReference *symRef, uint32_t len, TR::CodeGenerator *cg);
+    /**
+     * @brief Gets base register
+     * @return base register
+     */
+    TR::Register* getBaseRegister() { return _baseRegister; }
+    /**
+     * @brief Sets base register
+     * @param[in] br : base register
+     * @return base register
+     */
+    TR::Register* setBaseRegister(TR::Register* br) { return (_baseRegister = br); }
 
-   /**
-    * @brief Gets base register
-    * @return base register
-    */
-   TR::Register *getBaseRegister() {return _baseRegister;}
-   /**
-    * @brief Sets base register
-    * @param[in] br : base register
-    * @return base register
-    */
-   TR::Register *setBaseRegister(TR::Register *br) {return (_baseRegister = br);}
+    /**
+     * @brief Gets base node
+     * @return base node
+     */
+    TR::Node* getBaseNode() { return _baseNode; }
+    /**
+     * @brief Sets base node
+     * @param[in] bn : base node
+     * @return base node
+     */
+    TR::Node* setBaseNode(TR::Node* bn) { return (_baseNode = bn); }
 
-   /**
-    * @brief Gets base node
-    * @return base node
-    */
-   TR::Node *getBaseNode() {return _baseNode;}
-   /**
-    * @brief Sets base node
-    * @param[in] bn : base node
-    * @return base node
-    */
-   TR::Node *setBaseNode(TR::Node *bn) {return (_baseNode = bn);}
+    /**
+     * @brief Gets index register
+     * @return index register
+     */
+    TR::Register* getIndexRegister() { return _indexRegister; }
+    /**
+     * @brief Sets index register
+     * @param[in] ir : index register
+     * @return index register
+     */
+    TR::Register* setIndexRegister(TR::Register* ir) { return (_indexRegister = ir); }
 
-   /**
-    * @brief Gets index register
-    * @return index register
-    */
-   TR::Register *getIndexRegister() {return _indexRegister;}
-   /**
-    * @brief Sets index register
-    * @param[in] ir : index register
-    * @return index register
-    */
-   TR::Register *setIndexRegister(TR::Register *ir) {return (_indexRegister = ir);}
+    /**
+     * @brief Gets index node
+     * @return index node
+     */
+    TR::Node* getIndexNode() { return _indexNode; }
+    /**
+     * @brief Sets index node
+     * @param[in] in : index node
+     * @return index node
+     */
+    TR::Node* setIndexNode(TR::Node* in) { return (_indexNode = in); }
 
-   /**
-    * @brief Gets index node
-    * @return index node
-    */
-   TR::Node *getIndexNode() {return _indexNode;}
-   /**
-    * @brief Sets index node
-    * @param[in] in : index node
-    * @return index node
-    */
-   TR::Node *setIndexNode(TR::Node *in) {return (_indexNode = in);}
+    /**
+     * @brief Gets length
+     * @return length
+     */
+    uint32_t getLength() { return _length; }
+    /**
+     * @brief Sets length
+     * @param[in] len : length
+     * @return length
+     */
+    uint32_t setLength(uint32_t len) { return (_length = len); }
 
-   /**
-    * @brief Gets length
-    * @return length
-    */
-   uint32_t getLength() {return _length;}
-   /**
-    * @brief Sets length
-    * @param[in] len : length
-    * @return length
-    */
-   uint32_t setLength(uint32_t len) {return (_length = len);}
+    /**
+     * @brief Gets scale
+     * @return scale
+     */
+    uint8_t getScale() { return _scale; }
 
-   /**
-    * @brief Gets scale
-    * @return scale
-    */
-   uint8_t getScale() { return _scale; }
+    /**
+     * @brief Uses indexed form or not
+     * @return true when index form is used
+     */
+    bool useIndexedForm();
 
-   /**
-    * @brief Uses indexed form or not
-    * @return true when index form is used
-    */
-   bool useIndexedForm();
+    /**
+     * @brief Has delayed offset or not
+     * @return true when it has delayed offset
+     */
+    bool hasDelayedOffset()
+    {
+        if (_symbolReference->getSymbol() != NULL && _symbolReference->getSymbol()->isRegisterMappedSymbol()) {
+            return true;
+        }
 
-   /**
-    * @brief Has delayed offset or not
-    * @return true when it has delayed offset
-    */
-   bool hasDelayedOffset()
-      {
-      if (_symbolReference->getSymbol() != NULL &&
-         _symbolReference->getSymbol()->isRegisterMappedSymbol())
-         {
-         return true;
-         }
+        return false;
+    }
 
-      return false;
-      }
+    /**
+     * @brief Gets offset
+     * @param[in] withRegSym : add offset of register mapped symbol if true
+     * @return offset
+     */
+    int32_t getOffset(bool withRegSym = false)
+    {
+        int32_t displacement = _offset;
+        if (withRegSym && _symbolReference->getSymbol() != NULL
+            && _symbolReference->getSymbol()->isRegisterMappedSymbol())
+            displacement += _symbolReference->getSymbol()->getOffset();
 
-   /**
-    * @brief Gets offset
-    * @param[in] withRegSym : add offset of register mapped symbol if true
-    * @return offset
-    */
-   int32_t getOffset(bool withRegSym = false)
-      {
-      int32_t displacement = _offset;
-      if (withRegSym &&
-          _symbolReference->getSymbol() != NULL &&
-          _symbolReference->getSymbol()->isRegisterMappedSymbol())
-         displacement += _symbolReference->getSymbol()->getOffset();
+        return displacement;
+    }
+    /**
+     * @brief Sets offset
+     * @param[in] o : offset
+     * @return offset
+     */
+    int32_t setOffset(int32_t o) { return _offset = o; }
 
-      return displacement;
-      }
-   /**
-    * @brief Sets offset
-    * @param[in] o : offset
-    * @return offset
-    */
-   int32_t setOffset(int32_t o) {return _offset = o;}
+    /**
+     * @brief Answers if MemoryReference refs specified register
+     * @param[in] reg : register
+     * @return true if MemoryReference refs the register, false otherwise
+     */
+    bool refsRegister(TR::Register* reg) { return (reg == _baseRegister || reg == _indexRegister); }
 
-   /**
-    * @brief Answers if MemoryReference refs specified register
-    * @param[in] reg : register
-    * @return true if MemoryReference refs the register, false otherwise
-    */
-   bool refsRegister(TR::Register *reg)
-      {
-      return (reg == _baseRegister ||
-              reg == _indexRegister);
-      }
+    /**
+     * @brief Blocks registers used by MemoryReference
+     */
+    void blockRegisters()
+    {
+        if (_baseRegister != NULL) {
+            _baseRegister->block();
+        }
+        if (_indexRegister != NULL) {
+            _indexRegister->block();
+        }
+    }
 
-   /**
-    * @brief Blocks registers used by MemoryReference
-    */
-   void blockRegisters()
-      {
-      if (_baseRegister != NULL)
-         {
-         _baseRegister->block();
-         }
-      if (_indexRegister != NULL)
-         {
-         _indexRegister->block();
-         }
-      }
+    /**
+     * @brief Unblocks registers used by MemoryReference
+     */
+    void unblockRegisters()
+    {
+        if (_baseRegister != NULL) {
+            _baseRegister->unblock();
+        }
+        if (_indexRegister != NULL) {
+            _indexRegister->unblock();
+        }
+    }
 
-   /**
-    * @brief Unblocks registers used by MemoryReference
-    */
-   void unblockRegisters()
-      {
-      if (_baseRegister != NULL)
-         {
-         _baseRegister->unblock();
-         }
-      if (_indexRegister != NULL)
-         {
-         _indexRegister->unblock();
-         }
-      }
+    /**
+     * @brief Base register is modifiable or not
+     * @return true when base register is modifiable
+     */
+    bool isBaseModifiable() { return ((_flag & TR_ARM64MemoryReferenceControl_Base_Modifiable) != 0); }
+    /**
+     * @brief Sets the BaseModifiable flag
+     */
+    void setBaseModifiable() { _flag |= TR_ARM64MemoryReferenceControl_Base_Modifiable; }
+    /**
+     * @brief Clears the BaseModifiable flag
+     */
+    void clearBaseModifiable() { _flag &= ~TR_ARM64MemoryReferenceControl_Base_Modifiable; }
 
-   /**
-    * @brief Base register is modifiable or not
-    * @return true when base register is modifiable
-    */
-   bool isBaseModifiable()
-      {
-      return ((_flag & TR_ARM64MemoryReferenceControl_Base_Modifiable) != 0);
-      }
-   /**
-    * @brief Sets the BaseModifiable flag
-    */
-   void setBaseModifiable() {_flag |= TR_ARM64MemoryReferenceControl_Base_Modifiable;}
-   /**
-    * @brief Clears the BaseModifiable flag
-    */
-   void clearBaseModifiable() {_flag &= ~TR_ARM64MemoryReferenceControl_Base_Modifiable;}
+    /**
+     * @brief Index register is modifiable or not
+     * @return true when index register is modifiable
+     */
+    bool isIndexModifiable() { return ((_flag & TR_ARM64MemoryReferenceControl_Index_Modifiable) != 0); }
+    /**
+     * @brief Sets the IndexModifiable flag
+     */
+    void setIndexModifiable() { _flag |= TR_ARM64MemoryReferenceControl_Index_Modifiable; }
+    /**
+     * @brief Clears the IndexModifiable flag
+     */
+    void clearIndexModifiable() { _flag &= ~TR_ARM64MemoryReferenceControl_Index_Modifiable; }
 
-   /**
-    * @brief Index register is modifiable or not
-    * @return true when index register is modifiable
-    */
-   bool isIndexModifiable()
-      {
-      return ((_flag & TR_ARM64MemoryReferenceControl_Index_Modifiable) != 0);
-      }
-   /**
-    * @brief Sets the IndexModifiable flag
-    */
-   void setIndexModifiable() {_flag |= TR_ARM64MemoryReferenceControl_Index_Modifiable;}
-   /**
-    * @brief Clears the IndexModifiable flag
-    */
-   void clearIndexModifiable() {_flag &= ~TR_ARM64MemoryReferenceControl_Index_Modifiable;}
+    /**
+     * @brief Gets the unresolved data snippet
+     * @return the unresolved data snippet
+     */
+    TR::UnresolvedDataSnippet* getUnresolvedSnippet() { return _unresolvedSnippet; }
+    /**
+     * @brief Sets an unresolved data snippet
+     * @return the unresolved data snippet
+     */
+    TR::UnresolvedDataSnippet* setUnresolvedSnippet(TR::UnresolvedDataSnippet* s) { return (_unresolvedSnippet = s); }
 
-   /**
-    * @brief Gets the unresolved data snippet
-    * @return the unresolved data snippet
-    */
-   TR::UnresolvedDataSnippet *getUnresolvedSnippet() {return _unresolvedSnippet;}
-   /**
-    * @brief Sets an unresolved data snippet
-    * @return the unresolved data snippet
-    */
-   TR::UnresolvedDataSnippet *setUnresolvedSnippet(TR::UnresolvedDataSnippet *s)
-      {
-      return (_unresolvedSnippet = s);
-      }
+    /**
+     * @brief Gets the symbol reference
+     * @return the symbol reference
+     */
+    TR::SymbolReference* getSymbolReference() { return _symbolReference; }
 
-   /**
-    * @brief Gets the symbol reference
-    * @return the symbol reference
-    */
-   TR::SymbolReference *getSymbolReference() {return _symbolReference;}
+    /**
+     * @brief Sets symbol
+     * @param[in] symbol : symbol to be set
+     * @param[in] cg : CodeGenerator
+     */
+    void setSymbol(TR::Symbol* symbol, TR::CodeGenerator* cg);
 
-   /**
-    * @brief Sets symbol
-    * @param[in] symbol : symbol to be set
-    * @param[in] cg : CodeGenerator
-    */
-   void setSymbol(TR::Symbol *symbol, TR::CodeGenerator *cg);
+    /**
+     * @brief Adds to offset
+     * @param[in] node : node
+     * @param[in] amount : amount to be added to offset
+     * @param[in] cg : CodeGenerator
+     */
+    void addToOffset(TR::Node* node, intptrj_t amount, TR::CodeGenerator* cg);
 
-   /**
-    * @brief Adds to offset
-    * @param[in] node : node
-    * @param[in] amount : amount to be added to offset
-    * @param[in] cg : CodeGenerator
-    */
-   void addToOffset(TR::Node *node, intptrj_t amount, TR::CodeGenerator *cg);
+    /**
+     * @brief Decrements node reference counts
+     * @param[in] cg : CodeGenerator
+     */
+    void decNodeReferenceCounts(TR::CodeGenerator* cg);
 
-   /**
-    * @brief Decrements node reference counts
-    * @param[in] cg : CodeGenerator
-    */
-   void decNodeReferenceCounts(TR::CodeGenerator *cg);
+    /**
+     * @brief Populates memory reference
+     * @param[in] subTree : sub-tree node
+     * @param[in] cg : CodeGenerator
+     */
+    void populateMemoryReference(TR::Node* subTree, TR::CodeGenerator* cg);
 
-   /**
-    * @brief Populates memory reference
-    * @param[in] subTree : sub-tree node
-    * @param[in] cg : CodeGenerator
-    */
-   void populateMemoryReference(TR::Node *subTree, TR::CodeGenerator *cg);
+    /**
+     * @brief Consolidates registers
+     * @param[in] srcReg : source register
+     * @param[in] srcTree : source tree node
+     * @param[in] srcModifiable : true if modifiable
+     * @param[in] cg : CodeGenerator
+     */
+    void consolidateRegisters(TR::Register* srcReg, TR::Node* srcTree, bool srcModifiable, TR::CodeGenerator* cg);
 
-   /**
-    * @brief Consolidates registers
-    * @param[in] srcReg : source register
-    * @param[in] srcTree : source tree node
-    * @param[in] srcModifiable : true if modifiable
-    * @param[in] cg : CodeGenerator
-    */
-   void consolidateRegisters(TR::Register *srcReg, TR::Node *srcTree, bool srcModifiable, TR::CodeGenerator *cg);
+    /**
+     * @brief Increment totalUseCounts of registers in MemoryReference
+     * @param[in] cg : CodeGenerator
+     */
+    void incRegisterTotalUseCounts(TR::CodeGenerator* cg);
 
-   /**
-    * @brief Increment totalUseCounts of registers in MemoryReference
-    * @param[in] cg : CodeGenerator
-    */
-   void incRegisterTotalUseCounts(TR::CodeGenerator *cg);
+    /**
+     * @brief Assigns registers
+     * @param[in] currentInstruction : current instruction
+     * @param[in] cg : CodeGenerator
+     */
+    void assignRegisters(TR::Instruction* currentInstruction, TR::CodeGenerator* cg);
 
-   /**
-    * @brief Assigns registers
-    * @param[in] currentInstruction : current instruction
-    * @param[in] cg : CodeGenerator
-    */
-   void assignRegisters(TR::Instruction *currentInstruction, TR::CodeGenerator *cg);
+    /**
+     * @brief Estimates the length of generated binary
+     * @param[in] op : opcode of the instruction to attach this memory reference to
+     * @return estimated binary length
+     */
+    uint32_t estimateBinaryLength(TR::InstOpCode op);
 
-   /**
-    * @brief Estimates the length of generated binary
-    * @param[in] op : opcode of the instruction to attach this memory reference to
-    * @return estimated binary length
-    */
-   uint32_t estimateBinaryLength(TR::InstOpCode op);
+    /**
+     * @brief Generates binary encoding
+     * @param[in] ci : current instruction
+     * @param[in] cursor : instruction cursor
+     * @param[in] cg : CodeGenerator
+     * @return estimated binary length
+     */
+    uint8_t* generateBinaryEncoding(TR::Instruction* ci, uint8_t* cursor, TR::CodeGenerator* cg);
+};
 
-   /**
-    * @brief Generates binary encoding
-    * @param[in] ci : current instruction
-    * @param[in] cursor : instruction cursor
-    * @param[in] cg : CodeGenerator
-    * @return estimated binary length
-    */
-   uint8_t *generateBinaryEncoding(TR::Instruction *ci, uint8_t *cursor, TR::CodeGenerator *cg);
-   };
-
-} // ARM64
-} // OMR
+} // namespace ARM64
+} // namespace OMR
 
 #endif

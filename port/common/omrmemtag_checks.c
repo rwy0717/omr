@@ -31,30 +31,29 @@
  *
  * @return 0 if the sum check is successful, non-zero otherwise
  */
-uint32_t
-checkTagSumCheck(J9MemTag *tagAddress, uint32_t eyeCatcher)
+uint32_t checkTagSumCheck(J9MemTag* tagAddress, uint32_t eyeCatcher)
 {
-	uint32_t sum = 0;
-	uint32_t *slots;
-	uintptr_t i;
-	J9MemTag *tagStoragePointer;
+    uint32_t sum = 0;
+    uint32_t* slots;
+    uintptr_t i;
+    J9MemTag* tagStoragePointer;
 
-	tagStoragePointer = tagAddress;
+    tagStoragePointer = tagAddress;
 
-	if (tagStoragePointer->eyeCatcher != eyeCatcher) {
-		return U_32_MAX;
-	}
-	slots = (uint32_t *) tagStoragePointer;
-	/* Could be unrolled into chained xors with a OMR_ENV_DATA64 conditional on the extra 2 uint32_ts */
-	for (i = 0; i < (sizeof(J9MemTag) / sizeof(uint32_t)); i++) {
-		sum ^= *slots++;
-	}
+    if (tagStoragePointer->eyeCatcher != eyeCatcher) {
+        return U_32_MAX;
+    }
+    slots = (uint32_t*)tagStoragePointer;
+    /* Could be unrolled into chained xors with a OMR_ENV_DATA64 conditional on the extra 2 uint32_ts */
+    for (i = 0; i < (sizeof(J9MemTag) / sizeof(uint32_t)); i++) {
+        sum ^= *slots++;
+    }
 #ifdef OMR_ENV_DATA64
-	sum ^= ((uint32_t)(((uintptr_t)tagAddress) >> 32)) ^ ((uint32_t)(((uintptr_t)tagAddress) & U_32_MAX));
+    sum ^= ((uint32_t)(((uintptr_t)tagAddress) >> 32)) ^ ((uint32_t)(((uintptr_t)tagAddress) & U_32_MAX));
 #else
-	sum ^= (uint32_t) tagAddress;
+    sum ^= (uint32_t)tagAddress;
 #endif
-	return sum;
+    return sum;
 }
 
 /**
@@ -64,30 +63,28 @@ checkTagSumCheck(J9MemTag *tagAddress, uint32_t eyeCatcher)
  *
  * @return	0 if no corruption was detected, otherwise non-zero.
  */
-uint32_t
-checkPadding(J9MemTag *headerTagAddress)
+uint32_t checkPadding(J9MemTag* headerTagAddress)
 {
-	uint8_t *padding;
+    uint8_t* padding;
 
-	padding = omrmem_get_footer_padding(headerTagAddress);
+    padding = omrmem_get_footer_padding(headerTagAddress);
 
-	while ((((uintptr_t) padding) & (ROUNDING_GRANULARITY - 1)) != 0) {
-		if (*padding == J9MEMTAG_PADDING_BYTE) {
-			padding++;
-		} else {
-			return J9MEMTAG_TAG_CORRUPTION;
-		}
-	}
-	return 0;
+    while ((((uintptr_t)padding) & (ROUNDING_GRANULARITY - 1)) != 0) {
+        if (*padding == J9MEMTAG_PADDING_BYTE) {
+            padding++;
+        } else {
+            return J9MEMTAG_TAG_CORRUPTION;
+        }
+    }
+    return 0;
 }
 
 /* Given the address of the headerEyecatcher for the memory block, return the memory pointer that
  * was returned by omrmem_allocate_memory() when the block was allocated.
  */
-void *
-omrmem_get_memory_base(J9MemTag *headerEyeCatcherAddress)
+void* omrmem_get_memory_base(J9MemTag* headerEyeCatcherAddress)
 {
-	return (uint8_t *)headerEyeCatcherAddress + sizeof(J9MemTag);
+    return (uint8_t*)headerEyeCatcherAddress + sizeof(J9MemTag);
 }
 
 /**
@@ -97,41 +94,34 @@ omrmem_get_memory_base(J9MemTag *headerEyeCatcherAddress)
  * the address of the footer tag.
  *
  */
-void *
-omrmem_get_footer_padding(J9MemTag *headerEyeCatcherAddress)
+void* omrmem_get_footer_padding(J9MemTag* headerEyeCatcherAddress)
 {
-	J9MemTag *headerTagStoragePointer;
-	uintptr_t cursor;
-	void *padding;
+    J9MemTag* headerTagStoragePointer;
+    uintptr_t cursor;
+    void* padding;
 
-	headerTagStoragePointer = headerEyeCatcherAddress;
+    headerTagStoragePointer = headerEyeCatcherAddress;
 
-	cursor = (uintptr_t)((uint8_t *)headerEyeCatcherAddress + sizeof(J9MemTag));
-	padding = (uint8_t *)(cursor + headerTagStoragePointer->allocSize);
+    cursor = (uintptr_t)((uint8_t*)headerEyeCatcherAddress + sizeof(J9MemTag));
+    padding = (uint8_t*)(cursor + headerTagStoragePointer->allocSize);
 
-	return padding;
+    return padding;
 }
 
 /**
  * Given the address of the headerEyecatcher for the memory block, return the address of the corresponding footer tag.
  */
-J9MemTag *
-omrmem_get_footer_tag(J9MemTag *headerEyeCatcherAddress)
+J9MemTag* omrmem_get_footer_tag(J9MemTag* headerEyeCatcherAddress)
 {
-	J9MemTag *headerTagStoragePointer;
+    J9MemTag* headerTagStoragePointer;
 
-	headerTagStoragePointer = headerEyeCatcherAddress;
+    headerTagStoragePointer = headerEyeCatcherAddress;
 
-	return (J9MemTag *)((uint8_t *)headerEyeCatcherAddress + ROUNDED_FOOTER_OFFSET(headerTagStoragePointer->allocSize));
+    return (J9MemTag*)((uint8_t*)headerEyeCatcherAddress + ROUNDED_FOOTER_OFFSET(headerTagStoragePointer->allocSize));
 }
 
 /**
  * Given the address returned by @ref omrmem_allocate_memory(), return address of the header tag for the memory block
  *
  */
-J9MemTag *
-omrmem_get_header_tag(void *memoryPointer)
-{
-	return (J9MemTag *)((uint8_t *)memoryPointer - sizeof(J9MemTag));
-}
-
+J9MemTag* omrmem_get_header_tag(void* memoryPointer) { return (J9MemTag*)((uint8_t*)memoryPointer - sizeof(J9MemTag)); }

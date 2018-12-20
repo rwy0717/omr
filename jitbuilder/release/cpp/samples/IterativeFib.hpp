@@ -20,19 +20,17 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #ifndef ITERATIVEFIB_INCL
 #define ITERATIVEFIB_INCL
 
 #include "JitBuilder.hpp"
 
-typedef int32_t (IterativeFibFunctionType)(int32_t);
+typedef int32_t(IterativeFibFunctionType)(int32_t);
 
-class IterativeFibonnaciMethod : public OMR::JitBuilder::MethodBuilder
-   {
-   public:
-   IterativeFibonnaciMethod(OMR::JitBuilder::TypeDictionary *types);
-   virtual bool buildIL();
-   };
+class IterativeFibonnaciMethod : public OMR::JitBuilder::MethodBuilder {
+public:
+    IterativeFibonnaciMethod(OMR::JitBuilder::TypeDictionary* types);
+    virtual bool buildIL();
+};
 
 #endif // !defined(ITERATIVEFIB_INCL)

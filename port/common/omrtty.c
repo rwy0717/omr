@@ -21,15 +21,13 @@
  *******************************************************************************/
 
 /**
-  * @file
-  * @ingroup Port
-  * @brief TTY output
-  *
-  * All VM output goes to stderr by default.  These routines provide the helpers for such output.
-  */
+ * @file
+ * @ingroup Port
+ * @brief TTY output
+ *
+ * All VM output goes to stderr by default.  These routines provide the helpers for such output.
+ */
 #include "omrport.h"
-
-
 
 /**
  * Determine the number of characters remaining to be read from stdin.
@@ -38,11 +36,7 @@
  *
  * @return number of characters remaining to be read.
  */
-intptr_t
-omrtty_available(struct OMRPortLibrary *portLibrary)
-{
-	return 0;
-}
+intptr_t omrtty_available(struct OMRPortLibrary* portLibrary) { return 0; }
 
 /**
  * Output message to stderr.
@@ -56,17 +50,14 @@ omrtty_available(struct OMRPortLibrary *portLibrary)
  * @internal @note Supported, portable format specifiers are described in the document entitled "PortLibrary printf"
  * in the "Inside J9" Lotus Notes database.
  */
-void
-omrtty_err_printf(struct OMRPortLibrary *portLibrary, const char *format, ...)
+void omrtty_err_printf(struct OMRPortLibrary* portLibrary, const char* format, ...)
 {
-	va_list args;
+    va_list args;
 
-	va_start(args, format);
-	portLibrary->tty_err_vprintf(portLibrary, format, args);
-	va_end(args);
+    va_start(args, format);
+    portLibrary->tty_err_vprintf(portLibrary, format, args);
+    va_end(args);
 }
-
-
 
 /**
  * Output message to stderr.
@@ -80,13 +71,10 @@ omrtty_err_printf(struct OMRPortLibrary *portLibrary, const char *format, ...)
  * @internal @note Supported, portable format specifiers are described in the document entitled "PortLibrary printf"
  * in the "Inside J9" Lotus Notes database.
  */
-void
-omrtty_err_vprintf(struct OMRPortLibrary *portLibrary, const char *format, va_list args)
+void omrtty_err_vprintf(struct OMRPortLibrary* portLibrary, const char* format, va_list args)
 {
-	portLibrary->file_vprintf(portLibrary, OMRPORT_TTY_ERR, format, args);
+    portLibrary->file_vprintf(portLibrary, OMRPORT_TTY_ERR, format, args);
 }
-
-
 
 /**
  * Read characters from stdin into buffer.
@@ -97,13 +85,7 @@ omrtty_err_vprintf(struct OMRPortLibrary *portLibrary, const char *format, va_li
  *
  * @return The number of characters read, -1 on error.
  */
-intptr_t
-omrtty_get_chars(struct OMRPortLibrary *portLibrary, char *s, uintptr_t length)
-{
-	return -1;
-}
-
-
+intptr_t omrtty_get_chars(struct OMRPortLibrary* portLibrary, char* s, uintptr_t length) { return -1; }
 
 /**
  * Write characters to stderr.
@@ -117,17 +99,14 @@ omrtty_get_chars(struct OMRPortLibrary *portLibrary, char *s, uintptr_t length)
  * @internal @note Supported, portable format specifiers are described in the document entitled "PortLibrary printf"
  * in the "Inside J9" Lotus Notes database.
  */
-void
-omrtty_printf(struct OMRPortLibrary *portLibrary, const char *format, ...)
+void omrtty_printf(struct OMRPortLibrary* portLibrary, const char* format, ...)
 {
-	va_list args;
+    va_list args;
 
-	va_start(args, format);
-	portLibrary->tty_vprintf(portLibrary, format, args);
-	va_end(args);
+    va_start(args, format);
+    portLibrary->tty_vprintf(portLibrary, format, args);
+    va_end(args);
 }
-
-
 
 /**
  * PortLibrary shutdown.
@@ -139,10 +118,7 @@ omrtty_printf(struct OMRPortLibrary *portLibrary, const char *format, ...)
  *
  * @note Most implementations will be empty.
  */
-void
-omrtty_shutdown(struct OMRPortLibrary *portLibrary)
-{
-}
+void omrtty_shutdown(struct OMRPortLibrary* portLibrary) {}
 /**
  * PortLibrary startup.
  *
@@ -159,11 +135,7 @@ omrtty_shutdown(struct OMRPortLibrary *portLibrary)
  *
  * @note Most implementations will simply return success.
  */
-int32_t
-omrtty_startup(struct OMRPortLibrary *portLibrary)
-{
-	return 0;
-}
+int32_t omrtty_startup(struct OMRPortLibrary* portLibrary) { return 0; }
 /**
  * Output message to stderr.
  *
@@ -176,10 +148,9 @@ omrtty_startup(struct OMRPortLibrary *portLibrary)
  * @internal @note Supported, portable format specifiers are described in the document entitled "PortLibrary printf"
  * in the "Inside J9" Lotus Notes database.
  */
-void
-omrtty_vprintf(struct OMRPortLibrary *portLibrary, const char *format, va_list args)
+void omrtty_vprintf(struct OMRPortLibrary* portLibrary, const char* format, va_list args)
 {
-	portLibrary->file_vprintf(portLibrary, OMRPORT_TTY_ERR, format, args);
+    portLibrary->file_vprintf(portLibrary, OMRPORT_TTY_ERR, format, args);
 }
 
 /**
@@ -189,9 +160,4 @@ omrtty_vprintf(struct OMRPortLibrary *portLibrary, const char *format, va_list a
  * @param[in] portLibrary The port library.
  *
  */
-void
-omrtty_daemonize(struct OMRPortLibrary *portLibrary)
-{
-}
-
-
+void omrtty_daemonize(struct OMRPortLibrary* portLibrary) {}

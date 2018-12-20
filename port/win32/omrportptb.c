@@ -23,10 +23,9 @@
 /* windows.h defined uintptr_t.  Ignore its definition */
 #define UDATA UDATA_win32_
 #include <windows.h>
-#undef UDATA	/* this is safe because our UDATA is a typedef, not a macro */
+#undef UDATA /* this is safe because our UDATA is a typedef, not a macro */
 #include "omrportpriv.h"
 #include "omrportptb.h"
-
 
 /**
  * @internal
@@ -38,21 +37,20 @@
  * @param[in] portLibrary The port library.
  * @param[in] ptBuffers pointer to the PortlibPTBuffers struct that contains the buffers
  */
-void
-omrport_free_ptBuffer(struct OMRPortLibrary *portLibrary, PortlibPTBuffers_t ptBuffer)
+void omrport_free_ptBuffer(struct OMRPortLibrary* portLibrary, PortlibPTBuffers_t ptBuffer)
 {
-	if (NULL != ptBuffer) {
-		if (NULL != ptBuffer->errorMessageBuffer) {
-			portLibrary->mem_free_memory(portLibrary, ptBuffer->errorMessageBuffer);
-			ptBuffer->errorMessageBufferSize = 0;
-		}
-		if (NULL != ptBuffer->reportedMessageBuffer) {
-			portLibrary->mem_free_memory(portLibrary, ptBuffer->reportedMessageBuffer);
-			ptBuffer->reportedMessageBufferSize = 0;
-		}
+    if (NULL != ptBuffer) {
+        if (NULL != ptBuffer->errorMessageBuffer) {
+            portLibrary->mem_free_memory(portLibrary, ptBuffer->errorMessageBuffer);
+            ptBuffer->errorMessageBufferSize = 0;
+        }
+        if (NULL != ptBuffer->reportedMessageBuffer) {
+            portLibrary->mem_free_memory(portLibrary, ptBuffer->reportedMessageBuffer);
+            ptBuffer->reportedMessageBufferSize = 0;
+        }
 
-		portLibrary->mem_free_memory(portLibrary, ptBuffer);
-	}
+        portLibrary->mem_free_memory(portLibrary, ptBuffer);
+    }
 }
 
 /* These functions don't belong here, but they don't belong anywhere else either. */
@@ -71,33 +69,36 @@ omrport_free_ptBuffer(struct OMRPortLibrary *portLibrary, PortlibPTBuffers_t ptB
  * If the returned buffer is not the same as @ref unicodeBuffer, the returned buffer needs to be freed
  * 	using @ref omrmem_free_memory
  */
-wchar_t *
-port_convertFromUTF8(OMRPortLibrary *portLibrary, const char *string, wchar_t *unicodeBuffer, uintptr_t unicodeBufferSize)
+wchar_t* port_convertFromUTF8(
+    OMRPortLibrary* portLibrary, const char* string, wchar_t* unicodeBuffer, uintptr_t unicodeBufferSize)
 {
-	wchar_t *unicodeString;
-	uintptr_t length;
+    wchar_t* unicodeString;
+    uintptr_t length;
 
-	if (NULL == string) {
-		return NULL;
-	}
-	length = (uintptr_t)strlen(string);
-	if (length < unicodeBufferSize) {
-		unicodeString = unicodeBuffer;
-	} else {
-		unicodeString = portLibrary->mem_allocate_memory(portLibrary, (length + 1) * 2, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
-		if (NULL == unicodeString) {
-			return NULL;
-		}
-	}
-	if (0 == MultiByteToWideChar(OS_ENCODING_CODE_PAGE, OS_ENCODING_MB_FLAGS, string, -1, unicodeString, (int)length + 1)) {
-		portLibrary->error_set_last_error(portLibrary, GetLastError(), OMRPORT_ERROR_OPFAILED);
-		if (unicodeString != unicodeBuffer) {
-			portLibrary->mem_free_memory(portLibrary, unicodeString);
-		}
-		return NULL;
-	}
+    if (NULL == string) {
+        return NULL;
+    }
+    length = (uintptr_t)strlen(string);
+    if (length < unicodeBufferSize) {
+        unicodeString = unicodeBuffer;
+    } else {
+        unicodeString = portLibrary->mem_allocate_memory(
+            portLibrary, (length + 1) * 2, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
+        if (NULL == unicodeString) {
+            return NULL;
+        }
+    }
+    if (0
+        == MultiByteToWideChar(
+               OS_ENCODING_CODE_PAGE, OS_ENCODING_MB_FLAGS, string, -1, unicodeString, (int)length + 1)) {
+        portLibrary->error_set_last_error(portLibrary, GetLastError(), OMRPORT_ERROR_OPFAILED);
+        if (unicodeString != unicodeBuffer) {
+            portLibrary->mem_free_memory(portLibrary, unicodeString);
+        }
+        return NULL;
+    }
 
-	return unicodeString;
+    return unicodeString;
 }
 /**
  * @internal
@@ -110,13 +111,13 @@ port_convertFromUTF8(OMRPortLibrary *portLibrary, const char *string, wchar_t *u
  *
  * @return 0 on success, -1 on failure.
  */
-int32_t
-port_convertToUTF8(OMRPortLibrary *portLibrary, const wchar_t *unicodeString, char *utf8Buffer, uintptr_t size)
+int32_t port_convertToUTF8(OMRPortLibrary* portLibrary, const wchar_t* unicodeString, char* utf8Buffer, uintptr_t size)
 {
-	if (0 == WideCharToMultiByte(OS_ENCODING_CODE_PAGE, OS_ENCODING_WC_FLAGS, unicodeString, -1, utf8Buffer, (int)size, NULL, NULL)) {
-		portLibrary->error_set_last_error(portLibrary, GetLastError(), OMRPORT_ERROR_OPFAILED); /* continue */
-		return -1;
-	}
-	return 0;
+    if (0
+        == WideCharToMultiByte(
+               OS_ENCODING_CODE_PAGE, OS_ENCODING_WC_FLAGS, unicodeString, -1, utf8Buffer, (int)size, NULL, NULL)) {
+        portLibrary->error_set_last_error(portLibrary, GetLastError(), OMRPORT_ERROR_OPFAILED); /* continue */
+        return -1;
+    }
+    return 0;
 }
-

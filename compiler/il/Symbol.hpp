@@ -49,29 +49,28 @@
 
 #include "il/symbol/OMRSymbol.hpp"
 
-#include <stdint.h>          // for uint32_t
-#include "il/DataTypes.hpp"  // for DataTypes
+#include <stdint.h> // for uint32_t
+#include "il/DataTypes.hpp" // for DataTypes
 
-namespace TR
-{
+namespace TR {
 
-class OMR_EXTENSIBLE Symbol : public OMR::SymbolConnector
-   {
+class OMR_EXTENSIBLE Symbol : public OMR::SymbolConnector {
 
 public:
+    Symbol()
+        : OMR::SymbolConnector()
+    {}
 
-   Symbol() :
-      OMR::SymbolConnector() {}
+    Symbol(TR::DataType d)
+        : OMR::SymbolConnector(d)
+    {}
 
-   Symbol(TR::DataType d) :
-      OMR::SymbolConnector(d) {}
+    Symbol(TR::DataType d, uint32_t s)
+        : OMR::SymbolConnector(d, s)
+    {}
+};
 
-   Symbol(TR::DataType d, uint32_t s) :
-      OMR::SymbolConnector(d,s) {}
-
-   };
-
-}
+} // namespace TR
 
 #include "il/Symbol_inlines.hpp"
 

@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 /**
  * @file
  * @ingroup GC_Base
@@ -40,32 +39,30 @@ class MM_MemorySubSpace;
  * Iterate through all visible memory pools for a given memory sub space.
  * Provides a preordered walk of all memory subspaces siblings to find all memory pools
  * for a memory subspace.
- * 
+ *
  * @ingroup GC_Base
- */	
-class MM_MemorySubSpacePoolIterator
-{
+ */
+class MM_MemorySubSpacePoolIterator {
 private:
-	MM_MemorySubSpaceChildIterator _mssChildIterator;
-	MM_MemorySubSpace *_memorySubSpace;
-	MM_MemoryPool *_memoryPool;
-	uintptr_t _state;
-	
-	void reset();
+    MM_MemorySubSpaceChildIterator _mssChildIterator;
+    MM_MemorySubSpace* _memorySubSpace;
+    MM_MemoryPool* _memoryPool;
+    uintptr_t _state;
+
+    void reset();
 
 protected:
 public:
-	MM_MemoryPool *nextPool();
+    MM_MemoryPool* nextPool();
 
-	MM_MemorySubSpacePoolIterator(MM_MemorySubSpace *memorySubSpace) :
-		_mssChildIterator(memorySubSpace),
-		_memorySubSpace(NULL),
-		_memoryPool(NULL),
-		_state(0)
-	{
-		reset();
-	}
-		
+    MM_MemorySubSpacePoolIterator(MM_MemorySubSpace* memorySubSpace)
+        : _mssChildIterator(memorySubSpace)
+        , _memorySubSpace(NULL)
+        , _memoryPool(NULL)
+        , _state(0)
+    {
+        reset();
+    }
 };
 
 #endif /* MEMORYSUBSPACEPOOLITERATOR_HPP_ */

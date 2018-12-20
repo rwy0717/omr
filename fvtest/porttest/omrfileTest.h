@@ -22,8 +22,8 @@
 #if !defined(J9FILETEST_H_INCLUDED)
 #define J9FILETEST_H_INCLUDED
 
-intptr_t omrfile_create_file(OMRPortLibrary *portLibrary, char *filename, int32_t openMode, const char *testName);
-intptr_t omrfile_create_status_file(OMRPortLibrary *portLibrary, char *filename, const char *testName);
-intptr_t omrfile_status_file_exists(OMRPortLibrary *portLibrary, char *filename, const char *testName);
+intptr_t omrfile_create_file(OMRPortLibrary* portLibrary, char* filename, int32_t openMode, const char* testName);
+intptr_t omrfile_create_status_file(OMRPortLibrary* portLibrary, char* filename, const char* testName);
+intptr_t omrfile_status_file_exists(OMRPortLibrary* portLibrary, char* filename, const char* testName);
 
 #endif /* !defined(J9FILETEST_H_INCLUDED) */

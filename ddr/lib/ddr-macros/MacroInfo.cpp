@@ -21,37 +21,16 @@
 
 #include "ddr/macros/MacroInfo.hpp"
 
-MacroInfo::MacroInfo(const string &typeName)
-	: _typeName(typeName)
-{
-}
+MacroInfo::MacroInfo(const string& typeName)
+    : _typeName(typeName)
+{}
 
-const string &
-MacroInfo::getTypeName() const
-{
-	return _typeName;
-}
+const string& MacroInfo::getTypeName() const { return _typeName; }
 
-void
-MacroInfo::addMacro(const string &name, const string &value)
-{
-	_macros.insert(make_pair(name, value));
-}
+void MacroInfo::addMacro(const string& name, const string& value) { _macros.insert(make_pair(name, value)); }
 
-size_t
-MacroInfo::getNumMacros() const
-{
-	return _macros.size();
-}
+size_t MacroInfo::getNumMacros() const { return _macros.size(); }
 
-set<pair<string, string> >::const_iterator
-MacroInfo::getMacroStart() const
-{
-	return _macros.begin();
-}
+set<pair<string, string> >::const_iterator MacroInfo::getMacroStart() const { return _macros.begin(); }
 
-set<pair<string, string> >::const_iterator
-MacroInfo::getMacroEnd() const
-{
-	return _macros.end();
-}
+set<pair<string, string> >::const_iterator MacroInfo::getMacroEnd() const { return _macros.end(); }

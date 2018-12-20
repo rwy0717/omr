@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -28,97 +27,75 @@
 
 #include "Pow2.hpp"
 
-Pow2Method::Pow2Method(OMR::JitBuilder::TypeDictionary *types)
-   : OMR::JitBuilder::MethodBuilder(types)
-   {
-   DefineLine(LINETOSTR(__LINE__));
-   DefineFile(__FILE__);
+Pow2Method::Pow2Method(OMR::JitBuilder::TypeDictionary* types)
+    : OMR::JitBuilder::MethodBuilder(types)
+{
+    DefineLine(LINETOSTR(__LINE__));
+    DefineFile(__FILE__);
 
-   DefineName("pow2");
-   DefineParameter("n", Int64);
-   DefineReturnType(Int64);
-   }
+    DefineName("pow2");
+    DefineParameter("n", Int64);
+    DefineReturnType(Int64);
+}
 
-bool
-Pow2Method::buildIL()
-   {
-   Store("a",
-      ConstInt64(1));
+bool Pow2Method::buildIL()
+{
+    Store("a", ConstInt64(1));
 
-   Store("b",
-      ConstInt64(1));
+    Store("b", ConstInt64(1));
 
-   Store("i",
-      Load("n"));
+    Store("i", Load("n"));
 
-   Store("keepIterating",
-      GreaterThan(
-         Load("i"),
-         ConstInt64(-1)));
+    Store("keepIterating", GreaterThan(Load("i"), ConstInt64(-1)));
 
-   OMR::JitBuilder::IlBuilder *loopBody = NULL;
-   WhileDoLoop("keepIterating", &loopBody);
+    OMR::JitBuilder::IlBuilder* loopBody = NULL;
+    WhileDoLoop("keepIterating", &loopBody);
 
-   loopBody->Store("a",
-   loopBody->   Load("b"));
+    loopBody->Store("a", loopBody->Load("b"));
 
-   loopBody->Store("b",
-   loopBody->   Add(
-   loopBody->      Load("a"),
-   loopBody->      Load("b")));
+    loopBody->Store("b", loopBody->Add(loopBody->Load("a"), loopBody->Load("b")));
 
-   loopBody->Store("i",
-   loopBody->   Sub(
-   loopBody->      Load("i"),
-   loopBody->      ConstInt64(1)));
+    loopBody->Store("i", loopBody->Sub(loopBody->Load("i"), loopBody->ConstInt64(1)));
 
-   loopBody->Store("keepIterating",
-   loopBody->   GreaterThan(
-   loopBody->      Load("i"),
-   loopBody->      ConstInt64(-1)));
+    loopBody->Store("keepIterating", loopBody->GreaterThan(loopBody->Load("i"), loopBody->ConstInt64(-1)));
 
-   Return(
-      Load("a"));
+    Return(Load("a"));
 
-   return true;
-   }
+    return true;
+}
 
+int main(int argc, char* argv[])
+{
+    printf("Step 1: initialize JIT\n");
+    bool initialized = initializeJit();
+    if (!initialized) {
+        fprintf(stderr, "FAIL: could not initialize JIT\n");
+        exit(-1);
+    }
 
-int
-main(int argc, char *argv[])
-   {
-   printf("Step 1: initialize JIT\n");
-   bool initialized = initializeJit();
-   if (!initialized)
-      {
-      fprintf(stderr, "FAIL: could not initialize JIT\n");
-      exit(-1);
-      }
+    printf("Step 2: define relevant types\n");
+    OMR::JitBuilder::TypeDictionary types;
 
-   printf("Step 2: define relevant types\n");
-   OMR::JitBuilder::TypeDictionary types;
+    printf("Step 3: compile method builder\n");
+    Pow2Method Pow2Method(&types);
+    void* entry = 0;
+    int32_t rc = compileMethodBuilder(&Pow2Method, &entry);
+    if (rc != 0) {
+        fprintf(stderr, "FAIL: compilation error %d\n", rc);
+        exit(-2);
+    }
 
-   printf("Step 3: compile method builder\n");
-   Pow2Method Pow2Method(&types);
-   void *entry=0;
-   int32_t rc = compileMethodBuilder(&Pow2Method, &entry);
-   if (rc != 0)
-      {
-      fprintf(stderr,"FAIL: compilation error %d\n", rc);
-      exit(-2);
-      }
+    printf("Step 4: invoke compiled code\n");
+    Pow2FunctionType* pow2 = (Pow2FunctionType*)entry;
+    int32_t n = (argc > 1) ? atoi(argv[1]) : 6000000;
+    int64_t r;
+    for (int32_t i = 0; i < n; i++)
+        r = pow2((int64_t)45);
 
-   printf("Step 4: invoke compiled code\n");
-   Pow2FunctionType *pow2 = (Pow2FunctionType *)entry;
-   int32_t n = (argc > 1) ? atoi(argv[1]) : 6000000;
-   int64_t r;
-   for (int32_t i=0;i < n;i++)
-      r = pow2((int64_t) 45);
+    printf("pow2(45) is %lld\n", r);
 
-   printf("pow2(45) is %lld\n", r);
+    printf("Step 5: shutdown JIT\n");
+    shutdownJit();
 
-   printf ("Step 5: shutdown JIT\n");
-   shutdownJit();
-
-   printf("PASS\n");
-   }
+    printf("PASS\n");
+}

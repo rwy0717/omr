@@ -44,29 +44,29 @@ class MM_EnvironmentBase;
  * @todo Provide class documentation
  * @ingroup GC_Modron_Standard
  */
-class MM_ConcurrentScanRememberedSetTask : public MM_ParallelTask
-{
+class MM_ConcurrentScanRememberedSetTask : public MM_ParallelTask {
 private:
-	MM_ConcurrentGC *_collector;
-	MM_CycleState *_cycleState;  /**< Collection cycle state active for the task */
+    MM_ConcurrentGC* _collector;
+    MM_CycleState* _cycleState; /**< Collection cycle state active for the task */
 
 public:
-	virtual UDATA getVMStateID() { return OMRVMSTATE_GC_CONCURRENT_MARK_SCAN_REMEMBERED_SET; };
-	
-	virtual void run(MM_EnvironmentBase *envBase);
-	virtual void setup(MM_EnvironmentBase *env);
-	virtual void cleanup(MM_EnvironmentBase *env);
+    virtual UDATA getVMStateID() { return OMRVMSTATE_GC_CONCURRENT_MARK_SCAN_REMEMBERED_SET; };
 
-	/**
-	 * Create a ConcurrentScanRememberedSetTask object
-	 */
-	MM_ConcurrentScanRememberedSetTask(MM_EnvironmentBase *env, MM_Dispatcher *dispatcher, MM_ConcurrentGC *collector, MM_CycleState *cycleState) :
-		MM_ParallelTask(env, dispatcher)
-		,_collector(collector)
-		,_cycleState(cycleState)
-	{
-		_typeId = __FUNCTION__;
-	};
+    virtual void run(MM_EnvironmentBase* envBase);
+    virtual void setup(MM_EnvironmentBase* env);
+    virtual void cleanup(MM_EnvironmentBase* env);
+
+    /**
+     * Create a ConcurrentScanRememberedSetTask object
+     */
+    MM_ConcurrentScanRememberedSetTask(
+        MM_EnvironmentBase* env, MM_Dispatcher* dispatcher, MM_ConcurrentGC* collector, MM_CycleState* cycleState)
+        : MM_ParallelTask(env, dispatcher)
+        , _collector(collector)
+        , _cycleState(cycleState)
+    {
+        _typeId = __FUNCTION__;
+    };
 };
 #endif /* OMR_GC_MODRON_SCAVENGER */
 #endif /* CONCURRENTSCANREMEMBERSETTASK_HPP_ */

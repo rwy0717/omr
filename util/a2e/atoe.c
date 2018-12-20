@@ -45,9 +45,9 @@
  * Include all system header files.
  * ======================================================================
  */
-#define _OPEN_SYS_FILE_EXT  /* For SETCVTOFF */    /*ibm@57265*/
+#define _OPEN_SYS_FILE_EXT /* For SETCVTOFF */ /*ibm@57265*/
 #include <unistd.h>
-#include <fcntl.h>          /* <--SETCVTOFF in here */
+#include <fcntl.h> /* <--SETCVTOFF in here */
 #include <pthread.h>
 #include <string.h>
 #include <stdlib.h>
@@ -72,43 +72,42 @@
 #include <sys/utsname.h>
 #include <sys/ipc.h>
 #include <strings.h>
-#include <limits.h>              /*ibm@52465*/
+#include <limits.h> /*ibm@52465*/
 #include <_Ccsid.h>
 #include <sys/statvfs.h>
 
 #if 1 /* msf - did not find this stuff in LE headers */
-                                                   /*ibm@57265 start*/
-int fcntl_init = 0;       /* Global flag that says the OS release    */
-                          /* has been tested for.                    */
-int use_fcntl  = 0;       /* Is SETCVTOFF flag supported in fcntl()? */
-                          /* use_fcntl flag set TRUE if yes.         */
-#define MIN_FCNTL_LEVEL  0x41020000  /* This is the lowest version   */
-                                     /* of OS that supports the use  */
-                                     /* of SETCVTOFF flag in fcntl().*/
+/*ibm@57265 start*/
+int fcntl_init = 0; /* Global flag that says the OS release    */
+/* has been tested for.                    */
+int use_fcntl = 0; /* Is SETCVTOFF flag supported in fcntl()? */
+/* use_fcntl flag set TRUE if yes.         */
+#define MIN_FCNTL_LEVEL 0x41020000 /* This is the lowest version   */
+/* of OS that supports the use  */
+/* of SETCVTOFF flag in fcntl().*/
 
 /* Macros for checking and setting global flags for use of fcntl()   */
 /* and turning autoconversion off.                                   */
-#define check_fcntl_init()                                           \
-    /* Has the use of fcntl been checked yet?  */                    \
-    /* If not, check to see if we have the     */                    \
-    /* right OS level that supports the use of */                    \
-    /* SETCVTOFF flag to prevent autoconversion*/                    \
-    /* of a file.                              */                    \
-    if (!fcntl_init)                                                 \
-      {                                                              \
-        if (MIN_FCNTL_LEVEL <= __librel())                           \
-          use_fcntl = 1;  /* Yes, SETCVTOFF supported */             \
-        fcntl_init = 1;   /* Turn on global checked flag */          \
-      }
+#define check_fcntl_init()                                \
+    /* Has the use of fcntl been checked yet?  */         \
+    /* If not, check to see if we have the     */         \
+    /* right OS level that supports the use of */         \
+    /* SETCVTOFF flag to prevent autoconversion*/         \
+    /* of a file.                              */         \
+    if (!fcntl_init) {                                    \
+        if (MIN_FCNTL_LEVEL <= __librel())                \
+            use_fcntl = 1; /* Yes, SETCVTOFF supported */ \
+        fcntl_init = 1; /* Turn on global checked flag */ \
+    }
 
-#define set_SETCVTOFF()                                              \
-	struct f_cnvrt std_cnvrt;                                    \
-        std_cnvrt.cvtcmd = SETCVTOFF;                                \
-        std_cnvrt.pccsid = 0;                                        \
-        std_cnvrt.fccsid = 0;                                        \
-        /* Turn of autoconversion for this file. */                  \
-        fcntl( fd, F_CONTROL_CVT, &std_cnvrt);
-                                                   /*ibm@57265 end*/
+#define set_SETCVTOFF()                         \
+    struct f_cnvrt std_cnvrt;                   \
+    std_cnvrt.cvtcmd = SETCVTOFF;               \
+    std_cnvrt.pccsid = 0;                       \
+    std_cnvrt.fccsid = 0;                       \
+    /* Turn of autoconversion for this file. */ \
+    fcntl(fd, F_CONTROL_CVT, &std_cnvrt);
+/*ibm@57265 end*/
 #else
 
 #define check_fcntl_init() (1)
@@ -122,7 +121,6 @@ static int fileTaggingEnabled = 0;
 /* CCSID for new files */
 static __ccsid_t newFileCCSID = 0;
 
-
 /*
  * ======================================================================
  * Trace logging?
@@ -131,10 +129,9 @@ static __ccsid_t newFileCCSID = 0;
 #ifdef LOGGING
 #include <dg_defs.h>
 #else
-#define Log(level,message)
-#define Log1(level,message,x1)
+#define Log(level, message)
+#define Log1(level, message, x1)
 #endif
-
 
 /*
  * ======================================================================
@@ -153,9 +150,9 @@ char e2a_tab[CONV_TABLE_SIZE];
  */
 #include "atoe.h"
 
-int   atoe_vsnprintf(char *str, size_t count, const char *fmt, va_list args);
-int   atoe_fprintf(FILE *, const char *, ...);
-struct passwd *etoa_passwd(struct passwd *e_passwd);
+int atoe_vsnprintf(char* str, size_t count, const char* fmt, va_list args);
+int atoe_fprintf(FILE*, const char*, ...);
+struct passwd* etoa_passwd(struct passwd* e_passwd);
 
 /*
  * ======================================================================
@@ -167,23 +164,21 @@ struct passwd *etoa_passwd(struct passwd *e_passwd);
  * ======================================================================
  */
 struct ascii_envvar {
-	struct ascii_envvar *next;
-	char *name;
-	char *value;
+    struct ascii_envvar* next;
+    char* name;
+    char* value;
 };
 typedef struct ascii_envvar envvar_t;
 
 /* Anchor entry */
-envvar_t env_anchor = {NULL, NULL, NULL};
+envvar_t env_anchor = { NULL, NULL, NULL };
 
 /* Mutex for single-threading list updates */
 pthread_mutex_t env_mutex;
 
-
-char *
-sysTranslate(const char *source, int length, char *trtable, char *xlate_buf)
+char* sysTranslate(const char* source, int length, char* trtable, char* xlate_buf)
 {
-	return sysTranslateASM(source, length, trtable, xlate_buf);
+    return sysTranslateASM(source, length, trtable, xlate_buf);
 }
 
 /**************************************************************************
@@ -196,56 +191,55 @@ sysTranslate(const char *source, int length, char *trtable, char *xlate_buf)
  * returns     - envvar_t entry that was added or updated, or NULL if the
  *               value parameter was NULL
  *************************************************************************/
-static envvar_t *
-updateEnvvar(char *name, char *value)
+static envvar_t* updateEnvvar(char* name, char* value)
 {
-	envvar_t *prev;
-	envvar_t *envvar;
+    envvar_t* prev;
+    envvar_t* envvar;
 
-	/* Grab the lock */
-	pthread_mutex_lock(&env_mutex);
+    /* Grab the lock */
+    pthread_mutex_lock(&env_mutex);
 
-	/* Find an existing entry, if any. */
-	prev = &env_anchor;
-	envvar = env_anchor.next;
-	while (NULL != envvar) {
-		if (0 == strcmp(name, envvar->name)) {
-			break;
-		}
-		prev = envvar;
-		envvar = envvar->next;
-	}
+    /* Find an existing entry, if any. */
+    prev = &env_anchor;
+    envvar = env_anchor.next;
+    while (NULL != envvar) {
+        if (0 == strcmp(name, envvar->name)) {
+            break;
+        }
+        prev = envvar;
+        envvar = envvar->next;
+    }
 
-	if (NULL == value) {
-		if (NULL != envvar) {
-			/* Remove the old entry from the list. */
-			prev->next = envvar->next;
-			free(envvar->name);
-			free(envvar->value);
-			free(envvar);
-			envvar = NULL;
-		}
-	} else if (NULL != envvar) {
-		/* Update the existing entry */
-		if (strlen(value) <= strlen(envvar->value)) {
-			strcpy(envvar->value, value);
-		} else {
-			free(envvar->value);
-			envvar->value = strdup(value);
-		}
-	} else {
-		/* Add a new entry to the list */
-		prev->next = (envvar_t *)malloc(sizeof(envvar_t));
-		envvar = prev->next;
-		envvar->next = NULL;
-		envvar->name = strdup(name);
-		envvar->value = strdup(value);
-	}
+    if (NULL == value) {
+        if (NULL != envvar) {
+            /* Remove the old entry from the list. */
+            prev->next = envvar->next;
+            free(envvar->name);
+            free(envvar->value);
+            free(envvar);
+            envvar = NULL;
+        }
+    } else if (NULL != envvar) {
+        /* Update the existing entry */
+        if (strlen(value) <= strlen(envvar->value)) {
+            strcpy(envvar->value, value);
+        } else {
+            free(envvar->value);
+            envvar->value = strdup(value);
+        }
+    } else {
+        /* Add a new entry to the list */
+        prev->next = (envvar_t*)malloc(sizeof(envvar_t));
+        envvar = prev->next;
+        envvar->next = NULL;
+        envvar->name = strdup(name);
+        envvar->value = strdup(value);
+    }
 
-	/* Release the lock */
-	pthread_mutex_unlock(&env_mutex);
+    /* Release the lock */
+    pthread_mutex_unlock(&env_mutex);
 
-	return envvar;
+    return envvar;
 }
 
 /**************************************************************************
@@ -256,11 +250,7 @@ updateEnvvar(char *name, char *value)
  *               len, Length of str
  * returns     - Converted EBCDIC string
  *************************************************************************/
-char *
-a2e_func(char *str, int len)
-{
-	return a2e(str, len);
-}
+char* a2e_func(char* str, int len) { return a2e(str, len); }
 
 /**************************************************************************
  * name        - e2a_func (ibm@3218)
@@ -270,11 +260,7 @@ a2e_func(char *str, int len)
  *               len, Length of str
  * returns     - Converted ASCII string
  *************************************************************************/
-char *
-e2a_func(char *str, int len)
-{
-	return e2a(str, len);
-}
+char* e2a_func(char* str, int len) { return e2a(str, len); }
 
 /**************************************************************************
  * name        - atoe_getenv
@@ -285,34 +271,33 @@ e2a_func(char *str, int len)
  * parameters  -
  * returns     -
  *************************************************************************/
-char *
-atoe_getenv(const char *name)
+char* atoe_getenv(const char* name)
 {
-	envvar_t *envvar;
-	char *value, *e_name, *e_value;
+    envvar_t* envvar;
+    char *value, *e_name, *e_value;
 
-	Log(1, "Entry: atoe_getenv\n");
+    Log(1, "Entry: atoe_getenv\n");
 
-	if (name == NULL) {
-		return NULL;
-	}
+    if (name == NULL) {
+        return NULL;
+    }
 
-	/* Always get the EBCIDC value from the system (in case it may have changed). */
-	e_name = a2e_string((char *)name);
-	e_value = getenv(e_name);
-	free(e_name);
+    /* Always get the EBCIDC value from the system (in case it may have changed). */
+    e_name = a2e_string((char*)name);
+    e_value = getenv(e_name);
+    free(e_name);
 
-	if (NULL == e_value) {
-		updateEnvvar((char *)name, NULL);
-		return NULL;
-	}
+    if (NULL == e_value) {
+        updateEnvvar((char*)name, NULL);
+        return NULL;
+    }
 
-	/* Convert the value and update the ASCII environment variable entry. */
-	value = e2a_string(e_value);
-	envvar = updateEnvvar((char *)name, value);
-	free(value);
+    /* Convert the value and update the ASCII environment variable entry. */
+    value = e2a_string(e_value);
+    envvar = updateEnvvar((char*)name, value);
+    free(value);
 
-	return envvar->value;
+    return envvar->value;
 }
 
 /**************************************************************************
@@ -323,26 +308,25 @@ atoe_getenv(const char *name)
  * parameters  -
  * returns     -
  *************************************************************************/
-int
-atoe_putenv(const char *envstr)
+int atoe_putenv(const char* envstr)
 {
-	char *w_envstr;
-	int result;
+    char* w_envstr;
+    int result;
 
-	Log(1, "Entry: atoe_putenv\n");
+    Log(1, "Entry: atoe_putenv\n");
 
-	/* Set the system EBCDIC environment */
-	w_envstr = a2e_string((char *)envstr);
+    /* Set the system EBCDIC environment */
+    w_envstr = a2e_string((char*)envstr);
 
-	/* note that this causes a leak - z/OS needs to have the memory, so we copy here. */
-	result = putenv(w_envstr);
+    /* note that this causes a leak - z/OS needs to have the memory, so we copy here. */
+    result = putenv(w_envstr);
 
-	/*
-	 * Note: We don't add / update the entry in the envvar_t list, as that list is only
-	 * to keep track of memory we allocated for getenv(), and is not used for lookups.
-	 */
+    /*
+     * Note: We don't add / update the entry in the envvar_t list, as that list is only
+     * to keep track of memory we allocated for getenv(), and is not used for lookups.
+     */
 
-	return result;
+    return result;
 }
 
 /**************************************************************************
@@ -351,19 +335,18 @@ atoe_putenv(const char *envstr)
  * parameters  -
  * returns     -
  *************************************************************************/
-void
-atoe_perror(const char *string)
+void atoe_perror(const char* string)
 {
-	char *e;
+    char* e;
 
-	Log(1, "Entry: atoe_perror\n");
+    Log(1, "Entry: atoe_perror\n");
 
-	e = a2e_string((char *)string);
-	perror(e);
+    e = a2e_string((char*)string);
+    perror(e);
 
-	free(e);
+    free(e);
 
-	return;
+    return;
 }
 
 /**************************************************************************
@@ -373,34 +356,32 @@ atoe_perror(const char *string)
  * parameters  - ccsid - Required CCSID for file tags
  * returns     - none
  *************************************************************************/
-void
-atoe_enableFileTagging(void)
+void atoe_enableFileTagging(void)
 {
 #pragma convlit(suspend)
-	const char *dllname = "libwrappers.so";
-	const char *fnname  = "atoe_enableFileTagging";
-	dllhandle *libwrappersDll;
-	void (*patoe_enableFileTagging)();
+    const char* dllname = "libwrappers.so";
+    const char* fnname = "atoe_enableFileTagging";
+    dllhandle* libwrappersDll;
+    void (*patoe_enableFileTagging)();
 
-	fileTaggingEnabled = 1;
+    fileTaggingEnabled = 1;
 
-	/* Handle libwrappers.so:atoe_enableFileTagging as well */
-	libwrappersDll = dllload(dllname);
-	if (libwrappersDll == NULL) {
-		perror(0);
-		printf("atoe_enableFileTagging: %s not found\n", dllname);
-	} else {
-		patoe_enableFileTagging = (void (*)()) dllqueryfn(libwrappersDll, fnname);
-		if (patoe_enableFileTagging == NULL) {
-			perror(0);
-			printf("atoe_enableFileTagging: %s not found\n", fnname);
-		} else {
-			patoe_enableFileTagging();
-		}
-	}
+    /* Handle libwrappers.so:atoe_enableFileTagging as well */
+    libwrappersDll = dllload(dllname);
+    if (libwrappersDll == NULL) {
+        perror(0);
+        printf("atoe_enableFileTagging: %s not found\n", dllname);
+    } else {
+        patoe_enableFileTagging = (void (*)())dllqueryfn(libwrappersDll, fnname);
+        if (patoe_enableFileTagging == NULL) {
+            perror(0);
+            printf("atoe_enableFileTagging: %s not found\n", fnname);
+        } else {
+            patoe_enableFileTagging();
+        }
+    }
 #pragma convlit(resume)
 }
-
 
 /**************************************************************************
  * name        - atoe_enableFileTagging
@@ -408,13 +389,11 @@ atoe_enableFileTagging(void)
  * parameters  - ccsid - Required CCSID for file tags
  * returns     - none
  *************************************************************************/
-void
-atoe_setFileTaggingCcsid(void *pccsid)
+void atoe_setFileTaggingCcsid(void* pccsid)
 {
-	__ccsid_t ccsid = *(__ccsid_t *) pccsid;
-	newFileCCSID = ccsid;
+    __ccsid_t ccsid = *(__ccsid_t*)pccsid;
+    newFileCCSID = ccsid;
 }
-
 
 /**************************************************************************
  * name        - fileTagRequired
@@ -423,15 +402,13 @@ atoe_setFileTaggingCcsid(void *pccsid)
  * returns     - 1 if file tagging enabled and file doesn't already exist.
  *               0 otherwise
  *************************************************************************/
-static int
-fileTagRequired(const char *filename)
+static int fileTagRequired(const char* filename)
 {
-	struct stat sbuf;
-	if (fileTaggingEnabled && newFileCCSID != 0 &&
-		(stat(filename, &sbuf) == -1 && errno == ENOENT)) {
-		return 1;
-	}
-	return 0;
+    struct stat sbuf;
+    if (fileTaggingEnabled && newFileCCSID != 0 && (stat(filename, &sbuf) == -1 && errno == ENOENT)) {
+        return 1;
+    }
+    return 0;
 }
 
 /**************************************************************************
@@ -441,15 +418,14 @@ fileTagRequired(const char *filename)
  * parameters  - fd - open file descriptor of file for tagging
  * returns     - none
  *************************************************************************/
-static void
-setFileTag(int fd)
+static void setFileTag(int fd)
 {
-	struct file_tag tag;
-	tag.ft_ccsid = newFileCCSID;
-	tag.ft_txtflag = 1;
-	tag.ft_deferred = 0;
-	tag.ft_rsvflags = 0;
-	fcntl(fd, F_SETTAG, &tag);
+    struct file_tag tag;
+    tag.ft_ccsid = newFileCCSID;
+    tag.ft_txtflag = 1;
+    tag.ft_deferred = 0;
+    tag.ft_rsvflags = 0;
+    fcntl(fd, F_SETTAG, &tag);
 }
 
 /**************************************************************************
@@ -459,15 +435,14 @@ setFileTag(int fd)
  * parameters  - codesetName - codeset name as an ASCII text string
  * returns     - codeset type: _CSTYPE_EBCDIC or _CSTYPE_ASCII
  *************************************************************************/
-__csType
-atoe___CSNameType(char *codesetName)
+__csType atoe___CSNameType(char* codesetName)
 {
-	char *estr;
-	__csType ret;
-	estr = a2e_string(codesetName);
-	ret = __CSNameType(estr);
-	free(estr);
-	return ret;
+    char* estr;
+    __csType ret;
+    estr = a2e_string(codesetName);
+    ret = __CSNameType(estr);
+    free(estr);
+    return ret;
 }
 
 /**************************************************************************
@@ -477,17 +452,15 @@ atoe___CSNameType(char *codesetName)
  * parameters  - codesetName - codeset name as an ASCII text string
  * returns     - CCSID
  *************************************************************************/
-__ccsid_t
-atoe___toCcsid(char *codesetName)
+__ccsid_t atoe___toCcsid(char* codesetName)
 {
-	char *estr;
-	__ccsid_t ret;
-	estr = a2e_string(codesetName);
-	ret = __toCcsid(estr);
-	free(estr);
-	return ret;
+    char* estr;
+    __ccsid_t ret;
+    estr = a2e_string(codesetName);
+    ret = __toCcsid(estr);
+    free(estr);
+    return ret;
 }
-
 
 /**************************************************************************
  * name        - atoe_tagged_open
@@ -495,53 +468,52 @@ atoe___toCcsid(char *codesetName)
  * parameters  -
  * returns     -
  *************************************************************************/
-int
-atoe_open(const char *fname, int options, ...)
+int atoe_open(const char* fname, int options, ...)
 {
-	int fd;
-	int mode;
-	int tagFile;
-	va_list args;
-	char *f;
+    int fd;
+    int mode;
+    int tagFile;
+    va_list args;
+    char* f;
 
-	Log(1, "Entry: atoe_open\n");
+    Log(1, "Entry: atoe_open\n");
 
-	check_fcntl_init();                            /*ibm@57265*/
+    check_fcntl_init(); /*ibm@57265*/
 
-	/* Convert filename to ebcdic before calling fileTagRequired() - CMVC 191919/199888 */
-	f = a2e_string((char *)fname);
+    /* Convert filename to ebcdic before calling fileTagRequired() - CMVC 191919/199888 */
+    f = a2e_string((char*)fname);
 
-	/* See if the file needs to be tagged */
-	tagFile = fileTagRequired(f);
+    /* See if the file needs to be tagged */
+    tagFile = fileTagRequired(f);
 
-	va_start(args, options);
+    va_start(args, options);
 
-	if (options & O_CREAT) {
-		mode = va_arg(args, int);
-	} else {
-		mode = 0;
-	}
+    if (options & O_CREAT) {
+        mode = va_arg(args, int);
+    } else {
+        mode = 0;
+    }
 
-	va_end(args);
+    va_end(args);
 
-	fd = open(f, options, mode);
+    fd = open(f, options, mode);
 
-	/*ibm@57265 start*/
-	if ((fd != -1) &&                     /* file descriptor ok? */
-		(use_fcntl)) {                    /* OS level is ok      */
-		set_SETCVTOFF();
-	}
+    /*ibm@57265 start*/
+    if ((fd != -1) && /* file descriptor ok? */
+        (use_fcntl)) { /* OS level is ok      */
+        set_SETCVTOFF();
+    }
 
-	if (fd != -1) { /* file descriptor ok? */
-		if (tagFile) {
-			setFileTag(fd);
-		}
-	}
-	/*ibm@57265 end*/
+    if (fd != -1) { /* file descriptor ok? */
+        if (tagFile) {
+            setFileTag(fd);
+        }
+    }
+    /*ibm@57265 end*/
 
-	free(f);
+    free(f);
 
-	return fd;
+    return fd;
 }
 
 /**************************************************************************
@@ -553,34 +525,33 @@ atoe_open(const char *fname, int options, ...)
  *             - options - file open options/flags
  * returns     - file descriptor
  *************************************************************************/
-int
-atoe_open_notag(const char *fname, int options, ...)
+int atoe_open_notag(const char* fname, int options, ...)
 {
-	int fd;
-	int mode;
-	va_list args;
-	char *f;
+    int fd;
+    int mode;
+    va_list args;
+    char* f;
 
-	check_fcntl_init();
+    check_fcntl_init();
 
-	f = a2e_string((char *)fname);
+    f = a2e_string((char*)fname);
 
-	va_start(args, options);
-	if (options & O_CREAT) {
-		mode = va_arg(args, int);
-	} else {
-		mode = 0;
-	}
-	va_end(args);
+    va_start(args, options);
+    if (options & O_CREAT) {
+        mode = va_arg(args, int);
+    } else {
+        mode = 0;
+    }
+    va_end(args);
 
-	fd = open(f, options, mode);
+    fd = open(f, options, mode);
 
-	if ((fd != -1) && (use_fcntl)) {
-		set_SETCVTOFF();
-	}
+    if ((fd != -1) && (use_fcntl)) {
+        set_SETCVTOFF();
+    }
 
-	free(f);
-	return fd;
+    free(f);
+    return fd;
 }
 
 /**************************************************************************
@@ -589,29 +560,27 @@ atoe_open_notag(const char *fname, int options, ...)
  * parameters  -
  * returns     -
  *************************************************************************/
-char *
-atoe_tempnam(const char *dir, char *pfx)
+char* atoe_tempnam(const char* dir, char* pfx)
 {
-	char *tempfn = 0;
-	char *a = 0;
-	char *d = a2e_string((char *)dir);
-	char *p = a2e_string(pfx);
+    char* tempfn = 0;
+    char* a = 0;
+    char* d = a2e_string((char*)dir);
+    char* p = a2e_string(pfx);
 
-	Log(1, "Entry: atoe_tempnam\n");
+    Log(1, "Entry: atoe_tempnam\n");
 
-	if ((tempfn = tempnam(d, p)) == 0) {
-		atoe_fprintf(stderr, "Creation of temp file %s/%s failed.\n", dir, pfx);
-	} else {
-		a = e2a_string(tempfn);
-		free(tempfn);
-	}
+    if ((tempfn = tempnam(d, p)) == 0) {
+        atoe_fprintf(stderr, "Creation of temp file %s/%s failed.\n", dir, pfx);
+    } else {
+        a = e2a_string(tempfn);
+        free(tempfn);
+    }
 
-	free(d);
-	free(p);
+    free(d);
+    free(p);
 
-	return a;
+    return a;
 }
-
 
 /**************************************************************************
  * name        - atoe_stat
@@ -619,22 +588,20 @@ atoe_tempnam(const char *dir, char *pfx)
  * parameters  -
  * returns     -
  *************************************************************************/
-int
-atoe_stat(const char *pathname, struct stat *sbuf)
+int atoe_stat(const char* pathname, struct stat* sbuf)
 {
-	int rc;
-	char *e;
+    int rc;
+    char* e;
 
-	Log(1, "Entry: atoe_stat\n");
+    Log(1, "Entry: atoe_stat\n");
 
-	e = a2e_string((char *)pathname);
-	rc = stat(e, sbuf);
+    e = a2e_string((char*)pathname);
+    rc = stat(e, sbuf);
 
-	free(e);
+    free(e);
 
-	return rc;
+    return rc;
 }
-
 
 /**************************************************************************
  * name        - atoe_statvfs
@@ -642,20 +609,19 @@ atoe_stat(const char *pathname, struct stat *sbuf)
  * parameters  -
  * returns     -
  *************************************************************************/
-int
-atoe_statvfs(const char *pathname, struct statvfs *buf)
+int atoe_statvfs(const char* pathname, struct statvfs* buf)
 {
-	int rc;
-	char *e;
+    int rc;
+    char* e;
 
-	Log(1, "Entry: atoe_statvfs\n");
+    Log(1, "Entry: atoe_statvfs\n");
 
-	e = a2e_string((char *)pathname);
-	rc = statvfs(e, buf);
+    e = a2e_string((char*)pathname);
+    rc = statvfs(e, buf);
 
-	free(e);
+    free(e);
 
-	return rc;
+    return rc;
 }
 
 /**************************************************************************
@@ -664,22 +630,20 @@ atoe_statvfs(const char *pathname, struct statvfs *buf)
  * parameters  -
  * returns     -
  *************************************************************************/
-int
-atoe_lstat(const char *pathname, struct stat *sbuf)
+int atoe_lstat(const char* pathname, struct stat* sbuf)
 {
-	int rc;
-	char *e;
+    int rc;
+    char* e;
 
-	Log(1, "Entry: atoe_stat\n");
+    Log(1, "Entry: atoe_stat\n");
 
-	e = a2e_string((char *)pathname);
-	rc = lstat(e, sbuf);
+    e = a2e_string((char*)pathname);
+    rc = lstat(e, sbuf);
 
-	free(e);
+    free(e);
 
-	return rc;
+    return rc;
 }
-
 
 /**************************************************************************
  * name        - atoe_fopen
@@ -687,33 +651,32 @@ atoe_lstat(const char *pathname, struct stat *sbuf)
  * parameters  -
  * returns     -
  *************************************************************************/
-FILE *
-atoe_fopen(const char *filename, char *mode)
+FILE* atoe_fopen(const char* filename, char* mode)
 {
-	FILE *outfp;
-	char *f, *m;
-	int  fd = -1;         /* file descriptor */    /*ibm@57265*/
+    FILE* outfp;
+    char *f, *m;
+    int fd = -1; /* file descriptor */ /*ibm@57265*/
 
-	Log(1, "Entry: atoe_fopen\n");
+    Log(1, "Entry: atoe_fopen\n");
 
-	check_fcntl_init();                            /*ibm@57265*/
+    check_fcntl_init(); /*ibm@57265*/
 
-	f = a2e_string((char *)filename);
-	m = a2e_string(mode);
-	outfp = fopen(f, m);
+    f = a2e_string((char*)filename);
+    m = a2e_string(mode);
+    outfp = fopen(f, m);
 
-	/*ibm@57265 start*/
-	if ((outfp != NULL) &&                        /* fopen() ok?    */
-		(use_fcntl)    &&                         /* OS level is ok */
-		((fd = fileno(outfp)) != -1)) {           /* have a file descriptor? */
-		set_SETCVTOFF();
-	}
-	/*ibm@57265 end*/
+    /*ibm@57265 start*/
+    if ((outfp != NULL) && /* fopen() ok?    */
+        (use_fcntl) && /* OS level is ok */
+        ((fd = fileno(outfp)) != -1)) { /* have a file descriptor? */
+        set_SETCVTOFF();
+    }
+    /*ibm@57265 end*/
 
-	free(f);
-	free(m);
+    free(f);
+    free(m);
 
-	return outfp;
+    return outfp;
 }
 
 /**************************************************************************
@@ -722,35 +685,33 @@ atoe_fopen(const char *filename, char *mode)
  * parameters  -
  * returns     -
  *************************************************************************/
-FILE *
-atoe_freopen(const char *filename, char *mode, FILE *stream)
+FILE* atoe_freopen(const char* filename, char* mode, FILE* stream)
 {
-	FILE *outfp;
-	char *f, *m;
-	int  fd = -1;         /* file descriptor */    /*ibm@57265*/
+    FILE* outfp;
+    char *f, *m;
+    int fd = -1; /* file descriptor */ /*ibm@57265*/
 
-	Log(1, "Entry: atoe_freopen\n");
+    Log(1, "Entry: atoe_freopen\n");
 
-	check_fcntl_init();                            /*ibm@57265*/
+    check_fcntl_init(); /*ibm@57265*/
 
-	f = a2e_string((char *)filename);
-	m = a2e_string(mode);
-	outfp = freopen(f, m, stream);
+    f = a2e_string((char*)filename);
+    m = a2e_string(mode);
+    outfp = freopen(f, m, stream);
 
-	/*ibm@57265 start*/
-	if ((outfp != NULL) &&                        /* fopen() ok?    */
-		(use_fcntl)    &&                         /* OS level is ok */
-		((fd = fileno(outfp)) != -1)) {           /* have a file descriptor? */
-		set_SETCVTOFF();
-	}
-	/*ibm@57265 end*/
+    /*ibm@57265 start*/
+    if ((outfp != NULL) && /* fopen() ok?    */
+        (use_fcntl) && /* OS level is ok */
+        ((fd = fileno(outfp)) != -1)) { /* have a file descriptor? */
+        set_SETCVTOFF();
+    }
+    /*ibm@57265 end*/
 
-	free(f);
-	free(m);
+    free(f);
+    free(m);
 
-	return outfp;
+    return outfp;
 }
-
 
 /**************************************************************************
  * name        - atoe_mkdir
@@ -758,20 +719,19 @@ atoe_freopen(const char *filename, char *mode, FILE *stream)
  * parameters  -
  * returns     -
  *************************************************************************/
-int
-atoe_mkdir(const char *pathname, mode_t mode)
+int atoe_mkdir(const char* pathname, mode_t mode)
 {
-	int rc;
-	char *e;
+    int rc;
+    char* e;
 
-	Log(1, "Entry: atoe_mkdir\n");
+    Log(1, "Entry: atoe_mkdir\n");
 
-	e = a2e_string((char *)pathname);
-	rc = mkdir(e, mode);
+    e = a2e_string((char*)pathname);
+    rc = mkdir(e, mode);
 
-	free(e);
+    free(e);
 
-	return rc;
+    return rc;
 }
 
 /**************************************************************************
@@ -780,20 +740,19 @@ atoe_mkdir(const char *pathname, mode_t mode)
  * parameters  -
  * returns     -
  *************************************************************************/
-int
-atoe_remove(const char *pathname)
+int atoe_remove(const char* pathname)
 {
-	int rc;
-	char *e;
+    int rc;
+    char* e;
 
-	Log(1, "Entry: atoe_remove\n");
+    Log(1, "Entry: atoe_remove\n");
 
-	e = a2e_string((char *)pathname);
-	rc = remove(e);
+    e = a2e_string((char*)pathname);
+    rc = remove(e);
 
-	free(e);
+    free(e);
 
-	return rc;
+    return rc;
 }
 
 /**************************************************************************
@@ -803,55 +762,52 @@ atoe_remove(const char *pathname)
  * returns     -
  * re-written by ibm@56159.1
  *************************************************************************/
-#define ERRNO_CACHE_SIZE   250
+#define ERRNO_CACHE_SIZE 250
 typedef struct ascii_errno_t {
-	int   errnum;
-	char *ascii_msg;
+    int errnum;
+    char* ascii_msg;
 } ascii_errno_t;
 static ascii_errno_t errno_cache[ERRNO_CACHE_SIZE];
 static int errno_cache_next = 0;
 static pthread_mutex_t strerror_mutex = PTHREAD_MUTEX_INITIALIZER;
 static int strerror_initialized = 0;
-char *
-atoe_strerror(int errnum)
+char* atoe_strerror(int errnum)
 {
-	char *a, *e;
-	int index;
+    char *a, *e;
+    int index;
 
-	Log(1, "Entry: atoe_strerror\n");
+    Log(1, "Entry: atoe_strerror\n");
 
-	pthread_mutex_lock(&strerror_mutex);
-	if (0 == strerror_initialized) {
-		for (index = 0; index < ERRNO_CACHE_SIZE; index++) {
-			errno_cache[index].errnum = -1;
-			errno_cache[index].ascii_msg = 0;
-		}
-		strerror_initialized = 1;
-	}
+    pthread_mutex_lock(&strerror_mutex);
+    if (0 == strerror_initialized) {
+        for (index = 0; index < ERRNO_CACHE_SIZE; index++) {
+            errno_cache[index].errnum = -1;
+            errno_cache[index].ascii_msg = 0;
+        }
+        strerror_initialized = 1;
+    }
 
-	for (index = 0;
-		 index < ERRNO_CACHE_SIZE, errno_cache[index].errnum != -1;
-		 index++) {
-		if (errnum == errno_cache[index].errnum) {
-			pthread_mutex_unlock(&strerror_mutex);
-			return errno_cache[index].ascii_msg;
-		}
-	}
+    for (index = 0; index < ERRNO_CACHE_SIZE, errno_cache[index].errnum != -1; index++) {
+        if (errnum == errno_cache[index].errnum) {
+            pthread_mutex_unlock(&strerror_mutex);
+            return errno_cache[index].ascii_msg;
+        }
+    }
 
-	e = strerror(errnum);
-	a = e2a_string(e);
+    e = strerror(errnum);
+    a = e2a_string(e);
 
-	errno_cache[errno_cache_next].errnum = errnum;
-	if (errno_cache[errno_cache_next].ascii_msg) {
-		free(errno_cache[errno_cache_next].ascii_msg);
-	}
-	errno_cache[errno_cache_next].ascii_msg = a;
-	if (++errno_cache_next == ERRNO_CACHE_SIZE) {
-		errno_cache_next = 0;
-	}
-	pthread_mutex_unlock(&strerror_mutex);
+    errno_cache[errno_cache_next].errnum = errnum;
+    if (errno_cache[errno_cache_next].ascii_msg) {
+        free(errno_cache[errno_cache_next].ascii_msg);
+    }
+    errno_cache[errno_cache_next].ascii_msg = a;
+    if (++errno_cache_next == ERRNO_CACHE_SIZE) {
+        errno_cache_next = 0;
+    }
+    pthread_mutex_unlock(&strerror_mutex);
 
-	return a;
+    return a;
 }
 
 /**************************************************************************
@@ -860,22 +816,21 @@ atoe_strerror(int errnum)
  * parameters  -
  * returns     -
  *************************************************************************/
-char *
-atoe_getcwd(char *buffer, size_t size)
+char* atoe_getcwd(char* buffer, size_t size)
 {
-	char *abuf;
+    char* abuf;
 
-	Log(1, "Entry: atoe_getcwd\n");
+    Log(1, "Entry: atoe_getcwd\n");
 
-	if (getcwd(buffer, size) == NULL) {    /*ibm@9777*/
-		buffer = NULL;
-	} else {
-		abuf = e2a(buffer, size);
-		memcpy(buffer, abuf, size);
-		free(abuf);
-	}
+    if (getcwd(buffer, size) == NULL) { /*ibm@9777*/
+        buffer = NULL;
+    } else {
+        abuf = e2a(buffer, size);
+        memcpy(buffer, abuf, size);
+        free(abuf);
+    }
 
-	return buffer;
+    return buffer;
 }
 
 /**************************************************************************
@@ -884,25 +839,23 @@ atoe_getcwd(char *buffer, size_t size)
  * parameters  -
  * returns     -
  *************************************************************************/
-char *
-atoe_fgets(char *buffer, int num, FILE *file)
+char* atoe_fgets(char* buffer, int num, FILE* file)
 {
-	char *abuf;
+    char* abuf;
 
-	Log(1, "Entry: atoe_fgets\n");
+    Log(1, "Entry: atoe_fgets\n");
 
-	if (fgets(buffer, num, file)) {
-		int len = strlen(buffer);
-		abuf = e2a(buffer, len);
-		memcpy(buffer, abuf, len);
+    if (fgets(buffer, num, file)) {
+        int len = strlen(buffer);
+        abuf = e2a(buffer, len);
+        memcpy(buffer, abuf, len);
 
-		free(abuf);
-		return buffer;
-	}
+        free(abuf);
+        return buffer;
+    }
 
-	return (char *)0;
+    return (char*)0;
 }
-
 
 /**************************************************************************
  * name        - atoe_gets
@@ -910,23 +863,22 @@ atoe_fgets(char *buffer, int num, FILE *file)
  * parameters  -
  * returns     -
  *************************************************************************/
-char *
-atoe_gets(char *buffer)
+char* atoe_gets(char* buffer)
 {
-	char *abuf;
+    char* abuf;
 
-	Log(1, "Entry: atoe_gets\n");
+    Log(1, "Entry: atoe_gets\n");
 
-	if (gets(buffer)) {
-		int len = strlen(buffer);
-		abuf = e2a(buffer, len);
-		memcpy(buffer, abuf, len);
+    if (gets(buffer)) {
+        int len = strlen(buffer);
+        abuf = e2a(buffer, len);
+        memcpy(buffer, abuf, len);
 
-		free(abuf);
-		return buffer;
-	}
+        free(abuf);
+        return buffer;
+    }
 
-	return (char *)0;
+    return (char*)0;
 }
 
 /**************************************************************************
@@ -935,22 +887,20 @@ atoe_gets(char *buffer)
  * parameters  -
  * returns     -
  *************************************************************************/
-int
-atoe_unlink(const char *pathname)
+int atoe_unlink(const char* pathname)
 {
-	int rc;
-	char *e;
+    int rc;
+    char* e;
 
-	Log(1, "Entry: atoe_unlink\n");
+    Log(1, "Entry: atoe_unlink\n");
 
-	e = a2e_string((char *)pathname);
-	rc = unlink(e);
+    e = a2e_string((char*)pathname);
+    rc = unlink(e);
 
-	free(e);
+    free(e);
 
-	return rc;
+    return rc;
 }
-
 
 /**************************************************************************
  * name        - atoe_unlink
@@ -958,22 +908,20 @@ atoe_unlink(const char *pathname)
  * parameters  -
  * returns     -
  *************************************************************************/
-int
-atoe_rmdir(const char *pathname)
+int atoe_rmdir(const char* pathname)
 {
-	int rc;
-	char *e;
+    int rc;
+    char* e;
 
-	Log(1, "Entry: atoe_rmdir\n");
+    Log(1, "Entry: atoe_rmdir\n");
 
-	e = a2e_string((char *)pathname);
-	rc = rmdir(e);
+    e = a2e_string((char*)pathname);
+    rc = rmdir(e);
 
-	free(e);
+    free(e);
 
-	return rc;
+    return rc;
 }
-
 
 /**************************************************************************
  * name        - atoe_access
@@ -981,22 +929,20 @@ atoe_rmdir(const char *pathname)
  * parameters  -
  * returns     -
  *************************************************************************/
-int
-atoe_access(const char *pathname, int how)
+int atoe_access(const char* pathname, int how)
 {
-	int rc;
-	char *e;
+    int rc;
+    char* e;
 
-	Log(1, "Entry: atoe_access\n");
+    Log(1, "Entry: atoe_access\n");
 
-	e = a2e_string((char *)pathname);
-	rc = access(e, how);
+    e = a2e_string((char*)pathname);
+    rc = access(e, how);
 
-	free(e);
+    free(e);
 
-	return rc;
+    return rc;
 }
-
 
 /**************************************************************************
  * name        - atoe_opendir
@@ -1004,22 +950,20 @@ atoe_access(const char *pathname, int how)
  * parameters  -
  * returns     -
  *************************************************************************/
-DIR *
-atoe_opendir(const char *dirname)
+DIR* atoe_opendir(const char* dirname)
 {
-	DIR *dir;
-	char *e;
+    DIR* dir;
+    char* e;
 
-	Log(1, "Entry: atoe_opendir\n");
+    Log(1, "Entry: atoe_opendir\n");
 
-	e = a2e_string((char *)dirname);
-	dir = opendir(e);
+    e = a2e_string((char*)dirname);
+    dir = opendir(e);
 
-	free(e);
+    free(e);
 
-	return dir;
+    return dir;
 }
-
 
 /**************************************************************************
  * name        - atoe_readdir
@@ -1027,26 +971,25 @@ atoe_opendir(const char *dirname)
  * parameters  -
  * returns     -
  *************************************************************************/
-struct dirent *
-atoe_readdir(DIR *dir)
+struct dirent* atoe_readdir(DIR* dir)
 {
-	struct dirent *d;
-	char *a;
+    struct dirent* d;
+    char* a;
 
-	Log(1, "Entry: atoe_readdir\n");
+    Log(1, "Entry: atoe_readdir\n");
 
-	d = readdir(dir);
+    d = readdir(dir);
 
-	if (d == NULL) {
-		return NULL;
-	}
+    if (d == NULL) {
+        return NULL;
+    }
 
-	a = e2a_string(d->d_name);
+    a = e2a_string(d->d_name);
 
-	strcpy(d->d_name, a);
-	free(a);
+    strcpy(d->d_name, a);
+    free(a);
 
-	return d;
+    return d;
 }
 
 /**************************************************************************
@@ -1055,28 +998,27 @@ atoe_readdir(DIR *dir)
  * parameters  -
  * returns     -
  *************************************************************************/
-char *
-atoe_realpath(const char *file_name, char *resolved_name)
+char* atoe_realpath(const char* file_name, char* resolved_name)
 {
-	char e_resolved_name[MAXPATHLEN];
-	char *e_file_name, *p;
+    char e_resolved_name[MAXPATHLEN];
+    char *e_file_name, *p;
 
-	Log(1, "Entry: atoe_realpath\n");
+    Log(1, "Entry: atoe_realpath\n");
 
-	e_file_name = a2e_string((char *)file_name);                   /*ibm@34803*/
-	p = realpath(e_file_name, e_resolved_name);                    /*ibm@34803*/
+    e_file_name = a2e_string((char*)file_name); /*ibm@34803*/
+    p = realpath(e_file_name, e_resolved_name); /*ibm@34803*/
 
-	free(e_file_name);
+    free(e_file_name);
 
-	if (NULL == p) {
-		return p;
-	}
+    if (NULL == p) {
+        return p;
+    }
 
-	p = e2a_string(e_resolved_name);
-	strcpy(resolved_name, p);
-	free(p);
+    p = e2a_string(e_resolved_name);
+    strcpy(resolved_name, p);
+    free(p);
 
-	return resolved_name;
+    return resolved_name;
 }
 
 /**************************************************************************
@@ -1085,24 +1027,22 @@ atoe_realpath(const char *file_name, char *resolved_name)
  * parameters  -
  * returns     -
  *************************************************************************/
-int
-atoe_rename(const char *oldname, const char *newname)
+int atoe_rename(const char* oldname, const char* newname)
 {
-	int rc;
-	char *o, *n;
+    int rc;
+    char *o, *n;
 
-	Log(1, "Entry: atoe_rename\n");
+    Log(1, "Entry: atoe_rename\n");
 
-	o = a2e_string((char *)oldname);
-	n = a2e_string(newname);
-	rc = rename(o, n);
+    o = a2e_string((char*)oldname);
+    n = a2e_string(newname);
+    rc = rename(o, n);
 
-	free(o);
-	free(n);
+    free(o);
+    free(n);
 
-	return rc;
+    return rc;
 }
-
 
 /**************************************************************************
  * name        - atoe_getpwuid
@@ -1110,12 +1050,11 @@ atoe_rename(const char *oldname, const char *newname)
  * parameters  -
  * returns     -
  *************************************************************************/
-struct passwd *
-atoe_getpwuid(uid_t uid)
+struct passwd* atoe_getpwuid(uid_t uid)
 {
-	Log(1, "Entry: atoe_getpwuid\n");
+    Log(1, "Entry: atoe_getpwuid\n");
 
-	return etoa_passwd(getpwuid(uid));
+    return etoa_passwd(getpwuid(uid));
 }
 
 /**************************************************************************
@@ -1124,19 +1063,18 @@ atoe_getpwuid(uid_t uid)
  * parameters  -
  * returns     -
  *************************************************************************/
-struct passwd *
-atoe_getpwnam(const char *name)
+struct passwd* atoe_getpwnam(const char* name)
 {
-	struct passwd *e_passwd;
-	char *e_name;
+    struct passwd* e_passwd;
+    char* e_name;
 
-	Log(1, "Entry: atoe_getpwnam\n");
+    Log(1, "Entry: atoe_getpwnam\n");
 
-	e_name = a2e_string((char *)name);
-	e_passwd = getpwnam(e_name);
-	free(e_name);
+    e_name = a2e_string((char*)name);
+    e_passwd = getpwnam(e_name);
+    free(e_name);
 
-	return etoa_passwd(e_passwd);
+    return etoa_passwd(e_passwd);
 }
 
 /**************************************************************************
@@ -1145,24 +1083,23 @@ atoe_getpwnam(const char *name)
  * parameters  -
  * returns     -
  *************************************************************************/
-struct passwd *
-etoa_passwd(struct passwd *e_passwd)
+struct passwd* etoa_passwd(struct passwd* e_passwd)
 {
-	struct passwd *a_passwd = NULL;
+    struct passwd* a_passwd = NULL;
 
-	if (e_passwd != NULL) {
-		a_passwd = (struct passwd *)malloc(sizeof(struct passwd));
+    if (e_passwd != NULL) {
+        a_passwd = (struct passwd*)malloc(sizeof(struct passwd));
 
-		if (a_passwd != NULL) {
-			a_passwd->pw_name  = e2a_string(e_passwd->pw_name);
-			a_passwd->pw_uid   = e_passwd->pw_uid;
-			a_passwd->pw_gid   = e_passwd->pw_gid;
-			a_passwd->pw_dir   = e2a_string(e_passwd->pw_dir);
-			a_passwd->pw_shell = e2a_string(e_passwd->pw_shell);
-		}
-	}
+        if (a_passwd != NULL) {
+            a_passwd->pw_name = e2a_string(e_passwd->pw_name);
+            a_passwd->pw_uid = e_passwd->pw_uid;
+            a_passwd->pw_gid = e_passwd->pw_gid;
+            a_passwd->pw_dir = e2a_string(e_passwd->pw_dir);
+            a_passwd->pw_shell = e2a_string(e_passwd->pw_shell);
+        }
+    }
 
-	return a_passwd;
+    return a_passwd;
 }
 
 /**************************************************************************
@@ -1171,21 +1108,20 @@ etoa_passwd(struct passwd *e_passwd)
  * parameters  -
  * returns     -
  *************************************************************************/
-char *
-atoe_getlogin(void)
+char* atoe_getlogin(void)
 {
-	char *e_login;
-	char *a_login = NULL;
+    char* e_login;
+    char* a_login = NULL;
 
-	Log(1, "Entry: atoe_getlogin\n");
+    Log(1, "Entry: atoe_getlogin\n");
 
-	e_login = getlogin();
+    e_login = getlogin();
 
-	if (e_login != NULL) {
-		a_login = e2a_string(e_login);
-	}
+    if (e_login != NULL) {
+        a_login = e2a_string(e_login);
+    }
 
-	return a_login;
+    return a_login;
 }
 
 /**************************************************************************
@@ -1194,36 +1130,34 @@ atoe_getlogin(void)
  * parameters  -
  * returns     -
  *************************************************************************/
-struct group *
-e2a_group(struct group *e_group)
+struct group* e2a_group(struct group* e_group)
 {
-	struct group *a_group = NULL;
+    struct group* a_group = NULL;
 
-	if (e_group != NULL) {
-		a_group = (struct group *)malloc(sizeof(struct group));
+    if (e_group != NULL) {
+        a_group = (struct group*)malloc(sizeof(struct group));
 
-		if (a_group != NULL) {
-			char **e_member = NULL;
-			char **a_member = NULL;
-			int arraySize = 0;
-			a_group->gr_name  = e2a_string(e_group->gr_name);
-			a_group->gr_gid   = e_group->gr_gid;
-			for (e_member = e_group->gr_mem; *e_member != NULL; e_member++) {
-				arraySize++;
-			}
-			a_group->gr_mem = (char **)malloc((arraySize + 1) * sizeof(char *));
-			if (a_group->gr_mem != NULL) {
-				for (e_member = e_group->gr_mem, a_member = a_group->gr_mem;
-					 *e_member != NULL;
-					 e_member++, a_member++) {
-					*a_member = e2a_string(*e_member);
-				}
-				*a_member = NULL;
-			}
-		}
-	}
+        if (a_group != NULL) {
+            char** e_member = NULL;
+            char** a_member = NULL;
+            int arraySize = 0;
+            a_group->gr_name = e2a_string(e_group->gr_name);
+            a_group->gr_gid = e_group->gr_gid;
+            for (e_member = e_group->gr_mem; *e_member != NULL; e_member++) {
+                arraySize++;
+            }
+            a_group->gr_mem = (char**)malloc((arraySize + 1) * sizeof(char*));
+            if (a_group->gr_mem != NULL) {
+                for (e_member = e_group->gr_mem, a_member = a_group->gr_mem; *e_member != NULL;
+                     e_member++, a_member++) {
+                    *a_member = e2a_string(*e_member);
+                }
+                *a_member = NULL;
+            }
+        }
+    }
 
-	return a_group;
+    return a_group;
 }
 
 /**************************************************************************
@@ -1232,21 +1166,20 @@ e2a_group(struct group *e_group)
  * parameters  -
  * returns     -
  *************************************************************************/
-struct group *
-atoe_getgrgid(gid_t gid)
+struct group* atoe_getgrgid(gid_t gid)
 {
-	struct group *e_group;
-	struct group *a_group = NULL;
+    struct group* e_group;
+    struct group* a_group = NULL;
 
-	Log(1, "Entry: atoe_getgrgid\n");
+    Log(1, "Entry: atoe_getgrgid\n");
 
-	e_group = getgrgid(gid);
+    e_group = getgrgid(gid);
 
-	if (e_group != NULL) {
-		a_group = e2a_group(e_group);
-	}
+    if (e_group != NULL) {
+        a_group = e2a_group(e_group);
+    }
 
-	return a_group;
+    return a_group;
 }
 
 /**************************************************************************
@@ -1255,14 +1188,12 @@ atoe_getgrgid(gid_t gid)
  * parameters  -
  * returns     -
  *************************************************************************/
-int
-atoe_putchar(int ch)
+int atoe_putchar(int ch)
 {
-	Log(1, "Entry: atoe_putchar\n");
+    Log(1, "Entry: atoe_putchar\n");
 
-	return putchar((int)a2e_tab[ch]);
+    return putchar((int)a2e_tab[ch]);
 }
-
 
 /**************************************************************************
  * name        -
@@ -1270,34 +1201,32 @@ atoe_putchar(int ch)
  * parameters  -
  * returns     -
  *************************************************************************/
-int
-atoe_fprintf(FILE *file, const char *ascii_chars, ...)
+int atoe_fprintf(FILE* file, const char* ascii_chars, ...)
 {
-	va_list args;
-	char buf[BUFLEN];
-	char *ebuf;
-	int len;
+    va_list args;
+    char buf[BUFLEN];
+    char* ebuf;
+    int len;
 
-	va_start(args, ascii_chars);
+    va_start(args, ascii_chars);
 
-	len = atoe_vsnprintf(buf, BUFLEN, ascii_chars, args);
+    len = atoe_vsnprintf(buf, BUFLEN, ascii_chars, args);
 
-	/* Abort if failed... */
-	if (len == -1) {
-		return len;
-	}
+    /* Abort if failed... */
+    if (len == -1) {
+        return len;
+    }
 
-	ebuf = a2e(buf, len);
+    ebuf = a2e(buf, len);
 #pragma convlit(suspend)
-	len = fprintf(file, "%s", ebuf);
+    len = fprintf(file, "%s", ebuf);
 #pragma convlit(resume)
-	free(ebuf);
+    free(ebuf);
 
-	va_end(args);
+    va_end(args);
 
-	return len;
+    return len;
 }
-
 
 /**************************************************************************
  * name        -
@@ -1305,32 +1234,31 @@ atoe_fprintf(FILE *file, const char *ascii_chars, ...)
  * parameters  -
  * returns     -
  *************************************************************************/
-int
-atoe_printf(const char *ascii_chars, ...)
+int atoe_printf(const char* ascii_chars, ...)
 {
-	va_list args;
-	char buf[BUFLEN];
-	char *ebuf;
-	int len;
+    va_list args;
+    char buf[BUFLEN];
+    char* ebuf;
+    int len;
 
-	va_start(args, ascii_chars);
+    va_start(args, ascii_chars);
 
-	len = atoe_vsnprintf(buf, BUFLEN, ascii_chars, args);
+    len = atoe_vsnprintf(buf, BUFLEN, ascii_chars, args);
 
-	/* Abort if failed... */
-	if (len == -1) {
-		return len;
-	}
+    /* Abort if failed... */
+    if (len == -1) {
+        return len;
+    }
 
-	ebuf = a2e(buf, len);
+    ebuf = a2e(buf, len);
 #pragma convlit(suspend)
-	len = printf("%s", ebuf);
+    len = printf("%s", ebuf);
 #pragma convlit(resume)
-	free(ebuf);
+    free(ebuf);
 
-	va_end(args);
+    va_end(args);
 
-	return len;
+    return len;
 }
 
 /***************************************************************ibm@3753**
@@ -1341,18 +1269,17 @@ atoe_printf(const char *ascii_chars, ...)
  * parameters  -
  * returns     -
  *************************************************************************/
-int
-std_sprintf(const char *buf, char *ascii_chars, ...)
+int std_sprintf(const char* buf, char* ascii_chars, ...)
 {
-	int len;
-	va_list args;
-	va_start(args, ascii_chars);
+    int len;
+    va_list args;
+    va_start(args, ascii_chars);
 
-	len = sprintf((char *)buf, ascii_chars, args);
+    len = sprintf((char*)buf, ascii_chars, args);
 
-	va_end(args);
+    va_end(args);
 
-	return len;
+    return len;
 }
 
 /**************************************************************************
@@ -1363,25 +1290,24 @@ std_sprintf(const char *buf, char *ascii_chars, ...)
  * parameters  -
  * returns     -
  *************************************************************************/
-int
-atoe_sprintf(char *buf, char *ascii_chars, ...)
+int atoe_sprintf(char* buf, char* ascii_chars, ...)
 {
-	int len;
-	char wrkbuf[BUFLEN];
+    int len;
+    char wrkbuf[BUFLEN];
 
-	va_list args;
-	va_start(args, ascii_chars);
+    va_list args;
+    va_start(args, ascii_chars);
 
-	len = atoe_vsnprintf(wrkbuf, BUFLEN, ascii_chars, args);
+    len = atoe_vsnprintf(wrkbuf, BUFLEN, ascii_chars, args);
 
-	va_end(args);
-	if (-1 == len) {
-		return len;
-	}
+    va_end(args);
+    if (-1 == len) {
+        return len;
+    }
 
-	strcpy((char *)buf, wrkbuf);
+    strcpy((char*)buf, wrkbuf);
 
-	return len;
+    return len;
 }
 
 /**************************************************************************
@@ -1392,22 +1318,21 @@ atoe_sprintf(char *buf, char *ascii_chars, ...)
  * parameters  -
  * returns     -
  *************************************************************************/
-int
-atoe_snprintf(char *buf, size_t buflen, char *ascii_chars, ...)
+int atoe_snprintf(char* buf, size_t buflen, char* ascii_chars, ...)
 {
-	int len;
+    int len;
 
-	va_list args;
-	va_start(args, ascii_chars);
+    va_list args;
+    va_start(args, ascii_chars);
 
-	len = atoe_vsnprintf(buf, buflen, ascii_chars, args);
+    len = atoe_vsnprintf(buf, buflen, ascii_chars, args);
 
-	va_end(args);
-	if (-1 == len) {
-		return len;
-	}
+    va_end(args);
+    if (-1 == len) {
+        return len;
+    }
 
-	return len;
+    return len;
 }
 
 /**************************************************************************
@@ -1416,11 +1341,7 @@ atoe_snprintf(char *buf, size_t buflen, char *ascii_chars, ...)
  * parameters  -
  * returns     -
  *************************************************************************/
-int
-atoe_vprintf(const char *ascii_chars, va_list args)
-{
-	return atoe_vfprintf(stdout, ascii_chars, args);
-}
+int atoe_vprintf(const char* ascii_chars, va_list args) { return atoe_vfprintf(stdout, ascii_chars, args); }
 
 /**************************************************************************
  * name        - atoe_vfprintf
@@ -1428,27 +1349,26 @@ atoe_vprintf(const char *ascii_chars, va_list args)
  * parameters  -
  * returns     -
  *************************************************************************/
-int
-atoe_vfprintf(FILE *file, const char *ascii_chars, va_list args)
+int atoe_vfprintf(FILE* file, const char* ascii_chars, va_list args)
 {
-	char buf[BUFLEN];
-	char *ebuf;
-	int len;
+    char buf[BUFLEN];
+    char* ebuf;
+    int len;
 
-	len = atoe_vsnprintf(buf, BUFLEN, ascii_chars, args);
+    len = atoe_vsnprintf(buf, BUFLEN, ascii_chars, args);
 
-	if (len == -1) {
-		return len;
-	}
+    if (len == -1) {
+        return len;
+    }
 
-	ebuf = a2e(buf, len);
+    ebuf = a2e(buf, len);
 #pragma convlit(suspend)
-	len = fprintf(file, "%s", ebuf);
+    len = fprintf(file, "%s", ebuf);
 #pragma convlit(resume)
 
-	free(ebuf);
+    free(ebuf);
 
-	return len;
+    return len;
 }
 
 /**************************************************************************
@@ -1457,18 +1377,17 @@ atoe_vfprintf(FILE *file, const char *ascii_chars, va_list args)
  * parameters  -
  * returns     -
  *************************************************************************/
-int
-atoe_vsprintf(char *target, const char *ascii_chars, va_list args)
+int atoe_vsprintf(char* target, const char* ascii_chars, va_list args)
 {
-	char buf[BUFLEN];                                     /*ibm@029013*/
-	int  bsize = 0;                                       /*ibm@029013*/
+    char buf[BUFLEN]; /*ibm@029013*/
+    int bsize = 0; /*ibm@029013*/
 
-	bsize = atoe_vsnprintf(buf, BUFLEN, ascii_chars, args); /*ibm@029013*/
-	if (-1 == bsize) {
-		return bsize;
-	}
-	strcpy(target, buf);                                  /*ibm@029013*/
-	return bsize;                                         /*ibm@029013*/
+    bsize = atoe_vsnprintf(buf, BUFLEN, ascii_chars, args); /*ibm@029013*/
+    if (-1 == bsize) {
+        return bsize;
+    }
+    strcpy(target, buf); /*ibm@029013*/
+    return bsize; /*ibm@029013*/
 }
 
 /**************************************************************************
@@ -1482,15 +1401,14 @@ atoe_vsprintf(char *target, const char *ascii_chars, va_list args)
  *                argument list in order to convert characters/strings from
  *                EBCDIC back to ASCII after calling the RTL sscanf().
  *************************************************************************/
-int
-atoe_sscanf(const char *buffer, const char *format, va_list args)
+int atoe_sscanf(const char* buffer, const char* format, va_list args)
 {
-	char *e_buffer = a2e_string((char *)buffer);
-	char *e_format = a2e_string((char *)format);
-	int len = sscanf((const char *)e_buffer, (const char *)e_format, args);
-	free(e_buffer);
-	free(e_format);
-	return len;
+    char* e_buffer = a2e_string((char*)buffer);
+    char* e_format = a2e_string((char*)format);
+    int len = sscanf((const char*)e_buffer, (const char*)e_format, args);
+    free(e_buffer);
+    free(e_format);
+    return len;
 }
 
 /**************************************************************************
@@ -1499,24 +1417,22 @@ atoe_sscanf(const char *buffer, const char *format, va_list args)
  * parameters  -
  * returns     -
  *************************************************************************/
-size_t
-atoe_strftime(char *buf, size_t buflen,
-			  const char *format, const struct tm *timeptr)
+size_t atoe_strftime(char* buf, size_t buflen, const char* format, const struct tm* timeptr)
 {
-	size_t num;
-	char *e, *a;
+    size_t num;
+    char *e, *a;
 
-	Log(1, "Entry: atoe_strftime\n");
+    Log(1, "Entry: atoe_strftime\n");
 
-	e = a2e_string((char *)format);
-	num = strftime(buf, buflen, e, timeptr);
-	a = e2a(buf, num);
-	memcpy(buf, a, num);
+    e = a2e_string((char*)format);
+    num = strftime(buf, buflen, e, timeptr);
+    a = e2a(buf, num);
+    memcpy(buf, a, num);
 
-	free(e);
-	free(a);
+    free(e);
+    free(a);
 
-	return num;
+    return num;
 }
 
 /**************************************************************************
@@ -1525,20 +1441,19 @@ atoe_strftime(char *buf, size_t buflen,
  * parameters  -
  * returns     -
  *************************************************************************/
-size_t
-atoe_fwrite(const void *buffer, size_t size, size_t count, FILE *stream)
+size_t atoe_fwrite(const void* buffer, size_t size, size_t count, FILE* stream)
 {
-	int numwritten;
-	char *e;
+    int numwritten;
+    char* e;
 
-	Log(1, "Entry: atoe_fwrite\n");
+    Log(1, "Entry: atoe_fwrite\n");
 
-	e = a2e((void *)buffer, size * count);    /*ibm@2795*/
-	numwritten = fwrite(e, size, count, stream);
+    e = a2e((void*)buffer, size * count); /*ibm@2795*/
+    numwritten = fwrite(e, size, count, stream);
 
-	free(e);
+    free(e);
 
-	return numwritten;
+    return numwritten;
 }
 
 /**************************************************************************
@@ -1547,21 +1462,20 @@ atoe_fwrite(const void *buffer, size_t size, size_t count, FILE *stream)
  * parameters  -
  * returns     -
  *************************************************************************/
-size_t
-atoe_fread(void *buffer, size_t size, size_t count, FILE *stream)
+size_t atoe_fread(void* buffer, size_t size, size_t count, FILE* stream)
 {
-	int numread;
-	char *a;
+    int numread;
+    char* a;
 
-	Log(1, "Entry: atoe_fread\n");
+    Log(1, "Entry: atoe_fread\n");
 
-	numread = fread(buffer, size, count, stream);
-	a = e2a((char *)buffer, numread);
-	memcpy(buffer, a, numread);
+    numread = fread(buffer, size, count, stream);
+    a = e2a((char*)buffer, numread);
+    memcpy(buffer, a, numread);
 
-	free(a);
+    free(a);
 
-	return numread;
+    return numread;
 }
 
 /**************************************************************************
@@ -1570,20 +1484,19 @@ atoe_fread(void *buffer, size_t size, size_t count, FILE *stream)
  * parameters  -
  * returns     -
  *************************************************************************/
-int
-atoe_system(char *cmd)
+int atoe_system(char* cmd)
 {
-	char *eb;
-	int result;
+    char* eb;
+    int result;
 
-	Log(1, "Entry: atoe_system\n");
+    Log(1, "Entry: atoe_system\n");
 
-	eb = a2e_string(cmd);
-	result = system(eb) ;
+    eb = a2e_string(cmd);
+    result = system(eb);
 
-	free(eb);
+    free(eb);
 
-	return result;
+    return result;
 }
 
 /**************************************************************************
@@ -1592,21 +1505,20 @@ atoe_system(char *cmd)
  * parameters  -
  * returns     -
  *************************************************************************/
-char *
-atoe_setlocale(int category, const char *locale)
+char* atoe_setlocale(int category, const char* locale)
 {
-	char *eb, *result;
+    char *eb, *result;
 
-	Log(1, "Entry: atoe_setlocale\n");
+    Log(1, "Entry: atoe_setlocale\n");
 
-	/* CMVC 143879: a2e_string converts a NULL pointer to an empty string */
-	eb = (NULL == locale) ? NULL : a2e_string((char *)locale);
+    /* CMVC 143879: a2e_string converts a NULL pointer to an empty string */
+    eb = (NULL == locale) ? NULL : a2e_string((char*)locale);
 
-	result = setlocale(category, eb) ;
+    result = setlocale(category, eb);
 
-	free(eb);
+    free(eb);
 
-	return e2a_string(result);
+    return e2a_string(result);
 }
 
 /**************************************************************************
@@ -1615,16 +1527,15 @@ atoe_setlocale(int category, const char *locale)
  * parameters  -
  * returns     -
  *************************************************************************/
-char *
-atoe_ctime(const time_t *t_in)
+char* atoe_ctime(const time_t* t_in)
 {
-	char *eb;
+    char* eb;
 
-	Log(1, "Entry: atoe_ctime\n");
+    Log(1, "Entry: atoe_ctime\n");
 
-	eb = ctime(t_in);
+    eb = ctime(t_in);
 
-	return e2a_string(eb);
+    return e2a_string(eb);
 }
 
 /**************************************************************************
@@ -1633,23 +1544,22 @@ atoe_ctime(const time_t *t_in)
  * parameters  -
  * returns     -
  *************************************************************************/
-double
-atoe_strtod(char *s, char **p)
+double atoe_strtod(char* s, char** p)
 {
-	char *sebcdic;
-	char *pebcdic;
-	double d;
+    char* sebcdic;
+    char* pebcdic;
+    double d;
 
-	Log(1, "Entry: atoe_strtod\n");
+    Log(1, "Entry: atoe_strtod\n");
 
-	sebcdic = a2e_string(s);
-	d = strtod(sebcdic, &pebcdic);
-	if (p != NULL) {
-		*p = s + (pebcdic - sebcdic);
-	}
-	free(sebcdic);
+    sebcdic = a2e_string(s);
+    d = strtod(sebcdic, &pebcdic);
+    if (p != NULL) {
+        *p = s + (pebcdic - sebcdic);
+    }
+    free(sebcdic);
 
-	return d;
+    return d;
 }
 
 /**************************************************************************
@@ -1658,23 +1568,22 @@ atoe_strtod(char *s, char **p)
  * parameters  -
  * returns     -
  *************************************************************************/
-int
-atoe_strtol(const char *s, char **p, int b)
+int atoe_strtol(const char* s, char** p, int b)
 {
-	char *sebcdic;
-	char *pebcdic;
-	int  i;
+    char* sebcdic;
+    char* pebcdic;
+    int i;
 
-	Log(1, "Entry: atoe_strtol\n");
+    Log(1, "Entry: atoe_strtol\n");
 
-	sebcdic = a2e_string((char *)s);
-	i = strtol((const char *)sebcdic, &pebcdic, b);
-	if (p != NULL) {
-		*p = (char *)s + (pebcdic - sebcdic);
-	}
-	free(sebcdic);
+    sebcdic = a2e_string((char*)s);
+    i = strtol((const char*)sebcdic, &pebcdic, b);
+    if (p != NULL) {
+        *p = (char*)s + (pebcdic - sebcdic);
+    }
+    free(sebcdic);
 
-	return i;
+    return i;
 }
 
 /**************************************************************************
@@ -1683,23 +1592,22 @@ atoe_strtol(const char *s, char **p, int b)
  * parameters  -
  * returns     -
  *************************************************************************/
-unsigned long
-atoe_strtoul(const char *s, char **p, int b)
+unsigned long atoe_strtoul(const char* s, char** p, int b)
 {
-	char *sebcdic;
-	char *pebcdic;
-	unsigned long  i;
+    char* sebcdic;
+    char* pebcdic;
+    unsigned long i;
 
-	Log(1, "Entry: atoe_strtoul\n");
+    Log(1, "Entry: atoe_strtoul\n");
 
-	sebcdic = a2e_string((char *)s);
-	i = strtoul((const char *)sebcdic, &pebcdic, b);
-	if (p != NULL) {
-		*p = (char *)s + (pebcdic - sebcdic);
-	}
-	free(sebcdic);
+    sebcdic = a2e_string((char*)s);
+    i = strtoul((const char*)sebcdic, &pebcdic, b);
+    if (p != NULL) {
+        *p = (char*)s + (pebcdic - sebcdic);
+    }
+    free(sebcdic);
 
-	return i;
+    return i;
 }
 
 /**************************************************************************
@@ -1708,23 +1616,22 @@ atoe_strtoul(const char *s, char **p, int b)
  * parameters  -
  * returns     -
  *************************************************************************/
-unsigned long long
-atoe_strtoull(const char *s, char **p, int b)
+unsigned long long atoe_strtoull(const char* s, char** p, int b)
 {
-	char *sebcdic;
-	char *pebcdic;
-	unsigned long long i;
+    char* sebcdic;
+    char* pebcdic;
+    unsigned long long i;
 
-	Log(1, "Entry: atoe_strtoull\n");
+    Log(1, "Entry: atoe_strtoull\n");
 
-	sebcdic = a2e_string((char *)s);
-	i = strtoull((const char *)sebcdic, &pebcdic, b);
-	if (p != NULL) {
-		*p = (char *)s + (pebcdic - sebcdic);
-	}
-	free(sebcdic);
+    sebcdic = a2e_string((char*)s);
+    i = strtoull((const char*)sebcdic, &pebcdic, b);
+    if (p != NULL) {
+        *p = (char*)s + (pebcdic - sebcdic);
+    }
+    free(sebcdic);
 
-	return i;
+    return i;
 }
 
 /**************************************************************************
@@ -1733,23 +1640,22 @@ atoe_strtoull(const char *s, char **p, int b)
  * parameters  -
  * returns     -
  *************************************************************************/
-int
-atoe_strcasecmp(const char *string1, const char *string2)
+int atoe_strcasecmp(const char* string1, const char* string2)
 {
-	int return_val;
-	char *ebsstr1, *ebsstr2;
+    int return_val;
+    char *ebsstr1, *ebsstr2;
 
-	Log(1, "Entry: atoe_strcasecmp\n");
+    Log(1, "Entry: atoe_strcasecmp\n");
 
-	ebsstr1 = a2e_string((char *)string1);
-	ebsstr2 = a2e_string((char *)string2);
+    ebsstr1 = a2e_string((char*)string1);
+    ebsstr2 = a2e_string((char*)string2);
 
-	return_val = strcasecmp(ebsstr1, ebsstr2);
+    return_val = strcasecmp(ebsstr1, ebsstr2);
 
-	free(ebsstr1);
-	free(ebsstr2);
+    free(ebsstr1);
+    free(ebsstr2);
 
-	return return_val;
+    return return_val;
 }
 
 /**************************************************************************
@@ -1758,23 +1664,22 @@ atoe_strcasecmp(const char *string1, const char *string2)
  * parameters  -
  * returns     -
  *************************************************************************/
-int
-atoe_strncasecmp(const char *string1, const char *string2, int n)
+int atoe_strncasecmp(const char* string1, const char* string2, int n)
 {
-	int return_val;
-	char *ebsstr1, *ebsstr2;
+    int return_val;
+    char *ebsstr1, *ebsstr2;
 
-	Log(1, "Entry: atoe_strncasecmp\n");
+    Log(1, "Entry: atoe_strncasecmp\n");
 
-	ebsstr1 = a2e_string((char *)string1);
-	ebsstr2 = a2e_string((char *)string2);
+    ebsstr1 = a2e_string((char*)string1);
+    ebsstr2 = a2e_string((char*)string2);
 
-	return_val = strncasecmp(ebsstr1, ebsstr2, n);
+    return_val = strncasecmp(ebsstr1, ebsstr2, n);
 
-	free(ebsstr1);
-	free(ebsstr2);
+    free(ebsstr1);
+    free(ebsstr2);
 
-	return return_val;
+    return return_val;
 }
 
 /*****************************************************************ibm@3817
@@ -1783,19 +1688,18 @@ atoe_strncasecmp(const char *string1, const char *string2, int n)
  * parameters  -
  * returns     -
  *************************************************************************/
-double
-atoe_atof(char *ascii_string)
+double atoe_atof(char* ascii_string)
 {
-	double rc;
-	char *ebcdic_string;
+    double rc;
+    char* ebcdic_string;
 
-	Log(1, "Entry: atoe_atof\n");
+    Log(1, "Entry: atoe_atof\n");
 
-	ebcdic_string = a2e_string(ascii_string);
-	rc = atof(ebcdic_string);
-	free(ebcdic_string);
+    ebcdic_string = a2e_string(ascii_string);
+    rc = atof(ebcdic_string);
+    free(ebcdic_string);
 
-	return rc;
+    return rc;
 }
 
 /**************************************************************************
@@ -1804,19 +1708,18 @@ atoe_atof(char *ascii_string)
  * parameters  -
  * returns     -
  *************************************************************************/
-int
-atoe_atoi(char *ascii_string)
+int atoe_atoi(char* ascii_string)
 {
-	int rc;
-	char *ebcdic_string;
+    int rc;
+    char* ebcdic_string;
 
-	Log(1, "Entry: atoe_atoi\n");
+    Log(1, "Entry: atoe_atoi\n");
 
-	ebcdic_string = a2e_string(ascii_string);
-	rc = atoi(ebcdic_string);
-	free(ebcdic_string);
+    ebcdic_string = a2e_string(ascii_string);
+    rc = atoi(ebcdic_string);
+    free(ebcdic_string);
 
-	return rc;
+    return rc;
 }
 
 /*****************************************************************ibm@3817
@@ -1825,19 +1728,18 @@ atoe_atoi(char *ascii_string)
  * parameters  -
  * returns     -
  *************************************************************************/
-long
-atoe_atol(char *ascii_string)
+long atoe_atol(char* ascii_string)
 {
-	long rc;
-	char *ebcdic_string;
+    long rc;
+    char* ebcdic_string;
 
-	Log(1, "Entry: atoe_atol\n");
+    Log(1, "Entry: atoe_atol\n");
 
-	ebcdic_string = a2e_string(ascii_string);
-	rc = atol(ebcdic_string);
-	free(ebcdic_string);
+    ebcdic_string = a2e_string(ascii_string);
+    rc = atol(ebcdic_string);
+    free(ebcdic_string);
 
-	return rc;
+    return rc;
 }
 
 /**************************************************************************
@@ -1846,19 +1748,18 @@ atoe_atol(char *ascii_string)
  * parameters  -
  * returns     -
  *************************************************************************/
-int
-atoe_gethostname(char *name, int namelen)
+int atoe_gethostname(char* name, int namelen)
 {
-	int rc = gethostname(name, namelen);
+    int rc = gethostname(name, namelen);
 
-	char *ascii_name = e2a(name, namelen);
+    char* ascii_name = e2a(name, namelen);
 
-	strcpy(name, ascii_name);
-	free(ascii_name);
+    strcpy(name, ascii_name);
+    free(ascii_name);
 
-	Log1(1, "Entry: atoe_gethostname: %s\n", name);
+    Log1(1, "Entry: atoe_gethostname: %s\n", name);
 
-	return rc;
+    return rc;
 }
 
 /**************************************************************************
@@ -1868,87 +1769,84 @@ atoe_gethostname(char *name, int namelen)
  * returns     -
  * re-written by ibm@58845
  *************************************************************************/
-#define HOSTBYNAME_CACHE_SIZE   50
+#define HOSTBYNAME_CACHE_SIZE 50
 typedef struct hostbyname_t {
-	char *hostname;
-	struct hostent h;
+    char* hostname;
+    struct hostent h;
 } hostbyname_t;
 static hostbyname_t hostbyname_cache[HOSTBYNAME_CACHE_SIZE];
 static int hostbyname_cache_next = 0;
 static pthread_mutex_t hostbyname_mutex = PTHREAD_MUTEX_INITIALIZER;
 static int hostbyname_initialized = 0;
-struct hostent *
-atoe_gethostbyname(const char *hostname)
+struct hostent* atoe_gethostbyname(const char* hostname)
 {
-	char *h;
-	struct hostent *hostptr = NULL, *hostptr_a = NULL;
-	int index;
+    char* h;
+    struct hostent *hostptr = NULL, *hostptr_a = NULL;
+    int index;
 
-	Log1(1, "Entry: atoe_gethostbyname: %s\n", hostname);
+    Log1(1, "Entry: atoe_gethostbyname: %s\n", hostname);
 
-	pthread_mutex_lock(&hostbyname_mutex);
-	if (0 == hostbyname_initialized) {
-		/* initialize cache in static storage */
-		for (index = 0; index < HOSTBYNAME_CACHE_SIZE; index++) {
-			hostbyname_cache[index].hostname = NULL;
-			memset(&hostbyname_cache[index].h, 0, sizeof(struct hostent));
-		}
-		hostbyname_initialized = 1;
-	}
+    pthread_mutex_lock(&hostbyname_mutex);
+    if (0 == hostbyname_initialized) {
+        /* initialize cache in static storage */
+        for (index = 0; index < HOSTBYNAME_CACHE_SIZE; index++) {
+            hostbyname_cache[index].hostname = NULL;
+            memset(&hostbyname_cache[index].h, 0, sizeof(struct hostent));
+        }
+        hostbyname_initialized = 1;
+    }
 
-	/* see if we are already using a cache entry for this hostname */
-	for (index = 0;
-		 index < HOSTBYNAME_CACHE_SIZE, hostbyname_cache[index].hostname != NULL;
-		 index++) {
-		if (0 == strcmp(hostname, hostbyname_cache[index].hostname)) {
-			hostptr_a = &hostbyname_cache[index].h;
-			break;
-		}
-	}
-	if (NULL == hostptr_a) {
-		/* use next cache slot for this hostname */
-		if (hostbyname_cache[hostbyname_cache_next].hostname) {
-			free(hostbyname_cache[hostbyname_cache_next].hostname);
-		}
-		hostbyname_cache[hostbyname_cache_next].hostname = strdup(hostname);
-		if (!hostbyname_cache[hostbyname_cache_next].hostname) {
-			pthread_mutex_unlock(&hostbyname_mutex);
-			return NULL;
-		}
-		hostptr_a = &hostbyname_cache[hostbyname_cache_next].h;
-		if (++hostbyname_cache_next == HOSTBYNAME_CACHE_SIZE) {
-			hostbyname_cache_next = 0;
-		}
-	}
+    /* see if we are already using a cache entry for this hostname */
+    for (index = 0; index < HOSTBYNAME_CACHE_SIZE, hostbyname_cache[index].hostname != NULL; index++) {
+        if (0 == strcmp(hostname, hostbyname_cache[index].hostname)) {
+            hostptr_a = &hostbyname_cache[index].h;
+            break;
+        }
+    }
+    if (NULL == hostptr_a) {
+        /* use next cache slot for this hostname */
+        if (hostbyname_cache[hostbyname_cache_next].hostname) {
+            free(hostbyname_cache[hostbyname_cache_next].hostname);
+        }
+        hostbyname_cache[hostbyname_cache_next].hostname = strdup(hostname);
+        if (!hostbyname_cache[hostbyname_cache_next].hostname) {
+            pthread_mutex_unlock(&hostbyname_mutex);
+            return NULL;
+        }
+        hostptr_a = &hostbyname_cache[hostbyname_cache_next].h;
+        if (++hostbyname_cache_next == HOSTBYNAME_CACHE_SIZE) {
+            hostbyname_cache_next = 0;
+        }
+    }
 
-	/* convert the input hostname to ebcdic */
-	h = a2e_string(hostname);
-	/* and issue the system call */
-	hostptr = gethostbyname(h);
-	/* don't need the ebcdic copy of hostname any more */
-	free(h);
+    /* convert the input hostname to ebcdic */
+    h = a2e_string(hostname);
+    /* and issue the system call */
+    hostptr = gethostbyname(h);
+    /* don't need the ebcdic copy of hostname any more */
+    free(h);
 
-	/* if the system call worked save the results, otherwise return NULL */
-	if (hostptr) {
-		/* if we're re-using a cache slot, free any previously saved name */
-		if (hostptr_a->h_name) {
-			free(hostptr_a->h_name);
-		}
-		/* copy the system returned hostent into our cache */
-		memcpy(hostptr_a, hostptr, sizeof(struct hostent));
-		/* convert the system returned name to ascii and save it in our cache */
-		hostptr_a->h_name = e2a_string(hostptr->h_name);
-		/* if everything worked return the address of the cache entry */
-		if (hostptr_a->h_name) {
-			hostptr = hostptr_a;
-		} else {
-			hostptr = NULL;
-		}
-	}
+    /* if the system call worked save the results, otherwise return NULL */
+    if (hostptr) {
+        /* if we're re-using a cache slot, free any previously saved name */
+        if (hostptr_a->h_name) {
+            free(hostptr_a->h_name);
+        }
+        /* copy the system returned hostent into our cache */
+        memcpy(hostptr_a, hostptr, sizeof(struct hostent));
+        /* convert the system returned name to ascii and save it in our cache */
+        hostptr_a->h_name = e2a_string(hostptr->h_name);
+        /* if everything worked return the address of the cache entry */
+        if (hostptr_a->h_name) {
+            hostptr = hostptr_a;
+        } else {
+            hostptr = NULL;
+        }
+    }
 
-	pthread_mutex_unlock(&hostbyname_mutex);
+    pthread_mutex_unlock(&hostbyname_mutex);
 
-	return hostptr;
+    return hostptr;
 }
 
 /**************************************************************************
@@ -1957,35 +1855,34 @@ atoe_gethostbyname(const char *hostname)
  * parameters  -
  * returns     -
  *************************************************************************/
-struct hostent *
-atoe_gethostbyname_r(char *hostname, struct hostent *hentptr,     /*ibm@38180.1*/
-					 char *buf, int bufsize, int *h_error)
+struct hostent* atoe_gethostbyname_r(char* hostname, struct hostent* hentptr, /*ibm@38180.1*/
+    char* buf, int bufsize, int* h_error)
 {
-	char *h, *h_n;
-	struct hostent *hostptr;
+    char *h, *h_n;
+    struct hostent* hostptr;
 
-	Log1(1, "Entry: atoe_gethostbyname_r: %s\n", hostname);       /*ibm@38180.1*/
+    Log1(1, "Entry: atoe_gethostbyname_r: %s\n", hostname); /*ibm@38180.1*/
 
-	h = a2e_string(hostname);
+    h = a2e_string(hostname);
 
-	if ((hostptr = gethostbyname(h)) == NULL) {                    /*ibm.7612*/
-		hentptr = NULL;                                            /*ibm.7612*/
-	} else if ((strlen(hostptr->h_name) + 1) > bufsize) {          /*ibm.7612*/
-		*h_error = errno = ERANGE;                                 /*ibm.7612*/
-		hentptr = NULL;                                            /*ibm.7612*/
-	} else {                                                       /*ibm.7612*/
-		memcpy(hentptr, hostptr, sizeof(struct hostent));          /*ibm.7612*/
+    if ((hostptr = gethostbyname(h)) == NULL) { /*ibm.7612*/
+        hentptr = NULL; /*ibm.7612*/
+    } else if ((strlen(hostptr->h_name) + 1) > bufsize) { /*ibm.7612*/
+        *h_error = errno = ERANGE; /*ibm.7612*/
+        hentptr = NULL; /*ibm.7612*/
+    } else { /*ibm.7612*/
+        memcpy(hentptr, hostptr, sizeof(struct hostent)); /*ibm.7612*/
 
-		h_n = e2a_string(hostptr->h_name);
-		strcpy(buf, h_n);                                          /*ibm.7612*/
-		free(h_n);                                                 /*ibm.7612*/
+        h_n = e2a_string(hostptr->h_name);
+        strcpy(buf, h_n); /*ibm.7612*/
+        free(h_n); /*ibm.7612*/
 
-		hentptr->h_name = buf;                                     /*ibm.7612*/
-	}
+        hentptr->h_name = buf; /*ibm.7612*/
+    }
 
-	free(h);
+    free(h);
 
-	return hentptr;                                                /*ibm.7612*/
+    return hentptr; /*ibm.7612*/
 }
 
 /**************************************************************************
@@ -1994,32 +1891,30 @@ atoe_gethostbyname_r(char *hostname, struct hostent *hentptr,     /*ibm@38180.1*
  * parameters  -
  * returns     -
  *************************************************************************/
-struct hostent *
-atoe_gethostbyaddr(const void *address, int addrlen, int domain,
-				   struct hostent *hentptr, char *buf, int bufsize,
-				   int *h_error)
+struct hostent* atoe_gethostbyaddr(
+    const void* address, int addrlen, int domain, struct hostent* hentptr, char* buf, int bufsize, int* h_error)
 {
-	char *h_n;
-	struct hostent *hostptr;
+    char* h_n;
+    struct hostent* hostptr;
 
-	Log(1, "Entry: atoe_gethostbyaddr:\n");
+    Log(1, "Entry: atoe_gethostbyaddr:\n");
 
-	if ((hostptr = gethostbyaddr(address, addrlen, domain)) == NULL) { /*ibm.7612*/
-		hentptr = NULL;                                            /*ibm.7612*/
-	} else if ((strlen(hostptr->h_name) + 1) > bufsize) {          /*ibm.7612*/
-		*h_error = errno = ERANGE;                                 /*ibm.7612*/
-		hentptr = NULL;                                            /*ibm.7612*/
-	} else {                                                       /*ibm.7612*/
-		memcpy(hentptr, hostptr, sizeof(struct hostent));          /*ibm.7612*/
+    if ((hostptr = gethostbyaddr(address, addrlen, domain)) == NULL) { /*ibm.7612*/
+        hentptr = NULL; /*ibm.7612*/
+    } else if ((strlen(hostptr->h_name) + 1) > bufsize) { /*ibm.7612*/
+        *h_error = errno = ERANGE; /*ibm.7612*/
+        hentptr = NULL; /*ibm.7612*/
+    } else { /*ibm.7612*/
+        memcpy(hentptr, hostptr, sizeof(struct hostent)); /*ibm.7612*/
 
-		h_n = e2a_string(hostptr->h_name);
-		strcpy(buf, h_n);                                          /*ibm.7612*/
-		free(h_n);                                                 /*ibm.7612*/
+        h_n = e2a_string(hostptr->h_name);
+        strcpy(buf, h_n); /*ibm.7612*/
+        free(h_n); /*ibm.7612*/
 
-		hentptr->h_name = buf;                                     /*ibm.7612*/
-	}
+        hentptr->h_name = buf; /*ibm.7612*/
+    }
 
-	return hentptr;                                                /*ibm.7612*/
+    return hentptr; /*ibm.7612*/
 }
 
 /**************************************************************************
@@ -2028,24 +1923,23 @@ atoe_gethostbyaddr(const void *address, int addrlen, int domain,
  * parameters  -
  * returns     -
  *************************************************************************/
-struct protoent *
-atoe_getprotobyname(const char *name)
+struct protoent* atoe_getprotobyname(const char* name)
 {
-	struct protoent *pent;
-	char *e_name, *p_n;
+    struct protoent* pent;
+    char *e_name, *p_n;
 
-	Log1(1, "Entry: atoe_getprotobyname: %s\n", name);
+    Log1(1, "Entry: atoe_getprotobyname: %s\n", name);
 
-	e_name = a2e_string((char *)name);
+    e_name = a2e_string((char*)name);
 
-	if ((pent = getprotobyname(e_name)) != 0) {
-		p_n = e2a_string(pent->p_name);
-		pent->p_name = p_n;
-	}
+    if ((pent = getprotobyname(e_name)) != 0) {
+        p_n = e2a_string(pent->p_name);
+        pent->p_name = p_n;
+    }
 
-	free(e_name);
+    free(e_name);
 
-	return pent;
+    return pent;
 }
 
 /**************************************************************************
@@ -2054,19 +1948,18 @@ atoe_getprotobyname(const char *name)
  * parameters  -
  * returns     -
  *************************************************************************/
-unsigned long
-atoe_inet_addr(char *hostname)
+unsigned long atoe_inet_addr(char* hostname)
 {
-	unsigned long iaddr = -1;
-	char *h = a2e_string(hostname);
+    unsigned long iaddr = -1;
+    char* h = a2e_string(hostname);
 
-	Log1(1, "Entry: atoe_inet_addr: %s\n", hostname);
+    Log1(1, "Entry: atoe_inet_addr: %s\n", hostname);
 
-	iaddr = inet_addr(h);
+    iaddr = inet_addr(h);
 
-	free(h);
+    free(h);
 
-	return iaddr;
+    return iaddr;
 }
 
 /**************************************************************************
@@ -2075,22 +1968,21 @@ atoe_inet_addr(char *hostname)
  * parameters  -
  * returns     -
  *************************************************************************/
-int
-atoe_getaddrinfo(const char *nodename, const char *servname, const struct addrinfo *hints, struct addrinfo **result)
+int atoe_getaddrinfo(const char* nodename, const char* servname, const struct addrinfo* hints, struct addrinfo** result)
 {
-	int rc;
-	char *e, *f;
+    int rc;
+    char *e, *f;
 
-	Log(1, "Entry: atoe_getaddrinfo\n");
+    Log(1, "Entry: atoe_getaddrinfo\n");
 
-	e = a2e_string((char *)nodename);
-	f = a2e_string((char *)servname);
-	rc = getaddrinfo(e, f, hints, result);
+    e = a2e_string((char*)nodename);
+    f = a2e_string((char*)servname);
+    rc = getaddrinfo(e, f, hints, result);
 
-	free(e);
-	free(f);
+    free(e);
+    free(f);
 
-	return rc;
+    return rc;
 }
 
 /**************************************************************************
@@ -2099,47 +1991,47 @@ atoe_getaddrinfo(const char *nodename, const char *servname, const struct addrin
  * parameters  -
  * returns     -
  *************************************************************************/
-int
-atoe_getnameinfo(const struct sockaddr *sa, socklen_t salen, char *host, socklen_t hostlen, char *serv, socklen_t servlen, int flags)
+int atoe_getnameinfo(
+    const struct sockaddr* sa, socklen_t salen, char* host, socklen_t hostlen, char* serv, socklen_t servlen, int flags)
 {
-	int rc;
-	char *host_ascii, *serv_ascii;
+    int rc;
+    char *host_ascii, *serv_ascii;
 
-	Log(1, "Entry: atoe_getnameinfo\n");
+    Log(1, "Entry: atoe_getnameinfo\n");
 
-	rc = getnameinfo(sa, salen, host, hostlen, serv, servlen, flags);
+    rc = getnameinfo(sa, salen, host, hostlen, serv, servlen, flags);
 
-	if (0 != hostlen) {
-		host_ascii = e2a_string(host);
-		strncpy(host, host_ascii, hostlen);
-		host[hostlen - 1] = '\0';
-		free(host_ascii);
-	}
+    if (0 != hostlen) {
+        host_ascii = e2a_string(host);
+        strncpy(host, host_ascii, hostlen);
+        host[hostlen - 1] = '\0';
+        free(host_ascii);
+    }
 
-	if (0 != servlen) {
-		serv_ascii = e2a_string(serv);
-		strncpy(serv, serv_ascii, servlen);
-		serv[servlen - 1] = '\0';
-		free(serv_ascii);
-	}
+    if (0 != servlen) {
+        serv_ascii = e2a_string(serv);
+        strncpy(serv, serv_ascii, servlen);
+        serv[servlen - 1] = '\0';
+        free(serv_ascii);
+    }
 
-	return rc;
+    return rc;
 }
 
-#define _ISALNUM_ASCII  0x0001
-#define _ISALPHA_ASCII  0x0002
-#define _ISCNTRL_ASCII  0x0004
-#define _ISDIGIT_ASCII  0x0008
-#define _ISGRAPH_ASCII  0x0010
-#define _ISLOWER_ASCII  0x0020
-#define _ISPRINT_ASCII  0x0040
-#define _ISPUNCT_ASCII  0x0080
-#define _ISSPACE_ASCII  0x0100
-#define _ISUPPER_ASCII  0x0200
+#define _ISALNUM_ASCII 0x0001
+#define _ISALPHA_ASCII 0x0002
+#define _ISCNTRL_ASCII 0x0004
+#define _ISDIGIT_ASCII 0x0008
+#define _ISGRAPH_ASCII 0x0010
+#define _ISLOWER_ASCII 0x0020
+#define _ISPRINT_ASCII 0x0040
+#define _ISPUNCT_ASCII 0x0080
+#define _ISSPACE_ASCII 0x0100
+#define _ISUPPER_ASCII 0x0200
 #define _ISXDIGIT_ASCII 0x0400
 
-#define _XUPPER_ASCII   0xdf                                        /*ibm@4345*/
-#define _XLOWER_ASCII   0x20                                        /*ibm@4345*/
+#define _XUPPER_ASCII 0xdf /*ibm@4345*/
+#define _XLOWER_ASCII 0x20 /*ibm@4345*/
 
 /* Check for iconv_init() already done   */
 int iconv_initialized = 0;
@@ -2156,84 +2048,83 @@ int _ascii_is_tab[CONV_TABLE_SIZE];
  * parameters  -
  * returns     -
  *************************************************************************/
-int
-iconv_init(void)
+int iconv_init(void)
 {
-	char *asciiSet = "ISO8859-1";
-	char *defaultSet = "IBM-1047";
-	char *ebcdicSet, *inptr, *outptr;
-	size_t inleft, outleft;
-	iconv_t atoe_cd = (iconv_t)(-1);                         /*ibm@33935*/
-	iconv_t etoa_cd = (iconv_t)(-1);                         /*ibm@33935*/
-	char init_tab[CONV_TABLE_SIZE];
-	int i;
+    char* asciiSet = "ISO8859-1";
+    char* defaultSet = "IBM-1047";
+    char *ebcdicSet, *inptr, *outptr;
+    size_t inleft, outleft;
+    iconv_t atoe_cd = (iconv_t)(-1); /*ibm@33935*/
+    iconv_t etoa_cd = (iconv_t)(-1); /*ibm@33935*/
+    char init_tab[CONV_TABLE_SIZE];
+    int i;
 
-	/* Need to save start locale setting                            ibm@38796 */
-	char *slc = NULL;
-	/* Get the current locale setting                               ibm@38796 */
-	char *clc = setlocale(LC_ALL, NULL);
+    /* Need to save start locale setting                            ibm@38796 */
+    char* slc = NULL;
+    /* Get the current locale setting                               ibm@38796 */
+    char* clc = setlocale(LC_ALL, NULL);
 
-	/* Handle initialization of libwrappers.so iconv as well */
-	const char *dllname = "libwrappers.so";
-	const char *fnname  = "iconv_init";
-	dllhandle *libwrappersDll;
-	int (*piconv_init)();
+    /* Handle initialization of libwrappers.so iconv as well */
+    const char* dllname = "libwrappers.so";
+    const char* fnname = "iconv_init";
+    dllhandle* libwrappersDll;
+    int (*piconv_init)();
 
-	if (iconv_initialized) {
-		return 0;
-	}
+    if (iconv_initialized) {
+        return 0;
+    }
 
-	/*
-	 * Test whether we're running with an DBCS codepage
-	 * If so, use default IBM-1047 EBCDIC SBCS codepage to build translate table.
-	 */
-	{
-		char a[] = {97, 0}; /* ASCII "a" */
+    /*
+     * Test whether we're running with an DBCS codepage
+     * If so, use default IBM-1047 EBCDIC SBCS codepage to build translate table.
+     */
+    {
+        char a[] = { 97, 0 }; /* ASCII "a" */
 
-		/* Copy the start locale setting to reset it later          ibm@38796 */
-		slc = strdup(clc);
-		if (!slc) {
-			return -1;
-		}
+        /* Copy the start locale setting to reset it later          ibm@38796 */
+        slc = strdup(clc);
+        if (!slc) {
+            return -1;
+        }
 
-		/* Set the locale to whatever is set by the env. vars       ibm@38796 */
-		setlocale(LC_ALL, "") ;
+        /* Set the locale to whatever is set by the env. vars       ibm@38796 */
+        setlocale(LC_ALL, "");
 
-		if ((__atoe(a) < 1) && (errno == EINVAL)) {
-			/* The current locale does not describe a single-byte character set.*/
-			/* This test does not always give the correct result - see below ibm@12464*/
-			ebcdicSet = defaultSet;
-		} else {
-			char *encoding = NULL;                                    /*ibm@12741*/
-			char *lc;
-			char *p;
-			int i;
+        if ((__atoe(a) < 1) && (errno == EINVAL)) {
+            /* The current locale does not describe a single-byte character set.*/
+            /* This test does not always give the correct result - see below ibm@12464*/
+            ebcdicSet = defaultSet;
+        } else {
+            char* encoding = NULL; /*ibm@12741*/
+            char* lc;
+            char* p;
+            int i;
 
-			lc = getenv("LC_ALL");
-			if (lc == NULL) {
-				lc = getenv("LC_CTYPE");
-				if (lc == NULL) {
-					lc = getenv("LANG");
-				}
-			}
+            lc = getenv("LC_ALL");
+            if (lc == NULL) {
+                lc = getenv("LC_CTYPE");
+                if (lc == NULL) {
+                    lc = getenv("LANG");
+                }
+            }
 
-			if (lc != NULL) {
+            if (lc != NULL) {
 
-				/* We now have a string with the format
-				 * language_region.encoding@variant any part of which
-				 * may be missing. We need to extract the encoding part
-				 */
+                /* We now have a string with the format
+                 * language_region.encoding@variant any part of which
+                 * may be missing. We need to extract the encoding part
+                 */
 
-				lc = strdup(lc);
-				if ((p = strchr(lc, '.')) != NULL) {
-					encoding = p + 1;                                 /*ibm@12741*/
-				}
-				if ((p = strchr(lc, '@')) != NULL) {
-					*p = '\0';
-				}
-			}
+                lc = strdup(lc);
+                if ((p = strchr(lc, '.')) != NULL) {
+                    encoding = p + 1; /*ibm@12741*/
+                }
+                if ((p = strchr(lc, '@')) != NULL) {
+                    *p = '\0';
+                }
+            }
 
-			/* Translate alias to encoding */
+            /* Translate alias to encoding */
 #if 0 /* msf - the encoding_names code can not be pulled into here - need to write this yourself if needed */
 
 			if (encoding == NULL) {                                   /*ibm@12741*/
@@ -2264,147 +2155,158 @@ iconv_init(void)
 
 			else
 #endif
-			{
-				lc = encoding;
-			}                                                         /*ibm@12741*/
+            {
+                lc = encoding;
+            } /*ibm@12741*/
 
-			/* If lc is still NULL or we have "C" encoding
-			 * use the default encoding.
-			 */
-			if (lc == NULL || !strcmp(lc, "C")) {
-				ebcdicSet = defaultSet;
-			} else {
-				ebcdicSet = lc;
-			}
-		}
-	}
+            /* If lc is still NULL or we have "C" encoding
+             * use the default encoding.
+             */
+            if (lc == NULL || !strcmp(lc, "C")) {
+                ebcdicSet = defaultSet;
+            } else {
+                ebcdicSet = lc;
+            }
+        }
+    }
 
-	/* reset the locale to start setting                            ibm@38796 */
-	clc = setlocale(LC_ALL, slc);
-	free(slc);
+    /* reset the locale to start setting                            ibm@38796 */
+    clc = setlocale(LC_ALL, slc);
+    free(slc);
 
-	if (((etoa_cd = iconv_open(asciiSet, ebcdicSet)) == (iconv_t)(-1)) ||
-		((atoe_cd = iconv_open(ebcdicSet, asciiSet)) == (iconv_t)(-1))) {
-		/* Retry with default ebcdicSet                                 ibm@12741*/
-		if (strcmp(ebcdicSet, defaultSet) == 0) {
-			return -1;
-		}
-		/* Close conversion descriptors just in case one of them succeeded */
-		if (etoa_cd != (iconv_t)(-1)) {                               /*ibm@33935*/
-			iconv_close(etoa_cd);                                     /*ibm@33935*/
-		}                                                             /*ibm@33935*/
+    if (((etoa_cd = iconv_open(asciiSet, ebcdicSet)) == (iconv_t)(-1))
+        || ((atoe_cd = iconv_open(ebcdicSet, asciiSet)) == (iconv_t)(-1))) {
+        /* Retry with default ebcdicSet                                 ibm@12741*/
+        if (strcmp(ebcdicSet, defaultSet) == 0) {
+            return -1;
+        }
+        /* Close conversion descriptors just in case one of them succeeded */
+        if (etoa_cd != (iconv_t)(-1)) { /*ibm@33935*/
+            iconv_close(etoa_cd); /*ibm@33935*/
+        } /*ibm@33935*/
 
-		if (atoe_cd != (iconv_t)(-1)) {                               /*ibm@33935*/
-			iconv_close(atoe_cd);                                     /*ibm@33935*/
-		}                                                             /*ibm@33935*/
+        if (atoe_cd != (iconv_t)(-1)) { /*ibm@33935*/
+            iconv_close(atoe_cd); /*ibm@33935*/
+        } /*ibm@33935*/
 
-		if (((etoa_cd = iconv_open(asciiSet, defaultSet)) == (iconv_t)(-1)) ||
-			((atoe_cd = iconv_open(defaultSet, asciiSet)) == (iconv_t)(-1))) {
-			return -1;
-		}                                                             /*ibm@12741*/
-	}
+        if (((etoa_cd = iconv_open(asciiSet, defaultSet)) == (iconv_t)(-1))
+            || ((atoe_cd = iconv_open(defaultSet, asciiSet)) == (iconv_t)(-1))) {
+            return -1;
+        } /*ibm@12741*/
+    }
 
-	/* Build initial table x'00' - x'ff'   */
-	for (i = 0; i < CONV_TABLE_SIZE; i++) {
-		init_tab[i] = i;
-	}
+    /* Build initial table x'00' - x'ff'   */
+    for (i = 0; i < CONV_TABLE_SIZE; i++) {
+        init_tab[i] = i;
+    }
 
-	/* Create conversion table for ASCII=>EBCDIC */
-	inptr = init_tab;
-	outptr = a2e_tab;
-	inleft = outleft = CONV_TABLE_SIZE;
-	if (iconv(atoe_cd, &inptr, &inleft, &outptr, &outleft) == -1) {
-		/* atoe conversion failed */
-		if (errno == E2BIG) {                                        /*ibm@12464*/
-			/* The EBCDIC codepage is probably DBCS */
-			/* Close conversion descriptors */
-			iconv_close(atoe_cd);
-			iconv_close(etoa_cd);
-			/* Retry with default IBM-1047 */
-			if (((etoa_cd = iconv_open(asciiSet, defaultSet)) == (iconv_t)(-1)) ||
-				((atoe_cd = iconv_open(defaultSet, asciiSet)) == (iconv_t)(-1))) {
-				return -1;
-			}
-			inptr = init_tab;
-			outptr = a2e_tab;
-			inleft = outleft = CONV_TABLE_SIZE;
-			if (iconv(atoe_cd, &inptr, &inleft, &outptr, &outleft) == -1) {
-				return -1;
-			}
-		}                                                            /*ibm@12464*/
-	}
+    /* Create conversion table for ASCII=>EBCDIC */
+    inptr = init_tab;
+    outptr = a2e_tab;
+    inleft = outleft = CONV_TABLE_SIZE;
+    if (iconv(atoe_cd, &inptr, &inleft, &outptr, &outleft) == -1) {
+        /* atoe conversion failed */
+        if (errno == E2BIG) { /*ibm@12464*/
+            /* The EBCDIC codepage is probably DBCS */
+            /* Close conversion descriptors */
+            iconv_close(atoe_cd);
+            iconv_close(etoa_cd);
+            /* Retry with default IBM-1047 */
+            if (((etoa_cd = iconv_open(asciiSet, defaultSet)) == (iconv_t)(-1))
+                || ((atoe_cd = iconv_open(defaultSet, asciiSet)) == (iconv_t)(-1))) {
+                return -1;
+            }
+            inptr = init_tab;
+            outptr = a2e_tab;
+            inleft = outleft = CONV_TABLE_SIZE;
+            if (iconv(atoe_cd, &inptr, &inleft, &outptr, &outleft) == -1) {
+                return -1;
+            }
+        } /*ibm@12464*/
+    }
 
-	/* Create conversion table for EBCDIC=>ASCII */
-	inptr = init_tab;
-	outptr = e2a_tab;
-	inleft = outleft = CONV_TABLE_SIZE;
+    /* Create conversion table for EBCDIC=>ASCII */
+    inptr = init_tab;
+    outptr = e2a_tab;
+    inleft = outleft = CONV_TABLE_SIZE;
 
-	/* ibm@54240 start */
-	/* Try to create a complete translate table for this codepage */
-	/* if an EILSEQ return is received for a codepoint bypass and */
-	/* move on to the next one.                                   */
-	while (inleft > 0) {
-		size_t ret;
-		ret = iconv(etoa_cd, &inptr, &inleft, &outptr, &outleft);
-		if (ret != (size_t)-1) {
-			break;
-		}
-		if (errno == EILSEQ) {
-			inptr  += 1;
-			inleft -= 1;
-			outptr  += 1;
-			outleft -= 1;
-		} else {
-			/* etoa conversion failed */
-			return -1;
-		}
-	}
-	/* ibm@54240 end */
+    /* ibm@54240 start */
+    /* Try to create a complete translate table for this codepage */
+    /* if an EILSEQ return is received for a codepoint bypass and */
+    /* move on to the next one.                                   */
+    while (inleft > 0) {
+        size_t ret;
+        ret = iconv(etoa_cd, &inptr, &inleft, &outptr, &outleft);
+        if (ret != (size_t)-1) {
+            break;
+        }
+        if (errno == EILSEQ) {
+            inptr += 1;
+            inleft -= 1;
+            outptr += 1;
+            outleft -= 1;
+        } else {
+            /* etoa conversion failed */
+            return -1;
+        }
+    }
+    /* ibm@54240 end */
 
-	/* Close conversion descriptors */
-	iconv_close(atoe_cd);
-	iconv_close(etoa_cd);
+    /* Close conversion descriptors */
+    iconv_close(atoe_cd);
+    iconv_close(etoa_cd);
 
-	/* Build integer test macros flag table */
-	for (i = 0; i < CONV_TABLE_SIZE; i++) {
-		_ascii_is_tab[i] = 0;
-		if (isalnum(a2e_tab[i])) _ascii_is_tab[i] |=  _ISALNUM_ASCII;
-		if (isalpha(a2e_tab[i])) _ascii_is_tab[i] |=  _ISALPHA_ASCII;
-		if (iscntrl(a2e_tab[i])) _ascii_is_tab[i] |=  _ISCNTRL_ASCII;
-		if (isdigit(a2e_tab[i])) _ascii_is_tab[i] |=  _ISDIGIT_ASCII;
-		if (isgraph(a2e_tab[i])) _ascii_is_tab[i] |=  _ISGRAPH_ASCII;
-		if (islower(a2e_tab[i])) _ascii_is_tab[i] |=  _ISLOWER_ASCII;
-		if (isprint(a2e_tab[i])) _ascii_is_tab[i] |=  _ISPRINT_ASCII;
-		if (ispunct(a2e_tab[i])) _ascii_is_tab[i] |=  _ISPUNCT_ASCII;
-		if (isspace(a2e_tab[i])) _ascii_is_tab[i] |=  _ISSPACE_ASCII;
-		if (isupper(a2e_tab[i])) _ascii_is_tab[i] |=  _ISUPPER_ASCII;
-		if (isxdigit(a2e_tab[i])) _ascii_is_tab[i] |=  _ISXDIGIT_ASCII;
-	}
+    /* Build integer test macros flag table */
+    for (i = 0; i < CONV_TABLE_SIZE; i++) {
+        _ascii_is_tab[i] = 0;
+        if (isalnum(a2e_tab[i]))
+            _ascii_is_tab[i] |= _ISALNUM_ASCII;
+        if (isalpha(a2e_tab[i]))
+            _ascii_is_tab[i] |= _ISALPHA_ASCII;
+        if (iscntrl(a2e_tab[i]))
+            _ascii_is_tab[i] |= _ISCNTRL_ASCII;
+        if (isdigit(a2e_tab[i]))
+            _ascii_is_tab[i] |= _ISDIGIT_ASCII;
+        if (isgraph(a2e_tab[i]))
+            _ascii_is_tab[i] |= _ISGRAPH_ASCII;
+        if (islower(a2e_tab[i]))
+            _ascii_is_tab[i] |= _ISLOWER_ASCII;
+        if (isprint(a2e_tab[i]))
+            _ascii_is_tab[i] |= _ISPRINT_ASCII;
+        if (ispunct(a2e_tab[i]))
+            _ascii_is_tab[i] |= _ISPUNCT_ASCII;
+        if (isspace(a2e_tab[i]))
+            _ascii_is_tab[i] |= _ISSPACE_ASCII;
+        if (isupper(a2e_tab[i]))
+            _ascii_is_tab[i] |= _ISUPPER_ASCII;
+        if (isxdigit(a2e_tab[i]))
+            _ascii_is_tab[i] |= _ISXDIGIT_ASCII;
+    }
 
-	/* Now we handle libwrappers.so:iconv_init as well */
-	libwrappersDll = dllload(dllname);
-	if (libwrappersDll == NULL) {
-		perror(0);
-		printf("iconv_init: %s not found\n", dllname);
-	} else {
-		piconv_init = (int (*)()) dllqueryfn(libwrappersDll, fnname);
-		if (piconv_init == NULL) {
-			perror(0);
-			printf("iconv_init: libwrappers.so:%s not found\n", fnname);
-		} else {
-			if (piconv_init() == -1) {
-				printf("iconv_init: libwrappers.so:iconv_init() failed\n");
-			}
-		}
-	}
+    /* Now we handle libwrappers.so:iconv_init as well */
+    libwrappersDll = dllload(dllname);
+    if (libwrappersDll == NULL) {
+        perror(0);
+        printf("iconv_init: %s not found\n", dllname);
+    } else {
+        piconv_init = (int (*)())dllqueryfn(libwrappersDll, fnname);
+        if (piconv_init == NULL) {
+            perror(0);
+            printf("iconv_init: libwrappers.so:%s not found\n", fnname);
+        } else {
+            if (piconv_init() == -1) {
+                printf("iconv_init: libwrappers.so:iconv_init() failed\n");
+            }
+        }
+    }
 
-	/* initialize the mutex used by putEnv and getEnv */
-	pthread_mutex_init(&env_mutex, NULL);
+    /* initialize the mutex used by putEnv and getEnv */
+    pthread_mutex_init(&env_mutex, NULL);
 
-	/* If we get here, then we are initialized.                    /*ibm@54240*/
-	iconv_initialized = 1;                                         /*ibm@54240*/
+    /* If we get here, then we are initialized.                    /*ibm@54240*/
+    iconv_initialized = 1; /*ibm@54240*/
 
-	return 0;
+    return 0;
 }
 #pragma convlit(resume)
 
@@ -2414,59 +2316,56 @@ iconv_init(void)
  * parameters  -
  * returns     -
  *************************************************************************/
-dllhandle *
-atoe_dllload(char *dllName)
+dllhandle* atoe_dllload(char* dllName)
 {
-	dllhandle *handle;
-	char *d = a2e(dllName, strlen(dllName));
-	char buf[280];                                                /*ibm@29859*/
+    dllhandle* handle;
+    char* d = a2e(dllName, strlen(dllName));
+    char buf[280]; /*ibm@29859*/
 
-	Log1(1, "Entry: atoe_dllload: %s\n", dllName);
+    Log1(1, "Entry: atoe_dllload: %s\n", dllName);
 
-/*
- * TBN 2003/06/05 - Removed perror() because it does not make
- * any sense to spew out error messages when it's not supposed to!!
- * It is supposed to keep the same behaviour as dllload() and NOT
- * try to do more than what it's supposed to do!!
- */
-/*
-	if ((handle = dllload(d)) == 0)
-	{
-*/
-/*        atoe_sprintf(buf,"Could not load dll : %s \n",dllName); */  /*ibm@29859*/
-/*        atoe_perror(buf);                                       */  /*ibm@29859*/
-/*
-	}
-*/
-	handle = dllload(d);
-	free(d);
-	return handle;
+    /*
+     * TBN 2003/06/05 - Removed perror() because it does not make
+     * any sense to spew out error messages when it's not supposed to!!
+     * It is supposed to keep the same behaviour as dllload() and NOT
+     * try to do more than what it's supposed to do!!
+     */
+    /*
+            if ((handle = dllload(d)) == 0)
+            {
+    */
+    /*        atoe_sprintf(buf,"Could not load dll : %s \n",dllName); */ /*ibm@29859*/
+    /*        atoe_perror(buf);                                       */ /*ibm@29859*/
+    /*
+            }
+    */
+    handle = dllload(d);
+    free(d);
+    return handle;
 }
 
-void *
-atoe_dllqueryvar(dllhandle *dllHandle, char *varName)
+void* atoe_dllqueryvar(dllhandle* dllHandle, char* varName)
 {
-	char *n = a2e_string(varName);
-	void *r = dllqueryvar(dllHandle, n);
+    char* n = a2e_string(varName);
+    void* r = dllqueryvar(dllHandle, n);
 
-	Log1(1, "Entry: atoe_dllqueryvar: %s\n", varName);
+    Log1(1, "Entry: atoe_dllqueryvar: %s\n", varName);
 
-	free(n);
+    free(n);
 
-	return r;
+    return r;
 }
 
-
-void (*atoe_dllqueryfn(dllhandle *dllHandle, char *funcName))()
+void (*atoe_dllqueryfn(dllhandle* dllHandle, char* funcName))()
 {
-	char *n = a2e_string(funcName);
-	void (*r)() = dllqueryfn(dllHandle, n);
+    char* n = a2e_string(funcName);
+    void (*r)() = dllqueryfn(dllHandle, n);
 
-	Log1(1, "Entry: atoe_dllqueryfn: %s\n", funcName);
+    Log1(1, "Entry: atoe_dllqueryfn: %s\n", funcName);
 
-	free(n);
+    free(n);
 
-	return r;
+    return r;
 }
 
 /**************************************************************************
@@ -2481,30 +2380,29 @@ void (*atoe_dllqueryfn(dllhandle *dllHandle, char *funcName))()
  * parameters  -
  * returns     -
  *************************************************************************/
-pid_t
-atoe_spawnpe(const char *filename, const int fd_cnt, const int *fd_map,
-			 const struct inheritance *inherit, char **argv, char **envp, int envlen)
+pid_t atoe_spawnpe(const char* filename, const int fd_cnt, const int* fd_map, const struct inheritance* inherit,
+    char** argv, char** envp, int envlen)
 {
-	char *e_envp[1025];
-	int i, j;
-	pid_t pid;
+    char* e_envp[1025];
+    int i, j;
+    pid_t pid;
 
-	Log(1, "Entry: atoe_spawnpe\n");
+    Log(1, "Entry: atoe_spawnpe\n");
 
-	i = j = (envlen < 1025) ? envlen : 1025;
-	while (i--) {
-		e_envp[i] = a2e(envp[i], strlen(envp[i]));
-	}
+    i = j = (envlen < 1025) ? envlen : 1025;
+    while (i--) {
+        e_envp[i] = a2e(envp[i], strlen(envp[i]));
+    }
 
-	e_envp[envlen] = NULL; /* ensure null terminated */
+    e_envp[envlen] = NULL; /* ensure null terminated */
 
-	pid = atoe_spawnp(filename, fd_cnt, fd_map, inherit, argv, e_envp);
+    pid = atoe_spawnp(filename, fd_cnt, fd_map, inherit, argv, e_envp);
 
-	while (j--) {
-		free(e_envp[j]);
-	}
+    while (j--) {
+        free(e_envp[j]);
+    }
 
-	return pid;
+    return pid;
 }
 
 /**************************************************************************
@@ -2517,60 +2415,57 @@ atoe_spawnpe(const char *filename, const int fd_cnt, const int *fd_map,
  * returns     -
  *************************************************************************/
 
-pid_t
-atoe_spawnp(const char *filename, const int fd_cnt, const int *fd_map,
-			const struct inheritance *inherit, char **argv, const char **envp)
+pid_t atoe_spawnp(const char* filename, const int fd_cnt, const int* fd_map, const struct inheritance* inherit,
+    char** argv, const char** envp)
 {
-	char **e_argv;                                                              /*ibm@52465*/
-	int  validArgs = 1;                                                         /*ibm@52465*/
-	char *e_filename;                                              /*ibm.7677*/
-	int   i = 0;
-	pid_t pid = -1;
+    char** e_argv; /*ibm@52465*/
+    int validArgs = 1; /*ibm@52465*/
+    char* e_filename; /*ibm.7677*/
+    int i = 0;
+    pid_t pid = -1;
 
-	Log1(1, "Entry: atoe_spawnp: %s\n", filename);
+    Log1(1, "Entry: atoe_spawnp: %s\n", filename);
 
-	/* Determine the number of arguments. Note that the max number of      */   /*ibm@52465 ...*/
-	/* bytes in the argument list to the spawn command is _POSIX_ARG_MAX   */
-	/* hence it is not possible to have more than _POSIX_ARG_MAX arguments */
-	for (i = 0; argv[i] != NULL && i < _POSIX_ARG_MAX; i++);
-	e_argv = (char **)malloc(i * sizeof(char *) + 1);
-	if (e_argv == NULL) {
-		atoe_fprintf(stderr,
-					 "atoe_spawnp insufficient memory for command arguments\n");
-		return -1;
-	}                                                                           /*... ibm@52465*/
+    /* Determine the number of arguments. Note that the max number of      */ /*ibm@52465 ...*/
+    /* bytes in the argument list to the spawn command is _POSIX_ARG_MAX   */
+    /* hence it is not possible to have more than _POSIX_ARG_MAX arguments */
+    for (i = 0; argv[i] != NULL && i < _POSIX_ARG_MAX; i++)
+        ;
+    e_argv = (char**)malloc(i * sizeof(char*) + 1);
+    if (e_argv == NULL) {
+        atoe_fprintf(stderr, "atoe_spawnp insufficient memory for command arguments\n");
+        return -1;
+    } /*... ibm@52465*/
 
-	e_filename = a2e((char *)filename, strlen(filename));          /*ibm.7677*/
+    e_filename = a2e((char*)filename, strlen(filename)); /*ibm.7677*/
 
-	for (i = 0; argv[i] != NULL && i < _POSIX_ARG_MAX; i++) {      /*ibm.7677*/ /*ibm@52465*/
-		e_argv[i] = a2e(argv[i], strlen(argv[i]));                 /*ibm.7677*/
-		if (e_argv[i] == NULL) {                                                /*ibm@52465 ...*/
-			atoe_fprintf(stderr,
-						 "atoe_spawnp insufficient memory for command argument %d\n", i);
-			validArgs = 0;
-			break;
-		}                                                                       /*... ibm@52465*/
-	}
-	e_argv[i] = NULL;  /* ensure null terminated char array */     /*ibm.7677*/
+    for (i = 0; argv[i] != NULL && i < _POSIX_ARG_MAX; i++) { /*ibm.7677*/ /*ibm@52465*/
+        e_argv[i] = a2e(argv[i], strlen(argv[i])); /*ibm.7677*/
+        if (e_argv[i] == NULL) { /*ibm@52465 ...*/
+            atoe_fprintf(stderr, "atoe_spawnp insufficient memory for command argument %d\n", i);
+            validArgs = 0;
+            break;
+        } /*... ibm@52465*/
+    }
+    e_argv[i] = NULL; /* ensure null terminated char array */ /*ibm.7677*/
 
-	if (validArgs) {                                                            /*ibm@52465*/
-		pid = spawnp((const char *)e_filename, fd_cnt, fd_map, inherit, /*ibm.7677*/
-					 (const char **)e_argv, envp);
+    if (validArgs) { /*ibm@52465*/
+        pid = spawnp((const char*)e_filename, fd_cnt, fd_map, inherit, /*ibm.7677*/
+            (const char**)e_argv, envp);
 
-		if (pid == -1) {
-			atoe_fprintf(stderr, "spawn of \"%s\" failed\n", filename);
-		}
-	}                                                                           /*ibm@52465*/
+        if (pid == -1) {
+            atoe_fprintf(stderr, "spawn of \"%s\" failed\n", filename);
+        }
+    } /*ibm@52465*/
 
-	free(e_filename);
-	for (i = 0; e_argv[i] != NULL; i++) {
-		free(e_argv[i]);
-	}
-	free(e_argv);                                                               /*ibm@52465*/
+    free(e_filename);
+    for (i = 0; e_argv[i] != NULL; i++) {
+        free(e_argv[i]);
+    }
+    free(e_argv); /*ibm@52465*/
 
-	return pid;
+    return pid;
 }
-
 
 /**************************************************************************
  * name        - etoa_uname                                 ibm@3752
@@ -2578,35 +2473,34 @@ atoe_spawnp(const char *filename, const int fd_cnt, const int *fd_map,
  * parameters  -
  * returns     -
  *************************************************************************/
-int
-etoa_uname(struct utsname *a)
+int etoa_uname(struct utsname* a)
 {
-	struct utsname e;
-	int rc = 0;
+    struct utsname e;
+    int rc = 0;
 
-	Log(1, "Entry: etoa_uname\n");
+    Log(1, "Entry: etoa_uname\n");
 
-	rc = uname(&e);
-	if (rc == 0 && a != NULL) {
-		char *temp = NULL;
-		temp  = e2a_string(e.sysname);
-		strcpy(a->sysname, temp);
-		free(temp);
-		temp  = e2a_string(e.nodename);
-		strcpy(a->nodename, temp);
-		free(temp);
-		temp  = e2a_string(e.release);
-		strcpy(a->release, temp);
-		free(temp);
-		temp  = e2a_string(e.version);
-		strcpy(a->version, temp);
-		free(temp);
-		temp  = e2a_string(e.machine);
-		strcpy(a->machine, temp);
-		free(temp);
-	}
+    rc = uname(&e);
+    if (rc == 0 && a != NULL) {
+        char* temp = NULL;
+        temp = e2a_string(e.sysname);
+        strcpy(a->sysname, temp);
+        free(temp);
+        temp = e2a_string(e.nodename);
+        strcpy(a->nodename, temp);
+        free(temp);
+        temp = e2a_string(e.release);
+        strcpy(a->release, temp);
+        free(temp);
+        temp = e2a_string(e.version);
+        strcpy(a->version, temp);
+        free(temp);
+        temp = e2a_string(e.machine);
+        strcpy(a->machine, temp);
+        free(temp);
+    }
 
-	return rc;
+    return rc;
 }
 
 /**************************************************************************
@@ -2615,13 +2509,12 @@ etoa_uname(struct utsname *a)
  * parameters  -
  * returns     -
  *************************************************************************/
-char *
-etoa_nl_langinfo(int nl_item)
+char* etoa_nl_langinfo(int nl_item)
 {
 
-	char *retVal = NULL;
-	retVal = nl_langinfo(nl_item);
-	return (retVal != NULL) ? e2a_string(retVal) : NULL;
+    char* retVal = NULL;
+    retVal = nl_langinfo(nl_item);
+    return (retVal != NULL) ? e2a_string(retVal) : NULL;
 }
 
 /*********************************************************************/
@@ -2638,21 +2531,20 @@ etoa_nl_langinfo(int nl_item)
 /* returns     - int: 0 (success) or -1 (failure)                    */
 /*********************************************************************/
 
-int
-atoe_utimes(const char *path, const struct timeval *times)
+int atoe_utimes(const char* path, const struct timeval* times)
 {
-	char *ep;
-	int rc;
+    char* ep;
+    int rc;
 
-	Log(1, "Entry: atoe_utimes\n");
+    Log(1, "Entry: atoe_utimes\n");
 
-	ep = a2e_string(path);
+    ep = a2e_string(path);
 
-	rc = utimes(ep, times);
+    rc = utimes(ep, times);
 
-	free(ep);
+    free(ep);
 
-	return rc;
+    return rc;
 }
 
 /*********************************************************************/
@@ -2669,21 +2561,20 @@ atoe_utimes(const char *path, const struct timeval *times)
 /* returns     - int: 0 (success) or -1 (failure)                    */
 /*********************************************************************/
 
-int
-atoe_chmod(const char *path, mode_t mode)
+int atoe_chmod(const char* path, mode_t mode)
 {
-	char *ep;
-	int rc;
+    char* ep;
+    int rc;
 
-	Log(1, "Entry: atoe_chmod\n");
+    Log(1, "Entry: atoe_chmod\n");
 
-	ep = a2e_string(path);
+    ep = a2e_string(path);
 
-	rc = chmod(ep, mode);
+    rc = chmod(ep, mode);
 
-	free(ep);
+    free(ep);
 
-	return rc;
+    return rc;
 }
 
 /*********************************************************************/
@@ -2698,21 +2589,20 @@ atoe_chmod(const char *path, mode_t mode)
 /* returns     - int: 0 (success) or -1 (failure)                    */
 /*********************************************************************/
 
-int
-atoe_chdir(const char *path)
+int atoe_chdir(const char* path)
 {
-	int  rc;
-	char *ep;
+    int rc;
+    char* ep;
 
-	Log(1, "Entry: atoe_chdir\n");
+    Log(1, "Entry: atoe_chdir\n");
 
-	ep = a2e_string(path);
+    ep = a2e_string(path);
 
-	rc = chdir(ep);
+    rc = chdir(ep);
 
-	free(ep);
+    free(ep);
 
-	return rc;
+    return rc;
 }
 
 /*********************************************************************/
@@ -2729,21 +2619,20 @@ atoe_chdir(const char *path)
 /* returns     - int: 0 (success) or -1 (failure)                    */
 /*********************************************************************/
 
-int
-atoe_chown(const char *path, uid_t uid, gid_t gid)
+int atoe_chown(const char* path, uid_t uid, gid_t gid)
 {
-	int  rc;
-	char *ep;
+    int rc;
+    char* ep;
 
-	Log(1, "Entry: atoe_chown\n");
+    Log(1, "Entry: atoe_chown\n");
 
-	ep = a2e_string(path);
+    ep = a2e_string(path);
 
-	rc = chown(ep, uid, gid);
+    rc = chown(ep, uid, gid);
 
-	free(ep);
+    free(ep);
 
-	return rc;
+    return rc;
 }
 
 /**************************************************************************
@@ -2753,20 +2642,19 @@ atoe_chown(const char *path, uid_t uid, gid_t gid)
  * returns     -
  *************************************************************************/
 
-key_t
-atoe_ftok(const char *pathname, int id)
+key_t atoe_ftok(const char* pathname, int id)
 {
-	key_t key;
-	char  *e;
+    key_t key;
+    char* e;
 
-	Log(1, "Entry: atoe_ftok\n");
+    Log(1, "Entry: atoe_ftok\n");
 
-	e   = a2e_string((char *) pathname);
-	key = ftok(e, id);
+    e = a2e_string((char*)pathname);
+    key = ftok(e, id);
 
-	free(e);
+    free(e);
 
-	return key;
+    return key;
 }
 
 /**************************************************************************
@@ -2775,40 +2663,38 @@ atoe_ftok(const char *pathname, int id)
  * parameters  -
  * returns     -
  *************************************************************************/
-int
-etoa___osname(struct utsname *a)
+int etoa___osname(struct utsname* a)
 {
-	struct utsname e;
-	int rc = 0;
+    struct utsname e;
+    int rc = 0;
 
-	Log(1, "Entry: etoa___osname\n");
+    Log(1, "Entry: etoa___osname\n");
 
-	rc = __osname(&e);
-	if (rc == 0 && a != NULL) {
-		char *temp = NULL;
-		temp = e2a_string(e.sysname);
-		strcpy(a->sysname, temp);
-		free(temp);
+    rc = __osname(&e);
+    if (rc == 0 && a != NULL) {
+        char* temp = NULL;
+        temp = e2a_string(e.sysname);
+        strcpy(a->sysname, temp);
+        free(temp);
 
-		temp = e2a_string(e.nodename);
-		strcpy(a->nodename, temp);
-		free(temp);
+        temp = e2a_string(e.nodename);
+        strcpy(a->nodename, temp);
+        free(temp);
 
-		temp = e2a_string(e.release);
-		strcpy(a->release, temp);
-		free(temp);
+        temp = e2a_string(e.release);
+        strcpy(a->release, temp);
+        free(temp);
 
-		temp = e2a_string(e.version);
-		strcpy(a->version, temp);
-		free(temp);
+        temp = e2a_string(e.version);
+        strcpy(a->version, temp);
+        free(temp);
 
-		temp = e2a_string(e.machine);
-		strcpy(a->machine, temp);
-		free(temp);
-	}
+        temp = e2a_string(e.machine);
+        strcpy(a->machine, temp);
+        free(temp);
+    }
 
-	return rc;
+    return rc;
 }
-
 
 /* END OF FILE */

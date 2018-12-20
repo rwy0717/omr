@@ -32,52 +32,39 @@
 /**
  * \brief       Get the next slot of a J9HashTable
  * \ingroup     GC_Structs
- *  
+ *
  * @return      A slot pointer (NULL when no more slots)
- * 
+ *
  *	Continues the interation of all nodes in a J9HashTable
- *      
+ *
  */
-void **
-GC_HashTableIterator::nextSlot()
+void** GC_HashTableIterator::nextSlot()
 {
-	void **value;
-	
-	if (_firstIteration) {
-		_firstIteration = false;
+    void** value;
 
-		value = (void **)hashTableStartDo(_hashTable, &_handle);
-	} else {
-		value = (void **)hashTableNextDo(&_handle);
-	}
+    if (_firstIteration) {
+        _firstIteration = false;
 
-	return value;
+        value = (void**)hashTableStartDo(_hashTable, &_handle);
+    } else {
+        value = (void**)hashTableNextDo(&_handle);
+    }
+
+    return value;
 }
 
 /**
  * \brief       Remove the current slot in a J9HashTable
  * \ingroup     GC_Structs
- *  
- *	Removes the current slot in a J9HashTable (not valid in Out Of Process) 
- *      
+ *
+ *	Removes the current slot in a J9HashTable (not valid in Out Of Process)
+ *
  */
-void 
-GC_HashTableIterator::removeSlot()
-{
-	hashTableDoRemove(&_handle);
-}
+void GC_HashTableIterator::removeSlot() { hashTableDoRemove(&_handle); }
 
-void
-GC_HashTableIterator::disableTableGrowth()
-{
-	hashTableSetFlag(_hashTable, J9HASH_TABLE_DO_NOT_REHASH);
-}
+void GC_HashTableIterator::disableTableGrowth() { hashTableSetFlag(_hashTable, J9HASH_TABLE_DO_NOT_REHASH); }
 
 /**
  * Re-enable table growth which has been disabled by disableTableGrowth().
  */
-void
-GC_HashTableIterator::enableTableGrowth()
-{
-	hashTableResetFlag(_hashTable, J9HASH_TABLE_DO_NOT_REHASH);
-}
+void GC_HashTableIterator::enableTableGrowth() { hashTableResetFlag(_hashTable, J9HASH_TABLE_DO_NOT_REHASH); }

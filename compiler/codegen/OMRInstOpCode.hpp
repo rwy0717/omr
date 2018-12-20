@@ -27,77 +27,74 @@
  */
 #ifndef OMR_INSTOPCODE_CONNECTOR
 #define OMR_INSTOPCODE_CONNECTOR
-namespace OMR { class InstOpCode; }
-namespace OMR { typedef OMR::InstOpCode InstOpCodeConnector; }
+namespace OMR {
+class InstOpCode;
+}
+namespace OMR {
+typedef OMR::InstOpCode InstOpCodeConnector;
+}
 #endif
 
-#include <stdint.h>          // for uint8_t, int32_t
-#include "env/TRMemory.hpp"  // for TR_Memory, etc
+#include <stdint.h> // for uint8_t, int32_t
+#include "env/TRMemory.hpp" // for TR_Memory, etc
 
-namespace OMR
-{
+namespace OMR {
 
-class InstOpCode
-   {
-   public:
+class InstOpCode {
+public:
+    TR_ALLOC(TR_Memory::Instruction)
 
-   TR_ALLOC(TR_Memory::Instruction)
+    enum Mnemonic {
+#include "codegen/InstOpCodeEnum.hpp"
+        NumOpCodes
+    };
 
-   enum Mnemonic
-      {
-      #include "codegen/InstOpCodeEnum.hpp"
-      NumOpCodes
-      };
+protected:
+    InstOpCode(Mnemonic m)
+        : _mnemonic(m)
+    {}
 
-   protected:
+public:
+    Mnemonic getMnemonic() { return _mnemonic; }
+    void setMnemonic(Mnemonic op) { _mnemonic = op; }
 
-   InstOpCode(Mnemonic m) :
-      _mnemonic(m) {}
+    static int32_t getNumOpCodes() { return NumOpCodes; }
 
-   public:
+    /*
+     * Length of the encoded binary representation of an opcode.
+     */
+    static uint8_t length(Mnemonic m);
 
-   Mnemonic getMnemonic() { return _mnemonic; }
-   void setMnemonic(Mnemonic op) { _mnemonic = op; }
+    /*
+     * Copies the encoded binary representation of a given mnemonic to the
+     * provided buffer.  This will copy at most length() bytes.
+     *
+     * Returns the cursor position after the bytes have been copied.
+     */
+    static uint8_t* copyBinaryToBuffer(Mnemonic m, uint8_t* cursor);
+    static const char* getOpCodeName(Mnemonic m);
+    static const char* getMnemonicName(Mnemonic m);
 
-   static int32_t getNumOpCodes() { return NumOpCodes; }
+    const char* getOpCodeName() { return getOpCodeName(_mnemonic); }
+    const char* getMnemonicName() { return getMnemonicName(_mnemonic); }
 
-   /*
-    * Length of the encoded binary representation of an opcode.
-    */
-   static uint8_t length(Mnemonic m);
+    /*
+     * 0-terminated, printable description of the given mnemonic
+     */
+    // static char *description(Mnemonic m);
 
-   /*
-    * Copies the encoded binary representation of a given mnemonic to the
-    * provided buffer.  This will copy at most length() bytes.
-    *
-    * Returns the cursor position after the bytes have been copied.
-    */
-   static uint8_t *copyBinaryToBuffer(Mnemonic m, uint8_t *cursor);
-   static const char *getOpCodeName(Mnemonic m);
-   static const char *getMnemonicName(Mnemonic m);
+protected:
+    /*
+     * Pointer to the encoded binary representation of an instruction.
+     */
+    static uint8_t* binaryEncoding(Mnemonic m);
 
-   const char *getOpCodeName()    { return getOpCodeName(_mnemonic);  }
-   const char *getMnemonicName()  { return getMnemonicName(_mnemonic);  }
+    Mnemonic _mnemonic;
 
-   /*
-    * 0-terminated, printable description of the given mnemonic
-    */
-   //static char *description(Mnemonic m);
+private:
+    InstOpCode() {}
+};
 
-   protected:
-
-   /*
-    * Pointer to the encoded binary representation of an instruction.
-    */
-   static uint8_t *binaryEncoding(Mnemonic m);
-
-   Mnemonic _mnemonic;
-
-   private:
-
-   InstOpCode() {}
-   };
-
-}
+} // namespace OMR
 
 #endif

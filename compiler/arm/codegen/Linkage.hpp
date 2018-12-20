@@ -24,18 +24,16 @@
 
 #include "codegen/OMRLinkage.hpp"
 
-#include "infra/Annotations.hpp"  // for OMR_EXTENSIBLE
+#include "infra/Annotations.hpp" // for OMR_EXTENSIBLE
 
-namespace TR
-{
+namespace TR {
 
-class OMR_EXTENSIBLE Linkage : public OMR::LinkageConnector
-   {
-   public:
-
-   Linkage(TR::CodeGenerator *cg)
-      : OMR::LinkageConnector(cg) {}
-   };
-}
+class OMR_EXTENSIBLE Linkage : public OMR::LinkageConnector {
+public:
+    Linkage(TR::CodeGenerator* cg)
+        : OMR::LinkageConnector(cg)
+    {}
+};
+} // namespace TR
 
 #endif

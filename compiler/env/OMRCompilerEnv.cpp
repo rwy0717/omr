@@ -24,74 +24,59 @@
 #include "env/CPU.hpp"
 #include "env/defines.h"
 
+OMR::CompilerEnv::CompilerEnv(TR::RawAllocator raw, const TR::PersistentAllocatorKit& persistentAllocatorKit)
+    : rawAllocator(raw)
+    , _initialized(false)
+    , _persistentAllocator(persistentAllocatorKit)
+    , regionAllocator(_persistentAllocator)
+{}
 
-OMR::CompilerEnv::CompilerEnv(
-   TR::RawAllocator raw,
-   const TR::PersistentAllocatorKit &persistentAllocatorKit
-   ) :
-      rawAllocator(raw),
-      _initialized(false),
-      _persistentAllocator(persistentAllocatorKit),
-      regionAllocator(_persistentAllocator)
-   {
-   }
+TR::CompilerEnv* OMR::CompilerEnv::self() { return static_cast<TR::CompilerEnv*>(this); }
 
+void OMR::CompilerEnv::initialize()
+{
+    self()->initializeHostEnvironment();
 
-TR::CompilerEnv *OMR::CompilerEnv::self()
-   {
-   return static_cast<TR::CompilerEnv *>(this);
-   }
+    self()->initializeTargetEnvironment();
 
+    om.initialize();
 
-void
-OMR::CompilerEnv::initialize()
-   {
-   self()->initializeHostEnvironment();
+    _initialized = true;
+}
 
-   self()->initializeTargetEnvironment();
+void OMR::CompilerEnv::initializeHostEnvironment()
+{
 
-   om.initialize();
-
-   _initialized = true;
-   }
-
-
-void
-OMR::CompilerEnv::initializeHostEnvironment()
-   {
-
-   // Host processor bitness
-   //
+    // Host processor bitness
+    //
 #ifdef TR_HOST_64BIT
-   host.setBitness(TR::bits_64);
+    host.setBitness(TR::bits_64);
 #elif TR_HOST_32BIT
-   host.setBitness(TR::bits_32);
+    host.setBitness(TR::bits_32);
 #else
-   host.setBitness(TR::bits_unknown);
+    host.setBitness(TR::bits_unknown);
 #endif
 
-   // Initialize the host CPU by querying the host processor
-   //
-   host.cpu.initializeByHostQuery();
+    // Initialize the host CPU by querying the host processor
+    //
+    host.cpu.initializeByHostQuery();
 
-   // Host major operating system
-   //
+    // Host major operating system
+    //
 #if HOST_OS == OMR_LINUX
-   host.setMajorOS(TR::os_linux);
+    host.setMajorOS(TR::os_linux);
 #elif HOST_OS == OMR_AIX
-   host.setMajorOS(TR::os_aix);
+    host.setMajorOS(TR::os_aix);
 #elif HOST_OS == OMR_WINDOWS
-   host.setMajorOS(TR::os_windows);
+    host.setMajorOS(TR::os_windows);
 #elif HOST_OS == OMR_ZOS
-   host.setMajorOS(TR::os_zos);
+    host.setMajorOS(TR::os_zos);
 #elif HOST_OS == OMR_OSX
-   host.setMajorOS(TR::os_osx);
+    host.setMajorOS(TR::os_osx);
 #else
-   host.setMajorOS(TR::os_unknown);
+    host.setMajorOS(TR::os_unknown);
 #endif
-
-   }
-
+}
 
 // Projects are encouraged to over-ride this function in their project
 // extension.
@@ -99,38 +84,36 @@ OMR::CompilerEnv::initializeHostEnvironment()
 // By default, the target will be initialized to the same environment
 // as the host.
 //
-void
-OMR::CompilerEnv::initializeTargetEnvironment()
-   {
+void OMR::CompilerEnv::initializeTargetEnvironment()
+{
 
-   // Target processor bitness
-   //
+    // Target processor bitness
+    //
 #ifdef TR_TARGET_64BIT
-   target.setBitness(TR::bits_64);
+    target.setBitness(TR::bits_64);
 #elif TR_TARGET_32BIT
-   target.setBitness(TR::bits_32);
+    target.setBitness(TR::bits_32);
 #else
-   target.setBitness(TR::bits_unknown);
+    target.setBitness(TR::bits_unknown);
 #endif
 
-   // Initialize the target CPU by querying the host processor
-   //
-   target.cpu.initializeByHostQuery();
+    // Initialize the target CPU by querying the host processor
+    //
+    target.cpu.initializeByHostQuery();
 
-   // Target major operating system
-   //
+    // Target major operating system
+    //
 #if HOST_OS == OMR_LINUX
-   target.setMajorOS(TR::os_linux);
+    target.setMajorOS(TR::os_linux);
 #elif HOST_OS == OMR_AIX
-   target.setMajorOS(TR::os_aix);
+    target.setMajorOS(TR::os_aix);
 #elif HOST_OS == OMR_WINDOWS
-   target.setMajorOS(TR::os_windows);
+    target.setMajorOS(TR::os_windows);
 #elif HOST_OS == OMR_ZOS
-   target.setMajorOS(TR::os_zos);
+    target.setMajorOS(TR::os_zos);
 #elif HOST_OS == OMR_OSX
-   target.setMajorOS(TR::os_osx);
+    target.setMajorOS(TR::os_osx);
 #else
-   target.setMajorOS(TR::os_unknown);
+    target.setMajorOS(TR::os_unknown);
 #endif
-
-   }
+}

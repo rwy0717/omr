@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 /**
  * @file
  * @ingroup GC_Modron_Standard
@@ -42,41 +41,37 @@ class MM_MarkingScheme;
  * @todo Provide class documentation
  * @ingroup GC_Modron_Standard
  */
-class MM_ParallelMarkTask : public MM_ParallelTask
-{
+class MM_ParallelMarkTask : public MM_ParallelTask {
 private:
-	MM_MarkingScheme *_markingScheme;
-	const bool _initMarkMap;
-	MM_CycleState *_cycleState;  /**< Collection cycle state active for the task */
-	
+    MM_MarkingScheme* _markingScheme;
+    const bool _initMarkMap;
+    MM_CycleState* _cycleState; /**< Collection cycle state active for the task */
+
 public:
-	virtual uintptr_t getVMStateID();
-	
-	virtual void run(MM_EnvironmentBase *env);
-	virtual void setup(MM_EnvironmentBase *env);
-	virtual void cleanup(MM_EnvironmentBase *env);
-	
+    virtual uintptr_t getVMStateID();
+
+    virtual void run(MM_EnvironmentBase* env);
+    virtual void setup(MM_EnvironmentBase* env);
+    virtual void cleanup(MM_EnvironmentBase* env);
+
 #if defined(J9MODRON_TGC_PARALLEL_STATISTICS)
-	virtual void synchronizeGCThreads(MM_EnvironmentBase *env, const char *id);
-	virtual bool synchronizeGCThreadsAndReleaseMaster(MM_EnvironmentBase *env, const char *id);
-	virtual bool synchronizeGCThreadsAndReleaseSingleThread(MM_EnvironmentBase *env, const char *id);
+    virtual void synchronizeGCThreads(MM_EnvironmentBase* env, const char* id);
+    virtual bool synchronizeGCThreadsAndReleaseMaster(MM_EnvironmentBase* env, const char* id);
+    virtual bool synchronizeGCThreadsAndReleaseSingleThread(MM_EnvironmentBase* env, const char* id);
 #endif /* J9MODRON_TGC_PARALLEL_STATISTICS */
 
-	/**
-	 * Create a ParallelMarkTask object.
-	 */
-	MM_ParallelMarkTask(MM_EnvironmentBase *env,
-			MM_Dispatcher *dispatcher, 
-			MM_MarkingScheme *markingScheme, 
-			bool initMarkMap,
-			MM_CycleState *cycleState) :
-		MM_ParallelTask(env, dispatcher)
-		,_markingScheme(markingScheme)
-		,_initMarkMap(initMarkMap)
-		,_cycleState(cycleState)
-	{
-		_typeId = __FUNCTION__;
-	};
+    /**
+     * Create a ParallelMarkTask object.
+     */
+    MM_ParallelMarkTask(MM_EnvironmentBase* env, MM_Dispatcher* dispatcher, MM_MarkingScheme* markingScheme,
+        bool initMarkMap, MM_CycleState* cycleState)
+        : MM_ParallelTask(env, dispatcher)
+        , _markingScheme(markingScheme)
+        , _initMarkMap(initMarkMap)
+        , _cycleState(cycleState)
+    {
+        _typeId = __FUNCTION__;
+    };
 };
 
 #endif /* PARALLELMARKTASK_HPP_ */

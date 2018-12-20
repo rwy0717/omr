@@ -23,8 +23,4 @@
 #include <pthread.h>
 #include "omrthread.h"
 
-uintptr_t
-omrthread_get_ras_tid(void)
-{
-	return (uintptr_t)(*(uint32_t *)pthread_self().__);
-}
+uintptr_t omrthread_get_ras_tid(void) { return (uintptr_t)(*(uint32_t*)pthread_self().__); }

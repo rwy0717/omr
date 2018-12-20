@@ -40,11 +40,7 @@
  * @return 0 on success, -1 on failure.
  * @internal @todo return negative portable return code on failure.
  */
-int32_t
-omrfile_blockingasync_close(struct OMRPortLibrary *portLibrary, intptr_t fd)
-{
-	return -1;
-}
+int32_t omrfile_blockingasync_close(struct OMRPortLibrary* portLibrary, intptr_t fd) { return -1; }
 
 /**
  * Convert a pathname into a file descriptor.
@@ -57,10 +53,9 @@ omrfile_blockingasync_close(struct OMRPortLibrary *portLibrary, intptr_t fd)
  * @return The file descriptor of the newly opened file, -1 on failure.
  *
  */
-intptr_t
-omrfile_blockingasync_open(struct OMRPortLibrary *portLibrary, const char *path, int32_t flags, int32_t mode)
+intptr_t omrfile_blockingasync_open(struct OMRPortLibrary* portLibrary, const char* path, int32_t flags, int32_t mode)
 {
-	return -1;
+    return -1;
 }
 
 /**
@@ -79,12 +74,11 @@ omrfile_blockingasync_open(struct OMRPortLibrary *portLibrary, const char *path,
  *
  * @return                              0 on success, -1 on failure
  */
-int32_t
-omrfile_blockingasync_lock_bytes(struct OMRPortLibrary *portLibrary, intptr_t fd, int32_t lockFlags, uint64_t offset, uint64_t length)
+int32_t omrfile_blockingasync_lock_bytes(
+    struct OMRPortLibrary* portLibrary, intptr_t fd, int32_t lockFlags, uint64_t offset, uint64_t length)
 {
-	return -1;
+    return -1;
 }
-
 
 /**
  * This function will release the lock on the given file, starting at offset bytes
@@ -97,10 +91,10 @@ omrfile_blockingasync_lock_bytes(struct OMRPortLibrary *portLibrary, intptr_t fd
  *
  * @return                              0 on success, -1 on failure
  */
-int32_t
-omrfile_blockingasync_unlock_bytes(struct OMRPortLibrary *portLibrary, intptr_t fd, uint64_t offset, uint64_t length)
+int32_t omrfile_blockingasync_unlock_bytes(
+    struct OMRPortLibrary* portLibrary, intptr_t fd, uint64_t offset, uint64_t length)
 {
-	return -1;
+    return -1;
 }
 /**
  * Read bytes from a file descriptor into a user provided buffer.
@@ -112,12 +106,10 @@ omrfile_blockingasync_unlock_bytes(struct OMRPortLibrary *portLibrary, intptr_t 
  *
  * @return The number of bytes read, or -1 on failure.
  */
-intptr_t
-omrfile_blockingasync_read(struct OMRPortLibrary *portLibrary, intptr_t fd, void *buf, intptr_t nbytes)
+intptr_t omrfile_blockingasync_read(struct OMRPortLibrary* portLibrary, intptr_t fd, void* buf, intptr_t nbytes)
 {
-	return -1;
+    return -1;
 }
-
 
 /**
  * Write to a file.
@@ -131,10 +123,9 @@ omrfile_blockingasync_read(struct OMRPortLibrary *portLibrary, intptr_t fd, void
  *
  * @return Number of bytes written on success, portable error return code (which is negative) on failure.
  */
-intptr_t
-omrfile_blockingasync_write(struct OMRPortLibrary *portLibrary, intptr_t fd, const void *buf, intptr_t nbytes)
+intptr_t omrfile_blockingasync_write(struct OMRPortLibrary* portLibrary, intptr_t fd, const void* buf, intptr_t nbytes)
 {
-	return -1;
+    return -1;
 }
 
 /**
@@ -146,10 +137,9 @@ omrfile_blockingasync_write(struct OMRPortLibrary *portLibrary, intptr_t fd, con
  *
  * @return 0 on success, negative portable error code on failure
  */
-int32_t
-omrfile_blockingasync_set_length(struct OMRPortLibrary *portLibrary, intptr_t fd, int64_t newLength)
+int32_t omrfile_blockingasync_set_length(struct OMRPortLibrary* portLibrary, intptr_t fd, int64_t newLength)
 {
-	return -1;
+    return -1;
 }
 
 /**
@@ -160,26 +150,19 @@ omrfile_blockingasync_set_length(struct OMRPortLibrary *portLibrary, intptr_t fd
  *
  * @return Length in bytes of the file on success, negative portable error code on failure
  */
-int64_t
-omrfile_blockingasync_flength(struct OMRPortLibrary *portLibrary, intptr_t fd)
-{
-	return -1;
-}
+int64_t omrfile_blockingasync_flength(struct OMRPortLibrary* portLibrary, intptr_t fd) { return -1; }
 
 /**
  * PortLibrary shutdown.
  *
- * This function is called during shutdown of the portLibrary.  Any resources that were created by @ref omrfile_blockingasync_startup
- * should be destroyed here.
+ * This function is called during shutdown of the portLibrary.  Any resources that were created by @ref
+ * omrfile_blockingasync_startup should be destroyed here.
  *
  * @param[in] portLibrary The port library
  *
  * @note Most implementations will be empty.
  */
-void
-omrfile_blockingasync_shutdown(struct OMRPortLibrary *portLibrary)
-{
-}
+void omrfile_blockingasync_shutdown(struct OMRPortLibrary* portLibrary) {}
 
 /**
  * PortLibrary startup.
@@ -195,8 +178,4 @@ omrfile_blockingasync_shutdown(struct OMRPortLibrary *portLibrary)
  *
  * @note Most implementations will simply return success.
  */
-int32_t
-omrfile_blockingasync_startup(struct OMRPortLibrary *portLibrary)
-{
-	return 0;
-}
+int32_t omrfile_blockingasync_startup(struct OMRPortLibrary* portLibrary) { return 0; }

@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 /**
  * @file
  * @ingroup GC_Base
@@ -48,91 +47,91 @@ class MM_MemorySubSpace;
  * This class represents the per-thread type associated to each MM_Environment that controls how a
  * thread allocates objects.  This control includes any caching measures (e.g., TLH).
  */
-class MM_ObjectAllocationInterface : public MM_BaseVirtual
-{
-/*
- * Data members
- */
+class MM_ObjectAllocationInterface : public MM_BaseVirtual {
+    /*
+     * Data members
+     */
 private:
-
 protected:
-	MM_EnvironmentBase *_owningEnv;  /**< The environment with which the receiver is associated */
-	MM_AllocationStats _stats; /**< Allocation statistics for this allocation interface. */
-	MM_FrequentObjectsStats* _frequentObjectsStats;
+    MM_EnvironmentBase* _owningEnv; /**< The environment with which the receiver is associated */
+    MM_AllocationStats _stats; /**< Allocation statistics for this allocation interface. */
+    MM_FrequentObjectsStats* _frequentObjectsStats;
 
 public:
-
-/*
- * Function members
- */
+    /*
+     * Function members
+     */
 private:
-
 protected:
-	/**
-	 * Provide an initialization for the class
-	 *
-	 * @param env environment
-	 * @return true if an initialization is successful
-	 */
-	virtual bool initialize(MM_EnvironmentBase *env) = 0;
+    /**
+     * Provide an initialization for the class
+     *
+     * @param env environment
+     * @return true if an initialization is successful
+     */
+    virtual bool initialize(MM_EnvironmentBase* env) = 0;
 
-	/**
-	 * Tear Down for the class
-	 *
-	 * @param env environment
-	 */
-	virtual void tearDown(MM_EnvironmentBase *env) = 0;
+    /**
+     * Tear Down for the class
+     *
+     * @param env environment
+     */
+    virtual void tearDown(MM_EnvironmentBase* env) = 0;
 
-	MM_ObjectAllocationInterface(MM_EnvironmentBase *env) :
-		MM_BaseVirtual(),
-		_owningEnv(env)
-		,_stats()
-		,_frequentObjectsStats(NULL)
-	{
-		_typeId = __FUNCTION__;
-	};
+    MM_ObjectAllocationInterface(MM_EnvironmentBase* env)
+        : MM_BaseVirtual()
+        , _owningEnv(env)
+        , _stats()
+        , _frequentObjectsStats(NULL)
+    {
+        _typeId = __FUNCTION__;
+    };
 
 public:
-	MM_AllocationStats* getAllocationStats() { return &_stats; }
-	MM_FrequentObjectsStats* getFrequentObjectsStats() { return _frequentObjectsStats; }
-	MM_EnvironmentBase *getOwningEnv() { return _owningEnv; }
+    MM_AllocationStats* getAllocationStats() { return &_stats; }
+    MM_FrequentObjectsStats* getFrequentObjectsStats() { return _frequentObjectsStats; }
+    MM_EnvironmentBase* getOwningEnv() { return _owningEnv; }
 
-	virtual void kill(MM_EnvironmentBase *env) = 0;
+    virtual void kill(MM_EnvironmentBase* env) = 0;
 
-	virtual void *allocateObject(MM_EnvironmentBase *env, MM_AllocateDescription *allocateDescription, MM_MemorySpace *memorySpace, bool shouldCollectOnFailure) = 0;
-	virtual void *allocateArray(MM_EnvironmentBase *env, MM_AllocateDescription *allocateDescription, MM_MemorySpace *memorySpace, bool shouldCollectOnFailure) = 0;
+    virtual void* allocateObject(MM_EnvironmentBase* env, MM_AllocateDescription* allocateDescription,
+        MM_MemorySpace* memorySpace, bool shouldCollectOnFailure)
+        = 0;
+    virtual void* allocateArray(MM_EnvironmentBase* env, MM_AllocateDescription* allocateDescription,
+        MM_MemorySpace* memorySpace, bool shouldCollectOnFailure)
+        = 0;
 #if defined(OMR_GC_ARRAYLETS)
-	/**
-	 * Allocate the arraylet spine.
-	 */
-	virtual void *
-	allocateArrayletSpine(MM_EnvironmentBase *env, MM_AllocateDescription *allocateDescription, MM_MemorySpace *memorySpace, bool shouldCollectOnFailure)
-	{
-		Assert_MM_unreachable();
-		return NULL;
-	}
+    /**
+     * Allocate the arraylet spine.
+     */
+    virtual void* allocateArrayletSpine(MM_EnvironmentBase* env, MM_AllocateDescription* allocateDescription,
+        MM_MemorySpace* memorySpace, bool shouldCollectOnFailure)
+    {
+        Assert_MM_unreachable();
+        return NULL;
+    }
 
-	/**
-	 * Allocate an arraylet leaf.
-	 */
-	virtual void *
-	allocateArrayletLeaf(MM_EnvironmentBase *env, MM_AllocateDescription *allocateDescription, MM_MemorySpace *memorySpace, bool shouldCollectOnFailure)
-	{
-		Assert_MM_unreachable();
-		return NULL;
-	}
+    /**
+     * Allocate an arraylet leaf.
+     */
+    virtual void* allocateArrayletLeaf(MM_EnvironmentBase* env, MM_AllocateDescription* allocateDescription,
+        MM_MemorySpace* memorySpace, bool shouldCollectOnFailure)
+    {
+        Assert_MM_unreachable();
+        return NULL;
+    }
 #endif /* OMR_GC_ARRAYLETS */
 
 #if defined(OMR_GC_THREAD_LOCAL_HEAP)
-	virtual void *allocateTLH(MM_EnvironmentBase *env, MM_AllocateDescription *allocDescription, MM_MemorySubSpace *memorySubSpace, MM_MemoryPool *memoryPool);
+    virtual void* allocateTLH(MM_EnvironmentBase* env, MM_AllocateDescription* allocDescription,
+        MM_MemorySubSpace* memorySubSpace, MM_MemoryPool* memoryPool);
 #endif /* OMR_GC_THREAD_LOCAL_HEAP */
 
-	virtual void flushCache(MM_EnvironmentBase *env);
-	virtual void restartCache(MM_EnvironmentBase *env);
-	
-	virtual void enableCachedAllocations(MM_EnvironmentBase* env) {};
-	virtual void disableCachedAllocations(MM_EnvironmentBase* env) {};
-	virtual bool cachedAllocationsEnabled(MM_EnvironmentBase* env) { return true; }
-	
+    virtual void flushCache(MM_EnvironmentBase* env);
+    virtual void restartCache(MM_EnvironmentBase* env);
+
+    virtual void enableCachedAllocations(MM_EnvironmentBase* env) {};
+    virtual void disableCachedAllocations(MM_EnvironmentBase* env) {};
+    virtual bool cachedAllocationsEnabled(MM_EnvironmentBase* env) { return true; }
 };
 #endif /* OBJECTALLOCATIONINTERFACE_HPP_ */

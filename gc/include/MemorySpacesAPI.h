@@ -76,7 +76,6 @@ extern "C" {
 #define MEMORY_SUBSPACE_NAME_METRONOME "Metronome"
 #define MEMORY_SUBSPACE_DESCRIPTION_METRONOME "Metronome MemorySubSpace Description"
 
-
 #ifdef __cplusplus
 } /* extern "C" { */
 #endif /* __cplusplus */

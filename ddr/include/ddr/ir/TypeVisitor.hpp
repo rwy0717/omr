@@ -31,15 +31,14 @@ class Type;
 class TypedefUDT;
 class UnionUDT;
 
-class TypeVisitor
-{
+class TypeVisitor {
 public:
-	virtual DDR_RC visitType(Type *type) const = 0;
-	virtual DDR_RC visitClass(ClassUDT *type) const = 0;
-	virtual DDR_RC visitEnum(EnumUDT *type) const = 0;
-	virtual DDR_RC visitNamespace(NamespaceUDT *type) const = 0;
-	virtual DDR_RC visitTypedef(TypedefUDT *type) const = 0;
-	virtual DDR_RC visitUnion(UnionUDT *type) const = 0;
+    virtual DDR_RC visitType(Type* type) const = 0;
+    virtual DDR_RC visitClass(ClassUDT* type) const = 0;
+    virtual DDR_RC visitEnum(EnumUDT* type) const = 0;
+    virtual DDR_RC visitNamespace(NamespaceUDT* type) const = 0;
+    virtual DDR_RC visitTypedef(TypedefUDT* type) const = 0;
+    virtual DDR_RC visitUnion(UnionUDT* type) const = 0;
 };
 
 #endif /* TYPEVISITOR_HPP */

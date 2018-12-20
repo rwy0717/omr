@@ -22,18 +22,17 @@
 #include <pthread.h>
 #include "omrthread.h"
 
-uintptr_t
-omrthread_get_ras_tid(void)
+uintptr_t omrthread_get_ras_tid(void)
 {
-	struct __pthrdsinfo buf;
-	pthread_t myThread = pthread_self();
-	int retval;
-	int regSize = 0;
+    struct __pthrdsinfo buf;
+    pthread_t myThread = pthread_self();
+    int retval;
+    int regSize = 0;
 
-	retval = pthread_getthrds_np(&myThread, PTHRDSINFO_QUERY_TID, &buf, sizeof(buf), NULL, &regSize);
-	if (!retval) {
-		return buf.__pi_tid;
-	} else {
-		return 0;
-	}
+    retval = pthread_getthrds_np(&myThread, PTHRDSINFO_QUERY_TID, &buf, sizeof(buf), NULL, &regSize);
+    if (!retval) {
+        return buf.__pi_tid;
+    } else {
+        return 0;
+    }
 }

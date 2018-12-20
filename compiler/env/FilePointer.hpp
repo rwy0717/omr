@@ -24,24 +24,22 @@
 
 #include "env/FilePointerDecl.hpp"
 
-#include <stdio.h>                  // for NULL, stderr, stdin, stdout
+#include <stdio.h> // for NULL, stderr, stdin, stdout
 
-namespace TR
-{
+namespace TR {
 
-   typedef struct FilePointer
-      {
+typedef struct FilePointer {
 
-      static FILE *Null() { return NULL; }
+    static FILE* Null() { return NULL; }
 
-      static FILE *Stdin() { return stdin; }
+    static FILE* Stdin() { return stdin; }
 
-      static FILE *Stdout() { return stdout; }
+    static FILE* Stdout() { return stdout; }
 
-      static FILE *Stderr() { return stderr; }
+    static FILE* Stderr() { return stderr; }
 
-      } FilePointer;
+} FilePointer;
 
-}
+} // namespace TR
 
 #endif

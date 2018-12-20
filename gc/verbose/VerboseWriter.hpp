@@ -31,64 +31,65 @@
 #include "EnvironmentBase.hpp"
 
 typedef enum {
-	VERBOSE_WRITER_STANDARD_STREAM = 1,
-	VERBOSE_WRITER_FILE_LOGGING_SYNCHRONOUS = 2,
-	VERBOSE_WRITER_FILE_LOGGING_BUFFERED = 3,
-	VERBOSE_WRITER_TRACE = 4,
-	VERBOSE_WRITER_HOOK = 5
+    VERBOSE_WRITER_STANDARD_STREAM = 1,
+    VERBOSE_WRITER_FILE_LOGGING_SYNCHRONOUS = 2,
+    VERBOSE_WRITER_FILE_LOGGING_BUFFERED = 3,
+    VERBOSE_WRITER_TRACE = 4,
+    VERBOSE_WRITER_HOOK = 5
 } WriterType;
 
 /**
  * The base class for writers that do output for the verbose GC.
  * Actual writers subclass this.
  */
-class MM_VerboseWriter : public MM_Base
-{
-	/*
-	 * Data members
-	 */
+class MM_VerboseWriter : public MM_Base {
+    /*
+     * Data members
+     */
 public:
 protected:
 private:
-	MM_VerboseWriter *_nextWriter;
+    MM_VerboseWriter* _nextWriter;
 
-	char* _header;
-	char* _footer;
+    char* _header;
+    char* _footer;
 
-	WriterType _type;
-	bool _isActive;
+    WriterType _type;
+    bool _isActive;
 
-	/*
-	 * Function members
-	 */
+    /*
+     * Function members
+     */
 public:
-	virtual void kill(MM_EnvironmentBase *env);
+    virtual void kill(MM_EnvironmentBase* env);
 
-	MM_VerboseWriter* getNextWriter();
-	void setNextWriter(MM_VerboseWriter* writer);
+    MM_VerboseWriter* getNextWriter();
+    void setNextWriter(MM_VerboseWriter* writer);
 
-	virtual void outputString(MM_EnvironmentBase *env, const char* string) = 0;
+    virtual void outputString(MM_EnvironmentBase* env, const char* string) = 0;
 
-	virtual bool reconfigure(MM_EnvironmentBase *env, const char *filename, uintptr_t fileCount, uintptr_t iterations) = 0;
+    virtual bool reconfigure(MM_EnvironmentBase* env, const char* filename, uintptr_t fileCount, uintptr_t iterations)
+        = 0;
 
-	virtual void endOfCycle(MM_EnvironmentBase *env) = 0;
+    virtual void endOfCycle(MM_EnvironmentBase* env) = 0;
 
-	virtual void closeStream(MM_EnvironmentBase *env) = 0;
+    virtual void closeStream(MM_EnvironmentBase* env) = 0;
 
-	MMINLINE WriterType getType(void) { return _type; }
+    MMINLINE WriterType getType(void) { return _type; }
 
-	MMINLINE bool isActive(void) { return _isActive; }
-	MMINLINE void isActive(bool isActive) { _isActive = isActive; }
+    MMINLINE bool isActive(void) { return _isActive; }
+    MMINLINE void isActive(bool isActive) { _isActive = isActive; }
 
 protected:
-	MM_VerboseWriter(WriterType type);
+    MM_VerboseWriter(WriterType type);
 
-	virtual void tearDown(MM_EnvironmentBase *env);
+    virtual void tearDown(MM_EnvironmentBase* env);
 
-	bool initialize(MM_EnvironmentBase* env);
+    bool initialize(MM_EnvironmentBase* env);
 
-	const char* getHeader(MM_EnvironmentBase *env);
-	const char* getFooter(MM_EnvironmentBase *env);
+    const char* getHeader(MM_EnvironmentBase* env);
+    const char* getFooter(MM_EnvironmentBase* env);
+
 private:
 };
 

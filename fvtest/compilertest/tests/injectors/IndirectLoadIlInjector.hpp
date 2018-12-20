@@ -24,22 +24,20 @@
 
 #include "tests/injectors/UnaryOpIlInjector.hpp"
 
-namespace TR { class TypeDictionary; }
+namespace TR {
+class TypeDictionary;
+}
 
-namespace TestCompiler
-{
-class IndirectLoadIlInjector : public UnaryOpIlInjector
-   {
-   public:
-   IndirectLoadIlInjector(TR::TypeDictionary *types, TestDriver *test, TR::ILOpCodes opCode)
-   : UnaryOpIlInjector(types, test, opCode)
-   {
-   }
+namespace TestCompiler {
+class IndirectLoadIlInjector : public UnaryOpIlInjector {
+public:
+    IndirectLoadIlInjector(TR::TypeDictionary* types, TestDriver* test, TR::ILOpCodes opCode)
+        : UnaryOpIlInjector(types, test, opCode)
+    {}
 
-   TR_ALLOC(TR_Memory::IlGenerator)
-   bool injectIL();
-
-   };
+    TR_ALLOC(TR_Memory::IlGenerator)
+    bool injectIL();
+};
 
 } // namespace TestCompiler
 

@@ -19,13 +19,13 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-//On zOS XLC linker can't handle files with same name at link time
-//This workaround with pragma is needed. What this does is essentially
-//give a different name to the codesection (csect) for this file. So it
-//doesn't conflict with another file with same name.
-#pragma csect(CODE,"OMRZRegPairBase#C")
-#pragma csect(STATIC,"OMRZRegPairBase#S")
-#pragma csect(TEST,"OMRZRegPairBase#T")
+// On zOS XLC linker can't handle files with same name at link time
+// This workaround with pragma is needed. What this does is essentially
+// give a different name to the codesection (csect) for this file. So it
+// doesn't conflict with another file with same name.
+#pragma csect(CODE, "OMRZRegPairBase#C")
+#pragma csect(STATIC, "OMRZRegPairBase#S")
+#pragma csect(TEST, "OMRZRegPairBase#T")
 
 #include "z/codegen/OMRRegisterPair.hpp"
 
@@ -37,34 +37,32 @@
 #include "il/SymbolReference.hpp"
 #include "optimizer/Structure.hpp"
 
-OMR::Z::RegisterPair::RegisterPair(TR::Register *lo, TR::Register *ho):
-   OMR::RegisterPair(lo, ho)
-   {
-   // highword RA HPR upgrade
-   if (lo)
-      lo->setIsNotHighWordUpgradable(true);
-   if (ho)
-      ho->setIsNotHighWordUpgradable(true);
-   }
+OMR::Z::RegisterPair::RegisterPair(TR::Register* lo, TR::Register* ho)
+    : OMR::RegisterPair(lo, ho)
+{
+    // highword RA HPR upgrade
+    if (lo)
+        lo->setIsNotHighWordUpgradable(true);
+    if (ho)
+        ho->setIsNotHighWordUpgradable(true);
+}
 
+TR::Register* OMR::Z::RegisterPair::setLowOrder(TR::Register* lo, TR::CodeGenerator* codeGen)
+{
+    // highword RA HPR upgrade
+    if (lo)
+        lo->setIsNotHighWordUpgradable(true);
 
-TR::Register *
-OMR::Z::RegisterPair::setLowOrder(TR::Register *lo, TR::CodeGenerator *codeGen)
-   {
-   // highword RA HPR upgrade
-   if (lo) lo->setIsNotHighWordUpgradable(true);
+    // call base class implementation
+    return OMR::RegisterPair::setLowOrder(lo, codeGen);
+}
 
-   // call base class implementation
-   return OMR::RegisterPair::setLowOrder(lo, codeGen);
-   }
+TR::Register* OMR::Z::RegisterPair::setHighOrder(TR::Register* ho, TR::CodeGenerator* codeGen)
+{
+    // highword RA HPR upgrade
+    if (ho)
+        ho->setIsNotHighWordUpgradable(true);
 
-
-TR::Register *
-OMR::Z::RegisterPair::setHighOrder(TR::Register *ho, TR::CodeGenerator *codeGen)
-   {
-   // highword RA HPR upgrade
-   if (ho) ho->setIsNotHighWordUpgradable(true);
-
-   // call base class implementation
-   return OMR::RegisterPair::setHighOrder(ho, codeGen);
-   }
+    // call base class implementation
+    return OMR::RegisterPair::setHighOrder(ho, codeGen);
+}

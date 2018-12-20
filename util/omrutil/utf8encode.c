@@ -37,41 +37,39 @@
  * @note If result is NULL then bytesRemaining is ignored and the number
  * of characters required to encode the unicode character is returned.
  */
-uint32_t
-encodeUTF8CharN(uintptr_t unicode, uint8_t *result, uint32_t bytesRemaining)
+uint32_t encodeUTF8CharN(uintptr_t unicode, uint8_t* result, uint32_t bytesRemaining)
 {
-	if (unicode >= 0x01 && unicode <= 0x7f) {
-		if (result) {
-			if (bytesRemaining < 1) {
-				return 0;
-			}
-			*result = (uint8_t)unicode;
-		}
-		return 1;
-	} else if (unicode == 0 || (unicode >= 0x80 && unicode <= 0x7ff)) {
-		if (result) {
-			if (bytesRemaining < 2) {
-				return 0;
-			}
-			*result++ = (uint8_t)(((unicode >> 6) & 0x1f) | 0xc0);
-			*result = (uint8_t)((unicode & 0x3f) | 0x80);
-		}
-		return 2;
-	} else if (unicode >= 0x800 && unicode <= 0xffff) {
-		if (result) {
-			if (bytesRemaining < 3) {
-				return 0;
-			}
-			*result++ = (uint8_t)(((unicode >> 12) & 0x0f) | 0xe0);
-			*result++ = (uint8_t)(((unicode >> 6) & 0x3f) | 0x80);
-			*result = (uint8_t)((unicode & 0x3f) | 0x80);
-		}
-		return 3;
-	} else {
-		return 0;
-	}
+    if (unicode >= 0x01 && unicode <= 0x7f) {
+        if (result) {
+            if (bytesRemaining < 1) {
+                return 0;
+            }
+            *result = (uint8_t)unicode;
+        }
+        return 1;
+    } else if (unicode == 0 || (unicode >= 0x80 && unicode <= 0x7ff)) {
+        if (result) {
+            if (bytesRemaining < 2) {
+                return 0;
+            }
+            *result++ = (uint8_t)(((unicode >> 6) & 0x1f) | 0xc0);
+            *result = (uint8_t)((unicode & 0x3f) | 0x80);
+        }
+        return 2;
+    } else if (unicode >= 0x800 && unicode <= 0xffff) {
+        if (result) {
+            if (bytesRemaining < 3) {
+                return 0;
+            }
+            *result++ = (uint8_t)(((unicode >> 12) & 0x0f) | 0xe0);
+            *result++ = (uint8_t)(((unicode >> 6) & 0x3f) | 0x80);
+            *result = (uint8_t)((unicode & 0x3f) | 0x80);
+        }
+        return 3;
+    } else {
+        return 0;
+    }
 }
-
 
 /**
  * Encode the Unicode character.
@@ -86,12 +84,4 @@ encodeUTF8CharN(uintptr_t unicode, uint8_t *result, uint32_t bytesRemaining)
  * @note If result is NULL then the number of characters required to
  * encode the character is returned.
  */
-uint32_t
-encodeUTF8Char(uintptr_t unicode, uint8_t *result)
-{
-	return encodeUTF8CharN(unicode, result, 3);
-}
-
-
-
-
+uint32_t encodeUTF8Char(uintptr_t unicode, uint8_t* result) { return encodeUTF8CharN(unicode, result, 3); }

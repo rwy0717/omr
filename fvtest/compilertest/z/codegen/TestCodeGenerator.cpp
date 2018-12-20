@@ -24,15 +24,12 @@
 #include "compile/Compilation.hpp"
 #include "env/CompilerEnv.hpp"
 
-namespace TestCompiler
-{
-namespace Z
-{
+namespace TestCompiler {
+namespace Z {
 
-CodeGenerator::CodeGenerator() :
-   TestCompiler::CodeGenerator()
-   {
-   }
+CodeGenerator::CodeGenerator()
+    : TestCompiler::CodeGenerator()
+{}
 
 } // namespace Z
 } // namespace TestCompiler

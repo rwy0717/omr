@@ -27,53 +27,51 @@
 #include "ras/IlVerifierHelpers.hpp"
 #include "SharedVerifiers.hpp" //for NoAndIlVerifier
 
-
 /**
- * Test Fixture for SimplifierFoldAndTest that 
+ * Test Fixture for SimplifierFoldAndTest that
  * selects only the relevant opts for the test case
  */
-class SimplifierFoldAndTest : public TRTest::JitOptTest
-   {
+class SimplifierFoldAndTest : public TRTest::JitOptTest {
 
-   public:
-   SimplifierFoldAndTest()
-      {
-      /* Add an optimization.
-       * You can add as many optimizations as you need, in order,
-       * using `addOptimization`, or add a group using
-       * `addOptimizations(omrCompilationStrategies[warm])`.
-       * This could also be done in test cases themselves.
-       */
-      addOptimization(OMR::treeSimplification);
-      }
-
-   };
+public:
+    SimplifierFoldAndTest()
+    {
+        /* Add an optimization.
+         * You can add as many optimizations as you need, in order,
+         * using `addOptimization`, or add a group using
+         * `addOptimizations(omrCompilationStrategies[warm])`.
+         * This could also be done in test cases themselves.
+         */
+        addOptimization(OMR::treeSimplification);
+    }
+};
 
 /*
- * method(int32_t parameter) 
+ * method(int32_t parameter)
  *   int64_t i = ((int64_t) parameter) & 0xFFFFFFFF00000000ll;
  *   return i;
  *
  * Note that the combo of the mask and width of the parameter means
- * the expression should always fold to zero. 
+ * the expression should always fold to zero.
  */
-TEST_F(SimplifierFoldAndTest, FoldHappens) {
+TEST_F(SimplifierFoldAndTest, FoldHappens)
+{
     auto* inputTrees = "(method return=Int64 args=[Int32]  "
                        " (block                            "
                        "  (lreturn                         "
-                       "   (land                           " 
+                       "   (land                           "
                        "    (lconst 0xFFFFFFFF00000000)    "
-                       "    (iu2l (iload parm=0))))))      "; 
-
+                       "    (iu2l (iload parm=0))))))      ";
 
     auto trees = parseString(inputTrees);
 
     ASSERT_NOTNULL(trees);
 
-    Tril::DefaultCompiler compiler{trees};
-    NoAndIlVerifier verifier;  
+    Tril::DefaultCompiler compiler { trees };
+    NoAndIlVerifier verifier;
 
-    ASSERT_EQ(0, compiler.compileWithVerifier(&verifier)) << "Compilation failed unexpectedly\n" << "Input trees: " << inputTrees;
+    ASSERT_EQ(0, compiler.compileWithVerifier(&verifier)) << "Compilation failed unexpectedly\n"
+                                                          << "Input trees: " << inputTrees;
 
     auto entry_point = compiler.getEntryPoint<int64_t (*)(int32_t)>();
     // Invoke the compiled method, and assert the output is correct.
@@ -83,4 +81,3 @@ TEST_F(SimplifierFoldAndTest, FoldHappens) {
     EXPECT_EQ(0ll, entry_point(-9));
     EXPECT_EQ(0ll, entry_point(2147483647));
 }
-

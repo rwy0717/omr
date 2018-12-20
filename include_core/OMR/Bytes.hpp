@@ -26,32 +26,15 @@
 #include <omrcfg.h>
 #include <stddef.h>
 
-namespace OMR
-{
+namespace OMR {
 
-inline size_t
-bytes(size_t n)
-{
-	return n;
-}
+inline size_t bytes(size_t n) { return n; }
 
-inline size_t
-kibibytes(size_t n)
-{
-	return n * bytes(1024);
-}
+inline size_t kibibytes(size_t n) { return n * bytes(1024); }
 
-inline size_t
-mebibytes(size_t n)
-{
-	return n * kibibytes(1024);
-}
+inline size_t mebibytes(size_t n) { return n * kibibytes(1024); }
 
-inline size_t
-gibibytes(size_t n)
-{
-	return n * mebibytes(1024);
-}
+inline size_t gibibytes(size_t n) { return n * mebibytes(1024); }
 
 } // namespace OMR
 

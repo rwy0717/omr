@@ -36,58 +36,57 @@
 /*
  * Do NOT dispense with this wrapper without relocating FD_SETSIZE below
  */
-#ifndef FD_SETSIZE                                               /*ibm@55297.1*/
-#define FD_SETSIZE  65535                                        /*ibm@55297.1*/
-#endif                                                           /*ibm@55297.1*/
+#ifndef FD_SETSIZE /*ibm@55297.1*/
+#define FD_SETSIZE 65535 /*ibm@55297.1*/
+#endif /*ibm@55297.1*/
 
-#if __TARGET_LIB__ == 0X22080000                                   /*ibm@28725*/
-#include <//'PP.ADLE370.OS39028.SCEEH.SYS.H(time)'>                /*ibm@28725*/
-#else                                                              /*ibm@28725*/
+#if __TARGET_LIB__ == 0X22080000 /*ibm@28725*/
+#include < //'PP.ADLE370.OS39028.SCEEH.SYS.H(time)'>                /*ibm@28725*/
+#else /*ibm@28725*/
 #include "prefixpath.h"
-#include PREFIXPATH(sys/time.h)                                 /*ibm@28725*/
-#endif                                                             /*ibm@28725*/
+#include PREFIXPATH(sys / time.h) /*ibm@28725*/
+#endif /*ibm@28725*/
 
 #if !defined(IBM_ATOE_SYS_TIME)
-   #define IBM_ATOE_SYS_TIME
+#define IBM_ATOE_SYS_TIME
 
-   /******************************************************************/
-   /*  Define prototypes for replacement functions.                  */
-   /******************************************************************/
+/******************************************************************/
+/*  Define prototypes for replacement functions.                  */
+/******************************************************************/
 
-   #ifdef __cplusplus
-      extern "C" {
-   #endif
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-   #if defined(IBM_ATOE)
+#if defined(IBM_ATOE)
 
-      int atoe_utimes(const char *, const struct timeval *);
+int atoe_utimes(const char*, const struct timeval*);
 
-   #endif
+#endif
 
-   #ifdef __cplusplus
-      }
-   #endif
+#ifdef __cplusplus
+}
+#endif
 
-   /******************************************************************/
-   /*  Undefine the functions                                        */
-   /******************************************************************/
+/******************************************************************/
+/*  Undefine the functions                                        */
+/******************************************************************/
 
-   #if defined(IBM_ATOE)
+#if defined(IBM_ATOE)
 
-      #undef  utimes
+#undef utimes
 
-   #endif
+#endif
 
-   /******************************************************************/
-   /*  Redefine the functions                                        */
-   /******************************************************************/
+/******************************************************************/
+/*  Redefine the functions                                        */
+/******************************************************************/
 
-   #if defined(IBM_ATOE)
+#if defined(IBM_ATOE)
 
-      #define utimes   atoe_utimes
+#define utimes atoe_utimes
 
-   #endif
+#endif
 #endif
 
 /* END OF FILE */
-

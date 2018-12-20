@@ -29,8 +29,16 @@
 #ifndef OMR_ELF_RELOCATION_RESOLVER_CONNECTOR
 #define OMR_ELF_RELOCATION_RESOLVER_CONNECTOR
 
-namespace OMR { namespace X86 { namespace AMD64 { class ELFRelocationResolver; } } }
-namespace OMR { typedef ::OMR::X86::AMD64::ELFRelocationResolver ELFRelocationResolverConnector; }
+namespace OMR {
+namespace X86 {
+namespace AMD64 {
+class ELFRelocationResolver;
+}
+} // namespace X86
+} // namespace OMR
+namespace OMR {
+typedef ::OMR::X86::AMD64::ELFRelocationResolver ELFRelocationResolverConnector;
+}
 
 #endif /* OMR_ELF_RELOCATION_RESOLVER_CONNECTOR */
 
@@ -41,25 +49,25 @@ namespace X86 {
 namespace AMD64 {
 
 /**
- * @brief The ELFRelocationResolver class translates between a TR::StaticRelocation and the ELF relocation type required for the platform.
+ * @brief The ELFRelocationResolver class translates between a TR::StaticRelocation and the ELF relocation type required
+ * for the platform.
  */
-class OMR_EXTENSIBLE ELFRelocationResolver : public ::OMR::ELFRelocationResolver
-   {
+class OMR_EXTENSIBLE ELFRelocationResolver : public ::OMR::ELFRelocationResolver {
 public:
-
-   /**
-    * @brief resolveRelocationType translates between a TR::StaticRelocation and the ELF relocation type required for the platform.
-    * @param relocation The relocation object containing the information that requires translation.
-    * @return The ELF relocation type appropriate for the platform
-    */
-   uint32_t resolveRelocationType(const TR::StaticRelocation &relocation);
+    /**
+     * @brief resolveRelocationType translates between a TR::StaticRelocation and the ELF relocation type required for
+     * the platform.
+     * @param relocation The relocation object containing the information that requires translation.
+     * @return The ELF relocation type appropriate for the platform
+     */
+    uint32_t resolveRelocationType(const TR::StaticRelocation& relocation);
 
 private:
-   };
+};
 
-}
-}
-}
+} // namespace AMD64
+} // namespace X86
+} // namespace OMR
 
 #endif /* defined(LINUX) */
 

@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #ifndef UNIXTHREADATTR_H_
 #define UNIXTHREADATTR_H_
 
@@ -35,11 +34,11 @@ extern "C" {
  * for consistency
  */
 typedef struct unixthread_attr {
-	omrthread_attr hdr; /* must be first member */
-	pthread_attr_t pattr;
+    omrthread_attr hdr; /* must be first member */
+    pthread_attr_t pattr;
 } unixthread_attr;
 
-typedef struct unixthread_attr *unixthread_attr_t;
+typedef struct unixthread_attr* unixthread_attr_t;
 
 #ifdef __cplusplus
 }

@@ -36,56 +36,59 @@
 
 class MM_EnvironmentBase;
 
-class MM_SegregatedMarkingScheme : public MM_MarkingScheme
-{
-	/*
-	 * Data members
-	 */
+class MM_SegregatedMarkingScheme : public MM_MarkingScheme {
+    /*
+     * Data members
+     */
 public:
 protected:
 private:
-	/*
-	 * Function members
-	 */
+    /*
+     * Function members
+     */
 public:
-	static MM_SegregatedMarkingScheme *newInstance(MM_EnvironmentBase *env);
-	void kill(MM_EnvironmentBase *env);
-	
-	MMINLINE void
-	preMarkSmallCells(MM_EnvironmentBase* env, MM_HeapRegionDescriptorSegregated *containingRegion, uintptr_t *cellList, uintptr_t preAllocatedBytes)
-	{
-		if (NULL != cellList) {
-			uintptr_t cellSize = containingRegion->getCellSize();
+    static MM_SegregatedMarkingScheme* newInstance(MM_EnvironmentBase* env);
+    void kill(MM_EnvironmentBase* env);
 
-			uint8_t *objPtrLow = (uint8_t *)cellList;
-			/* objPtrHigh is the last object (cell) to be premarked.
-			 * => if there is only one object to premark than low will be equal to high
-			 */
-			uint8_t *objPtrHigh = (uint8_t *)cellList + preAllocatedBytes - cellSize;
-			uintptr_t slotIndexLow, slotIndexHigh;
-			uintptr_t bitMaskLow, bitMaskHigh;
+    MMINLINE void preMarkSmallCells(MM_EnvironmentBase* env, MM_HeapRegionDescriptorSegregated* containingRegion,
+        uintptr_t* cellList, uintptr_t preAllocatedBytes)
+    {
+        if (NULL != cellList) {
+            uintptr_t cellSize = containingRegion->getCellSize();
 
-			_markMap->getSlotIndexAndBlockMask((omrobjectptr_t)objPtrLow, &slotIndexLow, &bitMaskLow, false /* high bit block mask for low slot word */);
-			_markMap->getSlotIndexAndBlockMask((omrobjectptr_t)objPtrHigh, &slotIndexHigh, &bitMaskHigh, true /* low bit block mask for high slot word */);
+            uint8_t* objPtrLow = (uint8_t*)cellList;
+            /* objPtrHigh is the last object (cell) to be premarked.
+             * => if there is only one object to premark than low will be equal to high
+             */
+            uint8_t* objPtrHigh = (uint8_t*)cellList + preAllocatedBytes - cellSize;
+            uintptr_t slotIndexLow, slotIndexHigh;
+            uintptr_t bitMaskLow, bitMaskHigh;
 
-			if (slotIndexLow == slotIndexHigh) {
-				_markMap->markBlockAtomic(slotIndexLow, bitMaskLow & bitMaskHigh);
-			} else {
-				_markMap->markBlockAtomic(slotIndexLow, bitMaskLow);
-				_markMap->setMarkBlock(slotIndexLow + 1, slotIndexHigh - 1, (uintptr_t)-1);
-				_markMap->markBlockAtomic(slotIndexHigh, bitMaskHigh);
-			}
-		}
-	}
+            _markMap->getSlotIndexAndBlockMask((omrobjectptr_t)objPtrLow, &slotIndexLow, &bitMaskLow,
+                false /* high bit block mask for low slot word */);
+            _markMap->getSlotIndexAndBlockMask((omrobjectptr_t)objPtrHigh, &slotIndexHigh, &bitMaskHigh,
+                true /* low bit block mask for high slot word */);
+
+            if (slotIndexLow == slotIndexHigh) {
+                _markMap->markBlockAtomic(slotIndexLow, bitMaskLow & bitMaskHigh);
+            } else {
+                _markMap->markBlockAtomic(slotIndexLow, bitMaskLow);
+                _markMap->setMarkBlock(slotIndexLow + 1, slotIndexHigh - 1, (uintptr_t)-1);
+                _markMap->markBlockAtomic(slotIndexHigh, bitMaskHigh);
+            }
+        }
+    }
+
 protected:
-	/**
-	 * Create a MM_RealtimeMarkingScheme object
-	 */
-	MM_SegregatedMarkingScheme(MM_EnvironmentBase *env)
-		: MM_MarkingScheme(env)
-	{
-		_typeId = __FUNCTION__;
-	}
+    /**
+     * Create a MM_RealtimeMarkingScheme object
+     */
+    MM_SegregatedMarkingScheme(MM_EnvironmentBase* env)
+        : MM_MarkingScheme(env)
+    {
+        _typeId = __FUNCTION__;
+    }
+
 private:
 };
 

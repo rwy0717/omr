@@ -24,30 +24,33 @@
 
 #include "method_compiler.hpp"
 
-namespace TR { class IlVerifier; } 
+namespace TR {
+class IlVerifier;
+}
 
 namespace Tril {
 
 /**
- * @brief Concrete realization of MethodCompiler 
+ * @brief Concrete realization of MethodCompiler
  */
 class SimpleCompiler : public Tril::MethodCompiler {
-    public:
-        explicit SimpleCompiler(const ASTNode* methodNode)
-            : MethodCompiler{methodNode} {}
+public:
+    explicit SimpleCompiler(const ASTNode* methodNode)
+        : MethodCompiler { methodNode }
+    {}
 
-        /**
-         * @brief Compiles the Tril method
-         * @return 0 on compilation success, an error code otherwise
-         */
-        int32_t compile() /* override */ ;
+    /**
+     * @brief Compiles the Tril method
+     * @return 0 on compilation success, an error code otherwise
+     */
+    int32_t compile() /* override */;
 
-        /**
-         * @brief Start compilation with a verifier. 
-         * @param verifier The verifier to run. 
-         * @return 0 on complilation success, an error code or exception otherwise. 
-         */
-        int32_t compileWithVerifier(TR::IlVerifier* verifier);
+    /**
+     * @brief Start compilation with a verifier.
+     * @param verifier The verifier to run.
+     * @return 0 on complilation success, an error code or exception otherwise.
+     */
+    int32_t compileWithVerifier(TR::IlVerifier* verifier);
 };
 
 } // namespace Tril

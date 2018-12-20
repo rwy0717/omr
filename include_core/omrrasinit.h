@@ -45,7 +45,7 @@ typedef struct OMR_Agent OMR_Agent;
  *
  * @return an OMR error code
  */
-omr_error_t omr_ras_initMemCategories(OMRPortLibrary *portLibrary);
+omr_error_t omr_ras_initMemCategories(OMRPortLibrary* portLibrary);
 
 /**
  * @brief Start the HealthCenter agent.
@@ -60,7 +60,7 @@ omr_error_t omr_ras_initMemCategories(OMRPortLibrary *portLibrary);
  * @param[in]     healthCenterOpt Option string passed to the agent's OMRAgent_OnLoad() function.
  * @return an OMR error code
  */
-omr_error_t omr_ras_initHealthCenter(OMR_VM *omrVM, OMR_Agent **hc, const char *healthCenterOpt);
+omr_error_t omr_ras_initHealthCenter(OMR_VM* omrVM, OMR_Agent** hc, const char* healthCenterOpt);
 
 /**
  * @brief Shutdown and destroy the HealthCenter agent.
@@ -69,7 +69,7 @@ omr_error_t omr_ras_initHealthCenter(OMR_VM *omrVM, OMR_Agent **hc, const char *
  * @param[in,out] hc The healthcenter agent.
  * @return an OMR error code
  */
-omr_error_t omr_ras_cleanupHealthCenter(OMR_VM *omrVM, OMR_Agent **hc);
+omr_error_t omr_ras_cleanupHealthCenter(OMR_VM* omrVM, OMR_Agent** hc);
 
 /**
  * @internal
@@ -81,7 +81,7 @@ omr_error_t omr_ras_cleanupHealthCenter(OMR_VM *omrVM, OMR_Agent **hc);
  * @param[in] vm the current OMR VM
  * @return OMR error code
  */
-omr_error_t omr_ras_initTI(OMR_VM *vm);
+omr_error_t omr_ras_initTI(OMR_VM* vm);
 
 /**
  * @internal
@@ -93,7 +93,7 @@ omr_error_t omr_ras_initTI(OMR_VM *vm);
  * @param[in] vm the current OMR VM
  * @return an OMR error code. There is no error if TI was uninitialized.
  */
-omr_error_t omr_ras_cleanupTI(OMR_VM *vm);
+omr_error_t omr_ras_cleanupTI(OMR_VM* vm);
 
 /**
  * @brief Initialize the trace engine.
@@ -106,7 +106,7 @@ omr_error_t omr_ras_cleanupTI(OMR_VM *vm);
  * @param[in]     datDir Path containing trace format files (*TraceFormat.dat).
  * @return an OMR error code
  */
-omr_error_t omr_ras_initTraceEngine(OMR_VM *omrVM, const char *traceOptString, const char *datDir);
+omr_error_t omr_ras_initTraceEngine(OMR_VM* omrVM, const char* traceOptString, const char* datDir);
 
 /**
  * @brief Shutdown and destroy the trace engine.
@@ -114,7 +114,7 @@ omr_error_t omr_ras_initTraceEngine(OMR_VM *omrVM, const char *traceOptString, c
  * @param[in]     currentThread The current OMR VMThread.
  * @return an OMR error code
  */
-omr_error_t omr_ras_cleanupTraceEngine(OMR_VMThread *currentThread);
+omr_error_t omr_ras_cleanupTraceEngine(OMR_VMThread* currentThread);
 
 #ifdef __cplusplus
 }

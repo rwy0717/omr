@@ -21,10 +21,9 @@
 
 #include "cudaTests.hpp"
 
-static void
-streamCallback(J9CudaStream stream, int32_t error, uintptr_t userData)
+static void streamCallback(J9CudaStream stream, int32_t error, uintptr_t userData)
 {
-	*(J9CudaStream *)userData = stream;
+    *(J9CudaStream*)userData = stream;
 }
 
 /**
@@ -32,78 +31,78 @@ streamCallback(J9CudaStream stream, int32_t error, uintptr_t userData)
  */
 TEST_F(CudaDeviceTest, streams)
 {
-	OMRPORT_ACCESS_FROM_OMRPORT(getPortLibrary());
+    OMRPORT_ACCESS_FROM_OMRPORT(getPortLibrary());
 
-	for (uint32_t deviceId = 0; deviceId < deviceCount; ++deviceId) {
-		J9CudaStream callbackData = NULL;
-		J9CudaEvent event = NULL;
-		int32_t rc = 0;
-		J9CudaStream stream1 = NULL;
-		J9CudaStream stream2 = NULL;
-		uint32_t streamFlags = 0;
-		int32_t streamPriority = 0;
+    for (uint32_t deviceId = 0; deviceId < deviceCount; ++deviceId) {
+        J9CudaStream callbackData = NULL;
+        J9CudaEvent event = NULL;
+        int32_t rc = 0;
+        J9CudaStream stream1 = NULL;
+        J9CudaStream stream2 = NULL;
+        uint32_t streamFlags = 0;
+        int32_t streamPriority = 0;
 
-		rc = omrcuda_streamCreate(deviceId, &stream1);
+        rc = omrcuda_streamCreate(deviceId, &stream1);
 
-		ASSERT_EQ(0, rc) << "omrcuda_streamCreate failed";
-		ASSERT_NOT_NULL(stream1) << "created null stream";
+        ASSERT_EQ(0, rc) << "omrcuda_streamCreate failed";
+        ASSERT_NOT_NULL(stream1) << "created null stream";
 
-		rc = omrcuda_streamCreateWithPriority(deviceId, -1, J9CUDA_STREAM_FLAG_NON_BLOCKING, &stream2);
+        rc = omrcuda_streamCreateWithPriority(deviceId, -1, J9CUDA_STREAM_FLAG_NON_BLOCKING, &stream2);
 
-		ASSERT_EQ(0, rc) << "omrcuda_streamCreateWithPriority failed";
-		ASSERT_NOT_NULL(stream2) << "created null stream";
+        ASSERT_EQ(0, rc) << "omrcuda_streamCreateWithPriority failed";
+        ASSERT_NOT_NULL(stream2) << "created null stream";
 
-		rc = omrcuda_eventCreate(deviceId, J9CUDA_EVENT_FLAG_DEFAULT, &event);
+        rc = omrcuda_eventCreate(deviceId, J9CUDA_EVENT_FLAG_DEFAULT, &event);
 
-		ASSERT_EQ(0, rc) << "omrcuda_eventCreate failed";
-		ASSERT_NOT_NULL(event) << "created null event";
+        ASSERT_EQ(0, rc) << "omrcuda_eventCreate failed";
+        ASSERT_NOT_NULL(event) << "created null event";
 
-		rc = omrcuda_eventRecord(deviceId, event, stream1);
+        rc = omrcuda_eventRecord(deviceId, event, stream1);
 
-		ASSERT_EQ(0, rc) << "omrcuda_eventRecord failed";
+        ASSERT_EQ(0, rc) << "omrcuda_eventRecord failed";
 
-		rc = omrcuda_streamWaitEvent(deviceId, stream2, event);
+        rc = omrcuda_streamWaitEvent(deviceId, stream2, event);
 
-		ASSERT_EQ(0, rc) << "omrcuda_streamWaitEvent failed";
+        ASSERT_EQ(0, rc) << "omrcuda_streamWaitEvent failed";
 
-		rc = omrcuda_streamAddCallback(deviceId, stream2, streamCallback, (uintptr_t)&callbackData);
+        rc = omrcuda_streamAddCallback(deviceId, stream2, streamCallback, (uintptr_t)&callbackData);
 
-		ASSERT_EQ(0, rc) << "omrcuda_streamAddCallback failed";
+        ASSERT_EQ(0, rc) << "omrcuda_streamAddCallback failed";
 
-		rc = omrcuda_streamGetFlags(deviceId, stream2, &streamFlags);
+        rc = omrcuda_streamGetFlags(deviceId, stream2, &streamFlags);
 
-		ASSERT_EQ(0, rc) << "omrcuda_streamGetFlags failed";
+        ASSERT_EQ(0, rc) << "omrcuda_streamGetFlags failed";
 
-		rc = omrcuda_streamGetPriority(deviceId, stream2, &streamPriority);
+        rc = omrcuda_streamGetPriority(deviceId, stream2, &streamPriority);
 
-		ASSERT_EQ(0, rc) << "omrcuda_streamGetPriority failed";
+        ASSERT_EQ(0, rc) << "omrcuda_streamGetPriority failed";
 
-		rc = omrcuda_streamSynchronize(deviceId, stream2);
+        rc = omrcuda_streamSynchronize(deviceId, stream2);
 
-		ASSERT_EQ(0, rc) << "omrcuda_streamSynchronize failed";
+        ASSERT_EQ(0, rc) << "omrcuda_streamSynchronize failed";
 
-		rc = omrcuda_streamQuery(deviceId, stream2);
+        rc = omrcuda_streamQuery(deviceId, stream2);
 
-		ASSERT_EQ(0, rc) << "omrcuda_streamQuery failed";
+        ASSERT_EQ(0, rc) << "omrcuda_streamQuery failed";
 
-		ASSERT_EQ(stream2, callbackData) << "callback did not execute correctly";
+        ASSERT_EQ(stream2, callbackData) << "callback did not execute correctly";
 
-		if (NULL != stream1) {
-			rc = omrcuda_streamDestroy(deviceId, stream1);
+        if (NULL != stream1) {
+            rc = omrcuda_streamDestroy(deviceId, stream1);
 
-			ASSERT_EQ(0, rc) << "omrcuda_streamDestroy failed";
-		}
+            ASSERT_EQ(0, rc) << "omrcuda_streamDestroy failed";
+        }
 
-		if (NULL != stream2) {
-			rc = omrcuda_streamDestroy(deviceId, stream2);
+        if (NULL != stream2) {
+            rc = omrcuda_streamDestroy(deviceId, stream2);
 
-			ASSERT_EQ(0, rc) << "omrcuda_streamDestroy failed";
-		}
+            ASSERT_EQ(0, rc) << "omrcuda_streamDestroy failed";
+        }
 
-		if (NULL != event) {
-			rc = omrcuda_eventDestroy(deviceId, event);
+        if (NULL != event) {
+            rc = omrcuda_eventDestroy(deviceId, event);
 
-			ASSERT_EQ(0, rc) << "omrcuda_eventDestroy failed";
-		}
-	}
+            ASSERT_EQ(0, rc) << "omrcuda_eventDestroy failed";
+        }
+    }
 }

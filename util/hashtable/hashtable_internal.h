@@ -24,13 +24,13 @@
 #define hashtable_internal_h
 
 /**
-* @file hashtable_internal.h
-* @brief Internal prototypes used within the HASHTABLE module.
-*
-* This file contains implementation-private function prototypes and
-* type definitions for the HASHTABLE module.
-*
-*/
+ * @file hashtable_internal.h
+ * @brief Internal prototypes used within the HASHTABLE module.
+ *
+ * This file contains implementation-private function prototypes and
+ * type definitions for the HASHTABLE module.
+ *
+ */
 
 #include "omrcomp.h"
 #include "hashtable_api.h"
@@ -39,10 +39,8 @@
 extern "C" {
 #endif
 
-
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* hashtable_internal_h */
-

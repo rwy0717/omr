@@ -33,47 +33,46 @@
  * ===========================================================================
  */
 
-#if !defined(IBM_STAT_INCLUDED)  /*ibm@39757*/
-#define IBM_STAT_INCLUDED        /*ibm@39757*/
+#if !defined(IBM_STAT_INCLUDED) /*ibm@39757*/
+#define IBM_STAT_INCLUDED /*ibm@39757*/
 
 #include "prefixpath.h"
-#include PREFIXPATH(sys/stat.h)                          /*ibm@39429*/
+#include PREFIXPATH(sys / stat.h) /*ibm@39429*/
 
 #if defined(IBM_ATOE)
 
-	#if !defined(IBM_ATOE_SYS_STAT)
-		#define IBM_ATOE_SYS_STAT
+#if !defined(IBM_ATOE_SYS_STAT)
+#define IBM_ATOE_SYS_STAT
 
-		#ifdef __cplusplus
-            extern "C" {
-		#endif
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-        int atoe_mkdir (const char*, mode_t);
-        int atoe_remove (const char*);                     /*ibm@4838*/
-        int atoe_chmod (const char*, mode_t);             /*ibm@11596*/
-        int atoe_stat (const char*, struct stat*);
-        int atoe_statvfs (const char*, struct statvfs *buf);
+int atoe_mkdir(const char*, mode_t);
+int atoe_remove(const char*); /*ibm@4838*/
+int atoe_chmod(const char*, mode_t); /*ibm@11596*/
+int atoe_stat(const char*, struct stat*);
+int atoe_statvfs(const char*, struct statvfs* buf);
 
-		#ifdef __cplusplus
-            }
-		#endif
+#ifdef __cplusplus
+}
+#endif
 
-		#undef mkdir
-        #undef remove                                      /*ibm@4838*/
-		#undef stat
-		#undef chmod                                      /*ibm@11596*/
-		#undef statvfs
+#undef mkdir
+#undef remove /*ibm@4838*/
+#undef stat
+#undef chmod /*ibm@11596*/
+#undef statvfs
 
-		#define mkdir           atoe_mkdir
-		#define remove          atoe_remove                /*ibm@4838*/
-		#define stat(a,b)       atoe_stat(a,b)
-		#define statvfs(a,b)    atoe_statvfs(a,b)
-		#define lstat(a,b)      atoe_lstat(a,b)
-		#define chmod           atoe_chmod                /*ibm@11596*/
+#define mkdir atoe_mkdir
+#define remove atoe_remove /*ibm@4838*/
+#define stat(a, b) atoe_stat(a, b)
+#define statvfs(a, b) atoe_statvfs(a, b)
+#define lstat(a, b) atoe_lstat(a, b)
+#define chmod atoe_chmod /*ibm@11596*/
 
-	#endif
+#endif
 
 #endif
 #endif /*ibm@39757 - IBM_STAT_INCLUDED*/
 /* END OF FILE */
-

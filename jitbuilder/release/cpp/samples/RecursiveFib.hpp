@@ -20,19 +20,17 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #ifndef RECURSIVEFIB_INCL
 #define RECURSIVEFIB_INCL
 
 #include "JitBuilder.hpp"
 
-typedef int32_t (RecursiveFibFunctionType)(int32_t);
+typedef int32_t(RecursiveFibFunctionType)(int32_t);
 
-class RecursiveFibonnaciMethod : public OMR::JitBuilder::MethodBuilder
-   {
-   public:
-   RecursiveFibonnaciMethod(OMR::JitBuilder::TypeDictionary *types);
-   virtual bool buildIL();
-   };
+class RecursiveFibonnaciMethod : public OMR::JitBuilder::MethodBuilder {
+public:
+    RecursiveFibonnaciMethod(OMR::JitBuilder::TypeDictionary* types);
+    virtual bool buildIL();
+};
 
 #endif // !defined(RECURSIVEFIB_INCL)

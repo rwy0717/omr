@@ -25,39 +25,35 @@
 
 #include "JitBuilder.hpp"
 
-struct Struct
-   {
-   uint16_t f1;
-   uint8_t f2;
-   };
+struct Struct {
+    uint16_t f1;
+    uint8_t f2;
+};
 
-union Union
-   {
-   uint16_t f1;
-   uint8_t f2;
-   };
+union Union {
+    uint16_t f1;
+    uint8_t f2;
+};
 
-typedef uint8_t* (GetStructFieldAddressFunction)(Struct*);
-typedef uint8_t* (GetUnionFieldAddressFunction)(Union*);
+typedef uint8_t*(GetStructFieldAddressFunction)(Struct*);
+typedef uint8_t*(GetUnionFieldAddressFunction)(Union*);
 
-class GetStructFieldAddressBuilder : public OMR::JitBuilder::MethodBuilder
-   {
-   private:
-   OMR::JitBuilder::IlType *pStructType;
+class GetStructFieldAddressBuilder : public OMR::JitBuilder::MethodBuilder {
+private:
+    OMR::JitBuilder::IlType* pStructType;
 
-   public:
-   GetStructFieldAddressBuilder(OMR::JitBuilder::TypeDictionary *);
-   virtual bool buildIL();
-   };
+public:
+    GetStructFieldAddressBuilder(OMR::JitBuilder::TypeDictionary*);
+    virtual bool buildIL();
+};
 
-class GetUnionFieldAddressBuilder : public OMR::JitBuilder::MethodBuilder
-   {
-   private:
-   OMR::JitBuilder::IlType *pUnionType;
+class GetUnionFieldAddressBuilder : public OMR::JitBuilder::MethodBuilder {
+private:
+    OMR::JitBuilder::IlType* pUnionType;
 
-   public:
-   GetUnionFieldAddressBuilder(OMR::JitBuilder::TypeDictionary *);
-   virtual bool buildIL();
-   };
+public:
+    GetUnionFieldAddressBuilder(OMR::JitBuilder::TypeDictionary*);
+    virtual bool buildIL();
+};
 
 #endif // FIELDADDRESS_INCL

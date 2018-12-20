@@ -21,16 +21,16 @@
 
 #include "codegen/Register.hpp"
 
-void
-OMR::X86::Register::setNeedsPrecisionAdjustment()
-   {
-   _flags.set(NeedsPrecisionAdjustment);
-   TR_ASSERT(self()->mayNeedPrecisionAdjustment(), "setNeedsPrecisionAdjustment: precision adjustment flags must be consistent");
-   }
+void OMR::X86::Register::setNeedsPrecisionAdjustment()
+{
+    _flags.set(NeedsPrecisionAdjustment);
+    TR_ASSERT(self()->mayNeedPrecisionAdjustment(),
+        "setNeedsPrecisionAdjustment: precision adjustment flags must be consistent");
+}
 
-void
-OMR::X86::Register::resetMayNeedPrecisionAdjustment()
-    {
+void OMR::X86::Register::resetMayNeedPrecisionAdjustment()
+{
     _flags.reset(MayNeedPrecisionAdjustment);
-    TR_ASSERT(!self()->needsPrecisionAdjustment(), "resetMayNeedPrecisionAdjustment: precision adjustment flags must be consistent");
-    }
+    TR_ASSERT(!self()->needsPrecisionAdjustment(),
+        "resetMayNeedPrecisionAdjustment: precision adjustment flags must be consistent");
+}

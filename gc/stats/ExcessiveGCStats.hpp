@@ -38,37 +38,37 @@
  * @note This class is intended to have a single global instance
  * @ingroup GC_Stats
  */
-class MM_ExcessiveGCStats : public MM_Base
-{
+class MM_ExcessiveGCStats : public MM_Base {
 public:
-	uintptr_t gcCount; /**< Total number of GCs of all types that have occurred */
-	
-	/**
-	 * Stats for determining excessive GC
-	 * @{
-	 */
-	uint64_t startGCTimeStamp; /**< Raw timestamp (no units) of the start of the last GC */
-	uint64_t endGCTimeStamp; /**< Raw timestamp (no units) of the end of the last GC */
-	uintptr_t freeMemorySizeBefore; /**< The amount of free memory before the last GC */
-	uintptr_t freeMemorySizeAfter; /**< The amount of free memory after the last GC */
-	float newGCToUserTimeRatio; /**< Time spent in GC version vs. time in user code */
-	float avgGCToUserTimeRatio; /**< Weighted average of time spent in GC version vs. time in user code */
-	uint64_t totalGCTime; /**< Time (in microseconds) of all the GCs since the last global GC.  This includes all the local GCs (ie: new space scavenges) and the current global GC */
-	uint64_t lastEndGlobalGCTimeStamp; /**< Raw timestamp (no units) of the end of the last global GC */
-	/** @} */
+    uintptr_t gcCount; /**< Total number of GCs of all types that have occurred */
 
-	MM_ExcessiveGCStats() :
-		MM_Base(),
-		gcCount(0),
-		startGCTimeStamp(0),
-		endGCTimeStamp(0),
-		freeMemorySizeBefore(0),
-		freeMemorySizeAfter(0),
-		newGCToUserTimeRatio(0.0),
-		avgGCToUserTimeRatio(0.0),
-		totalGCTime(0),
-		lastEndGlobalGCTimeStamp(0)
-	{}
-}; 
+    /**
+     * Stats for determining excessive GC
+     * @{
+     */
+    uint64_t startGCTimeStamp; /**< Raw timestamp (no units) of the start of the last GC */
+    uint64_t endGCTimeStamp; /**< Raw timestamp (no units) of the end of the last GC */
+    uintptr_t freeMemorySizeBefore; /**< The amount of free memory before the last GC */
+    uintptr_t freeMemorySizeAfter; /**< The amount of free memory after the last GC */
+    float newGCToUserTimeRatio; /**< Time spent in GC version vs. time in user code */
+    float avgGCToUserTimeRatio; /**< Weighted average of time spent in GC version vs. time in user code */
+    uint64_t totalGCTime; /**< Time (in microseconds) of all the GCs since the last global GC.  This includes all the
+                             local GCs (ie: new space scavenges) and the current global GC */
+    uint64_t lastEndGlobalGCTimeStamp; /**< Raw timestamp (no units) of the end of the last global GC */
+    /** @} */
+
+    MM_ExcessiveGCStats()
+        : MM_Base()
+        , gcCount(0)
+        , startGCTimeStamp(0)
+        , endGCTimeStamp(0)
+        , freeMemorySizeBefore(0)
+        , freeMemorySizeAfter(0)
+        , newGCToUserTimeRatio(0.0)
+        , avgGCToUserTimeRatio(0.0)
+        , totalGCTime(0)
+        , lastEndGlobalGCTimeStamp(0)
+    {}
+};
 
 #endif /* EXCESSIVEGCSTATS_HPP_ */

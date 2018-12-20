@@ -27,15 +27,12 @@
 
 #if defined(OMR_GC_MODRON_COMPACTION)
 
-void
-MM_CompactSchemeFixupObject::fixupObject(MM_EnvironmentStandard *env, omrobjectptr_t objectPtr)
+void MM_CompactSchemeFixupObject::fixupObject(MM_EnvironmentStandard* env, omrobjectptr_t objectPtr)
 {
 #error provide an implementation to fix objects during a compact
 }
 
-
-void
-MM_CompactSchemeFixupObject::verifyForwardingPtr(omrobjectptr_t objectPtr, omrobjectptr_t forwardingPtr)
+void MM_CompactSchemeFixupObject::verifyForwardingPtr(omrobjectptr_t objectPtr, omrobjectptr_t forwardingPtr)
 {
 #error provide an implementation to verify objects after a compact is complete
 }

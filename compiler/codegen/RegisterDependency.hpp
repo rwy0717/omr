@@ -22,18 +22,14 @@
 #ifndef TR_REGISTER_DEPENDENCY_INCL
 #define TR_REGISTER_DEPENDENCY_INCL
 
-#include "codegen/OMRRegisterDependency.hpp"  // for RegisterDependencyConditions
+#include "codegen/OMRRegisterDependency.hpp" // for RegisterDependencyConditions
 
-namespace TR
-{
-class RegisterDependencyConditions : public OMR::RegisterDependencyConditionsConnector
-   {
-   public:
-
-   RegisterDependencyConditions() :
-      OMR::RegisterDependencyConditions() {};
-
-   };
-}
+namespace TR {
+class RegisterDependencyConditions : public OMR::RegisterDependencyConditionsConnector {
+public:
+    RegisterDependencyConditions()
+        : OMR::RegisterDependencyConditions() {};
+};
+} // namespace TR
 
 #endif

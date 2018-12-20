@@ -22,24 +22,26 @@
 #ifndef TR_REGISTER_PAIR_INCL
 #define TR_REGISTER_PAIR_INCL
 
-#include "codegen/RegisterConstants.hpp"         // for TR_RegisterKinds
-#include "codegen/OMRRegisterPair.hpp"  // for RegisterPair
+#include "codegen/RegisterConstants.hpp" // for TR_RegisterKinds
+#include "codegen/OMRRegisterPair.hpp" // for RegisterPair
 
-namespace TR { class Register; }
-
-namespace TR
-{
-
-class OMR_EXTENSIBLE RegisterPair: public OMR::RegisterPairConnector
-   {
-   public:
-
-   RegisterPair() {}
-   RegisterPair(TR_RegisterKinds rk) : OMR::RegisterPairConnector(rk) {}
-   RegisterPair(TR::Register *lo, TR::Register *ho) : OMR::RegisterPairConnector(lo, ho) {}
-
-   };
-
+namespace TR {
+class Register;
 }
+
+namespace TR {
+
+class OMR_EXTENSIBLE RegisterPair : public OMR::RegisterPairConnector {
+public:
+    RegisterPair() {}
+    RegisterPair(TR_RegisterKinds rk)
+        : OMR::RegisterPairConnector(rk)
+    {}
+    RegisterPair(TR::Register* lo, TR::Register* ho)
+        : OMR::RegisterPairConnector(lo, ho)
+    {}
+};
+
+} // namespace TR
 
 #endif

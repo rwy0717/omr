@@ -22,28 +22,32 @@
 #ifndef PPC_TREE_EVALUATOR_INCL
 #define PPC_TREE_EVALUATOR_INCL
 
-
-#include <stddef.h>                         // for NULL
-#include <stdint.h>                         // for int32_t
+#include <stddef.h> // for NULL
+#include <stdint.h> // for int32_t
 #include "codegen/TreeEvaluator.hpp"
 
-namespace TR { class CodeGenerator; }
-namespace TR { class Node; }
-namespace TR { class Register; }
+namespace TR {
+class CodeGenerator;
+}
+namespace TR {
+class Node;
+}
+namespace TR {
+class Register;
+}
 
-
-
-void simplifyANDRegImm(TR::Node *, TR::Register *trgReg, TR::Register *srcReg, int32_t value, TR::CodeGenerator *cg, TR::Node *constNode=NULL);
+void simplifyANDRegImm(TR::Node*, TR::Register* trgReg, TR::Register* srcReg, int32_t value, TR::CodeGenerator* cg,
+    TR::Node* constNode = NULL);
 
 #define VOID_BODY
 #define NULL_BODY
 #define BOOL_BODY
 
-class TR_PPCComputeCC : public TR::TreeEvaluator
-   {
-   public:
-   static bool setCarryBorrow(TR::Node *flagNode, bool invertValue, TR::Register **flagReg, TR::CodeGenerator *cg) BOOL_BODY;
-   };
+class TR_PPCComputeCC : public TR::TreeEvaluator {
+public:
+    static bool setCarryBorrow(
+        TR::Node* flagNode, bool invertValue, TR::Register** flagReg, TR::CodeGenerator* cg) BOOL_BODY;
+};
 
 #undef NULL_BODY
 #undef VOID_BODY

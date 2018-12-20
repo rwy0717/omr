@@ -28,24 +28,21 @@
 #include "ilgen/IlGeneratorMethodDetails.hpp"
 #include "ilgen/MethodBuilder.hpp"
 
-namespace TestCompiler
+namespace TestCompiler {
+void TestDriver::RunTest()
 {
-void
-TestDriver::RunTest()
-   {
-   compileTestMethods();
-   invokeTests();
-   }
+    compileTestMethods();
+    invokeTests();
+}
 
-int32_t
-TestDriver::compileMethodBuilder(TR::MethodBuilder *m, uint8_t ** entry)
-   {
-   TR::ResolvedMethod resolvedMethod(m);
-   TR::IlGeneratorMethodDetails details(&resolvedMethod);
+int32_t TestDriver::compileMethodBuilder(TR::MethodBuilder* m, uint8_t** entry)
+{
+    TR::ResolvedMethod resolvedMethod(m);
+    TR::IlGeneratorMethodDetails details(&resolvedMethod);
 
-   int32_t rc=0;
-   *entry = (uint8_t *) compileMethod(details, warm, rc);
-   return rc;
-   }
+    int32_t rc = 0;
+    *entry = (uint8_t*)compileMethod(details, warm, rc);
+    return rc;
+}
 
-} //namespace TestCompiler
+} // namespace TestCompiler

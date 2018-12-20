@@ -36,19 +36,19 @@ class MM_HeapRegionDescriptorStandard : public MM_HeapRegionDescriptor {
 public:
 protected:
 private:
-
 public:
-	MM_HeapRegionDescriptorStandard(MM_EnvironmentStandard *env, void *lowAddress, void *highAddress);
-	
-	bool initialize(MM_EnvironmentBase *envBase, MM_HeapRegionManager *regionManager);
-	void tearDown(MM_EnvironmentBase *env);
-	
-	static bool initializer(MM_EnvironmentBase *env, MM_HeapRegionManager *regionManager, MM_HeapRegionDescriptor *descriptor, void *lowAddress, void *highAddress);
-	static void destructor(MM_EnvironmentBase *env, MM_HeapRegionManager *regionManager, MM_HeapRegionDescriptor *descriptor);
+    MM_HeapRegionDescriptorStandard(MM_EnvironmentStandard* env, void* lowAddress, void* highAddress);
+
+    bool initialize(MM_EnvironmentBase* envBase, MM_HeapRegionManager* regionManager);
+    void tearDown(MM_EnvironmentBase* env);
+
+    static bool initializer(MM_EnvironmentBase* env, MM_HeapRegionManager* regionManager,
+        MM_HeapRegionDescriptor* descriptor, void* lowAddress, void* highAddress);
+    static void destructor(
+        MM_EnvironmentBase* env, MM_HeapRegionManager* regionManager, MM_HeapRegionDescriptor* descriptor);
 
 protected:
 private:
-	
 };
 
 #endif /* HEAPREGIONDESCRIPTORSTANDARD_HPP */

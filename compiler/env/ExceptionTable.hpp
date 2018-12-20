@@ -24,57 +24,61 @@
 
 #include "infra/Array.hpp"
 
-#include <stdint.h>          // for uint32_t, uint16_t, int32_t
-#include "env/TRMemory.hpp"  // for TR_Memory, etc
-#include "env/jittypes.h"    // for TR_ByteCodeInfo
-#include "infra/List.hpp"    // for List (ptr only), ListIterator
+#include <stdint.h> // for uint32_t, uint16_t, int32_t
+#include "env/TRMemory.hpp" // for TR_Memory, etc
+#include "env/jittypes.h" // for TR_ByteCodeInfo
+#include "infra/List.hpp" // for List (ptr only), ListIterator
 
 class TR_ResolvedMethod;
-namespace TR { class Block; }
-namespace TR { class Compilation; }
-template <class T> class TR_Array;
+namespace TR {
+class Block;
+}
+namespace TR {
+class Compilation;
+}
+template <class T>
+class TR_Array;
 
-struct TR_PCMapEntry
-   {
-   TR_ALLOC(TR_Memory::PCMapEntry)
+struct TR_PCMapEntry {
+    TR_ALLOC(TR_Memory::PCMapEntry)
 
-   uint16_t _instructionStartPC;
-   uint16_t _instructionEndPC;
-   uint16_t _bytecodeStartPC;
-   uint16_t _bytecodeEndPC;
-   };
+    uint16_t _instructionStartPC;
+    uint16_t _instructionEndPC;
+    uint16_t _bytecodeStartPC;
+    uint16_t _bytecodeEndPC;
+};
 
-struct TR_ExceptionTableEntry
-   {
-   TR_ALLOC(TR_Memory::ExceptionTableEntry)
+struct TR_ExceptionTableEntry {
+    TR_ALLOC(TR_Memory::ExceptionTableEntry)
 
-   TR_ResolvedMethod *   _method;
-   uint32_t              _instructionStartPC;
-   uint32_t              _instructionEndPC;
-   uint32_t              _instructionHandlerPC;
-   uint32_t              _catchType;
-   TR_ByteCodeInfo       _byteCodeInfo;
-   };
+    TR_ResolvedMethod* _method;
+    uint32_t _instructionStartPC;
+    uint32_t _instructionEndPC;
+    uint32_t _instructionHandlerPC;
+    uint32_t _catchType;
+    TR_ByteCodeInfo _byteCodeInfo;
+};
 
-struct TR_ExceptionTableEntryIterator
-   {
-   TR_ALLOC(TR_Memory::ExceptionTableEntryIterator)
+struct TR_ExceptionTableEntryIterator {
+    TR_ALLOC(TR_Memory::ExceptionTableEntryIterator)
 
-   TR_ExceptionTableEntryIterator(TR::Compilation *comp);
+    TR_ExceptionTableEntryIterator(TR::Compilation* comp);
 
-   TR_ExceptionTableEntry * getFirst();
-   TR_ExceptionTableEntry * getNext();
+    TR_ExceptionTableEntry* getFirst();
+    TR_ExceptionTableEntry* getNext();
 
-   uint32_t                 size();
+    uint32_t size();
+
 private:
-   TR_ExceptionTableEntry * getCurrent();
-   void                     addSnippetRanges(List<TR_ExceptionTableEntry> &, TR::Block *, TR::Block *, uint32_t, TR_ResolvedMethod *, TR::Compilation *);
+    TR_ExceptionTableEntry* getCurrent();
+    void addSnippetRanges(
+        List<TR_ExceptionTableEntry>&, TR::Block*, TR::Block*, uint32_t, TR_ResolvedMethod*, TR::Compilation*);
 
-   TR::Compilation *                          _compilation;
-   TR_Array<List<TR_ExceptionTableEntry> > * _tableEntries;
-   ListIterator<TR_ExceptionTableEntry>      _entryIterator;
-   int32_t                                   _inlineDepth;
-   uint32_t                                  _handlerIndex;
-   };
+    TR::Compilation* _compilation;
+    TR_Array<List<TR_ExceptionTableEntry> >* _tableEntries;
+    ListIterator<TR_ExceptionTableEntry> _entryIterator;
+    int32_t _inlineDepth;
+    uint32_t _handlerIndex;
+};
 
 #endif

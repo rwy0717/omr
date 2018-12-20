@@ -60,74 +60,71 @@
  * [1]: https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md#Ri-expects
  */
 
-
 #ifndef TR_ASSERT_HPP
 #define TR_ASSERT_HPP
 
-#include "infra/Annotations.hpp"                // OMR_NORETURN
+#include "infra/Annotations.hpp" // OMR_NORETURN
 #include "compile/CompilationException.hpp"
-namespace TR
-   {
-   void OMR_NORETURN trap();
+namespace TR {
+void OMR_NORETURN trap();
 
-   // Don't use these directly.
-   //
-   // Use the TR_ASSERT* macros instead as they control the string
-   // contents in production builds.
-   void OMR_NORETURN fatal_assertion(const char *file, int line, const char *condition, const char *format, ...);
+// Don't use these directly.
+//
+// Use the TR_ASSERT* macros instead as they control the string
+// contents in production builds.
+void OMR_NORETURN fatal_assertion(const char* file, int line, const char* condition, const char* format, ...);
 
-   // Non fatal assertions may in some circumstances return, so do not mark them as
-   // no-return.
-   void              assertion(const char *file, int line, const char *condition, const char *format, ...);
+// Non fatal assertions may in some circumstances return, so do not mark them as
+// no-return.
+void assertion(const char* file, int line, const char* condition, const char* format, ...);
 
-   /**
-    * Assertion failure exception type.
-    *
-    * Thrown only by TR_ASSERT_SAFE_FATAL, when softFailOnAssumes is set.
-    */
-   struct AssertionFailure : public virtual CompilationException
-      {
-      virtual const char* what() const throw() { return "Assertion Failure"; }
-      };
+/**
+ * Assertion failure exception type.
+ *
+ * Thrown only by TR_ASSERT_SAFE_FATAL, when softFailOnAssumes is set.
+ */
+struct AssertionFailure : public virtual CompilationException {
+    virtual const char* what() const throw() { return "Assertion Failure"; }
+};
 
-
-   }
-
-
+} // namespace TR
 
 // Macro Definitions
 
-#define TR_ASSERT_FATAL(condition, format, ...) \
-         do { (condition) ? (void)0 : TR::fatal_assertion(__FILE__, __LINE__, #condition, format, ##__VA_ARGS__); } while(0)
+#define TR_ASSERT_FATAL(condition, format, ...)                                                             \
+    do {                                                                                                    \
+        (condition) ? (void)0 : TR::fatal_assertion(__FILE__, __LINE__, #condition, format, ##__VA_ARGS__); \
+    } while (0)
 
 #if defined(DEBUG) || defined(PROD_WITH_ASSUMES)
 
-   #define TR_ASSERT(condition, format, ...) \
-         do { (condition) ? (void)0 : TR::assertion(__FILE__, __LINE__, #condition, format, ##__VA_ARGS__); } while(0)
+#define TR_ASSERT(condition, format, ...)                                                             \
+    do {                                                                                              \
+        (condition) ? (void)0 : TR::assertion(__FILE__, __LINE__, #condition, format, ##__VA_ARGS__); \
+    } while (0)
 
-   #define TR_ASSERT_SAFE_FATAL(condition, format, ...) \
-         do { (condition) ? (void)0 : TR::assertion(__FILE__, __LINE__, #condition, format, ##__VA_ARGS__); } while(0)
+#define TR_ASSERT_SAFE_FATAL(condition, format, ...)                                                  \
+    do {                                                                                              \
+        (condition) ? (void)0 : TR::assertion(__FILE__, __LINE__, #condition, format, ##__VA_ARGS__); \
+    } while (0)
 
 #else
 
-   #define TR_ASSERT(condition, format, ...) (void)0
+#define TR_ASSERT(condition, format, ...) (void)0
 
-   #define TR_ASSERT_SAFE_FATAL(condition, format, ...) \
-         do { (condition) ? (void)0 : TR::assertion(__FILE__, __LINE__, NULL, NULL); } while(0)
-
+#define TR_ASSERT_SAFE_FATAL(condition, format, ...)                           \
+    do {                                                                       \
+        (condition) ? (void)0 : TR::assertion(__FILE__, __LINE__, NULL, NULL); \
+    } while (0)
 
 #endif
-
-
 
 #if defined(DEBUG) || defined(EXPECT_BUILD)
-   #define Expect(x) TR_ASSERT((x), "Expectation Failure:")
-   #define Ensure(x) TR_ASSERT((x), "Ensure Failure:")
+#define Expect(x) TR_ASSERT((x), "Expectation Failure:")
+#define Ensure(x) TR_ASSERT((x), "Ensure Failure:")
 #else
-   #define Expect(x) (void)0
-   #define Ensure(x) (void)0
+#define Expect(x) (void)0
+#define Ensure(x) (void)0
 #endif
-
-
 
 #endif

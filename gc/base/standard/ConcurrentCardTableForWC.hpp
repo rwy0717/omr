@@ -28,7 +28,6 @@
 #if !defined(CONCURRENTCARDTABLEFORWC_HPP_)
 #define CONCURRENTCARDTABLEFORWC_HPP_
 
-
 #include "omrcfg.h"
 
 #include "Base.hpp"
@@ -36,76 +35,66 @@
 #include "EnvironmentBase.hpp"
 #include "ConcurrentSafepointCallback.hpp"
 
+#define CARD_CLEAN_SAFE (CARD_DIRTY << 7)
 
-#define CARD_CLEAN_SAFE						(CARD_DIRTY << 7)
+#define CONCURRENT_CARD_CLEAN_MASK_FOR_WC (CARD_CLEAN_SAFE | CARD_DIRTY)
+#define FINAL_CARD_CLEAN_MASK_FOR_WC (CARD_DIRTY)
+#define PREPARE_PARALLEL_MULTIPLIER 6
+// todo what is the best alignment for card cleaning chunks
+#define PREPARE_UNIT_SIZE_ALIGNMENT 128
 
-#define CONCURRENT_CARD_CLEAN_MASK_FOR_WC 	(CARD_CLEAN_SAFE | CARD_DIRTY)
-#define FINAL_CARD_CLEAN_MASK_FOR_WC 		(CARD_DIRTY)
-#define PREPARE_PARALLEL_MULTIPLIER			6 
-//todo what is the best alignment for card cleaning chunks 
-#define PREPARE_UNIT_SIZE_ALIGNMENT			128
+typedef enum { MARK_DIRTY_CARD_SAFE = 1, MARK_SAFE_CARD_DIRTY } CardAction;
 
-typedef enum {
-	MARK_DIRTY_CARD_SAFE=1,
-	MARK_SAFE_CARD_DIRTY
-} CardAction;
+#if defined(OMR_GC_MODRON_CONCURRENT_MARK)
 
-#if defined (OMR_GC_MODRON_CONCURRENT_MARK)
+class MM_ConcurrentCardTableForWC : public MM_ConcurrentCardTable {
+    bool _cardTablePreparedForCleaning;
+    MM_ConcurrentSafepointCallback* _callback;
 
-class MM_ConcurrentCardTableForWC : public MM_ConcurrentCardTable 
-{
-	bool _cardTablePreparedForCleaning;
-	MM_ConcurrentSafepointCallback *_callback;
-	
-	bool initialize(MM_EnvironmentBase *env, MM_Heap *heap);
-	virtual void tearDown(MM_EnvironmentBase *env);
-		
-	virtual	void prepareCardsForCleaning(MM_EnvironmentBase *env);
-	virtual bool getExclusiveCardTableAccess(MM_EnvironmentBase *env, CardCleanPhase currentPhase, bool threadAtSafePoint);
-	virtual void releaseExclusiveCardTableAccess(MM_EnvironmentBase *env);
-	void prepareCardTable(MM_EnvironmentBase *env);
-		
-	uintptr_t countCardsInRange(MM_EnvironmentBase *env, Card *rangeStart, Card *rangeEnd);
-	
-	MMINLINE virtual void concurrentCleanCard(Card *card)
-	{
-		/* Do nothing ...leave card ASIS, ie CARD_DIRTY or CARD_CLEAN_SAFE*/
-		;	
-	};
-	
-	MMINLINE virtual void finalCleanCard(Card *card)
-	{
-		*card = CARD_CLEAN;	
-	};		
-	
-	
+    bool initialize(MM_EnvironmentBase* env, MM_Heap* heap);
+    virtual void tearDown(MM_EnvironmentBase* env);
+
+    virtual void prepareCardsForCleaning(MM_EnvironmentBase* env);
+    virtual bool getExclusiveCardTableAccess(
+        MM_EnvironmentBase* env, CardCleanPhase currentPhase, bool threadAtSafePoint);
+    virtual void releaseExclusiveCardTableAccess(MM_EnvironmentBase* env);
+    void prepareCardTable(MM_EnvironmentBase* env);
+
+    uintptr_t countCardsInRange(MM_EnvironmentBase* env, Card* rangeStart, Card* rangeEnd);
+
+    MMINLINE virtual void concurrentCleanCard(Card* card)
+    {
+        /* Do nothing ...leave card ASIS, ie CARD_DIRTY or CARD_CLEAN_SAFE*/
+        ;
+    };
+
+    MMINLINE virtual void finalCleanCard(Card* card) { *card = CARD_CLEAN; };
+
 public:
-	static MM_ConcurrentCardTable	*newInstance(MM_EnvironmentBase *env, MM_Heap *heap, MM_MarkingScheme *markingScheme, MM_ConcurrentGC *collector);
-	
-	void prepareCardTableChunk(MM_EnvironmentBase *env, Card *chunkStart, Card *chunkEnd, CardAction action);
-	virtual void initializeFinalCardCleaning(MM_EnvironmentBase *env);
-	
-	static void prepareCardTableAsyncEventHandler(OMR_VMThread *omrVMThread, void *userData);
-	
-	/* TODO: For now always return false but we could just check if card is CARD_DIRTY 
-	 * as we know such cards are sure to be cleaned in future either after a STW card table 
-	 * prepare phase or during FCC.
-	 */  
-	MMINLINE virtual bool isObjectInUncleanedDirtyCard(MM_EnvironmentBase *env, omrobjectptr_t object)
-	{
-		return false;	
-	}
-		
-	/**
-	 * Create a CardTableForWC object.
-	 */
-	MM_ConcurrentCardTableForWC(MM_EnvironmentBase *env, MM_MarkingScheme *markingScheme, MM_ConcurrentGC *collector):
-		MM_ConcurrentCardTable(env, markingScheme, collector),
-		_cardTablePreparedForCleaning(false)
-		,_callback(NULL)
-		{
-			_typeId = __FUNCTION__;
-		};
+    static MM_ConcurrentCardTable* newInstance(
+        MM_EnvironmentBase* env, MM_Heap* heap, MM_MarkingScheme* markingScheme, MM_ConcurrentGC* collector);
+
+    void prepareCardTableChunk(MM_EnvironmentBase* env, Card* chunkStart, Card* chunkEnd, CardAction action);
+    virtual void initializeFinalCardCleaning(MM_EnvironmentBase* env);
+
+    static void prepareCardTableAsyncEventHandler(OMR_VMThread* omrVMThread, void* userData);
+
+    /* TODO: For now always return false but we could just check if card is CARD_DIRTY
+     * as we know such cards are sure to be cleaned in future either after a STW card table
+     * prepare phase or during FCC.
+     */
+    MMINLINE virtual bool isObjectInUncleanedDirtyCard(MM_EnvironmentBase* env, omrobjectptr_t object) { return false; }
+
+    /**
+     * Create a CardTableForWC object.
+     */
+    MM_ConcurrentCardTableForWC(MM_EnvironmentBase* env, MM_MarkingScheme* markingScheme, MM_ConcurrentGC* collector)
+        : MM_ConcurrentCardTable(env, markingScheme, collector)
+        , _cardTablePreparedForCleaning(false)
+        , _callback(NULL)
+    {
+        _typeId = __FUNCTION__;
+    };
 };
 
 #endif /* defined (OMR_GC_MODRON_CONCURRENT_MARK)*/

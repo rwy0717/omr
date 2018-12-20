@@ -19,33 +19,29 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 /**
- * This Verifier checks if an AND operation exists. 
+ * This Verifier checks if an AND operation exists.
  *
  * Compilation is stopped by returning a non-zero return code.
  */
-class NoAndIlVerifier : public TR::IlVerifier
-   {
-   public:
-   int32_t verifyNode(TR::Node *node)
-      {
-      if (node->getOpCode().isAnd()) 
-         {
-         return 1;
-         }
-      return 0;
-      }
+class NoAndIlVerifier : public TR::IlVerifier {
+public:
+    int32_t verifyNode(TR::Node* node)
+    {
+        if (node->getOpCode().isAnd()) {
+            return 1;
+        }
+        return 0;
+    }
 
-   int32_t verify(TR::ResolvedMethodSymbol *sym)
-      {
-      for(TR::PreorderNodeIterator iter(sym->getFirstTreeTop(), sym->comp()); iter.currentTree(); ++iter)
-         {
-         int32_t rtn = verifyNode(iter.currentNode());
-         if(rtn)
-            return rtn;
-         }
+    int32_t verify(TR::ResolvedMethodSymbol* sym)
+    {
+        for (TR::PreorderNodeIterator iter(sym->getFirstTreeTop(), sym->comp()); iter.currentTree(); ++iter) {
+            int32_t rtn = verifyNode(iter.currentNode());
+            if (rtn)
+                return rtn;
+        }
 
-      return 0;
-      }
-   };
+        return 0;
+    }
+};

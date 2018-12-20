@@ -40,56 +40,55 @@
 /**
  * Initialize the sublist puddle for use.
  * Given the size for element storage, initialize the default values to represent an empty puddle.
- * 
+ *
  * @return true if the initialization is successful, false otherwise.
  */
-bool
-MM_SublistPuddle::initialize(MM_EnvironmentBase *env, uintptr_t size, MM_SublistPool *parent)
+bool MM_SublistPuddle::initialize(MM_EnvironmentBase* env, uintptr_t size, MM_SublistPool* parent)
 {
-	/* Clear all members and element backing store */
-	memset(this, 0, sizeof(*this) + size);
+    /* Clear all members and element backing store */
+    memset(this, 0, sizeof(*this) + size);
 
-	/* Record the size */
-	_size = size;
+    /* Record the size */
+    _size = size;
 
-	/* Reset the list pointers */
-	_listBase = (uintptr_t *)(this + 1);
-	_listCurrent = _listBase;
-	_listTop = (uintptr_t *) (((uint8_t *)_listBase) + size);
-	
-	/* Remember the parent pool */
-	_parent = parent;
+    /* Reset the list pointers */
+    _listBase = (uintptr_t*)(this + 1);
+    _listCurrent = _listBase;
+    _listTop = (uintptr_t*)(((uint8_t*)_listBase) + size);
 
-	return true;
+    /* Remember the parent pool */
+    _parent = parent;
+
+    return true;
 }
 
 /**
  * Create a new instance of a sublist puddle.
  * Given the size of the element backing store, create and return a newly initialized sublist puddle.
- * 
+ *
  * @return An initialized instance of a sublist puddle with backing store
  */
-MM_SublistPuddle *
-MM_SublistPuddle::newInstance(MM_EnvironmentBase *env, uintptr_t size, MM_SublistPool *parent, OMR::GC::AllocationCategory::Enum category)
+MM_SublistPuddle* MM_SublistPuddle::newInstance(
+    MM_EnvironmentBase* env, uintptr_t size, MM_SublistPool* parent, OMR::GC::AllocationCategory::Enum category)
 {
-	MM_SublistPuddle *puddle = (MM_SublistPuddle *) env->getForge()->allocate(size + sizeof(MM_SublistPuddle), category, OMR_GET_CALLSITE());
+    MM_SublistPuddle* puddle
+        = (MM_SublistPuddle*)env->getForge()->allocate(size + sizeof(MM_SublistPuddle), category, OMR_GET_CALLSITE());
 
-	if(NULL == puddle) {
-		return NULL;
-	}
-	puddle->initialize(env, size, parent);
+    if (NULL == puddle) {
+        return NULL;
+    }
+    puddle->initialize(env, size, parent);
 
-	return puddle;
+    return puddle;
 }
 
 /**
  * Free a sublist puddle and clean up any internal structures
  */
-void
-MM_SublistPuddle::kill(MM_EnvironmentBase *env, MM_SublistPuddle *puddle)
+void MM_SublistPuddle::kill(MM_EnvironmentBase* env, MM_SublistPuddle* puddle)
 {
-	puddle->tearDown(env);
-	env->getForge()->free(puddle);
+    puddle->tearDown(env);
+    env->getForge()->free(puddle);
 }
 
 /**
@@ -97,54 +96,54 @@ MM_SublistPuddle::kill(MM_EnvironmentBase *env, MM_SublistPuddle *puddle)
  * Update a fragment by allocating a subrange from the given puddle, and updating the fragment with
  * the details of the new range.  The allocate is a simple bump pointer allocate that is contended.
  * On failure, no recovery operations are run.
- * 
+ *
  * @return true if the fragment allocate was successfull, false otherwise.
  */
-bool
-MM_SublistPuddle::allocate(MM_SublistFragment *fragment)
+bool MM_SublistPuddle::allocate(MM_SublistFragment* fragment)
 {
-	uintptr_t growSize;
-	uintptr_t oldListCurrent, newListCurrent = 0;
+    uintptr_t growSize;
+    uintptr_t oldListCurrent, newListCurrent = 0;
 
-	/* Loop on trying to allocate a fragment range from the puddle until successfull or there is no room */
-	do {
-		/* Record the old current pointer (required from proper bump pointer allocation) */
-		oldListCurrent = (uintptr_t)_listCurrent;
+    /* Loop on trying to allocate a fragment range from the puddle until successfull or there is no room */
+    do {
+        /* Record the old current pointer (required from proper bump pointer allocation) */
+        oldListCurrent = (uintptr_t)_listCurrent;
 
-		/* Validate the grow size */
-		growSize = ((uintptr_t)_listTop) - oldListCurrent;
-		if(0 == growSize) {
-			/* There was no more room - fail to allocate */
-			return false;
-		}
-		if(growSize > fragment->getFragmentSize()) {
-			growSize = fragment->getFragmentSize();
-		}
+        /* Validate the grow size */
+        growSize = ((uintptr_t)_listTop) - oldListCurrent;
+        if (0 == growSize) {
+            /* There was no more room - fail to allocate */
+            return false;
+        }
+        if (growSize > fragment->getFragmentSize()) {
+            growSize = fragment->getFragmentSize();
+        }
 
-		/* Calculate the new pointer after a successful allocate */
-		newListCurrent = oldListCurrent + growSize;
+        /* Calculate the new pointer after a successful allocate */
+        newListCurrent = oldListCurrent + growSize;
 
-	} while(oldListCurrent != MM_AtomicOperations::lockCompareExchange((volatile uintptr_t *)&_listCurrent, oldListCurrent, newListCurrent));
+    } while (oldListCurrent
+        != MM_AtomicOperations::lockCompareExchange(
+               (volatile uintptr_t*)&_listCurrent, oldListCurrent, newListCurrent));
 
-	/* Allocate was successful.  Update the fragment and return */
-	fragment->update((uintptr_t *)oldListCurrent, (uintptr_t *)newListCurrent);
-	return true;
+    /* Allocate was successful.  Update the fragment and return */
+    fragment->update((uintptr_t*)oldListCurrent, (uintptr_t*)newListCurrent);
+    return true;
 }
 
 /**
  * Allocate a single element from the puddle.
- * 
+ *
  * @return An element slot allocated from the puddle on success, NULL otherwise.
- * 
+ *
  * @note Assumes no contention when allocating the element.
  */
-uintptr_t *
-MM_SublistPuddle::allocateElementNoContention()
+uintptr_t* MM_SublistPuddle::allocateElementNoContention()
 {
-	if(_listCurrent < _listTop) {
-		return _listCurrent++;
-	}
-	return NULL;
+    if (_listCurrent < _listTop) {
+        return _listCurrent++;
+    }
+    return NULL;
 }
 
 /**
@@ -152,11 +151,10 @@ MM_SublistPuddle::allocateElementNoContention()
  * Fragments have an expectation that when allocated, the entries are NULL.  The backing store of a
  * puddle (the range from the base to the top pointer) is cleared.
  */
-void
-MM_SublistPuddle::reset()
+void MM_SublistPuddle::reset()
 {
-	memset((void *)_listBase, 0, _size);
-	_listCurrent = _listBase;
+    memset((void*)_listBase, 0, _size);
+    _listCurrent = _listBase;
 }
 
 /**
@@ -165,28 +163,24 @@ MM_SublistPuddle::reset()
  * that the sourcePuddle will not have all of its elements copied.  The routine guarantees that both
  * puddles will be in the correct state (with internal list pointers correctly adjusted) upon return.
  */
-void
-MM_SublistPuddle::merge(MM_SublistPuddle *sourcePuddle)
+void MM_SublistPuddle::merge(MM_SublistPuddle* sourcePuddle)
 {
-	uintptr_t availableSize, copySize;
+    uintptr_t availableSize, copySize;
 
-	availableSize = freeSize();
-	copySize = sourcePuddle->consumedSize();
+    availableSize = freeSize();
+    copySize = sourcePuddle->consumedSize();
 
-	/* Determine the actual copy size */
-	if(availableSize < copySize) {
-		copySize = availableSize;
-	}
+    /* Determine the actual copy size */
+    if (availableSize < copySize) {
+        copySize = availableSize;
+    }
 
-	/* Copy the data from the tail of the source puddle */
-	memcpy(_listCurrent, ((uint8_t *)sourcePuddle->_listCurrent) - copySize, copySize);
-	/* And clear the data from the source puddle (fragments require preinitialized slots) */
-	memset(((uint8_t *)sourcePuddle->_listCurrent) - copySize, 0, copySize);
+    /* Copy the data from the tail of the source puddle */
+    memcpy(_listCurrent, ((uint8_t*)sourcePuddle->_listCurrent) - copySize, copySize);
+    /* And clear the data from the source puddle (fragments require preinitialized slots) */
+    memset(((uint8_t*)sourcePuddle->_listCurrent) - copySize, 0, copySize);
 
-	/* Adjust the receiver and source puddle list pointers */
-	_listCurrent = (uintptr_t *) (((uint8_t *)_listCurrent) + copySize);
-	sourcePuddle->_listCurrent = (uintptr_t *) (((uint8_t *)sourcePuddle->_listCurrent) - copySize);
+    /* Adjust the receiver and source puddle list pointers */
+    _listCurrent = (uintptr_t*)(((uint8_t*)_listCurrent) + copySize);
+    sourcePuddle->_listCurrent = (uintptr_t*)(((uint8_t*)sourcePuddle->_listCurrent) - copySize);
 }
-
-
-

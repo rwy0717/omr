@@ -40,67 +40,60 @@
  * Storage for statistics relevant to the sweep phase of global collection
  * @ingroup GC_Stats
  */
-class MM_SweepVLHGCStats
-{
+class MM_SweepVLHGCStats {
 public:
-	uintptr_t _gcCount; /**< The GC cycle in which these stats were collected */
-	uint64_t _startTime;  /**< Start timestamp (hires ticks) for last sweep operation */
-	uint64_t _endTime;  /**< End timestamp (hires ticks) for last sweep operation */
+    uintptr_t _gcCount; /**< The GC cycle in which these stats were collected */
+    uint64_t _startTime; /**< Start timestamp (hires ticks) for last sweep operation */
+    uint64_t _endTime; /**< End timestamp (hires ticks) for last sweep operation */
 
 #if defined(J9MODRON_TGC_PARALLEL_STATISTICS)
-	uint64_t idleTime;
-	uint64_t mergeTime;
-	
-	uintptr_t sweepChunksTotal;
-	uintptr_t sweepChunksProcessed;
+    uint64_t idleTime;
+    uint64_t mergeTime;
+
+    uintptr_t sweepChunksTotal;
+    uintptr_t sweepChunksProcessed;
 #endif /* J9MODRON_TGC_PARALLEL_STATISTICS */
-	
-	void clear()
-	{
+
+    void clear()
+    {
 #if defined(J9MODRON_TGC_PARALLEL_STATISTICS)
-		idleTime = 0;
-		mergeTime = 0;
-		sweepChunksProcessed = 0;
+        idleTime = 0;
+        mergeTime = 0;
+        sweepChunksProcessed = 0;
 #endif /* J9MODRON_TGC_PARALLEL_STATISTICS */
-	}
+    }
 
-	void merge(MM_SweepVLHGCStats *statsToMerge)
-	{
+    void merge(MM_SweepVLHGCStats* statsToMerge)
+    {
 #if defined(J9MODRON_TGC_PARALLEL_STATISTICS)
-		/* It may not ever be useful to merge these stats, but do it anyways */
-		idleTime += statsToMerge->idleTime;
-		mergeTime += statsToMerge->mergeTime;
-		sweepChunksProcessed += statsToMerge->sweepChunksProcessed;
+        /* It may not ever be useful to merge these stats, but do it anyways */
+        idleTime += statsToMerge->idleTime;
+        mergeTime += statsToMerge->mergeTime;
+        sweepChunksProcessed += statsToMerge->sweepChunksProcessed;
 #endif /* J9MODRON_TGC_PARALLEL_STATISTICS */
-	}
+    }
 
 #if defined(J9MODRON_TGC_PARALLEL_STATISTICS)
-	/* Time is stored in raw format, converted to resolution at time of output
-	 * Don't need to worry about wrap (endTime < startTime as unsigned math
-	 * takes care of wrap
-	 */
-	void addToIdleTime(uint64_t startTime, uint64_t endTime)
-	{
-		idleTime += (endTime - startTime);
-	}
+    /* Time is stored in raw format, converted to resolution at time of output
+     * Don't need to worry about wrap (endTime < startTime as unsigned math
+     * takes care of wrap
+     */
+    void addToIdleTime(uint64_t startTime, uint64_t endTime) { idleTime += (endTime - startTime); }
 
-	/* Time is stored in raw format, converted to resolution at time of output
-	 * Don't need to worry about wrap (endTime < startTime as unsigned math
-	 * takes care of wrap
-	 */
-	void addToMergeTime(uint64_t startTime, uint64_t endTime)
-	{
-		mergeTime += (endTime - startTime);
-	}
+    /* Time is stored in raw format, converted to resolution at time of output
+     * Don't need to worry about wrap (endTime < startTime as unsigned math
+     * takes care of wrap
+     */
+    void addToMergeTime(uint64_t startTime, uint64_t endTime) { mergeTime += (endTime - startTime); }
 #endif /* J9MODRON_TGC_PARALLEL_STATISTICS */
 
-	MM_SweepVLHGCStats() :
-		_gcCount(UDATA_MAX)
-		,_startTime(0)
-		,_endTime(0)
-	{
-		clear();
-	};
+    MM_SweepVLHGCStats()
+        : _gcCount(UDATA_MAX)
+        , _startTime(0)
+        , _endTime(0)
+    {
+        clear();
+    };
 };
 
 #endif /* OMR_GC_VLHGC */

@@ -34,53 +34,49 @@
 
 static void omrVmResetStart();
 
-extern PortEnvironment *vmTestEnv;
+extern PortEnvironment* vmTestEnv;
 
-TEST(ThreadForkResetTest, OmrVmReset)
+TEST(ThreadForkResetTest, OmrVmReset) { omrVmResetStart(); }
+
+static void omrVmResetStart()
 {
-	omrVmResetStart();
-}
+    intptr_t rc;
+    int pipedata[2];
+    OMRTestVM testVM;
+    OMR_VMThread* vmthread = NULL;
 
-static void
-omrVmResetStart()
-{
-	intptr_t rc;
-	int pipedata[2];
-	OMRTestVM testVM;
-	OMR_VMThread *vmthread = NULL;
+    OMRPORT_ACCESS_FROM_OMRPORT(vmTestEnv->getPortLibrary());
+    OMRTEST_ASSERT_ERROR_NONE(omrTestVMInit(&testVM, OMRPORTLIB));
+    OMRTEST_ASSERT_ERROR_NONE(OMR_Thread_Init(&testVM.omrVM, NULL, &vmthread, "vmForkTest"));
 
-	OMRPORT_ACCESS_FROM_OMRPORT(vmTestEnv->getPortLibrary());
-	OMRTEST_ASSERT_ERROR_NONE(omrTestVMInit(&testVM, OMRPORTLIB));
-	OMRTEST_ASSERT_ERROR_NONE(OMR_Thread_Init(&testVM.omrVM, NULL, &vmthread, "vmForkTest"));
+    /* Pre-fork */
+    int pipeRC = pipe(pipedata);
+    EXPECT_TRUE(0 == pipeRC) << "Failure occurred calling pipe";
 
-	/* Pre-fork */
-	int pipeRC = pipe(pipedata);
-	EXPECT_TRUE(0 == pipeRC)  << "Failure occurred calling pipe";
+    omr_vm_preFork(&testVM.omrVM);
+    if (0 == fork()) {
+        omr_vm_postForkChild(&testVM.omrVM);
+        /* Post-fork child process. */
 
-	omr_vm_preFork(&testVM.omrVM);
-	if (0 == fork()) {
-		omr_vm_postForkChild(&testVM.omrVM);
-		/* Post-fork child process. */
+        rc = OMR_Thread_Free(vmthread);
+        if (OMR_ERROR_NONE == rc) {
+            rc = omrTestVMFini(&testVM);
+        }
 
-		rc = OMR_Thread_Free(vmthread);
-		if (OMR_ERROR_NONE == rc) {
-			rc = omrTestVMFini(&testVM);
-		}
+        J9_IGNORE_RETURNVAL(write(pipedata[1], (int*)&rc, sizeof(rc)));
+        close(pipedata[0]);
+        close(pipedata[1]);
+        exit(0);
+    }
+    omr_vm_postForkParent(&testVM.omrVM);
 
-		J9_IGNORE_RETURNVAL(write(pipedata[1], (int *)&rc, sizeof(rc)));
-		close(pipedata[0]);
-		close(pipedata[1]);
-		exit(0);
-	}
-	omr_vm_postForkParent(&testVM.omrVM);
+    /* After fork, notify the sibling thread and wait for it to unlock the global mutex. */
+    ssize_t readBytes = read(pipedata[0], (int*)&rc, sizeof(rc));
+    EXPECT_TRUE(readBytes == sizeof(rc)) << "Didn't read back enough from pipe";
+    EXPECT_TRUE(0 == rc) << "Failure occurred in child process.";
+    close(pipedata[0]);
+    close(pipedata[1]);
 
-	/* After fork, notify the sibling thread and wait for it to unlock the global mutex. */
-	ssize_t readBytes = read(pipedata[0], (int *)&rc, sizeof(rc));
-	EXPECT_TRUE(readBytes == sizeof(rc)) << "Didn't read back enough from pipe";
-	EXPECT_TRUE(0 == rc) << "Failure occurred in child process.";
-	close(pipedata[0]);
-	close(pipedata[1]);
-
-	OMRTEST_ASSERT_ERROR_NONE(OMR_Thread_Free(vmthread));
-	OMRTEST_ASSERT_ERROR_NONE(omrTestVMFini(&testVM));
+    OMRTEST_ASSERT_ERROR_NONE(OMR_Thread_Free(vmthread));
+    OMRTEST_ASSERT_ERROR_NONE(omrTestVMFini(&testVM));
 }

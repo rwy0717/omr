@@ -33,38 +33,37 @@
  * ===========================================================================
  */
 
-#if __TARGET_LIB__ == 0X22080000                                   /*ibm@28725*/
-#include <//'PP.ADLE370.OS39028.SCEEH.SYS.H(utsname)'>             /*ibm@28725*/
-#else                                                              /*ibm@28725*/
+#if __TARGET_LIB__ == 0X22080000 /*ibm@28725*/
+#include < //'PP.ADLE370.OS39028.SCEEH.SYS.H(utsname)'>             /*ibm@28725*/
+#else /*ibm@28725*/
 #include "prefixpath.h"
-#include PREFIXPATH(sys/utsname.h)                              /*ibm@28725*/
-#endif                                                             /*ibm@28725*/
+#include PREFIXPATH(sys / utsname.h) /*ibm@28725*/
+#endif /*ibm@28725*/
 
 #if defined(IBM_ATOE)
 
-	#if !defined(IBM_ATOE_SYS_UTSNAME)
-	    #define IBM_ATOE_SYS_UTSNAME
+#if !defined(IBM_ATOE_SYS_UTSNAME)
+#define IBM_ATOE_SYS_UTSNAME
 
-	#ifdef __cplusplus
-            extern "C" {
-	#endif
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-            int etoa_uname(struct utsname *);
-            int etoa___osname(struct utsname *);                    /*ibm@27407*/
+int etoa_uname(struct utsname*);
+int etoa___osname(struct utsname*); /*ibm@27407*/
 
-	#ifdef __cplusplus
-            }
-	#endif
+#ifdef __cplusplus
+}
+#endif
 
-	#undef uname
-	#define uname(a)    etoa_uname(a)
+#undef uname
+#define uname(a) etoa_uname(a)
 
-	#undef __osname                                                 /*ibm@27407*/
-	#define __osname(a) etoa___osname(a)                            /*ibm@27407*/
+#undef __osname /*ibm@27407*/
+#define __osname(a) etoa___osname(a) /*ibm@27407*/
 
-    #endif
+#endif
 
 #endif
 
 /* END OF FILE */
-

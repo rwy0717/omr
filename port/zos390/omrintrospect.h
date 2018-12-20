@@ -65,62 +65,62 @@ typedef union sigval sigval_t;
 
 /* Program routine entry area (XPLINK) */
 typedef struct XPLINK_Routine_entry {
-	uint8_t  eyecatcher[7];
-	uint8_t  mark_type;
-	uint32_t ppa1_offset;
-	uint32_t dsa_size_and_entry_flags;
+    uint8_t eyecatcher[7];
+    uint8_t mark_type;
+    uint32_t ppa1_offset;
+    uint32_t dsa_size_and_entry_flags;
 } XPLINK_Routine_entry;
 
 /* Program Prologue area version 3 (XPLINK) */
 typedef struct PPA1_Version3 {
-	uint8_t  version;
-	uint8_t  le_signature;
-	uint16_t gpr_mask;
-	int32_t ppa2_offset;
-	uint8_t  flags1;
-	uint8_t  flags2;
-	uint8_t  flags3;
-	uint8_t  flags4;
-	uint16_t length_parms;
-	uint8_t  length_prolog;
-	uint8_t  alloca_reg_and_sp_offset;
-	uint32_t length_code;
+    uint8_t version;
+    uint8_t le_signature;
+    uint16_t gpr_mask;
+    int32_t ppa2_offset;
+    uint8_t flags1;
+    uint8_t flags2;
+    uint8_t flags3;
+    uint8_t flags4;
+    uint16_t length_parms;
+    uint8_t length_prolog;
+    uint8_t alloca_reg_and_sp_offset;
+    uint32_t length_code;
 } PPA1_Version3;
 
 /*   flags3
-	 '0.......'B State Variable locator field is not in optional area.
-	 '1.......'B State Variable locator field is in the optional area.
-	 '.0......'B Argument Area Length is not in the optional area.
-	 '.1......'B Argument Area Length is in the optional area.
-	 '..0.....'B FP Register Mask is not in the optional area.
-	 '..1.....'B FP Register Mask is in the optional area.
-	 '...0....'B No ARs are saved. AR mask not in optional area.
-	 '...1....'B ARs are saved. AR mask in optional area.
-	 '....0...'B Member PPA1 word is not present in optional area.
-	 '....1...'B Member PPA1 word is present in the optional area.
-	 '.....0..'B Offset to BDI is not present in optional area.
-	 '.....1..'B Offset to BDI is present in the optional area.
-	 '......0.'B Interface mapping flags not in the optional area.
-	 '......1.'B Interface mapping flags in the optional area.
-	 '.......0'B Java Method Locator Table not in the optional area.
-	 '.......1'B Java Method Locator Table in the optional area.
+         '0.......'B State Variable locator field is not in optional area.
+         '1.......'B State Variable locator field is in the optional area.
+         '.0......'B Argument Area Length is not in the optional area.
+         '.1......'B Argument Area Length is in the optional area.
+         '..0.....'B FP Register Mask is not in the optional area.
+         '..1.....'B FP Register Mask is in the optional area.
+         '...0....'B No ARs are saved. AR mask not in optional area.
+         '...1....'B ARs are saved. AR mask in optional area.
+         '....0...'B Member PPA1 word is not present in optional area.
+         '....1...'B Member PPA1 word is present in the optional area.
+         '.....0..'B Offset to BDI is not present in optional area.
+         '.....1..'B Offset to BDI is present in the optional area.
+         '......0.'B Interface mapping flags not in the optional area.
+         '......1.'B Interface mapping flags in the optional area.
+         '.......0'B Java Method Locator Table not in the optional area.
+         '.......1'B Java Method Locator Table in the optional area.
 */
-#define STATE_VARIABLE_LOCATOR	0x80
-#define ARGUMENT_AREA_LENGTH	0x40
-#define FP_REGISTER				0x20
-#define AR_SAVED				0x10
-#define PPA1_WORD_FLAG			0x08
-#define BDI_OFFSET				0x04
-#define INTERFACE_MAPPING		0x02
-#define JAVA_METHOD_LOCATOR		0x01
+#define STATE_VARIABLE_LOCATOR 0x80
+#define ARGUMENT_AREA_LENGTH 0x40
+#define FP_REGISTER 0x20
+#define AR_SAVED 0x10
+#define PPA1_WORD_FLAG 0x08
+#define BDI_OFFSET 0x04
+#define INTERFACE_MAPPING 0x02
+#define JAVA_METHOD_LOCATOR 0x01
 
 /*  flags4
-	'0000000.'B Reserved for future optional fields (must all be zero).
-	'.......0'B Name length and name are not in the optional area.
-	'.......1'B Name length and name in the optional area.
+        '0000000.'B Reserved for future optional fields (must all be zero).
+        '.......0'B Name length and name are not in the optional area.
+        '.......1'B Name length and name in the optional area.
 */
 
-#define NAME_LENGTH_AND_NAME   0x01
+#define NAME_LENGTH_AND_NAME 0x01
 
 /*
 PGTHA                 DSECT ,        I N P U T - - - - - - - - - - -
@@ -155,34 +155,33 @@ PGTHAPTAG             EQU   X'02'      PGTHK, PTAG (NEEDS PGTHJ)
                       DS    FL1
 PGTHA#LEN             EQU   *-PGTHA
 */
-#define PGTHA_ACCESS_FIRST			0
-#define PGTHA_ACCESS_CURRENT		1
-#define PGTHA_ACCESS_NEXT			2
-#define PGTHA_ACCESS_LAST			3
+#define PGTHA_ACCESS_FIRST 0
+#define PGTHA_ACCESS_CURRENT 1
+#define PGTHA_ACCESS_NEXT 2
+#define PGTHA_ACCESS_LAST 3
 
-#define PGTHA_FLAG_PROCESS_DATA		0x80
-#define PGTHA_FLAG_CONTTY			0x40
-#define PGTHA_FLAG_PATH				0x20
-#define PGTHA_FLAG_CMD_AND_ARGS		0x10
-#define PGTHA_FLAG_FILE_DATA		0x8
-#define PGTHA_FLAG_THREAD_DATA		0x4
-#define PGTHA_FLAG_PTAG				0x2 /* needs thread data */
+#define PGTHA_FLAG_PROCESS_DATA 0x80
+#define PGTHA_FLAG_CONTTY 0x40
+#define PGTHA_FLAG_PATH 0x20
+#define PGTHA_FLAG_CMD_AND_ARGS 0x10
+#define PGTHA_FLAG_FILE_DATA 0x8
+#define PGTHA_FLAG_THREAD_DATA 0x4
+#define PGTHA_FLAG_PTAG 0x2 /* needs thread data */
 
 struct pgtha {
-	/* start of PGTHACONTINUE group */
-	unsigned int pid;
-	unsigned char thid[8];
-	unsigned char accesspid; /* FIRST, CURRENT or NEXT */
-	unsigned char accessthid; /* FIRST, CURRENT, NEXT or LAST */
-	/* end of PGTHACONTINUE group */
+    /* start of PGTHACONTINUE group */
+    unsigned int pid;
+    unsigned char thid[8];
+    unsigned char accesspid; /* FIRST, CURRENT or NEXT */
+    unsigned char accessthid; /* FIRST, CURRENT, NEXT or LAST */
+    /* end of PGTHACONTINUE group */
 
-	unsigned short asid;
-	unsigned char loginname[8];
-	unsigned char flag1; /* ONLY THREAD and PTAG checked if ACCESSPID==CURRENT & ACCESSTHID==NEXT */
+    unsigned short asid;
+    unsigned char loginname[8];
+    unsigned char flag1; /* ONLY THREAD and PTAG checked if ACCESSPID==CURRENT & ACCESSTHID==NEXT */
 
-	char _padding;
+    char _padding;
 };
-
 
 /*
 PGTHB                 DSECT ,        O U T P U T - - - - - - - - - -
@@ -209,29 +208,29 @@ PGTHBOFFJ             DS    FL3      OFFSET OF THREAD AREA
 PGTHB#LEN             EQU   *-PGTHB
 */
 struct pgthb {
-	char id[4];	/* "gthb" eyecatcher */
-	/* start of PGTHBCONTINUE */
-	int pid;
-	char thid[8];
-	char accesspid;
-	char accessthid;
-	/* end of PGTHBCONTINUE */
+    char id[4]; /* "gthb" eyecatcher */
+    /* start of PGTHBCONTINUE */
+    int pid;
+    char thid[8];
+    char accesspid;
+    char accessthid;
+    /* end of PGTHBCONTINUE */
 
-	char _padding[2];
+    char _padding[2];
 
-	int lenused;
-	char limitc;
-	char offc[3];
-	char limitd;
-	char offd[3];
-	char limite;
-	char offe[3];
-	char limitf;
-	char offf[3];
-	char limitg;
-	char offg[3];
-	char limitj;
-	char offj[3];
+    int lenused;
+    char limitc;
+    char offc[3];
+    char limitd;
+    char offd[3];
+    char limite;
+    char offe[3];
+    char limitf;
+    char offf[3];
+    char limitg;
+    char offg[3];
+    char limitj;
+    char offj[3];
 };
 
 /*
@@ -243,11 +242,11 @@ PGTH#STORAGE          EQU   C'S'     output buffer exhausted
 PGTH#VAGUE            EQU   C'V'     Changed out from under us
 PGTH#NOTCONNECTED     EQU   C'X'     Need data not connected
 */
-#define PGTH_NOTREQUESTED	0xD5
-#define PGTH_OK				0xC1
-#define PGTH_STORAGE		0xE2
-#define PGTH_VAGUE			0xE5
-#define PGTH_NOTCONNECTED	0xE7
+#define PGTH_NOTREQUESTED 0xD5
+#define PGTH_OK 0xC1
+#define PGTH_STORAGE 0xE2
+#define PGTH_VAGUE 0xE5
+#define PGTH_NOTCONNECTED 0xE7
 
 /*
 * USING PGTHC,Rx where Rx = ADDRESS of PGTHB + PGTHBOFFC
@@ -324,19 +323,19 @@ PGTHC#LEN             EQU   *-PGTHC
 *
 */
 
-#define PGTHC_FLAG1_MULTIPLE_PROCESSES		0x80
-#define PGTHC_FLAG1_TCBOUT					0x40
-#define PGTHC_FLAG1_THREAD_BEING_TRACED		0x20
-#define PGTHC_FLAG1_STOPPED					0x10
-#define PGTHC_FLAG1_NOT_ALL_BLOCKS_PRESENT	0x08
-#define PGTHC_FLAG1_PROCESS_IS_ZOMBIE		0x04
-#define PGTHC_FLAG1_SHUTDOWN_BLOCKING		0x02
-#define PGTHC_FLAG1_SHUTDOWN_PERMENANT		0x01
+#define PGTHC_FLAG1_MULTIPLE_PROCESSES 0x80
+#define PGTHC_FLAG1_TCBOUT 0x40
+#define PGTHC_FLAG1_THREAD_BEING_TRACED 0x20
+#define PGTHC_FLAG1_STOPPED 0x10
+#define PGTHC_FLAG1_NOT_ALL_BLOCKS_PRESENT 0x08
+#define PGTHC_FLAG1_PROCESS_IS_ZOMBIE 0x04
+#define PGTHC_FLAG1_SHUTDOWN_BLOCKING 0x02
+#define PGTHC_FLAG1_SHUTDOWN_PERMENANT 0x01
 
-#define PGTHC_FLAG2_MEM_LIMIT_TYPE			0x80 /* On - MemLimit is a BinMult */
-#define PGTHC_FLAG2_RESPAWNABLE_PROCESS		0x40
+#define PGTHC_FLAG2_MEM_LIMIT_TYPE 0x80 /* On - MemLimit is a BinMult */
+#define PGTHC_FLAG2_RESPAWNABLE_PROCESS 0x40
 
-#define PGTHC_FLAG3_MEM_USAGE_TYPE			0x80 /* On - MemUsage is a BinMult */
+#define PGTHC_FLAG3_MEM_USAGE_TYPE 0x80 /* On - MemUsage is a BinMult */
 
 #define PGTHC_MEM_DENOMINATION_KILOBYTE 0xD2
 #define PGTHC_MEM_DENOMINATION_MEGABYTE 0xD4
@@ -345,53 +344,53 @@ PGTHC#LEN             EQU   *-PGTHC
 #define PGTHC_MEM_DENOMINATION_PETABYTE 0xD7
 
 struct pgthc {
-	char id[4]; /* "gthc" eyecatcher */
-	char flag1;
-	char flag2;
-	char flag3;
+    char id[4]; /* "gthc" eyecatcher */
+    char flag1;
+    char flag2;
+    char flag3;
 
-	char _padding;
+    char _padding;
 
-	int pid;
-	int ppid;
-	int pgpid;
-	int sid;
-	int fgpid;
-	int euid;
-	int ruid;
-	int suid;
-	int egid;
-	int rgid;
-	int sgid;
-	int tsize;
-	int syscallcount;
-	int usertime;
-	int systime;
-	int starttime;
+    int pid;
+    int ppid;
+    int pgpid;
+    int sid;
+    int fgpid;
+    int euid;
+    int ruid;
+    int suid;
+    int egid;
+    int rgid;
+    int sgid;
+    int tsize;
+    int syscallcount;
+    int usertime;
+    int systime;
+    int starttime;
 
-	short cntoe;
-	short cntptcreated;
-	short cntthreads;
-	short asid;
+    short cntoe;
+    short cntptcreated;
+    short cntthreads;
+    short asid;
 
-	char jobname[8];
-	char loginname[8];
+    char jobname[8];
+    char loginname[8];
 
-	union {
-		int value;
-		struct {
-			char value[3];
-			char demonination;
-		} tuple;
-	} memlimit;
+    union {
+        int value;
+        struct {
+            char value[3];
+            char demonination;
+        } tuple;
+    } memlimit;
 
-	union {
-		int value;
-		struct {
-			char value[3];
-			char demonination;
-		} tuple;
-	} memusage;
+    union {
+        int value;
+        struct {
+            char value[3];
+            char demonination;
+        } tuple;
+    } memusage;
 };
 
 /*
@@ -402,9 +401,9 @@ PGTHDLEN              DS    FL2      Length of ConTty
 PGTHDCONTTY           DS    CL1024   1024 = max ConTty
 */
 struct pgthd {
-	char id[4]; /* "gthd" eyecatcher */
-	short len;
-	char contty[1024];
+    char id[4]; /* "gthd" eyecatcher */
+    short len;
+    char contty[1024];
 };
 
 /*
@@ -415,9 +414,9 @@ PGTHELEN              DS    FL2      Length of Path
 PGTHEPATH             DS    CL1024   1024 = max path
 */
 struct pgthe {
-	char id[4]; /* "gthe" eyecatcher */
-	short len;
-	char path[1024];
+    char id[4]; /* "gthe" eyecatcher */
+    short len;
+    char path[1024];
 };
 
 /*
@@ -428,9 +427,9 @@ PGTHFLEN              DS    FL2      Length of command and arguments
 PGTHFCOMMAND          DS    CL1024   1024 = max command
 */
 struct pgthf {
-	char id[4]; /* "gthf" eyecatcher */
-	short len;
-	char command[1024];
+    char id[4]; /* "gthf" eyecatcher */
+    short len;
+    char command[1024];
 };
 
 /*
@@ -452,16 +451,16 @@ PGTHG#LEN             EQU   *-PGTHG
 PGTHGARRAY            DS    0C       first PGTHH
 */
 struct pgthg {
-	char id[4]; /* "gthg" eyecatcher */
-	char limith;
-	char offh[3];
-	int count;
-	int maxvnodetokens;
-	int vnodetokencount;
-	int serverflags;
-	char servername[32];
-	int activefiles;
-	int servertype;
+    char id[4]; /* "gthg" eyecatcher */
+    char limith;
+    char offh[3];
+    int count;
+    int maxvnodetokens;
+    int vnodetokencount;
+    int serverflags;
+    char servername[32];
+    int activefiles;
+    int servertype;
 };
 
 /*
@@ -480,11 +479,12 @@ PGTHHDEVNO            DS    F        DEVICE NUMBER see stat()
 PGTHH#LEN             EQU   *-PGTHH
 */
 struct pgthh {
-	char id[2]; /* rd = root directory (fist), cd = current directory (second), fd = file directory, vd = vnode directory */
-	char type;
-	char open;
-	int inode;
-	int devno;
+    char id[2]; /* rd = root directory (fist), cd = current directory (second), fd = file directory, vd = vnode
+                   directory */
+    char type;
+    char open;
+    int inode;
+    int devno;
 };
 
 /*
@@ -545,58 +545,58 @@ PGTHJ#FREEZE          EQU   C'E'       quiesce freeze
 PGTHJ#LEN             EQU   *-PGTHJ
 */
 
-#define PGTHJ_STATUS1_THDCREATED	0xD1
+#define PGTHJ_STATUS1_THDCREATED 0xD1
 
-#define PGTHJ_STATUS2_MSGRCV		0xC1
-#define PGTHJ_STATUS2_MSGSND		0xC2
-#define PGTHJ_STATUS2_WAITC			0xC3
-#define PGTHJ_STATUS2_SEMOP			0xC4
-#define PGTHJ_STATUS2_WAITF			0xC6
-#define PGTHJ_STATUS2_MVSPAUSE		0xC7
-#define PGTHJ_STATUS2_WAITO			0xD2
-#define PGTHJ_STATUS2_WAITP			0xD7
-#define PGTHJ_STATUS2_RUN			0xD9
-#define PGTHJ_STATUS2_SLEEP			0xE2
-#define PGTHJ_STATUS2_CHILD			0xE6
-#define PGTHJ_STATUS2_FORK			0xE7
-#define PGTHJ_STATUS2_MVSWAIT		0xE8
+#define PGTHJ_STATUS2_MSGRCV 0xC1
+#define PGTHJ_STATUS2_MSGSND 0xC2
+#define PGTHJ_STATUS2_WAITC 0xC3
+#define PGTHJ_STATUS2_SEMOP 0xC4
+#define PGTHJ_STATUS2_WAITF 0xC6
+#define PGTHJ_STATUS2_MVSPAUSE 0xC7
+#define PGTHJ_STATUS2_WAITO 0xD2
+#define PGTHJ_STATUS2_WAITP 0xD7
+#define PGTHJ_STATUS2_RUN 0xD9
+#define PGTHJ_STATUS2_SLEEP 0xE2
+#define PGTHJ_STATUS2_CHILD 0xE6
+#define PGTHJ_STATUS2_FORK 0xE7
+#define PGTHJ_STATUS2_MVSWAIT 0xE8
 
-#define PGTHJ_STATUS3_MEDIUMWGHT	0xD5
-#define PGTHJ_STATUS3_ASYNC			0xD6
-#define PGTHJ_STATUS3_IPT			0xE4
-#define PGTHJ_STATUS3_ZOMBIE		0xE9
+#define PGTHJ_STATUS3_MEDIUMWGHT 0xD5
+#define PGTHJ_STATUS3_ASYNC 0xD6
+#define PGTHJ_STATUS3_IPT 0xE4
+#define PGTHJ_STATUS3_ZOMBIE 0xE9
 
-#define PGTHJ_STATUS4_DETACHED		0xE5
+#define PGTHJ_STATUS4_DETACHED 0xE5
 
-#define PGTHJ_STATUS5_FREEZE		0xC5
+#define PGTHJ_STATUS5_FREEZE 0xC5
 struct pgthj {
-	char id[4]; /* "gthj" eyecatcher */
-	char limitj;
-	char offj[3];
-	char limitk;
-	char offk[3];
-	char thid[8];
-	char syscall[4];
-	struct tcb *tcb;
-	int ttime;
-	int wtime;
+    char id[4]; /* "gthj" eyecatcher */
+    char limitj;
+    char offj[3];
+    char limitk;
+    char offk[3];
+    char thid[8];
+    char syscall[4];
+    struct tcb* tcb;
+    int ttime;
+    int wtime;
 
-	int _padding;
+    int _padding;
 
-	short semnum; /* if status2==D */
-	short semval; /* if status2==D */
-	int latchwaitpid;
-	char penmask[8];
-	char loginname[8];
-	char prevsc[5][4]; /* last 5 syscalls */
+    short semnum; /* if status2==D */
+    short semval; /* if status2==D */
+    int latchwaitpid;
+    char penmask[8];
+    char loginname[8];
+    char prevsc[5][4]; /* last 5 syscalls */
 
-	/* start of PGTHJSTATUSCHARS group */
-	char status1;
-	char status2;
-	char status3;
-	char status4;
-	char status5;
-	/* end of PGTHJSTATUSCHARS group */
+    /* start of PGTHJSTATUSCHARS group */
+    char status1;
+    char status2;
+    char status3;
+    char status4;
+    char status5;
+    /* end of PGTHJSTATUSCHARS group */
 };
 
 /*
@@ -607,42 +607,41 @@ PGTHKDATA             DS    CL68     SEE pthread_tag_np
 PGTHK#LEN             EQU   *-PGTHH
 */
 struct pgthk {
-	int datalen;
-	char data[68];
+    int datalen;
+    char data[68];
 };
-
 
 #if 0
 /* we're not currently using pthread_quiesce_and_get_np, but may be in the future
  * if the signals prove too dangerous, so leaving this in here.
  */
 /* flags.fbytes[1] */
-#define THDQALLSAFE		0x80
+#define THDQALLSAFE 0x80
 /* flags.fbytes[4] */
-#define THDQGETSTATE	0x80
+#define THDQGETSTATE 0x80
 
 /* thread.flags.fbytes[1] */
-#define THDQANOTFOUND	0x80
-#define THDQAQFRZSAFE	0x40
-#define THDQAOTHERLE	0x20
-#define THDQANODATA		0x10
-#define THDQACONDWAIT	0x8
+#define THDQANOTFOUND 0x80
+#define THDQAQFRZSAFE 0x40
+#define THDQAOTHERLE 0x20
+#define THDQANODATA 0x10
+#define THDQACONDWAIT 0x8
 
 /* thread.flags.fbytes[4] */
-#define THDQAQUICKFRZ	0x80
-#define THDQAREGSOK		0x40
-#define THDQASKIP		0x20
+#define THDQAQUICKFRZ 0x80
+#define THDQAREGSOK 0x40
+#define THDQASKIP 0x20
 
-#define THDQREGSPPSD	1		/* Regs from PPSD */
-#define THDQREGSIRB		2		/* Regs from IRB */
-#define THDQREGSUSTA	3		/* Regs from USTA */
-#define THDQREGSLS		4		/* Regs from link stack */
-#define THDQREGSTCB		5		/* Regs from TCB/STCB */
-#define THDQREGSRB		6		/* Regs from RB/XSB */
-#define THDQREGSCW		7		/* Regs for CondWait. Status returned as zeroes */
-#define THDQID			'THDQ'	/* Eye catcher */
-#define THDQVER			1		/* Current version of control block */
-#define THDQVER01		1		/* Version 1 of control block */
+#define THDQREGSPPSD 1 /* Regs from PPSD */
+#define THDQREGSIRB 2 /* Regs from IRB */
+#define THDQREGSUSTA 3 /* Regs from USTA */
+#define THDQREGSLS 4 /* Regs from link stack */
+#define THDQREGSTCB 5 /* Regs from TCB/STCB */
+#define THDQREGSRB 6 /* Regs from RB/XSB */
+#define THDQREGSCW 7 /* Regs for CondWait. Status returned as zeroes */
+#define THDQID 'THDQ' /* Eye catcher */
+#define THDQVER 1 /* Current version of control block */
+#define THDQVER01 1 /* Version 1 of control block */
 
 struct thdq {
 	char eye[4];
@@ -706,20 +705,20 @@ typedef struct __thdq
        unsigned           __frzsafe    :1 ;
        unsigned           __otherle    :1 ;
        unsigned           __nodata     :1 ;
-       #if __EDC_TARGET >= __EDC_LE210
+#if __EDC_TARGET >= __EDC_LE210
          unsigned           __condwait   :1 ;
          unsigned                        :19;
-       #else
+#else
        unsigned                        :20;
-       #endif /* __EDC_TARGET >= __EDC_LE210 */
+#endif /* __EDC_TARGET >= __EDC_LE210 */
        unsigned           __quickfrz   :1 ;
        unsigned           __regsok     :1 ;
-       #if __EDC_TARGET >= __EDC_LE210
+#if __EDC_TARGET >= __EDC_LE210
          unsigned           __skip       :1 ;
          unsigned                        :5 ;
-       #else
+#else
        unsigned                        :6 ;
-       #endif /* __EDC_TARGET >= __EDC_LE210 */
+#endif /* __EDC_TARGET >= __EDC_LE210 */
      }                    __flags;
 
      char                 ___1___[4];
@@ -738,46 +737,37 @@ typedef struct __thdq
 #endif
 
 #ifndef J9ZOS39064
-void getthent(	int *input_length,
-				struct pgtha **input,
-				int *output_length,
-				void **output_buffer,
-				int *return_value,
-				int *return_code,
-				int *reason_code);
+void getthent(int* input_length, struct pgtha** input, int* output_length, void** output_buffer, int* return_value,
+    int* return_code, int* reason_code);
 
-void pthread_quiesce(	int *request_type,
-						char **user_data,
-						int *return_value,
-						int *return_code,
-						int *reason_code);
+void pthread_quiesce(int* request_type, char** user_data, int* return_value, int* return_code, int* reason_code);
 
 #endif
 
 /* TCB structure: http://publib.boulder.ibm.com/infocenter/zos/v1r9/topic/com.ibm.zos.r9.iead500/iea2d580218.htm */
 #ifndef J9ZOS39064
 struct tcb {
-	char _padding_fpr[32];
-	/* void *tcb starts here, fpr are at a negative offset */
-	char _padding_tcpptr[48];
-	int32_t gpr[16];
+    char _padding_fpr[32];
+    /* void *tcb starts here, fpr are at a negative offset */
+    char _padding_tcpptr[48];
+    int32_t gpr[16];
 };
 
 #endif
 
-
-
-/* quiesce types from http://publib.boulder.ibm.com/infocenter/zos/v1r9/topic/com.ibm.zos.r9.bpxb100/ycons.htm?resultof=%22%51%55%49%45%53%43%45%5f%46%52%45%45%5a%45%22%20 */
-#define QUIESCE_TERM         1  /*  Quiesce threads type = term      @D3A */
-#define QUIESCE_FORCE        2  /*  Quiesce threads type = force     @D3A */
-#define QUIESCE_QUERY        3  /*  Alias of pthread_query           @P4C */
-#define PTHREAD_QUERY        3  /*  Quiesce threads type = query     @P4A */
-#define QUIESCE_FREEZE       4  /*  Quiesce threads type = freeze    @D6A */
-#define QUIESCE_UNFREEZE     5  /*  Quiesce threads type = unfreeze  @D6A */
-#define FREEZE_THIS_THREAD   6  /*  Quiesce threads type = freezeme  @D6A */
+/* quiesce types from
+ * http://publib.boulder.ibm.com/infocenter/zos/v1r9/topic/com.ibm.zos.r9.bpxb100/ycons.htm?resultof=%22%51%55%49%45%53%43%45%5f%46%52%45%45%5a%45%22%20
+ */
+#define QUIESCE_TERM 1 /*  Quiesce threads type = term      @D3A */
+#define QUIESCE_FORCE 2 /*  Quiesce threads type = force     @D3A */
+#define QUIESCE_QUERY 3 /*  Alias of pthread_query           @P4C */
+#define PTHREAD_QUERY 3 /*  Quiesce threads type = query     @P4A */
+#define QUIESCE_FREEZE 4 /*  Quiesce threads type = freeze    @D6A */
+#define QUIESCE_UNFREEZE 5 /*  Quiesce threads type = unfreeze  @D6A */
+#define FREEZE_THIS_THREAD 6 /*  Quiesce threads type = freezeme  @D6A */
 /* Skip 7 because of collision with BPXZCONS Freeze_Force */
-#define FREEZE_EXIT          8  /*  Quiesce threads type = freeze_exit */
-#define QUIESCE_SRB          9  /*  Quiesce threads type = SRBs      @DGA */
+#define FREEZE_EXIT 8 /*  Quiesce threads type = freeze_exit */
+#define QUIESCE_SRB 9 /*  Quiesce threads type = SRBs      @DGA */
 /* Skip 10 and 11 due to collision with BPXZCONS Freeze/Unfreeze Fast */
 
 #pragma pack(reset)

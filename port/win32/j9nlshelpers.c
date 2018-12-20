@@ -26,7 +26,6 @@
  * @brief Native language support helpers
  */
 
-
 #include <windows.h>
 #include <winbase.h>
 #include <stdlib.h>
@@ -36,7 +35,7 @@
 #include "omrport.h"
 #include "omrportpriv.h"
 
-void nls_determine_locale(struct OMRPortLibrary *portLibrary);
+void nls_determine_locale(struct OMRPortLibrary* portLibrary);
 
 /**
  * @internal
@@ -44,64 +43,60 @@ void nls_determine_locale(struct OMRPortLibrary *portLibrary);
  *
  * @param[in] portLibrary The port library
  */
-void
-nls_determine_locale(struct OMRPortLibrary *portLibrary)
+void nls_determine_locale(struct OMRPortLibrary* portLibrary)
 {
-	LCID localeID = LOCALE_USER_DEFAULT;
-	LCTYPE infoType;
-	int length;
+    LCID localeID = LOCALE_USER_DEFAULT;
+    LCTYPE infoType;
+    int length;
 #ifdef UNICODE
-	int i;
+    int i;
 #endif
-	char lang[8];
-	char country[8];
-	J9NLSDataCache *nls = &portLibrary->portGlobals->nls_data;
+    char lang[8];
+    char country[8];
+    J9NLSDataCache* nls = &portLibrary->portGlobals->nls_data;
 
-	/* Get the language */
-	infoType = LOCALE_SISO639LANGNAME;
+    /* Get the language */
+    infoType = LOCALE_SISO639LANGNAME;
 
-	length = GetLocaleInfo(localeID, infoType, (LPTSTR)&lang[0], sizeof(lang));
-	if (length < 2) {
-		strncpy(nls->language, "en", 2);
-	} else {
+    length = GetLocaleInfo(localeID, infoType, (LPTSTR)&lang[0], sizeof(lang));
+    if (length < 2) {
+        strncpy(nls->language, "en", 2);
+    } else {
 
 #ifdef UNICODE
-		/* convert double byte to single byte */
-		for (i = 0; i < length; i++) {
-			lang[i] = (char)((short *)lang)[i];
-		}
+        /* convert double byte to single byte */
+        for (i = 0; i < length; i++) {
+            lang[i] = (char)((short*)lang)[i];
+        }
 #endif
 
-		_strlwr(lang);
+        _strlwr(lang);
 
-		if (!strcmp(lang, "jp")) {
-			// Not required for NT, Win32 gets it wrong
-			strncpy(nls->language, "ja", 2);
-		} else if (!strcmp(lang, "ch")) {
-			/*[PR 104204] Pocket PC 2004 gives ch instead of zh for Chinese */
-			strncpy(nls->language, "zh", 2);
-		} else {
-			strncpy(nls->language, lang, 3);
-		}
-	}
+        if (!strcmp(lang, "jp")) {
+            // Not required for NT, Win32 gets it wrong
+            strncpy(nls->language, "ja", 2);
+        } else if (!strcmp(lang, "ch")) {
+            /*[PR 104204] Pocket PC 2004 gives ch instead of zh for Chinese */
+            strncpy(nls->language, "zh", 2);
+        } else {
+            strncpy(nls->language, lang, 3);
+        }
+    }
 
-	/* Get the region */
-	infoType = LOCALE_SISO3166CTRYNAME;
+    /* Get the region */
+    infoType = LOCALE_SISO3166CTRYNAME;
 
-	length = GetLocaleInfo(localeID, infoType, (LPTSTR)&country[0], sizeof(country));
-	if (length < 2) {
-		strncpy(nls->region, "US", 2);
-	} else {
+    length = GetLocaleInfo(localeID, infoType, (LPTSTR)&country[0], sizeof(country));
+    if (length < 2) {
+        strncpy(nls->region, "US", 2);
+    } else {
 #ifdef UNICODE
-		// convert double byte to single byte
-		for (i = 0; i < length; i++) {
-			country[i] = (char)((short *)country)[i];
-		}
+        // convert double byte to single byte
+        for (i = 0; i < length; i++) {
+            country[i] = (char)((short*)country)[i];
+        }
 #endif
-		country[2] = 0; /* force null-terminator */
-		strncpy(nls->region, country, 2);
-	}
-
+        country[2] = 0; /* force null-terminator */
+        strncpy(nls->region, country, 2);
+    }
 }
-
-

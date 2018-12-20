@@ -37,30 +37,28 @@
 
 #define OPT_DETAILS "O^O ILGEN: "
 
-void
-TestCompiler::IlInjector::setMethodAndTest(TR::IlInjector *source)
-   {
-   setMethodAndTest(source->_method, source->_test);
-   }
+void TestCompiler::IlInjector::setMethodAndTest(TR::IlInjector* source)
+{
+    setMethodAndTest(source->_method, source->_test);
+}
 
-void
-TestCompiler::IlInjector::initialize(TR::IlGeneratorMethodDetails * details,
-                             TR::ResolvedMethodSymbol     * methodSymbol,
-                             TR::FrontEnd                 * fe,
-                             TR::SymbolReferenceTable     * symRefTab)
-   {
-   this->OMR::IlInjector::initialize(details, methodSymbol, fe, symRefTab);
-   _method = reinterpret_cast<TR::ResolvedMethod *>(methodSymbol->getResolvedMethod());
-   }
+void TestCompiler::IlInjector::initialize(TR::IlGeneratorMethodDetails* details, TR::ResolvedMethodSymbol* methodSymbol,
+    TR::FrontEnd* fe, TR::SymbolReferenceTable* symRefTab)
+{
+    this->OMR::IlInjector::initialize(details, methodSymbol, fe, symRefTab);
+    _method = reinterpret_cast<TR::ResolvedMethod*>(methodSymbol->getResolvedMethod());
+}
 
-TR::Node *
-TestCompiler::IlInjector::callFunction(TR::ResolvedMethod *resolvedMethod, TR::IlType *returnType, int32_t numArgs, TR::Node *firstArg)
-   {
-   TR_ASSERT(numArgs == 1, "Hack alert: currently only supports single argument function calls!");
+TR::Node* TestCompiler::IlInjector::callFunction(
+    TR::ResolvedMethod* resolvedMethod, TR::IlType* returnType, int32_t numArgs, TR::Node* firstArg)
+{
+    TR_ASSERT(numArgs == 1, "Hack alert: currently only supports single argument function calls!");
 
-   // arbitrarily treat as "Static" so no receiver expected and should match use of a direct call opcode
-   TR::SymbolReference *methodSymRef = symRefTab()->findOrCreateMethodSymbol(_methodSymbol->getResolvedMethodIndex(), 0, resolvedMethod, TR::MethodSymbol::Kinds::Static);
-   TR::Node *callNode = TR::Node::createWithSymRef(TR::ILOpCode::getDirectCall(returnType->getPrimitiveType()), numArgs, methodSymRef);
-   callNode->setAndIncChild(0, firstArg);
-   return callNode;
-   }
+    // arbitrarily treat as "Static" so no receiver expected and should match use of a direct call opcode
+    TR::SymbolReference* methodSymRef = symRefTab()->findOrCreateMethodSymbol(
+        _methodSymbol->getResolvedMethodIndex(), 0, resolvedMethod, TR::MethodSymbol::Kinds::Static);
+    TR::Node* callNode = TR::Node::createWithSymRef(
+        TR::ILOpCode::getDirectCall(returnType->getPrimitiveType()), numArgs, methodSymRef);
+    callNode->setAndIncChild(0, firstArg);
+    return callNode;
+}

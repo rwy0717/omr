@@ -26,59 +26,59 @@
  */
 TEST_F(CudaDeviceTest, events)
 {
-	OMRPORT_ACCESS_FROM_OMRPORT(getPortLibrary());
+    OMRPORT_ACCESS_FROM_OMRPORT(getPortLibrary());
 
-	for (uint32_t deviceId = 0; deviceId < deviceCount; ++deviceId) {
-		J9CudaEvent event1 = NULL;
-		J9CudaEvent event2 = NULL;
-		float elapsedMillis = 0;
-		int32_t rc = 0;
+    for (uint32_t deviceId = 0; deviceId < deviceCount; ++deviceId) {
+        J9CudaEvent event1 = NULL;
+        J9CudaEvent event2 = NULL;
+        float elapsedMillis = 0;
+        int32_t rc = 0;
 
-		rc = omrcuda_eventCreate(deviceId, J9CUDA_EVENT_FLAG_DEFAULT, &event1);
+        rc = omrcuda_eventCreate(deviceId, J9CUDA_EVENT_FLAG_DEFAULT, &event1);
 
-		ASSERT_EQ(0, rc) << "omrcuda_eventCreate failed";
-		ASSERT_NOT_NULL(event1) << "created null event";
+        ASSERT_EQ(0, rc) << "omrcuda_eventCreate failed";
+        ASSERT_NOT_NULL(event1) << "created null event";
 
-		rc = omrcuda_eventCreate(deviceId, J9CUDA_EVENT_FLAG_DEFAULT, &event2);
+        rc = omrcuda_eventCreate(deviceId, J9CUDA_EVENT_FLAG_DEFAULT, &event2);
 
-		ASSERT_EQ(0, rc) << "omrcuda_eventCreate failed";
-		ASSERT_NOT_NULL(event2) << "created null event";
+        ASSERT_EQ(0, rc) << "omrcuda_eventCreate failed";
+        ASSERT_NOT_NULL(event2) << "created null event";
 
-		rc = omrcuda_eventRecord(deviceId, event1, NULL);
+        rc = omrcuda_eventRecord(deviceId, event1, NULL);
 
-		ASSERT_EQ(0, rc) << "omrcuda_eventRecord failed";
+        ASSERT_EQ(0, rc) << "omrcuda_eventRecord failed";
 
-		rc = omrcuda_eventRecord(deviceId, event2, NULL);
+        rc = omrcuda_eventRecord(deviceId, event2, NULL);
 
-		ASSERT_EQ(0, rc) << "omrcuda_eventRecord failed";
+        ASSERT_EQ(0, rc) << "omrcuda_eventRecord failed";
 
-		rc = omrcuda_eventSynchronize(event2);
+        rc = omrcuda_eventSynchronize(event2);
 
-		ASSERT_EQ(0, rc) << "omrcuda_eventSynchronize failed";
+        ASSERT_EQ(0, rc) << "omrcuda_eventSynchronize failed";
 
-		rc = omrcuda_eventQuery(event1);
+        rc = omrcuda_eventQuery(event1);
 
-		ASSERT_EQ(0, rc) << "omrcuda_eventQuery failed";
+        ASSERT_EQ(0, rc) << "omrcuda_eventQuery failed";
 
-		rc = omrcuda_eventQuery(event2);
+        rc = omrcuda_eventQuery(event2);
 
-		ASSERT_EQ(0, rc) << "omrcuda_eventQuery failed";
+        ASSERT_EQ(0, rc) << "omrcuda_eventQuery failed";
 
-		rc = omrcuda_eventElapsedTime(event1, event2, &elapsedMillis);
+        rc = omrcuda_eventElapsedTime(event1, event2, &elapsedMillis);
 
-		ASSERT_EQ(0, rc) << "omrcuda_eventElapsedTime failed";
-		ASSERT_LT(0, elapsedMillis) << "elapsed time should be non-negative";
+        ASSERT_EQ(0, rc) << "omrcuda_eventElapsedTime failed";
+        ASSERT_LT(0, elapsedMillis) << "elapsed time should be non-negative";
 
-		if (NULL != event1) {
-			rc = omrcuda_eventDestroy(deviceId, event1);
+        if (NULL != event1) {
+            rc = omrcuda_eventDestroy(deviceId, event1);
 
-			ASSERT_EQ(0, rc) << "omrcuda_eventDestroy failed";
-		}
+            ASSERT_EQ(0, rc) << "omrcuda_eventDestroy failed";
+        }
 
-		if (NULL != event2) {
-			rc = omrcuda_eventDestroy(deviceId, event2);
+        if (NULL != event2) {
+            rc = omrcuda_eventDestroy(deviceId, event2);
 
-			ASSERT_EQ(0, rc) << "omrcuda_eventDestroy failed";
-		}
-	}
+            ASSERT_EQ(0, rc) << "omrcuda_eventDestroy failed";
+        }
+    }
 }

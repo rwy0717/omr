@@ -51,17 +51,17 @@
  * Storage for data related to the threads state.
  */
 typedef struct PortlibPTBuffers_struct {
-	struct PortlibPTBuffers_struct *next; /**< Next per thread buffer */
-	struct PortlibPTBuffers_struct *previous; /**< Previous per thread buffer */
+    struct PortlibPTBuffers_struct* next; /**< Next per thread buffer */
+    struct PortlibPTBuffers_struct* previous; /**< Previous per thread buffer */
 
-	int32_t platformErrorCode; /**< error code as reported by the OS */
-	int32_t portableErrorCode; /**< error code translated to portable format by application */
-	char *errorMessageBuffer; /**< last saved error message, either customized or from OS */
-	uintptr_t errorMessageBufferSize; /**< error message buffer size */
+    int32_t platformErrorCode; /**< error code as reported by the OS */
+    int32_t portableErrorCode; /**< error code translated to portable format by application */
+    char* errorMessageBuffer; /**< last saved error message, either customized or from OS */
+    uintptr_t errorMessageBufferSize; /**< error message buffer size */
 
-	int32_t reportedErrorCode; /**< last reported error code */
-	char *reportedMessageBuffer; /**< last reported error message, either customized or from OS */
-	uintptr_t reportedMessageBufferSize; /**< reported message buffer size */
+    int32_t reportedErrorCode; /**< last reported error code */
+    char* reportedMessageBuffer; /**< last reported error message, either customized or from OS */
+    uintptr_t reportedMessageBufferSize; /**< reported message buffer size */
 } PortlibPTBuffers_struct;
 
 /**
@@ -69,12 +69,11 @@ typedef struct PortlibPTBuffers_struct {
  * @brief The per thread buffer
  * Storage for data related to the threads state.
  */
-typedef struct PortlibPTBuffers_struct *PortlibPTBuffers_t;
+typedef struct PortlibPTBuffers_struct* PortlibPTBuffers_t;
 
-void omrport_free_ptBuffer(struct OMRPortLibrary *portLibrary, PortlibPTBuffers_t ptBuffer);
-int32_t port_convertToUTF8(OMRPortLibrary *portLibrary, const wchar_t *unicodeString, char *utf8Buffer, uintptr_t size);
-wchar_t *port_convertFromUTF8(OMRPortLibrary *portLibrary, const char *string, wchar_t *unicodeBuffer, uintptr_t unicodeBufferSize);
+void omrport_free_ptBuffer(struct OMRPortLibrary* portLibrary, PortlibPTBuffers_t ptBuffer);
+int32_t port_convertToUTF8(OMRPortLibrary* portLibrary, const wchar_t* unicodeString, char* utf8Buffer, uintptr_t size);
+wchar_t* port_convertFromUTF8(
+    OMRPortLibrary* portLibrary, const char* string, wchar_t* unicodeBuffer, uintptr_t unicodeBufferSize);
 
-#endif     /* omrportptb_h */
-
-
+#endif /* omrportptb_h */

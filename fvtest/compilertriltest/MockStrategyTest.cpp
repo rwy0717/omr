@@ -27,53 +27,47 @@
 #include "ras/IlVerifierHelpers.hpp"
 #include "SharedVerifiers.hpp" //for NoAndIlVerifier
 
-
 /**
- * Uses the mockStrategy support to select only an 
- * optimization that should have no effect on the 
- * existence of 'and' operations. 
+ * Uses the mockStrategy support to select only an
+ * optimization that should have no effect on the
+ * existence of 'and' operations.
  *
  * Coupling note: This is assuming the default optimization
  * strategy contains the simplifier. If it did not, this test
  * case would be invalid
  */
-class MockStrategyTest : public TRTest::JitOptTest
-   {
+class MockStrategyTest : public TRTest::JitOptTest {
 
-   public:
-   MockStrategyTest()
-      {
-      /*
-       * By adding a non-simplifier opt, we make sure the 
-       * simplifier doesn't run. 
-       */
-      addOptimization(OMR::trivialDeadTreeRemoval);
-      }
-
-   };
+public:
+    MockStrategyTest()
+    {
+        /*
+         * By adding a non-simplifier opt, we make sure the
+         * simplifier doesn't run.
+         */
+        addOptimization(OMR::trivialDeadTreeRemoval);
+    }
+};
 
 /*
  * This tree should not fold, as the simplifier should be disabled. This
- * ensures that the mock optimizer support is working. 
+ * ensures that the mock optimizer support is working.
  */
-TEST_F(MockStrategyTest, FoldDoesntHappen) {
+TEST_F(MockStrategyTest, FoldDoesntHappen)
+{
     auto* inputTrees = "(method return=Int64 args=[Int32]  "
                        " (block                            "
                        "  (lreturn                         "
-                       "   (land                           " 
+                       "   (land                           "
                        "    (lconst 0xFFFFFFFF00000000)    "
-                       "    (iu2l (iload parm=0))))))      "; 
-
+                       "    (iu2l (iload parm=0))))))      ";
 
     auto trees = parseString(inputTrees);
 
     ASSERT_NOTNULL(trees);
 
-    Tril::DefaultCompiler compiler{trees};
-    NoAndIlVerifier verifier;  
+    Tril::DefaultCompiler compiler { trees };
+    NoAndIlVerifier verifier;
 
-    ASSERT_NE(0, compiler.compileWithVerifier(&verifier)) 
-       << "Simplifier simplified when it shouldn't have!";
+    ASSERT_NE(0, compiler.compileWithVerifier(&verifier)) << "Simplifier simplified when it shouldn't have!";
 }
-
-

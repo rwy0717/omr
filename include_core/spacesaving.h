@@ -33,21 +33,20 @@ extern "C" {
 #endif
 
 typedef struct {
-	OMRRanking *ranking;
-	OMRPortLibrary *portLib;
+    OMRRanking* ranking;
+    OMRPortLibrary* portLib;
 } OMRSpaceSaving;
 
-OMRSpaceSaving *spaceSavingNew(OMRPortLibrary *portLibrary, uint32_t size);
-void spaceSavingFree(OMRSpaceSaving *spaceSaving);
-void spaceSavingUpdate(OMRSpaceSaving *spaceSaving, void *data, uintptr_t count);
-void spaceSavingClear(OMRSpaceSaving *spaceSaving);
-void *spaceSavingGetKthMostFreq(OMRSpaceSaving *spaceSaving, uintptr_t k);
-uintptr_t spaceSavingGetKthMostFreqCount(OMRSpaceSaving *spaceSaving, uintptr_t k);
-uintptr_t spaceSavingGetCurSize(OMRSpaceSaving *spaceSaving);
+OMRSpaceSaving* spaceSavingNew(OMRPortLibrary* portLibrary, uint32_t size);
+void spaceSavingFree(OMRSpaceSaving* spaceSaving);
+void spaceSavingUpdate(OMRSpaceSaving* spaceSaving, void* data, uintptr_t count);
+void spaceSavingClear(OMRSpaceSaving* spaceSaving);
+void* spaceSavingGetKthMostFreq(OMRSpaceSaving* spaceSaving, uintptr_t k);
+uintptr_t spaceSavingGetKthMostFreqCount(OMRSpaceSaving* spaceSaving, uintptr_t k);
+uintptr_t spaceSavingGetCurSize(OMRSpaceSaving* spaceSaving);
 
 #ifdef __cplusplus
 }
 #endif
-
 
 #endif

@@ -41,19 +41,16 @@ class MM_SublistPuddle;
  * @see MM_SublistPool
  * @ingroup GC_Structs
  */
-class GC_SublistIterator
-{
-	MM_SublistPuddle *_currentPuddle;
-	MM_SublistPool *_sublistPool;
+class GC_SublistIterator {
+    MM_SublistPuddle* _currentPuddle;
+    MM_SublistPool* _sublistPool;
 
 public:
-	GC_SublistIterator(MM_SublistPool *sublistPool) :
-		_currentPuddle(NULL),
-		_sublistPool(sublistPool)
-	{};
+    GC_SublistIterator(MM_SublistPool* sublistPool)
+        : _currentPuddle(NULL)
+        , _sublistPool(sublistPool) {};
 
-	MM_SublistPuddle *nextList();
+    MM_SublistPuddle* nextList();
 };
 
 #endif /* SUBLISTITERATOR_HPP_ */
-

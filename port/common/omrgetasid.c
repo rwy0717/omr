@@ -33,15 +33,14 @@
 #define ASID_STRING_LENGTH sizeof(ASID_STRING)
 
 /* Generic version of omrget_asid() */
-uintptr_t
-omrget_asid(struct OMRPortLibrary *portLibrary, char *asid, uintptr_t length)
+uintptr_t omrget_asid(struct OMRPortLibrary* portLibrary, char* asid, uintptr_t length)
 {
-	/* Check that caller provided enough space for the string */
-	if ((NULL == asid) || (length < ASID_STRING_LENGTH)) {
-		return ASID_STRING_LENGTH;
-	}
-	/* Default behaviour for platforms other than zOS, simply return the ASID string token */
-	strcpy(asid, ASID_STRING);
+    /* Check that caller provided enough space for the string */
+    if ((NULL == asid) || (length < ASID_STRING_LENGTH)) {
+        return ASID_STRING_LENGTH;
+    }
+    /* Default behaviour for platforms other than zOS, simply return the ASID string token */
+    strcpy(asid, ASID_STRING);
 
-	return 0;
+    return 0;
 }

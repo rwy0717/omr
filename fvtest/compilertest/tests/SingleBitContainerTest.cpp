@@ -25,310 +25,315 @@
 
 namespace {
 
-class SingleBitContainerTest : public :: testing :: Test {
+class SingleBitContainerTest : public ::testing ::Test {
 
-	protected:
-		TR_SingleBitContainer container;
-		TR_SingleBitContainer other;
+protected:
+    TR_SingleBitContainer container;
+    TR_SingleBitContainer other;
 
-
-	virtual void SetUp() {
-		container.resetAll(1);
-		other.resetAll(1);
-	}
-
-
+    virtual void SetUp()
+    {
+        container.resetAll(1);
+        other.resetAll(1);
+    }
 };
-
 
 //****** resetAll(int64_t m, int64_t n) ******//
 
-TEST_F(SingleBitContainerTest, resetAllTest1) {
+TEST_F(SingleBitContainerTest, resetAllTest1)
+{
 
-	//Reseting container to false
-	container.set();
-	container.resetAll(0, 1);
-	ASSERT_EQ(container.get(), false) << "resetAll - bit not reset";
+    // Reseting container to false
+    container.set();
+    container.resetAll(0, 1);
+    ASSERT_EQ(container.get(), false) << "resetAll - bit not reset";
 }
 
-TEST_F(SingleBitContainerTest, resetAllTest2) {
+TEST_F(SingleBitContainerTest, resetAllTest2)
+{
 
-	//Reseting with m = 1 and n = 1, container should not be reset
-	container.set();
-	container.resetAll(1,1);
-	ASSERT_EQ(container.get(), true);
+    // Reseting with m = 1 and n = 1, container should not be reset
+    container.set();
+    container.resetAll(1, 1);
+    ASSERT_EQ(container.get(), true);
 }
 
-TEST_F(SingleBitContainerTest, resetAllTest3) {
+TEST_F(SingleBitContainerTest, resetAllTest3)
+{
 
-	//Reseting with m = 0, n = 0, container should not be reset
-	container.set();
-	container.resetAll(0,0);
-	ASSERT_EQ(container.get(), true);
+    // Reseting with m = 0, n = 0, container should not be reset
+    container.set();
+    container.resetAll(0, 0);
+    ASSERT_EQ(container.get(), true);
 }
 
 //****** Test resetAll(int64_t n) *******//
 
-TEST_F(SingleBitContainerTest, resetAllTest4) {
+TEST_F(SingleBitContainerTest, resetAllTest4)
+{
 
-	//Reseting with n = 0, container should not be reset
-	container.set();
-	container.resetAll(0);
-	ASSERT_EQ(container.get(), true) << "resetAll - invalid bit number, should not reset bit";
-
+    // Reseting with n = 0, container should not be reset
+    container.set();
+    container.resetAll(0);
+    ASSERT_EQ(container.get(), true) << "resetAll - invalid bit number, should not reset bit";
 }
 
-TEST_F(SingleBitContainerTest, resetAllTest5) {
+TEST_F(SingleBitContainerTest, resetAllTest5)
+{
 
-	//Reset the first bit
-	container.set();
-	container.resetAll(1);
-	ASSERT_EQ(container.get(), false) << "resetAll - bit not reset to false";
+    // Reset the first bit
+    container.set();
+    container.resetAll(1);
+    ASSERT_EQ(container.get(), false) << "resetAll - bit not reset to false";
 }
-
 
 //****** Test setAll(int64_t m, int64_t n) ******//
 
-TEST_F(SingleBitContainerTest, setAllTest1) {
+TEST_F(SingleBitContainerTest, setAllTest1)
+{
 
-	//Set first bit to true
-	container.setAll(0, 1);
-	ASSERT_EQ(container.get(), true) << "setAll - bit not set";
+    // Set first bit to true
+    container.setAll(0, 1);
+    ASSERT_EQ(container.get(), true) << "setAll - bit not set";
 }
 
-TEST_F(SingleBitContainerTest, setAllTest2) {
+TEST_F(SingleBitContainerTest, setAllTest2)
+{
 
-	//m = 1, n = 1, container should not be set
-	container.setAll(1,1);
-	ASSERT_EQ(container.get(), false);
+    // m = 1, n = 1, container should not be set
+    container.setAll(1, 1);
+    ASSERT_EQ(container.get(), false);
 }
 
-TEST_F(SingleBitContainerTest, setAllTest3) {
+TEST_F(SingleBitContainerTest, setAllTest3)
+{
 
-	//m = 0, n = 0, container should not be set
-	container.setAll(0,0);
-	ASSERT_EQ(container.get(), false);
+    // m = 0, n = 0, container should not be set
+    container.setAll(0, 0);
+    ASSERT_EQ(container.get(), false);
 }
-
 
 //******* Test setAll(int64_t n) *******//
 
-TEST_F(SingleBitContainerTest, setAllTest4) {
+TEST_F(SingleBitContainerTest, setAllTest4)
+{
 
-	//setting bit to false
-	container.setAll(0);
-	ASSERT_EQ(container.get(), false);
+    // setting bit to false
+    container.setAll(0);
+    ASSERT_EQ(container.get(), false);
 }
 
-TEST_F(SingleBitContainerTest, setAllTest5) {
+TEST_F(SingleBitContainerTest, setAllTest5)
+{
 
-	//setting bit to true
-	container.setAll(1);
-	ASSERT_EQ(container.get(), true);
+    // setting bit to true
+    container.setAll(1);
+    ASSERT_EQ(container.get(), true);
 }
-
 
 //******* Test intersection of two container ******//
 
-TEST_F(SingleBitContainerTest, intersects) {
+TEST_F(SingleBitContainerTest, intersects)
+{
 
-	//Intersection of two false containers
-	container.resetAll(1);
-	other.resetAll(1);
-	ASSERT_EQ(container.intersects(other), false);
+    // Intersection of two false containers
+    container.resetAll(1);
+    other.resetAll(1);
+    ASSERT_EQ(container.intersects(other), false);
 
-	//Intersection of two true bit containers
-	container.setAll(1);
-	other.setAll(1);
-	ASSERT_EQ(container.intersects(other), true);
+    // Intersection of two true bit containers
+    container.setAll(1);
+    other.setAll(1);
+    ASSERT_EQ(container.intersects(other), true);
 
-	//Intersection of one false one true containers
-	container.resetAll(1);
-	other.setAll(1);
-	ASSERT_EQ(container.intersects(other), false);
+    // Intersection of one false one true containers
+    container.resetAll(1);
+    other.setAll(1);
+    ASSERT_EQ(container.intersects(other), false);
 }
 
 //****** Test operatorEqual ******//
 
-TEST_F(SingleBitContainerTest, operatorEqual){
+TEST_F(SingleBitContainerTest, operatorEqual)
+{
 
-	//Both container set to false
-	container.resetAll(1);
-	other.resetAll(1);
-	ASSERT_EQ(container == other, true);
+    // Both container set to false
+    container.resetAll(1);
+    other.resetAll(1);
+    ASSERT_EQ(container == other, true);
 
-	//Both container set to true
-	container.setAll(1);
-	other.setAll(1);
-	ASSERT_EQ(container == other, true);
+    // Both container set to true
+    container.setAll(1);
+    other.setAll(1);
+    ASSERT_EQ(container == other, true);
 
-	//Both container set differently
-	container.setAll(1);
-	other.resetAll(1);
-	ASSERT_EQ(container == other, false);
-
+    // Both container set differently
+    container.setAll(1);
+    other.resetAll(1);
+    ASSERT_EQ(container == other, false);
 }
 
 //****** Test operatorNotEqual ******//
 
-TEST_F(SingleBitContainerTest, operatorNotEqualTest1) {
+TEST_F(SingleBitContainerTest, operatorNotEqualTest1)
+{
 
-	//Both container set to false
-	container.resetAll(1);
-	other.resetAll(1);
-	ASSERT_EQ(container != other, false);
+    // Both container set to false
+    container.resetAll(1);
+    other.resetAll(1);
+    ASSERT_EQ(container != other, false);
 
-	//Containers set differently
-	container.setAll(1);
-	other.resetAll(1);
-	ASSERT_EQ(container != other, true);
+    // Containers set differently
+    container.setAll(1);
+    other.resetAll(1);
+    ASSERT_EQ(container != other, true);
 }
 
 //****** Test for |= operator ******//
 
-TEST_F(SingleBitContainerTest, bitOperator) {
+TEST_F(SingleBitContainerTest, bitOperator)
+{
 
-	//Both container set to false based on default behaviour
-	container |= other;
-	ASSERT_EQ(container.get(), false);
+    // Both container set to false based on default behaviour
+    container |= other;
+    ASSERT_EQ(container.get(), false);
 
-	//Both containers set differently
-	container.setAll(1);
-	other.resetAll(1);
-	container |= other;
-	ASSERT_EQ(container.get(), true);
+    // Both containers set differently
+    container.setAll(1);
+    other.resetAll(1);
+    container |= other;
+    ASSERT_EQ(container.get(), true);
 
-	//other container set to true
-	container.resetAll(1);
-	other.setAll(1);
-	container |= other;
-	ASSERT_EQ(container.get(), true);
-
+    // other container set to true
+    container.resetAll(1);
+    other.setAll(1);
+    container |= other;
+    ASSERT_EQ(container.get(), true);
 }
 
 //****** Test for &= operator ******//
 
-TEST_F(SingleBitContainerTest, operatorAndEqualTest) {
+TEST_F(SingleBitContainerTest, operatorAndEqualTest)
+{
 
-	//Both container set to false be default
-	container &= other;
-	ASSERT_EQ(container.get(), false);
+    // Both container set to false be default
+    container &= other;
+    ASSERT_EQ(container.get(), false);
 
-	//Both container set to true
-	container.setAll(1);
-	other.setAll(1);
-	container &= other;
-	ASSERT_EQ(container.get(), true);
+    // Both container set to true
+    container.setAll(1);
+    other.setAll(1);
+    container &= other;
+    ASSERT_EQ(container.get(), true);
 
-	//other container set to false
-	container.setAll(1);
-	other.resetAll(1);
-	container &= other;
-	ASSERT_EQ(container.get(), false);
-
+    // other container set to false
+    container.setAll(1);
+    other.resetAll(1);
+    container &= other;
+    ASSERT_EQ(container.get(), false);
 }
 
 //****** Test for SubEqual operator ******//
 
-TEST_F(SingleBitContainerTest, operatorSubEqualTest){
+TEST_F(SingleBitContainerTest, operatorSubEqualTest)
+{
 
-	//Both container set to false by default
-	container -= other;
-	ASSERT_EQ(container.get(), false);
+    // Both container set to false by default
+    container -= other;
+    ASSERT_EQ(container.get(), false);
 
-	//other container is set to true
-	container.resetAll(1);
-	other.setAll(1);
-	container -= other;
-	ASSERT_EQ(container.get(), false);
-
+    // other container is set to true
+    container.resetAll(1);
+    other.setAll(1);
+    container -= other;
+    ASSERT_EQ(container.get(), false);
 }
 
 //****** Test for assignment Operator *******//
 
-TEST_F(SingleBitContainerTest, assignmentTest) {
+TEST_F(SingleBitContainerTest, assignmentTest)
+{
 
-	//other is set to true
-	other.setAll(1);
-	container = other;
-	ASSERT_EQ(container.get(), true);
+    // other is set to true
+    other.setAll(1);
+    container = other;
+    ASSERT_EQ(container.get(), true);
 
-	//assigning other to container
-	container.setAll(1);
-	other.resetAll(1);
-	container = other;
-	ASSERT_EQ(container.get(), false);
-
-
-
+    // assigning other to container
+    container.setAll(1);
+    other.resetAll(1);
+    container = other;
+    ASSERT_EQ(container.get(), false);
 }
 
 //****** Test for empty checking ******//
 
-TEST_F(SingleBitContainerTest, emptyTest){
+TEST_F(SingleBitContainerTest, emptyTest)
+{
 
-	//Testing emptiness for a filled container
-	container.set();
-	ASSERT_EQ(container.get(), true);
+    // Testing emptiness for a filled container
+    container.set();
+    ASSERT_EQ(container.get(), true);
 
-	//Testing emptiness for an empty container
-	container.empty();
-	ASSERT_EQ(container.get(), false);
-
+    // Testing emptiness for an empty container
+    container.empty();
+    ASSERT_EQ(container.get(), false);
 }
 
 //****** Test for element count ******//
 
-TEST_F(SingleBitContainerTest, hasMoreThanOneElementTest){
+TEST_F(SingleBitContainerTest, hasMoreThanOneElementTest)
+{
 
-	//SingleBitContainer should always have one element
-	ASSERT_EQ(container.hasMoreThanOneElement(), false);
+    // SingleBitContainer should always have one element
+    ASSERT_EQ(container.hasMoreThanOneElement(), false);
 }
 
 //******* Test for element count ******//
 
-TEST_F(SingleBitContainerTest, elementCount){
+TEST_F(SingleBitContainerTest, elementCount)
+{
 
-	//SingleBitContainer should always have one element
-	ASSERT_EQ(container.elementCount(), 1);
+    // SingleBitContainer should always have one element
+    ASSERT_EQ(container.elementCount(), 1);
 }
 
 //****** Test for number of non-zero chunks  ******//
 
-TEST_F(SingleBitContainerTest, numUsedChunks1){
+TEST_F(SingleBitContainerTest, numUsedChunks1)
+{
 
-	//should always have only one element in use
-	container.set();
-	ASSERT_EQ(container.numUsedChunks(), 1);
+    // should always have only one element in use
+    container.set();
+    ASSERT_EQ(container.numUsedChunks(), 1);
 }
 
 //****** Test for number of non-zero chunks  ******//
 
-TEST_F(SingleBitContainerTest, numNonZeroChunks) {
+TEST_F(SingleBitContainerTest, numNonZeroChunks)
+{
 
-	//testing an empty container
-	container.empty();
-	ASSERT_EQ(container.numNonZeroChunks(), 0);
+    // testing an empty container
+    container.empty();
+    ASSERT_EQ(container.numNonZeroChunks(), 0);
 
-	//testing a filled container
-	container.set();
-	ASSERT_EQ(container.numNonZeroChunks(), 1);
+    // testing a filled container
+    container.set();
+    ASSERT_EQ(container.numNonZeroChunks(), 1);
 }
 
 //****** Test emptiness of container ******//
 
-TEST_F(SingleBitContainerTest, isEmpty) {
+TEST_F(SingleBitContainerTest, isEmpty)
+{
 
-	//empty the container
-	container.empty();
-	ASSERT_EQ(container.isEmpty(), true);
+    // empty the container
+    container.empty();
+    ASSERT_EQ(container.isEmpty(), true);
 
-	//testing emptiness of filled container
-	container.set();
-	ASSERT_EQ(container.isEmpty(), false);
+    // testing emptiness of filled container
+    container.set();
+    ASSERT_EQ(container.isEmpty(), false);
 }
 
-
-};
-
-
+}; // namespace

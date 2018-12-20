@@ -24,21 +24,20 @@
 
 #include "ddr/ir/Type.hpp"
 
-class UDT : public Type
-{
+class UDT : public Type {
 public:
-	NamespaceUDT *_outerNamespace;
-	unsigned int const _lineNumber;
+    NamespaceUDT* _outerNamespace;
+    unsigned int const _lineNumber;
 
-	explicit UDT(size_t size, unsigned int lineNumber = 0);
-	virtual ~UDT();
+    explicit UDT(size_t size, unsigned int lineNumber = 0);
+    virtual ~UDT();
 
-	virtual string getFullName() const;
-	virtual bool insertUnique(Symbol_IR *ir);
-	virtual NamespaceUDT * getNamespace();
+    virtual string getFullName() const;
+    virtual bool insertUnique(Symbol_IR* ir);
+    virtual NamespaceUDT* getNamespace();
 
-	bool operator==(const Type & rhs) const;
-	virtual bool compareToUDT(const UDT &) const;
+    bool operator==(const Type& rhs) const;
+    virtual bool compareToUDT(const UDT&) const;
 };
 
 #endif /* UDT_HPP */

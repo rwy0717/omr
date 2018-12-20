@@ -27,8 +27,14 @@
  */
 #ifndef OMR_LINKAGE_CONNECTOR
 #define OMR_LINKAGE_CONNECTOR
-namespace OMR { namespace ARM64 { class Linkage; } }
-namespace OMR { typedef OMR::ARM64::Linkage LinkageConnector; }
+namespace OMR {
+namespace ARM64 {
+class Linkage;
+}
+} // namespace OMR
+namespace OMR {
+typedef OMR::ARM64::Linkage LinkageConnector;
+}
 #endif
 
 #include "compiler/codegen/OMRLinkage.hpp"
@@ -43,374 +49,336 @@ namespace OMR { typedef OMR::ARM64::Linkage LinkageConnector; }
 #include "env/TRMemory.hpp"
 
 class TR_FrontEnd;
-namespace TR { class AutomaticSymbol; }
-namespace TR { class Compilation; }
-namespace TR { class Instruction; }
-namespace TR { class MemoryReference; }
-namespace TR { class Node; }
-namespace TR { class ParameterSymbol; }
-namespace TR { class ResolvedMethodSymbol; }
+namespace TR {
+class AutomaticSymbol;
+}
+namespace TR {
+class Compilation;
+}
+namespace TR {
+class Instruction;
+}
+namespace TR {
+class MemoryReference;
+}
+namespace TR {
+class Node;
+}
+namespace TR {
+class ParameterSymbol;
+}
+namespace TR {
+class ResolvedMethodSymbol;
+}
 
 /**
  * @brief Adds dependency
  */
-inline void
-addDependency(
-      TR::RegisterDependencyConditions *dep,
-      TR::Register *vreg,
-      TR::RealRegister::RegNum rnum,
-      TR_RegisterKinds rk,
-      TR::CodeGenerator *cg)
-   {
-   if (vreg == NULL)
-      {
-      vreg = cg->allocateRegister(rk);
-      }
+inline void addDependency(TR::RegisterDependencyConditions* dep, TR::Register* vreg, TR::RealRegister::RegNum rnum,
+    TR_RegisterKinds rk, TR::CodeGenerator* cg)
+{
+    if (vreg == NULL) {
+        vreg = cg->allocateRegister(rk);
+    }
 
-   dep->addPreCondition(vreg, rnum);
-   dep->addPostCondition(vreg, rnum);
-   }
+    dep->addPreCondition(vreg, rnum);
+    dep->addPostCondition(vreg, rnum);
+}
 
 namespace TR {
 
 // linkage properties
-#define CallerCleanup       0x01
-#define RightToLeft         0x02
+#define CallerCleanup 0x01
+#define RightToLeft 0x02
 #define IntegersInRegisters 0x04
-#define LongsInRegisters    0x08
-#define FloatsInRegisters   0x10
+#define LongsInRegisters 0x08
+#define FloatsInRegisters 0x10
 
 // register flags
-#define Preserved                   0x01
-#define IntegerReturn               0x02
-#define IntegerArgument             0x04
-#define FloatReturn                 0x08
-#define FloatArgument               0x10
+#define Preserved 0x01
+#define IntegerReturn 0x02
+#define IntegerArgument 0x04
+#define FloatReturn 0x08
+#define FloatArgument 0x10
 #define CallerAllocatesBackingStore 0x20
-#define ARM64_Reserved              0x40
+#define ARM64_Reserved 0x40
 
-struct ARM64LinkageProperties
-   {
-   uint32_t _properties;
-   uint32_t _registerFlags[TR::RealRegister::NumRegisters];
-   uint8_t _numIntegerArgumentRegisters;
-   uint8_t _firstIntegerArgumentRegister;
-   uint8_t _numFloatArgumentRegisters;
-   uint8_t _firstFloatArgumentRegister;
-   TR::RealRegister::RegNum _argumentRegisters[TR::RealRegister::NumRegisters];
-   uint8_t _firstIntegerReturnRegister;
-   uint8_t _firstFloatReturnRegister;
-   TR::RealRegister::RegNum _returnRegisters[TR::RealRegister::NumRegisters];
-   uint8_t _numAllocatableIntegerRegisters;
-   uint8_t _numAllocatableFloatRegisters;
-   TR::RealRegister::RegNum _methodMetaDataRegister;
-   TR::RealRegister::RegNum _stackPointerRegister;
-   TR::RealRegister::RegNum _framePointerRegister;
-   uint8_t _numberOfDependencyGPRegisters;
-   int8_t _offsetToFirstParm;
-   int8_t _offsetToFirstLocal;
+struct ARM64LinkageProperties {
+    uint32_t _properties;
+    uint32_t _registerFlags[TR::RealRegister::NumRegisters];
+    uint8_t _numIntegerArgumentRegisters;
+    uint8_t _firstIntegerArgumentRegister;
+    uint8_t _numFloatArgumentRegisters;
+    uint8_t _firstFloatArgumentRegister;
+    TR::RealRegister::RegNum _argumentRegisters[TR::RealRegister::NumRegisters];
+    uint8_t _firstIntegerReturnRegister;
+    uint8_t _firstFloatReturnRegister;
+    TR::RealRegister::RegNum _returnRegisters[TR::RealRegister::NumRegisters];
+    uint8_t _numAllocatableIntegerRegisters;
+    uint8_t _numAllocatableFloatRegisters;
+    TR::RealRegister::RegNum _methodMetaDataRegister;
+    TR::RealRegister::RegNum _stackPointerRegister;
+    TR::RealRegister::RegNum _framePointerRegister;
+    uint8_t _numberOfDependencyGPRegisters;
+    int8_t _offsetToFirstParm;
+    int8_t _offsetToFirstLocal;
 
-   uint32_t getNumIntArgRegs() const {return _numIntegerArgumentRegisters;}
+    uint32_t getNumIntArgRegs() const { return _numIntegerArgumentRegisters; }
 
-   uint32_t getNumFloatArgRegs() const {return _numFloatArgumentRegisters;}
+    uint32_t getNumFloatArgRegs() const { return _numFloatArgumentRegisters; }
 
-   uint32_t getProperties() const {return _properties;}
+    uint32_t getProperties() const { return _properties; }
 
-   uint32_t getCallerCleanup() const {return (_properties & CallerCleanup);}
+    uint32_t getCallerCleanup() const { return (_properties & CallerCleanup); }
 
-   uint32_t getRightToLeft() const {return (_properties & RightToLeft);}
+    uint32_t getRightToLeft() const { return (_properties & RightToLeft); }
 
-   uint32_t getIntegersInRegisters() const {return (_properties & IntegersInRegisters);}
+    uint32_t getIntegersInRegisters() const { return (_properties & IntegersInRegisters); }
 
-   uint32_t getLongsInRegisters() const {return (_properties & LongsInRegisters);}
+    uint32_t getLongsInRegisters() const { return (_properties & LongsInRegisters); }
 
-   uint32_t getFloatsInRegisters() const {return (_properties & FloatsInRegisters);}
+    uint32_t getFloatsInRegisters() const { return (_properties & FloatsInRegisters); }
 
-   uint32_t getRegisterFlags(TR::RealRegister::RegNum regNum) const
-      {
-      return _registerFlags[regNum];
-      }
+    uint32_t getRegisterFlags(TR::RealRegister::RegNum regNum) const { return _registerFlags[regNum]; }
 
-   uint32_t getPreserved(TR::RealRegister::RegNum regNum) const
-      {
-      return (_registerFlags[regNum] & Preserved);
-      }
+    uint32_t getPreserved(TR::RealRegister::RegNum regNum) const { return (_registerFlags[regNum] & Preserved); }
 
-   uint32_t getIntegerReturn(TR::RealRegister::RegNum regNum) const
-      {
-      return (_registerFlags[regNum] & IntegerReturn);
-      }
+    uint32_t getIntegerReturn(TR::RealRegister::RegNum regNum) const
+    {
+        return (_registerFlags[regNum] & IntegerReturn);
+    }
 
-   uint32_t getIntegerArgument(TR::RealRegister::RegNum regNum) const
-      {
-      return (_registerFlags[regNum] & IntegerArgument);
-      }
+    uint32_t getIntegerArgument(TR::RealRegister::RegNum regNum) const
+    {
+        return (_registerFlags[regNum] & IntegerArgument);
+    }
 
-   uint32_t getFloatReturn(TR::RealRegister::RegNum regNum) const
-      {
-      return (_registerFlags[regNum] & FloatReturn);
-      }
+    uint32_t getFloatReturn(TR::RealRegister::RegNum regNum) const { return (_registerFlags[regNum] & FloatReturn); }
 
-   uint32_t getFloatArgument(TR::RealRegister::RegNum regNum) const
-      {
-      return (_registerFlags[regNum] & FloatArgument);
-      }
+    uint32_t getFloatArgument(TR::RealRegister::RegNum regNum) const
+    {
+        return (_registerFlags[regNum] & FloatArgument);
+    }
 
-   uint32_t getCallerAllocatesBackingStore(TR::RealRegister::RegNum regNum) const
-      {
-      return (_registerFlags[regNum] & CallerAllocatesBackingStore);
-      }
+    uint32_t getCallerAllocatesBackingStore(TR::RealRegister::RegNum regNum) const
+    {
+        return (_registerFlags[regNum] & CallerAllocatesBackingStore);
+    }
 
-   uint32_t getKilledAndNonReturn(TR::RealRegister::RegNum regNum) const
-      {
-      return ((_registerFlags[regNum] & (Preserved | IntegerReturn | FloatReturn)) == 0);
-      }
+    uint32_t getKilledAndNonReturn(TR::RealRegister::RegNum regNum) const
+    {
+        return ((_registerFlags[regNum] & (Preserved | IntegerReturn | FloatReturn)) == 0);
+    }
 
-   // get the indexth integer argument register
-   TR::RealRegister::RegNum getIntegerArgumentRegister(uint32_t index) const
-      {
-      return _argumentRegisters[_firstIntegerArgumentRegister+index];
-      }
+    // get the indexth integer argument register
+    TR::RealRegister::RegNum getIntegerArgumentRegister(uint32_t index) const
+    {
+        return _argumentRegisters[_firstIntegerArgumentRegister + index];
+    }
 
-   // get the indexth float argument register
-   TR::RealRegister::RegNum getFloatArgumentRegister(uint32_t index) const
-      {
-      return _argumentRegisters[_firstFloatArgumentRegister+index];
-      }
+    // get the indexth float argument register
+    TR::RealRegister::RegNum getFloatArgumentRegister(uint32_t index) const
+    {
+        return _argumentRegisters[_firstFloatArgumentRegister + index];
+    }
 
-   // get the indexth integer return register
-   TR::RealRegister::RegNum getIntegerReturnRegister(uint32_t index) const
-      {
-      return _returnRegisters[_firstIntegerReturnRegister+index];
-      }
+    // get the indexth integer return register
+    TR::RealRegister::RegNum getIntegerReturnRegister(uint32_t index) const
+    {
+        return _returnRegisters[_firstIntegerReturnRegister + index];
+    }
 
-   // get the indexth float return register
-   TR::RealRegister::RegNum getFloatReturnRegister(uint32_t index) const
-      {
-      return _returnRegisters[_firstFloatReturnRegister+index];
-      }
+    // get the indexth float return register
+    TR::RealRegister::RegNum getFloatReturnRegister(uint32_t index) const
+    {
+        return _returnRegisters[_firstFloatReturnRegister + index];
+    }
 
-   TR::RealRegister::RegNum getArgument(uint32_t index) const
-      {
-      return _argumentRegisters[index];
-      }
+    TR::RealRegister::RegNum getArgument(uint32_t index) const { return _argumentRegisters[index]; }
 
-   TR::RealRegister::RegNum getReturnRegister(uint32_t index) const
-      {
-      return _returnRegisters[index];
-      }
+    TR::RealRegister::RegNum getReturnRegister(uint32_t index) const { return _returnRegisters[index]; }
 
-   TR::RealRegister::RegNum getIntegerReturnRegister() const
-      {
-      return _returnRegisters[_firstIntegerReturnRegister];
-      }
+    TR::RealRegister::RegNum getIntegerReturnRegister() const { return _returnRegisters[_firstIntegerReturnRegister]; }
 
-   TR::RealRegister::RegNum getLongReturnRegister() const
-      {
-      return _returnRegisters[_firstIntegerReturnRegister];
-      }
+    TR::RealRegister::RegNum getLongReturnRegister() const { return _returnRegisters[_firstIntegerReturnRegister]; }
 
-   TR::RealRegister::RegNum getFloatReturnRegister() const
-      {
-      return _returnRegisters[_firstFloatReturnRegister];
-      }
+    TR::RealRegister::RegNum getFloatReturnRegister() const { return _returnRegisters[_firstFloatReturnRegister]; }
 
-   TR::RealRegister::RegNum getDoubleReturnRegister() const
-      {
-      return _returnRegisters[_firstFloatReturnRegister];
-      }
+    TR::RealRegister::RegNum getDoubleReturnRegister() const { return _returnRegisters[_firstFloatReturnRegister]; }
 
-   int32_t getNumAllocatableIntegerRegisters() const
-      {
-      return _numAllocatableIntegerRegisters;
-      }
+    int32_t getNumAllocatableIntegerRegisters() const { return _numAllocatableIntegerRegisters; }
 
-   int32_t getNumAllocatableFloatRegisters() const
-      {
-      return _numAllocatableFloatRegisters;
-      }
+    int32_t getNumAllocatableFloatRegisters() const { return _numAllocatableFloatRegisters; }
 
-   TR::RealRegister::RegNum getMethodMetaDataRegister() const
-      {
-      return _methodMetaDataRegister;
-      }
+    TR::RealRegister::RegNum getMethodMetaDataRegister() const { return _methodMetaDataRegister; }
 
-   TR::RealRegister::RegNum getStackPointerRegister() const
-      {
-      return _stackPointerRegister;
-      }
+    TR::RealRegister::RegNum getStackPointerRegister() const { return _stackPointerRegister; }
 
-   TR::RealRegister::RegNum getFramePointerRegister() const
-      {
-      return _framePointerRegister;
-      }
+    TR::RealRegister::RegNum getFramePointerRegister() const { return _framePointerRegister; }
 
-   int32_t getOffsetToFirstParm() const {return _offsetToFirstParm;}
+    int32_t getOffsetToFirstParm() const { return _offsetToFirstParm; }
 
-   int32_t getOffsetToFirstLocal() const {return _offsetToFirstLocal;}
+    int32_t getOffsetToFirstLocal() const { return _offsetToFirstLocal; }
 
-   uint32_t getNumberOfDependencyGPRegisters() const {return _numberOfDependencyGPRegisters;}
-   };
+    uint32_t getNumberOfDependencyGPRegisters() const { return _numberOfDependencyGPRegisters; }
+};
 
-}
+} // namespace TR
 
-namespace OMR
-{
-namespace ARM64
-{
-class OMR_EXTENSIBLE Linkage : public OMR::Linkage
-   {
-   public:
+namespace OMR {
+namespace ARM64 {
+class OMR_EXTENSIBLE Linkage : public OMR::Linkage {
+public:
+    /**
+     * @brief Constructor
+     */
+    Linkage()
+        : OMR::Linkage()
+    {}
+    /**
+     * @brief Constructor
+     * @param[in] cg : CodeGenerator
+     */
+    Linkage(TR::CodeGenerator* cg)
+        : _cg(cg)
+    {}
 
-   /**
-    * @brief Constructor
-    */
-   Linkage () : OMR::Linkage() {}
-   /**
-    * @brief Constructor
-    * @param[in] cg : CodeGenerator
-    */
-   Linkage (TR::CodeGenerator *cg) : _cg(cg) {}
+    /**
+     * @brief Parameter has to be on stack or not
+     * @param[in] parm : parameter symbol
+     * @return true if the parameter has to be on stack, false otherwise
+     */
+    virtual bool hasToBeOnStack(TR::ParameterSymbol* parm);
+    /**
+     * @brief Maps symbols to locations on stack
+     * @param[in] method : method for which symbols are mapped on stack
+     */
+    virtual void mapStack(TR::ResolvedMethodSymbol* method);
+    /**
+     * @brief Maps an automatic symbol to an index on stack
+     * @param[in] p : automatic symbol
+     * @param[in/out] stackIndex : index on stack
+     */
+    virtual void mapSingleAutomatic(TR::AutomaticSymbol* p, uint32_t& stackIndex);
+    /**
+     * @brief Initializes ARM64 RealRegister linkage
+     */
+    virtual void initARM64RealRegisterLinkage();
 
-   /**
-    * @brief Parameter has to be on stack or not
-    * @param[in] parm : parameter symbol
-    * @return true if the parameter has to be on stack, false otherwise
-    */
-   virtual bool hasToBeOnStack(TR::ParameterSymbol *parm);
-   /**
-    * @brief Maps symbols to locations on stack
-    * @param[in] method : method for which symbols are mapped on stack
-    */
-   virtual void mapStack(TR::ResolvedMethodSymbol *method);
-   /**
-    * @brief Maps an automatic symbol to an index on stack
-    * @param[in] p : automatic symbol
-    * @param[in/out] stackIndex : index on stack
-    */
-   virtual void mapSingleAutomatic(TR::AutomaticSymbol *p, uint32_t &stackIndex);
-   /**
-    * @brief Initializes ARM64 RealRegister linkage
-    */
-   virtual void initARM64RealRegisterLinkage();
+    /**
+     * @brief Saves arguments
+     * @param[in] cursor : instruction cursor
+     */
+    virtual TR::Instruction* saveArguments(TR::Instruction* cursor); // may need more parameters
+    /**
+     * @brief Loads up arguments
+     * @param[in] cursor : instruction cursor
+     */
+    virtual TR::Instruction* loadUpArguments(TR::Instruction* cursor);
+    /**
+     * @brief Flushes arguments
+     * @param[in] cursor : instruction cursor
+     */
+    virtual TR::Instruction* flushArguments(TR::Instruction* cursor);
+    /**
+     * @brief Sets parameter linkage register index
+     * @param[in] method : method symbol
+     */
+    virtual void setParameterLinkageRegisterIndex(TR::ResolvedMethodSymbol* method);
 
-   /**
-    * @brief Saves arguments
-    * @param[in] cursor : instruction cursor
-    */
-   virtual TR::Instruction *saveArguments(TR::Instruction *cursor); // may need more parameters
-   /**
-    * @brief Loads up arguments
-    * @param[in] cursor : instruction cursor
-    */
-   virtual TR::Instruction *loadUpArguments(TR::Instruction *cursor);
-   /**
-    * @brief Flushes arguments
-    * @param[in] cursor : instruction cursor
-    */
-   virtual TR::Instruction *flushArguments(TR::Instruction *cursor);
-   /**
-    * @brief Sets parameter linkage register index
-    * @param[in] method : method symbol
-    */
-   virtual void setParameterLinkageRegisterIndex(TR::ResolvedMethodSymbol *method);
+    /**
+     * @brief Pushes integer argument to register
+     * @return the register holding the argument
+     */
+    TR::Register* pushIntegerWordArg(TR::Node* child);
+    /**
+     * @brief Pushes address argument to register
+     * @return the register holding the argument
+     */
+    TR::Register* pushAddressArg(TR::Node* child);
+    /**
+     * @brief Pushes long argument to register
+     * @return the register holding the argument
+     */
+    TR::Register* pushLongArg(TR::Node* child);
+    /**
+     * @brief Pushes float argument to register
+     * @return the register holding the argument
+     */
+    TR::Register* pushFloatArg(TR::Node* child);
+    /**
+     * @brief Pushes double argument to register
+     * @return the register holding the argument
+     */
+    TR::Register* pushDoubleArg(TR::Node* child);
 
-   /**
-    * @brief Pushes integer argument to register
-    * @return the register holding the argument
-    */
-   TR::Register *pushIntegerWordArg(TR::Node *child);
-   /**
-    * @brief Pushes address argument to register
-    * @return the register holding the argument
-    */
-   TR::Register *pushAddressArg(TR::Node *child);
-   /**
-    * @brief Pushes long argument to register
-    * @return the register holding the argument
-    */
-   TR::Register *pushLongArg(TR::Node *child);
-   /**
-    * @brief Pushes float argument to register
-    * @return the register holding the argument
-    */
-   TR::Register *pushFloatArg(TR::Node *child);
-   /**
-    * @brief Pushes double argument to register
-    * @return the register holding the argument
-    */
-   TR::Register *pushDoubleArg(TR::Node *child);
+    /**
+     * @brief Gets ARM64 linkage properties
+     * @return Linkage properties
+     */
+    virtual const TR::ARM64LinkageProperties& getProperties() = 0;
 
-   /**
-    * @brief Gets ARM64 linkage properties
-    * @return Linkage properties
-    */
-   virtual const TR::ARM64LinkageProperties& getProperties() = 0;
+    /**
+     * @brief Gets the number of argument registers
+     * @param[in] kind : register kind
+     * @return number of argument registers of specified kind
+     */
+    virtual int32_t numArgumentRegisters(TR_RegisterKinds kind);
 
-   /**
-    * @brief Gets the number of argument registers
-    * @param[in] kind : register kind
-    * @return number of argument registers of specified kind
-    */
-   virtual int32_t numArgumentRegisters(TR_RegisterKinds kind);
+    /**
+     * @brief Builds method arguments
+     * @param[in] node : caller node
+     * @param[in] dependencies : register dependency conditions
+     */
+    virtual int32_t buildArgs(TR::Node* callNode, TR::RegisterDependencyConditions* dependencies) = 0;
 
-   /**
-    * @brief Builds method arguments
-    * @param[in] node : caller node
-    * @param[in] dependencies : register dependency conditions
-    */
-   virtual int32_t buildArgs(
-         TR::Node *callNode,
-         TR::RegisterDependencyConditions *dependencies) = 0;
+    /**
+     * @brief Builds direct dispatch to method
+     * @param[in] node : caller node
+     */
+    virtual TR::Register* buildDirectDispatch(TR::Node* callNode) = 0;
+    /**
+     * @brief Builds indirect dispatch to method
+     * @param[in] node : caller node
+     */
+    virtual TR::Register* buildIndirectDispatch(TR::Node* callNode) = 0;
 
-   /**
-    * @brief Builds direct dispatch to method
-    * @param[in] node : caller node
-    */
-   virtual TR::Register *buildDirectDispatch(TR::Node *callNode) = 0;
-   /**
-    * @brief Builds indirect dispatch to method
-    * @param[in] node : caller node
-    */
-   virtual TR::Register *buildIndirectDispatch(TR::Node *callNode) = 0;
+    /**
+     * @brief Gets the CodeGenerator
+     * @return CodeGenerator
+     */
+    TR::CodeGenerator* cg() { return _cg; }
+    /**
+     * @brief Gets the Compilation
+     * @return Compilation
+     */
+    TR::Compilation* comp() { return _cg->comp(); }
+    /**
+     * @brief Gets the FrontEnd
+     * @return FrontEnd
+     */
+    TR_FrontEnd* fe() { return _cg->fe(); }
 
-   /**
-    * @brief Gets the CodeGenerator
-    * @return CodeGenerator
-    */
-   TR::CodeGenerator *cg() {return _cg;}
-   /**
-    * @brief Gets the Compilation
-    * @return Compilation
-    */
-   TR::Compilation *comp() {return _cg->comp();}
-   /**
-    * @brief Gets the FrontEnd
-    * @return FrontEnd
-    */
-   TR_FrontEnd *fe() {return _cg->fe();}
+    /**
+     * @brief Gets the TR_Memory
+     * @return TR_Memory
+     */
+    TR_Memory* trMemory() { return _cg->trMemory(); }
+    /**
+     * @brief Gets the Heap Memory
+     * @return Heap Memory
+     */
+    TR_HeapMemory trHeapMemory();
+    /**
+     * @brief Gets the Stack Memory
+     * @return Stack Memory
+     */
+    TR_StackMemory trStackMemory();
 
-   /**
-    * @brief Gets the TR_Memory
-    * @return TR_Memory
-    */
-   TR_Memory *trMemory() {return _cg->trMemory();}
-   /**
-    * @brief Gets the Heap Memory
-    * @return Heap Memory
-    */
-   TR_HeapMemory trHeapMemory();
-   /**
-    * @brief Gets the Stack Memory
-    * @return Stack Memory
-    */
-   TR_StackMemory trStackMemory();
-
-   protected:
-
-   TR::CodeGenerator*_cg;
-   };
-} // ARM64
-} // TR
+protected:
+    TR::CodeGenerator* _cg;
+};
+} // namespace ARM64
+} // namespace OMR
 
 #endif

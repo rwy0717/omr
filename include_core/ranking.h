@@ -32,11 +32,11 @@ typedef struct OMRRanking OMRRanking;
 typedef struct hashTableEntry hashTableEntry;
 
 struct OMRRanking {
-	uint32_t size;
-	uint32_t curSize;
-	rankTableEntry *rankTable;
-	OMRPortLibrary *portLib;
-	J9HashTable *hashTable;
+    uint32_t size;
+    uint32_t curSize;
+    rankTableEntry* rankTable;
+    OMRPortLibrary* portLib;
+    J9HashTable* hashTable;
 };
 
 /*
@@ -51,39 +51,39 @@ struct OMRRanking {
  * @param size number of entries to have in the ranking table
  * @return pointer to new ranking data structure
  */
-OMRRanking *rankingNew(OMRPortLibrary *portLibrary, uint32_t size);
-void rankingFree(OMRRanking *ranking);
+OMRRanking* rankingNew(OMRPortLibrary* portLibrary, uint32_t size);
+void rankingFree(OMRRanking* ranking);
 
 /* resets all entries in the ranking data structure */
-void rankingClear(OMRRanking *ranking);
+void rankingClear(OMRRanking* ranking);
 
 /* Get the lowest count value in the data structure*/
-uintptr_t rankingGetLowestCount(OMRRanking *ranking);
+uintptr_t rankingGetLowestCount(OMRRanking* ranking);
 
 /* Replace the entry with the lowest count value with the given key and count value
  * @param key to replace lowest entry with
  * @param count count to replace lowest entry wtih
  */
-void rankingUpdateLowest(OMRRanking *ranking, void *key, uintptr_t count);
+void rankingUpdateLowest(OMRRanking* ranking, void* key, uintptr_t count);
 
 /* Increment an entry by count
  * @param key the entry to increment
  * @param count how much to increment by
  * @return returns TRUE if an entry with the given key exists(who's count is then increment), false otherwise
  * */
-uintptr_t rankingIncrementEntry(OMRRanking *ranking, void *key, uintptr_t count);
+uintptr_t rankingIncrementEntry(OMRRanking* ranking, void* key, uintptr_t count);
 
 /* get the key at rank k
  * @param k the kth highest count we're enquiring about
  * @return the key at rank k
  */
-void *rankingGetKthHighest(OMRRanking *ranking, uintptr_t k);
+void* rankingGetKthHighest(OMRRanking* ranking, uintptr_t k);
 
 /* get the count at rank k
  * @param k the kth highest count we're enquiring about
  * @return the count at rank k
  */
-uintptr_t rankingGetKthHighestCount(OMRRanking *ranking, uintptr_t k);
+uintptr_t rankingGetKthHighestCount(OMRRanking* ranking, uintptr_t k);
 
 #ifdef __cplusplus
 }

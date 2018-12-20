@@ -27,97 +27,107 @@
 #include <stdint.h>
 #include "codegen/Register.hpp"
 
-namespace TR { class AutomaticSymbol; }
-namespace TR { class CodeGenerator; }
-namespace TR { class Instruction; }
-namespace TR { class Node; }
-namespace TR { class ParameterSymbol; }
-namespace TR { class RegisterDependencyConditions; }
-namespace TR { class ResolvedMethodSymbol; }
-template <class T> class List;
+namespace TR {
+class AutomaticSymbol;
+}
+namespace TR {
+class CodeGenerator;
+}
+namespace TR {
+class Instruction;
+}
+namespace TR {
+class Node;
+}
+namespace TR {
+class ParameterSymbol;
+}
+namespace TR {
+class RegisterDependencyConditions;
+}
+namespace TR {
+class ResolvedMethodSymbol;
+}
+template <class T>
+class List;
 
 namespace TR {
 
-class ARM64SystemLinkage : public TR::Linkage
-   {
-   protected:
+class ARM64SystemLinkage : public TR::Linkage {
+protected:
+    TR::ARM64LinkageProperties _properties;
 
-   TR::ARM64LinkageProperties _properties;
+public:
+    /**
+     * @brief Constructor
+     * @param[in] cg : CodeGenerator
+     */
+    ARM64SystemLinkage(TR::CodeGenerator* cg);
 
-   public:
+    /**
+     * @brief Gets linkage properties
+     * @return Linkage properties
+     */
+    virtual const TR::ARM64LinkageProperties& getProperties();
 
-   /**
-    * @brief Constructor
-    * @param[in] cg : CodeGenerator
-    */
-   ARM64SystemLinkage(TR::CodeGenerator *cg);
+    /**
+     * @brief Gets the RightToLeft flag
+     * @return RightToLeft flag
+     */
+    virtual uint32_t getRightToLeft();
+    /**
+     * @brief Maps symbols to locations on stack
+     * @param[in] method : method for which symbols are mapped on stack
+     */
+    virtual void mapStack(TR::ResolvedMethodSymbol* method);
+    /**
+     * @brief Maps an automatic symbol to an index on stack
+     * @param[in] p : automatic symbol
+     * @param[in/out] stackIndex : index on stack
+     */
+    virtual void mapSingleAutomatic(TR::AutomaticSymbol* p, uint32_t& stackIndex);
+    /**
+     * @brief Initializes ARM64 RealRegister linkage
+     */
+    virtual void initARM64RealRegisterLinkage();
 
-   /**
-    * @brief Gets linkage properties
-    * @return Linkage properties
-    */
-   virtual const TR::ARM64LinkageProperties& getProperties();
+    /**
+     * @brief Creates method prologue
+     * @param[in] cursor : instruction cursor
+     */
+    virtual void createPrologue(TR::Instruction* cursor);
+    /**
+     * @brief Creates method prologue
+     * @param[in] cursor : instruction cursor
+     */
+    virtual void createPrologue(TR::Instruction* cursor, List<TR::ParameterSymbol>& parm);
 
-   /**
-    * @brief Gets the RightToLeft flag
-    * @return RightToLeft flag
-    */
-   virtual uint32_t getRightToLeft();
-   /**
-    * @brief Maps symbols to locations on stack
-    * @param[in] method : method for which symbols are mapped on stack
-    */
-   virtual void mapStack(TR::ResolvedMethodSymbol *method);
-   /**
-    * @brief Maps an automatic symbol to an index on stack
-    * @param[in] p : automatic symbol
-    * @param[in/out] stackIndex : index on stack
-    */
-   virtual void mapSingleAutomatic(TR::AutomaticSymbol *p, uint32_t &stackIndex);
-   /**
-    * @brief Initializes ARM64 RealRegister linkage
-    */
-   virtual void initARM64RealRegisterLinkage();
+    /**
+     * @brief Creates method epilogue
+     * @param[in] cursor : instruction cursor
+     */
+    virtual void createEpilogue(TR::Instruction* cursor);
 
-   /**
-    * @brief Creates method prologue
-    * @param[in] cursor : instruction cursor
-    */
-   virtual void createPrologue(TR::Instruction *cursor);
-   /**
-    * @brief Creates method prologue
-    * @param[in] cursor : instruction cursor
-    */
-   virtual void createPrologue(TR::Instruction *cursor, List<TR::ParameterSymbol> &parm);
+    /**
+     * @brief Builds method arguments
+     * @param[in] node : caller node
+     * @param[in] dependencies : register dependency conditions
+     */
+    virtual int32_t buildArgs(TR::Node* callNode, TR::RegisterDependencyConditions* dependencies);
 
-   /**
-    * @brief Creates method epilogue
-    * @param[in] cursor : instruction cursor
-    */
-   virtual void createEpilogue(TR::Instruction *cursor);
+    /**
+     * @brief Builds direct dispatch to method
+     * @param[in] node : caller node
+     */
+    virtual TR::Register* buildDirectDispatch(TR::Node* callNode);
 
-   /**
-    * @brief Builds method arguments
-    * @param[in] node : caller node
-    * @param[in] dependencies : register dependency conditions
-    */
-   virtual int32_t buildArgs(
-         TR::Node *callNode,
-         TR::RegisterDependencyConditions *dependencies);
+    /**
+     * @brief Builds indirect dispatch to method
+     * @param[in] node : caller node
+     */
+    virtual TR::Register* buildIndirectDispatch(TR::Node* callNode);
+};
 
-   /**
-    * @brief Builds direct dispatch to method
-    * @param[in] node : caller node
-    */
-   virtual TR::Register *buildDirectDispatch(TR::Node *callNode);
-
-   /**
-    * @brief Builds indirect dispatch to method
-    * @param[in] node : caller node
-    */
-   virtual TR::Register *buildIndirectDispatch(TR::Node *callNode);
-   };
-
-}
+} // namespace TR
 
 #endif

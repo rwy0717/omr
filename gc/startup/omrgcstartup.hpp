@@ -32,9 +32,9 @@ class MM_StartupManager;
 
 /* Initialization & Shutdown API */
 
-omr_error_t OMR_GC_InitializeHeap(OMR_VM* omrVM, MM_StartupManager *manager);
+omr_error_t OMR_GC_InitializeHeap(OMR_VM* omrVM, MM_StartupManager* manager);
 
-omr_error_t OMR_GC_IntializeHeapAndCollector(OMR_VM* omrVM, MM_StartupManager *manager);
+omr_error_t OMR_GC_IntializeHeapAndCollector(OMR_VM* omrVM, MM_StartupManager* manager);
 
 omr_error_t OMR_GC_InitializeDispatcherThreads(OMR_VMThread* omrVMThread);
 

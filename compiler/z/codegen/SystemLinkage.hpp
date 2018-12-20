@@ -27,24 +27,21 @@
 #include "codegen/Linkage.hpp"
 #include "codegen/LinkageConventionsEnum.hpp"
 
-namespace TR { class CodeGenerator; }
-
-namespace TR
-{
-
-class SystemLinkage : public OMR::SystemLinkageConnector
-   {
-   public:
-
-   SystemLinkage(TR::CodeGenerator * cg, TR_S390LinkageConventions elc=TR_S390LinkageDefault, TR_LinkageConventions lc=TR_System)
-      : OMR::SystemLinkageConnector(cg, elc, lc) {}
-   };
+namespace TR {
+class CodeGenerator;
 }
 
-inline TR::SystemLinkage *
-toSystemLinkage(TR::Linkage * l)
-   {
-   return (TR::SystemLinkage *) l;
-   }
+namespace TR {
+
+class SystemLinkage : public OMR::SystemLinkageConnector {
+public:
+    SystemLinkage(TR::CodeGenerator* cg, TR_S390LinkageConventions elc = TR_S390LinkageDefault,
+        TR_LinkageConventions lc = TR_System)
+        : OMR::SystemLinkageConnector(cg, elc, lc)
+    {}
+};
+} // namespace TR
+
+inline TR::SystemLinkage* toSystemLinkage(TR::Linkage* l) { return (TR::SystemLinkage*)l; }
 
 #endif

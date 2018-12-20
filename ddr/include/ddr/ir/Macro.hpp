@@ -25,32 +25,23 @@
 #include "ddr/error.hpp"
 #include "ddr/std/string.hpp"
 
-class Macro
-{
+class Macro {
 private:
-	std::string _value;
+    std::string _value;
 
 public:
-	std::string _name;
+    std::string _name;
 
-	Macro(const std::string &name, const std::string &value)
-		: _value(value), _name(name)
-	{
-	}
+    Macro(const std::string& name, const std::string& value)
+        : _value(value)
+        , _name(name)
+    {}
 
-	const std::string &
-	getValue() const
-	{
-		return _value;
-	}
+    const std::string& getValue() const { return _value; }
 
-	void
-	setValue(const std::string &value)
-	{
-		_value = value;
-	}
+    void setValue(const std::string& value) { _value = value; }
 
-	DDR_RC getNumeric(long long *ret) const;
+    DDR_RC getNumeric(long long* ret) const;
 };
 
 #endif /* MACRO_HPP */

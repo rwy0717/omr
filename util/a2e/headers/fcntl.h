@@ -33,36 +33,35 @@
  * ===========================================================================
  */
 
-#if __TARGET_LIB__ == 0X22080000                                   /*ibm@28725*/
-#include <//'PP.ADLE370.OS39028.SCEEH.H(fcntl)'>                   /*ibm@28725*/
-#else                                                              /*ibm@28725*/
+#if __TARGET_LIB__ == 0X22080000 /*ibm@28725*/
+#include < //'PP.ADLE370.OS39028.SCEEH.H(fcntl)'>                   /*ibm@28725*/
+#else /*ibm@28725*/
 #include "prefixpath.h"
-#include PREFIXPATH(fcntl.h)                                    /*ibm@28725*/
-#endif                                                             /*ibm@28725*/
+#include PREFIXPATH(fcntl.h) /*ibm@28725*/
+#endif /*ibm@28725*/
 
 #if defined(IBM_ATOE)
 
-	#if !defined(IBM_ATOE_FCNTL)
-		#define IBM_ATOE_FCNTL
+#if !defined(IBM_ATOE_FCNTL)
+#define IBM_ATOE_FCNTL
 
-		#ifdef __cplusplus
-            extern "C" {
-		#endif
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-	int atoe_tagged_open( const char *fname, int options, ...);
-        int atoe_open(const char*, int, ...);
+int atoe_tagged_open(const char* fname, int options, ...);
+int atoe_open(const char*, int, ...);
 
-		#ifdef __cplusplus
-            }
-		#endif
+#ifdef __cplusplus
+}
+#endif
 
-		#undef open
+#undef open
 
-		#define open            atoe_open
+#define open atoe_open
 
-	#endif
+#endif
 
 #endif
 
 /* END OF FILE */
-

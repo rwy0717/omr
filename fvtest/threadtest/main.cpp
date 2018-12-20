@@ -23,16 +23,15 @@
 #include "thread_api.h"
 #include "testHelper.hpp"
 
-ThreadTestEnvironment *omrTestEnv;
+ThreadTestEnvironment* omrTestEnv;
 
-extern "C" int
-omr_main_entry(int argc, char **argv, char **envp)
+extern "C" int omr_main_entry(int argc, char** argv, char** envp)
 {
-	::testing::InitGoogleTest(&argc, argv);
-	OMREventListener::setDefaultTestListener();
-	INITIALIZE_THREADLIBRARY_AND_ATTACH();
-	omrTestEnv = (ThreadTestEnvironment *)testing::AddGlobalTestEnvironment(new ThreadTestEnvironment(argc, argv));
-	int rc = RUN_ALL_TESTS();
-	DETACH_AND_DESTROY_THREADLIBRARY();
-	return rc;
+    ::testing::InitGoogleTest(&argc, argv);
+    OMREventListener::setDefaultTestListener();
+    INITIALIZE_THREADLIBRARY_AND_ATTACH();
+    omrTestEnv = (ThreadTestEnvironment*)testing::AddGlobalTestEnvironment(new ThreadTestEnvironment(argc, argv));
+    int rc = RUN_ALL_TESTS();
+    DETACH_AND_DESTROY_THREADLIBRARY();
+    return rc;
 }

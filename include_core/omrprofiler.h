@@ -35,8 +35,8 @@ extern "C" {
 #pragma warning(disable : 4200)
 #endif /* defined(_MSC_VER) */
 typedef struct OMR_MethodDictionaryEntry {
-	const void *key;
-	const char *propertyValues[];
+    const void* key;
+    const char* propertyValues[];
 } OMR_MethodDictionaryEntry;
 
 /* ---------------- OMR_MethodDictionary.cpp ---------------- */
@@ -55,14 +55,14 @@ typedef struct OMR_MethodDictionaryEntry {
  * @retval OMR_ERROR_FAILED_TO_ALLOCATE_MONITOR Unable to allocate the method dictionary's lock.
  * @retval OMR_ERROR_FAILED_TO_ATTACH_NATIVE_THREAD Unable to attach to the omrthread library.
  */
-omr_error_t omr_ras_initMethodDictionary(OMR_VM *vm, size_t numProperties, const char * const *propertyNames);
+omr_error_t omr_ras_initMethodDictionary(OMR_VM* vm, size_t numProperties, const char* const* propertyNames);
 
 /**
  * @brief Deallocate the VM's method dictionary.
  *
  * @param[in] vm The OMR VM.
  */
-void omr_ras_cleanupMethodDictionary(OMR_VM *vm);
+void omr_ras_cleanupMethodDictionary(OMR_VM* vm);
 
 /**
  * @brief Insert a method into the method dictionary.
@@ -80,7 +80,7 @@ void omr_ras_cleanupMethodDictionary(OMR_VM *vm);
  * which is needed to lock the method dictionary.
  * @retval OMR_ERROR_INTERNAL An unexpected internal error occurred.
  */
-omr_error_t omr_ras_insertMethodDictionary(OMR_VM *vm, OMR_MethodDictionaryEntry *entry);
+omr_error_t omr_ras_insertMethodDictionary(OMR_VM* vm, OMR_MethodDictionaryEntry* entry);
 
 /* ---------------- OMR_Profiler.cpp ---------------- */
 /**
@@ -96,7 +96,7 @@ omr_error_t omr_ras_insertMethodDictionary(OMR_VM *vm, OMR_MethodDictionaryEntry
  * @param[in] methodKey The stack frame's method's key. It corresponds to the key of
  *                      the method's entry in the method dictionary.
  */
-void omr_ras_sampleStackTraceStart(OMR_VMThread *omrVMThread, const void *methodKey);
+void omr_ras_sampleStackTraceStart(OMR_VMThread* omrVMThread, const void* methodKey);
 
 /**
  * @brief Trace a frame of the current thread's stack, other than the top-most frame.
@@ -111,7 +111,7 @@ void omr_ras_sampleStackTraceStart(OMR_VMThread *omrVMThread, const void *method
  * @param[in] methodKey The stack frame's method's key. It corresponds to the key of
  *                      the method's entry in the method dictionary.
  */
-void omr_ras_sampleStackTraceContinue(OMR_VMThread *omrVMThread, const void *methodKey);
+void omr_ras_sampleStackTraceContinue(OMR_VMThread* omrVMThread, const void* methodKey);
 
 /**
  * @brief Test whether stack sampling is enabled.

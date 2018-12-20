@@ -28,7 +28,7 @@
 #ifdef __cplusplus
 #define NULL (0)
 #else
-#define NULL ((void *)0)
+#define NULL ((void*)0)
 #endif
 #endif
 
@@ -40,18 +40,17 @@
  * Base Class
  * @ingroup GC_Base_Core
  */
-class MM_Base
-{
+class MM_Base {
 private:
 protected:
 public:
-	void *operator new(size_t size, void *memoryPtr) { return memoryPtr; }
-	void operator delete(void *, void *) {}
+    void* operator new(size_t size, void* memoryPtr) { return memoryPtr; }
+    void operator delete(void*, void*) {}
 
-	/**
-	 * Create a Base object.
-	 */
-	MM_Base() {}
+    /**
+     * Create a Base object.
+     */
+    MM_Base() {}
 };
 
 #endif /* BASE_HPP_ */

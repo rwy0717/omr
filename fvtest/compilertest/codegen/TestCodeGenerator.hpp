@@ -27,24 +27,24 @@
  */
 #ifndef TEST_CODEGENERATORBASE_CONNECTOR
 #define TEST_CODEGENERATORBASE_CONNECTOR
-namespace TestCompiler { class CodeGenerator; }
-namespace TestCompiler { typedef CodeGenerator CodeGeneratorConnector; }
+namespace TestCompiler {
+class CodeGenerator;
+}
+namespace TestCompiler {
+typedef CodeGenerator CodeGeneratorConnector;
+}
 #endif
-
 
 #include "codegen/OMRCodeGenerator.hpp"
 
-namespace TestCompiler
-{
+namespace TestCompiler {
 
-class OMR_EXTENSIBLE CodeGenerator : public OMR::CodeGeneratorConnector
-   {
-   public:
+class OMR_EXTENSIBLE CodeGenerator : public OMR::CodeGeneratorConnector {
+public:
+    CodeGenerator()
+        : OMR::CodeGeneratorConnector()
+    {}
+};
 
-   CodeGenerator() :
-      OMR::CodeGeneratorConnector() {}
-
-   };
-
-}
+} // namespace TestCompiler
 #endif // !defined(TEST_CODEGENERATORBASE_INCL)

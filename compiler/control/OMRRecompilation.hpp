@@ -27,56 +27,59 @@
  */
 #ifndef OMR_RECOMPILATION_CONNECTOR
 #define OMR_RECOMPILATION_CONNECTOR
-namespace OMR { class Recompilation; }
-namespace OMR { typedef OMR::Recompilation RecompilationConnector; }
+namespace OMR {
+class Recompilation;
+}
+namespace OMR {
+typedef OMR::Recompilation RecompilationConnector;
+}
 #endif
 
-#include <stddef.h>                       // for NULL
-#include <stdint.h>                       // for int32_t, uint32_t, etc
-#include "compile/Compilation.hpp"        // for Compilation
-#include "env/TRMemory.hpp"               // for TR_Memory, etc
+#include <stddef.h> // for NULL
+#include <stdint.h> // for int32_t, uint32_t, etc
+#include "compile/Compilation.hpp" // for Compilation
+#include "env/TRMemory.hpp" // for TR_Memory, etc
 
-namespace TR { class Instruction; }
-namespace TR { class Recompilation; }
+namespace TR {
+class Instruction;
+}
+namespace TR {
+class Recompilation;
+}
 
-namespace OMR
-{
+namespace OMR {
 
-class Recompilation
-   {
+class Recompilation {
 public:
+    TR_ALLOC(TR_Memory::Recompilation)
 
-   TR_ALLOC(TR_Memory::Recompilation)
+    TR::Recompilation* self();
 
-   TR::Recompilation *self();
+    virtual TR::Instruction* generatePrePrologue() { return 0; }
+    virtual TR::Instruction* generatePrologue(TR::Instruction*) { return 0; }
 
-   virtual TR::Instruction *generatePrePrologue() { return 0; }
-   virtual TR::Instruction *generatePrologue(TR::Instruction *) { return 0; }
+    bool isProfilingCompilation() { return false; }
+    bool couldBeCompiledAgain() { return false; }
+    bool shouldBeCompiledAgain() { return false; }
 
-   bool isProfilingCompilation() { return false; }
-   bool couldBeCompiledAgain() { return false; }
-   bool shouldBeCompiledAgain() { return false; }
+    void startOfCompilation() { return; }
+    void beforeOptimization() { return; }
+    void beforeCodeGen() { return; }
+    void endOfCompilation() { return; }
+    virtual void postCompilation() { return; }
 
-   void startOfCompilation() { return; }
-   void beforeOptimization() { return; }
-   void beforeCodeGen() { return; }
-   void endOfCompilation() { return; }
-   virtual void postCompilation() { return; }
-
-   static void shutdown();
+    static void shutdown();
 
 protected:
+    Recompilation(TR::Compilation*);
 
-   Recompilation(TR::Compilation *);
+    TR::Compilation* comp() { return _compilation; }
+    TR_Memory* trMemory() { return comp()->trMemory(); }
+    TR_HeapMemory trHeapMemory() { return trMemory(); }
 
-   TR::Compilation *comp() { return _compilation; }
-   TR_Memory *trMemory() { return comp()->trMemory(); }
-   TR_HeapMemory trHeapMemory() { return trMemory(); }
+    TR::Compilation* _compilation;
+};
 
-   TR::Compilation *_compilation;
-
-   };
-
-}
+} // namespace OMR
 
 #endif

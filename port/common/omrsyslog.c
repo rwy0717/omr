@@ -30,11 +30,10 @@
  *
  * @return Boolean: true on success, false on failure
  */
-uintptr_t
-omrsyslog_write(struct OMRPortLibrary *portLibrary, uintptr_t flags, const char *message)
+uintptr_t omrsyslog_write(struct OMRPortLibrary* portLibrary, uintptr_t flags, const char* message)
 {
-	/* noop */
-	return 0;
+    /* noop */
+    return 0;
 }
 
 /**
@@ -45,11 +44,10 @@ omrsyslog_write(struct OMRPortLibrary *portLibrary, uintptr_t flags, const char 
  *
  * @return Boolean: true on success, false on failure
  */
-uintptr_t
-syslogOpen(struct OMRPortLibrary *portLibrary, uintptr_t flags)
+uintptr_t syslogOpen(struct OMRPortLibrary* portLibrary, uintptr_t flags)
 {
-	/* noop */
-	return 0;
+    /* noop */
+    return 0;
 }
 
 /**
@@ -59,11 +57,10 @@ syslogOpen(struct OMRPortLibrary *portLibrary, uintptr_t flags)
  *
  * @return Boolean: true on success, false on failure
  */
-uintptr_t
-syslogClose(struct OMRPortLibrary *portLibrary)
+uintptr_t syslogClose(struct OMRPortLibrary* portLibrary)
 {
-	/* noop */
-	return 0;
+    /* noop */
+    return 0;
 }
 
 /**
@@ -73,11 +70,10 @@ syslogClose(struct OMRPortLibrary *portLibrary)
  *
  * @return uintptr_t: the current logging options
  */
-uintptr_t
-omrsyslog_query(struct OMRPortLibrary *portLibrary)
+uintptr_t omrsyslog_query(struct OMRPortLibrary* portLibrary)
 {
-	/* noop */
-	return 0;
+    /* noop */
+    return 0;
 }
 
 /**
@@ -88,9 +84,4 @@ omrsyslog_query(struct OMRPortLibrary *portLibrary)
  *
  * @return void
  */
-void
-omrsyslog_set(struct OMRPortLibrary *portLibrary, uintptr_t options)
-{
-	/* noop */
-}
-
+void omrsyslog_set(struct OMRPortLibrary* portLibrary, uintptr_t options) { /* noop */ }

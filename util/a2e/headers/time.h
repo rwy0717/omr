@@ -33,40 +33,39 @@
  * ===========================================================================
  */
 
-#define _OPEN_MSGQ_EXT                                             /*ibm@57343*/
+#define _OPEN_MSGQ_EXT /*ibm@57343*/
 
-#if __TARGET_LIB__ == 0X22080000                                   /*ibm@28725*/
-#include <//'PP.ADLE370.OS39028.SCEEH.H(time)'>                    /*ibm@28725*/
-#else                                                              /*ibm@28725*/
+#if __TARGET_LIB__ == 0X22080000 /*ibm@28725*/
+#include < //'PP.ADLE370.OS39028.SCEEH.H(time)'>                    /*ibm@28725*/
+#else /*ibm@28725*/
 #include "prefixpath.h"
-#include PREFIXPATH(time.h)                                     /*ibm@28725*/
-#endif                                                             /*ibm@28725*/
+#include PREFIXPATH(time.h) /*ibm@28725*/
+#endif /*ibm@28725*/
 
 #if defined(IBM_ATOE)
 
-	#if !defined(IBM_ATOE_TIME)
-		#define IBM_ATOE_TIME
+#if !defined(IBM_ATOE_TIME)
+#define IBM_ATOE_TIME
 
-		#ifdef __cplusplus
-            extern "C" {
-		#endif
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-        char * atoe_ctime     (const time_t*);
-        size_t atoe_strftime  (char*, size_t,const char*, const struct tm*);
+char* atoe_ctime(const time_t*);
+size_t atoe_strftime(char*, size_t, const char*, const struct tm*);
 
-		#ifdef __cplusplus
-            }
-		#endif
+#ifdef __cplusplus
+}
+#endif
 
-		#undef ctime
-		#undef strftime
+#undef ctime
+#undef strftime
 
-		#define ctime           atoe_ctime
-		#define strftime        atoe_strftime
+#define ctime atoe_ctime
+#define strftime atoe_strftime
 
-	#endif
+#endif
 
 #endif
 
 /* END OF FILE */
-

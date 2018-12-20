@@ -28,65 +28,55 @@
 #include "il/Node_inlines.hpp"
 #include "env/IO.hpp"
 
+#define NOT_IMPLEMENTED                                                             \
+    {                                                                               \
+        TR_ASSERT_FATAL(0, "This function is not implemented in TestCompiler JIT"); \
+    }
 
-#define NOT_IMPLEMENTED { TR_ASSERT_FATAL(0, "This function is not implemented in TestCompiler JIT"); }
+uint32_t TR::S390RestoreGPR7Snippet::getLength(int32_t estimatedSnippetStart)
+{
+    NOT_IMPLEMENTED;
+    return 0;
+}
 
+uint8_t* TR::S390RestoreGPR7Snippet::emitSnippetBody()
+{
+    NOT_IMPLEMENTED;
+    return NULL;
+}
 
-uint32_t
-TR::S390RestoreGPR7Snippet::getLength(int32_t estimatedSnippetStart)
-   {
-   NOT_IMPLEMENTED;
-   return 0;
-   }
+void TR_Debug::print(TR::FILE* pOutFile, TR::S390RestoreGPR7Snippet* snippet) { NOT_IMPLEMENTED; }
 
-uint8_t *
-TR::S390RestoreGPR7Snippet::emitSnippetBody()
-   {
-   NOT_IMPLEMENTED;
-   return NULL;
-   }
+void TestCompiler::FrontEnd::generateBinaryEncodingPrologue(TR_BinaryEncodingData* beData, TR::CodeGenerator* cg)
+{
+    TR::Compilation* comp = cg->comp();
+    TR_S390BinaryEncodingData* data = (TR_S390BinaryEncodingData*)beData;
 
-void
-TR_Debug::print(TR::FILE *pOutFile, TR::S390RestoreGPR7Snippet *snippet)
-   {
-   NOT_IMPLEMENTED;
-   }
+    data->cursorInstruction = cg->getFirstInstruction();
+    data->estimate = 0;
+    data->preProcInstruction = data->cursorInstruction;
+    data->jitTojitStart = data->cursorInstruction;
+    data->cursorInstruction = NULL;
 
-void
-TestCompiler::FrontEnd::generateBinaryEncodingPrologue(
-      TR_BinaryEncodingData *beData,
-      TR::CodeGenerator *cg)
-   {
-   TR::Compilation* comp = cg->comp();
-   TR_S390BinaryEncodingData *data = (TR_S390BinaryEncodingData *)beData;
+    TR::Instruction *preLoadArgs, *endLoadArgs;
+    preLoadArgs = data->preProcInstruction;
+    endLoadArgs = preLoadArgs;
 
-   data->cursorInstruction = cg->getFirstInstruction();
-   data->estimate = 0;
-   data->preProcInstruction = data->cursorInstruction;
-   data->jitTojitStart = data->cursorInstruction;
-   data->cursorInstruction = NULL;
+    TR::Instruction* oldFirstInstruction = data->cursorInstruction;
 
-   TR::Instruction * preLoadArgs, * endLoadArgs;
-   preLoadArgs = data->preProcInstruction;
-   endLoadArgs = preLoadArgs;
+    data->cursorInstruction = cg->getFirstInstruction();
 
-   TR::Instruction * oldFirstInstruction = data->cursorInstruction;
+    static char* disableAlignJITEP = feGetEnv("TR_DisableAlignJITEP");
 
-   data->cursorInstruction = cg->getFirstInstruction();
+    // Padding for JIT Entry Point
+    if (!disableAlignJITEP) {
+        data->estimate += 256;
+    }
 
-   static char *disableAlignJITEP = feGetEnv("TR_DisableAlignJITEP");
+    while (data->cursorInstruction && data->cursorInstruction->getOpCodeValue() != TR::InstOpCode::PROC) {
+        data->estimate = data->cursorInstruction->estimateBinaryLength(data->estimate);
+        data->cursorInstruction = data->cursorInstruction->getNext();
+    }
 
-   // Padding for JIT Entry Point
-   if (!disableAlignJITEP)
-      {
-      data->estimate += 256;
-      }
-
-   while (data->cursorInstruction && data->cursorInstruction->getOpCodeValue() != TR::InstOpCode::PROC)
-      {
-      data->estimate = data->cursorInstruction->estimateBinaryLength(data->estimate);
-      data->cursorInstruction = data->cursorInstruction->getNext();
-      }
-
-   cg->getLinkage()->createPrologue(data->cursorInstruction);
-   }
+    cg->getLinkage()->createPrologue(data->cursorInstruction);
+}

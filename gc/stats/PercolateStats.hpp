@@ -29,22 +29,22 @@
 #include "Base.hpp"
 
 class MM_PercolateStats : public MM_Base {
-	PercolateReason _lastPercolateReason;
-	uintptr_t _scavengesSincePercolate;
+    PercolateReason _lastPercolateReason;
+    uintptr_t _scavengesSincePercolate;
 
 public:
-	MMINLINE void setLastPercolateReason(PercolateReason reason) { _lastPercolateReason = reason; }
-	MMINLINE PercolateReason getLastPercolateReason() { return _lastPercolateReason; }
-	MMINLINE void resetLastPercolateReason() { _lastPercolateReason = NONE_SET; }
+    MMINLINE void setLastPercolateReason(PercolateReason reason) { _lastPercolateReason = reason; }
+    MMINLINE PercolateReason getLastPercolateReason() { return _lastPercolateReason; }
+    MMINLINE void resetLastPercolateReason() { _lastPercolateReason = NONE_SET; }
 
-	void incrementScavengesSincePercolate() { _scavengesSincePercolate++; }
-	void clearScavengesSincePercolate() { _scavengesSincePercolate = 0; }
-	uintptr_t getScavengesSincePercolate() { return _scavengesSincePercolate; }
+    void incrementScavengesSincePercolate() { _scavengesSincePercolate++; }
+    void clearScavengesSincePercolate() { _scavengesSincePercolate = 0; }
+    uintptr_t getScavengesSincePercolate() { return _scavengesSincePercolate; }
 
-	MM_PercolateStats()
-		: MM_Base()
-		, _lastPercolateReason(NONE_SET)
-		, _scavengesSincePercolate(0) {};
+    MM_PercolateStats()
+        : MM_Base()
+        , _lastPercolateReason(NONE_SET)
+        , _scavengesSincePercolate(0) {};
 };
 
 #endif /* PERCOLATESTATS_HPP_ */

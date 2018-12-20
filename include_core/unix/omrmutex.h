@@ -31,7 +31,6 @@ extern "C" {
 
 typedef pthread_mutex_t MUTEX;
 
-
 /* MUTEX_INIT */
 
 #define MUTEX_INIT(mutex) (pthread_mutex_init(&(mutex), NULL) == 0)
@@ -59,6 +58,4 @@ typedef pthread_mutex_t MUTEX;
 }
 #endif
 
-
 #endif /* omrmutex_h */
-

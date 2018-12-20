@@ -25,7 +25,7 @@
 /* windows.h defined uintptr_t.  Ignore its definition */
 #define UDATA UDATA_win32_
 #include <windows.h>
-#undef UDATA	/* this is safe because our UDATA is a typedef, not a macro */
+#undef UDATA /* this is safe because our UDATA is a typedef, not a macro */
 
 #include <process.h>
 
@@ -43,7 +43,7 @@ typedef MUTEX J9OSMutex;
 #define WRAPPER_TYPE unsigned __stdcall
 typedef void* WRAPPER_ARG;
 #define WRAPPER_RETURN() return 0
-typedef unsigned (__stdcall* WRAPPER_FUNC)(WRAPPER_ARG);
+typedef unsigned(__stdcall* WRAPPER_FUNC)(WRAPPER_ARG);
 
 typedef HANDLE OSSEMAPHORE;
 
@@ -75,39 +75,44 @@ extern struct J9ThreadLibrary default_library;
 
 /* NOTE: the calling thread must already own mutex */
 
-#define ADJUST_TIMEOUT(millis, nanos) (((nanos) && ((millis) != ((intptr_t) (((uintptr_t)-1) >> 1)))) ? ((millis) + 1) : (millis))
+#define ADJUST_TIMEOUT(millis, nanos) \
+    (((nanos) && ((millis) != ((intptr_t)(((uintptr_t)-1) >> 1)))) ? ((millis) + 1) : (millis))
 
-#define COND_WAIT_IF_TIMEDOUT(cond, mutex, millis, nanos) 								\
-	do {																										\
-		DWORD starttime_ = GetTickCount(); \
-		intptr_t initialtimeout_, timeout_, rc_;				\
-		initialtimeout_ = timeout_ = ADJUST_TIMEOUT(millis, nanos);														\
-		while (1) {																							\
-			ResetEvent((cond));																			\
-			MUTEX_EXIT(mutex);																		\
-			rc_ = WaitForSingleObject((cond), (DWORD)timeout_);										\
-			MUTEX_ENTER(mutex);																	\
-			if (rc_ == WAIT_TIMEOUT)
+#define COND_WAIT_IF_TIMEDOUT(cond, mutex, millis, nanos)           \
+    do {                                                            \
+        DWORD starttime_ = GetTickCount();                          \
+        intptr_t initialtimeout_, timeout_, rc_;                    \
+        initialtimeout_ = timeout_ = ADJUST_TIMEOUT(millis, nanos); \
+        while (1) {                                                 \
+            ResetEvent((cond));                                     \
+            MUTEX_EXIT(mutex);                                      \
+            rc_ = WaitForSingleObject((cond), (DWORD)timeout_);     \
+            MUTEX_ENTER(mutex);                                     \
+            if (rc_ == WAIT_TIMEOUT)
 
-#define COND_WAIT_TIMED_LOOP()																\
-			timeout_ = initialtimeout_ - (GetTickCount() - starttime_);										\
-			if (timeout_ < 0) { timeout_ = 0; } \
-		}	} while(0)
+#define COND_WAIT_TIMED_LOOP()                                  \
+    timeout_ = initialtimeout_ - (GetTickCount() - starttime_); \
+    if (timeout_ < 0) {                                         \
+        timeout_ = 0;                                           \
+    }                                                           \
+    }                                                           \
+    }                                                           \
+    while (0)
 
 /* COND_WAIT */
 
 /* NOTE: the calling thread must already own mutex */
 
-#define COND_WAIT(cond, mutex) \
-	do { \
-		ResetEvent((cond));	\
-		MUTEX_EXIT(mutex);	\
-		WaitForSingleObject((cond), INFINITE);	\
-		MUTEX_ENTER(mutex);
+#define COND_WAIT(cond, mutex)                 \
+    do {                                       \
+        ResetEvent((cond));                    \
+        MUTEX_EXIT(mutex);                     \
+        WaitForSingleObject((cond), INFINITE); \
+        MUTEX_ENTER(mutex);
 
-#define COND_WAIT_LOOP()	} while(1)
-
-
+#define COND_WAIT_LOOP() \
+    }                    \
+    while (1)
 
 /* COND_INIT */
 
@@ -117,7 +122,7 @@ extern struct J9ThreadLibrary default_library;
 
 /* THREAD_CANCEL */
 
-#define THREAD_CANCEL(thread) (TerminateThread(thread, (DWORD)-1)&&WaitForSingleObject(thread,INFINITE))
+#define THREAD_CANCEL(thread) (TerminateThread(thread, (DWORD)-1) && WaitForSingleObject(thread, INFINITE))
 
 /* THREAD_EXIT */
 
@@ -141,31 +146,28 @@ extern struct J9ThreadLibrary default_library;
 #define TLS_SET(key, value) (TlsSetValue(key, value))
 #define TLS_GET(key) (TlsGetValue(key))
 
-
 /* SEM_CREATE */
 
 /* Arbitrary maximum count */
 
-#define SEM_CREATE(lib, inval) CreateSemaphore(NULL,inval,2028,NULL)
+#define SEM_CREATE(lib, inval) CreateSemaphore(NULL, inval, 2028, NULL)
 
 /* SEM_INIT */
 
-#define SEM_INIT(sm,pshrd,inval)  (sm != NULL) ? 0: -1
+#define SEM_INIT(sm, pshrd, inval) (sm != NULL) ? 0 : -1
 /* SEM_DESTROY */
 
-#define SEM_DESTROY(sm)  CloseHandle(sm)
+#define SEM_DESTROY(sm) CloseHandle(sm)
 
 /* SEM_FREE */
 
 #define SEM_FREE(lib, s)
 /* SEM_POST */
 
-#define SEM_POST(sm)  (ReleaseSemaphore((sm),1,NULL) ? 0 : -1)
+#define SEM_POST(sm) (ReleaseSemaphore((sm), 1, NULL) ? 0 : -1)
 /* SEM_WAIT */
 
-
-#define SEM_WAIT(sm)  ((WaitForSingleObject((sm), INFINITE) == WAIT_FAILED) ? -1 : 0)
-
+#define SEM_WAIT(sm) ((WaitForSingleObject((sm), INFINITE) == WAIT_FAILED) ? -1 : 0)
 
 /* SEM_GETVALUE */
 
@@ -173,7 +175,7 @@ extern struct J9ThreadLibrary default_library;
 /* GET_HIRES_CLOCK */
 
 #ifdef OMR_THR_JLM_HOLD_TIMES
-#define	GET_HIRES_CLOCK()	getTimebase()
+#define GET_HIRES_CLOCK() getTimebase()
 #endif /* OMR_THR_JLM_HOLD_TIMES */
 /* ENABLE_OS_THREAD_STATS */
 
@@ -195,4 +197,4 @@ extern struct J9ThreadLibrary default_library;
 #define OMROSCOND_WAIT(cond, mutex) COND_WAIT((cond), (mutex))
 #define OMROSCOND_WAIT_LOOP() COND_WAIT_LOOP()
 
-#endif     /* thrdsup_h */
+#endif /* thrdsup_h */

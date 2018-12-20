@@ -20,7 +20,4 @@
  *******************************************************************************/
 
 /* Test function for sl tests. */
-void
-sl_test1_function(void)
-{
-}
+void sl_test1_function(void) {}

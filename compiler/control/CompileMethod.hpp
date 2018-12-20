@@ -19,16 +19,21 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-#include <stdint.h>                      // for int32_t, uint8_t
-#include "compile/CompilationTypes.hpp"  // for TR_Hotness
-#include "env/ConcreteFE.hpp"            // for FrontEnd
+#include <stdint.h> // for int32_t, uint8_t
+#include "compile/CompilationTypes.hpp" // for TR_Hotness
+#include "env/ConcreteFE.hpp" // for FrontEnd
 
 struct OMR_VMThread;
 class TR_ResolvedMethod;
-namespace TR { class IlGeneratorMethodDetails; }
-namespace TR { class JitConfig; }
+namespace TR {
+class IlGeneratorMethodDetails;
+}
+namespace TR {
+class JitConfig;
+}
 
-int32_t init_options(TR::JitConfig *jitConfig, char * cmdLineOptions);
-int32_t commonJitInit(OMR::FrontEnd &fe, char * cmdLineOptions);
-uint8_t *compileMethod(OMR_VMThread *omrVMThread, TR_ResolvedMethod &compilee, TR_Hotness hotness, int32_t &rc);
-uint8_t *compileMethodFromDetails(OMR_VMThread *omrVMThread, TR::IlGeneratorMethodDetails &details, TR_Hotness hotness, int32_t &rc);
+int32_t init_options(TR::JitConfig* jitConfig, char* cmdLineOptions);
+int32_t commonJitInit(OMR::FrontEnd& fe, char* cmdLineOptions);
+uint8_t* compileMethod(OMR_VMThread* omrVMThread, TR_ResolvedMethod& compilee, TR_Hotness hotness, int32_t& rc);
+uint8_t* compileMethodFromDetails(
+    OMR_VMThread* omrVMThread, TR::IlGeneratorMethodDetails& details, TR_Hotness hotness, int32_t& rc);

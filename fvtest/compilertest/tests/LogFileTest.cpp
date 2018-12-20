@@ -32,51 +32,47 @@
 #include "tests/OpCodesTest.hpp"
 
 TestCompiler::LogFileTest::LogFileTest()
-   {
-   // Don't use fork(), since that doesn't let us initialize the compiler
-   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-   }
+{
+    // Don't use fork(), since that doesn't let us initialize the compiler
+    ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+}
 
 TestCompiler::LogFileTest::~LogFileTest()
-   {
-   // Remove all generated log files.
-   for(auto it = _logFiles.begin(); it != _logFiles.end(); ++it)
-      {
-      unlink(it->c_str());
-      }
-   }
+{
+    // Remove all generated log files.
+    for (auto it = _logFiles.begin(); it != _logFiles.end(); ++it) {
+        unlink(it->c_str());
+    }
+}
 
-void
-TestCompiler::LogFileTest::compileTests()
-   {
-   ::TestCompiler::OpCodesTest unaryTest;
-   unaryTest.compileUnaryTestMethods();
-   }
+void TestCompiler::LogFileTest::compileTests()
+{
+    ::TestCompiler::OpCodesTest unaryTest;
+    unaryTest.compileUnaryTestMethods();
+}
 
 /**
  * Determine if a file exists.
  *
  * @param name The name of the file.
  */
-bool
-TestCompiler::LogFileTest::fileExists(std::string name)
-   {
-   struct stat buf;
-   int result = stat(name.c_str(), &buf);
-   return result == 0;
-   }
+bool TestCompiler::LogFileTest::fileExists(std::string name)
+{
+    struct stat buf;
+    int result = stat(name.c_str(), &buf);
+    return result == 0;
+}
 
 /**
  * Check that the log file created is not empty.
  *
  * @param logFile The name of the file.
  */
-bool
-TestCompiler::LogFileTest::fileIsNotEmpty(std::string logFile)
-   {
-   std::ifstream logFileStream(logFile);
-   return logFileStream.peek() != std::ifstream::traits_type::eof();
-   }
+bool TestCompiler::LogFileTest::fileIsNotEmpty(std::string logFile)
+{
+    std::ifstream logFileStream(logFile);
+    return logFileStream.peek() != std::ifstream::traits_type::eof();
+}
 
 /**
  * Build a std::map of <key,value> pairs where key is
@@ -87,17 +83,14 @@ TestCompiler::LogFileTest::fileIsNotEmpty(std::string logFile)
  * @param inputs A list of keywords to build the std::map.
  */
 
-std::map<const char*, bool>
-TestCompiler::LogFileTest::buildKeywordMap(std::initializer_list <const char*> inputs)
-   {
-   std::map<const char*, bool> keywords;
-   for (auto w = inputs.begin(); w != inputs.end(); w++)
-      {
-      keywords.insert(std::pair<const char*, bool>(*w, false));
-      }
-   return keywords;
-   }
-
+std::map<const char*, bool> TestCompiler::LogFileTest::buildKeywordMap(std::initializer_list<const char*> inputs)
+{
+    std::map<const char*, bool> keywords;
+    for (auto w = inputs.begin(); w != inputs.end(); w++) {
+        keywords.insert(std::pair<const char*, bool>(*w, false));
+    }
+    return keywords;
+}
 
 /**
  * Startup the compiler, run tests, shut down the compiler, then exit with
@@ -108,18 +101,17 @@ TestCompiler::LogFileTest::buildKeywordMap(std::initializer_list <const char*> i
  * @param logFile The file to log to.
  * @param logType The type of log to be generated..
  */
-void
-TestCompiler::LogFileTest::createLog(std::string logFile, const char *logType)
-   {
-   std::string args = std::string("-Xjit:");
-   args = args + logType + ",log=" + logFile;
+void TestCompiler::LogFileTest::createLog(std::string logFile, const char* logType)
+{
+    std::string args = std::string("-Xjit:");
+    args = args + logType + ",log=" + logFile;
 
-   OMRTestEnv::initialize(const_cast<char *>(args.c_str()));
-   compileTests();
-   OMRTestEnv::shutdown();
+    OMRTestEnv::initialize(const_cast<char*>(args.c_str()));
+    compileTests();
+    OMRTestEnv::shutdown();
 
-   exit(0);
-   }
+    exit(0);
+}
 
 /**
  * Run tests to ensure that a particular set of keywords are found
@@ -130,18 +122,16 @@ TestCompiler::LogFileTest::createLog(std::string logFile, const char *logType)
  * @param logFileChecks Pair of the log type and the keywords associated
  *        with that log type.
  */
-void
-TestCompiler::LogFileTest::runKeywordTests(std::map<const char*, std::map<const char*, bool>> logFileChecks)
-   {
-   for (auto it = logFileChecks.begin(); it != logFileChecks.end(); ++it)
-      {
-      const char *logType = it->first;
-      std::string logFile = std::string(logType) + std::string(".log");
+void TestCompiler::LogFileTest::runKeywordTests(std::map<const char*, std::map<const char*, bool> > logFileChecks)
+{
+    for (auto it = logFileChecks.begin(); it != logFileChecks.end(); ++it) {
+        const char* logType = it->first;
+        std::string logFile = std::string(logType) + std::string(".log");
 
-      forkAndCompile(logFile, logType);
-      checkLogForKeywords(it->second, logFile.c_str());
-      }
-   }
+        forkAndCompile(logFile, logType);
+        checkLogForKeywords(it->second, logFile.c_str());
+    }
+}
 
 /**
  * Assert that the keywords passed in exist in the log file.
@@ -151,45 +141,42 @@ TestCompiler::LogFileTest::runKeywordTests(std::map<const char*, std::map<const 
  *        found in the log file.
  * @param logFile The log file to search.
  */
-void
-TestCompiler::LogFileTest::checkLogForKeywords(std::map<const char*, bool> keywords, const char *logFile)
-   {
-   std::ifstream logFileStream(logFile);
-   ASSERT_TRUE(logFileStream.is_open());
+void TestCompiler::LogFileTest::checkLogForKeywords(std::map<const char*, bool> keywords, const char* logFile)
+{
+    std::ifstream logFileStream(logFile);
+    ASSERT_TRUE(logFileStream.is_open());
 
-   int keywordsFound = 0;
-   std::string line;
+    int keywordsFound = 0;
+    std::string line;
 
-   // Keep looping until all the keywords passed in have been found
-   while (keywordsFound < keywords.size())
-      {
-      std::getline(logFileStream, line);
+    // Keep looping until all the keywords passed in have been found
+    while (keywordsFound < keywords.size()) {
+        std::getline(logFileStream, line);
 
-      ASSERT_FALSE(logFileStream.eof()) << "End of log file reached without finding all keywords";
-      ASSERT_TRUE(logFileStream.good()) << "An error occured during an I/O operation while reading logfile";
+        ASSERT_FALSE(logFileStream.eof()) << "End of log file reached without finding all keywords";
+        ASSERT_TRUE(logFileStream.good()) << "An error occured during an I/O operation while reading logfile";
 
-      if (line.empty())
-         continue;
-
-      // Loop through all keywords in the std::map for each line
-      for (auto it = keywords.begin(); it != keywords.end(); ++it)
-         {
-         // If the value of this <key,value> pair is false, the keyword has already
-         // been found earlier.
-         if(it->second)
+        if (line.empty())
             continue;
 
-         // If the keyword is found on this line
-         if(line.find(it->first) != std::string::npos)
-            {
-            it->second = true;
-            keywordsFound++;
-            }
-         }
-      }
+        // Loop through all keywords in the std::map for each line
+        for (auto it = keywords.begin(); it != keywords.end(); ++it) {
+            // If the value of this <key,value> pair is false, the keyword has already
+            // been found earlier.
+            if (it->second)
+                continue;
 
-   ASSERT_EQ(keywords.size(), keywordsFound) << "Only " << keywordsFound << " of " << keywords.size() << " keywords found";
-   }
+            // If the keyword is found on this line
+            if (line.find(it->first) != std::string::npos) {
+                it->second = true;
+                keywordsFound++;
+            }
+        }
+    }
+
+    ASSERT_EQ(keywords.size(), keywordsFound)
+        << "Only " << keywordsFound << " of " << keywords.size() << " keywords found";
+}
 
 /**
  * Create a log file by creating a new process and running a set of tests.
@@ -206,20 +193,19 @@ TestCompiler::LogFileTest::checkLogForKeywords(std::map<const char*, bool> keywo
  * @param logType The type of log to be generated. This is an optional
  *        parameter. The default value is "traceFull"
  */
-void
-TestCompiler::LogFileTest::forkAndCompile(std::string logFile, const char *logType)
-   {
-   // Keep track of the filename in the vector _logFiles so that it
-   // can be deleted in the destructor.
-   _logFiles.push_back(logFile);
+void TestCompiler::LogFileTest::forkAndCompile(std::string logFile, const char* logType)
+{
+    // Keep track of the filename in the vector _logFiles so that it
+    // can be deleted in the destructor.
+    _logFiles.push_back(logFile);
 
-   /* This creates the new process, runs createLog, and asserts it exits
-    * with a status code of 0.
-    */
-   ASSERT_EXIT(createLog(logFile, logType), ::testing::ExitedWithCode(0), "") << "Error in createLog.";
+    /* This creates the new process, runs createLog, and asserts it exits
+     * with a status code of 0.
+     */
+    ASSERT_EXIT(createLog(logFile, logType), ::testing::ExitedWithCode(0), "") << "Error in createLog.";
 
-   ASSERT_TRUE(fileExists(logFile)) << "Log file not created.";
-   }
+    ASSERT_TRUE(fileExists(logFile)) << "Log file not created.";
+}
 
 namespace TestCompiler {
 
@@ -228,35 +214,35 @@ namespace TestCompiler {
 
 // Assert a traceFull log file was created
 TEST_F(LogFileTest, CreateTFLogTest)
-   {
-   const char *logType = "traceFull";
-   std::string logFile = "createTFLog.log";
-   forkAndCompile(logFile, logType);
-   }
+{
+    const char* logType = "traceFull";
+    std::string logFile = "createTFLog.log";
+    forkAndCompile(logFile, logType);
+}
 
 // Assert the traceFull log file is not empty
 TEST_F(LogFileTest, EmptyTFLogTest)
-   {
-   const char *logType = "traceFull";
-   std::string logFile = "emptyTFLog.log";
-   forkAndCompile(logFile, logType);
-   ASSERT_TRUE(fileIsNotEmpty(logFile)) << "The traceFull log file created is empty";
-   }
+{
+    const char* logType = "traceFull";
+    std::string logFile = "emptyTFLog.log";
+    forkAndCompile(logFile, logType);
+    ASSERT_TRUE(fileIsNotEmpty(logFile)) << "The traceFull log file created is empty";
+}
 
 // Assert keywords exist in log files
 TEST_F(LogFileTest, KeywordsLogTest)
-   {
-   std::map<const char*, std::map<const char*, bool>> logFileChecks;
-   
-   /* Additional pairs of log types and keywords to look for can be added to
-      logFileChecks like this. A failure is asserted if any of the keywords
-      cannot be found in the associated log type.
-   */
-   logFileChecks.insert(std::pair<const char*, std::map<const char*, bool>>
-      ("traceFull", buildKeywordMap({"<jitlog", "<ilgen", "<trees", "</trees>", "BBStart", "BBEnd", "<block_"})));
-   logFileChecks.insert(std::pair<const char*, std::map<const char*, bool>>
-      ("traceCG", buildKeywordMap({"<codegen"})));
+{
+    std::map<const char*, std::map<const char*, bool> > logFileChecks;
 
-   runKeywordTests(logFileChecks);
-   }
+    /* Additional pairs of log types and keywords to look for can be added to
+       logFileChecks like this. A failure is asserted if any of the keywords
+       cannot be found in the associated log type.
+    */
+    logFileChecks.insert(std::pair<const char*, std::map<const char*, bool> >(
+        "traceFull", buildKeywordMap({ "<jitlog", "<ilgen", "<trees", "</trees>", "BBStart", "BBEnd", "<block_" })));
+    logFileChecks.insert(
+        std::pair<const char*, std::map<const char*, bool> >("traceCG", buildKeywordMap({ "<codegen" })));
+
+    runKeywordTests(logFileChecks);
 }
+} // namespace TestCompiler

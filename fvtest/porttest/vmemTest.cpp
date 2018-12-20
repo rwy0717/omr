@@ -24,7 +24,7 @@
 #include "omrport.h"
 #include "portTestHelpers.hpp"
 
-extern PortTestEnvironment *portTestEnv;
+extern PortTestEnvironment* portTestEnv;
 
 /**
  * Verify virtual memory functions
@@ -35,13 +35,14 @@ extern PortTestEnvironment *portTestEnv;
  */
 TEST(PortVMemTest, omrvmem_get_available_physical_memory)
 {
-	OMRPORT_ACCESS_FROM_OMRPORT(portTestEnv->getPortLibrary());
-	uint64_t freePhysicalMemorySize = 0;
-	int32_t status = omrvmem_get_available_physical_memory(&freePhysicalMemorySize);
+    OMRPORT_ACCESS_FROM_OMRPORT(portTestEnv->getPortLibrary());
+    uint64_t freePhysicalMemorySize = 0;
+    int32_t status = omrvmem_get_available_physical_memory(&freePhysicalMemorySize);
 #if defined(LINUX) || defined(AIXPPC) || defined(OMR_OS_WINDOWS) || defined(OSX)
-	ASSERT_EQ(0, status) << "Non-zero status from omrvmem_get_available_physical_memory";
-	portTestEnv->log("freePhysicalMemorySize = %llu\n", freePhysicalMemorySize);
+    ASSERT_EQ(0, status) << "Non-zero status from omrvmem_get_available_physical_memory";
+    portTestEnv->log("freePhysicalMemorySize = %llu\n", freePhysicalMemorySize);
 #else /*  defined(LINUX) || defined(AIXPPC) || defined(OMR_OS_WINDOWS) || defined(OSX) */
-	ASSERT_EQ(OMRPORT_ERROR_VMEM_NOT_SUPPORTED, status) << "omrvmem_get_available_physical_memory should not be supported";
+    ASSERT_EQ(OMRPORT_ERROR_VMEM_NOT_SUPPORTED, status)
+        << "omrvmem_get_available_physical_memory should not be supported";
 #endif /*  defined(LINUX) || defined(AIXPPC) || defined(OMR_OS_WINDOWS) || defined(OSX) */
 }

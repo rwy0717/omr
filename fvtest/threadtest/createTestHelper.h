@@ -100,7 +100,7 @@
 
 /* ospriority.c */
 extern void initPrioMap(void);
-extern const char *mapOSPolicy(intptr_t policy);
+extern const char* mapOSPolicy(intptr_t policy);
 #if defined(LINUX) || defined(OSX)
 extern void initRealtimePrioMap(void);
 #endif /* defined(LINUX) || defined(OSX) */
@@ -111,6 +111,5 @@ extern int getRTPolicy(omrthread_prio_t priority);
 
 typedef int osprio_t;
 extern osprio_t getOsPriority(omrthread_prio_t priority);
-
 
 #endif /*CREATETESTHELPER_H_*/

@@ -33,42 +33,37 @@
  * ===========================================================================
  */
 
-#if __TARGET_LIB__ == 0X22080000                                   /*ibm@28725*/
-#include <//'PP.ADLE370.OS39028.SCEEH.H(spawn)'>                   /*ibm@28725*/
-#else                                                              /*ibm@28725*/
+#if __TARGET_LIB__ == 0X22080000 /*ibm@28725*/
+#include < //'PP.ADLE370.OS39028.SCEEH.H(spawn)'>                   /*ibm@28725*/
+#else /*ibm@28725*/
 #include "prefixpath.h"
-#include PREFIXPATH(spawn.h)                                    /*ibm@28725*/
-#endif                                                             /*ibm@28725*/
+#include PREFIXPATH(spawn.h) /*ibm@28725*/
+#endif /*ibm@28725*/
 
 #if defined(IBM_ATOE)
 
-	#if !defined(IBM_ATOE_SPAWN)
-		#define IBM_ATOE_SPAWN
+#if !defined(IBM_ATOE_SPAWN)
+#define IBM_ATOE_SPAWN
 
-		#ifdef __cplusplus
-            extern "C" {
-		#endif
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-        pid_t      atoe_spawnp (const char *, const int, const int[],
-						const struct inheritance *, const char *[],
-						const char *[]);
-        pid_t      atoe_spawnpe(const char *, const int, const int[],
-						const struct inheritance *, const char *[],
-						const char *[], int);
+pid_t atoe_spawnp(const char*, const int, const int[], const struct inheritance*, const char*[], const char*[]);
+pid_t atoe_spawnpe(const char*, const int, const int[], const struct inheritance*, const char*[], const char*[], int);
 
-		#ifdef __cplusplus
-            }
-		#endif
+#ifdef __cplusplus
+}
+#endif
 
-		#undef     spawnp
-		#undef     spawnpe
+#undef spawnp
+#undef spawnpe
 
-		#define    spawnp      atoe_spawnp
-		#define    spawnpe     atoe_spawnpe
+#define spawnp atoe_spawnp
+#define spawnpe atoe_spawnpe
 
-	#endif
+#endif
 
 #endif
 
 /* END OF FILE */
-

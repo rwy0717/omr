@@ -27,34 +27,32 @@
 
 #include "MarkStats.hpp"
 
-void
-MM_MarkStats::clear()
+void MM_MarkStats::clear()
 {
-	_scanTime = 0;
-	
-	_objectsMarked = 0;
-	_objectsScanned = 0;
-	_bytesScanned = 0;
+    _scanTime = 0;
+
+    _objectsMarked = 0;
+    _objectsScanned = 0;
+    _bytesScanned = 0;
 
 #if defined(J9MODRON_TGC_PARALLEL_STATISTICS)
-	_syncStallCount = 0;
-	_syncStallTime = 0;
+    _syncStallCount = 0;
+    _syncStallTime = 0;
 #endif /* J9MODRON_TGC_PARALLEL_STATISTICS */
 }
 
-void
-MM_MarkStats::merge(MM_MarkStats *statsToMerge)
+void MM_MarkStats::merge(MM_MarkStats* statsToMerge)
 {
-	_scanTime += statsToMerge->_scanTime;
+    _scanTime += statsToMerge->_scanTime;
 
-	_objectsMarked += statsToMerge->_objectsMarked;
-	_objectsScanned += statsToMerge->_objectsScanned;
-	_bytesScanned += statsToMerge->_bytesScanned;
+    _objectsMarked += statsToMerge->_objectsMarked;
+    _objectsScanned += statsToMerge->_objectsScanned;
+    _bytesScanned += statsToMerge->_bytesScanned;
 
 #if defined(J9MODRON_TGC_PARALLEL_STATISTICS)
-	/* It may not ever be useful to merge these stats, but do it anyways */
-	_syncStallCount += statsToMerge->_syncStallCount;
-	_syncStallTime += statsToMerge->_syncStallTime;
+    /* It may not ever be useful to merge these stats, but do it anyways */
+    _syncStallCount += statsToMerge->_syncStallCount;
+    _syncStallTime += statsToMerge->_syncStallTime;
 #endif /* J9MODRON_TGC_PARALLEL_STATISTICS */
 }
 

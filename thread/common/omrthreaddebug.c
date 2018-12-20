@@ -35,9 +35,5 @@
  * @param retVal Return value from function call.
  * @returns retVal
  */
-intptr_t
-omrthread_debug_syscall(const char *func, intptr_t retVal)
-{
-	return retVal;
-}
+intptr_t omrthread_debug_syscall(const char* func, intptr_t retVal) { return retVal; }
 #endif

@@ -27,77 +27,90 @@
  */
 #ifndef OMR_LINKAGE_CONNECTOR
 #define OMR_LINKAGE_CONNECTOR
-namespace OMR { class Linkage; }
-namespace OMR { typedef OMR::Linkage LinkageConnector; }
+namespace OMR {
+class Linkage;
+}
+namespace OMR {
+typedef OMR::Linkage LinkageConnector;
+}
 #endif
 
 #include "infra/List.hpp"
 #include "il/symbol/ParameterSymbol.hpp"
 
-#include <stddef.h>                            // for NULL
-#include <stdint.h>                            // for uint32_t, uint8_t, etc
-#include "codegen/RegisterConstants.hpp"       // for TR_RegisterKinds, etc
-#include "env/TRMemory.hpp"                    // for TR_Memory, etc
-#include "infra/Assert.hpp"                    // for TR_ASSERT
-#include "infra/Annotations.hpp"               // for OMR_EXTENSIBLE
+#include <stddef.h> // for NULL
+#include <stdint.h> // for uint32_t, uint8_t, etc
+#include "codegen/RegisterConstants.hpp" // for TR_RegisterKinds, etc
+#include "env/TRMemory.hpp" // for TR_Memory, etc
+#include "infra/Assert.hpp" // for TR_ASSERT
+#include "infra/Annotations.hpp" // for OMR_EXTENSIBLE
 
 class TR_BitVector;
-namespace TR { class AutomaticSymbol; }
-namespace TR { class Compilation; }
-namespace TR { class Linkage; }
-namespace TR { class Instruction; }
-namespace TR { class Node; }
-namespace TR { class ParameterSymbol; }
-namespace TR { class ResolvedMethodSymbol; }
-namespace TR { class Symbol; }
-namespace TR { class SymbolReference; }
-template <class T> class List;
-
-namespace OMR
-{
-class OMR_EXTENSIBLE Linkage
-   {
-   public:
-
-   TR::Linkage* self();
-
-   TR_ALLOC(TR_Memory::Linkage)
-
-   Linkage() { }
-
-   virtual void createPrologue(TR::Instruction *cursor) = 0;
-   virtual void createEpilogue(TR::Instruction *cursor) = 0;
-
-   virtual uint32_t getRightToLeft() = 0;
-   virtual bool     hasToBeOnStack(TR::ParameterSymbol *parm);
-   virtual void     mapStack(TR::ResolvedMethodSymbol *method) = 0;
-   virtual void     mapSingleAutomatic(TR::AutomaticSymbol *p, uint32_t &stackIndex) = 0;
-
-   virtual void setParameterLinkageRegisterIndex(TR::ResolvedMethodSymbol *method, List<TR::ParameterSymbol> &parm)
-      {
-      TR_ASSERT(0, "setParameterLinkageRegisterIndex has to be implemented for this linkage\n");
-      }
-
-   virtual int32_t numArgumentRegisters(TR_RegisterKinds kind) = 0;
-   virtual TR_RegisterKinds argumentRegisterKind(TR::Node *argumentNode);
-
-   virtual void setParameterLinkageRegisterIndex(TR::ResolvedMethodSymbol *method)
-      {
-      TR_ASSERT(0, "setParameterLinkageRegisterIndex(2) has to be implemented for this linkage\n");
-      }
-
-   virtual  TR_BitVector * getKilledRegisters(TR::Node *node)
-      {
-      return NULL;
-      }
-   virtual  TR_BitVector * getSavedRegisters(TR::Node *node, int32_t entryId = 0)
-      {
-      return NULL;
-      }
-   
-   virtual bool isSpecialNonVolatileArgumentRegister(int8_t) { return false; }
-
-   };
+namespace TR {
+class AutomaticSymbol;
 }
+namespace TR {
+class Compilation;
+}
+namespace TR {
+class Linkage;
+}
+namespace TR {
+class Instruction;
+}
+namespace TR {
+class Node;
+}
+namespace TR {
+class ParameterSymbol;
+}
+namespace TR {
+class ResolvedMethodSymbol;
+}
+namespace TR {
+class Symbol;
+}
+namespace TR {
+class SymbolReference;
+}
+template <class T>
+class List;
+
+namespace OMR {
+class OMR_EXTENSIBLE Linkage {
+public:
+    TR::Linkage* self();
+
+    TR_ALLOC(TR_Memory::Linkage)
+
+    Linkage() {}
+
+    virtual void createPrologue(TR::Instruction* cursor) = 0;
+    virtual void createEpilogue(TR::Instruction* cursor) = 0;
+
+    virtual uint32_t getRightToLeft() = 0;
+    virtual bool hasToBeOnStack(TR::ParameterSymbol* parm);
+    virtual void mapStack(TR::ResolvedMethodSymbol* method) = 0;
+    virtual void mapSingleAutomatic(TR::AutomaticSymbol* p, uint32_t& stackIndex) = 0;
+
+    virtual void setParameterLinkageRegisterIndex(TR::ResolvedMethodSymbol* method, List<TR::ParameterSymbol>& parm)
+    {
+        TR_ASSERT(0, "setParameterLinkageRegisterIndex has to be implemented for this linkage\n");
+    }
+
+    virtual int32_t numArgumentRegisters(TR_RegisterKinds kind) = 0;
+    virtual TR_RegisterKinds argumentRegisterKind(TR::Node* argumentNode);
+
+    virtual void setParameterLinkageRegisterIndex(TR::ResolvedMethodSymbol* method)
+    {
+        TR_ASSERT(0, "setParameterLinkageRegisterIndex(2) has to be implemented for this linkage\n");
+    }
+
+    virtual TR_BitVector* getKilledRegisters(TR::Node* node) { return NULL; }
+    virtual TR_BitVector* getSavedRegisters(TR::Node* node, int32_t entryId = 0) { return NULL; }
+
+    virtual bool isSpecialNonVolatileArgumentRegister(int8_t) { return false; }
+};
+} // namespace OMR
 
 #endif

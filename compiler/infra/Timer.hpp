@@ -22,36 +22,35 @@
 #ifndef TIMER_INCL
 #define TIMER_INCL
 
-#include <stdint.h>          // for uint32_t, uint64_t
+#include <stdint.h> // for uint32_t, uint64_t
 #include "env/IO.hpp"
-#include "env/TRMemory.hpp"  // for TR_Memory, etc
-#include "infra/Array.hpp"   // for TR_Array
+#include "env/TRMemory.hpp" // for TR_Memory, etc
+#include "infra/Array.hpp" // for TR_Array
 
 #include "infra/HashTab.hpp"
 
-namespace TR { class Compilation; }
+namespace TR {
+class Compilation;
+}
 
-class TR_SingleTimer
-   {
-   public:
-   TR_ALLOC(TR_Memory::SingleTimer);
+class TR_SingleTimer {
+public:
+    TR_ALLOC(TR_Memory::SingleTimer);
 
-   void     startTiming(TR::Compilation *);
-   void     initialize(const char *title, TR_Memory *);
+    void startTiming(TR::Compilation*);
+    void initialize(const char* title, TR_Memory*);
 
-   uint32_t stopTiming(TR::Compilation *);
+    uint32_t stopTiming(TR::Compilation*);
 
-   char    *title()                       { return _phaseTitle; }
-   uint64_t timeTaken()                   { return _total; }
-   double   secondsTaken();
-   bool isTimerRunning() const            { return _timerRunning; }
+    char* title() { return _phaseTitle; }
+    uint64_t timeTaken() { return _total; }
+    double secondsTaken();
+    bool isTimerRunning() const { return _timerRunning; }
 
-   private:
-
-   char    *_phaseTitle;
-   uint64_t _start,
-            _total;
-   bool     _timerRunning;
-   };
+private:
+    char* _phaseTitle;
+    uint64_t _start, _total;
+    bool _timerRunning;
+};
 
 #endif

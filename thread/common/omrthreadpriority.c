@@ -30,46 +30,43 @@
 #include "thrdsup.h"
 #include "thread_internal.h"
 
-uintptr_t
-omrthread_map_native_priority(int nativePriority)
+uintptr_t omrthread_map_native_priority(int nativePriority)
 {
-	int i;
-	int mapPriority;
-	int normal = omrthread_get_mapped_priority(J9THREAD_PRIORITY_NORMAL);
-	int ascending = omrthread_get_mapped_priority(J9THREAD_PRIORITY_MIN)
-					<= omrthread_get_mapped_priority(J9THREAD_PRIORITY_MAX);
+    int i;
+    int mapPriority;
+    int normal = omrthread_get_mapped_priority(J9THREAD_PRIORITY_NORMAL);
+    int ascending
+        = omrthread_get_mapped_priority(J9THREAD_PRIORITY_MIN) <= omrthread_get_mapped_priority(J9THREAD_PRIORITY_MAX);
 
-	for (i = J9THREAD_PRIORITY_MIN; i <= J9THREAD_PRIORITY_MAX; i++) {
-		/* find the closest priority that has higher priority than the given priority */
-		mapPriority = omrthread_get_mapped_priority(i);
-		if (ascending? (nativePriority <= mapPriority) : (nativePriority >= mapPriority)) {
-			if (mapPriority == normal) {
-				/* if the native priority of i is the same as the native priority of J9THREAD_PRIORITY_NORMAL
-				* then we default to J9THREAD_PRIORITY_NORMAL
-				*/
-				return J9THREAD_PRIORITY_NORMAL;
-			}
-			return i;
-		}
-	}
-	/* there is no omrthread priority that is higher than the given priority, so
-	 * we return the highest omrthread priority available
-	 */
-	return J9THREAD_PRIORITY_MAX;
+    for (i = J9THREAD_PRIORITY_MIN; i <= J9THREAD_PRIORITY_MAX; i++) {
+        /* find the closest priority that has higher priority than the given priority */
+        mapPriority = omrthread_get_mapped_priority(i);
+        if (ascending ? (nativePriority <= mapPriority) : (nativePriority >= mapPriority)) {
+            if (mapPriority == normal) {
+                /* if the native priority of i is the same as the native priority of J9THREAD_PRIORITY_NORMAL
+                 * then we default to J9THREAD_PRIORITY_NORMAL
+                 */
+                return J9THREAD_PRIORITY_NORMAL;
+            }
+            return i;
+        }
+    }
+    /* there is no omrthread priority that is higher than the given priority, so
+     * we return the highest omrthread priority available
+     */
+    return J9THREAD_PRIORITY_MAX;
 }
 
-
-int
-omrthread_get_mapped_priority(omrthread_prio_t omrthreadPriority)
+int omrthread_get_mapped_priority(omrthread_prio_t omrthreadPriority)
 {
-	int priority = priority_map[omrthreadPriority];
+    int priority = priority_map[omrthreadPriority];
 
-	/* When realtime scheduling is used the upper 8 bits are used
-	 * for the scheduling policy
-	 */
-	if (omrthread_lib_use_realtime_scheduling()) {
-		priority = (0x00ffffff & priority);
-	}
+    /* When realtime scheduling is used the upper 8 bits are used
+     * for the scheduling policy
+     */
+    if (omrthread_lib_use_realtime_scheduling()) {
+        priority = (0x00ffffff & priority);
+    }
 
-	return priority;
+    return priority;
 }

@@ -27,20 +27,19 @@
 
 class EnumMember;
 
-class EnumUDT : public UDT
-{
+class EnumUDT : public UDT {
 public:
-	std::vector<EnumMember *> _enumMembers;
+    std::vector<EnumMember*> _enumMembers;
 
-	explicit EnumUDT(unsigned int lineNumber = 0);
-	virtual ~EnumUDT();
+    explicit EnumUDT(unsigned int lineNumber = 0);
+    virtual ~EnumUDT();
 
-	virtual const string &getSymbolKindName() const;
+    virtual const string& getSymbolKindName() const;
 
-	virtual DDR_RC acceptVisitor(const TypeVisitor &visitor);
+    virtual DDR_RC acceptVisitor(const TypeVisitor& visitor);
 
-	bool operator==(const Type & rhs) const;
-	virtual bool compareToEnum(const EnumUDT &) const;
+    bool operator==(const Type& rhs) const;
+    virtual bool compareToEnum(const EnumUDT&) const;
 };
 
 #endif /* ENUMUDT_HPP */

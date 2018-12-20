@@ -36,10 +36,10 @@ using std::set;
 using std::vector;
 
 struct FieldOverride {
-	string structName;
-	string fieldName;
-	string overrideName;
-	bool isTypeOverride;
+    string structName;
+    string fieldName;
+    string overrideName;
+    bool isTypeOverride;
 };
 
 class MergeVisitor;
@@ -48,64 +48,62 @@ class TypeReplaceVisitor;
 
 class Symbol_IR {
 private:
-	OMRPortLibrary * const _portLibrary;
+    OMRPortLibrary* const _portLibrary;
 
-	struct OverrideInfo {
-		set<string> opaqueTypeNames;
-		vector<FieldOverride> fieldOverrides;
+    struct OverrideInfo {
+        set<string> opaqueTypeNames;
+        vector<FieldOverride> fieldOverrides;
 
-		OverrideInfo();
-	};
+        OverrideInfo();
+    };
 
-	DDR_RC readOverridesFile(const char *overridesFile, OverrideInfo *overrideInfo);
+    DDR_RC readOverridesFile(const char* overridesFile, OverrideInfo* overrideInfo);
 
 public:
-	vector<Type *> _types;
-	/* Keep a set of names of structures already printed, to avoid printing duplicates in the superset.
-	 * Currently, only use this approach for AIX, where removeDuplicates() runs too slowly. Using this
-	 * method on other platforms has not been tested yet. There may still be issues related to differences
-	 * in the DWARF/intermediate representation structures between platforms which may be revealed by this
-	 * approach.
-	 */
-	set<string> _fullTypeNames;
-	set<Type *> _typeSet;
-	unordered_map<string, set<Type *> > _typeMap;
+    vector<Type*> _types;
+    /* Keep a set of names of structures already printed, to avoid printing duplicates in the superset.
+     * Currently, only use this approach for AIX, where removeDuplicates() runs too slowly. Using this
+     * method on other platforms has not been tested yet. There may still be issues related to differences
+     * in the DWARF/intermediate representation structures between platforms which may be revealed by this
+     * approach.
+     */
+    set<string> _fullTypeNames;
+    set<Type*> _typeSet;
+    unordered_map<string, set<Type*> > _typeMap;
 
-	explicit Symbol_IR(OMRPortLibrary *portLibrary)
-		: _portLibrary(portLibrary)
-		, _types()
-		, _fullTypeNames()
-		, _typeSet()
-		, _typeMap()
-	{
-	}
+    explicit Symbol_IR(OMRPortLibrary* portLibrary)
+        : _portLibrary(portLibrary)
+        , _types()
+        , _fullTypeNames()
+        , _typeSet()
+        , _typeMap()
+    {}
 
-	explicit Symbol_IR(Symbol_IR *other)
-		: _portLibrary(other->_portLibrary)
-		, _types()
-		, _fullTypeNames()
-		, _typeSet()
-		, _typeMap()
-	{
-	}
+    explicit Symbol_IR(Symbol_IR* other)
+        : _portLibrary(other->_portLibrary)
+        , _types()
+        , _fullTypeNames()
+        , _typeSet()
+        , _typeMap()
+    {}
 
-	~Symbol_IR();
+    ~Symbol_IR();
 
-	DDR_RC applyOverridesList(const char *overridesListFile);
-	void removeDuplicates();
-	DDR_RC mergeIR(Symbol_IR *other);
+    DDR_RC applyOverridesList(const char* overridesListFile);
+    void removeDuplicates();
+    DDR_RC mergeIR(Symbol_IR* other);
 
 private:
-	template<typename T> void mergeTypes(vector<T *> *source, vector<T *> *other,
-		NamespaceUDT *outerNamespace, vector<Type *> *merged);
-	void mergeFields(vector<Field *> *source, vector<Field *> *other, Type *type, vector<Type *> *merged);
-	void mergeEnums(vector<EnumMember *> *source, vector<EnumMember *> *other);
-	void addTypeToMap(Type *type);
-	Type *findTypeInMap(Type *typeToFind);
-	DDR_RC replaceTypeUsingMap(Type **type, Type *outer);
+    template <typename T>
+    void mergeTypes(vector<T*>* source, vector<T*>* other, NamespaceUDT* outerNamespace, vector<Type*>* merged);
+    void mergeFields(vector<Field*>* source, vector<Field*>* other, Type* type, vector<Type*>* merged);
+    void mergeEnums(vector<EnumMember*>* source, vector<EnumMember*>* other);
+    void addTypeToMap(Type* type);
+    Type* findTypeInMap(Type* typeToFind);
+    DDR_RC replaceTypeUsingMap(Type** type, Type* outer);
 
-	friend class MergeVisitor;
-	friend class TypeReplaceVisitor;
+    friend class MergeVisitor;
+    friend class TypeReplaceVisitor;
 };
 
 #endif /* SYMBOL_IR_HPP */

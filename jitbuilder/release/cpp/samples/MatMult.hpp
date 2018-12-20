@@ -20,62 +20,43 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #ifndef MATMULT_INCL
 #define MATMULT_INCL
 
 #include "JitBuilder.hpp"
 
-typedef void (MatMultFunctionType)(double *, double *, double *, int32_t);
+typedef void(MatMultFunctionType)(double*, double*, double*, int32_t);
 
-class MatMult : public OMR::JitBuilder::MethodBuilder
-   {
-   private:
-   OMR::JitBuilder::IlType *pDouble;
+class MatMult : public OMR::JitBuilder::MethodBuilder {
+private:
+    OMR::JitBuilder::IlType* pDouble;
 
-   void Store2D(OMR::JitBuilder::IlBuilder *bldr,
-                OMR::JitBuilder::IlValue *base,
-                OMR::JitBuilder::IlValue *first,
-                OMR::JitBuilder::IlValue *second,
-                OMR::JitBuilder::IlValue *N,
-                OMR::JitBuilder::IlValue *value);
-   OMR::JitBuilder::IlValue *Load2D(OMR::JitBuilder::IlBuilder *bldr,
-                                    OMR::JitBuilder::IlValue *base,
-                                    OMR::JitBuilder::IlValue *first,
-                                    OMR::JitBuilder::IlValue *second,
-                                    OMR::JitBuilder::IlValue *N);
+    void Store2D(OMR::JitBuilder::IlBuilder* bldr, OMR::JitBuilder::IlValue* base, OMR::JitBuilder::IlValue* first,
+        OMR::JitBuilder::IlValue* second, OMR::JitBuilder::IlValue* N, OMR::JitBuilder::IlValue* value);
+    OMR::JitBuilder::IlValue* Load2D(OMR::JitBuilder::IlBuilder* bldr, OMR::JitBuilder::IlValue* base,
+        OMR::JitBuilder::IlValue* first, OMR::JitBuilder::IlValue* second, OMR::JitBuilder::IlValue* N);
 
-   public:
-   MatMult(OMR::JitBuilder::TypeDictionary *);
-   virtual bool buildIL();
-   };
+public:
+    MatMult(OMR::JitBuilder::TypeDictionary*);
+    virtual bool buildIL();
+};
 
-class VectorMatMult : public OMR::JitBuilder::MethodBuilder
-   {
-   private:
-   OMR::JitBuilder::IlType *pDouble;
-   OMR::JitBuilder::IlType *ppDouble;
+class VectorMatMult : public OMR::JitBuilder::MethodBuilder {
+private:
+    OMR::JitBuilder::IlType* pDouble;
+    OMR::JitBuilder::IlType* ppDouble;
 
-   void VectorStore2D(OMR::JitBuilder::IlBuilder *bldr,
-                      OMR::JitBuilder::IlValue *base,
-                      OMR::JitBuilder::IlValue *first,
-                      OMR::JitBuilder::IlValue *second,
-                      OMR::JitBuilder::IlValue *N,
-                      OMR::JitBuilder::IlValue *value);
-   OMR::JitBuilder::IlValue *VectorLoad2D(OMR::JitBuilder::IlBuilder *bldr,
-                                          OMR::JitBuilder::IlValue *base,
-                                          OMR::JitBuilder::IlValue *first,
-                                          OMR::JitBuilder::IlValue *second,
-                                          OMR::JitBuilder::IlValue *N);
-   OMR::JitBuilder::IlValue *Load2D(OMR::JitBuilder::IlBuilder *bldr,
-                                    OMR::JitBuilder::IlValue *base,
-                                    OMR::JitBuilder::IlValue *first,
-                                    OMR::JitBuilder::IlValue *second,
-                                    OMR::JitBuilder::IlValue *N);
+    void VectorStore2D(OMR::JitBuilder::IlBuilder* bldr, OMR::JitBuilder::IlValue* base,
+        OMR::JitBuilder::IlValue* first, OMR::JitBuilder::IlValue* second, OMR::JitBuilder::IlValue* N,
+        OMR::JitBuilder::IlValue* value);
+    OMR::JitBuilder::IlValue* VectorLoad2D(OMR::JitBuilder::IlBuilder* bldr, OMR::JitBuilder::IlValue* base,
+        OMR::JitBuilder::IlValue* first, OMR::JitBuilder::IlValue* second, OMR::JitBuilder::IlValue* N);
+    OMR::JitBuilder::IlValue* Load2D(OMR::JitBuilder::IlBuilder* bldr, OMR::JitBuilder::IlValue* base,
+        OMR::JitBuilder::IlValue* first, OMR::JitBuilder::IlValue* second, OMR::JitBuilder::IlValue* N);
 
-   public:
-   VectorMatMult(OMR::JitBuilder::TypeDictionary *);
-   virtual bool buildIL();
-   };
+public:
+    VectorMatMult(OMR::JitBuilder::TypeDictionary*);
+    virtual bool buildIL();
+};
 
 #endif // !defined(MATMULT_INCL)

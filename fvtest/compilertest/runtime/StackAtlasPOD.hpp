@@ -34,17 +34,15 @@
  * identically named header file earlier in the IPATH.
  */
 
-namespace OMR
-{
+namespace OMR {
 
-struct StackAtlasPOD
-   {
-   uint16_t numberOfMaps;
-   uint16_t bytesPerStackMap;
-   int32_t frameObjectParmOffset;
-   int32_t localBaseOffset;
-   };
+struct StackAtlasPOD {
+    uint16_t numberOfMaps;
+    uint16_t bytesPerStackMap;
+    int32_t frameObjectParmOffset;
+    int32_t localBaseOffset;
+};
 
-}
+} // namespace OMR
 
 #endif // !defined(TEST_STACKATLASPOD_INCL)

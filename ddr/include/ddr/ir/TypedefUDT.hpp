@@ -25,23 +25,22 @@
 #include "ddr/ir/Modifiers.hpp"
 #include "ddr/ir/UDT.hpp"
 
-class TypedefUDT : public UDT
-{
+class TypedefUDT : public UDT {
 public:
-	Type *_aliasedType;
-	Modifiers _modifiers;
+    Type* _aliasedType;
+    Modifiers _modifiers;
 
-	explicit TypedefUDT(unsigned int lineNumber = 0);
-	virtual ~TypedefUDT();
+    explicit TypedefUDT(unsigned int lineNumber = 0);
+    virtual ~TypedefUDT();
 
-	virtual DDR_RC acceptVisitor(const TypeVisitor &visitor);
-	virtual const string &getSymbolKindName() const;
-	virtual size_t getPointerCount();
-	virtual size_t getArrayDimensions();
-	virtual Type *getBaseType();
+    virtual DDR_RC acceptVisitor(const TypeVisitor& visitor);
+    virtual const string& getSymbolKindName() const;
+    virtual size_t getPointerCount();
+    virtual size_t getArrayDimensions();
+    virtual Type* getBaseType();
 
-	bool operator==(const Type & rhs) const;
-	virtual bool compareToTypedef(const TypedefUDT &) const;
+    bool operator==(const Type& rhs) const;
+    virtual bool compareToTypedef(const TypedefUDT&) const;
 };
 
 #endif /* TYPEDEFUDT_HPP */

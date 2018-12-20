@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 /**
  * @file
  * @ingroup GC_Base_Core
@@ -31,43 +30,46 @@
 
 #include "MemorySubSpace.hpp"
 
-#define HEAP_FREE_RATIO_EXPAND_DIVISOR		100
-#define HEAP_FREE_RATIO_EXPAND_MULTIPLIER	17
+#define HEAP_FREE_RATIO_EXPAND_DIVISOR 100
+#define HEAP_FREE_RATIO_EXPAND_MULTIPLIER 17
 
 /**
  * Functionality that is common for Flat/Concurrent but not applicable for SemiSpace.
  * An abstract class that should not be instantiated.
  * @ingroup GC_Base_Core
  */
-class MM_MemorySubSpaceUniSpace : public MM_MemorySubSpace
-{
+class MM_MemorySubSpaceUniSpace : public MM_MemorySubSpace {
 protected:
-	uintptr_t adjustExpansionWithinFreeLimits(MM_EnvironmentBase *env, uintptr_t expandSize);
-	uintptr_t adjustExpansionWithinSoftMax(MM_EnvironmentBase *env, uintptr_t expandSize, uintptr_t minimumBytesRequired);
-	uintptr_t checkForRatioExpand(MM_EnvironmentBase *env, uintptr_t bytesRequired);	
-	bool checkForRatioContract(MM_EnvironmentBase *env);
-	uintptr_t calculateExpandSize(MM_EnvironmentBase *env, uintptr_t bytesRequired, bool expandToSatisfy);
-	uintptr_t calculateCollectorExpandSize(MM_EnvironmentBase *env, MM_Collector *requestCollector, MM_AllocateDescription *allocDescription);
-	uintptr_t calculateTargetContractSize(MM_EnvironmentBase *env, uintptr_t allocSize, bool ratioContract);
-	bool timeForHeapContract(MM_EnvironmentBase *env, MM_AllocateDescription *allocDescription, bool systemGC);
-	bool timeForHeapExpand(MM_EnvironmentBase *env, MM_AllocateDescription *allocDescription);	
-	uintptr_t performExpand(MM_EnvironmentBase *env);
-	uintptr_t performContract(MM_EnvironmentBase *env, MM_AllocateDescription *allocDescription);
+    uintptr_t adjustExpansionWithinFreeLimits(MM_EnvironmentBase* env, uintptr_t expandSize);
+    uintptr_t adjustExpansionWithinSoftMax(
+        MM_EnvironmentBase* env, uintptr_t expandSize, uintptr_t minimumBytesRequired);
+    uintptr_t checkForRatioExpand(MM_EnvironmentBase* env, uintptr_t bytesRequired);
+    bool checkForRatioContract(MM_EnvironmentBase* env);
+    uintptr_t calculateExpandSize(MM_EnvironmentBase* env, uintptr_t bytesRequired, bool expandToSatisfy);
+    uintptr_t calculateCollectorExpandSize(
+        MM_EnvironmentBase* env, MM_Collector* requestCollector, MM_AllocateDescription* allocDescription);
+    uintptr_t calculateTargetContractSize(MM_EnvironmentBase* env, uintptr_t allocSize, bool ratioContract);
+    bool timeForHeapContract(MM_EnvironmentBase* env, MM_AllocateDescription* allocDescription, bool systemGC);
+    bool timeForHeapExpand(MM_EnvironmentBase* env, MM_AllocateDescription* allocDescription);
+    uintptr_t performExpand(MM_EnvironmentBase* env);
+    uintptr_t performContract(MM_EnvironmentBase* env, MM_AllocateDescription* allocDescription);
 
 public:
-	virtual void checkResize(MM_EnvironmentBase *env, MM_AllocateDescription *allocDescription = NULL, bool _systemGC = false);
-	virtual intptr_t performResize(MM_EnvironmentBase *env, MM_AllocateDescription *allocDescription = NULL);
+    virtual void checkResize(
+        MM_EnvironmentBase* env, MM_AllocateDescription* allocDescription = NULL, bool _systemGC = false);
+    virtual intptr_t performResize(MM_EnvironmentBase* env, MM_AllocateDescription* allocDescription = NULL);
 
-	/**
-	 * Create a MemorySubSpaceUniSpace object.
-	 */
-	MM_MemorySubSpaceUniSpace(MM_EnvironmentBase *env, MM_PhysicalSubArena *physicalSubArena,
-		bool usesGlobalCollector, uintptr_t minimumSize, uintptr_t initialSize, uintptr_t maximumSize, uintptr_t memoryFlags, uint32_t objectFlags)
-	:
-		MM_MemorySubSpace(env, NULL, physicalSubArena, usesGlobalCollector, minimumSize, initialSize, maximumSize, memoryFlags, objectFlags)
-	{
-		_typeId = __FUNCTION__;
-	};
+    /**
+     * Create a MemorySubSpaceUniSpace object.
+     */
+    MM_MemorySubSpaceUniSpace(MM_EnvironmentBase* env, MM_PhysicalSubArena* physicalSubArena, bool usesGlobalCollector,
+        uintptr_t minimumSize, uintptr_t initialSize, uintptr_t maximumSize, uintptr_t memoryFlags,
+        uint32_t objectFlags)
+        : MM_MemorySubSpace(env, NULL, physicalSubArena, usesGlobalCollector, minimumSize, initialSize, maximumSize,
+              memoryFlags, objectFlags)
+    {
+        _typeId = __FUNCTION__;
+    };
 };
- 
+
 #endif /* MEMORYSUBSPACEUNISPACE_HPP_ */

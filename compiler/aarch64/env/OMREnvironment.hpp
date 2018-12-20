@@ -27,36 +27,36 @@
  */
 #ifndef OMR_ENVIRONMENT_CONNECTOR
 #define OMR_ENVIRONMENT_CONNECTOR
-namespace OMR { namespace ARM64 { class Environment; } }
-namespace OMR { typedef OMR::ARM64::Environment EnvironmentConnector; }
+namespace OMR {
+namespace ARM64 {
+class Environment;
+}
+} // namespace OMR
+namespace OMR {
+typedef OMR::ARM64::Environment EnvironmentConnector;
+}
 #else
 #error OMR::ARM64::Environment expected to be a primary connector, but an OMR connector is already defined
 #endif
 
 #include "compiler/env/OMREnvironment.hpp"
 
+namespace OMR {
 
-namespace OMR
-{
+namespace ARM64 {
 
-namespace ARM64
-{
-
-class Environment : public OMR::Environment
-   {
+class Environment : public OMR::Environment {
 public:
+    Environment()
+        : OMR::Environment()
+    {}
 
-   Environment() :
-      OMR::Environment()
-      {}
+    Environment(TR::MajorOperatingSystem o, TR::Bitness b)
+        : OMR::Environment(o, b)
+    {}
+};
 
-   Environment(TR::MajorOperatingSystem o, TR::Bitness b) :
-      OMR::Environment(o, b)
-      {}
-      
-   };
+} // namespace ARM64
 
-}
-
-}
-#endif //OMR_ARM64_ENVIRONMENT_INCL
+} // namespace OMR
+#endif // OMR_ARM64_ENVIRONMENT_INCL

@@ -28,26 +28,24 @@
  */
 #ifndef JITBUILDER_CODEGENERATORBASE_CONNECTOR
 #define JITBUILDER_CODEGENERATORBASE_CONNECTOR
-namespace JitBuilder { class CodeGenerator; }
-namespace JitBuilder { typedef CodeGenerator CodeGeneratorConnector; }
+namespace JitBuilder {
+class CodeGenerator;
+}
+namespace JitBuilder {
+typedef CodeGenerator CodeGeneratorConnector;
+}
 #endif
-
 
 #include "codegen/OMRCodeGenerator.hpp"
 
-namespace JitBuilder
-{
+namespace JitBuilder {
 
-class OMR_EXTENSIBLE CodeGenerator : public OMR::CodeGeneratorConnector
-   {
-   public:
+class OMR_EXTENSIBLE CodeGenerator : public OMR::CodeGeneratorConnector {
+public:
+    CodeGenerator()
+        : OMR::CodeGeneratorConnector()
+    {}
+};
 
-   CodeGenerator() :
-      OMR::CodeGeneratorConnector() {}
-
-   };
-
-}
+} // namespace JitBuilder
 #endif // !defined(JITBUILDER_CODEGENERATORBASE_INCL)
-
-

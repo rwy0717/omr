@@ -35,17 +35,16 @@
  * See @ref omrthread_get_mapped_priority() for information on how the priority
  * is obtained.
  */
-int
-omrthread_get_scheduling_policy(omrthread_prio_t omrthreadPriority)
+int omrthread_get_scheduling_policy(omrthread_prio_t omrthreadPriority)
 {
-	int policy = J9_DEFAULT_SCHED;
+    int policy = J9_DEFAULT_SCHED;
 
-	/* When realtime scheduling is used the upper 8 bits are used
-	 * for the scheduling policy
-	 */
-	if (omrthread_lib_use_realtime_scheduling()) {
-		policy = (priority_map[omrthreadPriority] >> 24);
-	}
+    /* When realtime scheduling is used the upper 8 bits are used
+     * for the scheduling policy
+     */
+    if (omrthread_lib_use_realtime_scheduling()) {
+        policy = (priority_map[omrthreadPriority] >> 24);
+    }
 
-	return policy;
+    return policy;
 }

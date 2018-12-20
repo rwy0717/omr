@@ -22,9 +22,11 @@
 
 #include <stdint.h>
 
-namespace TR { class MethodBuilder; }
+namespace TR {
+class MethodBuilder;
+}
 class TR_Memory;
 
 extern "C" bool initializeJit();
-extern "C" uint32_t compileMethodBuilder(TR::MethodBuilder *m, uint8_t **entry);
+extern "C" uint32_t compileMethodBuilder(TR::MethodBuilder* m, uint8_t** entry);
 extern "C" void shutdownJit();

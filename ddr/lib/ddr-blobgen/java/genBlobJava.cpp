@@ -30,33 +30,34 @@
 #include <stdio.h>
 
 DDR_RC
-genBlob(struct OMRPortLibrary *portLibrary, Symbol_IR *ir, const char *supersetFile, const char *blobFile, bool printEmptyTypes)
+genBlob(struct OMRPortLibrary* portLibrary, Symbol_IR* ir, const char* supersetFile, const char* blobFile,
+    bool printEmptyTypes)
 {
-	DDR_RC rc = DDR_RC_OK;
+    DDR_RC rc = DDR_RC_OK;
 
-	if (NULL != blobFile) {
-		JavaBlobGenerator blobGenerator(printEmptyTypes);
+    if (NULL != blobFile) {
+        JavaBlobGenerator blobGenerator(printEmptyTypes);
 
-		rc = blobGenerator.genBinaryBlob(portLibrary, ir, blobFile);
+        rc = blobGenerator.genBinaryBlob(portLibrary, ir, blobFile);
 
-		if (DDR_RC_OK == rc) {
-			printf("Blob written to file: %s\n", blobFile);
-		} else {
-			printf("Blob NOT written to file: %s\n", blobFile);
-		}
-	}
+        if (DDR_RC_OK == rc) {
+            printf("Blob written to file: %s\n", blobFile);
+        } else {
+            printf("Blob NOT written to file: %s\n", blobFile);
+        }
+    }
 
-	if ((DDR_RC_OK == rc) && (NULL != supersetFile)) {
-		JavaSupersetGenerator supersetGenerator(printEmptyTypes);
+    if ((DDR_RC_OK == rc) && (NULL != supersetFile)) {
+        JavaSupersetGenerator supersetGenerator(printEmptyTypes);
 
-		rc = supersetGenerator.printSuperset(portLibrary, ir, supersetFile);
+        rc = supersetGenerator.printSuperset(portLibrary, ir, supersetFile);
 
-		if (DDR_RC_OK == rc) {
-			printf("Superset written to file: %s\n", supersetFile);
-		} else {
-			printf("Superset NOT written to file: %s\n", supersetFile);
-		}
-	}
+        if (DDR_RC_OK == rc) {
+            printf("Superset written to file: %s\n", supersetFile);
+        } else {
+            printf("Superset NOT written to file: %s\n", supersetFile);
+        }
+    }
 
-	return rc;
+    return rc;
 }

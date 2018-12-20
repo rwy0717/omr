@@ -34,63 +34,52 @@ class MM_MarkMap;
 /**
  * Delegate class provides implementations for methods required for Collector Language Interface
  */
-class MM_CompactDelegate
-{
-	/*
-	 * Data members
-	 */
+class MM_CompactDelegate {
+    /*
+     * Data members
+     */
 private:
-	OMR_VM *_omrVM;
-	MM_CompactScheme *_compactScheme;
-	MM_MarkMap *_markMap;
+    OMR_VM* _omrVM;
+    MM_CompactScheme* _compactScheme;
+    MM_MarkMap* _markMap;
 
 protected:
-
 public:
-
-	/*
-	 * Function members
-	 */
+    /*
+     * Function members
+     */
 private:
-
 protected:
-
 public:
-	/**
-	 * Initialize the delegate.
-	 *
-	 * @param omrVM
-	 * @return true if delegate initialized successfully
-	 */
-	void
-	tearDown(MM_EnvironmentBase *env) { }
+    /**
+     * Initialize the delegate.
+     *
+     * @param omrVM
+     * @return true if delegate initialized successfully
+     */
+    void tearDown(MM_EnvironmentBase* env) {}
 
-	bool
-	initialize(MM_EnvironmentBase *env, OMR_VM *omrVM, MM_MarkMap *markMap, MM_CompactScheme *compactScheme)
-	{
-		_omrVM  = omrVM;
-		_compactScheme = compactScheme;
-		_markMap = markMap;
-		return true;
-	}
+    bool initialize(MM_EnvironmentBase* env, OMR_VM* omrVM, MM_MarkMap* markMap, MM_CompactScheme* compactScheme)
+    {
+        _omrVM = omrVM;
+        _compactScheme = compactScheme;
+        _markMap = markMap;
+        return true;
+    }
 
-	void
-	verifyHeap(MM_EnvironmentBase *env, MM_MarkMap *markMap) { }
+    void verifyHeap(MM_EnvironmentBase* env, MM_MarkMap* markMap) {}
 
-	void
-	fixupRoots(MM_EnvironmentBase *env, MM_CompactScheme *compactScheme) { }
+    void fixupRoots(MM_EnvironmentBase* env, MM_CompactScheme* compactScheme) {}
 
-	void
-	workerCleanupAfterGC(MM_EnvironmentBase *env) { }
+    void workerCleanupAfterGC(MM_EnvironmentBase* env) {}
 
-	void
-	masterSetupForGC(MM_EnvironmentBase *env) { }
+    void masterSetupForGC(MM_EnvironmentBase* env) {}
 
-	MM_CompactDelegate()
-		: _compactScheme(NULL)
-		, _markMap(NULL)
-		, _omrVM(NULL)
-	{}
+    MM_CompactDelegate()
+        : _compactScheme(NULL)
+        , _markMap(NULL)
+        , _omrVM(NULL)
+    {}
 };
 
 #endif /* OMR_GC_MODRON_COMPACTION */

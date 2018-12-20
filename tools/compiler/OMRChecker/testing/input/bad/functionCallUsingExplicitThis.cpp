@@ -27,20 +27,17 @@
 
 #define OMR_EXTENSIBLE __attribute__((annotate("OMR_Extensible")))
 
-namespace OMR
-{
+namespace OMR {
 
-class OMR_EXTENSIBLE ExtClass
-   {
-   public:
-   void functionCalled();   // function to be called
-   void callingFunction();  // function that will make call
+class OMR_EXTENSIBLE ExtClass {
+public:
+    void functionCalled(); // function to be called
+    void callingFunction(); // function that will make call
                             //    with explicit `this`
-   };
+};
 
 } // namespace OMR
 
 void OMR::ExtClass::functionCalled() {}
 
 void OMR::ExtClass::callingFunction() { this->functionCalled(); }
-

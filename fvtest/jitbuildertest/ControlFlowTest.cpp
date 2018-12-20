@@ -23,24 +23,23 @@
 
 typedef void (*DoubleReturnFunction)(void);
 
-DEFINE_BUILDER( DoubleReturn,
-                NoType )
-   {
-   auto firstBuilder = OrphanBytecodeBuilder(0, (char *)"return");
-   AppendBuilder(firstBuilder);
-   firstBuilder->Return();
+DEFINE_BUILDER(DoubleReturn, NoType)
+{
+    auto firstBuilder = OrphanBytecodeBuilder(0, (char*)"return");
+    AppendBuilder(firstBuilder);
+    firstBuilder->Return();
 
-   auto secondBuilder = OrphanBytecodeBuilder(1, (char *)"return"); // should be ignored and cleaned up
-   secondBuilder->Return();
+    auto secondBuilder = OrphanBytecodeBuilder(1, (char*)"return"); // should be ignored and cleaned up
+    secondBuilder->Return();
 
-   return true;
-   }
+    return true;
+}
 
 class ControlfFlowTest : public JitBuilderTest {};
 
 TEST_F(ControlfFlowTest, DoubleReturnTest)
-   {
-   DoubleReturnFunction doubleReturn;
-   ASSERT_COMPILE(OMR::JitBuilder::TypeDictionary, DoubleReturn, doubleReturn);
-   ASSERT_NO_FATAL_FAILURE(doubleReturn());
-   }
+{
+    DoubleReturnFunction doubleReturn;
+    ASSERT_COMPILE(OMR::JitBuilder::TypeDictionary, DoubleReturn, doubleReturn);
+    ASSERT_NO_FATAL_FAILURE(doubleReturn());
+}

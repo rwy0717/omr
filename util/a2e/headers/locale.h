@@ -32,35 +32,34 @@
  * ===========================================================================
  */
 
-#if __TARGET_LIB__ == 0X22080000                                   /*ibm@28725*/
-#include <//'PP.ADLE370.OS39028.SCEEH.H(locale)'>                  /*ibm@28725*/
-#else                                                              /*ibm@28725*/
+#if __TARGET_LIB__ == 0X22080000 /*ibm@28725*/
+#include < //'PP.ADLE370.OS39028.SCEEH.H(locale)'>                  /*ibm@28725*/
+#else /*ibm@28725*/
 #include "prefixpath.h"
-#include PREFIXPATH(locale.h)                                   /*ibm@28725*/
-#endif                                                             /*ibm@28725*/
+#include PREFIXPATH(locale.h) /*ibm@28725*/
+#endif /*ibm@28725*/
 
 #if defined(IBM_ATOE)
 
-	#if !defined(IBM_ATOE_LOCALE)
-		#define IBM_ATOE_LOCALE
+#if !defined(IBM_ATOE_LOCALE)
+#define IBM_ATOE_LOCALE
 
-		#ifdef __cplusplus
-            extern "C" {
-		#endif
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-        char * atoe_setlocale(int , const char *);
+char* atoe_setlocale(int, const char*);
 
-		#ifdef __cplusplus
-            }
-		#endif
+#ifdef __cplusplus
+}
+#endif
 
-		#undef setlocale
+#undef setlocale
 
-		#define setlocale	atoe_setlocale
+#define setlocale atoe_setlocale
 
-	#endif
+#endif
 
 #endif
 
 /* END OF FILE */
-

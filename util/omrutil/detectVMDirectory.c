@@ -29,28 +29,27 @@
 #include "omrutil.h"
 
 #if defined(OMR_OS_WINDOWS)
-omr_error_t
-detectVMDirectory(wchar_t *vmDirectory, size_t vmDirectoryLength, wchar_t **vmDirectoryEnd)
+omr_error_t detectVMDirectory(wchar_t* vmDirectory, size_t vmDirectoryLength, wchar_t** vmDirectoryEnd)
 {
-	omr_error_t rc = OMR_ERROR_NOT_AVAILABLE;
-	LPCSTR moduleName = NULL;
-	HANDLE moduleHandle = NULL;
-	DWORD pathLength = 0;
+    omr_error_t rc = OMR_ERROR_NOT_AVAILABLE;
+    LPCSTR moduleName = NULL;
+    HANDLE moduleHandle = NULL;
+    DWORD pathLength = 0;
 
-	if (OMR_ERROR_NONE == OMR_Glue_GetVMDirectoryToken((void *)&moduleName)) {
-		moduleHandle = GetModuleHandle(moduleName);
-		if (NULL != moduleHandle) {
-			pathLength = GetModuleFileNameW(moduleHandle, vmDirectory, (DWORD)vmDirectoryLength);
-			if ((0 != pathLength) && (pathLength < (DWORD)vmDirectoryLength)) {
-				/* remove the module name from the path */
-				*vmDirectoryEnd = wcsrchr(vmDirectory, '\\');
-				if (NULL != *vmDirectoryEnd) {
-					**vmDirectoryEnd = L'\0';
-				}
-				rc = OMR_ERROR_NONE;
-			}
-		}
-	}
-	return rc;
+    if (OMR_ERROR_NONE == OMR_Glue_GetVMDirectoryToken((void*)&moduleName)) {
+        moduleHandle = GetModuleHandle(moduleName);
+        if (NULL != moduleHandle) {
+            pathLength = GetModuleFileNameW(moduleHandle, vmDirectory, (DWORD)vmDirectoryLength);
+            if ((0 != pathLength) && (pathLength < (DWORD)vmDirectoryLength)) {
+                /* remove the module name from the path */
+                *vmDirectoryEnd = wcsrchr(vmDirectory, '\\');
+                if (NULL != *vmDirectoryEnd) {
+                    **vmDirectoryEnd = L'\0';
+                }
+                rc = OMR_ERROR_NONE;
+            }
+        }
+    }
+    return rc;
 }
 #endif /* defined(OMR_OS_WINDOWS) */

@@ -29,6 +29,7 @@
 #include "il/Node_inlines.hpp"
 #include "env/CompilerEnv.hpp"
 
-
-#define NOT_IMPLEMENTED { TR_ASSERT(0, "This function is not implemented in JitBuilder"); }
-
+#define NOT_IMPLEMENTED                                                 \
+    {                                                                   \
+        TR_ASSERT(0, "This function is not implemented in JitBuilder"); \
+    }

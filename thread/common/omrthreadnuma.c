@@ -35,27 +35,18 @@
  *
  * This function must only be called *once*. It is called from omrthread_init().
  */
-void
-omrthread_numa_init(omrthread_library_t lib)
-{
-}
+void omrthread_numa_init(omrthread_library_t lib) {}
 
 /**
  * Closes the dynamic library for NUMA. Should only be called from omrthread_shutdown().
  */
-void
-omrthread_numa_shutdown(omrthread_library_t lib)
-{
-}
+void omrthread_numa_shutdown(omrthread_library_t lib) {}
 
 /**
  * Sets the NUMA enabled status.
  * This applies to the entire process.
  */
-void
-omrthread_numa_set_enabled(BOOLEAN enabled)
-{
-}
+void omrthread_numa_set_enabled(BOOLEAN enabled) {}
 
 /**
  * Return the highest NUMA node ID available to the process.
@@ -68,11 +59,10 @@ omrthread_numa_set_enabled(BOOLEAN enabled)
  *
  * @return The highest NUMA node ID available to the process. 0 if no affinity, or NUMA not enabled.
  */
-uintptr_t
-omrthread_numa_get_max_node(void)
+uintptr_t omrthread_numa_get_max_node(void)
 {
-	/* This is the common function, just return 0 */
-	return 0;
+    /* This is the common function, just return 0 */
+    return 0;
 }
 
 /**
@@ -83,12 +73,13 @@ omrthread_numa_get_max_node(void)
  * that this function will return 0 even if NUMA is not available. Use omrthread_numa_get_max_node()
  * to test for the availability of NUMA.
  *
- * @see omrthread_numa_set_node_affinity(omrthread_t thread, const uintptr_t *nodeList, uintptr_t nodeCount, uint32_t flags)
+ * @see omrthread_numa_set_node_affinity(omrthread_t thread, const uintptr_t *nodeList, uintptr_t nodeCount, uint32_t
+ * flags)
  */
-intptr_t
-omrthread_numa_set_node_affinity_nolock(omrthread_t thread, const uintptr_t *nodeList, uintptr_t nodeCount, uint32_t flags)
+intptr_t omrthread_numa_set_node_affinity_nolock(
+    omrthread_t thread, const uintptr_t* nodeList, uintptr_t nodeCount, uint32_t flags)
 {
-	return 0;
+    return 0;
 }
 
 /**
@@ -113,11 +104,11 @@ omrthread_numa_set_node_affinity_nolock(omrthread_t thread, const uintptr_t *nod
  * @return 0 on success, -1 on failure. Note that this function will return 0 even if NUMA is not available.
  * Use omrthread_numa_get_max_node() to test for the availability of NUMA.
  */
-intptr_t
-omrthread_numa_set_node_affinity(omrthread_t thread, const uintptr_t *numaNodes, uintptr_t nodeCount, uint32_t flags)
+intptr_t omrthread_numa_set_node_affinity(
+    omrthread_t thread, const uintptr_t* numaNodes, uintptr_t nodeCount, uint32_t flags)
 {
-	/* This is the common function, just return 0 */
-	return 0;
+    /* This is the common function, just return 0 */
+    return 0;
 }
 
 /**
@@ -125,16 +116,17 @@ omrthread_numa_set_node_affinity(omrthread_t thread, const uintptr_t *numaNodes,
  *
  * @param[in] thread - the thread to be queried. Can be any arbitrary omrthread_t
  * @param[out] numaNodes The array of node indexes with which the given thread is associated, where 1 is the first node.
- * @param[in/out] nodeCount The number of nodes in the numaNodes array, on input, and the number of nodes with which this thread is associated, on output.  The minimum of these two values will be the number of entries populated in the numaNodes array (other entries will be untouched).
+ * @param[in/out] nodeCount The number of nodes in the numaNodes array, on input, and the number of nodes with which
+ * this thread is associated, on output.  The minimum of these two values will be the number of entries populated in the
+ * numaNodes array (other entries will be untouched).
  *
  * @return 0 on success, non-zero if affinity cannot be determined. Note that this function will return 0 even if
  * NUMA is not available. Use omrthread_numa_get_max_node() to test for the availability of NUMA.
  */
-intptr_t
-omrthread_numa_get_node_affinity(omrthread_t thread, uintptr_t *numaNodes, uintptr_t *nodeCount)
+intptr_t omrthread_numa_get_node_affinity(omrthread_t thread, uintptr_t* numaNodes, uintptr_t* nodeCount)
 {
-	/* This is the common function, just return 0 */
-	/* since we know about 0 nodes, don't touch anything in the numaNodes array */
-	*nodeCount = 0;
-	return 0;
+    /* This is the common function, just return 0 */
+    /* since we know about 0 nodes, don't touch anything in the numaNodes array */
+    *nodeCount = 0;
+    return 0;
 }

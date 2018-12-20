@@ -33,42 +33,42 @@
  */
 class MM_ClassUnloadStats : public MM_Base {
 public:
-	uintptr_t _classLoaderUnloadedCount; /**< number of unloaded class loaders */
-	uintptr_t _classLoaderCandidates; /**< number of class loaders visited */
-	uintptr_t _classesUnloadedCount; /**< number of unloaded classes */
-	uintptr_t _anonymousClassesUnloadedCount; /**< number of anonymous classes unloaded */
+    uintptr_t _classLoaderUnloadedCount; /**< number of unloaded class loaders */
+    uintptr_t _classLoaderCandidates; /**< number of class loaders visited */
+    uintptr_t _classesUnloadedCount; /**< number of unloaded classes */
+    uintptr_t _anonymousClassesUnloadedCount; /**< number of anonymous classes unloaded */
 
-	uint64_t _startTime; /**< Class unloading start time */
-	uint64_t _endTime; /**< Class unloading end time */
+    uint64_t _startTime; /**< Class unloading start time */
+    uint64_t _endTime; /**< Class unloading end time */
 
-	uint64_t _startSetupTime; /**< Class unloading setup start time */
-	uint64_t _endSetupTime; /**< Class unloading setup end time */
+    uint64_t _startSetupTime; /**< Class unloading setup start time */
+    uint64_t _endSetupTime; /**< Class unloading setup end time */
 
-	uint64_t _startScanTime; /**< Class unloading scan start time */
-	uint64_t _endScanTime; /**< Class unloading scan end time */
+    uint64_t _startScanTime; /**< Class unloading scan start time */
+    uint64_t _endScanTime; /**< Class unloading scan end time */
 
-	uint64_t _startPostTime; /**< Class unloading post-unloading start time */
-	uint64_t _endPostTime; /**< Class unloading post-unloading end time */
+    uint64_t _startPostTime; /**< Class unloading post-unloading start time */
+    uint64_t _endPostTime; /**< Class unloading post-unloading end time */
 
-	uint64_t _classUnloadMutexQuiesceTime; /**< Time the GC spends waiting on the classUnloadMutex */
+    uint64_t _classUnloadMutexQuiesceTime; /**< Time the GC spends waiting on the classUnloadMutex */
 
-	void clear();
+    void clear();
 
-	MM_ClassUnloadStats()
-		: MM_Base()
-		, _classLoaderUnloadedCount(0)
-		, _classLoaderCandidates(0)
-		, _classesUnloadedCount(0)
-		, _anonymousClassesUnloadedCount(0)
-		, _startTime(0)
-		, _endTime(0)
-		, _startSetupTime(0)
-		, _endSetupTime(0)
-		, _startScanTime(0)
-		, _endScanTime(0)
-		, _startPostTime(0)
-		, _endPostTime(0)
-		, _classUnloadMutexQuiesceTime(0) {};
+    MM_ClassUnloadStats()
+        : MM_Base()
+        , _classLoaderUnloadedCount(0)
+        , _classLoaderCandidates(0)
+        , _classesUnloadedCount(0)
+        , _anonymousClassesUnloadedCount(0)
+        , _startTime(0)
+        , _endTime(0)
+        , _startSetupTime(0)
+        , _endSetupTime(0)
+        , _startScanTime(0)
+        , _endScanTime(0)
+        , _startPostTime(0)
+        , _endPostTime(0)
+        , _classUnloadMutexQuiesceTime(0) {};
 };
 
 #endif /* CLASSUNLOADSTATS_HPP_ */

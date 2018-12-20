@@ -22,11 +22,8 @@
 #include "ddr/ir/EnumMember.hpp"
 
 EnumMember::EnumMember()
-	: Members()
-	, _value(0)
-{
-}
+    : Members()
+    , _value(0)
+{}
 
-EnumMember::~EnumMember()
-{
-}
+EnumMember::~EnumMember() {}

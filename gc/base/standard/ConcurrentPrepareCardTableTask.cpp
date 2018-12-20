@@ -30,12 +30,11 @@
 
 #include "ConcurrentPrepareCardTableTask.hpp"
 
-void
-MM_ConcurrentPrepareCardTableTask::run(MM_EnvironmentBase *envBase)
+void MM_ConcurrentPrepareCardTableTask::run(MM_EnvironmentBase* envBase)
 {
-	MM_EnvironmentStandard *env = MM_EnvironmentStandard::getEnvironment(envBase);
-	_cardTable->prepareCardTableChunk(env, _firstCard, _lastCard, _action);
+    MM_EnvironmentStandard* env = MM_EnvironmentStandard::getEnvironment(envBase);
+    _cardTable->prepareCardTableChunk(env, _firstCard, _lastCard, _action);
 }
 
-#endif /* OMR_GC_MODRON_CONCURRENT_MARK */ 
+#endif /* OMR_GC_MODRON_CONCURRENT_MARK */
 #endif /* AIXPPC || LINUXPPC */

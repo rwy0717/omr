@@ -32,7 +32,7 @@
 #include "threaddef.h"
 #include "thread_internal.h"
 
-static void J9THREAD_PROC tls_null_finalizer(void *entry);
+static void J9THREAD_PROC tls_null_finalizer(void* entry);
 
 /**
  * Allocate a thread local storage (TLS) key.
@@ -47,12 +47,10 @@ static void J9THREAD_PROC tls_null_finalizer(void *entry);
  *
  * @see omrthread_tls_free, omrthread_tls_set
  */
-intptr_t
-omrthread_tls_alloc(omrthread_tls_key_t *handle)
+intptr_t omrthread_tls_alloc(omrthread_tls_key_t* handle)
 {
-	return omrthread_tls_alloc_with_finalizer(handle, tls_null_finalizer);
+    return omrthread_tls_alloc_with_finalizer(handle, tls_null_finalizer);
 }
-
 
 /**
  * Allocate a thread local storage (TLS) key.
@@ -63,36 +61,34 @@ omrthread_tls_alloc(omrthread_tls_key_t *handle)
  * allocated yet.
  *
  * @param[out] handle pointer to a key to be initialized with a key value
- * @param[in] finalizer a finalizer function which will be invoked when a thread is detached or terminates if the thread's TLS entry for this key is non-NULL
+ * @param[in] finalizer a finalizer function which will be invoked when a thread is detached or terminates if the
+ * thread's TLS entry for this key is non-NULL
  * @return 0 on success or negative value if a key could not be allocated (i.e. all TLS has been allocated)
  *
  * @see omrthread_tls_free, omrthread_tls_set
  */
-intptr_t
-omrthread_tls_alloc_with_finalizer(omrthread_tls_key_t *handle, omrthread_tls_finalizer_t finalizer)
+intptr_t omrthread_tls_alloc_with_finalizer(omrthread_tls_key_t* handle, omrthread_tls_finalizer_t finalizer)
 {
-	intptr_t index;
-	omrthread_library_t lib = GLOBAL_DATA(default_library);
-	ASSERT(lib);
+    intptr_t index;
+    omrthread_library_t lib = GLOBAL_DATA(default_library);
+    ASSERT(lib);
 
-	*handle = 0;
+    *handle = 0;
 
-	OMROSMUTEX_ENTER(lib->tls_mutex);
+    OMROSMUTEX_ENTER(lib->tls_mutex);
 
-	for (index = 0; index < J9THREAD_MAX_TLS_KEYS; index++) {
-		if (lib->tls_finalizers[index] == NULL) {
-			*handle = index + 1;
-			lib->tls_finalizers[index] = finalizer;
-			break;
-		}
-	}
+    for (index = 0; index < J9THREAD_MAX_TLS_KEYS; index++) {
+        if (lib->tls_finalizers[index] == NULL) {
+            *handle = index + 1;
+            lib->tls_finalizers[index] = finalizer;
+            break;
+        }
+    }
 
-	OMROSMUTEX_EXIT(lib->tls_mutex);
+    OMROSMUTEX_EXIT(lib->tls_mutex);
 
-	return index < J9THREAD_MAX_TLS_KEYS ? 0 : -1;
+    return index < J9THREAD_MAX_TLS_KEYS ? 0 : -1;
 }
-
-
 
 /**
  * Release a TLS key.
@@ -105,31 +101,29 @@ omrthread_tls_alloc_with_finalizer(omrthread_tls_key_t *handle, omrthread_tls_fi
  * @see omrthread_tls_alloc, omrthread_tls_set
  *
  */
-intptr_t
-omrthread_tls_free(omrthread_tls_key_t key)
+intptr_t omrthread_tls_free(omrthread_tls_key_t key)
 {
-	J9PoolState state;
-	omrthread_t each;
-	omrthread_library_t lib = GLOBAL_DATA(default_library);
-	ASSERT(lib);
+    J9PoolState state;
+    omrthread_t each;
+    omrthread_library_t lib = GLOBAL_DATA(default_library);
+    ASSERT(lib);
 
-	/* clear the TLS in every existing thread */
-	GLOBAL_LOCK_SIMPLE(lib);
-	each = pool_startDo(lib->thread_pool, &state);
-	while (each) {
-		each->tls[key - 1] = NULL;
-		each = pool_nextDo(&state);
-	}
-	GLOBAL_UNLOCK_SIMPLE(lib);
+    /* clear the TLS in every existing thread */
+    GLOBAL_LOCK_SIMPLE(lib);
+    each = pool_startDo(lib->thread_pool, &state);
+    while (each) {
+        each->tls[key - 1] = NULL;
+        each = pool_nextDo(&state);
+    }
+    GLOBAL_UNLOCK_SIMPLE(lib);
 
-	/* now return the key to the free set */
-	OMROSMUTEX_ENTER(lib->tls_mutex);
-	lib->tls_finalizers[key - 1] = NULL;
-	OMROSMUTEX_EXIT(lib->tls_mutex);
+    /* now return the key to the free set */
+    OMROSMUTEX_ENTER(lib->tls_mutex);
+    lib->tls_finalizers[key - 1] = NULL;
+    OMROSMUTEX_EXIT(lib->tls_mutex);
 
-	return 0;
+    return 0;
 }
-
 
 /**
  * Set a thread's TLS value.
@@ -141,15 +135,12 @@ omrthread_tls_free(omrthread_tls_key_t key)
  *
  * @see omrthread_tls_alloc, omrthread_tls_free, omrthread_tls_get
  */
-intptr_t
-omrthread_tls_set(omrthread_t thread, omrthread_tls_key_t key, void *value)
+intptr_t omrthread_tls_set(omrthread_t thread, omrthread_tls_key_t key, void* value)
 {
-	thread->tls[key - 1] = value;
+    thread->tls[key - 1] = value;
 
-	return 0;
+    return 0;
 }
-
-
 
 /**
  * Run finalizers on any non-NULL TLS values for the current thread
@@ -157,50 +148,44 @@ omrthread_tls_set(omrthread_t thread, omrthread_tls_key_t key, void *value)
  * @param[in] thread current thread
  * @return none
  */
-void
-omrthread_tls_finalize(omrthread_t thread)
+void omrthread_tls_finalize(omrthread_t thread)
 {
-	intptr_t index;
-	omrthread_library_t lib = thread->library;
+    intptr_t index;
+    omrthread_library_t lib = thread->library;
 
-	for (index = 0; index < J9THREAD_MAX_TLS_KEYS; index++) {
-		if (thread->tls[index] != NULL) {
-			void *value;
-			omrthread_tls_finalizer_t finalizer;
+    for (index = 0; index < J9THREAD_MAX_TLS_KEYS; index++) {
+        if (thread->tls[index] != NULL) {
+            void* value;
+            omrthread_tls_finalizer_t finalizer;
 
-			/* read the value and finalizer together under mutex to be sure that they belong together */
-			OMROSMUTEX_ENTER(lib->tls_mutex);
-			value = thread->tls[index];
-			finalizer = lib->tls_finalizers[index];
-			OMROSMUTEX_EXIT(lib->tls_mutex);
+            /* read the value and finalizer together under mutex to be sure that they belong together */
+            OMROSMUTEX_ENTER(lib->tls_mutex);
+            value = thread->tls[index];
+            finalizer = lib->tls_finalizers[index];
+            OMROSMUTEX_EXIT(lib->tls_mutex);
 
-			if (value) {
-				finalizer(value);
-			}
-		}
-	}
+            if (value) {
+                finalizer(value);
+            }
+        }
+    }
 }
 
-void
-omrthread_tls_finalizeNoLock(omrthread_t thread)
+void omrthread_tls_finalizeNoLock(omrthread_t thread)
 {
-	intptr_t index = 0;
-	omrthread_library_t lib = thread->library;
+    intptr_t index = 0;
+    omrthread_library_t lib = thread->library;
 
-	for (index = 0; index < J9THREAD_MAX_TLS_KEYS; index++) {
-		if (NULL != thread->tls[index]) {
-			void *value = thread->tls[index];
-			omrthread_tls_finalizer_t finalizer = lib->tls_finalizers[index];
+    for (index = 0; index < J9THREAD_MAX_TLS_KEYS; index++) {
+        if (NULL != thread->tls[index]) {
+            void* value = thread->tls[index];
+            omrthread_tls_finalizer_t finalizer = lib->tls_finalizers[index];
 
-			if (NULL != value) {
-				finalizer(value);
-			}
-		}
-	}
+            if (NULL != value) {
+                finalizer(value);
+            }
+        }
+    }
 }
 
-static void J9THREAD_PROC
-tls_null_finalizer(void *entry)
-{
-	/* do nothing */
-}
+static void J9THREAD_PROC tls_null_finalizer(void* entry) { /* do nothing */ }

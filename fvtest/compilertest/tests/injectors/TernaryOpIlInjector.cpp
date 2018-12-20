@@ -24,19 +24,16 @@
 #include "compile/Method.hpp"
 #include "tests/injectors/TernaryOpIlInjector.hpp"
 
-namespace TestCompiler
+namespace TestCompiler {
+bool TernaryOpIlInjector::injectIL()
 {
-bool
-TernaryOpIlInjector::injectIL()
-   {
-   if (!isOpCodeSupported())
-      {
-      return false;
-      }
-   createBlocks(1);
-   // Block 2: blocks(0)
-   returnValue(createWithoutSymRef(_opCode, 3, parm(1), parm(2), parm(3)));
-   return true;
-   }
+    if (!isOpCodeSupported()) {
+        return false;
+    }
+    createBlocks(1);
+    // Block 2: blocks(0)
+    returnValue(createWithoutSymRef(_opCode, 3, parm(1), parm(2), parm(3)));
+    return true;
+}
 
 } /* namespace TestCompiler */

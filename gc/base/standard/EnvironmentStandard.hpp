@@ -43,76 +43,83 @@ class MM_CopyScanCacheStandard;
  * @todo Provide class documentation
  * @ingroup GC_Modron_Env
  */
-class MM_EnvironmentStandard : public MM_EnvironmentBase
-{
-/* Data Section */
+class MM_EnvironmentStandard : public MM_EnvironmentBase {
+    /* Data Section */
 public:
-	MM_CopyScanCacheStandard *_survivorCopyScanCache; /**< the current copy cache for flipping */
-	MM_CopyScanCacheStandard *_deferredScanCache; /**< a copy cache about to be pushed to scan queue, but before that may be merged with some other caches that collectively form contiguous memory */
-	MM_CopyScanCacheStandard *_deferredCopyCache; /**< a copy cache about to be pushed to scan queue, but before that may be merged with some other caches that collectively form contiguous memory */
-	MM_CopyScanCacheStandard *_tenureCopyScanCache; /**< the current copy cache for tenuring */
-	MM_CopyScanCacheStandard *_effectiveCopyScanCache; /**< the the copy cache the received the most recently copied object, or NULL if no object copied in copy() */
+    MM_CopyScanCacheStandard* _survivorCopyScanCache; /**< the current copy cache for flipping */
+    MM_CopyScanCacheStandard*
+        _deferredScanCache; /**< a copy cache about to be pushed to scan queue, but before that may be merged with some
+                               other caches that collectively form contiguous memory */
+    MM_CopyScanCacheStandard*
+        _deferredCopyCache; /**< a copy cache about to be pushed to scan queue, but before that may be merged with some
+                               other caches that collectively form contiguous memory */
+    MM_CopyScanCacheStandard* _tenureCopyScanCache; /**< the current copy cache for tenuring */
+    MM_CopyScanCacheStandard* _effectiveCopyScanCache; /**< the the copy cache the received the most recently copied
+                                                          object, or NULL if no object copied in copy() */
 #if defined(OMR_GC_MODRON_SCAVENGER)
-	J9VMGC_SublistFragment _scavengerRememberedSet;
+    J9VMGC_SublistFragment _scavengerRememberedSet;
 #endif
-	void *_tenureTLHRemainderBase;  /**< base and top pointers of the last unused tenure TLH copy cache, that might be reused  on next copy refresh */
-	void *_tenureTLHRemainderTop;
-	bool _loaAllocation;  /** true, if tenure TLH remainder is in LOA (TODO: try preventing remainder creation in LOA) */
-	void *_survivorTLHRemainderBase; /**< base and top pointers of the last unused survivor TLH copy cache, that might be reused  on next copy refresh */
-	void *_survivorTLHRemainderTop;
+    void* _tenureTLHRemainderBase; /**< base and top pointers of the last unused tenure TLH copy cache, that might be
+                                      reused  on next copy refresh */
+    void* _tenureTLHRemainderTop;
+    bool _loaAllocation; /** true, if tenure TLH remainder is in LOA (TODO: try preventing remainder creation in LOA) */
+    void* _survivorTLHRemainderBase; /**< base and top pointers of the last unused survivor TLH copy cache, that might
+                                        be reused  on next copy refresh */
+    void* _survivorTLHRemainderTop;
 
 protected:
-
 private:
-	
-/* Functionality Section */
+    /* Functionality Section */
 public:
-	static MM_EnvironmentStandard *newInstance(MM_GCExtensionsBase *extensions, OMR_VMThread *vmThread);
-	
-	virtual void flushNonAllocationCaches();
-	virtual void flushGCCaches();
-	
-	virtual void initializeGCThread() {
-		/* before a thread turning into a GC one, it shortly acted as a mutator (during thread attach sequence),
-		 * which means it may have allocated or exacuted an object access barrier. */
-		flushGCCaches();
-	}
+    static MM_EnvironmentStandard* newInstance(MM_GCExtensionsBase* extensions, OMR_VMThread* vmThread);
 
-	MMINLINE static MM_EnvironmentStandard *getEnvironment(OMR_VMThread *omrVMThread) { return static_cast<MM_EnvironmentStandard*>(omrVMThread->_gcOmrVMThreadExtensions); }
-	MMINLINE static MM_EnvironmentStandard *getEnvironment(MM_EnvironmentBase *env) { return static_cast<MM_EnvironmentStandard*>(env); }
+    virtual void flushNonAllocationCaches();
+    virtual void flushGCCaches();
 
-	MM_EnvironmentStandard(OMR_VMThread *omrVMThread) :
-		MM_EnvironmentBase(omrVMThread)
-		,_survivorCopyScanCache(NULL)
-		,_deferredScanCache(NULL)
-		,_deferredCopyCache(NULL)
-		,_tenureCopyScanCache(NULL)
-		,_effectiveCopyScanCache(NULL)
-		,_tenureTLHRemainderBase(NULL)
-		,_tenureTLHRemainderTop(NULL)
-		,_loaAllocation(false)
-		,_survivorTLHRemainderBase(NULL)
-		,_survivorTLHRemainderTop(NULL)
-	{
-		_typeId = __FUNCTION__;
-	}
+    virtual void initializeGCThread()
+    {
+        /* before a thread turning into a GC one, it shortly acted as a mutator (during thread attach sequence),
+         * which means it may have allocated or exacuted an object access barrier. */
+        flushGCCaches();
+    }
+
+    MMINLINE static MM_EnvironmentStandard* getEnvironment(OMR_VMThread* omrVMThread)
+    {
+        return static_cast<MM_EnvironmentStandard*>(omrVMThread->_gcOmrVMThreadExtensions);
+    }
+    MMINLINE static MM_EnvironmentStandard* getEnvironment(MM_EnvironmentBase* env)
+    {
+        return static_cast<MM_EnvironmentStandard*>(env);
+    }
+
+    MM_EnvironmentStandard(OMR_VMThread* omrVMThread)
+        : MM_EnvironmentBase(omrVMThread)
+        , _survivorCopyScanCache(NULL)
+        , _deferredScanCache(NULL)
+        , _deferredCopyCache(NULL)
+        , _tenureCopyScanCache(NULL)
+        , _effectiveCopyScanCache(NULL)
+        , _tenureTLHRemainderBase(NULL)
+        , _tenureTLHRemainderTop(NULL)
+        , _loaAllocation(false)
+        , _survivorTLHRemainderBase(NULL)
+        , _survivorTLHRemainderTop(NULL)
+    {
+        _typeId = __FUNCTION__;
+    }
 
 #if defined(OMR_GC_MODRON_SCAVENGER)
-	/**
-	 * Flush (to global stores) the local remembered object caches in thread-local GC_Environment
-	 */
-	void flushRememberedSet()
-	{
-		MM_SublistFragment::flush(&_scavengerRememberedSet);
-	}
+    /**
+     * Flush (to global stores) the local remembered object caches in thread-local GC_Environment
+     */
+    void flushRememberedSet() { MM_SublistFragment::flush(&_scavengerRememberedSet); }
 #endif
 
 protected:
-	virtual bool initialize(MM_GCExtensionsBase *extensions);
-	virtual void tearDown(MM_GCExtensionsBase *extensions);
-	
+    virtual bool initialize(MM_GCExtensionsBase* extensions);
+    virtual void tearDown(MM_GCExtensionsBase* extensions);
+
 private:
-	
 };
 
 #endif /* ENVIRONMENT_HPP_ */

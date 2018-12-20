@@ -19,7 +19,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
- 
+
 #ifndef CONDITIONALS_INCL
 #define CONDITIONALS_INCL
 
@@ -29,13 +29,12 @@
 
 #include "JitBuilder.hpp"
 
-typedef int32_t (ConditionalMethodFunction)(int32_t, int32_t, int32_t);
+typedef int32_t(ConditionalMethodFunction)(int32_t, int32_t, int32_t);
 
-class ConditionalMethod : public OMR::JitBuilder::MethodBuilder
-   {
-   public:
-   ConditionalMethod(OMR::JitBuilder::TypeDictionary *types);
-   virtual bool buildIL();
-   };
+class ConditionalMethod : public OMR::JitBuilder::MethodBuilder {
+public:
+    ConditionalMethod(OMR::JitBuilder::TypeDictionary* types);
+    virtual bool buildIL();
+};
 
 #endif // !defined(CONDITIONALS_INCL)

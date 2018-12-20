@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 /*
  * ===========================================================================
  * Module Information:
@@ -34,38 +33,37 @@
  * ===========================================================================
  */
 
-#if __TARGET_LIB__ == 0X22080000                                   /*ibm@28725*/
-#include <//'PP.ADLE370.OS39028.SCEEH.H(pwd)'>                     /*ibm@28725*/
-#else                                                              /*ibm@28725*/
+#if __TARGET_LIB__ == 0X22080000 /*ibm@28725*/
+#include < //'PP.ADLE370.OS39028.SCEEH.H(pwd)'>                     /*ibm@28725*/
+#else /*ibm@28725*/
 #include "prefixpath.h"
-#include PREFIXPATH(pwd.h)                                      /*ibm@28725*/
-#endif                                                             /*ibm@28725*/
+#include PREFIXPATH(pwd.h) /*ibm@28725*/
+#endif /*ibm@28725*/
 
 #if defined(IBM_ATOE)
 
-	#if !defined(IBM_ATOE_PWD)
-		#define IBM_ATOE_PWD
+#if !defined(IBM_ATOE_PWD)
+#define IBM_ATOE_PWD
 
-		#ifdef __cplusplus
-            extern "C" {
-		#endif
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-        struct passwd* atoe_getpwuid(uid_t);
-        struct passwd* atoe_getpwnam(const char *);
+struct passwd* atoe_getpwuid(uid_t);
+struct passwd* atoe_getpwnam(const char*);
 
-		#ifdef __cplusplus
-            }
-		#endif
+#ifdef __cplusplus
+}
+#endif
 
-		#undef getpwuid
-		#undef getpwnam
+#undef getpwuid
+#undef getpwnam
 
-		#define getpwuid        atoe_getpwuid
-		#define getpwnam        atoe_getpwnam
+#define getpwuid atoe_getpwuid
+#define getpwnam atoe_getpwnam
 
-	#endif
+#endif
 
 #endif
 
 /* END OF FILE */
-

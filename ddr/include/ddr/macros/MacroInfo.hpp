@@ -32,22 +32,22 @@ using std::string;
 
 class MacroInfo {
 private:
-	/* This could be a real type name, or a fake type name representing a
-	 * custom rule associated with a macro, or a name based off of a file.
-	 */
-	string _typeName;
+    /* This could be a real type name, or a fake type name representing a
+     * custom rule associated with a macro, or a name based off of a file.
+     */
+    string _typeName;
 
-	/* A list of all macros associated with typeName */
-	set<pair<string, string> > _macros;
+    /* A list of all macros associated with typeName */
+    set<pair<string, string> > _macros;
 
 public:
-	explicit MacroInfo(const string &typeName);
+    explicit MacroInfo(const string& typeName);
 
-	const string &getTypeName() const;
-	void addMacro(const string &name, const string &value);
-	size_t getNumMacros() const;
-	set<pair<string, string> >::const_iterator getMacroStart() const;
-	set<pair<string, string> >::const_iterator getMacroEnd() const;
+    const string& getTypeName() const;
+    void addMacro(const string& name, const string& value);
+    size_t getNumMacros() const;
+    set<pair<string, string> >::const_iterator getMacroStart() const;
+    set<pair<string, string> >::const_iterator getMacroEnd() const;
 };
 
 #endif /* MACROINFO_HPP */

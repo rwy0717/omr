@@ -24,19 +24,17 @@
 #include "compile/Method.hpp"
 #include "tests/injectors/UnaryOpIlInjector.hpp"
 
-namespace TestCompiler
+namespace TestCompiler {
+
+bool UnaryOpIlInjector::injectIL()
 {
+    if (!isOpCodeSupported())
+        return false;
 
-bool
-UnaryOpIlInjector::injectIL()
-   {
-   if (!isOpCodeSupported())
-      return false;
+    createBlocks(1);
+    returnValue(createWithoutSymRef(_opCode, 1, parm(1)));
 
-   createBlocks(1);
-   returnValue(createWithoutSymRef(_opCode, 1, parm(1)));
-
-   return true;
-   }
+    return true;
+}
 
 } // namespace TestCompiler

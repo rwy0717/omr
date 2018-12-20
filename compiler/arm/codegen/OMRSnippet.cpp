@@ -20,24 +20,12 @@
  *******************************************************************************/
 
 #include "codegen/Snippet.hpp"
-#include "codegen/CodeGenerator.hpp"  // for CodeGenerator
+#include "codegen/CodeGenerator.hpp" // for CodeGenerator
 
+OMR::ARM::Snippet::Snippet(TR::CodeGenerator* cg, TR::Node* node, TR::LabelSymbol* label, bool isGCSafePoint)
+    : OMR::Snippet(cg, node, label, isGCSafePoint)
+{}
 
-OMR::ARM::Snippet::Snippet(
-      TR::CodeGenerator *cg,
-      TR::Node *node,
-      TR::LabelSymbol *label,
-      bool isGCSafePoint) :
-   OMR::Snippet(cg, node, label, isGCSafePoint)
-   {
-   }
-
-
-
-OMR::ARM::Snippet::Snippet(
-      TR::CodeGenerator *cg,
-      TR::Node *node,
-      TR::LabelSymbol *label) :
-   OMR::Snippet(cg, node, label)
-   {
-   }
+OMR::ARM::Snippet::Snippet(TR::CodeGenerator* cg, TR::Node* node, TR::LabelSymbol* label)
+    : OMR::Snippet(cg, node, label)
+{}
