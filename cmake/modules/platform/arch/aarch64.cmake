@@ -20,12 +20,12 @@
 #############################################################################
 
 list(APPEND OMR_PLATFORM_DEFINITIONS
-	-DAARCH64
-	-DJ9AARCH64
-	-DAARCH64GNU
-	-DFIXUP_UNALIGNED
-	-march=armv8-a+simd
-	-Wno-unused-but-set-variable
+    -DAARCH64
+    -DJ9AARCH64
+    -DAARCH64GNU
+    -DFIXUP_UNALIGNED
+    -march=armv8-a+simd
+    -Wno-unused-but-set-variable
 )
 
 set(TR_HOST_ARCH aarch64)

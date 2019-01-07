@@ -26,7 +26,7 @@
  */
 
 omr_error_t
-OMRAgent_OnUnload(OMR_TI const *ti, OMR_VM *vm)
+OMRAgent_OnUnload(OMR_TI const* ti, OMR_VM* vm)
 {
-	return OMR_ERROR_NONE;
+    return OMR_ERROR_NONE;
 }

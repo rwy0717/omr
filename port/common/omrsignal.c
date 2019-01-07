@@ -27,8 +27,6 @@
  */
 #include "omrport.h"
 
-
-
 /**
  * Provides the name and value, specified by category/index of the gp information in info.
  * Returns the kind of information found at category/index specified, or undefined
@@ -65,10 +63,10 @@
  * @note If the exception is resumed using J9SIG_EXCEPTION_CONTINUE_EXECUTION, the modified values will be used
  */
 uint32_t
-omrsig_info(struct OMRPortLibrary *portLibrary, void *info, uint32_t category, int32_t index, const char **name, void **value)
+omrsig_info(struct OMRPortLibrary* portLibrary, void* info, uint32_t category, int32_t index, const char** name, void** value)
 {
-	*name = "";
-	return OMRPORT_SIG_VALUE_UNDEFINED;
+    *name = "";
+    return OMRPORT_SIG_VALUE_UNDEFINED;
 }
 /**
  * Returns the number of items that exist in the category specified, or zero if the category is undefined.
@@ -80,9 +78,9 @@ omrsig_info(struct OMRPortLibrary *portLibrary, void *info, uint32_t category, i
  * @note Return value must agree with the number of items that @ref omrsig_info makes available for the category specified.
 */
 uint32_t
-omrsig_info_count(struct OMRPortLibrary *portLibrary, void *info, uint32_t category)
+omrsig_info_count(struct OMRPortLibrary* portLibrary, void* info, uint32_t category)
 {
-	return 0;
+    return 0;
 }
 
 /**
@@ -125,10 +123,10 @@ omrsig_info_count(struct OMRPortLibrary *portLibrary, void *info, uint32_t categ
  * \arg OMRPORT_SIG_ERROR, if an error occurred before fn could be executed
  */
 int32_t
-omrsig_protect(struct OMRPortLibrary *portLibrary,  omrsig_protected_fn fn, void *fn_arg, omrsig_handler_fn handler, void *handler_arg, uint32_t flags, uintptr_t *result)
+omrsig_protect(struct OMRPortLibrary* portLibrary, omrsig_protected_fn fn, void* fn_arg, omrsig_handler_fn handler, void* handler_arg, uint32_t flags, uintptr_t* result)
 {
-	*result = fn(portLibrary, fn_arg);
-	return 0;
+    *result = fn(portLibrary, fn_arg);
+    return 0;
 }
 
 /**
@@ -166,11 +164,10 @@ omrsig_protect(struct OMRPortLibrary *portLibrary,  omrsig_protected_fn fn, void
  * @return 0 on success or non-zero on failure
  */
 int32_t
-omrsig_set_async_signal_handler(struct OMRPortLibrary *portLibrary, omrsig_handler_fn handler, void *handler_arg, uint32_t flags)
+omrsig_set_async_signal_handler(struct OMRPortLibrary* portLibrary, omrsig_handler_fn handler, void* handler_arg, uint32_t flags)
 {
-	return OMRPORT_SIG_ERROR;
+    return OMRPORT_SIG_ERROR;
 }
-
 
 /**
  * @brief Similar to omrsig_set_async_signal_handler. Refer to omrsig_set_async_signal_handler's description above.
@@ -195,9 +192,9 @@ omrsig_set_async_signal_handler(struct OMRPortLibrary *portLibrary, omrsig_handl
  * @return 0 on success or non-zero on failure
  */
 int32_t
-omrsig_set_single_async_signal_handler(struct OMRPortLibrary *portLibrary, omrsig_handler_fn handler, void *handler_arg, uint32_t portlibSignalFlag, void **oldOSHandler)
+omrsig_set_single_async_signal_handler(struct OMRPortLibrary* portLibrary, omrsig_handler_fn handler, void* handler_arg, uint32_t portlibSignalFlag, void** oldOSHandler)
 {
-	return OMRPORT_SIG_ERROR;
+    return OMRPORT_SIG_ERROR;
 }
 
 /**
@@ -209,9 +206,9 @@ omrsig_set_single_async_signal_handler(struct OMRPortLibrary *portLibrary, omrsi
  * @return port library signal flag on success and 0 on failure
  */
 uint32_t
-omrsig_map_os_signal_to_portlib_signal(struct OMRPortLibrary *portLibrary, uint32_t osSignalValue)
+omrsig_map_os_signal_to_portlib_signal(struct OMRPortLibrary* portLibrary, uint32_t osSignalValue)
 {
-	return 0;
+    return 0;
 }
 
 /**
@@ -223,9 +220,9 @@ omrsig_map_os_signal_to_portlib_signal(struct OMRPortLibrary *portLibrary, uint3
  * @return OS signal value on success and OMRPORT_SIG_ERROR (-1) on failure
  */
 int32_t
-omrsig_map_portlib_signal_to_os_signal(struct OMRPortLibrary *portLibrary, uint32_t portlibSignalFlag)
+omrsig_map_portlib_signal_to_os_signal(struct OMRPortLibrary* portLibrary, uint32_t portlibSignalFlag)
 {
-	return OMRPORT_SIG_ERROR;
+    return OMRPORT_SIG_ERROR;
 }
 
 /**
@@ -272,9 +269,9 @@ omrsig_map_portlib_signal_to_os_signal(struct OMRPortLibrary *portLibrary, uint3
  * @return 0 on success or non-zero on failure
  */
 int32_t
-omrsig_register_os_handler(struct OMRPortLibrary *portLibrary, uint32_t portlibSignalFlag, void *newOSHandler, void **oldOSHandler)
+omrsig_register_os_handler(struct OMRPortLibrary* portLibrary, uint32_t portlibSignalFlag, void* newOSHandler, void** oldOSHandler)
 {
-	return OMRPORT_SIG_ERROR;
+    return OMRPORT_SIG_ERROR;
 }
 
 /**
@@ -287,9 +284,9 @@ omrsig_register_os_handler(struct OMRPortLibrary *portLibrary, uint32_t portlibS
  * @return TRUE if osHandler is a predefined master handler. Otherwise, return FALSE.
  */
 BOOLEAN
-omrsig_is_master_signal_handler(struct OMRPortLibrary *portLibrary, void *osHandler)
+omrsig_is_master_signal_handler(struct OMRPortLibrary* portLibrary, void* osHandler)
 {
-	return FALSE;
+    return FALSE;
 }
 
 /**
@@ -303,17 +300,16 @@ omrsig_is_master_signal_handler(struct OMRPortLibrary *portLibrary, void *osHand
  * @return 0 on success and OMRPORT_SIG_ERROR (-1) on failure
  */
 int32_t
-omrsig_is_signal_ignored(struct OMRPortLibrary *portLibrary, uint32_t portlibSignalFlag, BOOLEAN *isSignalIgnored)
+omrsig_is_signal_ignored(struct OMRPortLibrary* portLibrary, uint32_t portlibSignalFlag, BOOLEAN* isSignalIgnored)
 {
-	int32_t rc = 0;
-	Trc_PRT_signal_omrsig_is_signal_ignored_entered(portlibSignalFlag);
+    int32_t rc = 0;
+    Trc_PRT_signal_omrsig_is_signal_ignored_entered(portlibSignalFlag);
 
-	*isSignalIgnored = FALSE;
+    *isSignalIgnored = FALSE;
 
-	Trc_PRT_signal_omrsig_is_signal_ignored_exiting(rc, *isSignalIgnored);
-	return rc;
+    Trc_PRT_signal_omrsig_is_signal_ignored_exiting(rc, *isSignalIgnored);
+    return rc;
 }
-
 
 /**
  * Determine if the port library is capable of protecting a function from the indicated signals in the indicated way.
@@ -343,14 +339,14 @@ omrsig_is_signal_ignored(struct OMRPortLibrary *portLibrary, uint32_t portlibSig
  * @return non-zero if the portlibrary can support the specified flags.
  */
 int32_t
-omrsig_can_protect(struct OMRPortLibrary *portLibrary,  uint32_t flags)
+omrsig_can_protect(struct OMRPortLibrary* portLibrary, uint32_t flags)
 {
-	/* in the stub implementation, no signals are supported */
-	if (flags & OMRPORT_SIG_FLAG_SIGALLSYNC) {
-		return 0;
-	} else {
-		return 1;
-	}
+    /* in the stub implementation, no signals are supported */
+    if (flags & OMRPORT_SIG_FLAG_SIGALLSYNC) {
+        return 0;
+    } else {
+        return 1;
+    }
 }
 
 /**
@@ -359,25 +355,24 @@ omrsig_can_protect(struct OMRPortLibrary *portLibrary,  uint32_t flags)
  * the default behaviour is to do nothing
 */
 int32_t
-omrsig_set_reporter_priority(struct OMRPortLibrary *portLibrary, uintptr_t priority)
+omrsig_set_reporter_priority(struct OMRPortLibrary* portLibrary, uintptr_t priority)
 {
-	return 0;
+    return 0;
 }
 
 /**
  * Shutdown the signal handling component of the port library
  */
-void
-omrsig_shutdown(struct OMRPortLibrary *portLibrary)
+void omrsig_shutdown(struct OMRPortLibrary* portLibrary)
 {
 }
 /**
  * Start up the signal handling component of the port library
  */
 int32_t
-omrsig_startup(struct OMRPortLibrary *portLibrary)
+omrsig_startup(struct OMRPortLibrary* portLibrary)
 {
-	return 0;
+    return 0;
 }
 
 /**
@@ -394,10 +389,10 @@ omrsig_startup(struct OMRPortLibrary *portLibrary)
  * 	after the vm has installed a handler will result in failure
  */
 int32_t
-omrsig_set_options(struct OMRPortLibrary *portLibrary, uint32_t options)
+omrsig_set_options(struct OMRPortLibrary* portLibrary, uint32_t options)
 {
-	/* options are not set in the default implementation */
-	return 1;
+    /* options are not set in the default implementation */
+    return 1;
 }
 /**
  * Get the port library's signal options.
@@ -406,9 +401,9 @@ omrsig_set_options(struct OMRPortLibrary *portLibrary, uint32_t options)
  * @return the value of the port library options
  */
 uint32_t
-omrsig_get_options(struct OMRPortLibrary *portLibrary)
+omrsig_get_options(struct OMRPortLibrary* portLibrary)
 {
-	return 0;
+    return 0;
 }
 
 /**
@@ -422,8 +417,7 @@ omrsig_get_options(struct OMRPortLibrary *portLibrary)
  *         possible values, excluding OMRPORT_SIG_FLAG_SIGALLSYNC and OMRPORT_SIG_FLAG_SIGALLASYNC.
  */
 intptr_t
-omrsig_get_current_signal(struct OMRPortLibrary *portLibrary)
+omrsig_get_current_signal(struct OMRPortLibrary* portLibrary)
 {
-	return 0;
+    return 0;
 }
-

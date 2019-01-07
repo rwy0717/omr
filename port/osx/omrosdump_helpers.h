@@ -29,4 +29,4 @@
 #include "omrport.h"
 #include "omrportpriv.h"
 
-uintptr_t renameDump(struct OMRPortLibrary *portLibrary, char *filename, pid_t pid, int signalNumber);
+uintptr_t renameDump(struct OMRPortLibrary* portLibrary, char* filename, pid_t pid, int signalNumber);

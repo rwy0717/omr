@@ -20,7 +20,7 @@
 #############################################################################
 
 if(OMR_PLATFORM_)
-	return()
+    return()
 endif()
 set(OMR_PLATFORM_ 1)
 
@@ -35,7 +35,7 @@ include(OmrUtility)
 omr_detect_system_information()
 
 if(NOT OMR_HOST_OS STREQUAL "zos")
-	enable_language(ASM)
+    enable_language(ASM)
 endif()
 
 # Pickup OS info
@@ -52,66 +52,66 @@ include(platform/toolcfg/verify)
 
 macro(omr_platform_global_setup)
 
-	omr_assert(WARNING TEST NOT OMR_PLATFORM_GLOBALLY_INITIALIZED
-		MESSAGE "omr_platform_global_setup called twice."
-	)
+    omr_assert(WARNING TEST NOT OMR_PLATFORM_GLOBALLY_INITIALIZED
+        MESSAGE "omr_platform_global_setup called twice."
+    )
 
-	set(OMR_PLATFORM_GLOBALLY_INITIALIZED 1)
+    set(OMR_PLATFORM_GLOBALLY_INITIALIZED 1)
 
 
-	omr_append_flags(CMAKE_C_FLAGS ${OMR_PLATFORM_COMPILE_OPTIONS})
-	omr_append_flags(CMAKE_CXX_FLAGS ${OMR_PLATFORM_COMPILE_OPTIONS})
-	omr_append_flags(CMAKE_ASM_FLAGS ${OMR_PLATFORM_COMPILE_OPTIONS})
+    omr_append_flags(CMAKE_C_FLAGS ${OMR_PLATFORM_COMPILE_OPTIONS})
+    omr_append_flags(CMAKE_CXX_FLAGS ${OMR_PLATFORM_COMPILE_OPTIONS})
+    omr_append_flags(CMAKE_ASM_FLAGS ${OMR_PLATFORM_COMPILE_OPTIONS})
 
-	omr_append_flags(CMAKE_C_FLAGS
-		${OMR_PLATFORM_C_COMPILE_OPTIONS}
-	)
+    omr_append_flags(CMAKE_C_FLAGS
+        ${OMR_PLATFORM_C_COMPILE_OPTIONS}
+    )
 
-	omr_append_flags(CMAKE_CXX_FLAGS
-		${OMR_PLATFORM_CXX_COMPILE_OPTIONS}
-	)
+    omr_append_flags(CMAKE_CXX_FLAGS
+        ${OMR_PLATFORM_CXX_COMPILE_OPTIONS}
+    )
 
-	omr_append_flags(CMAKE_EXE_LINKER_FLAGS
-		${OMR_PLATFORM_LINKER_OPTIONS}
-		${OMR_PLATFORM_EXE_LINKER_OPTIONS}
-	)
+    omr_append_flags(CMAKE_EXE_LINKER_FLAGS
+        ${OMR_PLATFORM_LINKER_OPTIONS}
+        ${OMR_PLATFORM_EXE_LINKER_OPTIONS}
+    )
 
-	omr_append_flags(CMAKE_SHARED_LINKER_FLAGS
-		${OMR_PLATFORM_LINKER_OPTIONS}
-		${OMR_PLATFORM_SHARED_LINKER_OPTIONS}
-	)
+    omr_append_flags(CMAKE_SHARED_LINKER_FLAGS
+        ${OMR_PLATFORM_LINKER_OPTIONS}
+        ${OMR_PLATFORM_SHARED_LINKER_OPTIONS}
+    )
 
-	omr_append_flags(CMAKE_STATIC_LINKER_FLAGS
-		${OMR_PLATFORM_LINKER_OPTIONS}
-		${OMR_PLATFORM_STATIC_LINKER_OPTIONS}
-	)
+    omr_append_flags(CMAKE_STATIC_LINKER_FLAGS
+        ${OMR_PLATFORM_LINKER_OPTIONS}
+        ${OMR_PLATFORM_STATIC_LINKER_OPTIONS}
+    )
 
-	include_directories(
-		${OMR_PLATFORM_INCLUDE_DIRECTORIES}
-	)
+    include_directories(
+        ${OMR_PLATFORM_INCLUDE_DIRECTORIES}
+    )
 
-	add_definitions(
-		${OMR_PLATFORM_DEFINITIONS}
-	)
+    add_definitions(
+        ${OMR_PLATFORM_DEFINITIONS}
+    )
 
-	link_libraries(
-		${OMR_PLATFORM_LIBRARIES}
-	)
+    link_libraries(
+        ${OMR_PLATFORM_LIBRARIES}
+    )
 
-	# If the OS requires global setup, do it here.
-	if(COMMAND omr_arch_global_setup)
-		omr_arch_global_setup()
-	endif()
+    # If the OS requires global setup, do it here.
+    if(COMMAND omr_arch_global_setup)
+        omr_arch_global_setup()
+    endif()
 
-	# If the OS requires global setup, do it here.
-	if(COMMAND omr_os_global_setup)
-		omr_os_global_setup()
-	endif()
+    # If the OS requires global setup, do it here.
+    if(COMMAND omr_os_global_setup)
+        omr_os_global_setup()
+    endif()
 
-	# And now the toolconfig setup
-	if(COMMAND omr_toolconfig_global_setup)
-		omr_toolconfig_global_setup()
-	endif()
+    # And now the toolconfig setup
+    if(COMMAND omr_toolconfig_global_setup)
+        omr_toolconfig_global_setup()
+    endif()
 endmacro()
 
 ###

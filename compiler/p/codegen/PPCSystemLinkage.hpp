@@ -24,71 +24,84 @@
 
 #include "codegen/Linkage.hpp"
 
-#include <stdint.h>                         // for uint32_t, uintptr_t, etc
-#include "codegen/Register.hpp"             // for Register
+#include <stdint.h> // for uint32_t, uintptr_t, etc
+#include "codegen/Register.hpp" // for Register
 
-namespace TR { class AutomaticSymbol; }
-namespace TR { class CodeGenerator; }
-namespace TR { class Instruction; }
-namespace TR { class Node; }
-namespace TR { class ParameterSymbol; }
-namespace TR { class RegisterDependencyConditions; }
-namespace TR { class ResolvedMethodSymbol; }
-namespace TR { class SymbolReference; }
+namespace TR {
+class AutomaticSymbol;
+}
+namespace TR {
+class CodeGenerator;
+}
+namespace TR {
+class Instruction;
+}
+namespace TR {
+class Node;
+}
+namespace TR {
+class ParameterSymbol;
+}
+namespace TR {
+class RegisterDependencyConditions;
+}
+namespace TR {
+class ResolvedMethodSymbol;
+}
+namespace TR {
+class SymbolReference;
+}
 template <class T> class List;
 
 namespace TR {
 
-class PPCSystemLinkage : public TR::Linkage
-   {
-   protected:
+class PPCSystemLinkage : public TR::Linkage {
+protected:
+    TR::PPCLinkageProperties _properties;
 
-   TR::PPCLinkageProperties _properties;
+public:
+    PPCSystemLinkage(TR::CodeGenerator* cg);
 
-   public:
+    virtual const TR::PPCLinkageProperties& getProperties();
+    virtual uintptr_t calculateActualParameterOffset(uintptr_t, TR::ParameterSymbol&);
+    virtual uintptr_t calculateParameterRegisterOffset(uintptr_t, TR::ParameterSymbol&);
 
-   PPCSystemLinkage(TR::CodeGenerator *cg);
+    virtual uint32_t getRightToLeft();
+    virtual bool hasToBeOnStack(TR::ParameterSymbol* parm);
+    virtual void mapStack(TR::ResolvedMethodSymbol* method);
+    virtual void mapSingleAutomatic(TR::AutomaticSymbol* p, uint32_t& stackIndex);
+    virtual void initPPCRealRegisterLinkage();
 
-   virtual const TR::PPCLinkageProperties& getProperties();
-   virtual uintptr_t calculateActualParameterOffset(uintptr_t, TR::ParameterSymbol&);
-   virtual uintptr_t calculateParameterRegisterOffset(uintptr_t, TR::ParameterSymbol&);
+    virtual void createPrologue(TR::Instruction* cursor);
+    virtual void createPrologue(TR::Instruction* cursor, List<TR::ParameterSymbol>& parm);
 
-   virtual uint32_t getRightToLeft();
-   virtual bool hasToBeOnStack(TR::ParameterSymbol *parm);
-   virtual void mapStack(TR::ResolvedMethodSymbol *method);
-   virtual void mapSingleAutomatic(TR::AutomaticSymbol *p, uint32_t &stackIndex);
-   virtual void initPPCRealRegisterLinkage();
+    virtual void createEpilogue(TR::Instruction* cursor);
 
-   virtual void createPrologue(TR::Instruction *cursor);
-   virtual void createPrologue(TR::Instruction *cursor, List<TR::ParameterSymbol> &parm);
+    virtual int32_t buildArgs(
+        TR::Node* callNode,
+        TR::RegisterDependencyConditions* dependencies);
 
-   virtual void createEpilogue(TR::Instruction *cursor);
+    virtual void buildVirtualDispatch(
+        TR::Node* callNode,
+        TR::RegisterDependencyConditions* dependencies,
+        uint32_t sizeOfArguments);
 
-   virtual int32_t buildArgs(
-         TR::Node *callNode,
-         TR::RegisterDependencyConditions *dependencies);
+    void buildDirectCall(
+        TR::Node* callNode,
+        TR::SymbolReference* callSymRef,
+        TR::RegisterDependencyConditions* dependencies,
+        const TR::PPCLinkageProperties& pp,
+        int32_t argSize);
 
-   virtual void buildVirtualDispatch(
-         TR::Node *callNode,
-         TR::RegisterDependencyConditions *dependencies,
-         uint32_t sizeOfArguments);
+    virtual TR::Register* buildDirectDispatch(TR::Node* callNode);
 
-   void buildDirectCall(
-         TR::Node *callNode,
-         TR::SymbolReference *callSymRef,
-         TR::RegisterDependencyConditions *dependencies,
-         const TR::PPCLinkageProperties &pp,
-         int32_t argSize);
+    virtual TR::Register* buildIndirectDispatch(TR::Node* callNode);
 
-   virtual TR::Register *buildDirectDispatch(TR::Node *callNode);
+    virtual void setParameterLinkageRegisterIndex(TR::ResolvedMethodSymbol* method);
+    virtual void setParameterLinkageRegisterIndex(TR::ResolvedMethodSymbol* method, List<TR::ParameterSymbol>& parmList);
+    virtual void mapParameters(TR::ResolvedMethodSymbol* method, List<TR::ParameterSymbol>& parmList);
+};
 
-   virtual TR::Register *buildIndirectDispatch(TR::Node *callNode);
-
-   virtual void setParameterLinkageRegisterIndex(TR::ResolvedMethodSymbol *method);
-   virtual void setParameterLinkageRegisterIndex(TR::ResolvedMethodSymbol *method, List<TR::ParameterSymbol> &parmList);
-   virtual void mapParameters(TR::ResolvedMethodSymbol *method, List<TR::ParameterSymbol> &parmList);
-   };
-
-}
+} // namespace TR
 
 #endif

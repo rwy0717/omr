@@ -28,13 +28,12 @@
  * Functions setting CPU attributes.
  */
 
-
 #include <stdlib.h>
-#if defined(RS6000) || defined (LINUXPPC) || defined (PPC)
+#if defined(RS6000) || defined(LINUXPPC) || defined(PPC)
 #include <string.h>
 #endif
 #include "omrport.h"
-#if defined(RS6000) || defined (LINUXPPC) || defined (PPC)
+#if defined(RS6000) || defined(LINUXPPC) || defined(PPC)
 #include "omrportpriv.h"
 #include "omrportpg.h"
 #endif
@@ -45,18 +44,18 @@
 #endif
 
 #if (__IBMC__ || __IBMCPP__)
-void dcbf(unsigned char *);
-void dcbst(unsigned char *);
-void icbi(unsigned char *);
+void dcbf(unsigned char*);
+void dcbst(unsigned char*);
+void icbi(unsigned char*);
 void sync(void);
 void isync(void);
-void dcbz(void *);
-#pragma mc_func dcbf  {"7c0018ac"}
-#pragma mc_func dcbst {"7c00186c"}
-#pragma mc_func icbi  {"7c001fac"}
-#pragma mc_func sync  {"7c0004ac"}
-#pragma mc_func isync {"4c00012c"}
-#pragma mc_func dcbz {"7c001fec"}
+void dcbz(void*);
+#pragma mc_func dcbf{ "7c0018ac" }
+#pragma mc_func dcbst{ "7c00186c" }
+#pragma mc_func icbi{ "7c001fac" }
+#pragma mc_func sync{ "7c0004ac" }
+#pragma mc_func isync{ "4c00012c" }
+#pragma mc_func dcbz{ "7c001fec" }
 #pragma reg_killed_by dcbf
 #pragma reg_killed_by dcbst
 #pragma reg_killed_by dcbz
@@ -64,8 +63,6 @@ void dcbz(void *);
 #pragma reg_killed_by sync
 #pragma reg_killed_by isync
 #endif
-
-
 
 /**
  * PortLibrary startup.
@@ -82,36 +79,35 @@ void dcbz(void *);
  * @note Most implementations will simply return success.
  */
 int32_t
-omrcpu_startup(struct OMRPortLibrary *portLibrary)
+omrcpu_startup(struct OMRPortLibrary* portLibrary)
 {
-	/* initialize the ppc level 1 cache line size */
-#if defined(RS6000) || defined (LINUXPPC) || defined (PPC)
-	int32_t ppcCacheLineSize;
+    /* initialize the ppc level 1 cache line size */
+#if defined(RS6000) || defined(LINUXPPC) || defined(PPC)
+    int32_t ppcCacheLineSize;
 
-	int  i;
-	char buf[1024];
-	memset(buf, 255, 1024);
+    int i;
+    char buf[1024];
+    memset(buf, 255, 1024);
 
 #if (__IBMC__ || __IBMCPP__)
-	dcbz((void *) &buf[512]);
+    dcbz((void*)&buf[512]);
 #elif defined(LINUX) || defined(OSX)
-	__asm__(
-		"dcbz 0, %0"
-		: /* no outputs */
-		:"r"((void *) &buf[512]));
+    __asm__(
+        "dcbz 0, %0"
+        : /* no outputs */
+        : "r"((void*)&buf[512]));
 #endif
 
+    for (i = 0, ppcCacheLineSize = 0; i < 1024; i++) {
+        if (buf[i] == 0) {
+            ppcCacheLineSize++;
+        }
+    }
 
-	for (i = 0, ppcCacheLineSize = 0; i < 1024; i++) {
-		if (buf[i] == 0) {
-			ppcCacheLineSize++;
-		}
-	}
-
-	PPG_mem_ppcCacheLineSize = ppcCacheLineSize;
+    PPG_mem_ppcCacheLineSize = ppcCacheLineSize;
 #endif
 
-	return 0;
+    return 0;
 }
 
 /**
@@ -124,8 +120,7 @@ omrcpu_startup(struct OMRPortLibrary *portLibrary)
  *
  * @note Most implementations will be empty.
  */
-void
-omrcpu_shutdown(struct OMRPortLibrary *portLibrary)
+void omrcpu_shutdown(struct OMRPortLibrary* portLibrary)
 {
 }
 
@@ -138,87 +133,80 @@ omrcpu_shutdown(struct OMRPortLibrary *portLibrary)
  * @param[in] memoryPointer The base address of memory to flush.
  * @param[in] byteAmount Number of bytes to flush.
  */
-void
-omrcpu_flush_icache(struct OMRPortLibrary *portLibrary, void *memoryPointer, uintptr_t byteAmount)
+void omrcpu_flush_icache(struct OMRPortLibrary* portLibrary, void* memoryPointer, uintptr_t byteAmount)
 {
-#if defined(RS6000) || defined (LINUXPPC) || defined (PPC)
+#if defined(RS6000) || defined(LINUXPPC) || defined(PPC)
 
-	int32_t cacheLineSize = PPG_mem_ppcCacheLineSize;
-	unsigned char  *addr;
-	unsigned char  *limit;
-	limit = (unsigned char *)(((unsigned long)memoryPointer + (unsigned int)byteAmount + (cacheLineSize - 1))
-							  / cacheLineSize * cacheLineSize);
+    int32_t cacheLineSize = PPG_mem_ppcCacheLineSize;
+    unsigned char* addr;
+    unsigned char* limit;
+    limit = (unsigned char*)(((unsigned long)memoryPointer + (unsigned int)byteAmount + (cacheLineSize - 1))
+        / cacheLineSize * cacheLineSize);
 
-	/* for each cache line, do a data cache block flush */
-	for (addr = (unsigned char *)memoryPointer ; addr < limit; addr += cacheLineSize) {
-
+    /* for each cache line, do a data cache block flush */
+    for (addr = (unsigned char*)memoryPointer; addr < limit; addr += cacheLineSize) {
 
 #if (__IBMC__ || __IBMCPP__)
-		dcbst(addr);
+        dcbst(addr);
 #elif defined(LINUX) || defined(OSX)
-		__asm__(
-			"dcbst 0,%0"
-			: /* no outputs */
-			: "r"(addr));
+        __asm__(
+            "dcbst 0,%0"
+            : /* no outputs */
+            : "r"(addr));
 #endif
-	}
+    }
 
 #if (__IBMC__ || __IBMCPP__)
-	sync();
+    sync();
 #elif defined(LINUX) || defined(OSX)
-	__asm__("sync");
+    __asm__("sync");
 #endif
 
-	/* for each cache line  do an icache block invalidate */
-	for (addr = (unsigned char *)memoryPointer; addr < limit; addr += cacheLineSize) {
+    /* for each cache line  do an icache block invalidate */
+    for (addr = (unsigned char*)memoryPointer; addr < limit; addr += cacheLineSize) {
 
 #if (__IBMC__ || __IBMCPP__)
-		icbi(addr);
+        icbi(addr);
 #elif defined(LINUX) || defined(OSX)
-		__asm__(
-			"icbi 0,%0"
-			: /* no outputs */
-			: "r"(addr));
+        __asm__(
+            "icbi 0,%0"
+            : /* no outputs */
+            : "r"(addr));
 #endif
-	}
+    }
 
 #if (__IBMC__ || __IBMCPP__)
-	sync();
-	isync();
+    sync();
+    isync();
 #elif defined(LINUX) || defined(OSX)
-	__asm__("sync");
-	__asm__("isync");
+    __asm__("sync");
+    __asm__("isync");
 #endif
 
 #endif /*  defined(RS6000) || defined (LINUXPPC) || defined (PPC) */
-
 }
 
 int32_t
-omrcpu_get_cache_line_size(struct OMRPortLibrary *portLibrary, int32_t *lineSize)
+omrcpu_get_cache_line_size(struct OMRPortLibrary* portLibrary, int32_t* lineSize)
 {
-	int32_t rc = OMRPORT_ERROR_NOT_SUPPORTED_ON_THIS_PLATFORM;
-	if (NULL == lineSize) {
-		rc = OMRPORT_ERROR_INVALID_ARGUMENTS;
-	} else {
-#if defined(RS6000) || defined (LINUXPPC) || defined (PPC)
-		*lineSize = PPG_mem_ppcCacheLineSize;
-		rc = 0;
-#elif defined (OSX)
-		int queryPath[] = {CTL_HW, HW_CACHELINE};
-		int64_t result = 0;
-		size_t resultSize = sizeof(result);
-		if (0 != sysctl(queryPath, 2, &result, &resultSize, NULL, 0)) {
-			rc = OMRPORT_ERROR_SYSINFO_OPFAILED;
-		} else {
-			*lineSize = (int32_t) result;
-			rc = 0;
-		}
+    int32_t rc = OMRPORT_ERROR_NOT_SUPPORTED_ON_THIS_PLATFORM;
+    if (NULL == lineSize) {
+        rc = OMRPORT_ERROR_INVALID_ARGUMENTS;
+    } else {
+#if defined(RS6000) || defined(LINUXPPC) || defined(PPC)
+        *lineSize = PPG_mem_ppcCacheLineSize;
+        rc = 0;
+#elif defined(OSX)
+        int queryPath[] = { CTL_HW, HW_CACHELINE };
+        int64_t result = 0;
+        size_t resultSize = sizeof(result);
+        if (0 != sysctl(queryPath, 2, &result, &resultSize, NULL, 0)) {
+            rc = OMRPORT_ERROR_SYSINFO_OPFAILED;
+        } else {
+            *lineSize = (int32_t)result;
+            rc = 0;
+        }
 #endif /* defined(OSX) */
-	}
-	return rc;
+    }
+    return rc;
 }
-
-
-
-

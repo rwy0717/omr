@@ -40,7 +40,7 @@
 /**
  * The number of elements in our PIC-to-si_signo,si_code table
  */
-#define PIC_TABLE_MAX  60 
+#define PIC_TABLE_MAX 60
 
 /*
  *	What follows is a set of signal number & signal code values to which a s390
@@ -54,76 +54,77 @@
  *	access-register mode, and home mode. Virtual address mapping is the same
  *	for all CPUs (I-streams) except for page 0 (addresses 0-0400 hex).
  */
-static const sigvpair_t	pic2pair[] = {	IMPOSSIBLE, /*	0: Not assigned						*/
-	{ SIGILL,	ILL_ILLOPC },	/* PIC 1, Operation exc */
-	{ SIGILL,	ILL_PRVOPC },	/* PIC 2, Priv Oper'n	*/
-	{ SIGILL,	ILL_ILLADR },	/* PIC 3, Execute exc.	*/
-	{ SIGSEGV,	SEGV_ACCERR },	/* PIC 4: Protection exc*/
-	{ SIGSEGV,	SEGV_ACCERR },	/* PIC 5: Addressing	*/
-	{ SIGILL,	ILL_ILLOPN },	/* PIC 6, Spec exc		*/
-	{ SIGFPE,	0 },			/* PIC 7: Data. All math*/
-	{ SIGFPE,	FPE_INTOVF },	/* PIC 8: Int overflow	*/
-	{ SIGFPE,	FPE_INTDIV },	/* PIC 9: Int divide	*/
-	{ SIGFPE,	FPE_INTOVF },	/* PIC A: Dec overflow	*/
-	{ SIGFPE,	FPE_INTDIV },	/* PIC B: Dec divide	*/
-	IMPOSSIBLE, /*	c: HFP Exponent O'flow. Impossible	*/
-	IMPOSSIBLE, /*	d: HFP Exponent U'flow. Impossible	*/
-	IMPOSSIBLE, /*	e: HFP Significance. Impossible.	*/
-	IMPOSSIBLE, /*	f: HFP Divide Exception. Impossible */
-	{ SIGSEGV,	SEGV_MAPERR },	/* PIC 10: PST exc(seg) */
-	{ SIGSEGV,	SEGV_MAPERR },	/* PIC 11: PST exc(tbl) */
-	{ SIGSEGV,	SEGV_MAPERR },	/* PIC 12: Translation	*/
-	{ SIGILL,	ILL_PRVOPC },	/* PIC 13: Spcl Oper	*/
-	IMPOSSIBLE, /* 14:									*/
-	{ SIGSEGV,	SEGV_ACCERR },	/* PIC 15: Operand excp */
-	IMPOSSIBLE, /* 16: Trace table. Impossible.			*/
-	IMPOSSIBLE, /* 17:									*/
-	IMPOSSIBLE, /* 18:									*/
-	IMPOSSIBLE, /* 19:									*/
-	IMPOSSIBLE, /* 1a: Block-Volatility. Impossible.	*/
-	IMPOSSIBLE, /* 1b:									*/ 
-	IMPOSSIBLE, /* 1c: Space switch. Impossible.		*/
-	IMPOSSIBLE, /* 1d: HFP Square Root. Impossible.		*/
-	IMPOSSIBLE, /* 1e:									*/
-	IMPOSSIBLE, /* 1f: PC Translation-Spec. Impossible. */
-	IMPOSSIBLE, /* 20: AFX-Translation. Impossible		*/
-	IMPOSSIBLE, /* 21: ASX Translation. Impossible		*/
-	IMPOSSIBLE, /* 22: LX Translation. Impossible.		*/
-	IMPOSSIBLE, /* 23: EX-Translation. Impossible.		*/
-	IMPOSSIBLE, /* 24: Primary Authority. Impossible.	*/
-	IMPOSSIBLE, /* 25: Secondary Authority. Impossible. */
-	IMPOSSIBLE, /* 26: LFX Translation. Impossible.		*/
-	IMPOSSIBLE, /* 27: LSX Translation. Impossible.		*/
-	IMPOSSIBLE, /* 28: ALET Specification. Impossible.	*/
-	IMPOSSIBLE, /* 29: ALEN Xlation. Impossible.		*/
-	IMPOSSIBLE, /* 2a: ALET Sequence. Impossible.		*/
-	IMPOSSIBLE, /* 2b: ASTE Validity. Impossible.		*/
-	IMPOSSIBLE, /* 2c: ASTE Sequence. Impossible.		*/
-	IMPOSSIBLE, /* 2d: Extended Authority. Impossible.	*/
-	IMPOSSIBLE, /* 2e: LSTE Sequence. Impossible.		*/
-	IMPOSSIBLE, /* 2f: ASTE Instance. Impossible.		*/
-	IMPOSSIBLE, /* 30: Stack full. Impossible.			*/
-	IMPOSSIBLE, /* 31:									*/
-	IMPOSSIBLE, /* 32: Stack specification. Impossible. */
-	IMPOSSIBLE, /* 33: Stack type. Impossible.			*/
-	IMPOSSIBLE, /* 34: Stack operation. Impossible.		*/
-	IMPOSSIBLE, /* 35:									*/
-	IMPOSSIBLE, /* 36:									*/
-	IMPOSSIBLE, /* 37:									*/
-	{ SIGSEGV,	SEGV_MAPERR },	/* PIC 38: ASCE Excep.	*/
-	{ SIGSEGV,	SEGV_MAPERR },	/* PIC 39: Reg 1st Xlt	*/
-	{ SIGSEGV,	SEGV_MAPERR },	/* PIC 3a: Reg 2nd Xlt	*/
-	{ SIGSEGV,	SEGV_MAPERR }	/* PIC 3b: Reg 3rd Xlt	*/
-}; 
-typedef	struct iproc IPROC;
+static const sigvpair_t pic2pair[] = {
+    IMPOSSIBLE, /*	0: Not assigned						*/
+    { SIGILL, ILL_ILLOPC }, /* PIC 1, Operation exc */
+    { SIGILL, ILL_PRVOPC }, /* PIC 2, Priv Oper'n	*/
+    { SIGILL, ILL_ILLADR }, /* PIC 3, Execute exc.	*/
+    { SIGSEGV, SEGV_ACCERR }, /* PIC 4: Protection exc*/
+    { SIGSEGV, SEGV_ACCERR }, /* PIC 5: Addressing	*/
+    { SIGILL, ILL_ILLOPN }, /* PIC 6, Spec exc		*/
+    { SIGFPE, 0 }, /* PIC 7: Data. All math*/
+    { SIGFPE, FPE_INTOVF }, /* PIC 8: Int overflow	*/
+    { SIGFPE, FPE_INTDIV }, /* PIC 9: Int divide	*/
+    { SIGFPE, FPE_INTOVF }, /* PIC A: Dec overflow	*/
+    { SIGFPE, FPE_INTDIV }, /* PIC B: Dec divide	*/
+    IMPOSSIBLE, /*	c: HFP Exponent O'flow. Impossible	*/
+    IMPOSSIBLE, /*	d: HFP Exponent U'flow. Impossible	*/
+    IMPOSSIBLE, /*	e: HFP Significance. Impossible.	*/
+    IMPOSSIBLE, /*	f: HFP Divide Exception. Impossible */
+    { SIGSEGV, SEGV_MAPERR }, /* PIC 10: PST exc(seg) */
+    { SIGSEGV, SEGV_MAPERR }, /* PIC 11: PST exc(tbl) */
+    { SIGSEGV, SEGV_MAPERR }, /* PIC 12: Translation	*/
+    { SIGILL, ILL_PRVOPC }, /* PIC 13: Spcl Oper	*/
+    IMPOSSIBLE, /* 14:									*/
+    { SIGSEGV, SEGV_ACCERR }, /* PIC 15: Operand excp */
+    IMPOSSIBLE, /* 16: Trace table. Impossible.			*/
+    IMPOSSIBLE, /* 17:									*/
+    IMPOSSIBLE, /* 18:									*/
+    IMPOSSIBLE, /* 19:									*/
+    IMPOSSIBLE, /* 1a: Block-Volatility. Impossible.	*/
+    IMPOSSIBLE, /* 1b:									*/
+    IMPOSSIBLE, /* 1c: Space switch. Impossible.		*/
+    IMPOSSIBLE, /* 1d: HFP Square Root. Impossible.		*/
+    IMPOSSIBLE, /* 1e:									*/
+    IMPOSSIBLE, /* 1f: PC Translation-Spec. Impossible. */
+    IMPOSSIBLE, /* 20: AFX-Translation. Impossible		*/
+    IMPOSSIBLE, /* 21: ASX Translation. Impossible		*/
+    IMPOSSIBLE, /* 22: LX Translation. Impossible.		*/
+    IMPOSSIBLE, /* 23: EX-Translation. Impossible.		*/
+    IMPOSSIBLE, /* 24: Primary Authority. Impossible.	*/
+    IMPOSSIBLE, /* 25: Secondary Authority. Impossible. */
+    IMPOSSIBLE, /* 26: LFX Translation. Impossible.		*/
+    IMPOSSIBLE, /* 27: LSX Translation. Impossible.		*/
+    IMPOSSIBLE, /* 28: ALET Specification. Impossible.	*/
+    IMPOSSIBLE, /* 29: ALEN Xlation. Impossible.		*/
+    IMPOSSIBLE, /* 2a: ALET Sequence. Impossible.		*/
+    IMPOSSIBLE, /* 2b: ASTE Validity. Impossible.		*/
+    IMPOSSIBLE, /* 2c: ASTE Sequence. Impossible.		*/
+    IMPOSSIBLE, /* 2d: Extended Authority. Impossible.	*/
+    IMPOSSIBLE, /* 2e: LSTE Sequence. Impossible.		*/
+    IMPOSSIBLE, /* 2f: ASTE Instance. Impossible.		*/
+    IMPOSSIBLE, /* 30: Stack full. Impossible.			*/
+    IMPOSSIBLE, /* 31:									*/
+    IMPOSSIBLE, /* 32: Stack specification. Impossible. */
+    IMPOSSIBLE, /* 33: Stack type. Impossible.			*/
+    IMPOSSIBLE, /* 34: Stack operation. Impossible.		*/
+    IMPOSSIBLE, /* 35:									*/
+    IMPOSSIBLE, /* 36:									*/
+    IMPOSSIBLE, /* 37:									*/
+    { SIGSEGV, SEGV_MAPERR }, /* PIC 38: ASCE Excep.	*/
+    { SIGSEGV, SEGV_MAPERR }, /* PIC 39: Reg 1st Xlt	*/
+    { SIGSEGV, SEGV_MAPERR }, /* PIC 3a: Reg 2nd Xlt	*/
+    { SIGSEGV, SEGV_MAPERR } /* PIC 3b: Reg 3rd Xlt	*/
+};
+typedef struct iproc IPROC;
 
 #include "safe_storage.h"
 
-static void	ztpfDeriveSigcontext( struct sigcontext *sigcPtr, ucontext_t *uctPtr );
-static void	ztpfDeriveUcontext( ucontext_t *uscPtr );
-safeStorage *allocateDurableStorage( void );
+static void ztpfDeriveSigcontext(struct sigcontext* sigcPtr, ucontext_t* uctPtr);
+static void ztpfDeriveUcontext(ucontext_t* uscPtr);
+safeStorage* allocateDurableStorage(void);
 
-#define MAX_CSTG_BLOCKS	16
+#define MAX_CSTG_BLOCKS 16
 #define _RGN_SIZE (sizeof(safeStorage))
 /*
  * TOD_16_SECONDS is really 16.777216 seconds, but who's splitting hairs?
@@ -135,15 +136,15 @@ safeStorage *allocateDurableStorage( void );
 #define TOD_16_SECONDS (UINT_MAX & 0x0000000fffffffff)
 
 typedef struct _unixcontext_block {
-	uint64_t tod;
-	safeStorage region;
+    uint64_t tod;
+    safeStorage region;
 } ustgndx;
 
 /*
  * These two short lines define a whole slew of space.
  */
 static ustgndx regions[MAX_CSTG_BLOCKS];
-static uint32_t	regions_used;
+static uint32_t regions_used;
 
 /**
  * \function allocateDurableStorage()
@@ -177,140 +178,139 @@ static uint32_t	regions_used;
  *				TO PARTITION THIS BLOCK.
  */
 
-safeStorage *
-allocateDurableStorage( void )
-{ 
-	uint8_t	i = 0;
-	safeStorage *rtnv;
-	uint64_t todNow;
-	tpf_TOD_type tod;
-	uint64_t elapsed;
+safeStorage*
+allocateDurableStorage(void)
+{
+    uint8_t i = 0;
+    safeStorage* rtnv;
+    uint64_t todNow;
+    tpf_TOD_type tod;
+    uint64_t elapsed;
 
 reenter:
-	tpf_STCK( &tod );
-	todNow = tod.stck_hex;
-	if( regions_used ) {
-		for( i = 0; i < MAX_CSTG_BLOCKS; i++ ) {
-			elapsed = todNow - regions[i].tod;
-			if (elapsed > TOD_16_SECONDS ) {
-				break;
-			}
-		}
-		if( i == MAX_CSTG_BLOCKS ) {
-			usleep(50000);
-			goto reenter;
-		}
-	}
-	/*
-	 * We've made our selection. Reserve it and clear it out.
-	 */
-	regions[i].tod = todNow;
-	regions_used += 1;
-	rtnv = &(regions[i].region);
-	memset( rtnv, 0, sizeof(safeStorage) );
-	rtnv->pPROC = iproc_process;
-	rtnv->argv.sii = &(rtnv->siginfo);
-	rtnv->argv.uct = &(rtnv->ucontext);
-	rtnv->argv.sct = &(rtnv->sigcontext);
-	rtnv->sigcontext.sregs = &(rtnv->_sregs); /* point to actual _sigregs struct */
-	rtnv->argv.wkspcSize = PATH_MAX;
-	rtnv->argv.wkSpace = &(rtnv->workbuffer[0]);
-	rtnv->argv.OSFilename = &(rtnv->filename[0]);
-	return rtnv;
+    tpf_STCK(&tod);
+    todNow = tod.stck_hex;
+    if (regions_used) {
+        for (i = 0; i < MAX_CSTG_BLOCKS; i++) {
+            elapsed = todNow - regions[i].tod;
+            if (elapsed > TOD_16_SECONDS) {
+                break;
+            }
+        }
+        if (i == MAX_CSTG_BLOCKS) {
+            usleep(50000);
+            goto reenter;
+        }
+    }
+    /*
+     * We've made our selection. Reserve it and clear it out.
+     */
+    regions[i].tod = todNow;
+    regions_used += 1;
+    rtnv = &(regions[i].region);
+    memset(rtnv, 0, sizeof(safeStorage));
+    rtnv->pPROC = iproc_process;
+    rtnv->argv.sii = &(rtnv->siginfo);
+    rtnv->argv.uct = &(rtnv->ucontext);
+    rtnv->argv.sct = &(rtnv->sigcontext);
+    rtnv->sigcontext.sregs = &(rtnv->_sregs); /* point to actual _sigregs struct */
+    rtnv->argv.wkspcSize = PATH_MAX;
+    rtnv->argv.wkSpace = &(rtnv->workbuffer[0]);
+    rtnv->argv.OSFilename = &(rtnv->filename[0]);
+    return rtnv;
 }
 
-void
-ztpfDeriveSiginfo( siginfo_t *build ) {
-   uint16_t	pic;
-   uint16_t	ilc;
-   uint8_t dxc;
-   sigvpair_t *translated = NULL;
-   void *lowcore = NULL;
-   DIB *pDib = ecbp2()->ce2dib;
-   DBFHDR *pDbf = (DBFHDR *)(pDib->dibjdb);
-   DBFITEM *pDbi;
-   struct cderi *pEri = NULL;
-   struct iproc *procPtr = iproc_process;
+void ztpfDeriveSiginfo(siginfo_t* build)
+{
+    uint16_t pic;
+    uint16_t ilc;
+    uint8_t dxc;
+    sigvpair_t* translated = NULL;
+    void* lowcore = NULL;
+    DIB* pDib = ecbp2()->ce2dib;
+    DBFHDR* pDbf = (DBFHDR*)(pDib->dibjdb);
+    DBFITEM* pDbi;
+    struct cderi* pEri = NULL;
+    struct iproc* procPtr = iproc_process;
 
-   /*
-	*	 If we have a java dump buffer (ijavdbf) which belongs to this
-	*	 thread AND that buffer is not locked, then use it. We prefer
-	*	 the low core image in the java dump buffer to the copy in the
-	*	 DIB; but use the DIB's copy if there's no buffer.
-	*/
-   if( pDbf && pDbf->ijavcnt ) {	/* We have the full Error Recording Info, use it.	*/
-	  pDbi = (DBFITEM *)pDbf+1;					/* We have a bunch of void ptrs			*/
-	  pEri = (struct cderi *)(pDbi->ijavsbuf);	/*	to cast through ... ugh...			*/
-	  lowcore = pEri;							/* And struct cderi is incomplete ...	*/
-	  lowcore += (unsigned long int)0x310;		/*	ai yi yi Lucy.						*/
-   }
-   else {							/* All we have is the DIB, so use it instead.		*/
-	  lowcore = pDib->dilow;					/* Fixup low core pointer				*/
-	  pEri = NULL;								/* And indicate there's no full ERI.	*/
-   }
-   pic = s390FetchPIC( lowcore );		/* Translate the PIC into si_signo & si_code	*/
-   translated = (sigvpair_t *)&pic2pair[pic];
-   build->si_signo = translated->si_signo;
-   build->si_code = translated->si_code;
-   /*
-	* This could just as well have been an "if-then-else" construct, but
-	* it was felt wise to leave it in case testing revealed something else
-	* that requires analysis.
-	*/
-   switch( build->si_signo ) { 
-   case SIGFPE:
-	  if( 0 == build->si_code ) {		   /* If we need to interpret DXC bits,   */
-		 /*
-		 * Returning a good si_code value means we have to interrogate the
-		 * DXC value, so go get a normalized version of it.
-		 */
-		 dxc = s390FetchDXC( lowcore );
-		 /*
-		  * "Sluice" through the acceptable values of the DXC for known si_code
-		  * values. If we don't find one, call it SI_KERNEL for lack of any 
-		  * better idea.
-		  */
-		 if( 0x09 == dxc )
-			build->si_code = FPE_INTDIV;
-		 else if( 0x08 == dxc )
-			build->si_code = FPE_INTOVF;
-		 else if( 0x40 == dxc )
-			build->si_code = FPE_FLTDIV;
-		 else if( 0x20 == dxc )
-			build->si_code = FPE_FLTOVF;
-		 else if( 0x10 == dxc )
-			build->si_code = FPE_FLTUND;
-		 else if( 0x08 == dxc )
-			build->si_code = FPE_FLTRES;
-		 else if( 0x80 == dxc )
-			build->si_code = FPE_FLTINV;
-		 else
-			build->si_code = SI_KERNEL;    /* Unknown synchronous signal	  */
-	  }
-	  break;
-	/*
-	 * SIGSEGV signals need si_addr set to the addr that failed translation
-	 * It's in the ERI, but not in the DIB. So if we have an ERI, use it.
-	 */
-   case SIGSEGV:
-	  if( build->si_code == SEGV_MAPERR && pEri ) { 
-		 uint64_t *address;
-		 lowcore = pEri;			/* The failing vaddr is at ISVTRXAD */
-		 address = lowcore+(unsigned long int)0x1b8;	/*	at offset 0x1B8 into the ERI*/
-		 build->si_addr = (void *)*address; /* Move the failed address.		*/
-	  }									/* Otherwise leave it zero.			*/
-	  break;
-   case SIGILL:
-	  build->si_addr = (char *)pDib->dispw[1];	/*	Failing PSW $IP			*/
-	  break;
-   default:
-	  break;
-   }										
-   build->si_pid = procPtr->iproc_pid;	/* All of them need PID and			 */
-   build->si_uid = procPtr->iproc_uid;	/*	UID values, with TID & errno	 */
-   build->si_ztpf_tid = ecbp2()->ce2thnum; /* values, too.					 */
-   build->si_errno = errno;
-   return;
+    /*
+    *	 If we have a java dump buffer (ijavdbf) which belongs to this
+    *	 thread AND that buffer is not locked, then use it. We prefer
+    *	 the low core image in the java dump buffer to the copy in the
+    *	 DIB; but use the DIB's copy if there's no buffer.
+    */
+    if (pDbf && pDbf->ijavcnt) { /* We have the full Error Recording Info, use it.	*/
+        pDbi = (DBFITEM*)pDbf + 1; /* We have a bunch of void ptrs			*/
+        pEri = (struct cderi*)(pDbi->ijavsbuf); /*	to cast through ... ugh...			*/
+        lowcore = pEri; /* And struct cderi is incomplete ...	*/
+        lowcore += (unsigned long int)0x310; /*	ai yi yi Lucy.						*/
+    } else { /* All we have is the DIB, so use it instead.		*/
+        lowcore = pDib->dilow; /* Fixup low core pointer				*/
+        pEri = NULL; /* And indicate there's no full ERI.	*/
+    }
+    pic = s390FetchPIC(lowcore); /* Translate the PIC into si_signo & si_code	*/
+    translated = (sigvpair_t*)&pic2pair[pic];
+    build->si_signo = translated->si_signo;
+    build->si_code = translated->si_code;
+    /*
+    * This could just as well have been an "if-then-else" construct, but
+    * it was felt wise to leave it in case testing revealed something else
+    * that requires analysis.
+    */
+    switch (build->si_signo) {
+    case SIGFPE:
+        if (0 == build->si_code) { /* If we need to interpret DXC bits,   */
+            /*
+         * Returning a good si_code value means we have to interrogate the
+         * DXC value, so go get a normalized version of it.
+         */
+            dxc = s390FetchDXC(lowcore);
+            /*
+          * "Sluice" through the acceptable values of the DXC for known si_code
+          * values. If we don't find one, call it SI_KERNEL for lack of any 
+          * better idea.
+          */
+            if (0x09 == dxc)
+                build->si_code = FPE_INTDIV;
+            else if (0x08 == dxc)
+                build->si_code = FPE_INTOVF;
+            else if (0x40 == dxc)
+                build->si_code = FPE_FLTDIV;
+            else if (0x20 == dxc)
+                build->si_code = FPE_FLTOVF;
+            else if (0x10 == dxc)
+                build->si_code = FPE_FLTUND;
+            else if (0x08 == dxc)
+                build->si_code = FPE_FLTRES;
+            else if (0x80 == dxc)
+                build->si_code = FPE_FLTINV;
+            else
+                build->si_code = SI_KERNEL; /* Unknown synchronous signal	  */
+        }
+        break;
+        /*
+     * SIGSEGV signals need si_addr set to the addr that failed translation
+     * It's in the ERI, but not in the DIB. So if we have an ERI, use it.
+     */
+    case SIGSEGV:
+        if (build->si_code == SEGV_MAPERR && pEri) {
+            uint64_t* address;
+            lowcore = pEri; /* The failing vaddr is at ISVTRXAD */
+            address = lowcore + (unsigned long int)0x1b8; /*	at offset 0x1B8 into the ERI*/
+            build->si_addr = (void*)*address; /* Move the failed address.		*/
+        } /* Otherwise leave it zero.			*/
+        break;
+    case SIGILL:
+        build->si_addr = (char*)pDib->dispw[1]; /*	Failing PSW $IP			*/
+        break;
+    default:
+        break;
+    }
+    build->si_pid = procPtr->iproc_pid; /* All of them need PID and			 */
+    build->si_uid = procPtr->iproc_uid; /*	UID values, with TID & errno	 */
+    build->si_ztpf_tid = ecbp2()->ce2thnum; /* values, too.					 */
+    build->si_errno = errno;
+    return;
 }
 
 /*
@@ -322,52 +322,51 @@ ztpfDeriveSiginfo( siginfo_t *build ) {
  */
 
 static void
-ztpfDeriveSigcontext( struct sigcontext *sigcPtr, ucontext_t *uctPtr ) {
+ztpfDeriveSigcontext(struct sigcontext* sigcPtr, ucontext_t* uctPtr)
+{
 
-        sigcPtr->sregs->regs.psw.mask  = uctPtr->uc_mcontext.psw.mask;
-        sigcPtr->sregs->regs.psw.addr  = uctPtr->uc_mcontext.psw.addr;
+    sigcPtr->sregs->regs.psw.mask = uctPtr->uc_mcontext.psw.mask;
+    sigcPtr->sregs->regs.psw.addr = uctPtr->uc_mcontext.psw.addr;
 
-        memcpy(&(sigcPtr->sregs->regs.gprs), &(uctPtr->uc_mcontext.gregs),sizeof(uctPtr->uc_mcontext.gregs));
-        memcpy(&(sigcPtr->sregs->regs.acrs), &(uctPtr->uc_mcontext.aregs),sizeof(uctPtr->uc_mcontext.aregs));
+    memcpy(&(sigcPtr->sregs->regs.gprs), &(uctPtr->uc_mcontext.gregs), sizeof(uctPtr->uc_mcontext.gregs));
+    memcpy(&(sigcPtr->sregs->regs.acrs), &(uctPtr->uc_mcontext.aregs), sizeof(uctPtr->uc_mcontext.aregs));
 
-        memcpy(&(sigcPtr->sregs->fpregs), &(uctPtr->uc_mcontext.fpregs), sizeof(fpregset_t));
+    memcpy(&(sigcPtr->sregs->fpregs), &(uctPtr->uc_mcontext.fpregs), sizeof(fpregset_t));
 
-        sigcPtr->oldmask[0]       = uctPtr->uc_sigmask;
-	return;
+    sigcPtr->oldmask[0] = uctPtr->uc_sigmask;
+    return;
 }
-
 
 static void
-ztpfDeriveUcontext( ucontext_t *uscPtr ) { 
-   DIB * pDib = ecbp2()->ce2dib;
-   DBFHDR * pJdb = (DBFHDR *)(pDib->dibjdb);
-   DBFITEM * pDbi = NULL;
-   void * lowcore = NULL;
+ztpfDeriveUcontext(ucontext_t* uscPtr)
+{
+    DIB* pDib = ecbp2()->ce2dib;
+    DBFHDR* pJdb = (DBFHDR*)(pDib->dibjdb);
+    DBFITEM* pDbi = NULL;
+    void* lowcore = NULL;
 
-   if( pJdb ) {					 /* If JDB contents are for this thread */
-	  if( pJdb->ijavcnt ) {		 /*  and the JDB is unlocked			*/
-		 pDbi = (DBFITEM *)(pJdb+1);		 /* Point at the JDB base	*/
-		 lowcore = (pDbi->ijavsbuf);		/*  and its low core copy. */
-	  }
-	  else {					 /* Otherwise use what's in the DIB		*/
-		 lowcore = pDib->dilow;  /* Use the low core pointer from DIB	*/
-	  }
-   }
-	/*
+    if (pJdb) { /* If JDB contents are for this thread */
+        if (pJdb->ijavcnt) { /*  and the JDB is unlocked			*/
+            pDbi = (DBFITEM*)(pJdb + 1); /* Point at the JDB base	*/
+            lowcore = (pDbi->ijavsbuf); /*  and its low core copy. */
+        } else { /* Otherwise use what's in the DIB		*/
+            lowcore = pDib->dilow; /* Use the low core pointer from DIB	*/
+        }
+    }
+    /*
      *	 Fill in the uc_mcontext, uc_flags and uc_sigmask fields. 
-	 *	 Leave uc_link alone, it has no meaning in or for z/TPF.
+     *	 Leave uc_link alone, it has no meaning in or for z/TPF.
      */
-   uscPtr->uc_mcontext.psw.mask = pDib->dispw[0];  /* PSW lo half */
-   uscPtr->uc_mcontext.psw.addr = pDib->dispw[1];  /* PSW hi half */
-   memcpy( uscPtr->uc_mcontext.gregs,
-		  pDib->direg, sizeof(pDib->direg) );		/*GPRs*/
-	memcpy( uscPtr->uc_mcontext.fpregs.fprs, 
-		  pDib->dfreg, sizeof(pDib->dfreg) );		/*FPRs*/
-	uscPtr->uc_flags = ecbp2()->ce2thnum;			/* Put the TID in ucontext->uc_flags  */
-	sigprocmask( SIG_SETMASK, NULL, &(uscPtr->uc_sigmask) ); /* Our mask is the old mask  */
-	return;
+    uscPtr->uc_mcontext.psw.mask = pDib->dispw[0]; /* PSW lo half */
+    uscPtr->uc_mcontext.psw.addr = pDib->dispw[1]; /* PSW hi half */
+    memcpy(uscPtr->uc_mcontext.gregs,
+        pDib->direg, sizeof(pDib->direg)); /*GPRs*/
+    memcpy(uscPtr->uc_mcontext.fpregs.fprs,
+        pDib->dfreg, sizeof(pDib->dfreg)); /*FPRs*/
+    uscPtr->uc_flags = ecbp2()->ce2thnum; /* Put the TID in ucontext->uc_flags  */
+    sigprocmask(SIG_SETMASK, NULL, &(uscPtr->uc_sigmask)); /* Our mask is the old mask  */
+    return;
 }
-
 
 /**
  * \brief Translate z/TPF-ish data into UNIX-ish context data
@@ -382,15 +381,14 @@ ztpfDeriveUcontext( ucontext_t *uscPtr ) {
  *
  * \returns void		All blank buffer regions filled in.
  */
-void
-translateInterruptContexts( args *argv ) { 
+void translateInterruptContexts(args* argv)
+{
 
-   ztpfDeriveSiginfo( dumpSiginfo(argv) );
-   ztpfDeriveUcontext( dumpUcontext(argv) );
-   ztpfDeriveSigcontext( dumpSigcontext(argv), dumpUcontext(argv) );
-   return;
+    ztpfDeriveSiginfo(dumpSiginfo(argv));
+    ztpfDeriveUcontext(dumpUcontext(argv));
+    ztpfDeriveSigcontext(dumpSigcontext(argv), dumpUcontext(argv));
+    return;
 }
-
 
 /**
  * \brief Store signal information in the OMRUnixSignalInfo struct.
@@ -405,12 +403,10 @@ translateInterruptContexts( args *argv ) {
  *
  * \returns		Not a thing.
  */
-void
-fillInUnixSignalInfo(struct OMRPortLibrary *portLibrary, void *contextInfo, struct OMRUnixSignalInfo *j9Info)
+void fillInUnixSignalInfo(struct OMRPortLibrary* portLibrary, void* contextInfo, struct OMRUnixSignalInfo* j9Info)
 {
-	j9Info->platformSignalInfo.context = (ucontext_t *)contextInfo;		/* module info is filled on demand */
+    j9Info->platformSignalInfo.context = (ucontext_t*)contextInfo; /* module info is filled on demand */
 }
-
 
 /**
  * \brief Return specific signal information to the caller.
@@ -430,64 +426,63 @@ fillInUnixSignalInfo(struct OMRPortLibrary *portLibrary, void *contextInfo, stru
  * \returns		Unsigned 32-bit integer describing what the \ref value return is, an address, or
  *				an address. Also can return an error indicator.
  */
-U_32
-infoForSignal(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *info, int32_t index, const char **name, void **value)
+U_32 infoForSignal(struct OMRPortLibrary* portLibrary, struct OMRUnixSignalInfo* info, int32_t index, const char** name, void** value)
 {
-	*name = "";
+    *name = "";
 
-	switch (index) {
-	case OMRPORT_SIG_SIGNAL_TYPE:
-	case 0:
-		*name = "J9Generic_Signal_Number";
-		*value = &info->portLibrarySignalType;
-		return OMRPORT_SIG_VALUE_32;
-	case OMRPORT_SIG_SIGNAL_PLATFORM_SIGNAL_TYPE:
-	case 1:
-		*name = "Signal_Number";
-		*value = &info->sigInfo->si_signo;
-		return OMRPORT_SIG_VALUE_32;
+    switch (index) {
+    case OMRPORT_SIG_SIGNAL_TYPE:
+    case 0:
+        *name = "J9Generic_Signal_Number";
+        *value = &info->portLibrarySignalType;
+        return OMRPORT_SIG_VALUE_32;
+    case OMRPORT_SIG_SIGNAL_PLATFORM_SIGNAL_TYPE:
+    case 1:
+        *name = "Signal_Number";
+        *value = &info->sigInfo->si_signo;
+        return OMRPORT_SIG_VALUE_32;
 
-	case OMRPORT_SIG_SIGNAL_ERROR_VALUE:
-	case 2:
-		*name = "Error_Value";
-		*value = &info->sigInfo->si_errno;
-		return OMRPORT_SIG_VALUE_32;
+    case OMRPORT_SIG_SIGNAL_ERROR_VALUE:
+    case 2:
+        *name = "Error_Value";
+        *value = &info->sigInfo->si_errno;
+        return OMRPORT_SIG_VALUE_32;
 
-	case OMRPORT_SIG_SIGNAL_CODE:
-	case 3:
-		*name = "Signal_Code";
-		*value = &info->sigInfo->si_code;
-		return OMRPORT_SIG_VALUE_32;
+    case OMRPORT_SIG_SIGNAL_CODE:
+    case 3:
+        *name = "Signal_Code";
+        *value = &info->sigInfo->si_code;
+        return OMRPORT_SIG_VALUE_32;
 
-	case OMRPORT_SIG_SIGNAL_HANDLER:
-	case 4:
-		*name = "Handler1";
-		*value = &info->handlerAddress;
-		return OMRPORT_SIG_VALUE_ADDRESS;
-	case 5:
-		*name = "Handler2";
-		*value = &info->handlerAddress2;
-		return OMRPORT_SIG_VALUE_ADDRESS;
+    case OMRPORT_SIG_SIGNAL_HANDLER:
+    case 4:
+        *name = "Handler1";
+        *value = &info->handlerAddress;
+        return OMRPORT_SIG_VALUE_ADDRESS;
+    case 5:
+        *name = "Handler2";
+        *value = &info->handlerAddress2;
+        return OMRPORT_SIG_VALUE_ADDRESS;
 
-	case OMRPORT_SIG_SIGNAL_INACCESSIBLE_ADDRESS:
-	case 6:
-		/*
-		 * si_code > 0 indicates that the signal was generated by the kernel
-		 */
-		if ( info->sigInfo->si_code > 0 ) {
-			if ( ( info->sigInfo->si_signo == SIGSEGV ) ) {
-				*name = "InaccessibleAddress";
-				*value = &info->sigInfo->si_addr;	/* This will be wrong for z/TPF until I figure
-														out where to get the failing address.		*/
-				return OMRPORT_SIG_VALUE_ADDRESS;
-			}
-		}
-		return OMRPORT_SIG_VALUE_UNDEFINED;
-	default:
-		return OMRPORT_SIG_VALUE_UNDEFINED;
-	}
+    case OMRPORT_SIG_SIGNAL_INACCESSIBLE_ADDRESS:
+    case 6:
+        /*
+         * si_code > 0 indicates that the signal was generated by the kernel
+         */
+        if (info->sigInfo->si_code > 0) {
+            if ((info->sigInfo->si_signo == SIGSEGV)) {
+                *name = "InaccessibleAddress";
+                *value = &info->sigInfo->si_addr; /* This will be wrong for z/TPF until I figure
+                                                        out where to get the failing address.		*/
+                return OMRPORT_SIG_VALUE_ADDRESS;
+            }
+        }
+        return OMRPORT_SIG_VALUE_UNDEFINED;
+    default:
+        return OMRPORT_SIG_VALUE_UNDEFINED;
+    }
 }
-	
+
 /**
  * \brief	Return a floating point register name
  *
@@ -504,32 +499,33 @@ infoForSignal(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *info
  *								pointer of type <TT>double</TT>.
  */
 uint32_t
-infoForFPR(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *info, int32_t index, const char **name, void **value)
+infoForFPR(struct OMRPortLibrary* portLibrary, struct OMRUnixSignalInfo* info, int32_t index, const char** name, void** value)
 {
-	const char *n_fpr[NUM_REGS] = {
-									"fpr0", 
-									"fpr1",  
-									"fpr2",  
-									"fpr3",  
-									"fpr4",  
-									"fpr5",  
-									"fpr6",  
-									"fpr7",  
-									"fpr8",  
-									"fpr9",  
-									"fpr10",  
-									"fpr11",  
-									"fpr12",  
-									"fpr13",  
-									"fpr14",  
-									"fpr15"}; 
-	*name = "";
-	if ( (index >=0) && (index < NUM_REGS)) {
-		*name = n_fpr[index];
-		*value = &(info->platformSignalInfo.context->uc_mcontext.fpregs.fprs[index]);
-		return OMRPORT_SIG_VALUE_FLOAT_64;
-	}
-	return OMRPORT_SIG_VALUE_UNDEFINED;
+    const char* n_fpr[NUM_REGS] = {
+        "fpr0",
+        "fpr1",
+        "fpr2",
+        "fpr3",
+        "fpr4",
+        "fpr5",
+        "fpr6",
+        "fpr7",
+        "fpr8",
+        "fpr9",
+        "fpr10",
+        "fpr11",
+        "fpr12",
+        "fpr13",
+        "fpr14",
+        "fpr15"
+    };
+    *name = "";
+    if ((index >= 0) && (index < NUM_REGS)) {
+        *name = n_fpr[index];
+        *value = &(info->platformSignalInfo.context->uc_mcontext.fpregs.fprs[index]);
+        return OMRPORT_SIG_VALUE_FLOAT_64;
+    }
+    return OMRPORT_SIG_VALUE_UNDEFINED;
 }
 
 /**
@@ -555,35 +551,34 @@ infoForFPR(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *info, i
  *			the high parts of the general registers. All gone; we don't support 32-bit 
  *			hardware (even if we do grudgingly support AMODE=31).
  */
-U_32
-infoForGPR(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *info, int32_t index, const char **name, void **value)
+U_32 infoForGPR(struct OMRPortLibrary* portLibrary, struct OMRUnixSignalInfo* info, int32_t index, const char** name, void** value)
 {
-	const char *n_gpr[NUM_REGS] = {
-									"gpr0", 
-									"gpr1",  
-									"gpr2",  
-									"gpr3",  
-									"gpr4",  
-									"gpr5",  
-									"gpr6",  
-									"gpr7",  
-									"gpr8",  
-									"gpr9",  
-									"gpr10",  
-									"gpr11",  
-									"gpr12",  
-									"gpr13",  
-									"gpr14",  
-									"gpr15"
-	};
+    const char* n_gpr[NUM_REGS] = {
+        "gpr0",
+        "gpr1",
+        "gpr2",
+        "gpr3",
+        "gpr4",
+        "gpr5",
+        "gpr6",
+        "gpr7",
+        "gpr8",
+        "gpr9",
+        "gpr10",
+        "gpr11",
+        "gpr12",
+        "gpr13",
+        "gpr14",
+        "gpr15"
+    };
 
-	*name = "";
-	if ( (index >=0) && (index < NUM_REGS)) {
-		*name = n_gpr[index];
-		*value = &(info->platformSignalInfo.context->uc_mcontext.gregs[index]);
-		return OMRPORT_SIG_VALUE_ADDRESS;
-	}
-	return OMRPORT_SIG_VALUE_UNDEFINED;
+    *name = "";
+    if ((index >= 0) && (index < NUM_REGS)) {
+        *name = n_gpr[index];
+        *value = &(info->platformSignalInfo.context->uc_mcontext.gregs[index]);
+        return OMRPORT_SIG_VALUE_ADDRESS;
+    }
+    return OMRPORT_SIG_VALUE_UNDEFINED;
 }
 
 /**
@@ -599,86 +594,83 @@ infoForGPR(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *info, i
  *			sized and permissioned.
  *
  */
-U_32
-infoForControl(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *info, int32_t index, const char **name, void **value)
+U_32 infoForControl(struct OMRPortLibrary* portLibrary, struct OMRUnixSignalInfo* info, int32_t index, const char** name, void** value)
 {
-	uint8_t *eip;
-	mcontext_t *mcontext = (mcontext_t *)&info->platformSignalInfo.context->uc_mcontext;
-	*name = "";
-	
-	switch (index) {
-	case OMRPORT_SIG_CONTROL_PC:
-	case 0:
-		*name = "psw";
-		*value = &(mcontext->psw.addr);
-		return OMRPORT_SIG_VALUE_ADDRESS;
-	case 1:
-		*name = "mask";
-		*value = &(mcontext->psw.mask);
-		return OMRPORT_SIG_VALUE_ADDRESS;
-	case OMRPORT_SIG_CONTROL_S390_FPC:
-	case 2:
-		*name = "fpc";
-		*value = &(mcontext->fpregs.fpc);
-		return OMRPORT_SIG_VALUE_ADDRESS;
-	case OMRPORT_SIG_CONTROL_S390_BEA:
-	case 3:
-		*name = "bea";
-		*value = &(info->platformSignalInfo.breakingEventAddr);
-		return OMRPORT_SIG_VALUE_ADDRESS;
-	default:
-		return OMRPORT_SIG_VALUE_UNDEFINED;
-	}
-	/* UNREACHABLE */
+    uint8_t* eip;
+    mcontext_t* mcontext = (mcontext_t*)&info->platformSignalInfo.context->uc_mcontext;
+    *name = "";
+
+    switch (index) {
+    case OMRPORT_SIG_CONTROL_PC:
+    case 0:
+        *name = "psw";
+        *value = &(mcontext->psw.addr);
+        return OMRPORT_SIG_VALUE_ADDRESS;
+    case 1:
+        *name = "mask";
+        *value = &(mcontext->psw.mask);
+        return OMRPORT_SIG_VALUE_ADDRESS;
+    case OMRPORT_SIG_CONTROL_S390_FPC:
+    case 2:
+        *name = "fpc";
+        *value = &(mcontext->fpregs.fpc);
+        return OMRPORT_SIG_VALUE_ADDRESS;
+    case OMRPORT_SIG_CONTROL_S390_BEA:
+    case 3:
+        *name = "bea";
+        *value = &(info->platformSignalInfo.breakingEventAddr);
+        return OMRPORT_SIG_VALUE_ADDRESS;
+    default:
+        return OMRPORT_SIG_VALUE_UNDEFINED;
+    }
+    /* UNREACHABLE */
 }
 
-U_32
-infoForModule(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *info, int32_t index, const char **name, void **value)
+U_32 infoForModule(struct OMRPortLibrary* portLibrary, struct OMRUnixSignalInfo* info, int32_t index, const char** name, void** value)
 {
-	Dl_info		*dl_info = &(info->platformSignalInfo.dl_info);
-	void*		address;
-	int32_t		dl_result;
-	mcontext_t *mcontext = (mcontext_t *)&info->platformSignalInfo.context->uc_mcontext;
-	*name = "";
+    Dl_info* dl_info = &(info->platformSignalInfo.dl_info);
+    void* address;
+    int32_t dl_result;
+    mcontext_t* mcontext = (mcontext_t*)&info->platformSignalInfo.context->uc_mcontext;
+    *name = "";
 
-	address = (void *)mcontext->psw.addr;
-	dl_result = dladdr(address, dl_info);
-	switch (index) {
-	case OMRPORT_SIG_MODULE_NAME:
-	case 0:
-		*name = "Module";
-		if (dl_result) {
-			*value = (void *)(dl_info->dli_fname);
-		return OMRPORT_SIG_VALUE_STRING;
-		}
-	return OMRPORT_SIG_VALUE_UNDEFINED;
-	case 1:
-		*name = "Module_base_address";
-		if (dl_result) {
-			*value = (void *)&(dl_info->dli_fbase);
-		return OMRPORT_SIG_VALUE_ADDRESS;
-		}
-		return OMRPORT_SIG_VALUE_UNDEFINED;
-	case 2:
-		*name = "Symbol";
-		if (dl_result) {
-			if (dl_info->dli_sname != NULL) {
-				*value = (void *)(dl_info->dli_sname);
-				return OMRPORT_SIG_VALUE_STRING;
-			}
-		}
-		return OMRPORT_SIG_VALUE_UNDEFINED;
-		case 3:
-			*name = "Symbol_address";
-			if (dl_result) {
-				*value = (void *)&(dl_info->dli_saddr);
-				return OMRPORT_SIG_VALUE_ADDRESS;
-			}
-			return OMRPORT_SIG_VALUE_UNDEFINED;
-	default:
-		return OMRPORT_SIG_VALUE_UNDEFINED;
-	}
-	/*	UNREACHABLE  */
-	return OMRPORT_SIG_VALUE_UNDEFINED;
+    address = (void*)mcontext->psw.addr;
+    dl_result = dladdr(address, dl_info);
+    switch (index) {
+    case OMRPORT_SIG_MODULE_NAME:
+    case 0:
+        *name = "Module";
+        if (dl_result) {
+            *value = (void*)(dl_info->dli_fname);
+            return OMRPORT_SIG_VALUE_STRING;
+        }
+        return OMRPORT_SIG_VALUE_UNDEFINED;
+    case 1:
+        *name = "Module_base_address";
+        if (dl_result) {
+            *value = (void*)&(dl_info->dli_fbase);
+            return OMRPORT_SIG_VALUE_ADDRESS;
+        }
+        return OMRPORT_SIG_VALUE_UNDEFINED;
+    case 2:
+        *name = "Symbol";
+        if (dl_result) {
+            if (dl_info->dli_sname != NULL) {
+                *value = (void*)(dl_info->dli_sname);
+                return OMRPORT_SIG_VALUE_STRING;
+            }
+        }
+        return OMRPORT_SIG_VALUE_UNDEFINED;
+    case 3:
+        *name = "Symbol_address";
+        if (dl_result) {
+            *value = (void*)&(dl_info->dli_saddr);
+            return OMRPORT_SIG_VALUE_ADDRESS;
+        }
+        return OMRPORT_SIG_VALUE_UNDEFINED;
+    default:
+        return OMRPORT_SIG_VALUE_UNDEFINED;
+    }
+    /*	UNREACHABLE  */
+    return OMRPORT_SIG_VALUE_UNDEFINED;
 }
-

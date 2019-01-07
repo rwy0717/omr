@@ -30,25 +30,25 @@
 #define MAX_NAME 256
 
 typedef struct {
-	_FEEDBACK *fc;
-	_CEECIB *cib;
-	uint16_t messageNumber;
-	char *facilityID;
+    _FEEDBACK* fc;
+    _CEECIB* cib;
+    uint16_t messageNumber;
+    char* facilityID;
 #if !defined(J9ZOS39064)
-	char program_unit_name[MAX_NAME];
-	_INT4 program_unit_address;
-	char entry_name[MAX_NAME];
-	_INT4 entry_address;
+    char program_unit_name[MAX_NAME];
+    _INT4 program_unit_address;
+    char entry_name[MAX_NAME];
+    _INT4 entry_address;
 #endif
-	uint32_t portLibrarySignalType;
-	void *handlerAddress;
-	void *handlerAddress2;
+    uint32_t portLibrarySignalType;
+    void* handlerAddress;
+    void* handlerAddress2;
 } J9LEConditionInfo;
 
-uint32_t infoForFPR_ceehdlr(struct OMRPortLibrary *portLibrary, J9LEConditionInfo *info, int32_t index, const char **name, void **value);
-uint32_t infoForGPR_ceehdlr(struct OMRPortLibrary *portLibrary, J9LEConditionInfo *info, int32_t index, const char **name, void **value);
-uint32_t infoForVR_ceehdlr(struct OMRPortLibrary *portLibrary, J9LEConditionInfo *info, int32_t index, const char **name, void **value);
-uint32_t infoForControl_ceehdlr(struct OMRPortLibrary *portLibrary, J9LEConditionInfo *info, int32_t index, const char **name, void **value);
-uint32_t infoForModule_ceehdlr(struct OMRPortLibrary *portLibrary, J9LEConditionInfo *info, int32_t index, const char **name, void **value);
+uint32_t infoForFPR_ceehdlr(struct OMRPortLibrary* portLibrary, J9LEConditionInfo* info, int32_t index, const char** name, void** value);
+uint32_t infoForGPR_ceehdlr(struct OMRPortLibrary* portLibrary, J9LEConditionInfo* info, int32_t index, const char** name, void** value);
+uint32_t infoForVR_ceehdlr(struct OMRPortLibrary* portLibrary, J9LEConditionInfo* info, int32_t index, const char** name, void** value);
+uint32_t infoForControl_ceehdlr(struct OMRPortLibrary* portLibrary, J9LEConditionInfo* info, int32_t index, const char** name, void** value);
+uint32_t infoForModule_ceehdlr(struct OMRPortLibrary* portLibrary, J9LEConditionInfo* info, int32_t index, const char** name, void** value);
 
 #endif /* omrsignal_context_ceehdlr_h */

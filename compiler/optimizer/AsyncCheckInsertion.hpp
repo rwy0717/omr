@@ -22,37 +22,35 @@
 #ifndef ASYNC_CHECK_INSERTION_H
 #define ASYNC_CHECK_INSERTION_H
 
-#include <stdint.h>                           // for int32_t, int64_t, etc
-#include "env/TRMemory.hpp"                   // for TR_Memory, etc
-#include "optimizer/Optimization.hpp"         // for Optimization
-#include "optimizer/OptimizationManager.hpp"  // for OptimizationManager
+#include <stdint.h> // for int32_t, int64_t, etc
+#include "env/TRMemory.hpp" // for TR_Memory, etc
+#include "optimizer/Optimization.hpp" // for Optimization
+#include "optimizer/OptimizationManager.hpp" // for OptimizationManager
 
+namespace TR {
+class Block;
+}
+namespace TR {
+class Compilation;
+}
 
+class TR_AsyncCheckInsertion : public TR::Optimization {
+public:
+    TR_AsyncCheckInsertion(TR::OptimizationManager* manager);
+    static TR::Optimization* create(TR::OptimizationManager* manager)
+    {
+        return new (manager->allocator()) TR_AsyncCheckInsertion(manager);
+    }
 
-namespace TR { class Block; }
-namespace TR { class Compilation; }
+    static int32_t insertReturnAsyncChecks(TR::Optimization* opt, const char* counterPrefix);
+    static void insertAsyncCheck(TR::Block* block, TR::Compilation* comp, const char* counterPrefix);
 
+    virtual bool shouldPerform();
+    virtual int32_t perform();
 
-class TR_AsyncCheckInsertion : public TR::Optimization
-   {
-   public:
-   TR_AsyncCheckInsertion(TR::OptimizationManager *manager);
-   static TR::Optimization *create(TR::OptimizationManager *manager)
-      {
-      return new (manager->allocator()) TR_AsyncCheckInsertion(manager);
-      }
+    virtual const char* optDetailString() const throw();
 
-
-   static int32_t insertReturnAsyncChecks(TR::Optimization *opt, const char *counterPrefix);
-   static void insertAsyncCheck(TR::Block *block, TR::Compilation *comp, const char *counterPrefix);
-
-   virtual bool    shouldPerform();
-   virtual int32_t perform();
-
-   virtual const char * optDetailString() const throw();
-
-   private:
-
-   };
+private:
+};
 
 #endif

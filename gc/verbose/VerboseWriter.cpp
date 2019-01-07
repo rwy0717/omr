@@ -36,78 +36,75 @@
 #define VERBOSEGC_FOOTER "</verbosegc>\n"
 
 MM_VerboseWriter::MM_VerboseWriter(WriterType type)
-	: MM_Base()
-	,_nextWriter(NULL)
-	,_header(NULL)
-	,_footer(NULL)
-	,_type(type)
-	,_isActive(false)
+    : MM_Base()
+    , _nextWriter(NULL)
+    , _header(NULL)
+    , _footer(NULL)
+    , _type(type)
+    , _isActive(false)
 {}
 
 const char*
-MM_VerboseWriter::getHeader(MM_EnvironmentBase *env)
+MM_VerboseWriter::getHeader(MM_EnvironmentBase* env)
 {
-	return _header;
+    return _header;
 }
 
 const char*
-MM_VerboseWriter::getFooter(MM_EnvironmentBase *env)
+MM_VerboseWriter::getFooter(MM_EnvironmentBase* env)
 {
-	return _footer;
+    return _footer;
 }
 
 MM_VerboseWriter*
 MM_VerboseWriter::getNextWriter()
 {
-	return _nextWriter;
+    return _nextWriter;
 }
 
-void
-MM_VerboseWriter::setNextWriter(MM_VerboseWriter* writer)
+void MM_VerboseWriter::setNextWriter(MM_VerboseWriter* writer)
 {
-	_nextWriter = writer;
+    _nextWriter = writer;
 }
 
-void
-MM_VerboseWriter::tearDown(MM_EnvironmentBase* env)
+void MM_VerboseWriter::tearDown(MM_EnvironmentBase* env)
 {
-	MM_GCExtensionsBase* ext = env->getExtensions();
-	ext->getForge()->free(_header);
-	_header = NULL;
-	ext->getForge()->free(_footer);
-	_footer = NULL;
+    MM_GCExtensionsBase* ext = env->getExtensions();
+    ext->getForge()->free(_header);
+    _header = NULL;
+    ext->getForge()->free(_footer);
+    _footer = NULL;
 }
 
-void
-MM_VerboseWriter::kill(MM_EnvironmentBase* env) {
-	tearDown(env);
-	env->getExtensions()->getForge()->free(this);
-}
-
-bool
-MM_VerboseWriter::initialize(MM_EnvironmentBase* env)
+void MM_VerboseWriter::kill(MM_EnvironmentBase* env)
 {
-	OMRPORT_ACCESS_FROM_OMRPORT(env->getPortLibrary());
-	MM_GCExtensionsBase* ext = env->getExtensions();
+    tearDown(env);
+    env->getExtensions()->getForge()->free(this);
+}
 
-	/* Initialize _header */
-	const char* version = omrgc_get_version(env->getOmrVM());
-	/* The length is -2 for the "%s" in VERBOSEGC_HEADER and +1 for '\0' */
-	uintptr_t headerLength = strlen(version) + strlen(VERBOSEGC_HEADER) - 1;
-	_header = (char*)ext->getForge()->allocate(sizeof(char) * headerLength, OMR::GC::AllocationCategory::DIAGNOSTIC, OMR_GET_CALLSITE());
-	if (NULL == _header) {
-		return false;
-	}
-	omrstr_printf(_header, headerLength, VERBOSEGC_HEADER, version);
+bool MM_VerboseWriter::initialize(MM_EnvironmentBase* env)
+{
+    OMRPORT_ACCESS_FROM_OMRPORT(env->getPortLibrary());
+    MM_GCExtensionsBase* ext = env->getExtensions();
 
-	/* Initialize _footer */
-	uintptr_t footerLength = strlen(VERBOSEGC_FOOTER) + 1;
-	_footer = (char*)ext->getForge()->allocate(sizeof(char) * footerLength, OMR::GC::AllocationCategory::DIAGNOSTIC, OMR_GET_CALLSITE());
-	if (NULL == _footer) {
-		ext->getForge()->free(_header);
-		return false;
-	}
-	omrstr_printf(_footer, footerLength, VERBOSEGC_FOOTER);
-	
-	return true;
+    /* Initialize _header */
+    const char* version = omrgc_get_version(env->getOmrVM());
+    /* The length is -2 for the "%s" in VERBOSEGC_HEADER and +1 for '\0' */
+    uintptr_t headerLength = strlen(version) + strlen(VERBOSEGC_HEADER) - 1;
+    _header = (char*)ext->getForge()->allocate(sizeof(char) * headerLength, OMR::GC::AllocationCategory::DIAGNOSTIC, OMR_GET_CALLSITE());
+    if (NULL == _header) {
+        return false;
+    }
+    omrstr_printf(_header, headerLength, VERBOSEGC_HEADER, version);
+
+    /* Initialize _footer */
+    uintptr_t footerLength = strlen(VERBOSEGC_FOOTER) + 1;
+    _footer = (char*)ext->getForge()->allocate(sizeof(char) * footerLength, OMR::GC::AllocationCategory::DIAGNOSTIC, OMR_GET_CALLSITE());
+    if (NULL == _footer) {
+        ext->getForge()->free(_header);
+        return false;
+    }
+    omrstr_printf(_footer, footerLength, VERBOSEGC_FOOTER);
+
+    return true;
 }

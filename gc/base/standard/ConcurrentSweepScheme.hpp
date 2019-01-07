@@ -53,11 +53,11 @@ class MM_ConcurrentSweepPoolState;
  * made a typedef).
  */
 enum {
-	modron_concurrentsweep_state_unprocessed = 0,  /**< has not been processed by the sweeper */
-	modron_concurrentsweep_state_busy_sweep,  /**< in the process of being swept */
-	modron_concurrentsweep_state_swept,  /**< has been swept */
-	modron_concurrentsweep_state_busy_connect,  /**< in the process of being connected to the free list */
-	modron_concurrentsweep_state_connected  /**< has been connected to the free list */
+    modron_concurrentsweep_state_unprocessed = 0, /**< has not been processed by the sweeper */
+    modron_concurrentsweep_state_busy_sweep, /**< in the process of being swept */
+    modron_concurrentsweep_state_swept, /**< has been swept */
+    modron_concurrentsweep_state_busy_connect, /**< in the process of being connected to the free list */
+    modron_concurrentsweep_state_connected /**< has been connected to the free list */
 };
 
 /**
@@ -67,124 +67,122 @@ enum {
  * 
  * @ingroup GC_Modron_Standard
  */
-class MM_ConcurrentSweepScheme : public MM_ParallelSweepScheme
-{
-	/*
-	 * Data members
-	 */
+class MM_ConcurrentSweepScheme : public MM_ParallelSweepScheme {
+    /*
+     * Data members
+     */
 private:
-	volatile UDATA _concurrentSweepingThreadCount;  /**< Number of threads currently sweeping concurrently */
-	omrthread_monitor_t _completeSweepingConcurrentlyLock;  /**< Lock to gain access to number of threads completing sweep concurrently */
+    volatile UDATA _concurrentSweepingThreadCount; /**< Number of threads currently sweeping concurrently */
+    omrthread_monitor_t _completeSweepingConcurrentlyLock; /**< Lock to gain access to number of threads completing sweep concurrently */
 protected:
-	MM_GlobalCollector *_collector;  /**< Global collector to which the receiver is associated */
-	MM_ConcurrentSweepStats _stats;  /**< Runtime statistics for execution and debugging (e.g., verbose gc) */
+    MM_GlobalCollector* _collector; /**< Global collector to which the receiver is associated */
+    MM_ConcurrentSweepStats _stats; /**< Runtime statistics for execution and debugging (e.g., verbose gc) */
 public:
-	
-	/*
-	 * Function members
-	 */
+    /*
+     * Function members
+     */
 private:
-	void initializeChunks(MM_EnvironmentBase *env);
+    void initializeChunks(MM_EnvironmentBase* env);
 
-	void verifyFreeList(MM_EnvironmentStandard *env, MM_HeapLinkedFreeHeader *freeListHead);
+    void verifyFreeList(MM_EnvironmentStandard* env, MM_HeapLinkedFreeHeader* freeListHead);
 
-	void checkRestrictions(MM_EnvironmentBase *env);
+    void checkRestrictions(MM_EnvironmentBase* env);
 
-	MM_ParallelSweepChunk *getNextSweepChunk(MM_EnvironmentStandard *env, MM_ConcurrentSweepPoolState *sweepPoolState);
-	MM_ParallelSweepChunk *getPreviousSweepChunk(MM_EnvironmentStandard *env, MM_ConcurrentSweepPoolState *sweepState);
-	bool incrementalSweepChunk(MM_EnvironmentStandard *env, MM_ParallelSweepChunk *chunk);
-	UDATA sweepPool(MM_EnvironmentBase *envModron, MM_MemoryPool *memoryPool, UDATA chunkTax);
-	bool sweepNextAvailableChunk(MM_EnvironmentStandard *env, MM_ConcurrentSweepPoolState *sweepPoolState);
-	bool sweepPreviousAvailableChunk(MM_EnvironmentStandard *env, MM_ConcurrentSweepPoolState *sweepPoolState);
-	bool concurrentSweepNextAvailableChunk(MM_EnvironmentStandard *env, MM_ConcurrentSweepPoolState *sweepState);
-	void propagateChunkProjections(MM_EnvironmentBase *envModron, MM_ParallelSweepChunk *startingChunkToPropagate);
-	void abandonOverlappedChunks(MM_EnvironmentBase *envModron, MM_ParallelSweepChunk *startingChunk, bool isFirstChunkInSubpool);
-	void walkChunkForOverlappingDeadSpace(MM_EnvironmentBase *envModron, MM_ParallelSweepChunk *currentChunk, void *walkStart);
+    MM_ParallelSweepChunk* getNextSweepChunk(MM_EnvironmentStandard* env, MM_ConcurrentSweepPoolState* sweepPoolState);
+    MM_ParallelSweepChunk* getPreviousSweepChunk(MM_EnvironmentStandard* env, MM_ConcurrentSweepPoolState* sweepState);
+    bool incrementalSweepChunk(MM_EnvironmentStandard* env, MM_ParallelSweepChunk* chunk);
+    UDATA sweepPool(MM_EnvironmentBase* envModron, MM_MemoryPool* memoryPool, UDATA chunkTax);
+    bool sweepNextAvailableChunk(MM_EnvironmentStandard* env, MM_ConcurrentSweepPoolState* sweepPoolState);
+    bool sweepPreviousAvailableChunk(MM_EnvironmentStandard* env, MM_ConcurrentSweepPoolState* sweepPoolState);
+    bool concurrentSweepNextAvailableChunk(MM_EnvironmentStandard* env, MM_ConcurrentSweepPoolState* sweepState);
+    void propagateChunkProjections(MM_EnvironmentBase* envModron, MM_ParallelSweepChunk* startingChunkToPropagate);
+    void abandonOverlappedChunks(MM_EnvironmentBase* envModron, MM_ParallelSweepChunk* startingChunk, bool isFirstChunkInSubpool);
+    void walkChunkForOverlappingDeadSpace(MM_EnvironmentBase* envModron, MM_ParallelSweepChunk* currentChunk, void* walkStart);
 
-	bool increaseActiveSweepingThreadCount(MM_EnvironmentBase *envModron, bool completeSweeping);
-	bool decreaseActiveSweepingThreadCount(MM_EnvironmentBase *envModron, bool completeSweeping);
+    bool increaseActiveSweepingThreadCount(MM_EnvironmentBase* envModron, bool completeSweeping);
+    bool decreaseActiveSweepingThreadCount(MM_EnvironmentBase* envModron, bool completeSweeping);
 
-	MM_ParallelSweepChunk *getNextConnectChunk(MM_EnvironmentStandard *env, MM_ConcurrentSweepPoolState *sweepPoolState);
-	void initializeStateForConnections(
-		MM_EnvironmentBase *envModron,
-		MM_MemoryPoolAddressOrderedList *memoryPool,
-		MM_ConcurrentSweepPoolState *sweepState,
-		MM_ParallelSweepChunk *chunk);
-	bool incrementalConnectChunk(
-		MM_EnvironmentStandard *env,
-		MM_ParallelSweepChunk *chunk,
-		MM_ConcurrentSweepPoolState *sweepState,
-		MM_MemoryPoolAddressOrderedList *memoryPool);
+    MM_ParallelSweepChunk* getNextConnectChunk(MM_EnvironmentStandard* env, MM_ConcurrentSweepPoolState* sweepPoolState);
+    void initializeStateForConnections(
+        MM_EnvironmentBase* envModron,
+        MM_MemoryPoolAddressOrderedList* memoryPool,
+        MM_ConcurrentSweepPoolState* sweepState,
+        MM_ParallelSweepChunk* chunk);
+    bool incrementalConnectChunk(
+        MM_EnvironmentStandard* env,
+        MM_ParallelSweepChunk* chunk,
+        MM_ConcurrentSweepPoolState* sweepState,
+        MM_MemoryPoolAddressOrderedList* memoryPool);
 
-	void workThreadCompleteSweep(MM_EnvironmentBase *env);
+    void workThreadCompleteSweep(MM_EnvironmentBase* env);
 
-	void workThreadFindMinimumSizeFreeEntry(MM_EnvironmentBase *env, MM_MemorySubSpace *memorySubSpace, UDATA minimumFreeSize);
+    void workThreadFindMinimumSizeFreeEntry(MM_EnvironmentBase* env, MM_MemorySubSpace* memorySubSpace, UDATA minimumFreeSize);
 
-	bool isConcurrentSweepCandidate(MM_MemorySubSpace *memorySubSpace);
+    bool isConcurrentSweepCandidate(MM_MemorySubSpace* memorySubSpace);
 
-	void preConnectChunk(MM_EnvironmentBase* env, MM_ParallelSweepChunk *chunk);
-	void postConnectChunk(MM_EnvironmentBase* env, MM_ParallelSweepChunk *chunk);
+    void preConnectChunk(MM_EnvironmentBase* env, MM_ParallelSweepChunk* chunk);
+    void postConnectChunk(MM_EnvironmentBase* env, MM_ParallelSweepChunk* chunk);
 
-	UDATA calculateTax(MM_EnvironmentBase *envModron, UDATA allocationSize);
+    UDATA calculateTax(MM_EnvironmentBase* envModron, UDATA allocationSize);
 
-	void reportConcurrentlyCompletedSweepPhase(MM_EnvironmentBase *envModron);
-	void reportCompletedConcurrentSweep(MM_EnvironmentBase *envModron, SweepCompletionReason reason);
+    void reportConcurrentlyCompletedSweepPhase(MM_EnvironmentBase* envModron);
+    void reportCompletedConcurrentSweep(MM_EnvironmentBase* envModron, SweepCompletionReason reason);
 
-	static void hookMemoryPoolNew(J9HookInterface** hook, UDATA eventNum, void* eventData, void* userData);
-	static void hookMemoryPoolKill(J9HookInterface** hook, UDATA eventNum, void* eventData, void* userData);
+    static void hookMemoryPoolNew(J9HookInterface** hook, UDATA eventNum, void* eventData, void* userData);
+    static void hookMemoryPoolKill(J9HookInterface** hook, UDATA eventNum, void* eventData, void* userData);
 
-	void calculateApproximateFree(MM_EnvironmentBase* env, MM_MemoryPool *memoryPool, MM_ConcurrentSweepPoolState *sweepState);
+    void calculateApproximateFree(MM_EnvironmentBase* env, MM_MemoryPool* memoryPool, MM_ConcurrentSweepPoolState* sweepState);
 
 protected:
-	virtual bool initialize(MM_EnvironmentBase *env);
-	virtual void tearDown(MM_EnvironmentBase *env);
+    virtual bool initialize(MM_EnvironmentBase* env);
+    virtual void tearDown(MM_EnvironmentBase* env);
 
-	virtual void setupForSweep(MM_EnvironmentBase *env);
+    virtual void setupForSweep(MM_EnvironmentBase* env);
 
-	virtual void connectChunk(MM_EnvironmentBase *env, MM_ParallelSweepChunk *chunk);
+    virtual void connectChunk(MM_EnvironmentBase* env, MM_ParallelSweepChunk* chunk);
 
-	virtual void flushAllFinalChunks(MM_EnvironmentBase *env);
+    virtual void flushAllFinalChunks(MM_EnvironmentBase* env);
 
 public:
-	static MM_ConcurrentSweepScheme *newInstance(MM_EnvironmentBase *env, MM_GlobalCollector *collector);
+    static MM_ConcurrentSweepScheme* newInstance(MM_EnvironmentBase* env, MM_GlobalCollector* collector);
 
-	/**
+    /**
  	* Request to create sweepPoolState class for pool
  	* @param  memoryPool memory pool to attach sweep state to
  	* @return pointer to created class
  	*/
-	virtual void *createSweepPoolState(MM_EnvironmentBase *env, MM_MemoryPool *memoryPool);
+    virtual void* createSweepPoolState(MM_EnvironmentBase* env, MM_MemoryPool* memoryPool);
 
-	bool isConcurrentSweepActive() { return _stats.isConcurrentSweepActive(); }
+    bool isConcurrentSweepActive() { return _stats.isConcurrentSweepActive(); }
 
-	virtual void sweep(MM_EnvironmentBase *env);
-	virtual void completeSweep(MM_EnvironmentBase* env, SweepCompletionReason reason);
-	virtual bool sweepForMinimumSize(MM_EnvironmentBase *env, MM_MemorySubSpace *baseMemorySubSpace, MM_AllocateDescription *allocateDescription);
-	bool completeSweepingConcurrently(MM_EnvironmentBase *envModron);
+    virtual void sweep(MM_EnvironmentBase* env);
+    virtual void completeSweep(MM_EnvironmentBase* env, SweepCompletionReason reason);
+    virtual bool sweepForMinimumSize(MM_EnvironmentBase* env, MM_MemorySubSpace* baseMemorySubSpace, MM_AllocateDescription* allocateDescription);
+    bool completeSweepingConcurrently(MM_EnvironmentBase* envModron);
 
-	virtual bool replenishPoolForAllocate(MM_EnvironmentBase *env, MM_MemoryPool *memoryPool, UDATA size);
-	void payAllocationTax(MM_EnvironmentBase *env, MM_MemorySubSpace *subspace,  MM_AllocateDescription *allocDescriptionn);
+    virtual bool replenishPoolForAllocate(MM_EnvironmentBase* env, MM_MemoryPool* memoryPool, UDATA size);
+    void payAllocationTax(MM_EnvironmentBase* env, MM_MemorySubSpace* subspace, MM_AllocateDescription* allocDescriptionn);
 
-	/**
-	 * @return true if the concurrent sweep is not active.
-	 */
-	virtual bool isSweepCompleted(MM_EnvironmentBase* env) { return (!isConcurrentSweepActive()); }
+    /**
+     * @return true if the concurrent sweep is not active.
+     */
+    virtual bool isSweepCompleted(MM_EnvironmentBase* env) { return (!isConcurrentSweepActive()); }
 
-	MM_ConcurrentSweepScheme(MM_EnvironmentBase *env, MM_GlobalCollector *collector)
-		: MM_ParallelSweepScheme(env)
-		, _concurrentSweepingThreadCount(0)
-		, _completeSweepingConcurrentlyLock(NULL)
-		, _collector(collector)
-		, _stats()
-	{
-		_typeId = __FUNCTION__;
-	}
-	
-	/*
-	 * Friends
-	 */
-	friend class MM_ConcurrentSweepCompleteSweepTask;
-	friend class MM_ConcurrentSweepFindMinimumSizeFreeTask;
+    MM_ConcurrentSweepScheme(MM_EnvironmentBase* env, MM_GlobalCollector* collector)
+        : MM_ParallelSweepScheme(env)
+        , _concurrentSweepingThreadCount(0)
+        , _completeSweepingConcurrentlyLock(NULL)
+        , _collector(collector)
+        , _stats()
+    {
+        _typeId = __FUNCTION__;
+    }
+
+    /*
+     * Friends
+     */
+    friend class MM_ConcurrentSweepCompleteSweepTask;
+    friend class MM_ConcurrentSweepFindMinimumSizeFreeTask;
 };
 
 #endif /* OMR_GC_CONCURRENT_SWEEP */

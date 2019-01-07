@@ -24,21 +24,21 @@
 
 #include "codegen/OMRLinkage.hpp"
 
-#include "codegen/LinkageConventionsEnum.hpp"  // for TR_LinkageConventions
-#include "infra/Annotations.hpp"               // for OMR_EXTENSIBLE
+#include "codegen/LinkageConventionsEnum.hpp" // for TR_LinkageConventions
+#include "infra/Annotations.hpp" // for OMR_EXTENSIBLE
 
-namespace TR { class CodeGenerator; }
-
-namespace TR
-{
-
-class OMR_EXTENSIBLE Linkage : public OMR::LinkageConnector
-   {
-   public:
-
-   Linkage(TR::CodeGenerator *cg, TR_S390LinkageConventions elc, TR_LinkageConventions le)
-      : OMR::LinkageConnector(cg, elc, le) {}
-   };
+namespace TR {
+class CodeGenerator;
 }
+
+namespace TR {
+
+class OMR_EXTENSIBLE Linkage : public OMR::LinkageConnector {
+public:
+    Linkage(TR::CodeGenerator* cg, TR_S390LinkageConventions elc, TR_LinkageConventions le)
+        : OMR::LinkageConnector(cg, elc, le)
+    {}
+};
+} // namespace TR
 
 #endif

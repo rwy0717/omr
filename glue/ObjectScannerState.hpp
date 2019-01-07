@@ -31,9 +31,8 @@
  * of GC_ObjectScannerState must be specified in the glue layer for the client language and that definition
  * will be used when OMR is built for the client language.
  */
-typedef union GC_ObjectScannerState
-{
-	uint8_t scanner[sizeof(GC_ObjectScanner)];
+typedef union GC_ObjectScannerState {
+    uint8_t scanner[sizeof(GC_ObjectScanner)];
 } GC_ObjectScannerState;
 
 #endif /* OBJECTSCANNERSTATE_HPP_ */

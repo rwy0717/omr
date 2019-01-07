@@ -45,30 +45,30 @@
 #define OMRPORT_VMEM_PAGESIZE_COUNT 5
 
 #if defined(OMR_ENV_DATA64)
-#define TTOKEN_BUF_SZ                   16
+#define TTOKEN_BUF_SZ 16
 #endif /* defined(OMR_ENV_DATA64) */
 
 typedef struct OMRPortPlatformGlobals {
-	char *si_osType;
-	char *si_osVersion;
-	uintptr_t vmem_pageSize[OMRPORT_VMEM_PAGESIZE_COUNT]; /** <0 terminated array of supported page sizes */
-	uintptr_t vmem_pageFlags[OMRPORT_VMEM_PAGESIZE_COUNT]; /** <0 terminated array of flags describing type of the supported page sizes */
+    char* si_osType;
+    char* si_osVersion;
+    uintptr_t vmem_pageSize[OMRPORT_VMEM_PAGESIZE_COUNT]; /** <0 terminated array of supported page sizes */
+    uintptr_t vmem_pageFlags[OMRPORT_VMEM_PAGESIZE_COUNT]; /** <0 terminated array of flags describing type of the supported page sizes */
 #if defined(OMR_ENV_DATA64)
-	J9SubAllocateHeapMem32 subAllocHeapMem32;
+    J9SubAllocateHeapMem32 subAllocHeapMem32;
 #endif
-	/* This must only be set in omrsignal_startup() so that subsequent reads of this don't need to worry about synchronization */
-	BOOLEAN resumableTrapsSupported;
-	/* This must only be set in omrvmem_startup() so that subsequent reads of this don't need to worry about synchronization */
-	uintptr_t userExtendedPrivateAreaMemoryType;
-	BOOLEAN loggingEnabled;
-	BOOLEAN fileTextIconvOpenFailed; /* this gets implicitly initialized to FALSE when the globals are allocated. */
-	BOOLEAN globalConverterEnabled;
-	iconv_t globalConverter[UNCACHED_ICONV_DESCRIPTOR];
-	MUTEX globalConverterMutex[UNCACHED_ICONV_DESCRIPTOR];
-	uintptr_t systemLoggingFlags;
-	char *si_executableName;
+    /* This must only be set in omrsignal_startup() so that subsequent reads of this don't need to worry about synchronization */
+    BOOLEAN resumableTrapsSupported;
+    /* This must only be set in omrvmem_startup() so that subsequent reads of this don't need to worry about synchronization */
+    uintptr_t userExtendedPrivateAreaMemoryType;
+    BOOLEAN loggingEnabled;
+    BOOLEAN fileTextIconvOpenFailed; /* this gets implicitly initialized to FALSE when the globals are allocated. */
+    BOOLEAN globalConverterEnabled;
+    iconv_t globalConverter[UNCACHED_ICONV_DESCRIPTOR];
+    MUTEX globalConverterMutex[UNCACHED_ICONV_DESCRIPTOR];
+    uintptr_t systemLoggingFlags;
+    char* si_executableName;
 #if defined(OMR_ENV_DATA64)
-	char iptTtoken[TTOKEN_BUF_SZ];
+    char iptTtoken[TTOKEN_BUF_SZ];
 #endif /* defined(OMR_ENV_DATA64) */
 } OMRPortPlatformGlobals;
 
@@ -79,7 +79,7 @@ typedef struct OMRPortPlatformGlobals {
 #if defined(OMR_ENV_DATA64)
 #define PPG_mem_mem32_subAllocHeapMem32 (portLibrary->portGlobals->platformGlobals.subAllocHeapMem32)
 #endif
-#define PPG_resumableTrapsSupported	(portLibrary->portGlobals->platformGlobals.resumableTrapsSupported)
+#define PPG_resumableTrapsSupported (portLibrary->portGlobals->platformGlobals.resumableTrapsSupported)
 #define PPG_userExtendedPrivateAreaMemoryType (portLibrary->portGlobals->platformGlobals.userExtendedPrivateAreaMemoryType)
 #define PPG_syslog_enabled (portLibrary->portGlobals->platformGlobals.loggingEnabled)
 #define PPG_syslog_flags (portLibrary->portGlobals->platformGlobals.systemLoggingFlags)

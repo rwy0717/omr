@@ -25,4 +25,4 @@
 
 #include <string.h>
 
-bool str_comparator(const char *s1, const char *s2) { return strcmp(s1, s2) < 0; }
+bool str_comparator(const char* s1, const char* s2) { return strcmp(s1, s2) < 0; }

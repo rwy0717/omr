@@ -24,19 +24,18 @@
 
 #include "optimizer/OMRTransformUtil.hpp"
 
-namespace TR { class Compilation; }
+namespace TR {
+class Compilation;
+}
 
-namespace TR
-   {
-   class OMR_EXTENSIBLE TransformUtil : public OMR::TransformUtilConnector
-      {
-      public:
-
-      TransformUtil() :
-         OMR::TransformUtilConnector()
-         {
-         }
-      };
-   }
+namespace TR {
+class OMR_EXTENSIBLE TransformUtil : public OMR::TransformUtilConnector {
+public:
+    TransformUtil()
+        : OMR::TransformUtilConnector()
+    {
+    }
+};
+} // namespace TR
 
 #endif

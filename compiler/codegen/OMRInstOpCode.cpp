@@ -23,40 +23,34 @@
 
 uint8_t
 OMR::InstOpCode::length(Mnemonic m)
-   {
-   return 0;
-   }
+{
+    return 0;
+}
 
-uint8_t *
+uint8_t*
 OMR::InstOpCode::copyBinaryToBuffer(
-      Mnemonic m,
-      uint8_t *cursor)
-   {
-   return cursor;
-   }
+    Mnemonic m,
+    uint8_t* cursor)
+{
+    return cursor;
+}
 
-const char *
+const char*
 OMR::InstOpCode::getOpCodeName(Mnemonic m)
-   {
-   if (IS_OMR_MNEMONIC(m))
-      {
-      return "OMROpCode";
-      }
-   else
-      {
-      return "Unknown";
-      }
-   }
+{
+    if (IS_OMR_MNEMONIC(m)) {
+        return "OMROpCode";
+    } else {
+        return "Unknown";
+    }
+}
 
-const char *
+const char*
 OMR::InstOpCode::getMnemonicName(Mnemonic m)
-   {
-   if (IS_OMR_MNEMONIC(m))
-      {
-      return "OMROpCode";
-      }
-   else
-      {
-      return "Unknown";
-      }
-   }
+{
+    if (IS_OMR_MNEMONIC(m)) {
+        return "OMROpCode";
+    } else {
+        return "Unknown";
+    }
+}

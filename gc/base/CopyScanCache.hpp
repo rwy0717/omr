@@ -63,79 +63,79 @@
  */
 
 class MM_CopyScanCache : public MM_Base {
-	/* Data Members */
+    /* Data Members */
 private:
 protected:
 public:
-	MM_CopyScanCache* next;
-	uintptr_t flags;
-	bool _hasPartiallyScannedObject; /**< whether the current object been scanned is partially scanned */
-	void* cacheBase;
-	void* cacheTop;
-	void* cacheAlloc;
-	void* scanCurrent;
+    MM_CopyScanCache* next;
+    uintptr_t flags;
+    bool _hasPartiallyScannedObject; /**< whether the current object been scanned is partially scanned */
+    void* cacheBase;
+    void* cacheTop;
+    void* cacheAlloc;
+    void* scanCurrent;
 
-	/* Members Function */
+    /* Members Function */
 private:
 protected:
 public:
-	/**
-	 * Sets the flag on the cache which denotes it is currently in use as a scan cache
-	 */
-	MMINLINE void setCurrentlyBeingScanned()
-	{
-		flags |= OMR_SCAVENGER_CACHE_TYPE_SCAN;
-	}
-	/**
-	 * Clears the flag on the cache which denotes it is currently in use as a scan cache
-	 */
-	MMINLINE void clearCurrentlyBeingScanned()
-	{
-		flags &= ~OMR_SCAVENGER_CACHE_TYPE_SCAN;
-	}
+    /**
+     * Sets the flag on the cache which denotes it is currently in use as a scan cache
+     */
+    MMINLINE void setCurrentlyBeingScanned()
+    {
+        flags |= OMR_SCAVENGER_CACHE_TYPE_SCAN;
+    }
+    /**
+     * Clears the flag on the cache which denotes it is currently in use as a scan cache
+     */
+    MMINLINE void clearCurrentlyBeingScanned()
+    {
+        flags &= ~OMR_SCAVENGER_CACHE_TYPE_SCAN;
+    }
 
-	/**
-	 * Checks the flag on the cache which denotes if it is currently in use as a scan cache
-	 * @return True if the receiver is currently being used for scanning
-	 */
-	MMINLINE bool isCurrentlyBeingScanned() const
-	{
-		return (OMR_SCAVENGER_CACHE_TYPE_SCAN == (flags & OMR_SCAVENGER_CACHE_TYPE_SCAN));
-	}
-	/**
-	 * @return whether there is scanning work in the receiver
-	 */
-	MMINLINE bool isScanWorkAvailable() const
-	{
-		return scanCurrent < cacheAlloc;
-	}
+    /**
+     * Checks the flag on the cache which denotes if it is currently in use as a scan cache
+     * @return True if the receiver is currently being used for scanning
+     */
+    MMINLINE bool isCurrentlyBeingScanned() const
+    {
+        return (OMR_SCAVENGER_CACHE_TYPE_SCAN == (flags & OMR_SCAVENGER_CACHE_TYPE_SCAN));
+    }
+    /**
+     * @return whether there is scanning work in the receiver
+     */
+    MMINLINE bool isScanWorkAvailable() const
+    {
+        return scanCurrent < cacheAlloc;
+    }
 
-	/**
-	 * Create a CopyScanCache object.
-	 */
-	MM_CopyScanCache()
-		: MM_Base()
-		, next(NULL)
-		, flags(0)
-		, _hasPartiallyScannedObject(false)
-		, cacheBase(NULL)
-		, cacheTop(NULL)
-		, cacheAlloc(NULL)
-		, scanCurrent(NULL)
-	{
-	}
+    /**
+     * Create a CopyScanCache object.
+     */
+    MM_CopyScanCache()
+        : MM_Base()
+        , next(NULL)
+        , flags(0)
+        , _hasPartiallyScannedObject(false)
+        , cacheBase(NULL)
+        , cacheTop(NULL)
+        , cacheAlloc(NULL)
+        , scanCurrent(NULL)
+    {
+    }
 
-	MM_CopyScanCache(uintptr_t givenFlags)
-		: MM_Base()
-		, next(NULL)
-		, flags(givenFlags)
-		, _hasPartiallyScannedObject(false)
-		, cacheBase(NULL)
-		, cacheTop(NULL)
-		, cacheAlloc(NULL)
-		, scanCurrent(NULL)
-	{
-	}
+    MM_CopyScanCache(uintptr_t givenFlags)
+        : MM_Base()
+        , next(NULL)
+        , flags(givenFlags)
+        , _hasPartiallyScannedObject(false)
+        , cacheBase(NULL)
+        , cacheTop(NULL)
+        , cacheAlloc(NULL)
+        , scanCurrent(NULL)
+    {
+    }
 };
 
 #endif /* COPYSCANCACHEBASE_HPP_ */

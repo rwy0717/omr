@@ -35,10 +35,9 @@ typedef struct J9GCSpinlock {
     uintptr_t spinCount3;
 } J9GCSpinlock;
 
-
-intptr_t omrgc_spinlock_destroy(J9GCSpinlock *spinlock);
-intptr_t omrgc_spinlock_init(J9GCSpinlock *spinlock);
-intptr_t omrgc_spinlock_release(J9GCSpinlock *spinlock);
-intptr_t omrgc_spinlock_acquire(J9GCSpinlock *spinlock, J9ThreadMonitorTracing*  lockTracing);
+intptr_t omrgc_spinlock_destroy(J9GCSpinlock* spinlock);
+intptr_t omrgc_spinlock_init(J9GCSpinlock* spinlock);
+intptr_t omrgc_spinlock_release(J9GCSpinlock* spinlock);
+intptr_t omrgc_spinlock_acquire(J9GCSpinlock* spinlock, J9ThreadMonitorTracing* lockTracing);
 
 #endif /* GCSPINLOCK_HPP_ */

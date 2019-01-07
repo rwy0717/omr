@@ -36,58 +36,59 @@ namespace Tril {
  * @brief Class for extracting infromation about a Tril method from its AST node
  */
 class MethodInfo {
-    public:
-
-        /**
+public:
+    /**
          * @brief Constructs a MethodInfo object from a Tril AST node
          * @param methodNode is the Tril AST node
          */
-        explicit MethodInfo(const ASTNode* methodNode) : _methodNode{methodNode} {
-            auto returnTypeArg = _methodNode->getArgByName("return");
-            _returnType = getTRDataTypes(returnTypeArg->getValue()->getString());
-            _argTypes = parseArgTypes(_methodNode); 
+    explicit MethodInfo(const ASTNode* methodNode)
+        : _methodNode { methodNode }
+    {
+        auto returnTypeArg = _methodNode->getArgByName("return");
+        _returnType = getTRDataTypes(returnTypeArg->getValue()->getString());
+        _argTypes = parseArgTypes(_methodNode);
 
-            auto nameArg = _methodNode->getArgByName("name");
-            if (nameArg != NULL) {
-                _name = nameArg->getValue()->get<ASTValue::String_t>();
-            }
+        auto nameArg = _methodNode->getArgByName("name");
+        if (nameArg != NULL) {
+            _name = nameArg->getValue()->get<ASTValue::String_t>();
         }
+    }
 
-        /**
+    /**
          * @brief Returns the name of the Tril method
          */
-        const std::string& getName() const { return _name; }
+    const std::string& getName() const { return _name; }
 
-        /**
+    /**
          * @brief Retruns the AST node representing the Tril method
          */
-        const ASTNode* getASTNode() const { return _methodNode; }
+    const ASTNode* getASTNode() const { return _methodNode; }
 
-        /**
+    /**
          * @brief Returns the AST representation of the method's body
          */
-        const ASTNode* getBodyAST() const { return _methodNode->getChildren(); }
+    const ASTNode* getBodyAST() const { return _methodNode->getChildren(); }
 
-        /**
+    /**
          * @brief Returns the return type of the method
          */
-        TR::DataTypes getReturnType() const { return _returnType; }
+    TR::DataTypes getReturnType() const { return _returnType; }
 
-        /**
+    /**
          * @brief Returns a vector with the argument types of the method
          */
-        const std::vector<TR::DataTypes>& getArgTypes() const { return _argTypes; }
+    const std::vector<TR::DataTypes>& getArgTypes() const { return _argTypes; }
 
-        /**
+    /**
          * @brief Returns the number of arguments the Tril method takes
          */
-        std::size_t getArgCount() const { return _argTypes.size(); }
+    std::size_t getArgCount() const { return _argTypes.size(); }
 
-    private:
-        const ASTNode* _methodNode;
-        std::string _name;
-        TR::DataTypes _returnType;
-        std::vector<TR::DataTypes> _argTypes;
+private:
+    const ASTNode* _methodNode;
+    std::string _name;
+    TR::DataTypes _returnType;
+    std::vector<TR::DataTypes> _argTypes;
 };
 
 } // namespace Tril

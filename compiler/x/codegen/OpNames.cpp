@@ -21,21 +21,21 @@
 
 #ifdef DEBUG
 
-#include "codegen/CodeGenerator.hpp"  // for CodeGenerator
-#include "compile/Compilation.hpp"    // for Compilation
-#include "ras/Debug.hpp"              // for TR_DebugBase
-#include "x/codegen/X86Ops.hpp"       // for TR_X86OpCode
+#include "codegen/CodeGenerator.hpp" // for CodeGenerator
+#include "compile/Compilation.hpp" // for Compilation
+#include "ras/Debug.hpp" // for TR_DebugBase
+#include "x/codegen/X86Ops.hpp" // for TR_X86OpCode
 
-const char *
-TR_X86OpCode::getOpCodeName(TR::CodeGenerator *cg)
-   {
-   return cg->comp()->getDebug()->getOpCodeName(this);
-   }
+const char*
+TR_X86OpCode::getOpCodeName(TR::CodeGenerator* cg)
+{
+    return cg->comp()->getDebug()->getOpCodeName(this);
+}
 
-const char *
-TR_X86OpCode::getMnemonicName(TR::CodeGenerator *cg)
-   {
-   return cg->comp()->getDebug()->getMnemonicName(this);
-   }
+const char*
+TR_X86OpCode::getMnemonicName(TR::CodeGenerator* cg)
+{
+    return cg->comp()->getDebug()->getMnemonicName(this);
+}
 
 #endif // ifdef DEBUG

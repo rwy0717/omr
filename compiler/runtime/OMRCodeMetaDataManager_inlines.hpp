@@ -24,9 +24,9 @@
 
 #include "runtime/CodeMetaDataManager.hpp"
 
-TR::CodeMetaDataManager * OMR::CodeMetaDataManager::self()
-   {
-   return static_cast<TR::CodeMetaDataManager *>(this);
-   }
+TR::CodeMetaDataManager* OMR::CodeMetaDataManager::self()
+{
+    return static_cast<TR::CodeMetaDataManager*>(this);
+}
 
 #endif

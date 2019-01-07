@@ -29,42 +29,40 @@ namespace OMR {
 namespace GC {
 
 struct MemoryHeader {
-	uintptr_t allocatedBytes;
-	OMR::GC::AllocationCategory::Enum category;
+    uintptr_t allocatedBytes;
+    OMR::GC::AllocationCategory::Enum category;
 };
 
 union AlignedMemoryHeader {
-	double forAlignment;
-	MemoryHeader header;
+    double forAlignment;
+    MemoryHeader header;
 };
 
-bool
-Forge::initialize(OMRPortLibrary* port)
+bool Forge::initialize(OMRPortLibrary* port)
 {
-	_portLibrary = port;
+    _portLibrary = port;
 
-	if (0 != omrthread_monitor_init_with_name(&_mutex, 0, "OMR::GC::Forge")) {
-		return false;
-	}	
+    if (0 != omrthread_monitor_init_with_name(&_mutex, 0, "OMR::GC::Forge")) {
+        return false;
+    }
 
-	for (uintptr_t i = 0; i < OMR::GC::AllocationCategory::CATEGORY_COUNT; i++) {
-		_statistics[i].category = (OMR::GC::AllocationCategory::Enum) i;
-		_statistics[i].allocated = 0;
-		_statistics[i].highwater = 0;
-	}
-	
-	return true;
+    for (uintptr_t i = 0; i < OMR::GC::AllocationCategory::CATEGORY_COUNT; i++) {
+        _statistics[i].category = (OMR::GC::AllocationCategory::Enum)i;
+        _statistics[i].allocated = 0;
+        _statistics[i].highwater = 0;
+    }
+
+    return true;
 }
 
-void 
-Forge::tearDown()
+void Forge::tearDown()
 {
-	_portLibrary = NULL;
-	
-	if (NULL != _mutex) {
-		omrthread_monitor_destroy(_mutex);
-		_mutex = NULL;
-	}
+    _portLibrary = NULL;
+
+    if (NULL != _mutex) {
+        omrthread_monitor_destroy(_mutex);
+        _mutex = NULL;
+    }
 }
 
 /**
@@ -76,28 +74,27 @@ Forge::tearDown()
  * @param[in] callsite - the origin of the memory request (e.g. filename.c:5), which should be found using the OMR_GET_CALLSITE() macro
  * @return a pointer to the allocated memory, or NULL if the request could not be performed
  */
-void* 
-Forge::allocate(std::size_t bytesRequested, OMR::GC::AllocationCategory::Enum category, const char* callsite)
+void* Forge::allocate(std::size_t bytesRequested, OMR::GC::AllocationCategory::Enum category, const char* callsite)
 {
-	AlignedMemoryHeader* memoryPointer;
+    AlignedMemoryHeader* memoryPointer;
 
-	memoryPointer = (AlignedMemoryHeader *) _portLibrary->mem_allocate_memory(_portLibrary, bytesRequested + sizeof(AlignedMemoryHeader), callsite, OMRMEM_CATEGORY_MM);
-	if (NULL != memoryPointer) {
-		memoryPointer->header.allocatedBytes = bytesRequested;
-		memoryPointer->header.category = category;
+    memoryPointer = (AlignedMemoryHeader*)_portLibrary->mem_allocate_memory(_portLibrary, bytesRequested + sizeof(AlignedMemoryHeader), callsite, OMRMEM_CATEGORY_MM);
+    if (NULL != memoryPointer) {
+        memoryPointer->header.allocatedBytes = bytesRequested;
+        memoryPointer->header.category = category;
 
-		omrthread_monitor_enter(_mutex);
+        omrthread_monitor_enter(_mutex);
 
-		_statistics[category].allocated += bytesRequested;
-		if (_statistics[category].allocated > _statistics[category].highwater) {
-			_statistics[category].highwater = _statistics[category].allocated; 
-		}
+        _statistics[category].allocated += bytesRequested;
+        if (_statistics[category].allocated > _statistics[category].highwater) {
+            _statistics[category].highwater = _statistics[category].allocated;
+        }
 
-		omrthread_monitor_exit(_mutex);
-		memoryPointer += 1;
-	}
-	
-	return memoryPointer;
+        omrthread_monitor_exit(_mutex);
+        memoryPointer += 1;
+    }
+
+    return memoryPointer;
 }
 
 /**
@@ -106,23 +103,21 @@ Forge::allocate(std::size_t bytesRequested, OMR::GC::AllocationCategory::Enum ca
  *
  * @param[in] memoryPointer - a pointer to the memory that will be freed
  */
-void 
-Forge::free(void* memoryPointer)
-{	
-	if (NULL == memoryPointer) {
-		return;
-	}
+void Forge::free(void* memoryPointer)
+{
+    if (NULL == memoryPointer) {
+        return;
+    }
 
-	AlignedMemoryHeader* alignedHeader = (AlignedMemoryHeader *) memoryPointer;
-	alignedHeader -= 1;
+    AlignedMemoryHeader* alignedHeader = (AlignedMemoryHeader*)memoryPointer;
+    alignedHeader -= 1;
 
+    omrthread_monitor_enter(_mutex);
+    _statistics[alignedHeader->header.category].allocated -= alignedHeader->header.allocatedBytes;
+    omrthread_monitor_exit(_mutex);
 
-	omrthread_monitor_enter(_mutex);
-	_statistics[alignedHeader->header.category].allocated -= alignedHeader->header.allocatedBytes; 
-	omrthread_monitor_exit(_mutex);
-	
-	OMRPORT_ACCESS_FROM_OMRPORT(_portLibrary);
-	omrmem_free_memory(alignedHeader);
+    OMRPORT_ACCESS_FROM_OMRPORT(_portLibrary);
+    omrmem_free_memory(alignedHeader);
 }
 
 /**
@@ -134,7 +129,7 @@ Forge::free(void* memoryPointer)
 OMR_GC_MemoryStatistics*
 Forge::getCurrentStatistics()
 {
-	return _statistics;
+    return _statistics;
 }
 
 } // namespace GC

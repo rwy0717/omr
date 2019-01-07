@@ -24,16 +24,13 @@
 
 #include "env/OMRIO.hpp"
 
-#include "infra/Annotations.hpp"  // for OMR_EXTENSIBLE
+#include "infra/Annotations.hpp" // for OMR_EXTENSIBLE
 
-namespace TR
-{
+namespace TR {
 
-class OMR_EXTENSIBLE IO : public OMR::IOConnector
-   {
+class OMR_EXTENSIBLE IO : public OMR::IOConnector {
+};
 
-   };
-
-}
+} // namespace TR
 
 #endif

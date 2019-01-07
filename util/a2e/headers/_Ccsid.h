@@ -32,37 +32,36 @@
  * ===========================================================================
  */
 
-#if __TARGET_LIB__ == 0X22080000                                   
-#include <//'PP.ADLE370.OS39028.SCEEH.H(Ccsid)'>                   
-#else                                                              
+#if __TARGET_LIB__ == 0X22080000
+#include < //'PP.ADLE370.OS39028.SCEEH.H(Ccsid)'>
+#else
 #include "prefixpath.h"
-#include PREFIXPATH(_Ccsid.h)                                    
-#endif                                                             
+#include PREFIXPATH(_Ccsid.h)
+#endif
 
 #if defined(IBM_ATOE)
 
-	#if !defined(IBM_ATOE_CCSID)
-		#define IBM_ATOE_CCSID
+#if !defined(IBM_ATOE_CCSID)
+#define IBM_ATOE_CCSID
 
-		#ifdef __cplusplus
-            extern "C" {
-		#endif
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-	__csType atoe___CSNameType(char *codesetName);
-	__ccsid_t atoe___toCcsid(char *codesetName);
+__csType atoe___CSNameType(char* codesetName);
+__ccsid_t atoe___toCcsid(char* codesetName);
 
-		#ifdef __cplusplus
-            }
-		#endif
+#ifdef __cplusplus
+}
+#endif
 
-		#undef atoe___CSNameType
-		#undef atoe___toCcsid
+#undef atoe___CSNameType
+#undef atoe___toCcsid
 
-		#define __CSNameType 	atoe___CSNameType 
-		#define __toCcsid	atoe___toCcsid	 
+#define __CSNameType atoe___CSNameType
+#define __toCcsid atoe___toCcsid
 
-		#define vsnprintf	atoe_vsnprintf
-	#endif
+#define vsnprintf atoe_vsnprintf
+#endif
 
 #endif
- 

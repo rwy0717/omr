@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 /**
  * Description: Calls an extensible class static member function
  *    wihtout scope resolution, which is not allowed.
@@ -28,20 +27,20 @@
 
 #define OMR_EXTENSIBLE __attribute__((annotate("OMR_Extensible")))
 
-namespace OMR
-{
+namespace OMR {
 
-class OMR_EXTENSIBLE ExtClass
-   {
-   public:
-   static void functionCalled();  // function to be called
-   void callingFunction();        // function that will make call
-                                  //   without scope resolution
-   };
+class OMR_EXTENSIBLE ExtClass {
+public:
+    static void functionCalled(); // function to be called
+    void callingFunction(); // function that will make call
+        //   without scope resolution
+};
 
 } // namespace OMR
 
-namespace TR { class OMR_EXTENSIBLE ExtClass : public OMR::ExtClass {}; }
+namespace TR {
+class OMR_EXTENSIBLE ExtClass : public OMR::ExtClass {};
+} // namespace TR
 
 void OMR::ExtClass::functionCalled() {}
 

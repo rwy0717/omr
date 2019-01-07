@@ -38,45 +38,45 @@ class MM_VerboseWriter;
  * This class manages a list of writers. It formats and buffers output, flushing it
  * to the writers when asked.
  */
-class MM_VerboseWriterChain : public MM_Base
-{
+class MM_VerboseWriterChain : public MM_Base {
 public:
 protected:
 private:
-	MM_VerboseBuffer *_buffer;
-	MM_VerboseWriter *_writers;
+    MM_VerboseBuffer* _buffer;
+    MM_VerboseWriter* _writers;
 
 public:
-	static MM_VerboseWriterChain *newInstance(MM_EnvironmentBase *env);
+    static MM_VerboseWriterChain* newInstance(MM_EnvironmentBase* env);
 
-	void kill(MM_EnvironmentBase *env);
+    void kill(MM_EnvironmentBase* env);
 
-	void formatAndOutput(MM_EnvironmentBase *env, uintptr_t indent, const char *format, ...);
-	void formatAndOutputV(MM_EnvironmentBase *env, uintptr_t indent, const char *format, va_list args);
-	void flush(MM_EnvironmentBase *env);
+    void formatAndOutput(MM_EnvironmentBase* env, uintptr_t indent, const char* format, ...);
+    void formatAndOutputV(MM_EnvironmentBase* env, uintptr_t indent, const char* format, va_list args);
+    void flush(MM_EnvironmentBase* env);
 
-	/**
-	 * Add a new verbose writer to the list of active output writers.
-	 * @param writer[in] New writer to add to list.
-	 */
-	void addWriter(MM_VerboseWriter* writer);
-	
-	/**
-	 * Fetch the first writer in the linked chain of writers.
-	 * @return the first writer
-	 */
-	MM_VerboseWriter *getFirstWriter() { return _writers; }
+    /**
+     * Add a new verbose writer to the list of active output writers.
+     * @param writer[in] New writer to add to list.
+     */
+    void addWriter(MM_VerboseWriter* writer);
 
-	/**
-	 * Notify each of the writers in the chain that a GC cycle has ended
-	 * @param env[in] the current thread 
-	 */
-	void endOfCycle(MM_EnvironmentBase *env);
-	
+    /**
+     * Fetch the first writer in the linked chain of writers.
+     * @return the first writer
+     */
+    MM_VerboseWriter* getFirstWriter() { return _writers; }
+
+    /**
+     * Notify each of the writers in the chain that a GC cycle has ended
+     * @param env[in] the current thread 
+     */
+    void endOfCycle(MM_EnvironmentBase* env);
+
 protected:
-	MM_VerboseWriterChain();
-	void tearDown(MM_EnvironmentBase *env);
-	bool initialize(MM_EnvironmentBase* env);
+    MM_VerboseWriterChain();
+    void tearDown(MM_EnvironmentBase* env);
+    bool initialize(MM_EnvironmentBase* env);
+
 private:
 };
 

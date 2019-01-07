@@ -22,7 +22,6 @@
 
 #include "MetronomeStats.hpp"
 
-void
-MM_MetronomeStats::merge(MM_MetronomeStats* statsToMerge)
+void MM_MetronomeStats::merge(MM_MetronomeStats* statsToMerge)
 {
 }

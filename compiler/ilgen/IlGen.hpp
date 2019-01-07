@@ -22,23 +22,26 @@
 #ifndef IlGen_hpp
 #define IlGen_hpp
 
-#include <stdint.h>  // for int32_t
+#include <stdint.h> // for int32_t
 
-namespace TR { class Block; }
-namespace TR { class ResolvedMethodSymbol;  } 
+namespace TR {
+class Block;
+}
+namespace TR {
+class ResolvedMethodSymbol;
+}
 
-class TR_IlGenerator
-   {
-   public:
-   virtual bool genIL() = 0; 
-   virtual int32_t currentByteCodeIndex() = 0;
-   virtual TR::Block *getCurrentBlock() = 0;
-   virtual int32_t currentCallSiteIndex() { return -1; }
-   virtual void setCallerMethod(TR::ResolvedMethodSymbol * caller) {}
-   virtual TR::ResolvedMethodSymbol *methodSymbol() const = 0;
+class TR_IlGenerator {
+public:
+    virtual bool genIL() = 0;
+    virtual int32_t currentByteCodeIndex() = 0;
+    virtual TR::Block* getCurrentBlock() = 0;
+    virtual int32_t currentCallSiteIndex() { return -1; }
+    virtual void setCallerMethod(TR::ResolvedMethodSymbol* caller) {}
+    virtual TR::ResolvedMethodSymbol* methodSymbol() const = 0;
 
-   // contributes to eliminate warnings in JitBuilder builds
-   virtual ~TR_IlGenerator() { }
-   };
+    // contributes to eliminate warnings in JitBuilder builds
+    virtual ~TR_IlGenerator() {}
+};
 
 #endif

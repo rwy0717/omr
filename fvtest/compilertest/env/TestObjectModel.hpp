@@ -27,26 +27,27 @@
  */
 #ifndef TEST_OBJECTMODEL_CONNECTOR
 #define TEST_OBJECTMODEL_CONNECTOR
-namespace TestCompiler { class ObjectModel; }
-namespace TestCompiler { typedef TestCompiler::ObjectModel ObjectModelConnector; }
+namespace TestCompiler {
+class ObjectModel;
+}
+namespace TestCompiler {
+typedef TestCompiler::ObjectModel ObjectModelConnector;
+}
 #endif
-
 
 #include "env/OMRObjectModel.hpp"
 
-namespace TestCompiler
-{
+namespace TestCompiler {
 
-class ObjectModel : public OMR::ObjectModelConnector
-   {
-   public:
+class ObjectModel : public OMR::ObjectModelConnector {
+public:
+    ObjectModel()
+        : OMR::ObjectModelConnector()
+    {}
 
-   ObjectModel() :
-      OMR::ObjectModelConnector() {}
+    virtual int32_t sizeofReferenceField() { return sizeof(char*); }
+};
 
-   virtual int32_t sizeofReferenceField() { return sizeof(char *); }
-   };
-
-}
+} // namespace TestCompiler
 
 #endif

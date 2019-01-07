@@ -22,17 +22,17 @@
 #ifndef LOADEXTENSIONS_INCL
 #define LOADEXTENSIONS_INCL
 
-#include <stdint.h>                           // for int32_t
-#include "codegen/CodeGenerator.hpp"          // for CodeGenerator
-#include "compile/Compilation.hpp"            // for Compilation
-#include "il/DataTypes.hpp"                   // for TR::DataType
-#include "il/ILOps.hpp"                       // for ILOpCode
-#include "il/Node.hpp"                        // for Node, etc
-#include "il/Node_inlines.hpp"                // for Node::getType
-#include "il/Symbol.hpp"                      // for Symbol
-#include "optimizer/Optimization.hpp"         // for Optimization
+#include <stdint.h> // for int32_t
+#include "codegen/CodeGenerator.hpp" // for CodeGenerator
+#include "compile/Compilation.hpp" // for Compilation
+#include "il/DataTypes.hpp" // for TR::DataType
+#include "il/ILOps.hpp" // for ILOpCode
+#include "il/Node.hpp" // for Node, etc
+#include "il/Node_inlines.hpp" // for Node::getType
+#include "il/Symbol.hpp" // for Symbol
+#include "optimizer/Optimization.hpp" // for Optimization
 #include "optimizer/Optimization_inlines.hpp" // for Optimization inlines
-#include "optimizer/OptimizationManager.hpp"  // for OptimizationManager
+#include "optimizer/OptimizationManager.hpp" // for OptimizationManager
 
 /** \brief
  *     Examines how often a load is being used to feed into a signed vs. unsigned conversion (ex. i2l vs iu2l) and
@@ -101,46 +101,43 @@
  *        - zeroExtendTo32BitAtSource
  *        - zeroExtendTo64BitAtSource
  */
-class TR_LoadExtensions : public TR::Optimization
-   {
-   public:
-
-   /** \brief
+class TR_LoadExtensions : public TR::Optimization {
+public:
+    /** \brief
     *     Helper function to create an instance of the LoadExtensions optimization using the
     *     OptimizationManager's default allocator.
     *
     *  \param manager
     *     The optimization manager.
     */
-   static TR::Optimization* create(TR::OptimizationManager* manager)
-      {
-      return new (manager->allocator()) TR_LoadExtensions(manager);
-      }
+    static TR::Optimization* create(TR::OptimizationManager* manager)
+    {
+        return new (manager->allocator()) TR_LoadExtensions(manager);
+    }
 
-   /** \brief
+    /** \brief
     *     Initializes the LoadExtensions codegen phase.
     *
     *  \param manager
     *     The optimization manager for this local optimization.
     */
-   TR_LoadExtensions(TR::OptimizationManager* manager);
+    TR_LoadExtensions(TR::OptimizationManager* manager);
 
-   /** \brief
+    /** \brief
     *     Performs the optimization on this compilation unit.
     *
     *  \return
     *     1 if any transformation was performed; 0 otherwise.
     */
-   int32_t perform();
+    int32_t perform();
 
-   virtual const char* optDetailString() const throw()
-      {
-      return "O^O LOAD EXTENSIONS: ";
-      }
+    virtual const char* optDetailString() const throw()
+    {
+        return "O^O LOAD EXTENSIONS: ";
+    }
 
-   private:
-
-   /** \brief
+private:
+    /** \brief
     *     Determines whether the conversion of a load can be skipped based on the loads extension preference and if the
     *     conversion can be skipped determine whether the respective load needs to be sign/zero extended.
     *
@@ -157,26 +154,26 @@ class TR_LoadExtensions : public TR::Optimization
     *  \return
     *     <c>true</c> if this \p conversion can be skipped; <c>false</c> otherwise.
     */
-   const bool canSkipConversion(TR::Node* conversion, TR::Node* child, bool& forceExtension);
+    const bool canSkipConversion(TR::Node* conversion, TR::Node* child, bool& forceExtension);
 
-   /** \brief
+    /** \brief
     *     Finds the (zero/sign) extension preference of a node.
     *
     *  \param node
     *     The node to examine.
     */
-   void findPreferredLoadExtensions(TR::Node* node);
+    void findPreferredLoadExtensions(TR::Node* node);
 
-   /** \brief
+    /** \brief
     *     Flags conversions with the unneededConv flag and sets preference of loads to zero/sign extend at source by
     *     flagging them with signExtendTo[32|64]BitAtSource and zeroExtendTo[32|64]BitAtSource flags.
     *
     *  \param node
     *     The node to flag.
     */
-   void flagPreferredLoadExtensions(TR::Node* node);
+    void flagPreferredLoadExtensions(TR::Node* node);
 
-   /** \brief
+    /** \brief
     *     Determines whether a node is of the supported type for skipping conversion operations or forcing sign or zero
     *     extensions on loads.
     *
@@ -186,9 +183,9 @@ class TR_LoadExtensions : public TR::Optimization
     *  \return
     *     <c>true</c> if this \p node is a load which is a candidate type for this optimization; <c>false</c> otherwise.
     */
-   const bool isSupportedType(TR::Node* node) const;
+    const bool isSupportedType(TR::Node* node) const;
 
-   /** \brief
+    /** \brief
     *     Determines whether a node is a load candidate for skipping conversion operations.
     *
     *  \param node
@@ -197,9 +194,9 @@ class TR_LoadExtensions : public TR::Optimization
     *  \return
     *     <c>true</c> if this \p node is a load which is a candidate type for this optimization; <c>false</c> otherwise.
     */
-   const bool isSupportedLoad(TR::Node* node) const;
+    const bool isSupportedLoad(TR::Node* node) const;
 
-   /** \brief
+    /** \brief
     *     Gets the zero/sign extension preference of a load.
     *
     *  \param load
@@ -209,9 +206,9 @@ class TR_LoadExtensions : public TR::Optimization
     *     Negative value if this \p load prefers to be zero extended and a positive value if this \p load prefers to be
     *     sign extended.
     */
-   const int32_t getExtensionPreference(TR::Node* load) const;
+    const int32_t getExtensionPreference(TR::Node* load) const;
 
-   /** \brief
+    /** \brief
     *     Sets the zero/sign extension preference of a load based on the conversion it feeds into.
     *
     *  \param load
@@ -221,24 +218,23 @@ class TR_LoadExtensions : public TR::Optimization
     *     Negative value if this \p load prefers to be zero extended and a positive value if this \p load prefers to be
     *     sign extended.
     */
-   const int32_t setExtensionPreference(TR::Node* load, TR::Node* conversion);
+    const int32_t setExtensionPreference(TR::Node* load, TR::Node* conversion);
 
-   private:
+private:
+    typedef TR::typed_allocator<std::pair<const TR::Node* const, int32_t>, TR::Region&> NodeToIntTableAllocator;
+    typedef std::less<const TR::Node*> NodeToIntTableComparator;
+    typedef std::map<const TR::Node*, int32_t, NodeToIntTableComparator, NodeToIntTableAllocator> NodeToIntTable;
 
-   typedef TR::typed_allocator<std::pair<const TR::Node* const, int32_t>, TR::Region&> NodeToIntTableAllocator;
-   typedef std::less<const TR::Node*> NodeToIntTableComparator;
-   typedef std::map<const TR::Node*, int32_t, NodeToIntTableComparator, NodeToIntTableAllocator> NodeToIntTable;
-
-   /** \brief
+    /** \brief
     *     Keeps track of all nodes which should be excluded from consideration in this optimization.
     */
-   NodeToIntTable* excludedNodes;
+    NodeToIntTable* excludedNodes;
 
-   /** \brief
+    /** \brief
     *     Keeps track of the load extension preference where a negative value indicates a preference towards a zero
     *     extension and a positive value indicates a preference towards a sign extension.
     */
-   NodeToIntTable* loadExtensionPreference;
-   };
+    NodeToIntTable* loadExtensionPreference;
+};
 
 #endif /* LOADEXTENSIONS_INCL_ */

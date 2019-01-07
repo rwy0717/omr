@@ -24,17 +24,17 @@ include(OmrUtility)
 
 set(OMR_SANITIZER OFF CACHE STRING "-fsanitize parameter")
 set_property(
-	CACHE OMR_SANITIZER
-	PROPERTY STRINGS OFF undefined address thread
-	)
+    CACHE OMR_SANITIZER
+    PROPERTY STRINGS OFF undefined address thread
+    )
 
 # GNU style sanitizers 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU") 
-	if (OMR_SANITIZER) 
-		message(STATUS "${OMR_SANITIZER} Sanitizer is enabled")
-		# Extra options for the sanitizers, often documented to improve output
-		set(ADDITIONAL_SANITIZER_FLAGS "-fno-omit-frame-pointer")
-		omr_append_flags(CMAKE_CXX_FLAGS ${ADDITIONAL_SANITIZER_FLAGS} "-fsanitize=${OMR_SANITIZER}")
-		omr_append_flags(CMAKE_C_FLAGS   ${ADDITIONAL_SANITIZER_FLAGS} "-fsanitize=${OMR_SANITIZER}")
-	endif() 
+    if (OMR_SANITIZER) 
+        message(STATUS "${OMR_SANITIZER} Sanitizer is enabled")
+        # Extra options for the sanitizers, often documented to improve output
+        set(ADDITIONAL_SANITIZER_FLAGS "-fno-omit-frame-pointer")
+        omr_append_flags(CMAKE_CXX_FLAGS ${ADDITIONAL_SANITIZER_FLAGS} "-fsanitize=${OMR_SANITIZER}")
+        omr_append_flags(CMAKE_C_FLAGS   ${ADDITIONAL_SANITIZER_FLAGS} "-fsanitize=${OMR_SANITIZER}")
+    endif() 
 endif()

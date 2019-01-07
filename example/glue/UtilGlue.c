@@ -27,19 +27,18 @@
  */
 #if defined(OMR_OS_WINDOWS)
 omr_error_t
-OMR_Glue_GetVMDirectoryToken(void **token)
+OMR_Glue_GetVMDirectoryToken(void** token)
 {
-	/* NULL means the runtime will look in the current executable's directory */
-	*token = NULL;
-	return OMR_ERROR_NONE;
+    /* NULL means the runtime will look in the current executable's directory */
+    *token = NULL;
+    return OMR_ERROR_NONE;
 }
 #endif /* defined(OMR_OS_WINDOWS) */
 
 /**
  * Provides the thread name to be used when no name is given.
  */
-char *
-OMR_Glue_GetThreadNameForUnamedThread(OMR_VMThread *vmThread)
+char* OMR_Glue_GetThreadNameForUnamedThread(OMR_VMThread* vmThread)
 {
-	return "(unnamed thread)";
+    return "(unnamed thread)";
 }

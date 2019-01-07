@@ -43,32 +43,32 @@
  * @return estimated upper bound number of chunks that will be required by the system.
  */
 uintptr_t
-MM_SweepHeapSectioningSegmented::estimateTotalChunkCount(MM_EnvironmentBase *env)
+MM_SweepHeapSectioningSegmented::estimateTotalChunkCount(MM_EnvironmentBase* env)
 {
-	uintptr_t totalChunkCountEstimate;
+    uintptr_t totalChunkCountEstimate;
 
-	if(0 == _extensions->parSweepChunkSize) {
-		/* -Xgc:sweepchunksize= has NOT been specified, so we set it heuristically.
-		 *
-		 *                  maxheapsize
-		 * chunksize =   ----------------   (rounded up to the nearest 256k)
-		 *               threadcount * 32
-		 */
-		_extensions->parSweepChunkSize = MM_Math::roundToCeiling(256*1024, _extensions->heap->getMaximumMemorySize() / (_extensions->dispatcher->threadCountMaximum() * 32));
-	}
+    if (0 == _extensions->parSweepChunkSize) {
+        /* -Xgc:sweepchunksize= has NOT been specified, so we set it heuristically.
+         *
+         *                  maxheapsize
+         * chunksize =   ----------------   (rounded up to the nearest 256k)
+         *               threadcount * 32
+         */
+        _extensions->parSweepChunkSize = MM_Math::roundToCeiling(256 * 1024, _extensions->heap->getMaximumMemorySize() / (_extensions->dispatcher->threadCountMaximum() * 32));
+    }
 
-	totalChunkCountEstimate = MM_Math::roundToCeiling(_extensions->parSweepChunkSize, _extensions->heap->getMaximumMemorySize()) / _extensions->parSweepChunkSize;
+    totalChunkCountEstimate = MM_Math::roundToCeiling(_extensions->parSweepChunkSize, _extensions->heap->getMaximumMemorySize()) / _extensions->parSweepChunkSize;
 
 #if defined(OMR_GC_MODRON_SCAVENGER)
-	/* Because object memory segments have not been allocated yet, we cannot get the real numbers.
-	 * Assume that if the scavenger is enabled, each of the semispaces will need an extra chunk */
-	/* TODO: Can we make an estimate based on the number of leaf memory subspaces allocated (if they are already allocated but not inflated)??? */
-	if(_extensions->scavengerEnabled) {
-		totalChunkCountEstimate += 2;
-	}
+    /* Because object memory segments have not been allocated yet, we cannot get the real numbers.
+     * Assume that if the scavenger is enabled, each of the semispaces will need an extra chunk */
+    /* TODO: Can we make an estimate based on the number of leaf memory subspaces allocated (if they are already allocated but not inflated)??? */
+    if (_extensions->scavengerEnabled) {
+        totalChunkCountEstimate += 2;
+    }
 #endif /* OMR_GC_MODRON_SCAVENGER */
 
-	return totalChunkCountEstimate;
+    return totalChunkCountEstimate;
 }
 
 /**
@@ -81,29 +81,29 @@ MM_SweepHeapSectioningSegmented::estimateTotalChunkCount(MM_EnvironmentBase *env
 uintptr_t
 MM_SweepHeapSectioningSegmented::calculateActualChunkNumbers() const
 {
-	uintptr_t totalChunkCount = 0;
+    uintptr_t totalChunkCount = 0;
 
-	MM_HeapRegionDescriptor *region;
-	MM_Heap *heap = _extensions->heap;
-	MM_HeapRegionManager *regionManager = heap->getHeapRegionManager();
-	GC_HeapRegionIterator regionIterator(regionManager);
+    MM_HeapRegionDescriptor* region;
+    MM_Heap* heap = _extensions->heap;
+    MM_HeapRegionManager* regionManager = heap->getHeapRegionManager();
+    GC_HeapRegionIterator regionIterator(regionManager);
 
-	while((region = regionIterator.nextRegion()) != NULL) {
-		if ((region)->isCommitted()) {
-			/* TODO:  this must be rethought for Tarok since it treats all regions identically but some might require different sweep logic */
-			MM_MemorySubSpace *subspace = region->getSubSpace();
-			/* if this is a committed region, it requires a non-NULL subspace */
-			Assert_MM_true(NULL != subspace);
-			uintptr_t poolCount = subspace->getMemoryPoolCount();
+    while ((region = regionIterator.nextRegion()) != NULL) {
+        if ((region)->isCommitted()) {
+            /* TODO:  this must be rethought for Tarok since it treats all regions identically but some might require different sweep logic */
+            MM_MemorySubSpace* subspace = region->getSubSpace();
+            /* if this is a committed region, it requires a non-NULL subspace */
+            Assert_MM_true(NULL != subspace);
+            uintptr_t poolCount = subspace->getMemoryPoolCount();
 
-			totalChunkCount += MM_Math::roundToCeiling(_extensions->parSweepChunkSize, region->getSize()) / _extensions->parSweepChunkSize;
+            totalChunkCount += MM_Math::roundToCeiling(_extensions->parSweepChunkSize, region->getSize()) / _extensions->parSweepChunkSize;
 
-			/* Add extra chunks if more than one memory pool */
-			totalChunkCount += (poolCount - 1);
-		}
-	}
+            /* Add extra chunks if more than one memory pool */
+            totalChunkCount += (poolCount - 1);
+        }
+    }
 
-	return totalChunkCount;
+    return totalChunkCount;
 }
 
 /**
@@ -115,102 +115,102 @@ MM_SweepHeapSectioningSegmented::calculateActualChunkNumbers() const
  * @return the total number of chunks in the system.
  */
 uintptr_t
-MM_SweepHeapSectioningSegmented::reassignChunks(MM_EnvironmentBase *env)
+MM_SweepHeapSectioningSegmented::reassignChunks(MM_EnvironmentBase* env)
 {
-	MM_ParallelSweepChunk *chunk; /* Sweep table chunk (global) */
-	MM_ParallelSweepChunk *previousChunk;
-	uintptr_t totalChunkCount;  /* Total chunks in system */
+    MM_ParallelSweepChunk* chunk; /* Sweep table chunk (global) */
+    MM_ParallelSweepChunk* previousChunk;
+    uintptr_t totalChunkCount; /* Total chunks in system */
 
-	MM_SweepHeapSectioningIterator sectioningIterator(this);
+    MM_SweepHeapSectioningIterator sectioningIterator(this);
 
-	totalChunkCount = 0;
-	previousChunk = NULL;
+    totalChunkCount = 0;
+    previousChunk = NULL;
 
-	MM_HeapRegionManager *regionManager = _extensions->getHeap()->getHeapRegionManager();
-	GC_HeapRegionIterator regionIterator(regionManager);
-	MM_HeapRegionDescriptor *region = NULL;
+    MM_HeapRegionManager* regionManager = _extensions->getHeap()->getHeapRegionManager();
+    GC_HeapRegionIterator regionIterator(regionManager);
+    MM_HeapRegionDescriptor* region = NULL;
 
-	while (NULL != (region = regionIterator.nextRegion())) {
-		if (region->isCommitted()) {
-			/* TODO:  this must be rethought for Tarok since it treats all regions identically but some might require different sweep logic */
-			uintptr_t *heapChunkBase = (uintptr_t *)region->getLowAddress();  /* Heap chunk base pointer */
-			uintptr_t *regionHighAddress = (uintptr_t *)region->getHighAddress();
+    while (NULL != (region = regionIterator.nextRegion())) {
+        if (region->isCommitted()) {
+            /* TODO:  this must be rethought for Tarok since it treats all regions identically but some might require different sweep logic */
+            uintptr_t* heapChunkBase = (uintptr_t*)region->getLowAddress(); /* Heap chunk base pointer */
+            uintptr_t* regionHighAddress = (uintptr_t*)region->getHighAddress();
 
-			while (heapChunkBase < regionHighAddress) {
-				void *poolHighAddr;
-				uintptr_t *heapChunkTop;
-				MM_MemoryPool *pool;
+            while (heapChunkBase < regionHighAddress) {
+                void* poolHighAddr;
+                uintptr_t* heapChunkTop;
+                MM_MemoryPool* pool;
 
-				chunk = sectioningIterator.nextChunk();
-				Assert_MM_true(chunk != NULL);  /* Should never return NULL */
-				totalChunkCount += 1;
+                chunk = sectioningIterator.nextChunk();
+                Assert_MM_true(chunk != NULL); /* Should never return NULL */
+                totalChunkCount += 1;
 
-				/* Clear all data in the chunk (including sweep implementation specific information) */
-				chunk->clear();
+                /* Clear all data in the chunk (including sweep implementation specific information) */
+                chunk->clear();
 
-				if(((uintptr_t)regionHighAddress - (uintptr_t)heapChunkBase) < _extensions->parSweepChunkSize) {
-					/* corner case - we will wrap our address range */
-					heapChunkTop = regionHighAddress;
-				} else {
-					/* normal case - just increment by the chunk size */
-					heapChunkTop = (uintptr_t *)((uintptr_t)heapChunkBase + _extensions->parSweepChunkSize);
-				}
+                if (((uintptr_t)regionHighAddress - (uintptr_t)heapChunkBase) < _extensions->parSweepChunkSize) {
+                    /* corner case - we will wrap our address range */
+                    heapChunkTop = regionHighAddress;
+                } else {
+                    /* normal case - just increment by the chunk size */
+                    heapChunkTop = (uintptr_t*)((uintptr_t)heapChunkBase + _extensions->parSweepChunkSize);
+                }
 
-				/* Find out if the range of memory we are considering spans 2 different pools.  If it does,
-				 * the current chunk can only be attributed to one, so we limit the upper range of the chunk
-				 * to the first pool and will continue the assignment at the upper address range.
-				 */
-				pool = region->getSubSpace()->getMemoryPool(env, heapChunkBase, heapChunkTop, poolHighAddr);
-				if (NULL == poolHighAddr) {
-					heapChunkTop = (heapChunkTop > regionHighAddress ? regionHighAddress : heapChunkTop);
-				} else {
-					/* Yes ..so adjust chunk boundaries */
-					assume0(poolHighAddr > heapChunkBase && poolHighAddr < heapChunkTop);
-					heapChunkTop = (uintptr_t *) poolHighAddr;
-				}
+                /* Find out if the range of memory we are considering spans 2 different pools.  If it does,
+                 * the current chunk can only be attributed to one, so we limit the upper range of the chunk
+                 * to the first pool and will continue the assignment at the upper address range.
+                 */
+                pool = region->getSubSpace()->getMemoryPool(env, heapChunkBase, heapChunkTop, poolHighAddr);
+                if (NULL == poolHighAddr) {
+                    heapChunkTop = (heapChunkTop > regionHighAddress ? regionHighAddress : heapChunkTop);
+                } else {
+                    /* Yes ..so adjust chunk boundaries */
+                    assume0(poolHighAddr > heapChunkBase && poolHighAddr < heapChunkTop);
+                    heapChunkTop = (uintptr_t*)poolHighAddr;
+                }
 
-				/* All values for the chunk have been calculated - assign them */
-				chunk->chunkBase = (void *)heapChunkBase;
-				chunk->chunkTop = (void *)heapChunkTop;
-				chunk->memoryPool = pool;
-				chunk->_coalesceCandidate = (heapChunkBase != region->getLowAddress());
-				chunk->_previous= previousChunk;
-				if(NULL != previousChunk) {
-					previousChunk->_next = chunk;
-				}
+                /* All values for the chunk have been calculated - assign them */
+                chunk->chunkBase = (void*)heapChunkBase;
+                chunk->chunkTop = (void*)heapChunkTop;
+                chunk->memoryPool = pool;
+                chunk->_coalesceCandidate = (heapChunkBase != region->getLowAddress());
+                chunk->_previous = previousChunk;
+                if (NULL != previousChunk) {
+                    previousChunk->_next = chunk;
+                }
 
-				/* Move to the next chunk */
-				heapChunkBase = heapChunkTop;
+                /* Move to the next chunk */
+                heapChunkBase = heapChunkTop;
 
-				/* and remember address of previous chunk */
-				previousChunk = chunk;
+                /* and remember address of previous chunk */
+                previousChunk = chunk;
 
-				assume0((uintptr_t)heapChunkBase == MM_Math::roundToCeiling(_extensions->heapAlignment,(uintptr_t)heapChunkBase));
-			}
-		}
-	}
+                assume0((uintptr_t)heapChunkBase == MM_Math::roundToCeiling(_extensions->heapAlignment, (uintptr_t)heapChunkBase));
+            }
+        }
+    }
 
-	if(NULL != previousChunk) {
-		previousChunk->_next = NULL;
-	}
+    if (NULL != previousChunk) {
+        previousChunk->_next = NULL;
+    }
 
-	return totalChunkCount;
+    return totalChunkCount;
 }
 
 /**
  * Allocate and initialize a new instance of the receiver.
  * @return pointer to the new instance.
  */
-MM_SweepHeapSectioningSegmented *
-MM_SweepHeapSectioningSegmented::newInstance(MM_EnvironmentBase *env)
+MM_SweepHeapSectioningSegmented*
+MM_SweepHeapSectioningSegmented::newInstance(MM_EnvironmentBase* env)
 {
-	MM_SweepHeapSectioningSegmented *sweepHeapSectioning = (MM_SweepHeapSectioningSegmented *)env->getForge()->allocate(sizeof(MM_SweepHeapSectioningSegmented), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
-	if (sweepHeapSectioning) {
-		new(sweepHeapSectioning) MM_SweepHeapSectioningSegmented(env);
-		if (!sweepHeapSectioning->initialize(env)) {
-			sweepHeapSectioning->kill(env);
-			return NULL;
-		}
-	}
-	return sweepHeapSectioning;
+    MM_SweepHeapSectioningSegmented* sweepHeapSectioning = (MM_SweepHeapSectioningSegmented*)env->getForge()->allocate(sizeof(MM_SweepHeapSectioningSegmented), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+    if (sweepHeapSectioning) {
+        new (sweepHeapSectioning) MM_SweepHeapSectioningSegmented(env);
+        if (!sweepHeapSectioning->initialize(env)) {
+            sweepHeapSectioning->kill(env);
+            return NULL;
+        }
+    }
+    return sweepHeapSectioning;
 }

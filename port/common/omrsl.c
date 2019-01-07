@@ -27,8 +27,6 @@
  */
 #include "omrport.h"
 
-
-
 /**
  * Close a shared library.
  *
@@ -38,9 +36,9 @@
  * @return 0 on success, any other value on failure.
  */
 uintptr_t
-omrsl_close_shared_library(struct OMRPortLibrary *portLibrary, uintptr_t descriptor)
+omrsl_close_shared_library(struct OMRPortLibrary* portLibrary, uintptr_t descriptor)
 {
-	return 1;
+    return 1;
 }
 
 /**
@@ -77,9 +75,9 @@ omrsl_close_shared_library(struct OMRPortLibrary *portLibrary, uintptr_t descrip
  * @note contents of func are undefined on failure.
  */
 uintptr_t
-omrsl_lookup_name(struct OMRPortLibrary *portLibrary, uintptr_t descriptor, char *name, uintptr_t *func, const char *argSignature)
+omrsl_lookup_name(struct OMRPortLibrary* portLibrary, uintptr_t descriptor, char* name, uintptr_t* func, const char* argSignature)
 {
-	return 1;
+    return 1;
 }
 
 /**
@@ -95,9 +93,9 @@ omrsl_lookup_name(struct OMRPortLibrary *portLibrary, uintptr_t descriptor, char
  * @note contents of descriptor are undefined on failure.
  */
 uintptr_t
-omrsl_open_shared_library(struct OMRPortLibrary *portLibrary, char *name, uintptr_t *descriptor, uintptr_t flags)
+omrsl_open_shared_library(struct OMRPortLibrary* portLibrary, char* name, uintptr_t* descriptor, uintptr_t flags)
 {
-	return 1;
+    return 1;
 }
 
 /**
@@ -110,8 +108,7 @@ omrsl_open_shared_library(struct OMRPortLibrary *portLibrary, char *name, uintpt
  *
  * @note Most implementations will be empty.
  */
-void
-omrsl_shutdown(struct OMRPortLibrary *portLibrary)
+void omrsl_shutdown(struct OMRPortLibrary* portLibrary)
 {
 }
 /**
@@ -129,9 +126,7 @@ omrsl_shutdown(struct OMRPortLibrary *portLibrary)
  * @note Most implementations will simply return success.
  */
 int32_t
-omrsl_startup(struct OMRPortLibrary *portLibrary)
+omrsl_startup(struct OMRPortLibrary* portLibrary)
 {
-	return 0;
+    return 0;
 }
-
-

@@ -202,171 +202,171 @@ This module was not used because:
 
 # include once
 if(OMR_OPTION_)
-	return()
+    return()
 endif()
 set(OMR_OPTION_ 1)
 
 include(OmrAssert)
 
 function(omr_add_option_group)
-	foreach (group IN LISTS ARGN)
-		define_property(GLOBAL PROPERTY ${group}
-			BRIEF_DOCS "A list of user-decideable options."
-			FULL_DOCS "A list of options which can be validated after the project has been configured."
-		)
-		set_property(GLOBAL PROPERTY ${group} "")
-	endforeach(group)
+    foreach (group IN LISTS ARGN)
+        define_property(GLOBAL PROPERTY ${group}
+            BRIEF_DOCS "A list of user-decideable options."
+            FULL_DOCS "A list of options which can be validated after the project has been configured."
+        )
+        set_property(GLOBAL PROPERTY ${group} "")
+    endforeach(group)
 endfunction(omr_add_option_group)
 
 # _omr_assert_is_option_group(<group>)
 # Assert that <group> has been defined as an options group. Will FATAL_ERROR if
 # group is not defined.
 function(_omr_assert_is_option_group group)
-	get_property(is_option_group GLOBAL PROPERTY ${group} SET)
-	omr_assert(
-		TEST is_option_group
-		MESSAGE "${group} is not an options group"
-	)
+    get_property(is_option_group GLOBAL PROPERTY ${group} SET)
+    omr_assert(
+        TEST is_option_group
+        MESSAGE "${group} is not an options group"
+    )
 endfunction(_omr_assert_is_option_group)
 
 function(omr_group_options group)
-	_omr_assert_is_option_group(${group})
-	set_property(GLOBAL APPEND PROPERTY ${group} ${ARGN})
+    _omr_assert_is_option_group(${group})
+    set_property(GLOBAL APPEND PROPERTY ${group} ${ARGN})
 endfunction(omr_group_options)
 
 # _omr_get_options_group(<output> <group>)
 # Store the list of options in <group> into the variable <output>.
 function(_omr_get_option_group output group)
-	_omr_assert_is_option_group(${group})
-	get_property(${output} GLOBAL PROPERTY ${group})
-	set(${output} ${${output}} PARENT_SCOPE)
+    _omr_assert_is_option_group(${group})
+    get_property(${output} GLOBAL PROPERTY ${group})
+    set(${output} ${${output}} PARENT_SCOPE)
 endfunction()
 
 function(omr_declare_option option)
-	define_property(GLOBAL PROPERTY ${option}_REQUIRES
-		BRIEF_DOCS "A list of required options for ${option}"
-		FULL_DOCS "A list of variables which must be true if ${option} is true-ish"
-	)
-	define_property(GLOBAL PROPERTY ${option}_CONFLICTS
-		BRIEF_DOCS "A list of conflicting options for ${option}"
-		FULL_DOCS "A list of variables which must be false if ${option} is true-ish"
-	)
-	define_property(GLOBAL PROPERTY ${option}_REQUIRES_EXPR
-		BRIEF_DOCS "An expression which must be true if ${option} is enabled."
-		FULL_DOCS " "
-	)
+    define_property(GLOBAL PROPERTY ${option}_REQUIRES
+        BRIEF_DOCS "A list of required options for ${option}"
+        FULL_DOCS "A list of variables which must be true if ${option} is true-ish"
+    )
+    define_property(GLOBAL PROPERTY ${option}_CONFLICTS
+        BRIEF_DOCS "A list of conflicting options for ${option}"
+        FULL_DOCS "A list of variables which must be false if ${option} is true-ish"
+    )
+    define_property(GLOBAL PROPERTY ${option}_REQUIRES_EXPR
+        BRIEF_DOCS "An expression which must be true if ${option} is enabled."
+        FULL_DOCS " "
+    )
 endfunction(omr_declare_option)
 
 function(omr_option_requires option)
-	set_property(GLOBAL APPEND PROPERTY ${option}_REQUIRES ${ARGN})
+    set_property(GLOBAL APPEND PROPERTY ${option}_REQUIRES ${ARGN})
 endfunction(omr_option_requires)
 
 function(omr_option_conflicts option)
-	set_property(GLOBAL APPEND PROPERTY ${option}_CONFLICTS ${ARGN})
+    set_property(GLOBAL APPEND PROPERTY ${option}_CONFLICTS ${ARGN})
 endfunction(omr_option_conflicts)
 
 function(omr_option_requires_expr option)
-	get_property(expr_set GLOBAL PROPERTY ${option}_REQUIRES_EXPR SET)
-	omr_assert(
-		TEST NOT expr_set
-		MESSAGE "More than one REQUIRES_EXPR defined for option ${option}"
-	)
-	set_property(GLOBAL PROPERTY ${option}_REQUIRES_EXPR ${ARGN})
+    get_property(expr_set GLOBAL PROPERTY ${option}_REQUIRES_EXPR SET)
+    omr_assert(
+        TEST NOT expr_set
+        MESSAGE "More than one REQUIRES_EXPR defined for option ${option}"
+    )
+    set_property(GLOBAL PROPERTY ${option}_REQUIRES_EXPR ${ARGN})
 endfunction(omr_option_requires_expr)
 
 function(omr_add_option option group)
-	cmake_parse_arguments(ARG "" "COMMENT" "DEFAULT;REQUIRES;CONFLICTS;REQUIRES_EXPR" ${ARGN})
+    cmake_parse_arguments(ARG "" "COMMENT" "DEFAULT;REQUIRES;CONFLICTS;REQUIRES_EXPR" ${ARGN})
 
-	if (DEFINED ARG_COMMENT)
-		set(comment ${ARG_COMMENT})
-	else()
-		set(comment "OMR: undocumented public option")
-	endif()
+    if (DEFINED ARG_COMMENT)
+        set(comment ${ARG_COMMENT})
+    else()
+        set(comment "OMR: undocumented public option")
+    endif()
 
-	omr_assert(
-		TEST DEFINED ARG_DEFAULT
-		MESSAGE "Missing DEFAULT value for ${option}"
-	)
+    omr_assert(
+        TEST DEFINED ARG_DEFAULT
+        MESSAGE "Missing DEFAULT value for ${option}"
+    )
 
-	# Evaluate the default value as an if expression
-	if(${ARG_DEFAULT})
-		set(default ON)
-	else()
-		set(default OFF)
-	endif()
+    # Evaluate the default value as an if expression
+    if(${ARG_DEFAULT})
+        set(default ON)
+    else()
+        set(default OFF)
+    endif()
 
-	# Option setup and initialization
+    # Option setup and initialization
 
-	omr_declare_option(${option} ${group})
-	omr_group_options(${group} ${option})
-	set(${option} ${default} CACHE BOOL "${comment}")
+    omr_declare_option(${option} ${group})
+    omr_group_options(${group} ${option})
+    set(${option} ${default} CACHE BOOL "${comment}")
 
-	# Register validation properties
+    # Register validation properties
 
-	if(DEFINED ARG_REQUIRES)
-		omr_option_requires(${option} ${ARG_REQUIRES})
-	endif()
+    if(DEFINED ARG_REQUIRES)
+        omr_option_requires(${option} ${ARG_REQUIRES})
+    endif()
 
-	if(DEFINED ARG_CONFLICTS)
-		omr_option_conflicts(${option} ${ARG_CONFLICTS})
-	endif()
+    if(DEFINED ARG_CONFLICTS)
+        omr_option_conflicts(${option} ${ARG_CONFLICTS})
+    endif()
 
-	if(DEFINED ARG_REQUIRES_EXPR)
-		omr_option_requires_expr(${option} ${ARG_REQUIRES_EXPR})
-	endif()
+    if(DEFINED ARG_REQUIRES_EXPR)
+        omr_option_requires_expr(${option} ${ARG_REQUIRES_EXPR})
+    endif()
 endfunction(omr_add_option)
 
 # _omr_check_option_requirements(<option>)
 # Assert that every required option is enabled.
 function(_omr_check_option_requirements option)
-	get_property(requirements GLOBAL PROPERTY ${option}_REQUIRES)
-	foreach(requirement IN LISTS requirements)
-		omr_assert(
-			TEST ${requirement}
-			MESSAGE "option ${option} requires ${requirement}"
-		)
-	endforeach(requirement)
+    get_property(requirements GLOBAL PROPERTY ${option}_REQUIRES)
+    foreach(requirement IN LISTS requirements)
+        omr_assert(
+            TEST ${requirement}
+            MESSAGE "option ${option} requires ${requirement}"
+        )
+    endforeach(requirement)
 endfunction(_omr_check_option_requirements)
 
 # _omr_check_option_conflicts(<option>)
 # Assert that every conflicting option is disabled.
 function(_omr_check_option_conflicts option)
-	get_property(conflicts GLOBAL PROPERTY ${option}_CONFLICTS)
-	foreach(conflict IN LISTS conflicts)
-		omr_assert(
-			TEST NOT ${conflict}
-			MESSAGE "option ${option} conflicts with ${conflict}"
-		)
-	endforeach(conflict)
+    get_property(conflicts GLOBAL PROPERTY ${option}_CONFLICTS)
+    foreach(conflict IN LISTS conflicts)
+        omr_assert(
+            TEST NOT ${conflict}
+            MESSAGE "option ${option} conflicts with ${conflict}"
+        )
+    endforeach(conflict)
 endfunction(_omr_check_option_conflicts)
 
 # _omr_check_option_requirement_expr(<option>)
 # if the option has a REQUIRE_EXPR defined, assert that the expression is true.
 function(_omr_check_option_requirement_expr option)
-	get_property(expr_set GLOBAL PROPERTY ${option}_REQUIRES_EXPR SET)
-	if(expr_set)
-		get_property(expr GLOBAL PROPERTY ${option}_REQUIRES_EXPR)
-		omr_assert(
-			TEST ${expr}
-			MESSAGE "option ${option} REQUIRES_EXPR failed"
-			
-		)
-	endif(expr_set)
+    get_property(expr_set GLOBAL PROPERTY ${option}_REQUIRES_EXPR SET)
+    if(expr_set)
+        get_property(expr GLOBAL PROPERTY ${option}_REQUIRES_EXPR)
+        omr_assert(
+            TEST ${expr}
+            MESSAGE "option ${option} REQUIRES_EXPR failed"
+            
+        )
+    endif(expr_set)
 endfunction(_omr_check_option_requirement_expr)
 
 function(omr_validate_option option)
-	if(${option})
-		_omr_check_option_requirements(${option})
-		_omr_check_option_conflicts(${option})
-		_omr_check_option_requirement_expr(${option})
-	endif(${option})
+    if(${option})
+        _omr_check_option_requirements(${option})
+        _omr_check_option_conflicts(${option})
+        _omr_check_option_requirement_expr(${option})
+    endif(${option})
 endfunction(omr_validate_option)
 
 function(omr_validate_option_group)
-	foreach(group IN LISTS ARGN)
-		_omr_get_option_group(options ${group})
-		foreach(option IN LISTS options)
-			omr_validate_option(${option})
-		endforeach(option)
-	endforeach(group)
+    foreach(group IN LISTS ARGN)
+        _omr_get_option_group(options ${group})
+        foreach(option IN LISTS options)
+            omr_validate_option(${option})
+        endforeach(option)
+    endforeach(group)
 endfunction(omr_validate_option_group)

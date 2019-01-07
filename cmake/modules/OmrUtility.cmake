@@ -21,7 +21,7 @@
 
 # Include once
 if(OMR_UTILITY_)
-	return()
+    return()
 endif()
 set(OMR_UTILITY_ 1)
 
@@ -32,56 +32,56 @@ include(OmrAssert)
 # assign to out: ie, add_prefix(out "-I" "a;b;c") should set out to
 # "-Ia;-Ib;-Ic".
 function(omr_add_prefix out prefix)
-	set(ret "")
-	foreach(var IN ITEMS ${ARGN})
-		list(APPEND ret "${prefix}${var}")
-	endforeach()
-	set(${out} ${ret} PARENT_SCOPE)
+    set(ret "")
+    foreach(var IN ITEMS ${ARGN})
+        list(APPEND ret "${prefix}${var}")
+    endforeach()
+    set(${out} ${ret} PARENT_SCOPE)
 endfunction(omr_add_prefix)
 
 # omr_trim_whitespace(<output_variable> <string>)
 # Trim repeated whitespace from <string> and assign to <output_variable>.
 # Does not remove leading/trailing whitespace. For that, use string(STRIP ...)
 function(omr_trim_whitespace variable string)
-	string(REGEX REPLACE " +" " " result "${string}")
-	set(${variable} "${result}" PARENT_SCOPE)
+    string(REGEX REPLACE " +" " " result "${string}")
+    set(${variable} "${result}" PARENT_SCOPE)
 endfunction(omr_trim_whitespace)
 
 # omr_remove_flags(<output_variable> [<flag>...])
 # Remove flags from a string.
 function(omr_remove_flags variable)
-	set(result "${${variable}}")
-	foreach(option IN ITEMS ${ARGN})
-		string(REGEX REPLACE "(^| )${option}( |$)" " " result "${result}")
-	endforeach()
-	omr_trim_whitespace(result "${result}")
-	set(${variable} "${result}" PARENT_SCOPE)
+    set(result "${${variable}}")
+    foreach(option IN ITEMS ${ARGN})
+        string(REGEX REPLACE "(^| )${option}( |$)" " " result "${result}")
+    endforeach()
+    omr_trim_whitespace(result "${result}")
+    set(${variable} "${result}" PARENT_SCOPE)
 endfunction(omr_remove_flags)
 
 # omr_stringify(<output_variable> <item>...)
 # Convert items to a string of space-separated items.
 function(omr_stringify output)
-	string(REPLACE ";" " " result "${ARGN}")
-	set(${output} ${result} PARENT_SCOPE)
+    string(REPLACE ";" " " result "${ARGN}")
+    set(${output} ${result} PARENT_SCOPE)
 endfunction(omr_stringify)
 
 # omr_append_flags(<output_variable> [<flag>...])
 # Append flags to variable. Flags are space separated.
 # <variable> is a string, <flag> is a list.
 function(omr_append_flags variable)
-	omr_stringify(flags ${ARGN})
-	set(${variable} "${${variable}} ${flags}" PARENT_SCOPE)
+    omr_stringify(flags ${ARGN})
+    set(${variable} "${${variable}} ${flags}" PARENT_SCOPE)
 endfunction(omr_append_flags)
 
 # omr_list_contains(<list> <element> <output>)
 # Checks if <element> is in a given named <list>
 # sets <output> TRUE/FALSE as appropriate
 macro(omr_list_contains lst element output)
-	list(FIND ${lst} ${element} _omr_list_contains_idx)
-	if(_omr_list_contains_idx EQUAL -1)
-		set(${output} FALSE)
-	else()
-		set(${output} TRUE)
-	endif()
-	unset(_omr_list_contains_idx)
+    list(FIND ${lst} ${element} _omr_list_contains_idx)
+    if(_omr_list_contains_idx EQUAL -1)
+        set(${output} FALSE)
+    else()
+        set(${output} TRUE)
+    endif()
+    unset(_omr_list_contains_idx)
 endmacro(omr_list_contains)

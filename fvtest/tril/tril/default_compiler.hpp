@@ -28,6 +28,8 @@
  */
 
 #include "simple_compiler.hpp"
-namespace Tril { typedef Tril::SimpleCompiler DefaultCompiler; } 
+namespace Tril {
+typedef Tril::SimpleCompiler DefaultCompiler;
+}
 
 #endif

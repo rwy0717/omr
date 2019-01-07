@@ -18,11 +18,10 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #ifndef TYPEDICTIONARY_EXTRAS_INSIDE_CLASS_INCL
 #define TYPEDICTIONARY_EXTRAS_INSIDE_CLASS_INCL
 
-   /**
+/**
     * @brief A template class for checking whether a particular type is supported by `toIlType<>()`
     * @tparam C/C++ type
     * @return whether `toIlType<>()` can generate a corresponding IlType instance or will fail to compile
@@ -49,18 +48,18 @@
     * - `is_supported<SomeEnum>::value == false` because JitBuilder cannot derive a type that is equivalent to the underlying type of the enum
     * - `is_supported<void>::value == true` because JitBuilder directly provides the corresponding `NoType`
     */
-   template <typename T>
-   struct is_supported {
-      static const bool value =  OMR::IsArithmetic<T>::VALUE // note: IsArithmetic = IsIntegral || IsFloatingPoint
-                              || OMR::IsVoid<T>::VALUE;
-   };
-   template <typename T>
-   struct is_supported<T*> {
-      // a pointer type is supported iff the type being pointed to is supported
-      static const bool value =  is_supported<T>::value;
-   };
+template <typename T>
+struct is_supported {
+    static const bool value = OMR::IsArithmetic<T>::VALUE // note: IsArithmetic = IsIntegral || IsFloatingPoint
+        || OMR::IsVoid<T>::VALUE;
+};
+template <typename T>
+struct is_supported<T*> {
+    // a pointer type is supported iff the type being pointed to is supported
+    static const bool value = is_supported<T>::value;
+};
 
-   /** @fn template <typename T> IlType* toIlType()
+/** @fn template <typename T> IlType* toIlType()
     * @brief Given a C/C++ type, returns a corresponding IlType, if available
     * @tparam C/C++ type
     * @return IlType instance corresponding to the specified C/C++ type
@@ -166,31 +165,31 @@
     * Otherwise, calls to `toIlType<>()` can become ambiguous for some types.
     */
 
-   // integral
-   template <typename T>
-   IlType* toIlType(typename OMR::EnableIf<OMR::IsIntegral<T>::VALUE && (sizeof(T) == 1)>::Type* = 0) { return Int8; }
-   template <typename T>
-   IlType* toIlType(typename OMR::EnableIf<OMR::IsIntegral<T>::VALUE && (sizeof(T) == 2)>::Type* = 0) { return Int16; }
-   template <typename T>
-   IlType* toIlType(typename OMR::EnableIf<OMR::IsIntegral<T>::VALUE && (sizeof(T) == 4)>::Type* = 0) { return Int32; }
-   template <typename T>
-   IlType* toIlType(typename OMR::EnableIf<OMR::IsIntegral<T>::VALUE && (sizeof(T) == 8)>::Type* = 0) { return Int64; }
+// integral
+template <typename T>
+IlType* toIlType(typename OMR::EnableIf<OMR::IsIntegral<T>::VALUE && (sizeof(T) == 1)>::Type* = 0) { return Int8; }
+template <typename T>
+IlType* toIlType(typename OMR::EnableIf<OMR::IsIntegral<T>::VALUE && (sizeof(T) == 2)>::Type* = 0) { return Int16; }
+template <typename T>
+IlType* toIlType(typename OMR::EnableIf<OMR::IsIntegral<T>::VALUE && (sizeof(T) == 4)>::Type* = 0) { return Int32; }
+template <typename T>
+IlType* toIlType(typename OMR::EnableIf<OMR::IsIntegral<T>::VALUE && (sizeof(T) == 8)>::Type* = 0) { return Int64; }
 
-   // floating point
-   template <typename T>
-   IlType* toIlType(typename OMR::EnableIf<OMR::IsFloatingPoint<T>::VALUE && (sizeof(T) == 4)>::Type* = 0) { return Float; }
-   template <typename T>
-   IlType* toIlType(typename OMR::EnableIf<OMR::IsFloatingPoint<T>::VALUE && (sizeof(T) == 8)>::Type* = 0) { return Double; }
+// floating point
+template <typename T>
+IlType* toIlType(typename OMR::EnableIf<OMR::IsFloatingPoint<T>::VALUE && (sizeof(T) == 4)>::Type* = 0) { return Float; }
+template <typename T>
+IlType* toIlType(typename OMR::EnableIf<OMR::IsFloatingPoint<T>::VALUE && (sizeof(T) == 8)>::Type* = 0) { return Double; }
 
-   // void
-   template <typename T>
-   IlType* toIlType(typename OMR::EnableIf<OMR::IsVoid<T>::VALUE>::Type* = 0) { return NoType; }
+// void
+template <typename T>
+IlType* toIlType(typename OMR::EnableIf<OMR::IsVoid<T>::VALUE>::Type* = 0) { return NoType; }
 
-   // pointer
-   template <typename T>
-   IlType* toIlType(typename OMR::EnableIf<OMR::IsPointer<T>::VALUE && is_supported<typename OMR::RemovePointer<T>::Type>::value>::Type* = 0)
-      {
-      return PointerTo(toIlType<typename OMR::RemovePointer<T>::Type>());
-      }
+// pointer
+template <typename T>
+IlType* toIlType(typename OMR::EnableIf<OMR::IsPointer<T>::VALUE && is_supported<typename OMR::RemovePointer<T>::Type>::value>::Type* = 0)
+{
+    return PointerTo(toIlType<typename OMR::RemovePointer<T>::Type>());
+}
 
 #endif // !defined(TYPEDICTIONARY_EXTRAS_INSIDE_CLASS_INCL)

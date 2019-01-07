@@ -30,282 +30,282 @@
 #include "threadTestHelp.h"
 #include "testHelper.hpp"
 
-extern ThreadTestEnvironment *omrTestEnv;
+extern ThreadTestEnvironment* omrTestEnv;
 
 #define START_DELAY (1 * 1000)
 #define TIMEOUT (60 * 1000)
 
 typedef struct testdata_rw_t {
-	omrthread_monitor_t monitor;
-	omrthread_rwmutex_t rwmutex;
-	volatile intptr_t rc;
+    omrthread_monitor_t monitor;
+    omrthread_rwmutex_t rwmutex;
+    volatile intptr_t rc;
 } testdata_rw_t;
 
-static intptr_t createJoinableThreadNoMacros(omrthread_t *newThread, omrthread_entrypoint_t entryProc, void *entryArg);
+static intptr_t createJoinableThreadNoMacros(omrthread_t* newThread, omrthread_entrypoint_t entryProc, void* entryArg);
 static void childForkHelper(int forkCount);
 static void siblingWriteStart(int forkCount);
-static void siblingWriteChild(testdata_rw_t *, int[2]);
-static int siblingWriteMain(void *arg);
+static void siblingWriteChild(testdata_rw_t*, int[2]);
+static int siblingWriteMain(void* arg);
 static void parentWriteStart(int forkCount);
-static void parentWriteChild(testdata_rw_t *, int[2]);
+static void parentWriteChild(testdata_rw_t*, int[2]);
 static void childSiblingWriteStart(int forkCount);
-static void childSiblingWriteChild(testdata_rw_t *, int[2]);
-static int childSiblingWriteMain(void *arg);
+static void childSiblingWriteChild(testdata_rw_t*, int[2]);
+static int childSiblingWriteMain(void* arg);
 static void parentWriteSiblingReadStart(int forkCount);
-static void parentWriteSiblingReadChild(testdata_rw_t *, int[2]);
-static int  parentWriteSiblingReadMain(void *arg);
+static void parentWriteSiblingReadChild(testdata_rw_t*, int[2]);
+static int parentWriteSiblingReadMain(void* arg);
 
 static void
 childForkHelper(int forkCount)
 {
-	while (forkCount > 0) {
-		omrthread_lib_postForkChild();
-		omrthread_lib_preFork();
-		if (0 == fork()) {
-			forkCount = forkCount - 1;
-		} else {
-			exit(0);
-		}
-	}
+    while (forkCount > 0) {
+        omrthread_lib_postForkChild();
+        omrthread_lib_preFork();
+        if (0 == fork()) {
+            forkCount = forkCount - 1;
+        } else {
+            exit(0);
+        }
+    }
 }
 
 TEST(ThreadForkResetTest, SiblingWriteLock)
 {
-	siblingWriteStart(1);
+    siblingWriteStart(1);
 }
 
 static void
 siblingWriteStart(int forkCount)
 {
-	omrthread_t t;
-	testdata_rw_t testdata;
-	int pipedata[2];
+    omrthread_t t;
+    testdata_rw_t testdata;
+    int pipedata[2];
 
-	/* Pre-fork */
-	int pipeRC = pipe(pipedata);
-	EXPECT_TRUE(0 == pipeRC)  << "Failure occurred calling pipe";
+    /* Pre-fork */
+    int pipeRC = pipe(pipedata);
+    EXPECT_TRUE(0 == pipeRC) << "Failure occurred calling pipe";
 
-	omrthread_monitor_init(&testdata.monitor, 0);
-	omrthread_rwmutex_init(&testdata.rwmutex, 0, "OMR_TEST SiblingWriteLock");
-	omrthread_monitor_enter(testdata.monitor);
-	ASSERT_NO_FATAL_FAILURE(createJoinableThread(&t, siblingWriteMain, &testdata));
+    omrthread_monitor_init(&testdata.monitor, 0);
+    omrthread_rwmutex_init(&testdata.rwmutex, 0, "OMR_TEST SiblingWriteLock");
+    omrthread_monitor_enter(testdata.monitor);
+    ASSERT_NO_FATAL_FAILURE(createJoinableThread(&t, siblingWriteMain, &testdata));
 
-	EXPECT_FALSE(J9THREAD_TIMED_OUT == omrthread_monitor_wait_timed(testdata.monitor, TIMEOUT, 0))
-			<< "Timed out waiting for sibling thread to enter monitor.";
+    EXPECT_FALSE(J9THREAD_TIMED_OUT == omrthread_monitor_wait_timed(testdata.monitor, TIMEOUT, 0))
+        << "Timed out waiting for sibling thread to enter monitor.";
 
-	omrthread_lib_preFork();
-	if (0 >= forkCount || 0 == fork()) {
-		childForkHelper(forkCount - 1);
-		/* Child process post-fork */
-		siblingWriteChild(&testdata, pipedata);
-	}
-	omrthread_lib_postForkParent();
+    omrthread_lib_preFork();
+    if (0 >= forkCount || 0 == fork()) {
+        childForkHelper(forkCount - 1);
+        /* Child process post-fork */
+        siblingWriteChild(&testdata, pipedata);
+    }
+    omrthread_lib_postForkParent();
 
-	/* Parent process post-fork */
-	ssize_t readBytes = read(pipedata[0], (int *)&testdata.rc, sizeof(testdata.rc));
-	EXPECT_TRUE(readBytes == sizeof(testdata.rc)) << "Didn't read back enough from pipe";
-	EXPECT_TRUE(0 == testdata.rc) << "Failure occurred in child process.";
-	close(pipedata[0]);
-	close(pipedata[1]);
-	EXPECT_TRUE(0 == omrthread_monitor_notify(testdata.monitor))
-			<< "Notifying monitor failed after fork: parent thread does not own monitor.";
-	EXPECT_TRUE(0 == omrthread_monitor_exit(testdata.monitor))
-			<< "Exiting monitor after fork failed: parent thread does not own monitor.";
+    /* Parent process post-fork */
+    ssize_t readBytes = read(pipedata[0], (int*)&testdata.rc, sizeof(testdata.rc));
+    EXPECT_TRUE(readBytes == sizeof(testdata.rc)) << "Didn't read back enough from pipe";
+    EXPECT_TRUE(0 == testdata.rc) << "Failure occurred in child process.";
+    close(pipedata[0]);
+    close(pipedata[1]);
+    EXPECT_TRUE(0 == omrthread_monitor_notify(testdata.monitor))
+        << "Notifying monitor failed after fork: parent thread does not own monitor.";
+    EXPECT_TRUE(0 == omrthread_monitor_exit(testdata.monitor))
+        << "Exiting monitor after fork failed: parent thread does not own monitor.";
 
-	VERBOSE_JOIN(t, J9THREAD_SUCCESS);
+    VERBOSE_JOIN(t, J9THREAD_SUCCESS);
 
-	EXPECT_TRUE(0 == omrthread_monitor_destroy(testdata.monitor))
-			<< "Destroying monitor failed: monitor still in use.";
-	EXPECT_TRUE(0 == omrthread_rwmutex_destroy(testdata.rwmutex))
-			<< "Destroying rwmutex failed: monitor still in use.";
-	EXPECT_TRUE(0 == testdata.rc) << "Failure occurred in sibling thread.";
+    EXPECT_TRUE(0 == omrthread_monitor_destroy(testdata.monitor))
+        << "Destroying monitor failed: monitor still in use.";
+    EXPECT_TRUE(0 == omrthread_rwmutex_destroy(testdata.rwmutex))
+        << "Destroying rwmutex failed: monitor still in use.";
+    EXPECT_TRUE(0 == testdata.rc) << "Failure occurred in sibling thread.";
 }
 
 static void
-siblingWriteChild(testdata_rw_t *testdata, int pipedata[2])
+siblingWriteChild(testdata_rw_t* testdata, int pipedata[2])
 {
-	omrthread_lib_postForkChild();
-	testdata->rc = omrthread_rwmutex_try_enter_write(testdata->rwmutex);
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_rwmutex_exit_write(testdata->rwmutex);
-	}
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_rwmutex_destroy(testdata->rwmutex);
-	}
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_monitor_exit(testdata->monitor);
-	}
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_monitor_destroy(testdata->monitor);
-	}
-	J9_IGNORE_RETURNVAL(write(pipedata[1], (int *)&testdata->rc, sizeof(testdata->rc)));
-	close(pipedata[0]);
-	close(pipedata[1]);
-	exit(0);
+    omrthread_lib_postForkChild();
+    testdata->rc = omrthread_rwmutex_try_enter_write(testdata->rwmutex);
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_rwmutex_exit_write(testdata->rwmutex);
+    }
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_rwmutex_destroy(testdata->rwmutex);
+    }
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_monitor_exit(testdata->monitor);
+    }
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_monitor_destroy(testdata->monitor);
+    }
+    J9_IGNORE_RETURNVAL(write(pipedata[1], (int*)&testdata->rc, sizeof(testdata->rc)));
+    close(pipedata[0]);
+    close(pipedata[1]);
+    exit(0);
 }
 
 static int
-siblingWriteMain(void *arg)
+siblingWriteMain(void* arg)
 {
-	testdata_rw_t *testdata = (testdata_rw_t *)arg;
-	testdata->rc = omrthread_monitor_enter(testdata->monitor);
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_rwmutex_try_enter_write(testdata->rwmutex);
-	}
-	/* Notify write lock is complete. */
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_monitor_notify(testdata->monitor);
-	}
-	/* Wait until after fork. */
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_monitor_wait_timed(testdata->monitor, TIMEOUT, 0);
-	}
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_rwmutex_exit_write(testdata->rwmutex);
-	}
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_monitor_exit(testdata->monitor);
-	}
+    testdata_rw_t* testdata = (testdata_rw_t*)arg;
+    testdata->rc = omrthread_monitor_enter(testdata->monitor);
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_rwmutex_try_enter_write(testdata->rwmutex);
+    }
+    /* Notify write lock is complete. */
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_monitor_notify(testdata->monitor);
+    }
+    /* Wait until after fork. */
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_monitor_wait_timed(testdata->monitor, TIMEOUT, 0);
+    }
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_rwmutex_exit_write(testdata->rwmutex);
+    }
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_monitor_exit(testdata->monitor);
+    }
 
-	return 0;
+    return 0;
 }
 
 TEST(ThreadForkResetTest, ParentWriteLock)
 {
-	parentWriteStart(1);
+    parentWriteStart(1);
 }
 
 static void
 parentWriteStart(int forkCount)
 {
-	testdata_rw_t testdata;
-	int pipedata[2];
+    testdata_rw_t testdata;
+    int pipedata[2];
 
-	/* Pre-fork */
-	int pipeRC = pipe(pipedata);
-	EXPECT_TRUE(0 == pipeRC)  << "Failure occurred calling pipe";
+    /* Pre-fork */
+    int pipeRC = pipe(pipedata);
+    EXPECT_TRUE(0 == pipeRC) << "Failure occurred calling pipe";
 
-	testdata.rc = omrthread_rwmutex_init(&testdata.rwmutex, 0, "OMR_TEST ParentWriteLock");
-	EXPECT_TRUE(0 == omrthread_rwmutex_try_enter_write(testdata.rwmutex))
-			<< "Enter write rwmutex failed before fork.";
+    testdata.rc = omrthread_rwmutex_init(&testdata.rwmutex, 0, "OMR_TEST ParentWriteLock");
+    EXPECT_TRUE(0 == omrthread_rwmutex_try_enter_write(testdata.rwmutex))
+        << "Enter write rwmutex failed before fork.";
 
-	omrthread_lib_preFork();
-	if (0 >= forkCount || 0 == fork()) {
-		childForkHelper(forkCount - 1);
-		/* Child process post-fork */
-		parentWriteChild(&testdata, pipedata);
-	}
-	omrthread_lib_postForkParent();
+    omrthread_lib_preFork();
+    if (0 >= forkCount || 0 == fork()) {
+        childForkHelper(forkCount - 1);
+        /* Child process post-fork */
+        parentWriteChild(&testdata, pipedata);
+    }
+    omrthread_lib_postForkParent();
 
-	/* Parent process post-fork */
-	ssize_t readBytes = read(pipedata[0], (int *)&testdata.rc, sizeof(testdata.rc));
-	EXPECT_TRUE(readBytes == sizeof(testdata.rc)) << "Didn't read back enough from pipe";
-	EXPECT_TRUE(0 == testdata.rc) << "Failure occurred in child process.";
-	close(pipedata[0]);
-	close(pipedata[1]);
-	EXPECT_TRUE(0 == omrthread_rwmutex_exit_write(testdata.rwmutex))
-			<< "Exit rwmutex failed after fork: monitor still in use.";
-	EXPECT_TRUE(0 == omrthread_rwmutex_destroy(testdata.rwmutex))
-			<< "Destroying monitor failed: monitor still in use.";
+    /* Parent process post-fork */
+    ssize_t readBytes = read(pipedata[0], (int*)&testdata.rc, sizeof(testdata.rc));
+    EXPECT_TRUE(readBytes == sizeof(testdata.rc)) << "Didn't read back enough from pipe";
+    EXPECT_TRUE(0 == testdata.rc) << "Failure occurred in child process.";
+    close(pipedata[0]);
+    close(pipedata[1]);
+    EXPECT_TRUE(0 == omrthread_rwmutex_exit_write(testdata.rwmutex))
+        << "Exit rwmutex failed after fork: monitor still in use.";
+    EXPECT_TRUE(0 == omrthread_rwmutex_destroy(testdata.rwmutex))
+        << "Destroying monitor failed: monitor still in use.";
 }
 
 static void
-parentWriteChild(testdata_rw_t *testdata, int pipedata[2])
+parentWriteChild(testdata_rw_t* testdata, int pipedata[2])
 {
-	omrthread_lib_postForkChild();
-	testdata->rc = omrthread_rwmutex_try_enter_write(testdata->rwmutex);
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_rwmutex_exit_write(testdata->rwmutex);
-	}
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_rwmutex_exit_write(testdata->rwmutex);
-	}
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_rwmutex_destroy(testdata->rwmutex);
-	}
-	J9_IGNORE_RETURNVAL(write(pipedata[1], (int *)&testdata->rc, sizeof(testdata->rc)));
-	close(pipedata[0]);
-	close(pipedata[1]);
-	exit(0);
+    omrthread_lib_postForkChild();
+    testdata->rc = omrthread_rwmutex_try_enter_write(testdata->rwmutex);
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_rwmutex_exit_write(testdata->rwmutex);
+    }
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_rwmutex_exit_write(testdata->rwmutex);
+    }
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_rwmutex_destroy(testdata->rwmutex);
+    }
+    J9_IGNORE_RETURNVAL(write(pipedata[1], (int*)&testdata->rc, sizeof(testdata->rc)));
+    close(pipedata[0]);
+    close(pipedata[1]);
+    exit(0);
 }
 
 TEST(ThreadForkResetTest, ChildSiblingWriteLock)
 {
-	childSiblingWriteStart(1);
+    childSiblingWriteStart(1);
 }
 
 static void
 childSiblingWriteStart(int forkCount)
 {
-	testdata_rw_t testdata;
-	int pipedata[2];
+    testdata_rw_t testdata;
+    int pipedata[2];
 
-	/* Pre-fork */
-	int pipeRC = pipe(pipedata);
-	EXPECT_TRUE(0 == pipeRC)  << "Failure occurred calling pipe";
+    /* Pre-fork */
+    int pipeRC = pipe(pipedata);
+    EXPECT_TRUE(0 == pipeRC) << "Failure occurred calling pipe";
 
-	testdata.rc = omrthread_rwmutex_init(&testdata.rwmutex, 0, "OMR_TEST ParentWriteLock");
-	EXPECT_TRUE(0 == omrthread_rwmutex_try_enter_write(testdata.rwmutex))
-			<< "Enter write rwmutex failed before fork.";
+    testdata.rc = omrthread_rwmutex_init(&testdata.rwmutex, 0, "OMR_TEST ParentWriteLock");
+    EXPECT_TRUE(0 == omrthread_rwmutex_try_enter_write(testdata.rwmutex))
+        << "Enter write rwmutex failed before fork.";
 
-	omrthread_lib_preFork();
-	if (0 >= forkCount || 0 == fork()) {
-		childForkHelper(forkCount - 1);
-		/* Child process post-fork */
-		childSiblingWriteChild(&testdata, pipedata);
-	}
-	omrthread_lib_postForkParent();
+    omrthread_lib_preFork();
+    if (0 >= forkCount || 0 == fork()) {
+        childForkHelper(forkCount - 1);
+        /* Child process post-fork */
+        childSiblingWriteChild(&testdata, pipedata);
+    }
+    omrthread_lib_postForkParent();
 
-	/* Parent process post-fork */
-	ssize_t readBytes = read(pipedata[0], (int *)&testdata.rc, sizeof(testdata.rc));
-	EXPECT_TRUE(readBytes == sizeof(testdata.rc)) << "Didn't read back enough from pipe";
-	EXPECT_TRUE(0 == testdata.rc) << "Failure occurred in child process.";
-	close(pipedata[0]);
-	close(pipedata[1]);
-	EXPECT_TRUE(0 == omrthread_rwmutex_exit_write(testdata.rwmutex))
-			<< "Exit rwmutex failed after fork: monitor still in use.";
-	EXPECT_TRUE(0 == omrthread_rwmutex_destroy(testdata.rwmutex))
-			<< "Destroying monitor failed: monitor still in use.";
+    /* Parent process post-fork */
+    ssize_t readBytes = read(pipedata[0], (int*)&testdata.rc, sizeof(testdata.rc));
+    EXPECT_TRUE(readBytes == sizeof(testdata.rc)) << "Didn't read back enough from pipe";
+    EXPECT_TRUE(0 == testdata.rc) << "Failure occurred in child process.";
+    close(pipedata[0]);
+    close(pipedata[1]);
+    EXPECT_TRUE(0 == omrthread_rwmutex_exit_write(testdata.rwmutex))
+        << "Exit rwmutex failed after fork: monitor still in use.";
+    EXPECT_TRUE(0 == omrthread_rwmutex_destroy(testdata.rwmutex))
+        << "Destroying monitor failed: monitor still in use.";
 }
 
 static void
-childSiblingWriteChild(testdata_rw_t *testdata, int pipedata[2])
+childSiblingWriteChild(testdata_rw_t* testdata, int pipedata[2])
 {
-	omrthread_t t = NULL;
-	omrthread_lib_postForkChild();
-	testdata->rc = createJoinableThreadNoMacros(&t, childSiblingWriteMain, testdata);
-	if (NULL != t) {
-		testdata->rc = omrthread_join(t);
-		if (testdata->rc & J9THREAD_ERR_OS_ERRNO_SET) {
-			omrTestEnv->log(LEVEL_ERROR, "omrthread_join() returned 0x%08x and os_errno=%d\n", (int)testdata->rc, (int)omrthread_get_os_errno());
-		}
-	}
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_rwmutex_exit_write(testdata->rwmutex);
-	}
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_rwmutex_destroy(testdata->rwmutex);
-	}
-	J9_IGNORE_RETURNVAL(write(pipedata[1], (int *)&testdata->rc, sizeof(testdata->rc)));
-	close(pipedata[0]);
-	close(pipedata[1]);
-	exit(0);
+    omrthread_t t = NULL;
+    omrthread_lib_postForkChild();
+    testdata->rc = createJoinableThreadNoMacros(&t, childSiblingWriteMain, testdata);
+    if (NULL != t) {
+        testdata->rc = omrthread_join(t);
+        if (testdata->rc & J9THREAD_ERR_OS_ERRNO_SET) {
+            omrTestEnv->log(LEVEL_ERROR, "omrthread_join() returned 0x%08x and os_errno=%d\n", (int)testdata->rc, (int)omrthread_get_os_errno());
+        }
+    }
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_rwmutex_exit_write(testdata->rwmutex);
+    }
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_rwmutex_destroy(testdata->rwmutex);
+    }
+    J9_IGNORE_RETURNVAL(write(pipedata[1], (int*)&testdata->rc, sizeof(testdata->rc)));
+    close(pipedata[0]);
+    close(pipedata[1]);
+    exit(0);
 }
 
 static int
-childSiblingWriteMain(void *arg)
+childSiblingWriteMain(void* arg)
 {
-	testdata_rw_t *testdata = (testdata_rw_t *)arg;
+    testdata_rw_t* testdata = (testdata_rw_t*)arg;
 
-	testdata->rc = omrthread_rwmutex_try_enter_write(testdata->rwmutex);
-	if (J9THREAD_RWMUTEX_WOULDBLOCK == testdata->rc) {
-		testdata->rc = 0;
-	} else {
-		omrthread_rwmutex_exit_write(testdata->rwmutex);
-		testdata->rc = 1;
-	}
+    testdata->rc = omrthread_rwmutex_try_enter_write(testdata->rwmutex);
+    if (J9THREAD_RWMUTEX_WOULDBLOCK == testdata->rc) {
+        testdata->rc = 0;
+    } else {
+        omrthread_rwmutex_exit_write(testdata->rwmutex);
+        testdata->rc = 1;
+    }
 
-	return 0;
+    return 0;
 }
 
 /*
@@ -314,137 +314,137 @@ childSiblingWriteMain(void *arg)
  */
 TEST(ThreadForkResetTest, ParentWriteSiblingReadLock)
 {
-	parentWriteSiblingReadStart(1);
+    parentWriteSiblingReadStart(1);
 }
 
 static void
 parentWriteSiblingReadStart(int forkCount)
 {
-	omrthread_t t;
-	testdata_rw_t testdata;
-	int pipedata[2];
+    omrthread_t t;
+    testdata_rw_t testdata;
+    int pipedata[2];
 
-	/* Pre-fork */
-	int pipeRC = pipe(pipedata);
-	EXPECT_TRUE(0 == pipeRC)  << "Failure occurred calling pipe";
+    /* Pre-fork */
+    int pipeRC = pipe(pipedata);
+    EXPECT_TRUE(0 == pipeRC) << "Failure occurred calling pipe";
 
-	omrthread_monitor_init(&testdata.monitor, 0);
-	omrthread_rwmutex_init(&testdata.rwmutex, 0, "OMR_TEST ParentWriteSiblingReadLock");
-	omrthread_monitor_enter(testdata.monitor);
-	omrthread_rwmutex_enter_write(testdata.rwmutex);
-	ASSERT_NO_FATAL_FAILURE(createJoinableThread(&t, parentWriteSiblingReadMain, &testdata));
+    omrthread_monitor_init(&testdata.monitor, 0);
+    omrthread_rwmutex_init(&testdata.rwmutex, 0, "OMR_TEST ParentWriteSiblingReadLock");
+    omrthread_monitor_enter(testdata.monitor);
+    omrthread_rwmutex_enter_write(testdata.rwmutex);
+    ASSERT_NO_FATAL_FAILURE(createJoinableThread(&t, parentWriteSiblingReadMain, &testdata));
 
-	EXPECT_FALSE(J9THREAD_TIMED_OUT == omrthread_monitor_wait_timed(testdata.monitor, TIMEOUT, 0))
-			<< "Timed out waiting for sibling thread to enter monitor.";
-	EXPECT_TRUE(0 == omrthread_monitor_exit(testdata.monitor))
-			<< "Exiting monitor after fork failed: parent thread does not own monitor.";
-	EXPECT_TRUE(0 == omrthread_monitor_destroy(testdata.monitor))
-			<< "Destroying monitor failed: monitor still in use.";
-	omrthread_sleep(START_DELAY);
+    EXPECT_FALSE(J9THREAD_TIMED_OUT == omrthread_monitor_wait_timed(testdata.monitor, TIMEOUT, 0))
+        << "Timed out waiting for sibling thread to enter monitor.";
+    EXPECT_TRUE(0 == omrthread_monitor_exit(testdata.monitor))
+        << "Exiting monitor after fork failed: parent thread does not own monitor.";
+    EXPECT_TRUE(0 == omrthread_monitor_destroy(testdata.monitor))
+        << "Destroying monitor failed: monitor still in use.";
+    omrthread_sleep(START_DELAY);
 
-	omrthread_lib_preFork();
-	if (0 >= forkCount || 0 == fork()) {
-		childForkHelper(forkCount - 1);
-		/* Child process post-fork */
-		parentWriteSiblingReadChild(&testdata, pipedata);
-	}
-	omrthread_lib_postForkParent();
+    omrthread_lib_preFork();
+    if (0 >= forkCount || 0 == fork()) {
+        childForkHelper(forkCount - 1);
+        /* Child process post-fork */
+        parentWriteSiblingReadChild(&testdata, pipedata);
+    }
+    omrthread_lib_postForkParent();
 
-	/* Parent process post-fork */
-	ssize_t readBytes = read(pipedata[0], (int *)&testdata.rc, sizeof(testdata.rc));
-	EXPECT_TRUE(readBytes == sizeof(testdata.rc)) << "Didn't read back enough from pipe";
-	EXPECT_TRUE(0 == testdata.rc) << "Failure occurred in child process.";
-	close(pipedata[0]);
-	close(pipedata[1]);
-	EXPECT_TRUE(0 == omrthread_rwmutex_exit_write(testdata.rwmutex))
-			<< "Exit write failed after fork.";
+    /* Parent process post-fork */
+    ssize_t readBytes = read(pipedata[0], (int*)&testdata.rc, sizeof(testdata.rc));
+    EXPECT_TRUE(readBytes == sizeof(testdata.rc)) << "Didn't read back enough from pipe";
+    EXPECT_TRUE(0 == testdata.rc) << "Failure occurred in child process.";
+    close(pipedata[0]);
+    close(pipedata[1]);
+    EXPECT_TRUE(0 == omrthread_rwmutex_exit_write(testdata.rwmutex))
+        << "Exit write failed after fork.";
 
-	VERBOSE_JOIN(t, J9THREAD_SUCCESS);
+    VERBOSE_JOIN(t, J9THREAD_SUCCESS);
 
-	EXPECT_TRUE(0 == omrthread_rwmutex_destroy(testdata.rwmutex))
-			<< "Destroying rwmutex failed: monitor still in use.";
-	EXPECT_TRUE(0 == testdata.rc) << "Failure occurred in sibling thread.";
+    EXPECT_TRUE(0 == omrthread_rwmutex_destroy(testdata.rwmutex))
+        << "Destroying rwmutex failed: monitor still in use.";
+    EXPECT_TRUE(0 == testdata.rc) << "Failure occurred in sibling thread.";
 }
 
 static void
-parentWriteSiblingReadChild(testdata_rw_t *testdata, int pipedata[2])
+parentWriteSiblingReadChild(testdata_rw_t* testdata, int pipedata[2])
 {
-	omrthread_lib_postForkChild();
-	testdata->rc = omrthread_rwmutex_exit_write(testdata->rwmutex);
-	omrthread_sleep(START_DELAY);
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_rwmutex_try_enter_write(testdata->rwmutex);
-	}
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_rwmutex_exit_write(testdata->rwmutex);
-	}
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_rwmutex_enter_read(testdata->rwmutex);
-	}
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_rwmutex_exit_read(testdata->rwmutex);
-	}
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_rwmutex_destroy(testdata->rwmutex);
-	}
-	J9_IGNORE_RETURNVAL(write(pipedata[1], (int *)&testdata->rc, sizeof(testdata->rc)));
-	close(pipedata[0]);
-	close(pipedata[1]);
-	exit(0);
+    omrthread_lib_postForkChild();
+    testdata->rc = omrthread_rwmutex_exit_write(testdata->rwmutex);
+    omrthread_sleep(START_DELAY);
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_rwmutex_try_enter_write(testdata->rwmutex);
+    }
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_rwmutex_exit_write(testdata->rwmutex);
+    }
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_rwmutex_enter_read(testdata->rwmutex);
+    }
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_rwmutex_exit_read(testdata->rwmutex);
+    }
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_rwmutex_destroy(testdata->rwmutex);
+    }
+    J9_IGNORE_RETURNVAL(write(pipedata[1], (int*)&testdata->rc, sizeof(testdata->rc)));
+    close(pipedata[0]);
+    close(pipedata[1]);
+    exit(0);
 }
 
 static int
-parentWriteSiblingReadMain(void *arg)
+parentWriteSiblingReadMain(void* arg)
 {
-	testdata_rw_t *testdata = (testdata_rw_t *)arg;
-	testdata->rc = omrthread_monitor_enter(testdata->monitor);
-	/* Notify write lock is complete. */
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_monitor_notify(testdata->monitor);
-	}
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_monitor_exit(testdata->monitor);
-	}
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_rwmutex_enter_read(testdata->rwmutex);
-	}
-	/* Wait until after fork. */
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_rwmutex_exit_read(testdata->rwmutex);
-	}
+    testdata_rw_t* testdata = (testdata_rw_t*)arg;
+    testdata->rc = omrthread_monitor_enter(testdata->monitor);
+    /* Notify write lock is complete. */
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_monitor_notify(testdata->monitor);
+    }
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_monitor_exit(testdata->monitor);
+    }
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_rwmutex_enter_read(testdata->rwmutex);
+    }
+    /* Wait until after fork. */
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_rwmutex_exit_read(testdata->rwmutex);
+    }
 
-	return 0;
+    return 0;
 }
 
 TEST(ThreadForkResetTest, GrandchildRWLock)
 {
-	siblingWriteStart(2);
-	//siblingReadStart(2);
-	parentWriteStart(2);
-	childSiblingWriteStart(2);
-	parentWriteSiblingReadStart(2);
+    siblingWriteStart(2);
+    //siblingReadStart(2);
+    parentWriteStart(2);
+    childSiblingWriteStart(2);
+    parentWriteSiblingReadStart(2);
 }
 
 static intptr_t
-createJoinableThreadNoMacros(omrthread_t *newThread, omrthread_entrypoint_t entryProc, void *entryArg)
+createJoinableThreadNoMacros(omrthread_t* newThread, omrthread_entrypoint_t entryProc, void* entryArg)
 {
-	omrthread_attr_t attr = NULL;
-	intptr_t rc = 0;
+    omrthread_attr_t attr = NULL;
+    intptr_t rc = 0;
 
-	rc = omrthread_attr_init(&attr);
-	if (J9THREAD_SUCCESS == rc) {
-		rc = omrthread_attr_set_detachstate(&attr, J9THREAD_CREATE_JOINABLE);
-	}
-	if (J9THREAD_SUCCESS == rc) {
-		rc = omrthread_create_ex(newThread, &attr, 0, entryProc, entryArg);
-		if (J9THREAD_SUCCESS != rc) {
-			if (rc & J9THREAD_ERR_OS_ERRNO_SET) {
-				omrTestEnv->log(LEVEL_ERROR, "omrthread_create_ex() returned 0x%08x and os_errno=%d\n", (int)rc, (int)omrthread_get_os_errno());
-			}
-		}
-	}
-	if (NULL != attr) {
-		rc = omrthread_attr_destroy(&attr);
-	}
-	return rc;
+    rc = omrthread_attr_init(&attr);
+    if (J9THREAD_SUCCESS == rc) {
+        rc = omrthread_attr_set_detachstate(&attr, J9THREAD_CREATE_JOINABLE);
+    }
+    if (J9THREAD_SUCCESS == rc) {
+        rc = omrthread_create_ex(newThread, &attr, 0, entryProc, entryArg);
+        if (J9THREAD_SUCCESS != rc) {
+            if (rc & J9THREAD_ERR_OS_ERRNO_SET) {
+                omrTestEnv->log(LEVEL_ERROR, "omrthread_create_ex() returned 0x%08x and os_errno=%d\n", (int)rc, (int)omrthread_get_os_errno());
+            }
+        }
+    }
+    if (NULL != attr) {
+        rc = omrthread_attr_destroy(&attr);
+    }
+    return rc;
 }

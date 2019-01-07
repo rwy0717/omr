@@ -27,50 +27,49 @@
 #include "OMR_Agent.hpp"
 #include "rasTestHelpers.hpp"
 
-class RASAgentTest: public ::testing::TestWithParam<const char *>
-{
+class RASAgentTest : public ::testing::TestWithParam<const char*> {
 protected:
-	virtual void
-	SetUp()
-	{
-		OMRTEST_ASSERT_ERROR_NONE(omrTestVMInit(&testVM, rasTestEnv->getPortLibrary()));
-	}
+    virtual void
+    SetUp()
+    {
+        OMRTEST_ASSERT_ERROR_NONE(omrTestVMInit(&testVM, rasTestEnv->getPortLibrary()));
+    }
 
-	virtual void
-	TearDown()
-	{
-		OMRTEST_ASSERT_ERROR_NONE(omrTestVMFini(&testVM));
-	}
+    virtual void
+    TearDown()
+    {
+        OMRTEST_ASSERT_ERROR_NONE(omrTestVMFini(&testVM));
+    }
 
-	OMRTestVM testVM;
+    OMRTestVM testVM;
 };
 
 TEST_P(RASAgentTest, AgentCPP)
 {
-	OMR_Agent *agent = OMR_Agent::createAgent(&testVM.omrVM, GetParam());
-	ASSERT_FALSE(NULL == agent) << "testAgent: createAgent() failed";
+    OMR_Agent* agent = OMR_Agent::createAgent(&testVM.omrVM, GetParam());
+    ASSERT_FALSE(NULL == agent) << "testAgent: createAgent() failed";
 
-	OMRTEST_ASSERT_ERROR_NONE(agent->openLibrary());
+    OMRTEST_ASSERT_ERROR_NONE(agent->openLibrary());
 
-	OMRTEST_ASSERT_ERROR_NONE(agent->callOnLoad());
+    OMRTEST_ASSERT_ERROR_NONE(agent->callOnLoad());
 
-	OMRTEST_ASSERT_ERROR_NONE(agent->callOnUnload());
+    OMRTEST_ASSERT_ERROR_NONE(agent->callOnUnload());
 
-	OMR_Agent::destroyAgent(agent);
+    OMR_Agent::destroyAgent(agent);
 }
 
 TEST_P(RASAgentTest, AgentC)
 {
-	struct OMR_Agent *agent = omr_agent_create(&testVM.omrVM, GetParam());
-	ASSERT_FALSE(NULL == agent) << "testAgent: createAgent() failed";
+    struct OMR_Agent* agent = omr_agent_create(&testVM.omrVM, GetParam());
+    ASSERT_FALSE(NULL == agent) << "testAgent: createAgent() failed";
 
-	OMRTEST_ASSERT_ERROR_NONE(omr_agent_openLibrary(agent));
+    OMRTEST_ASSERT_ERROR_NONE(omr_agent_openLibrary(agent));
 
-	OMRTEST_ASSERT_ERROR_NONE(omr_agent_callOnLoad(agent));
+    OMRTEST_ASSERT_ERROR_NONE(omr_agent_callOnLoad(agent));
 
-	OMRTEST_ASSERT_ERROR_NONE(omr_agent_callOnUnload(agent));
+    OMRTEST_ASSERT_ERROR_NONE(omr_agent_callOnUnload(agent));
 
-	omr_agent_destroy(agent);
+    omr_agent_destroy(agent);
 }
 
 INSTANTIATE_TEST_CASE_P(TraceNotStartedAgentOpts, RASAgentTest, ::testing::Values("traceNotStartedAgent", "traceNotStartedAgent=", "traceNotStartedAgent=abc"));
@@ -83,12 +82,12 @@ INSTANTIATE_TEST_CASE_P(BindThreadAgentOpts, RASAgentTest, ::testing::Values("bi
  */
 TEST_F(RASAgentTest, ArgNullC)
 {
-	struct OMR_Agent *agent = omr_agent_create(&testVM.omrVM, NULL);
-	ASSERT_TRUE(NULL == agent);
+    struct OMR_Agent* agent = omr_agent_create(&testVM.omrVM, NULL);
+    ASSERT_TRUE(NULL == agent);
 }
 
 TEST_F(RASAgentTest, ArgNullCPP)
 {
-	OMR_Agent *agent = OMR_Agent::createAgent(&testVM.omrVM, NULL);
-	ASSERT_TRUE(NULL == agent);
+    OMR_Agent* agent = OMR_Agent::createAgent(&testVM.omrVM, NULL);
+    ASSERT_TRUE(NULL == agent);
 }

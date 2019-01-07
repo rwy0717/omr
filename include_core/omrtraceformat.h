@@ -60,7 +60,7 @@ extern "C" {
  * @param[in] componentName the name of the component this trace point belongs to, for example j9mm
  * @param[in] tracepoint the trace point number within the component, for example 123
  */
-typedef char *(*FormatStringCallback)(const char *componentName, int32_t tracepoint);
+typedef char* (*FormatStringCallback)(const char* componentName, int32_t tracepoint);
 
 typedef struct UtTraceFileIterator UtTraceFileIterator;
 typedef struct UtTracePointIterator UtTracePointIterator;
@@ -84,7 +84,7 @@ typedef struct UtTracePointIterator UtTracePointIterator;
  * @return OMR_ERROR_OUT_OF_NATIVE_MEMORY if memory for the iterator structure cannot be allocated.
  * @return OMR_ERROR_NOT_AVAILABLE if the specified file cannot be opened.
  */
-omr_error_t omr_trc_getTraceFileIterator(OMRPortLibrary *portLib, char *fileName, UtTraceFileIterator **iteratorPtr, FormatStringCallback getFormatString);
+omr_error_t omr_trc_getTraceFileIterator(OMRPortLibrary* portLib, char* fileName, UtTraceFileIterator** iteratorPtr, FormatStringCallback getFormatString);
 
 /**
  * @deprecated
@@ -95,7 +95,7 @@ omr_error_t omr_trc_getTraceFileIterator(OMRPortLibrary *portLib, char *fileName
  * @param[in] iter the UtTraceFileIterator to free
  * @return OMR_ERROR_NONE on success
  */
-omr_error_t omr_trc_freeTraceFileIterator(UtTraceFileIterator *iter);
+omr_error_t omr_trc_freeTraceFileIterator(UtTraceFileIterator* iter);
 
 /**
  * @deprecated
@@ -109,7 +109,7 @@ omr_error_t omr_trc_freeTraceFileIterator(UtTraceFileIterator *iter);
  * @return OMR_ERROR_OUT_OF_NATIVE_MEMORY if memory for the iterator structure cannot be allocated.
  * @return OMR_ERROR_INTERNAL if the file ends unexpectedly.
  */
-omr_error_t omr_trc_getTracePointIteratorForNextBuffer(UtTraceFileIterator *fileIter, UtTracePointIterator **bufferIteratorPtr);
+omr_error_t omr_trc_getTracePointIteratorForNextBuffer(UtTraceFileIterator* fileIter, UtTracePointIterator** bufferIteratorPtr);
 
 /**
  * @deprecated
@@ -123,7 +123,7 @@ omr_error_t omr_trc_getTracePointIteratorForNextBuffer(UtTraceFileIterator *file
  * @param[in] buffLen the length of the buffer
  * @return a pointer to buffer or NULL if there are no more trace points available
  */
-const char *omr_trc_formatNextTracePoint(UtTracePointIterator *iter, char *buffer, uint32_t buffLen);
+const char* omr_trc_formatNextTracePoint(UtTracePointIterator* iter, char* buffer, uint32_t buffLen);
 
 /**
  * @deprecated
@@ -135,7 +135,7 @@ const char *omr_trc_formatNextTracePoint(UtTracePointIterator *iter, char *buffe
  * @param[in] iter the UtTracePointIterator to free
  * @return OMR_ERROR_NONE on success
  */
-omr_error_t omr_trc_freeTracePointIterator(UtTracePointIterator *iter);
+omr_error_t omr_trc_freeTracePointIterator(UtTracePointIterator* iter);
 
 /**
  * @deprecated
@@ -146,7 +146,7 @@ omr_error_t omr_trc_freeTracePointIterator(UtTracePointIterator *iter);
  * @param[in] iter the UtTracePointIterator
  * @return the thread id.
  */
-uint64_t omr_trc_getBufferIteratorThreadId(UtTracePointIterator *iter);
+uint64_t omr_trc_getBufferIteratorThreadId(UtTracePointIterator* iter);
 
 /**
  * @deprecated
@@ -161,7 +161,7 @@ uint64_t omr_trc_getBufferIteratorThreadId(UtTracePointIterator *iter);
  * @param[buffLen] the size of buffer
  * @return the number of characters written to buffer
  */
-uint32_t omr_trc_getBufferIteratorThreadName(UtTracePointIterator *iter, char *buffer, uint32_t buffLen);
+uint32_t omr_trc_getBufferIteratorThreadName(UtTracePointIterator* iter, char* buffer, uint32_t buffLen);
 
 #ifdef __cplusplus
 }

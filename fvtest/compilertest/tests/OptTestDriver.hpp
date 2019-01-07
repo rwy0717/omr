@@ -29,45 +29,47 @@
 #include "optimizer/OptimizationStrategies.hpp"
 #include "TestDriver.hpp"
 
-namespace TestCompiler { class MethodInfo; }
-namespace TR { class IlVerifier; }
+namespace TestCompiler {
+class MethodInfo;
+}
+namespace TR {
+class IlVerifier;
+}
 
-namespace TestCompiler
-{
+namespace TestCompiler {
 
-class OptTestDriver : public TestDriver, public ::testing::Test
-   {
-   public:
-   ~OptTestDriver();
+class OptTestDriver : public TestDriver, public ::testing::Test {
+public:
+    ~OptTestDriver();
 
-   void setMethodInfo(TestCompiler::MethodInfo *methodInfo) { _methodInfo = methodInfo; }
-   void setIlVerifier(TR::IlVerifier *ilVer) { _ilVer = ilVer; }
+    void setMethodInfo(TestCompiler::MethodInfo* methodInfo) { _methodInfo = methodInfo; }
+    void setIlVerifier(TR::IlVerifier* ilVer) { _ilVer = ilVer; }
 
-   typedef std::vector<OptimizationStrategy> OptVector;
+    typedef std::vector<OptimizationStrategy> OptVector;
 
-   void addOptimization(OMR::Optimizations opt);
-   void addOptimizations(const OptimizationStrategy *opts);
+    void addOptimization(OMR::Optimizations opt);
+    void addOptimizations(const OptimizationStrategy* opts);
 
-   void Verify();
-   void VerifyAndInvoke();
+    void Verify();
+    void VerifyAndInvoke();
 
-   virtual void compileTestMethods();
+    virtual void compileTestMethods();
 
-   /**
+    /**
     * Returns the method most recently compiled, cast to type `T`.
     */
-   template<typename T> T getCompiledMethod() const { return reinterpret_cast<T>(_compiledMethod); }
+    template <typename T> T getCompiledMethod() const { return reinterpret_cast<T>(_compiledMethod); }
 
-   private:
-   void makeOptimizationStrategyArray(OptimizationStrategy *strategy);
-   void SetupStrategy();
+private:
+    void makeOptimizationStrategyArray(OptimizationStrategy* strategy);
+    void SetupStrategy();
 
-   uint8_t *_compiledMethod;
-   TestCompiler::MethodInfo *_methodInfo;
-   TR::IlVerifier  *_ilVer;
-   std::vector<OptimizationStrategy> _optimizations;
-   };
+    uint8_t* _compiledMethod;
+    TestCompiler::MethodInfo* _methodInfo;
+    TR::IlVerifier* _ilVer;
+    std::vector<OptimizationStrategy> _optimizations;
+};
 
-}// namespace TestCompiler
+} // namespace TestCompiler
 
 #endif

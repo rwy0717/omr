@@ -28,185 +28,185 @@
 #include "omragent.h"
 
 #define MATRIX_ORDER 1000
-#define NUM_ITERATIONS_SYSTEM_CPU_BURN	3000
+#define NUM_ITERATIONS_SYSTEM_CPU_BURN 3000
 
-static intptr_t dummy_omrsysinfo_get_CPU_utilization(struct OMRPortLibrary *portLibrary, struct J9SysinfoCPUTime *cpuTimeStats);
-static void matrixSquare(OMR_VMThread *vmThread);
+static intptr_t dummy_omrsysinfo_get_CPU_utilization(struct OMRPortLibrary* portLibrary, struct J9SysinfoCPUTime* cpuTimeStats);
+static void matrixSquare(OMR_VMThread* vmThread);
 static void systemTimeCPUBurn(void);
-static omr_error_t testProcessCpuLoad(OMR_VMThread *vmThread, OMR_TI const *ti, omr_error_t expectedRc, BOOLEAN dummyPort, BOOLEAN checkRc);
-static omr_error_t testSystemCpuLoad(OMR_VMThread *vmThread, OMR_TI const *ti, omr_error_t expectedRc, BOOLEAN dummyPort, BOOLEAN checkRc);
-static omr_error_t testTICpuLoad(OMR_VMThread *vmThread, OMR_TI const *ti);
+static omr_error_t testProcessCpuLoad(OMR_VMThread* vmThread, OMR_TI const* ti, omr_error_t expectedRc, BOOLEAN dummyPort, BOOLEAN checkRc);
+static omr_error_t testSystemCpuLoad(OMR_VMThread* vmThread, OMR_TI const* ti, omr_error_t expectedRc, BOOLEAN dummyPort, BOOLEAN checkRc);
+static omr_error_t testTICpuLoad(OMR_VMThread* vmThread, OMR_TI const* ti);
 
-static const char *agentName = "cpuLoadAgent";
+static const char* agentName = "cpuLoadAgent";
 
-typedef intptr_t (*real_sysinfo_get_CPU_utilization)(struct OMRPortLibrary *portLibrary, struct J9SysinfoCPUTime *cpuTime);
+typedef intptr_t (*real_sysinfo_get_CPU_utilization)(struct OMRPortLibrary* portLibrary, struct J9SysinfoCPUTime* cpuTime);
 /* real_omrsysinfo_get_CPU_utilization and callIndex are global because dummy_omrsysinfo_get_CPU_utilization() needs to access them */
 static real_sysinfo_get_CPU_utilization real_omrsysinfo_get_CPU_utilization = NULL;
 static int32_t callIndex = 0;
 
 omr_error_t
-OMRAgent_OnLoad(OMR_TI const *ti, OMR_VM *vm, char const *options, OMR_AgentCallbacks *agentCallbacks, ...)
+OMRAgent_OnLoad(OMR_TI const* ti, OMR_VM* vm, char const* options, OMR_AgentCallbacks* agentCallbacks, ...)
 {
-	OMR_VMThread *vmThread = NULL;
-	omr_error_t rc = OMR_ERROR_NONE;
-	OMRPORT_ACCESS_FROM_OMRVM(vm);
+    OMR_VMThread* vmThread = NULL;
+    omr_error_t rc = OMR_ERROR_NONE;
+    OMRPORT_ACCESS_FROM_OMRVM(vm);
 
-	omrtty_printf("%s: Agent_OnLoad(options=\"%s\")\n", agentName, options);
-	if (OMR_ERROR_NONE == rc) {
-		if (NULL == ti) {
-			omrtty_printf("%s:%d: NULL OMR_TI interface pointer.\n", __FILE__, __LINE__);
-			rc = OMR_ERROR_INTERNAL;
-		}
-	}
-	if (OMR_ERROR_NONE == rc) {
-		rc = ti->BindCurrentThread(vm, "cpuLoadAgent main", &vmThread);
-		if (OMR_ERROR_NONE != rc) {
-			omrtty_printf("%s: BindCurrentThread failed, rc=%d\n", agentName, rc);
-		} else if (NULL == vmThread) {
-			omrtty_printf("%s: BindCurrentThread failed, NULL vmThread was returned\n", agentName);
-			rc = OMR_ERROR_INTERNAL;
-		} else {
-			omrtty_printf("%s: BindCurrentThread passed, vmThread=0x%p\n", agentName, vmThread);
-		}
-	}
+    omrtty_printf("%s: Agent_OnLoad(options=\"%s\")\n", agentName, options);
+    if (OMR_ERROR_NONE == rc) {
+        if (NULL == ti) {
+            omrtty_printf("%s:%d: NULL OMR_TI interface pointer.\n", __FILE__, __LINE__);
+            rc = OMR_ERROR_INTERNAL;
+        }
+    }
+    if (OMR_ERROR_NONE == rc) {
+        rc = ti->BindCurrentThread(vm, "cpuLoadAgent main", &vmThread);
+        if (OMR_ERROR_NONE != rc) {
+            omrtty_printf("%s: BindCurrentThread failed, rc=%d\n", agentName, rc);
+        } else if (NULL == vmThread) {
+            omrtty_printf("%s: BindCurrentThread failed, NULL vmThread was returned\n", agentName);
+            rc = OMR_ERROR_INTERNAL;
+        } else {
+            omrtty_printf("%s: BindCurrentThread passed, vmThread=0x%p\n", agentName, vmThread);
+        }
+    }
 #if !defined(J9ZOS390)
-	/**
-	 * Exclude z/OS when testing GetProcessCpuLoad() and GetSystemCpuLoad(). Existing implementation of
-	 * omrsysinfo_get_CPU_utilization(), which the two APIs rely on, is problematic on z/OS. (details see JAZZ103 53507)
-	 */
-	if (OMR_ERROR_NONE == rc) {
-		rc = OMRTEST_PRINT_ERROR(testTICpuLoad(vmThread, ti));
-	}
+    /**
+     * Exclude z/OS when testing GetProcessCpuLoad() and GetSystemCpuLoad(). Existing implementation of
+     * omrsysinfo_get_CPU_utilization(), which the two APIs rely on, is problematic on z/OS. (details see JAZZ103 53507)
+     */
+    if (OMR_ERROR_NONE == rc) {
+        rc = OMRTEST_PRINT_ERROR(testTICpuLoad(vmThread, ti));
+    }
 #endif /* !defined(J9ZOS390) */
-	if (OMR_ERROR_NONE == rc) {
-		rc = ti->UnbindCurrentThread(vmThread);
-		if (OMR_ERROR_NONE != rc) {
-			omrtty_printf("%s: UnbindCurrentThread failed, rc=%d\n", agentName, rc);
-		} else {
-			omrtty_printf("%s: UnbindCurrentThread passed\n", agentName);
-		}
-	}
-	return rc;
+    if (OMR_ERROR_NONE == rc) {
+        rc = ti->UnbindCurrentThread(vmThread);
+        if (OMR_ERROR_NONE != rc) {
+            omrtty_printf("%s: UnbindCurrentThread failed, rc=%d\n", agentName, rc);
+        } else {
+            omrtty_printf("%s: UnbindCurrentThread passed\n", agentName);
+        }
+    }
+    return rc;
 }
 
 omr_error_t
-OMRAgent_OnUnload(OMR_TI const *ti, OMR_VM *vm)
+OMRAgent_OnUnload(OMR_TI const* ti, OMR_VM* vm)
 {
-	OMRPORT_ACCESS_FROM_OMRVM(vm);
-	omrtty_printf("%s: Agent_OnUnload\n", agentName);
-	return OMR_ERROR_NONE;
+    OMRPORT_ACCESS_FROM_OMRVM(vm);
+    omrtty_printf("%s: Agent_OnUnload\n", agentName);
+    return OMR_ERROR_NONE;
 }
 
 static intptr_t
-dummy_omrsysinfo_get_CPU_utilization(struct OMRPortLibrary *portLibrary, struct J9SysinfoCPUTime *cpuTimeStats)
+dummy_omrsysinfo_get_CPU_utilization(struct OMRPortLibrary* portLibrary, struct J9SysinfoCPUTime* cpuTimeStats)
 {
-	intptr_t rc = 0;
+    intptr_t rc = 0;
 
-	if ((2 == callIndex) || (6 == callIndex) || (7 == callIndex)) {
-		/* return an invalid sample */
-		real_omrsysinfo_get_CPU_utilization(portLibrary, cpuTimeStats);
-		cpuTimeStats->cpuTime = I_64_MAX;
-		cpuTimeStats->timestamp = 0;
-	} else if ((7 < callIndex) && (callIndex < 11)) {
-		/* set number of CPUs to 1 in the 8th and 10th calls */
-		real_omrsysinfo_get_CPU_utilization(portLibrary, cpuTimeStats);
-		cpuTimeStats->numberOfCpus = 1;
-	} else if (11 == callIndex) {
-		/* test INSUFFICIENT_PRIVILEGE case */
-		rc = OMRPORT_ERROR_SYSINFO_INSUFFICIENT_PRIVILEGE;
-	} else if (12 == callIndex) {
-		/* test SYSINFO_NOT_SUPPORTED case */
-		rc = OMRPORT_ERROR_SYSINFO_NOT_SUPPORTED;
-	} else {
-		real_omrsysinfo_get_CPU_utilization(portLibrary, cpuTimeStats);
-	}
-	return rc;
+    if ((2 == callIndex) || (6 == callIndex) || (7 == callIndex)) {
+        /* return an invalid sample */
+        real_omrsysinfo_get_CPU_utilization(portLibrary, cpuTimeStats);
+        cpuTimeStats->cpuTime = I_64_MAX;
+        cpuTimeStats->timestamp = 0;
+    } else if ((7 < callIndex) && (callIndex < 11)) {
+        /* set number of CPUs to 1 in the 8th and 10th calls */
+        real_omrsysinfo_get_CPU_utilization(portLibrary, cpuTimeStats);
+        cpuTimeStats->numberOfCpus = 1;
+    } else if (11 == callIndex) {
+        /* test INSUFFICIENT_PRIVILEGE case */
+        rc = OMRPORT_ERROR_SYSINFO_INSUFFICIENT_PRIVILEGE;
+    } else if (12 == callIndex) {
+        /* test SYSINFO_NOT_SUPPORTED case */
+        rc = OMRPORT_ERROR_SYSINFO_NOT_SUPPORTED;
+    } else {
+        real_omrsysinfo_get_CPU_utilization(portLibrary, cpuTimeStats);
+    }
+    return rc;
 }
 
 static omr_error_t
-testProcessCpuLoad(OMR_VMThread *vmThread, OMR_TI const *ti, omr_error_t expectedRc, BOOLEAN dummyPort, BOOLEAN checkRc)
+testProcessCpuLoad(OMR_VMThread* vmThread, OMR_TI const* ti, omr_error_t expectedRc, BOOLEAN dummyPort, BOOLEAN checkRc)
 {
-	omr_error_t rc = OMR_ERROR_NONE;
-	omr_error_t testRc = OMR_ERROR_NONE;
-	double processCpuLoad = 0.0;
-	OMRPORT_ACCESS_FROM_OMRVMTHREAD(vmThread);
+    omr_error_t rc = OMR_ERROR_NONE;
+    omr_error_t testRc = OMR_ERROR_NONE;
+    double processCpuLoad = 0.0;
+    OMRPORT_ACCESS_FROM_OMRVMTHREAD(vmThread);
 
-	real_omrsysinfo_get_CPU_utilization = OMRPORTLIB->sysinfo_get_CPU_utilization;
-	matrixSquare(vmThread);
-	systemTimeCPUBurn();
-	if (TRUE == dummyPort) {
-		/* use dummy_omrsysinfo_get_CPU_utilization */
-		OMRPORTLIB->sysinfo_get_CPU_utilization = dummy_omrsysinfo_get_CPU_utilization;
-	}
-	rc = ti->GetProcessCpuLoad(vmThread, &processCpuLoad);
-	if ((processCpuLoad < 0.0) || (processCpuLoad > 1.0)) {
-		omrtty_printf(
-			"%s:%d callIndex: %d: GetProcessCpuLoad() returned an invalid value, processCpuLoad = %lf ! ProcessCpuLoad should be in [0, 1].\n",
-			__FILE__, __LINE__, callIndex, processCpuLoad);
-		testRc = OMR_ERROR_INTERNAL;
-	} else if (checkRc) {
-		rc = OMRTEST_PRINT_UNEXPECTED_RC(rc, expectedRc);
-		if (expectedRc != rc) {
-			omrtty_printf(
-				"%s:%d callIndex: %d: GetProcessCpuLoad() returned a wrong error code !\n",
-				__FILE__, __LINE__, callIndex);
-			testRc = OMR_ERROR_INTERNAL;
-		} else if (OMR_ERROR_NONE == rc) {
-			omrtty_printf(
-				"callIndex: %d: rc = %d (%s), the function call is successful ! Process CPU load: %lf\n",
-				callIndex, rc, omrErrorToString(rc), processCpuLoad);
-		} else {
-			omrtty_printf("callIndex: %d: rc = %d (%s), the function call is successful !\n", callIndex, rc, omrErrorToString(rc));
-		}
-	}
-	if (TRUE == dummyPort) {
-		/* set sysinfo_get_CPU_utilization back to real_omrsysinfo_get_CPU_utilization */
-		OMRPORTLIB->sysinfo_get_CPU_utilization = real_omrsysinfo_get_CPU_utilization;
-	}
-	return testRc;
+    real_omrsysinfo_get_CPU_utilization = OMRPORTLIB->sysinfo_get_CPU_utilization;
+    matrixSquare(vmThread);
+    systemTimeCPUBurn();
+    if (TRUE == dummyPort) {
+        /* use dummy_omrsysinfo_get_CPU_utilization */
+        OMRPORTLIB->sysinfo_get_CPU_utilization = dummy_omrsysinfo_get_CPU_utilization;
+    }
+    rc = ti->GetProcessCpuLoad(vmThread, &processCpuLoad);
+    if ((processCpuLoad < 0.0) || (processCpuLoad > 1.0)) {
+        omrtty_printf(
+            "%s:%d callIndex: %d: GetProcessCpuLoad() returned an invalid value, processCpuLoad = %lf ! ProcessCpuLoad should be in [0, 1].\n",
+            __FILE__, __LINE__, callIndex, processCpuLoad);
+        testRc = OMR_ERROR_INTERNAL;
+    } else if (checkRc) {
+        rc = OMRTEST_PRINT_UNEXPECTED_RC(rc, expectedRc);
+        if (expectedRc != rc) {
+            omrtty_printf(
+                "%s:%d callIndex: %d: GetProcessCpuLoad() returned a wrong error code !\n",
+                __FILE__, __LINE__, callIndex);
+            testRc = OMR_ERROR_INTERNAL;
+        } else if (OMR_ERROR_NONE == rc) {
+            omrtty_printf(
+                "callIndex: %d: rc = %d (%s), the function call is successful ! Process CPU load: %lf\n",
+                callIndex, rc, omrErrorToString(rc), processCpuLoad);
+        } else {
+            omrtty_printf("callIndex: %d: rc = %d (%s), the function call is successful !\n", callIndex, rc, omrErrorToString(rc));
+        }
+    }
+    if (TRUE == dummyPort) {
+        /* set sysinfo_get_CPU_utilization back to real_omrsysinfo_get_CPU_utilization */
+        OMRPORTLIB->sysinfo_get_CPU_utilization = real_omrsysinfo_get_CPU_utilization;
+    }
+    return testRc;
 }
 
 static omr_error_t
-testSystemCpuLoad(OMR_VMThread *vmThread, OMR_TI const *ti, omr_error_t expectedRc, BOOLEAN dummyPort, BOOLEAN checkRc)
+testSystemCpuLoad(OMR_VMThread* vmThread, OMR_TI const* ti, omr_error_t expectedRc, BOOLEAN dummyPort, BOOLEAN checkRc)
 {
-	omr_error_t rc = OMR_ERROR_NONE;
-	omr_error_t testRc = OMR_ERROR_NONE;
-	double systemCpuLoad = 0.0;
-	OMRPORT_ACCESS_FROM_OMRVMTHREAD(vmThread);
+    omr_error_t rc = OMR_ERROR_NONE;
+    omr_error_t testRc = OMR_ERROR_NONE;
+    double systemCpuLoad = 0.0;
+    OMRPORT_ACCESS_FROM_OMRVMTHREAD(vmThread);
 
-	real_omrsysinfo_get_CPU_utilization = OMRPORTLIB->sysinfo_get_CPU_utilization;
-	matrixSquare(vmThread);
-	systemTimeCPUBurn();
-	if (TRUE == dummyPort) {
-		/* use dummy_omrsysinfo_get_CPU_utilization */
-		OMRPORTLIB->sysinfo_get_CPU_utilization = dummy_omrsysinfo_get_CPU_utilization;
-	}
-	rc = ti->GetSystemCpuLoad(vmThread, &systemCpuLoad);
-	if ((systemCpuLoad < 0.0) || (systemCpuLoad > 1.0)) {
-		omrtty_printf(
-			"%s:%d callIndex: %d: GetSystemCpuLoad() returned an invalid value, systemCpuLoad = %lf ! systemCpuLoad should be in [0, 1].\n",
-			__FILE__, __LINE__, callIndex, systemCpuLoad);
-		testRc = OMR_ERROR_INTERNAL;
-	} else if (checkRc) {
-		rc = OMRTEST_PRINT_UNEXPECTED_RC(rc, expectedRc);
-		if (expectedRc != rc) {
-			omrtty_printf(
-				"%s:%d callIndex: %d: GetSystemCpuLoad() returned a wrong error code ! \n",
-				__FILE__, __LINE__, callIndex);
-			testRc = OMR_ERROR_INTERNAL;
-		} else if (OMR_ERROR_NONE == rc) {
-			omrtty_printf(
-				"callIndex: %d: rc = %d (%s), the function call is successful ! system CPU load: %lf\n",
-				callIndex, rc, omrErrorToString(rc), systemCpuLoad);
-		} else {
-			omrtty_printf("callIndex: %d: rc = %d (%s), the function call is successful !\n", callIndex, rc, omrErrorToString(rc));
-		}
-	}
-	if (TRUE == dummyPort) {
-		/* set sysinfo_get_CPU_utilization back to real_omrsysinfo_get_CPU_utilization */
-		OMRPORTLIB->sysinfo_get_CPU_utilization = real_omrsysinfo_get_CPU_utilization;
-	}
-	return testRc;
+    real_omrsysinfo_get_CPU_utilization = OMRPORTLIB->sysinfo_get_CPU_utilization;
+    matrixSquare(vmThread);
+    systemTimeCPUBurn();
+    if (TRUE == dummyPort) {
+        /* use dummy_omrsysinfo_get_CPU_utilization */
+        OMRPORTLIB->sysinfo_get_CPU_utilization = dummy_omrsysinfo_get_CPU_utilization;
+    }
+    rc = ti->GetSystemCpuLoad(vmThread, &systemCpuLoad);
+    if ((systemCpuLoad < 0.0) || (systemCpuLoad > 1.0)) {
+        omrtty_printf(
+            "%s:%d callIndex: %d: GetSystemCpuLoad() returned an invalid value, systemCpuLoad = %lf ! systemCpuLoad should be in [0, 1].\n",
+            __FILE__, __LINE__, callIndex, systemCpuLoad);
+        testRc = OMR_ERROR_INTERNAL;
+    } else if (checkRc) {
+        rc = OMRTEST_PRINT_UNEXPECTED_RC(rc, expectedRc);
+        if (expectedRc != rc) {
+            omrtty_printf(
+                "%s:%d callIndex: %d: GetSystemCpuLoad() returned a wrong error code ! \n",
+                __FILE__, __LINE__, callIndex);
+            testRc = OMR_ERROR_INTERNAL;
+        } else if (OMR_ERROR_NONE == rc) {
+            omrtty_printf(
+                "callIndex: %d: rc = %d (%s), the function call is successful ! system CPU load: %lf\n",
+                callIndex, rc, omrErrorToString(rc), systemCpuLoad);
+        } else {
+            omrtty_printf("callIndex: %d: rc = %d (%s), the function call is successful !\n", callIndex, rc, omrErrorToString(rc));
+        }
+    }
+    if (TRUE == dummyPort) {
+        /* set sysinfo_get_CPU_utilization back to real_omrsysinfo_get_CPU_utilization */
+        OMRPORTLIB->sysinfo_get_CPU_utilization = real_omrsysinfo_get_CPU_utilization;
+    }
+    return testRc;
 }
 
 /**
@@ -254,141 +254,141 @@ testSystemCpuLoad(OMR_VMThread *vmThread, OMR_TI const *ti, omr_error_t expected
  */
 
 static omr_error_t
-testTICpuLoad(OMR_VMThread *vmThread, OMR_TI const *ti)
+testTICpuLoad(OMR_VMThread* vmThread, OMR_TI const* ti)
 {
-	OMRPORT_ACCESS_FROM_OMRVMTHREAD(vmThread);
-	omr_error_t testRc = OMR_ERROR_NONE;
+    OMRPORT_ACCESS_FROM_OMRVMTHREAD(vmThread);
+    omr_error_t testRc = OMR_ERROR_NONE;
 
-	/* test GetProcessCpuLoad() */
-	omrtty_printf("Test GetProcessCpuLoad()\n");
-	callIndex = 1;
-	if (OMR_ERROR_NONE == testRc) {
-		testRc = testProcessCpuLoad(vmThread, ti, OMR_ERROR_RETRY, FALSE, TRUE);
-		callIndex += 1;
-	}
-	if (OMR_ERROR_NONE == testRc) {
-		testRc = testProcessCpuLoad(vmThread, ti, OMR_ERROR_RETRY, TRUE, TRUE);
-		callIndex += 1;
-	}
-	if (OMR_ERROR_NONE == testRc) {
-		testRc = testProcessCpuLoad(vmThread, ti, OMR_ERROR_NONE, FALSE, TRUE);
-		callIndex += 1;
-	}
-	if (OMR_ERROR_NONE == testRc) {
-		testRc = testProcessCpuLoad(vmThread, ti, OMR_ERROR_NONE, FALSE, TRUE);
-		callIndex += 1;
-	}
-	if (OMR_ERROR_NONE == testRc) {
-		testRc = testProcessCpuLoad(vmThread, ti, OMR_ERROR_NONE, FALSE, TRUE);
-		callIndex += 1;
-	}
-	if (OMR_ERROR_NONE == testRc) {
-		testRc = testProcessCpuLoad(vmThread, ti, OMR_ERROR_RETRY, TRUE, FALSE);
-		callIndex += 1;
-	}
-	if (OMR_ERROR_NONE == testRc) {
-		testRc = testProcessCpuLoad(vmThread, ti, OMR_ERROR_RETRY, TRUE, TRUE);
-		callIndex += 1;
-	}
-	if (OMR_ERROR_NONE == testRc) {
-		testRc = testProcessCpuLoad(vmThread, ti, OMR_ERROR_NONE, TRUE, FALSE);
-		callIndex += 1;
-	}
-	if (OMR_ERROR_NONE == testRc) {
-		testRc = testProcessCpuLoad(vmThread, ti, OMR_ERROR_NONE, TRUE, FALSE);
-		callIndex += 1;
-	}
-	if (OMR_ERROR_NONE == testRc) {
-		testRc = testProcessCpuLoad(vmThread, ti, OMR_ERROR_NONE, TRUE, TRUE);
-		callIndex += 1;
-	}
-	if (OMR_ERROR_NONE == testRc) {
-		testRc = testProcessCpuLoad(vmThread, ti, OMR_ERROR_NOT_AVAILABLE, TRUE, TRUE);
-		callIndex += 1;
-	}
-	if (OMR_ERROR_NONE == testRc) {
-		testRc = testProcessCpuLoad(vmThread, ti, OMR_ERROR_NOT_AVAILABLE, TRUE, TRUE);
-		callIndex += 1;
-	}
-	if (OMR_ERROR_NONE == testRc) {
-		double cpuLoad = 0.0;
-		omr_error_t rc = OMRTEST_PRINT_UNEXPECTED_RC(ti->GetProcessCpuLoad(NULL, &cpuLoad), OMR_THREAD_NOT_ATTACHED);
+    /* test GetProcessCpuLoad() */
+    omrtty_printf("Test GetProcessCpuLoad()\n");
+    callIndex = 1;
+    if (OMR_ERROR_NONE == testRc) {
+        testRc = testProcessCpuLoad(vmThread, ti, OMR_ERROR_RETRY, FALSE, TRUE);
+        callIndex += 1;
+    }
+    if (OMR_ERROR_NONE == testRc) {
+        testRc = testProcessCpuLoad(vmThread, ti, OMR_ERROR_RETRY, TRUE, TRUE);
+        callIndex += 1;
+    }
+    if (OMR_ERROR_NONE == testRc) {
+        testRc = testProcessCpuLoad(vmThread, ti, OMR_ERROR_NONE, FALSE, TRUE);
+        callIndex += 1;
+    }
+    if (OMR_ERROR_NONE == testRc) {
+        testRc = testProcessCpuLoad(vmThread, ti, OMR_ERROR_NONE, FALSE, TRUE);
+        callIndex += 1;
+    }
+    if (OMR_ERROR_NONE == testRc) {
+        testRc = testProcessCpuLoad(vmThread, ti, OMR_ERROR_NONE, FALSE, TRUE);
+        callIndex += 1;
+    }
+    if (OMR_ERROR_NONE == testRc) {
+        testRc = testProcessCpuLoad(vmThread, ti, OMR_ERROR_RETRY, TRUE, FALSE);
+        callIndex += 1;
+    }
+    if (OMR_ERROR_NONE == testRc) {
+        testRc = testProcessCpuLoad(vmThread, ti, OMR_ERROR_RETRY, TRUE, TRUE);
+        callIndex += 1;
+    }
+    if (OMR_ERROR_NONE == testRc) {
+        testRc = testProcessCpuLoad(vmThread, ti, OMR_ERROR_NONE, TRUE, FALSE);
+        callIndex += 1;
+    }
+    if (OMR_ERROR_NONE == testRc) {
+        testRc = testProcessCpuLoad(vmThread, ti, OMR_ERROR_NONE, TRUE, FALSE);
+        callIndex += 1;
+    }
+    if (OMR_ERROR_NONE == testRc) {
+        testRc = testProcessCpuLoad(vmThread, ti, OMR_ERROR_NONE, TRUE, TRUE);
+        callIndex += 1;
+    }
+    if (OMR_ERROR_NONE == testRc) {
+        testRc = testProcessCpuLoad(vmThread, ti, OMR_ERROR_NOT_AVAILABLE, TRUE, TRUE);
+        callIndex += 1;
+    }
+    if (OMR_ERROR_NONE == testRc) {
+        testRc = testProcessCpuLoad(vmThread, ti, OMR_ERROR_NOT_AVAILABLE, TRUE, TRUE);
+        callIndex += 1;
+    }
+    if (OMR_ERROR_NONE == testRc) {
+        double cpuLoad = 0.0;
+        omr_error_t rc = OMRTEST_PRINT_UNEXPECTED_RC(ti->GetProcessCpuLoad(NULL, &cpuLoad), OMR_THREAD_NOT_ATTACHED);
 
-		if (OMR_THREAD_NOT_ATTACHED == rc) {
-			omrtty_printf(
-				"callIndex: %d: rc = %d (%s), the function call is successful !\n",
-				callIndex, OMR_THREAD_NOT_ATTACHED, omrErrorToString(OMR_THREAD_NOT_ATTACHED));
-		}
-		callIndex += 1;
-	}
-	if (OMR_ERROR_NONE == testRc) {
-		omrtty_printf("%s: GetProcessCpuLoad() passed\n", agentName);
-		omrtty_printf("Test GetSystemCpuLoad()\n");
-		callIndex = 1;
-	}
-	if (OMR_ERROR_NONE == testRc) {
-		testRc = testSystemCpuLoad(vmThread, ti, OMR_ERROR_RETRY, FALSE, TRUE);
-		callIndex += 1;
-	}
-	if (OMR_ERROR_NONE == testRc) {
-		testRc = testSystemCpuLoad(vmThread, ti, OMR_ERROR_RETRY, TRUE, TRUE);
-		callIndex += 1;
-	}
-	if (OMR_ERROR_NONE == testRc) {
-		testRc = testSystemCpuLoad(vmThread, ti, OMR_ERROR_NONE, FALSE, TRUE);
-		callIndex += 1;
-	}
-	if (OMR_ERROR_NONE == testRc) {
-		testRc = testSystemCpuLoad(vmThread, ti, OMR_ERROR_NONE, FALSE, TRUE);
-		callIndex += 1;
-	}
-	if (OMR_ERROR_NONE == testRc) {
-		testRc = testSystemCpuLoad(vmThread, ti, OMR_ERROR_NONE, FALSE, TRUE);
-		callIndex += 1;
-	}
-	if (OMR_ERROR_NONE == testRc) {
-		testRc = testSystemCpuLoad(vmThread, ti, OMR_ERROR_RETRY, TRUE, FALSE);
-		callIndex += 1;
-	}
-	if (OMR_ERROR_NONE == testRc) {
-		testRc = testSystemCpuLoad(vmThread, ti, OMR_ERROR_RETRY, TRUE, TRUE);
-		callIndex += 1;
-	}
-	if (OMR_ERROR_NONE == testRc) {
-		testRc = testSystemCpuLoad(vmThread, ti, OMR_ERROR_NONE, TRUE, FALSE);
-		callIndex += 1;
-	}
-	if (OMR_ERROR_NONE == testRc) {
-		testRc = testSystemCpuLoad(vmThread, ti, OMR_ERROR_NONE, TRUE, FALSE);
-		callIndex += 1;
-	}
-	if (OMR_ERROR_NONE == testRc) {
-		testRc = testSystemCpuLoad(vmThread, ti, OMR_ERROR_NONE, TRUE, TRUE);
-		callIndex += 1;
-	}
-	if (OMR_ERROR_NONE == testRc) {
-		testRc = testSystemCpuLoad(vmThread, ti, OMR_ERROR_NOT_AVAILABLE, TRUE, TRUE);
-		callIndex += 1;
-	}
-	if (OMR_ERROR_NONE == testRc) {
-		testRc = testSystemCpuLoad(vmThread, ti, OMR_ERROR_NOT_AVAILABLE, TRUE, TRUE);
-		callIndex += 1;
-	}
-	if (OMR_ERROR_NONE == testRc) {
-		double cpuLoad = 0.0;
-		omr_error_t rc = OMRTEST_PRINT_UNEXPECTED_RC(ti->GetSystemCpuLoad(NULL, &cpuLoad), OMR_THREAD_NOT_ATTACHED);
+        if (OMR_THREAD_NOT_ATTACHED == rc) {
+            omrtty_printf(
+                "callIndex: %d: rc = %d (%s), the function call is successful !\n",
+                callIndex, OMR_THREAD_NOT_ATTACHED, omrErrorToString(OMR_THREAD_NOT_ATTACHED));
+        }
+        callIndex += 1;
+    }
+    if (OMR_ERROR_NONE == testRc) {
+        omrtty_printf("%s: GetProcessCpuLoad() passed\n", agentName);
+        omrtty_printf("Test GetSystemCpuLoad()\n");
+        callIndex = 1;
+    }
+    if (OMR_ERROR_NONE == testRc) {
+        testRc = testSystemCpuLoad(vmThread, ti, OMR_ERROR_RETRY, FALSE, TRUE);
+        callIndex += 1;
+    }
+    if (OMR_ERROR_NONE == testRc) {
+        testRc = testSystemCpuLoad(vmThread, ti, OMR_ERROR_RETRY, TRUE, TRUE);
+        callIndex += 1;
+    }
+    if (OMR_ERROR_NONE == testRc) {
+        testRc = testSystemCpuLoad(vmThread, ti, OMR_ERROR_NONE, FALSE, TRUE);
+        callIndex += 1;
+    }
+    if (OMR_ERROR_NONE == testRc) {
+        testRc = testSystemCpuLoad(vmThread, ti, OMR_ERROR_NONE, FALSE, TRUE);
+        callIndex += 1;
+    }
+    if (OMR_ERROR_NONE == testRc) {
+        testRc = testSystemCpuLoad(vmThread, ti, OMR_ERROR_NONE, FALSE, TRUE);
+        callIndex += 1;
+    }
+    if (OMR_ERROR_NONE == testRc) {
+        testRc = testSystemCpuLoad(vmThread, ti, OMR_ERROR_RETRY, TRUE, FALSE);
+        callIndex += 1;
+    }
+    if (OMR_ERROR_NONE == testRc) {
+        testRc = testSystemCpuLoad(vmThread, ti, OMR_ERROR_RETRY, TRUE, TRUE);
+        callIndex += 1;
+    }
+    if (OMR_ERROR_NONE == testRc) {
+        testRc = testSystemCpuLoad(vmThread, ti, OMR_ERROR_NONE, TRUE, FALSE);
+        callIndex += 1;
+    }
+    if (OMR_ERROR_NONE == testRc) {
+        testRc = testSystemCpuLoad(vmThread, ti, OMR_ERROR_NONE, TRUE, FALSE);
+        callIndex += 1;
+    }
+    if (OMR_ERROR_NONE == testRc) {
+        testRc = testSystemCpuLoad(vmThread, ti, OMR_ERROR_NONE, TRUE, TRUE);
+        callIndex += 1;
+    }
+    if (OMR_ERROR_NONE == testRc) {
+        testRc = testSystemCpuLoad(vmThread, ti, OMR_ERROR_NOT_AVAILABLE, TRUE, TRUE);
+        callIndex += 1;
+    }
+    if (OMR_ERROR_NONE == testRc) {
+        testRc = testSystemCpuLoad(vmThread, ti, OMR_ERROR_NOT_AVAILABLE, TRUE, TRUE);
+        callIndex += 1;
+    }
+    if (OMR_ERROR_NONE == testRc) {
+        double cpuLoad = 0.0;
+        omr_error_t rc = OMRTEST_PRINT_UNEXPECTED_RC(ti->GetSystemCpuLoad(NULL, &cpuLoad), OMR_THREAD_NOT_ATTACHED);
 
-		if (OMR_THREAD_NOT_ATTACHED == rc) {
-			omrtty_printf(
-				"callIndex: %d: rc = %d (%s), the function call is successful !\n",
-				callIndex, OMR_THREAD_NOT_ATTACHED, omrErrorToString(OMR_THREAD_NOT_ATTACHED));
-		}
-		callIndex += 1;
-	}
-	if (OMR_ERROR_NONE == testRc) {
-		omrtty_printf("%s: GetSystemCpuLoad() passed\n", agentName);
-	}
-	return testRc;
+        if (OMR_THREAD_NOT_ATTACHED == rc) {
+            omrtty_printf(
+                "callIndex: %d: rc = %d (%s), the function call is successful !\n",
+                callIndex, OMR_THREAD_NOT_ATTACHED, omrErrorToString(OMR_THREAD_NOT_ATTACHED));
+        }
+        callIndex += 1;
+    }
+    if (OMR_ERROR_NONE == testRc) {
+        omrtty_printf("%s: GetSystemCpuLoad() passed\n", agentName);
+    }
+    return testRc;
 }
 
 /**
@@ -397,34 +397,34 @@ testTICpuLoad(OMR_VMThread *vmThread, OMR_TI const *ti)
  * This implementation is copied from thrbasetest/processtimetest.c
  */
 static void
-matrixSquare(OMR_VMThread *vmThread)
+matrixSquare(OMR_VMThread* vmThread)
 {
-	uintptr_t matrix_size = 0;
-	uintptr_t *matrix = NULL;
-	uintptr_t i = 0;
-	uintptr_t j = 0;
+    uintptr_t matrix_size = 0;
+    uintptr_t* matrix = NULL;
+    uintptr_t i = 0;
+    uintptr_t j = 0;
 
-	/* OMRPORT specific functions for memory management will be used here */
-	OMRPORT_ACCESS_FROM_OMRVMTHREAD(vmThread);
+    /* OMRPORT specific functions for memory management will be used here */
+    OMRPORT_ACCESS_FROM_OMRVMTHREAD(vmThread);
 
-	/* Declare and initialize the matrix. memset works here since this is a true 2D
-	 * array defined in the same scope as the memset. */
-	matrix_size = MATRIX_ORDER * MATRIX_ORDER * sizeof(uintptr_t);
-	matrix = (uintptr_t*) omrmem_allocate_memory(matrix_size,
-			OMRMEM_CATEGORY_UNKNOWN);
-	if (NULL == matrix) {
-		omrtty_err_printf("Unable to allocate %d bytes in the matrixSquare(vmThread) function.\n",
-				matrix_size);
-		return;
-	}
+    /* Declare and initialize the matrix. memset works here since this is a true 2D
+     * array defined in the same scope as the memset. */
+    matrix_size = MATRIX_ORDER * MATRIX_ORDER * sizeof(uintptr_t);
+    matrix = (uintptr_t*)omrmem_allocate_memory(matrix_size,
+        OMRMEM_CATEGORY_UNKNOWN);
+    if (NULL == matrix) {
+        omrtty_err_printf("Unable to allocate %d bytes in the matrixSquare(vmThread) function.\n",
+            matrix_size);
+        return;
+    }
 
-	memset(matrix, 0, matrix_size);
+    memset(matrix, 0, matrix_size);
 
-	for (j = 0; j < MATRIX_ORDER; j++) {
-		*(matrix + i * MATRIX_ORDER + j) = (uintptr_t) pow((double)100, 2.0);
-	}
+    for (j = 0; j < MATRIX_ORDER; j++) {
+        *(matrix + i * MATRIX_ORDER + j) = (uintptr_t)pow((double)100, 2.0);
+    }
 
-	omrmem_free_memory(matrix);
+    omrmem_free_memory(matrix);
 }
 
 /**
@@ -437,16 +437,16 @@ matrixSquare(OMR_VMThread *vmThread)
 static void
 systemTimeCPUBurn(void)
 {
-	uintptr_t j = 0;
-	FILE *tempFile = NULL;
+    uintptr_t j = 0;
+    FILE* tempFile = NULL;
 
-	for (j = 0; j < NUM_ITERATIONS_SYSTEM_CPU_BURN; j++) {
+    for (j = 0; j < NUM_ITERATIONS_SYSTEM_CPU_BURN; j++) {
 #if defined(OMR_OS_WINDOWS)
-		tempFile = fopen("nul", "w");
+        tempFile = fopen("nul", "w");
 #else
-		tempFile = fopen("/dev/null", "w");
+        tempFile = fopen("/dev/null", "w");
 #endif /* defined(OMR_OS_WINDOWS) */
-		fwrite("garbage", 1, sizeof("garbage"), tempFile);
-		fclose(tempFile);
-	}
+        fwrite("garbage", 1, sizeof("garbage"), tempFile);
+        fclose(tempFile);
+    }
 }

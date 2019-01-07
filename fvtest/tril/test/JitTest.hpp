@@ -26,7 +26,7 @@
 #include "ilgen/MethodBuilder.hpp"
 
 bool initializeJit();
-int32_t compileMethodBuilder(TR::MethodBuilder * methodBuilder, void ** entryPoint);
+int32_t compileMethodBuilder(TR::MethodBuilder* methodBuilder, void** entryPoint);
 void shutdownJit();
 
 namespace Tril {
@@ -41,20 +41,18 @@ namespace Test {
  *
  *    class MyTestCase : public JitTest {};
  */
-class JitTest : public ::testing::Test
-   {
-   public:
+class JitTest : public ::testing::Test {
+public:
+    static void SetUpTestCase()
+    {
+        ASSERT_TRUE(initializeJit()) << "Failed to initialize the JIT.";
+    }
 
-   static void SetUpTestCase()
-      {
-      ASSERT_TRUE(initializeJit()) << "Failed to initialize the JIT.";
-      }
-
-   static void TearDownTestCase()
-      {
-      shutdownJit();
-      }
-   };
+    static void TearDownTestCase()
+    {
+        shutdownJit();
+    }
+};
 
 } // namespace Test
 } // namespace Tril

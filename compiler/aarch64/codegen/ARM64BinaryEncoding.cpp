@@ -27,370 +27,351 @@
 #include "codegen/CodeGenerator.hpp"
 #include "codegen/Relocation.hpp"
 
-uint8_t *OMR::ARM64::Instruction::generateBinaryEncoding()
-   {
-   uint8_t *instructionStart = cg()->getBinaryBufferCursor();
-   uint8_t *cursor = instructionStart;
-   cursor = getOpCode().copyBinaryToBuffer(instructionStart);
-   cursor += ARM64_INSTRUCTION_LENGTH;
-   setBinaryLength(ARM64_INSTRUCTION_LENGTH);
-   setBinaryEncoding(instructionStart);
-   return cursor;
-   }
+uint8_t* OMR::ARM64::Instruction::generateBinaryEncoding()
+{
+    uint8_t* instructionStart = cg()->getBinaryBufferCursor();
+    uint8_t* cursor = instructionStart;
+    cursor = getOpCode().copyBinaryToBuffer(instructionStart);
+    cursor += ARM64_INSTRUCTION_LENGTH;
+    setBinaryLength(ARM64_INSTRUCTION_LENGTH);
+    setBinaryEncoding(instructionStart);
+    return cursor;
+}
 
 int32_t OMR::ARM64::Instruction::estimateBinaryLength(int32_t currentEstimate)
-   {
-   setEstimatedBinaryLength(ARM64_INSTRUCTION_LENGTH);
-   return currentEstimate + self()->getEstimatedBinaryLength();
-   }
+{
+    setEstimatedBinaryLength(ARM64_INSTRUCTION_LENGTH);
+    return currentEstimate + self()->getEstimatedBinaryLength();
+}
 
-uint8_t *TR::ARM64ImmInstruction::generateBinaryEncoding()
-   {
-   uint8_t *instructionStart = cg()->getBinaryBufferCursor();
-   uint8_t *cursor = instructionStart;
-   cursor = getOpCode().copyBinaryToBuffer(instructionStart);
-   *(int32_t *)cursor = (int32_t)getSourceImmediate();
-   cursor += ARM64_INSTRUCTION_LENGTH;
-   setBinaryLength(ARM64_INSTRUCTION_LENGTH);
-   setBinaryEncoding(instructionStart);
-   return cursor;
-   }
+uint8_t* TR::ARM64ImmInstruction::generateBinaryEncoding()
+{
+    uint8_t* instructionStart = cg()->getBinaryBufferCursor();
+    uint8_t* cursor = instructionStart;
+    cursor = getOpCode().copyBinaryToBuffer(instructionStart);
+    *(int32_t*)cursor = (int32_t)getSourceImmediate();
+    cursor += ARM64_INSTRUCTION_LENGTH;
+    setBinaryLength(ARM64_INSTRUCTION_LENGTH);
+    setBinaryEncoding(instructionStart);
+    return cursor;
+}
 
-uint8_t *TR::ARM64ImmSymInstruction::generateBinaryEncoding()
-   {
-   uint8_t *instructionStart = cg()->getBinaryBufferCursor();
-   uint8_t *cursor = instructionStart;
-   cursor = getOpCode().copyBinaryToBuffer(instructionStart);
+uint8_t* TR::ARM64ImmSymInstruction::generateBinaryEncoding()
+{
+    uint8_t* instructionStart = cg()->getBinaryBufferCursor();
+    uint8_t* cursor = instructionStart;
+    cursor = getOpCode().copyBinaryToBuffer(instructionStart);
 
-   if (getOpCodeValue() == TR::InstOpCode::bl)
-      {
-      uintptrj_t destination = getAddrImmediate();
-      intptrj_t distance = destination - (uintptrj_t)cursor;
+    if (getOpCodeValue() == TR::InstOpCode::bl) {
+        uintptrj_t destination = getAddrImmediate();
+        intptrj_t distance = destination - (uintptrj_t)cursor;
 
-      if (constantIsSignedImm28(distance))
-         {
-         insertImmediateField(toARM64Cursor(cursor), distance);
-         }
-      else
-         {
-         TR_ASSERT(false, "Branch destination is too far away. Not implemented yet.");
-         }
-      }
-   else
-      {
-      TR_ASSERT(false, "Unsupported opcode in ImmSymInstruction.");
-      }
+        if (constantIsSignedImm28(distance)) {
+            insertImmediateField(toARM64Cursor(cursor), distance);
+        } else {
+            TR_ASSERT(false, "Branch destination is too far away. Not implemented yet.");
+        }
+    } else {
+        TR_ASSERT(false, "Unsupported opcode in ImmSymInstruction.");
+    }
 
-   cursor += ARM64_INSTRUCTION_LENGTH;
-   setBinaryLength(ARM64_INSTRUCTION_LENGTH);
-   setBinaryEncoding(instructionStart);
-   return cursor;
-   }
+    cursor += ARM64_INSTRUCTION_LENGTH;
+    setBinaryLength(ARM64_INSTRUCTION_LENGTH);
+    setBinaryEncoding(instructionStart);
+    return cursor;
+}
 
-uint8_t *TR::ARM64LabelInstruction::generateBinaryEncoding()
-   {
-   uint8_t *instructionStart = cg()->getBinaryBufferCursor();
-   uint8_t *cursor = instructionStart;
-   TR::LabelSymbol *label = getLabelSymbol();
+uint8_t* TR::ARM64LabelInstruction::generateBinaryEncoding()
+{
+    uint8_t* instructionStart = cg()->getBinaryBufferCursor();
+    uint8_t* cursor = instructionStart;
+    TR::LabelSymbol* label = getLabelSymbol();
 
-   if (getOpCodeValue() == OMR::InstOpCode::label)
-      {
-      label->setCodeLocation(instructionStart);
-      }
-   else
-      {
-      TR_ASSERT(getOpCodeValue() == OMR::InstOpCode::b, "Unsupported opcode in LabelInstruction.");
+    if (getOpCodeValue() == OMR::InstOpCode::label) {
+        label->setCodeLocation(instructionStart);
+    } else {
+        TR_ASSERT(getOpCodeValue() == OMR::InstOpCode::b, "Unsupported opcode in LabelInstruction.");
 
-      uintptr_t destination = (uintptr_t)label->getCodeLocation();
-      cursor = getOpCode().copyBinaryToBuffer(instructionStart);
-      if (destination != 0)
-         {
-         intptr_t distance = destination - (uintptr_t)cursor;
-         TR_ASSERT(-0x8000000 <= distance && distance < 0x8000000, "Branch destination is too far away.");
-         insertImmediateField(toARM64Cursor(cursor), distance);
-         }
-      else
-         {
-         cg()->addRelocation(new (cg()->trHeapMemory()) TR::LabelRelative32BitRelocation(cursor, label));
-         }
-      cursor += ARM64_INSTRUCTION_LENGTH;
-      }
+        uintptr_t destination = (uintptr_t)label->getCodeLocation();
+        cursor = getOpCode().copyBinaryToBuffer(instructionStart);
+        if (destination != 0) {
+            intptr_t distance = destination - (uintptr_t)cursor;
+            TR_ASSERT(-0x8000000 <= distance && distance < 0x8000000, "Branch destination is too far away.");
+            insertImmediateField(toARM64Cursor(cursor), distance);
+        } else {
+            cg()->addRelocation(new (cg()->trHeapMemory()) TR::LabelRelative32BitRelocation(cursor, label));
+        }
+        cursor += ARM64_INSTRUCTION_LENGTH;
+    }
 
-   setBinaryLength(cursor - instructionStart);
-   cg()->addAccumulatedInstructionLengthError(getEstimatedBinaryLength() - getBinaryLength());
-   setBinaryEncoding(instructionStart);
-   return cursor;
-   }
+    setBinaryLength(cursor - instructionStart);
+    cg()->addAccumulatedInstructionLengthError(getEstimatedBinaryLength() - getBinaryLength());
+    setBinaryEncoding(instructionStart);
+    return cursor;
+}
 
 int32_t TR::ARM64LabelInstruction::estimateBinaryLength(int32_t currentEstimate)
-   {
-   if (getOpCodeValue() == OMR::InstOpCode::label)
-      {
-      setEstimatedBinaryLength(0);
-      getLabelSymbol()->setEstimatedCodeLocation(currentEstimate);
-      }
-   else
-      {
-      setEstimatedBinaryLength(ARM64_INSTRUCTION_LENGTH);
-      }
+{
+    if (getOpCodeValue() == OMR::InstOpCode::label) {
+        setEstimatedBinaryLength(0);
+        getLabelSymbol()->setEstimatedCodeLocation(currentEstimate);
+    } else {
+        setEstimatedBinaryLength(ARM64_INSTRUCTION_LENGTH);
+    }
 
-   return currentEstimate + getEstimatedBinaryLength();
-   }
+    return currentEstimate + getEstimatedBinaryLength();
+}
 
-uint8_t *TR::ARM64ConditionalBranchInstruction::generateBinaryEncoding()
-   {
-   uint8_t *instructionStart = cg()->getBinaryBufferCursor();
-   uint8_t *cursor = instructionStart;
-   cursor = getOpCode().copyBinaryToBuffer(instructionStart);
-   insertConditionCodeField(toARM64Cursor(cursor));
+uint8_t* TR::ARM64ConditionalBranchInstruction::generateBinaryEncoding()
+{
+    uint8_t* instructionStart = cg()->getBinaryBufferCursor();
+    uint8_t* cursor = instructionStart;
+    cursor = getOpCode().copyBinaryToBuffer(instructionStart);
+    insertConditionCodeField(toARM64Cursor(cursor));
 
-   TR::LabelSymbol *label = getLabelSymbol();
-   uintptr_t destination = (uintptr_t)label->getCodeLocation();
-   if (destination != 0)
-      {
-      intptr_t distance = destination - (uintptr_t)cursor;
-      TR_ASSERT(-0x100000 <= distance && distance < 0x100000, "Branch destination is too far away.");
-      insertImmediateField(toARM64Cursor(cursor), distance);
-      }
-   else
-      {
-      cg()->addRelocation(new (cg()->trHeapMemory()) TR::LabelRelative24BitRelocation(cursor, label));
-      }
+    TR::LabelSymbol* label = getLabelSymbol();
+    uintptr_t destination = (uintptr_t)label->getCodeLocation();
+    if (destination != 0) {
+        intptr_t distance = destination - (uintptr_t)cursor;
+        TR_ASSERT(-0x100000 <= distance && distance < 0x100000, "Branch destination is too far away.");
+        insertImmediateField(toARM64Cursor(cursor), distance);
+    } else {
+        cg()->addRelocation(new (cg()->trHeapMemory()) TR::LabelRelative24BitRelocation(cursor, label));
+    }
 
-   cursor += ARM64_INSTRUCTION_LENGTH;
-   setBinaryLength(ARM64_INSTRUCTION_LENGTH);
-   setBinaryEncoding(instructionStart);
-   return cursor;
-   }
+    cursor += ARM64_INSTRUCTION_LENGTH;
+    setBinaryLength(ARM64_INSTRUCTION_LENGTH);
+    setBinaryEncoding(instructionStart);
+    return cursor;
+}
 
 int32_t TR::ARM64ConditionalBranchInstruction::estimateBinaryLength(int32_t currentEstimate)
-   {
-   setEstimatedBinaryLength(ARM64_INSTRUCTION_LENGTH);
-   return currentEstimate + getEstimatedBinaryLength();
-   }
+{
+    setEstimatedBinaryLength(ARM64_INSTRUCTION_LENGTH);
+    return currentEstimate + getEstimatedBinaryLength();
+}
 
-uint8_t *TR::ARM64CompareBranchInstruction::generateBinaryEncoding()
-   {
-   uint8_t *instructionStart = cg()->getBinaryBufferCursor();
-   uint8_t *cursor = instructionStart;
-   TR::LabelSymbol *label = getLabelSymbol();
+uint8_t* TR::ARM64CompareBranchInstruction::generateBinaryEncoding()
+{
+    uint8_t* instructionStart = cg()->getBinaryBufferCursor();
+    uint8_t* cursor = instructionStart;
+    TR::LabelSymbol* label = getLabelSymbol();
 
-   TR_ASSERT(false, "Not implemented yet.");
+    TR_ASSERT(false, "Not implemented yet.");
 
-   return cursor;
-   }
+    return cursor;
+}
 
-uint8_t *TR::ARM64RegBranchInstruction::generateBinaryEncoding()
-   {
-   uint8_t *instructionStart = cg()->getBinaryBufferCursor();
-   uint8_t *cursor = instructionStart;
-   cursor = getOpCode().copyBinaryToBuffer(instructionStart);
-   insertTargetRegister(toARM64Cursor(cursor));
-   cursor += ARM64_INSTRUCTION_LENGTH;
-   setBinaryLength(ARM64_INSTRUCTION_LENGTH);
-   setBinaryEncoding(instructionStart);
-   return cursor;
-   }
+uint8_t* TR::ARM64RegBranchInstruction::generateBinaryEncoding()
+{
+    uint8_t* instructionStart = cg()->getBinaryBufferCursor();
+    uint8_t* cursor = instructionStart;
+    cursor = getOpCode().copyBinaryToBuffer(instructionStart);
+    insertTargetRegister(toARM64Cursor(cursor));
+    cursor += ARM64_INSTRUCTION_LENGTH;
+    setBinaryLength(ARM64_INSTRUCTION_LENGTH);
+    setBinaryEncoding(instructionStart);
+    return cursor;
+}
 
-uint8_t *TR::ARM64AdminInstruction::generateBinaryEncoding()
-   {
-   uint8_t *instructionStart = cg()->getBinaryBufferCursor();
-   TR::InstOpCode::Mnemonic op = getOpCodeValue();
+uint8_t* TR::ARM64AdminInstruction::generateBinaryEncoding()
+{
+    uint8_t* instructionStart = cg()->getBinaryBufferCursor();
+    TR::InstOpCode::Mnemonic op = getOpCodeValue();
 
-   if (op != OMR::InstOpCode::proc && op != OMR::InstOpCode::fence && op != OMR::InstOpCode::retn)
-      {
-      TR_ASSERT(false, "Unsupported opcode in AdminInstruction.");
-      }
+    if (op != OMR::InstOpCode::proc && op != OMR::InstOpCode::fence && op != OMR::InstOpCode::retn) {
+        TR_ASSERT(false, "Unsupported opcode in AdminInstruction.");
+    }
 
-   setBinaryLength(0);
-   setBinaryEncoding(instructionStart);
+    setBinaryLength(0);
+    setBinaryEncoding(instructionStart);
 
-   return instructionStart;
-   }
+    return instructionStart;
+}
 
 int32_t TR::ARM64AdminInstruction::estimateBinaryLength(int32_t currentEstimate)
-   {
-   setEstimatedBinaryLength(0);
-   return currentEstimate;
-   }
+{
+    setEstimatedBinaryLength(0);
+    return currentEstimate;
+}
 
-uint8_t *TR::ARM64Trg1Instruction::generateBinaryEncoding()
-   {
-   uint8_t *instructionStart = cg()->getBinaryBufferCursor();
-   uint8_t *cursor = instructionStart;
-   cursor = getOpCode().copyBinaryToBuffer(instructionStart);
-   insertTargetRegister(toARM64Cursor(cursor));
-   cursor += ARM64_INSTRUCTION_LENGTH;
-   setBinaryLength(ARM64_INSTRUCTION_LENGTH);
-   setBinaryEncoding(instructionStart);
-   return cursor;
-   }
+uint8_t* TR::ARM64Trg1Instruction::generateBinaryEncoding()
+{
+    uint8_t* instructionStart = cg()->getBinaryBufferCursor();
+    uint8_t* cursor = instructionStart;
+    cursor = getOpCode().copyBinaryToBuffer(instructionStart);
+    insertTargetRegister(toARM64Cursor(cursor));
+    cursor += ARM64_INSTRUCTION_LENGTH;
+    setBinaryLength(ARM64_INSTRUCTION_LENGTH);
+    setBinaryEncoding(instructionStart);
+    return cursor;
+}
 
-uint8_t *TR::ARM64Trg1CondInstruction::generateBinaryEncoding()
-   {
-   uint8_t *instructionStart = cg()->getBinaryBufferCursor();
-   uint8_t *cursor = instructionStart;
-   cursor = getOpCode().copyBinaryToBuffer(instructionStart);
-   insertTargetRegister(toARM64Cursor(cursor));
-   insertZeroRegister(toARM64Cursor(cursor));
-   insertConditionCodeField(toARM64Cursor(cursor));
-   cursor += ARM64_INSTRUCTION_LENGTH;
-   setBinaryLength(ARM64_INSTRUCTION_LENGTH);
-   setBinaryEncoding(instructionStart);
-   return cursor;
-   }
+uint8_t* TR::ARM64Trg1CondInstruction::generateBinaryEncoding()
+{
+    uint8_t* instructionStart = cg()->getBinaryBufferCursor();
+    uint8_t* cursor = instructionStart;
+    cursor = getOpCode().copyBinaryToBuffer(instructionStart);
+    insertTargetRegister(toARM64Cursor(cursor));
+    insertZeroRegister(toARM64Cursor(cursor));
+    insertConditionCodeField(toARM64Cursor(cursor));
+    cursor += ARM64_INSTRUCTION_LENGTH;
+    setBinaryLength(ARM64_INSTRUCTION_LENGTH);
+    setBinaryEncoding(instructionStart);
+    return cursor;
+}
 
-uint8_t *TR::ARM64Trg1ImmInstruction::generateBinaryEncoding()
-   {
-   uint8_t *instructionStart = cg()->getBinaryBufferCursor();
-   uint8_t *cursor = instructionStart;
-   cursor = getOpCode().copyBinaryToBuffer(instructionStart);
-   insertTargetRegister(toARM64Cursor(cursor));
-   insertImmediateField(toARM64Cursor(cursor));
-   cursor += ARM64_INSTRUCTION_LENGTH;
-   setBinaryLength(ARM64_INSTRUCTION_LENGTH);
-   setBinaryEncoding(instructionStart);
-   return cursor;
-   }
+uint8_t* TR::ARM64Trg1ImmInstruction::generateBinaryEncoding()
+{
+    uint8_t* instructionStart = cg()->getBinaryBufferCursor();
+    uint8_t* cursor = instructionStart;
+    cursor = getOpCode().copyBinaryToBuffer(instructionStart);
+    insertTargetRegister(toARM64Cursor(cursor));
+    insertImmediateField(toARM64Cursor(cursor));
+    cursor += ARM64_INSTRUCTION_LENGTH;
+    setBinaryLength(ARM64_INSTRUCTION_LENGTH);
+    setBinaryEncoding(instructionStart);
+    return cursor;
+}
 
-uint8_t *TR::ARM64Trg1Src1Instruction::generateBinaryEncoding()
-   {
-   uint8_t *instructionStart = cg()->getBinaryBufferCursor();
-   uint8_t *cursor = instructionStart;
-   cursor = getOpCode().copyBinaryToBuffer(instructionStart);
-   insertTargetRegister(toARM64Cursor(cursor));
-   insertSource1Register(toARM64Cursor(cursor));
-   cursor += ARM64_INSTRUCTION_LENGTH;
-   setBinaryLength(ARM64_INSTRUCTION_LENGTH);
-   setBinaryEncoding(instructionStart);
-   return cursor;
-   }
+uint8_t* TR::ARM64Trg1Src1Instruction::generateBinaryEncoding()
+{
+    uint8_t* instructionStart = cg()->getBinaryBufferCursor();
+    uint8_t* cursor = instructionStart;
+    cursor = getOpCode().copyBinaryToBuffer(instructionStart);
+    insertTargetRegister(toARM64Cursor(cursor));
+    insertSource1Register(toARM64Cursor(cursor));
+    cursor += ARM64_INSTRUCTION_LENGTH;
+    setBinaryLength(ARM64_INSTRUCTION_LENGTH);
+    setBinaryEncoding(instructionStart);
+    return cursor;
+}
 
-uint8_t *TR::ARM64Trg1Src1ImmInstruction::generateBinaryEncoding()
-   {
-   uint8_t *instructionStart = cg()->getBinaryBufferCursor();
-   uint8_t *cursor = instructionStart;
-   cursor = getOpCode().copyBinaryToBuffer(instructionStart);
-   insertTargetRegister(toARM64Cursor(cursor));
-   insertSource1Register(toARM64Cursor(cursor));
-   insertImmediateField(toARM64Cursor(cursor));
-   cursor += ARM64_INSTRUCTION_LENGTH;
-   setBinaryLength(ARM64_INSTRUCTION_LENGTH);
-   setBinaryEncoding(instructionStart);
-   return cursor;
-   }
+uint8_t* TR::ARM64Trg1Src1ImmInstruction::generateBinaryEncoding()
+{
+    uint8_t* instructionStart = cg()->getBinaryBufferCursor();
+    uint8_t* cursor = instructionStart;
+    cursor = getOpCode().copyBinaryToBuffer(instructionStart);
+    insertTargetRegister(toARM64Cursor(cursor));
+    insertSource1Register(toARM64Cursor(cursor));
+    insertImmediateField(toARM64Cursor(cursor));
+    cursor += ARM64_INSTRUCTION_LENGTH;
+    setBinaryLength(ARM64_INSTRUCTION_LENGTH);
+    setBinaryEncoding(instructionStart);
+    return cursor;
+}
 
-uint8_t *TR::ARM64Trg1Src2Instruction::generateBinaryEncoding()
-   {
-   uint8_t *instructionStart = cg()->getBinaryBufferCursor();
-   uint8_t *cursor = instructionStart;
-   cursor = getOpCode().copyBinaryToBuffer(instructionStart);
-   insertTargetRegister(toARM64Cursor(cursor));
-   insertSource1Register(toARM64Cursor(cursor));
-   insertSource2Register(toARM64Cursor(cursor));
-   cursor += ARM64_INSTRUCTION_LENGTH;
-   setBinaryLength(ARM64_INSTRUCTION_LENGTH);
-   setBinaryEncoding(instructionStart);
-   return cursor;
-   }
+uint8_t* TR::ARM64Trg1Src2Instruction::generateBinaryEncoding()
+{
+    uint8_t* instructionStart = cg()->getBinaryBufferCursor();
+    uint8_t* cursor = instructionStart;
+    cursor = getOpCode().copyBinaryToBuffer(instructionStart);
+    insertTargetRegister(toARM64Cursor(cursor));
+    insertSource1Register(toARM64Cursor(cursor));
+    insertSource2Register(toARM64Cursor(cursor));
+    cursor += ARM64_INSTRUCTION_LENGTH;
+    setBinaryLength(ARM64_INSTRUCTION_LENGTH);
+    setBinaryEncoding(instructionStart);
+    return cursor;
+}
 
-uint8_t *TR::ARM64Trg1Src2ShiftedInstruction::generateBinaryEncoding()
-   {
-   uint8_t *instructionStart = cg()->getBinaryBufferCursor();
-   uint8_t *cursor = instructionStart;
-   cursor = getOpCode().copyBinaryToBuffer(instructionStart);
-   insertTargetRegister(toARM64Cursor(cursor));
-   insertSource1Register(toARM64Cursor(cursor));
-   insertSource2Register(toARM64Cursor(cursor));
-   insertShift(toARM64Cursor(cursor));
-   cursor += ARM64_INSTRUCTION_LENGTH;
-   setBinaryLength(ARM64_INSTRUCTION_LENGTH);
-   setBinaryEncoding(instructionStart);
-   return cursor;
-   }
+uint8_t* TR::ARM64Trg1Src2ShiftedInstruction::generateBinaryEncoding()
+{
+    uint8_t* instructionStart = cg()->getBinaryBufferCursor();
+    uint8_t* cursor = instructionStart;
+    cursor = getOpCode().copyBinaryToBuffer(instructionStart);
+    insertTargetRegister(toARM64Cursor(cursor));
+    insertSource1Register(toARM64Cursor(cursor));
+    insertSource2Register(toARM64Cursor(cursor));
+    insertShift(toARM64Cursor(cursor));
+    cursor += ARM64_INSTRUCTION_LENGTH;
+    setBinaryLength(ARM64_INSTRUCTION_LENGTH);
+    setBinaryEncoding(instructionStart);
+    return cursor;
+}
 
-uint8_t *TR::ARM64Trg1Src2ExtendedInstruction::generateBinaryEncoding()
-   {
-   uint8_t *instructionStart = cg()->getBinaryBufferCursor();
-   uint8_t *cursor = instructionStart;
-   cursor = getOpCode().copyBinaryToBuffer(instructionStart);
-   insertTargetRegister(toARM64Cursor(cursor));
-   insertSource1Register(toARM64Cursor(cursor));
-   insertSource2Register(toARM64Cursor(cursor));
-   insertExtend(toARM64Cursor(cursor));
-   cursor += ARM64_INSTRUCTION_LENGTH;
-   setBinaryLength(ARM64_INSTRUCTION_LENGTH);
-   setBinaryEncoding(instructionStart);
-   return cursor;
-   }
+uint8_t* TR::ARM64Trg1Src2ExtendedInstruction::generateBinaryEncoding()
+{
+    uint8_t* instructionStart = cg()->getBinaryBufferCursor();
+    uint8_t* cursor = instructionStart;
+    cursor = getOpCode().copyBinaryToBuffer(instructionStart);
+    insertTargetRegister(toARM64Cursor(cursor));
+    insertSource1Register(toARM64Cursor(cursor));
+    insertSource2Register(toARM64Cursor(cursor));
+    insertExtend(toARM64Cursor(cursor));
+    cursor += ARM64_INSTRUCTION_LENGTH;
+    setBinaryLength(ARM64_INSTRUCTION_LENGTH);
+    setBinaryEncoding(instructionStart);
+    return cursor;
+}
 
-uint8_t *TR::ARM64Trg1Src3Instruction::generateBinaryEncoding()
-   {
-   uint8_t *instructionStart = cg()->getBinaryBufferCursor();
-   uint8_t *cursor = instructionStart;
-   cursor = getOpCode().copyBinaryToBuffer(instructionStart);
-   insertTargetRegister(toARM64Cursor(cursor));
-   insertSource1Register(toARM64Cursor(cursor));
-   insertSource2Register(toARM64Cursor(cursor));
-   insertSource3Register(toARM64Cursor(cursor));
-   cursor += ARM64_INSTRUCTION_LENGTH;
-   setBinaryLength(ARM64_INSTRUCTION_LENGTH);
-   setBinaryEncoding(instructionStart);
-   return cursor;
-   }
+uint8_t* TR::ARM64Trg1Src3Instruction::generateBinaryEncoding()
+{
+    uint8_t* instructionStart = cg()->getBinaryBufferCursor();
+    uint8_t* cursor = instructionStart;
+    cursor = getOpCode().copyBinaryToBuffer(instructionStart);
+    insertTargetRegister(toARM64Cursor(cursor));
+    insertSource1Register(toARM64Cursor(cursor));
+    insertSource2Register(toARM64Cursor(cursor));
+    insertSource3Register(toARM64Cursor(cursor));
+    cursor += ARM64_INSTRUCTION_LENGTH;
+    setBinaryLength(ARM64_INSTRUCTION_LENGTH);
+    setBinaryEncoding(instructionStart);
+    return cursor;
+}
 
-uint8_t *TR::ARM64Trg1MemInstruction::generateBinaryEncoding()
-   {
-   uint8_t *instructionStart = cg()->getBinaryBufferCursor();
-   uint8_t *cursor = instructionStart;
-   cursor = getOpCode().copyBinaryToBuffer(instructionStart);
-   insertTargetRegister(toARM64Cursor(cursor));
-   cursor = getMemoryReference()->generateBinaryEncoding(this, cursor, cg());
-   setBinaryLength(cursor - instructionStart);
-   setBinaryEncoding(instructionStart);
-   cg()->addAccumulatedInstructionLengthError(getEstimatedBinaryLength() - getBinaryLength());
-   return cursor;
-   }
+uint8_t* TR::ARM64Trg1MemInstruction::generateBinaryEncoding()
+{
+    uint8_t* instructionStart = cg()->getBinaryBufferCursor();
+    uint8_t* cursor = instructionStart;
+    cursor = getOpCode().copyBinaryToBuffer(instructionStart);
+    insertTargetRegister(toARM64Cursor(cursor));
+    cursor = getMemoryReference()->generateBinaryEncoding(this, cursor, cg());
+    setBinaryLength(cursor - instructionStart);
+    setBinaryEncoding(instructionStart);
+    cg()->addAccumulatedInstructionLengthError(getEstimatedBinaryLength() - getBinaryLength());
+    return cursor;
+}
 
 int32_t TR::ARM64Trg1MemInstruction::estimateBinaryLength(int32_t currentEstimate)
-   {
-   setEstimatedBinaryLength(getMemoryReference()->estimateBinaryLength(getOpCodeValue()));
-   return currentEstimate + getEstimatedBinaryLength();
-   }
+{
+    setEstimatedBinaryLength(getMemoryReference()->estimateBinaryLength(getOpCodeValue()));
+    return currentEstimate + getEstimatedBinaryLength();
+}
 
-uint8_t *TR::ARM64MemInstruction::generateBinaryEncoding()
-   {
-   uint8_t *instructionStart = cg()->getBinaryBufferCursor();
-   uint8_t *cursor = instructionStart;
-   cursor = getOpCode().copyBinaryToBuffer(instructionStart);
-   cursor = getMemoryReference()->generateBinaryEncoding(this, cursor, cg());
-   setBinaryLength(cursor - instructionStart);
-   setBinaryEncoding(instructionStart);
-   cg()->addAccumulatedInstructionLengthError(getEstimatedBinaryLength() - getBinaryLength());
-   return cursor;
-   }
+uint8_t* TR::ARM64MemInstruction::generateBinaryEncoding()
+{
+    uint8_t* instructionStart = cg()->getBinaryBufferCursor();
+    uint8_t* cursor = instructionStart;
+    cursor = getOpCode().copyBinaryToBuffer(instructionStart);
+    cursor = getMemoryReference()->generateBinaryEncoding(this, cursor, cg());
+    setBinaryLength(cursor - instructionStart);
+    setBinaryEncoding(instructionStart);
+    cg()->addAccumulatedInstructionLengthError(getEstimatedBinaryLength() - getBinaryLength());
+    return cursor;
+}
 
 int32_t TR::ARM64MemInstruction::estimateBinaryLength(int32_t currentEstimate)
-   {
-   setEstimatedBinaryLength(getMemoryReference()->estimateBinaryLength(getOpCodeValue()));
-   return(currentEstimate + getEstimatedBinaryLength());
-   }
+{
+    setEstimatedBinaryLength(getMemoryReference()->estimateBinaryLength(getOpCodeValue()));
+    return (currentEstimate + getEstimatedBinaryLength());
+}
 
-uint8_t *TR::ARM64MemSrc1Instruction::generateBinaryEncoding()
-   {
-   uint8_t *instructionStart = cg()->getBinaryBufferCursor();
-   uint8_t *cursor = instructionStart;
-   cursor = getOpCode().copyBinaryToBuffer(instructionStart);
-   insertSource1Register(toARM64Cursor(cursor));
-   cursor = getMemoryReference()->generateBinaryEncoding(this, cursor, cg());
-   setBinaryLength(cursor - instructionStart);
-   setBinaryEncoding(instructionStart);
-   cg()->addAccumulatedInstructionLengthError(getEstimatedBinaryLength() - getBinaryLength());
-   return cursor;
-   }
+uint8_t* TR::ARM64MemSrc1Instruction::generateBinaryEncoding()
+{
+    uint8_t* instructionStart = cg()->getBinaryBufferCursor();
+    uint8_t* cursor = instructionStart;
+    cursor = getOpCode().copyBinaryToBuffer(instructionStart);
+    insertSource1Register(toARM64Cursor(cursor));
+    cursor = getMemoryReference()->generateBinaryEncoding(this, cursor, cg());
+    setBinaryLength(cursor - instructionStart);
+    setBinaryEncoding(instructionStart);
+    cg()->addAccumulatedInstructionLengthError(getEstimatedBinaryLength() - getBinaryLength());
+    return cursor;
+}
 
 int32_t TR::ARM64MemSrc1Instruction::estimateBinaryLength(int32_t currentEstimate)
-   {
-   setEstimatedBinaryLength(getMemoryReference()->estimateBinaryLength(getOpCodeValue()));
-   return(currentEstimate + getEstimatedBinaryLength());
-   }
+{
+    setEstimatedBinaryLength(getMemoryReference()->estimateBinaryLength(getOpCodeValue()));
+    return (currentEstimate + getEstimatedBinaryLength());
+}

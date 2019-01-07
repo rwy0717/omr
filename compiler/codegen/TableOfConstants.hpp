@@ -29,28 +29,25 @@
  * allocated or hashed).
  */
 
-#include <stdint.h>  // for uint32_t
+#include <stdint.h> // for uint32_t
 
-namespace OMR
-{
+namespace OMR {
 
-class TableOfConstants
-   {
+class TableOfConstants {
 
-   public:
+public:
+    TableOfConstants(uint32_t size)
+        : _sizeInBytes(size)
+    {}
 
-   TableOfConstants(uint32_t size)
-      : _sizeInBytes(size) {}
+    uint32_t getTOCSize() { return _sizeInBytes; }
+    void setTOCSize(uint32_t s) { _sizeInBytes = s; }
 
-   uint32_t getTOCSize() {return _sizeInBytes;}
-   void setTOCSize(uint32_t s) {_sizeInBytes = s;}
+private:
+    uint32_t _sizeInBytes;
+};
 
-   private:
-
-   uint32_t _sizeInBytes;
-   };
-
-}
+} // namespace OMR
 
 using OMR::TableOfConstants;
 

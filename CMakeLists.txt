@@ -48,7 +48,7 @@ include(OmrSanitizerSupport)
 ###
 
 if(NOT OMR_PLATFORM_GLOBALLY_INITIALIZED)
-	omr_platform_global_setup()
+    omr_platform_global_setup()
 endif()
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
@@ -78,15 +78,15 @@ enable_testing()
 add_library(omr_base INTERFACE)
 
 target_include_directories(omr_base
-	INTERFACE
-		$<BUILD_INTERFACE:${omr_SOURCE_DIR}/include_core>
-		$<BUILD_INTERFACE:${omr_BINARY_DIR}>
-		$<INSTALL_INTERFACE:${OMR_INSTALL_INC_DIR}>
+    INTERFACE
+        $<BUILD_INTERFACE:${omr_SOURCE_DIR}/include_core>
+        $<BUILD_INTERFACE:${omr_BINARY_DIR}>
+        $<INSTALL_INTERFACE:${OMR_INSTALL_INC_DIR}>
 )
 
 install(
-	TARGETS omr_base
-	EXPORT OmrTargets
+    TARGETS omr_base
+    EXPORT OmrTargets
 )
 
 ###
@@ -96,13 +96,13 @@ install(
 # Check for existing omrcfg in the source tree since this can cause alot of headaches
 # Also check if we are building in tree while we are at it
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
-	if(NOT MSVC_IDE) #MSVC will handle in tree builds ok
-		message(WARNING "In tree builds are not recommended")
-	endif()
+    if(NOT MSVC_IDE) #MSVC will handle in tree builds ok
+        message(WARNING "In tree builds are not recommended")
+    endif()
 else()
 include(cmake/CheckSourceTree.cmake)
 add_custom_target(header_check ALL
-	${CMAKE_COMMAND} "-Domr_SOURCE_DIR=${omr_SOURCE_DIR}" -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/CheckSourceTree.cmake)
+    ${CMAKE_COMMAND} "-Domr_SOURCE_DIR=${omr_SOURCE_DIR}" -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/CheckSourceTree.cmake)
 endif()
 
 configure_file(./omrcfg.CMakeTemplate.h omrcfg.h)
@@ -113,11 +113,11 @@ configure_file(./omrversionstrings.CMakeTemplate.h omrversionstrings.h)
 ###
 
 if(OMR_TOOLS_IMPORTFILE)
-	include("${OMR_TOOLS_IMPORTFILE}")
+    include("${OMR_TOOLS_IMPORTFILE}")
 elseif(OMR_TOOLS)
-	add_subdirectory(tools)
+    add_subdirectory(tools)
 else()
-	message(FATAL_ERROR "OMR: Build tools are required. See OMR_TOOLS and OMR_TOOLS_IMPORTFILE")
+    message(FATAL_ERROR "OMR: Build tools are required. See OMR_TOOLS and OMR_TOOLS_IMPORTFILE")
 endif()
 
 
@@ -128,7 +128,7 @@ endif()
 # Each application provides it's own glue, so must be included before subdirectories.
 # The example and om are not yet compatible.
 if (OMR_EXAMPLE)
-	add_subdirectory(example)
+    add_subdirectory(example)
 endif (OMR_EXAMPLE)
 
 ###
@@ -143,29 +143,29 @@ add_subdirectory(third_party)
 add_subdirectory(omrsigcompat)
 
 if(OMR_RAS_TDF_TRACE)
-	add_subdirectory(omrtrace)
+    add_subdirectory(omrtrace)
 endif(OMR_RAS_TDF_TRACE)
 
 if(OMR_GC)
-	add_subdirectory(gc)
+    add_subdirectory(gc)
 endif(OMR_GC)
 
 if(OMR_DDR)
-	add_subdirectory(ddr)
+    add_subdirectory(ddr)
 endif(OMR_DDR)
 
 if(OMR_COMPILER)
-	add_subdirectory(compiler)
+    add_subdirectory(compiler)
 endif()
 
 if(OMR_JITBUILDER)
-	add_subdirectory(jitbuilder)
+    add_subdirectory(jitbuilder)
 endif(OMR_JITBUILDER)
 
 # This should come last to ensure dependencies
 # are defined
 if(OMR_FVTEST)
-	add_subdirectory(fvtest)
+    add_subdirectory(fvtest)
 endif()
 
 
@@ -186,7 +186,7 @@ install(EXPORT OmrTargets
 )
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/OmrConfig.cmake"
-	DESTINATION ${OMR_INSTALL_LIB_DIR}/cmake/Omr
+    DESTINATION ${OMR_INSTALL_LIB_DIR}/cmake/Omr
 )
 
 export(PACKAGE Omr)

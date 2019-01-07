@@ -27,14 +27,13 @@
 #include "infra/Assert.hpp"
 
 uint32_t
-OMR::X86::AMD64::ELFRelocationResolver::resolveRelocationType(const TR::StaticRelocation &relocation)
-   {
-   if (relocation.size() == TR::StaticRelocationSize::word64 && relocation.type() == TR::StaticRelocationType::Absolute)
-      {
-      return R_X86_64_64;
-      }
-   TR_ASSERT(false, "Unknown ELF relocation type.");
-   return static_cast<uint32_t>(-1);
-   }
+OMR::X86::AMD64::ELFRelocationResolver::resolveRelocationType(const TR::StaticRelocation& relocation)
+{
+    if (relocation.size() == TR::StaticRelocationSize::word64 && relocation.type() == TR::StaticRelocationType::Absolute) {
+        return R_X86_64_64;
+    }
+    TR_ASSERT(false, "Unknown ELF relocation type.");
+    return static_cast<uint32_t>(-1);
+}
 
 #endif /* defined(LINUX) */

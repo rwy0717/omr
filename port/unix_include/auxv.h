@@ -33,14 +33,14 @@
 /* We aren't going to assume that the system elf.h has the latest information
  * on all AUXV additions.  */
 #ifndef AT_BASE_PLATFORM
-#define AT_BASE_PLATFORM 24		/* String identifying real platforms.*/
+#define AT_BASE_PLATFORM 24 /* String identifying real platforms.*/
 #endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-  /* Function: prefetch_auxv
+/* Function: prefetch_auxv
    * -------------------------------------------------------------------------
    *
    *  The aux vector will be loaded into application addressable memory.
@@ -67,9 +67,9 @@ extern "C" {
    *   Note: On failure, no memory is allocated.
    *
    */
-  extern int prefetch_auxv(void);
+extern int prefetch_auxv(void);
 
-  /* Function: get_auxv
+/* Function: get_auxv
    * -------------------------------------------------------------------------
    *
    *  Returns a pointer to the aux vector that has been read into memory.
@@ -80,9 +80,9 @@ extern "C" {
    *  return the address of that memory.  If memory has not been allocated it
    *  will return zero.
    */
-  extern ElfW(auxv_t) * get_auxv(void);
+extern ElfW(auxv_t) * get_auxv(void);
 
-  /* Function: query_auxv
+/* Function: query_auxv
    * -------------------------------------------------------------------------
    *
    *  Queries the aux vector for an auxv_t struct where that auxv_t
@@ -110,7 +110,7 @@ extern "C" {
    *
    */
 
-  extern ElfW(Addr) query_auxv(ElfW(Addr));
+extern ElfW(Addr) query_auxv(ElfW(Addr));
 
 #ifdef __cplusplus
 }

@@ -58,8 +58,8 @@
  *
  */
 
-#pragma prolog(omrallocate_1M_pageable_pages_below_bar,"MYPROLOG")
-#pragma epilog(omrallocate_1M_pageable_pages_below_bar,"MYEPILOG")
+#pragma prolog(omrallocate_1M_pageable_pages_below_bar, "MYPROLOG")
+#pragma epilog(omrallocate_1M_pageable_pages_below_bar, "MYEPILOG")
 
 /*
  * Allocate 1MB pageable pages below 2GB bar using STORAGE system macro.
@@ -70,30 +70,30 @@
  *
  * @return pointer to memory allocated, NULL on failure.
  */
-void *
-omrallocate_1M_pageable_pages_below_bar(long *numBytes, int *subpool)
+void* omrallocate_1M_pageable_pages_below_bar(long* numBytes, int* subpool)
 {
-	long length;
-	long sp;
-	long addr;
-	int rc = 0;
+    long length;
+    long sp;
+    long addr;
+    int rc = 0;
 
-	length = *numBytes;
-	sp = *subpool;
+    length = *numBytes;
+    sp = *subpool;
 
-	__asm(" STORAGE OBTAIN,COND=YES,LOC=(31,PAGEFRAMESIZE1MB),"\
-			"LENGTH=(%2),RTCD=(%0),ADDR=(%1),SP=(%3)"\
-			:"=r"(rc),"=r"(addr):"r"(length),"r"(sp));
+    __asm(" STORAGE OBTAIN,COND=YES,LOC=(31,PAGEFRAMESIZE1MB),"
+          "LENGTH=(%2),RTCD=(%0),ADDR=(%1),SP=(%3)"
+          : "=r"(rc), "=r"(addr)
+          : "r"(length), "r"(sp));
 
-	if (0 == rc) {
-		return (void *)addr;
-	} else {
-		return (void *)0;
-	}
+    if (0 == rc) {
+        return (void*)addr;
+    } else {
+        return (void*)0;
+    }
 }
 
-#pragma prolog(omrallocate_4K_pages_below_bar,"MYPROLOG")
-#pragma epilog(omrallocate_4K_pages_below_bar,"MYEPILOG")
+#pragma prolog(omrallocate_4K_pages_below_bar, "MYPROLOG")
+#pragma epilog(omrallocate_4K_pages_below_bar, "MYEPILOG")
 
 /*
  * Allocate 4K pages below 2GB bar using STORAGE system macro.
@@ -104,30 +104,30 @@ omrallocate_1M_pageable_pages_below_bar(long *numBytes, int *subpool)
  *
  * @return pointer to memory allocated, NULL on failure. Returned value is guaranteed to be page aligned.
  */
-void *
-omrallocate_4K_pages_below_bar(long *numBytes, int *subpool)
+void* omrallocate_4K_pages_below_bar(long* numBytes, int* subpool)
 {
-	long length;
-	long sp;
-	long addr;
-	int rc = 0;
+    long length;
+    long sp;
+    long addr;
+    int rc = 0;
 
-	length = *numBytes;
-	sp = *subpool;
+    length = *numBytes;
+    sp = *subpool;
 
-	__asm(" STORAGE OBTAIN,COND=YES,LOC=(31,64),BNDRY=PAGE,"\
-			"LENGTH=(%2),RTCD=(%0),ADDR=(%1),SP=(%3)"\
-			:"=r"(rc),"=r"(addr):"r"(length),"r"(sp));
+    __asm(" STORAGE OBTAIN,COND=YES,LOC=(31,64),BNDRY=PAGE,"
+          "LENGTH=(%2),RTCD=(%0),ADDR=(%1),SP=(%3)"
+          : "=r"(rc), "=r"(addr)
+          : "r"(length), "r"(sp));
 
-	if (0 == rc) {
-		return (void *)addr;
-	} else {
-		return (void *)0;
-	}
+    if (0 == rc) {
+        return (void*)addr;
+    } else {
+        return (void*)0;
+    }
 }
 
-#pragma prolog(omrfree_memory_below_bar,"MYPROLOG")
-#pragma epilog(omrfree_memory_below_bar,"MYEPILOG")
+#pragma prolog(omrfree_memory_below_bar, "MYPROLOG")
+#pragma epilog(omrfree_memory_below_bar, "MYEPILOG")
 
 /*
  * Free memory allocated using STORAGE system macro.
@@ -136,21 +136,20 @@ omrallocate_4K_pages_below_bar(long *numBytes, int *subpool)
  *
  * @return non-zero if memory is not freed successfully, 0 otherwise.
  */
-int
-omrfree_memory_below_bar(void *address, long *length, int *subpool)
+int omrfree_memory_below_bar(void* address, long* length, int* subpool)
 {
-	int rc = 0;
-	void *addr;
-	long len;
-	long sp;
+    int rc = 0;
+    void* addr;
+    long len;
+    long sp;
 
-	addr = address;
-	len = *length;
-	sp = *subpool;
+    addr = address;
+    len = *length;
+    sp = *subpool;
 
-	__asm(" STORAGE RELEASE,COND=YES,ADDR=(%1),LENGTH=(%2),SP=(%3),RTCD=(%0)"\
-			:"=r"(rc):"r"(addr),"r"(len),"r"(sp));
+    __asm(" STORAGE RELEASE,COND=YES,ADDR=(%1),LENGTH=(%2),SP=(%3),RTCD=(%0)"
+          : "=r"(rc)
+          : "r"(addr), "r"(len), "r"(sp));
 
-	return rc;
-
+    return rc;
 }

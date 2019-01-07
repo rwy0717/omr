@@ -25,65 +25,64 @@
 #include "omrTest.h"
 #include "testHelper.hpp"
 
-extern ThreadTestEnvironment *omrTestEnv;
+extern ThreadTestEnvironment* omrTestEnv;
 
-class SanityTest: public ::testing::Test
-{
+class SanityTest : public ::testing::Test {
 public:
-	static unsigned int runTime;
-protected:
+    static unsigned int runTime;
 
-	static void
-	SetUpTestCase(void)
-	{
-		/* parse the command line options */
-		for (int32_t i = 1; i < omrTestEnv->_argc; i++) {
-			if (0 == strncmp(omrTestEnv->_argv[i], "-runTime=", strlen("-runTime="))) {
-				sscanf(&omrTestEnv->_argv[i][strlen("-runTime=")], "%u", &runTime);
-			}
-		}
-	}
+protected:
+    static void
+    SetUpTestCase(void)
+    {
+        /* parse the command line options */
+        for (int32_t i = 1; i < omrTestEnv->_argc; i++) {
+            if (0 == strncmp(omrTestEnv->_argv[i], "-runTime=", strlen("-runTime="))) {
+                sscanf(&omrTestEnv->_argv[i][strlen("-runTime=")], "%u", &runTime);
+            }
+        }
+    }
 };
 unsigned int SanityTest::runTime = 2; /* default test run time of 2 second */
 
 TEST_F(SanityTest, simpleSanity)
 {
-	SimpleSanity();
-	ASSERT_TRUE(SimpleSanity());
+    SimpleSanity();
+    ASSERT_TRUE(SimpleSanity());
 }
 
 TEST_F(SanityTest, SanityTestSingleThread)
 {
-	SanityTestNThreads(1, runTime);
+    SanityTestNThreads(1, runTime);
 }
 
 TEST_F(SanityTest, SanityTestTwoThreads)
 {
-	SanityTestNThreads(2, runTime);
+    SanityTestNThreads(2, runTime);
 }
 
 TEST_F(SanityTest, SanityTestFourThreads)
 {
-	SanityTestNThreads(4, runTime);
+    SanityTestNThreads(4, runTime);
 }
 
 TEST_F(SanityTest, QuickNDirtyPerformanceTest)
 {
-	QuickNDirtyPerformanceTest(runTime);
+    QuickNDirtyPerformanceTest(runTime);
 }
 
 TEST_F(SanityTest, TestWaitNotify)
 {
-	TestWaitNotify(runTime);
+    TestWaitNotify(runTime);
 }
 
 TEST_F(SanityTest, TestBlockingQueue)
 {
-	omrthread_t self;
-	omrthread_attach_ex(&self, J9THREAD_ATTR_DEFAULT);
+    omrthread_t self;
+    omrthread_attach_ex(&self, J9THREAD_ATTR_DEFAULT);
 
-	CThread cself(self);
-	EXPECT_TRUE(TestBlockingQueue(cself, 1)) << "1 thread failed";
-	EXPECT_TRUE(TestBlockingQueue(cself, 2)) << "2 threads failed";
-	EXPECT_TRUE(TestBlockingQueue(cself, 3)) << "3 threads failed";
+    CThread cself(self);
+    EXPECT_TRUE(TestBlockingQueue(cself, 1)) << "1 thread failed";
+    EXPECT_TRUE(TestBlockingQueue(cself, 2)) << "2 threads failed";
+    EXPECT_TRUE(TestBlockingQueue(cself, 3)) << "3 threads failed";
 }

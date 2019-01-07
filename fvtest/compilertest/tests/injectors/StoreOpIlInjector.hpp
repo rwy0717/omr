@@ -20,29 +20,29 @@
  *******************************************************************************/
 
 #ifndef TEST_STORE_OP_IL_INJECTOR_HPP
-#define TEST_STORE_OP_IL_INJECTOR_HPP 
+#define TEST_STORE_OP_IL_INJECTOR_HPP
 
 #include "tests/injectors/OpIlInjector.hpp"
 
-namespace TR { class TypeDictionary; }
+namespace TR {
+class TypeDictionary;
+}
 
-namespace TestCompiler
-{
-class StoreOpIlInjector : public OpIlInjector
-   {
-   public:
-   StoreOpIlInjector(TR::TypeDictionary *types, TestDriver *test, TR::ILOpCodes opCode)
-      : OpIlInjector(types, test, opCode)
-      {
-      initOptArgs(1);
-      }
-   TR_ALLOC(TR_Memory::IlGenerator)
+namespace TestCompiler {
+class StoreOpIlInjector : public OpIlInjector {
+public:
+    StoreOpIlInjector(TR::TypeDictionary* types, TestDriver* test, TR::ILOpCodes opCode)
+        : OpIlInjector(types, test, opCode)
+    {
+        initOptArgs(1);
+    }
+    TR_ALLOC(TR_Memory::IlGenerator)
 
-   bool injectIL();
+    bool injectIL();
 
-//   protected:
-//   TR::Node *parameter1() { return parameter(0, _dataType); }
-   };
+    //   protected:
+    //   TR::Node *parameter1() { return parameter(0, _dataType); }
+};
 
 } // namespace TestCompiler
 

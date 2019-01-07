@@ -31,7 +31,7 @@
 #include <tlhelp32.h>
 #include <Psapi.h>
 #include <DbgHelp.h>
-#undef UDATA	/* this is safe because our UDATA is a typedef, not a macro */
+#undef UDATA /* this is safe because our UDATA is a typedef, not a macro */
 #include <stdio.h>
 #include "omrport.h"
 #include "omrportpriv.h"
@@ -40,17 +40,15 @@
 #include "omrintrospect.h"
 #include "omrintrospect_common.h"
 
-
 struct PlatformWalkData {
-	/* system iterator */
-	THREADENTRY32 thread32;
-	HANDLE snapshot;
-	/* if set this will filter the specified thread out of the system iterator, for use when signal context is specified */
-	DWORD filterThread;
-	/* records whether the system iterator has been invoked yet */
-	BOOL walkStarted;
+    /* system iterator */
+    THREADENTRY32 thread32;
+    HANDLE snapshot;
+    /* if set this will filter the specified thread out of the system iterator, for use when signal context is specified */
+    DWORD filterThread;
+    /* records whether the system iterator has been invoked yet */
+    BOOL walkStarted;
 };
-
 
 /*
  * Conceptually this function resumes all the threads we suspend with suspend_all_preemtive.
@@ -58,52 +56,52 @@ struct PlatformWalkData {
  * somehow, we've not incremented it in suspend_all_preemptive (externally spawned threads by
  * debuggers for example).
  */
-int
-resume_all_preempted(struct PlatformWalkData *data)
+int resume_all_preempted(struct PlatformWalkData* data)
 {
-	int resumed = 0;
-	DWORD current_thread_id = GetCurrentThreadId();
-	DWORD current_pid = GetCurrentProcessId();
-	int result = 0;
+    int resumed = 0;
+    DWORD current_thread_id = GetCurrentThreadId();
+    DWORD current_pid = GetCurrentProcessId();
+    int result = 0;
 
-	if (!data || data->snapshot == INVALID_HANDLE_VALUE) {
-		return -1;
-	}
+    if (!data || data->snapshot == INVALID_HANDLE_VALUE) {
+        return -1;
+    }
 
-	/* required or the thread iterator functions fail */
-	data->thread32.dwSize = sizeof(THREADENTRY32);
+    /* required or the thread iterator functions fail */
+    data->thread32.dwSize = sizeof(THREADENTRY32);
 
-	if (!Thread32First(data->snapshot, &data->thread32)) {
-		result = GetLastError();
-		return -1;
-	}
+    if (!Thread32First(data->snapshot, &data->thread32)) {
+        result = GetLastError();
+        return -1;
+    }
 
-	do {
-		DWORD thread_id = data->thread32.th32ThreadID;
-		HANDLE thread_handle;
+    do {
+        DWORD thread_id = data->thread32.th32ThreadID;
+        HANDLE thread_handle;
 
-		if (data->thread32.th32OwnerProcessID != current_pid || thread_id == current_thread_id) {
-			continue;
-		}
+        if (data->thread32.th32OwnerProcessID != current_pid || thread_id == current_thread_id) {
+            continue;
+        }
 
-		thread_handle = OpenThread(THREAD_GET_CONTEXT | THREAD_SUSPEND_RESUME, FALSE, thread_id);
+        thread_handle = OpenThread(THREAD_GET_CONTEXT | THREAD_SUSPEND_RESUME, FALSE, thread_id);
 
-		if (thread_handle == NULL) {
-			result = GetLastError();
-			continue;
-		}
+        if (thread_handle == NULL) {
+            result = GetLastError();
+            continue;
+        }
 
-		while ((result = ResumeThread(thread_handle)) > 1);
-		if (result == -1) {
-			result = GetLastError();
-		} else {
-			resumed++;
-		}
+        while ((result = ResumeThread(thread_handle)) > 1)
+            ;
+        if (result == -1) {
+            result = GetLastError();
+        } else {
+            resumed++;
+        }
 
-		CloseHandle(thread_handle);
-	} while (Thread32Next(data->snapshot, &data->thread32));
+        CloseHandle(thread_handle);
+    } while (Thread32Next(data->snapshot, &data->thread32));
 
-	return resumed;
+    return resumed;
 }
 
 /*
@@ -113,155 +111,149 @@ resume_all_preempted(struct PlatformWalkData *data)
  * between the two snapshots.
  * Use GetLastError() to get error details if any.
  */
-int
-suspend_all_preemptive(struct PlatformWalkData *data)
+int suspend_all_preemptive(struct PlatformWalkData* data)
 {
-	int a_count = 0;
-	int b_count = 0;
-	char passA = 1;
-	DWORD result;
-	DWORD current_thread_id = GetCurrentThreadId();
-	DWORD current_pid = GetCurrentProcessId();
+    int a_count = 0;
+    int b_count = 0;
+    char passA = 1;
+    DWORD result;
+    DWORD current_thread_id = GetCurrentThreadId();
+    DWORD current_pid = GetCurrentProcessId();
 
+    /* required or the thread iterator functions fail */
+    data->thread32.dwSize = sizeof(THREADENTRY32);
 
-	/* required or the thread iterator functions fail */
-	data->thread32.dwSize = sizeof(THREADENTRY32);
+    /* primary processing loop */
+    do {
+        data->snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
 
-	/* primary processing loop */
-	do {
-		data->snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
+        if (data->snapshot == INVALID_HANDLE_VALUE) {
+            return -1;
+        }
 
-		if (data->snapshot == INVALID_HANDLE_VALUE) {
-			return -1;
-		}
+        if (!Thread32First(data->snapshot, &data->thread32)) {
+            return -1;
+        }
 
-		if (!Thread32First(data->snapshot, &data->thread32)) {
-			return -1;
-		}
+        do {
+            DWORD thread_id = data->thread32.th32ThreadID;
+            HANDLE thread_handle;
 
-		do {
-			DWORD thread_id = data->thread32.th32ThreadID;
-			HANDLE thread_handle;
+            if (data->thread32.th32OwnerProcessID != current_pid || thread_id == current_thread_id) {
+                continue;
+            }
 
-			if (data->thread32.th32OwnerProcessID != current_pid || thread_id == current_thread_id) {
-				continue;
-			}
+            if (passA) {
+                a_count++;
+            } else {
+                b_count++;
+            }
 
-			if (passA) {
-				a_count++;
-			} else {
-				b_count++;
-			}
+            /* not the current thread and belongs to this process */
+            thread_handle = OpenThread(THREAD_SUSPEND_RESUME, FALSE, thread_id);
 
-			/* not the current thread and belongs to this process */
-			thread_handle = OpenThread(THREAD_SUSPEND_RESUME, FALSE, thread_id);
+            if (thread_handle == NULL) {
+                result = GetLastError();
+                CloseHandle(thread_handle);
+                /* failed to get the thread handle */
+                goto error_return;
+            }
 
-			if (thread_handle == NULL) {
-				result = GetLastError();
-				CloseHandle(thread_handle);
-				/* failed to get the thread handle */
-				goto error_return;
-			}
+            if (SuspendThread(thread_handle) == -1) {
+                result = GetLastError();
+                CloseHandle(thread_handle);
+                /* failed to get the context */
+                goto error_return;
+            }
+        } while (Thread32Next(data->snapshot, &data->thread32));
 
-			if (SuspendThread(thread_handle) == -1) {
-				result = GetLastError();
-				CloseHandle(thread_handle);
-				/* failed to get the context */
-				goto error_return;
-			}
-		} while (Thread32Next(data->snapshot, &data->thread32));
+        /* next pass */
+        passA = !passA;
+    } while (a_count != b_count);
 
-		/* next pass */
-		passA = !passA;
-	} while (a_count != b_count);
-
-	return a_count;
+    return a_count;
 
 error_return:
-	/* we don't close the snapshot so that it's still available to resume any threads we suspended */
-	SetLastError(result);
+    /* we don't close the snapshot so that it's still available to resume any threads we suspended */
+    SetLastError(result);
 
-	return -1;
+    return -1;
 }
 
 /*
  * Frees anything and everything to do within the scope of the specified thread.
  */
-void
-freeThread(J9ThreadWalkState *state, J9PlatformThread *thread)
+void freeThread(J9ThreadWalkState* state, J9PlatformThread* thread)
 {
-	J9PlatformStackFrame *frame;
+    J9PlatformStackFrame* frame;
 
-	if (thread == NULL) {
-		return;
-	}
+    if (thread == NULL) {
+        return;
+    }
 
-	frame = thread->callstack;
-	while (frame) {
-		J9PlatformStackFrame *tmp = frame;
-		frame = frame->parent_frame;
+    frame = thread->callstack;
+    while (frame) {
+        J9PlatformStackFrame* tmp = frame;
+        frame = frame->parent_frame;
 
-		if (tmp->symbol) {
-			state->portLibrary->heap_free(state->portLibrary, state->heap, tmp->symbol);
-			tmp->symbol = NULL;
-		}
+        if (tmp->symbol) {
+            state->portLibrary->heap_free(state->portLibrary, state->heap, tmp->symbol);
+            tmp->symbol = NULL;
+        }
 
-		state->portLibrary->heap_free(state->portLibrary, state->heap, tmp);
-	}
+        state->portLibrary->heap_free(state->portLibrary, state->heap, tmp);
+    }
 
-	if (thread->context) {
-		state->portLibrary->heap_free(state->portLibrary, state->heap, thread->context);
-	}
+    if (thread->context) {
+        state->portLibrary->heap_free(state->portLibrary, state->heap, thread->context);
+    }
 
-	state->portLibrary->heap_free(state->portLibrary, state->heap, thread);
+    state->portLibrary->heap_free(state->portLibrary, state->heap, thread);
 
-	if (state->current_thread == thread) {
-		state->current_thread = NULL;
-	}
+    if (state->current_thread == thread) {
+        state->current_thread = NULL;
+    }
 }
-
 
 /*
  * Cleans up all state that we've created as part of the walk, including freeing up
  * the last returned thread, the debug library symbols, etc.
  */
-void
-cleanup(J9ThreadWalkState *state)
+void cleanup(J9ThreadWalkState* state)
 {
-	BOOL resumedOK = TRUE;
-	struct PlatformWalkData *data;
+    BOOL resumedOK = TRUE;
+    struct PlatformWalkData* data;
 
-	if (state) {
-		data = state->platform_data;
-		if (data) {
-			if (data->snapshot && data->snapshot != INVALID_HANDLE_VALUE) {
-				if (resume_all_preempted(data) == -1) {
-					resumedOK = FALSE;
-				}
+    if (state) {
+        data = state->platform_data;
+        if (data) {
+            if (data->snapshot && data->snapshot != INVALID_HANDLE_VALUE) {
+                if (resume_all_preempted(data) == -1) {
+                    resumedOK = FALSE;
+                }
 
-				if (!resumedOK || GetLastError() != ERROR_INVALID_HANDLE) {
-					/* it seems this can raise an exception if the handle has become invalid */
-					CloseHandle(data->snapshot);
-				}
+                if (!resumedOK || GetLastError() != ERROR_INVALID_HANDLE) {
+                    /* it seems this can raise an exception if the handle has become invalid */
+                    CloseHandle(data->snapshot);
+                }
 
-				data->snapshot = NULL;
-			}
+                data->snapshot = NULL;
+            }
 
-			/* clean up the heap */
-			state->portLibrary->heap_free(state->portLibrary, state->heap, data);
-			state->platform_data = NULL;
-		}
+            /* clean up the heap */
+            state->portLibrary->heap_free(state->portLibrary, state->heap, data);
+            state->platform_data = NULL;
+        }
 
-		if (state->current_thread) {
-			freeThread(state, state->current_thread);
-		}
+        if (state->current_thread) {
+            freeThread(state, state->current_thread);
+        }
 
-		free_dbg_symbols(state->portLibrary);
-	}
+        free_dbg_symbols(state->portLibrary);
+    }
 
-	return;
+    return;
 }
-
 
 /*
  * Sets up the native thread structures including the backtrace. If a context is specified it is used instead of grabbing
@@ -272,65 +264,63 @@ cleanup(J9ThreadWalkState *state)
  *
  * @return - 0 on success, non-zero otherwise.
  */
-int
-setup_native_thread(J9ThreadWalkState *state, CONTEXT *sigContext)
+int setup_native_thread(J9ThreadWalkState* state, CONTEXT* sigContext)
 {
-	CONTEXT tmpContext;
-	int result = 0;
+    CONTEXT tmpContext;
+    int result = 0;
 
-	/* allocate our various data structures */
-	state->current_thread = (J9PlatformThread *)state->portLibrary->heap_allocate(state->portLibrary, state->heap, sizeof(J9PlatformThread));
-	if (state->current_thread == NULL) {
-		return -1;
-	}
-	memset(state->current_thread, 0, sizeof(J9PlatformThread));
+    /* allocate our various data structures */
+    state->current_thread = (J9PlatformThread*)state->portLibrary->heap_allocate(state->portLibrary, state->heap, sizeof(J9PlatformThread));
+    if (state->current_thread == NULL) {
+        return -1;
+    }
+    memset(state->current_thread, 0, sizeof(J9PlatformThread));
 
-	state->current_thread->context = (PCONTEXT)state->portLibrary->heap_allocate(state->portLibrary, state->heap, sizeof(CONTEXT));
-	if (state->current_thread->context == NULL) {
-		return -2;
-	}
-	memset(state->current_thread->context, 0, sizeof(CONTEXT));
+    state->current_thread->context = (PCONTEXT)state->portLibrary->heap_allocate(state->portLibrary, state->heap, sizeof(CONTEXT));
+    if (state->current_thread->context == NULL) {
+        return -2;
+    }
+    memset(state->current_thread->context, 0, sizeof(CONTEXT));
 
-	state->current_thread->thread_id = ((struct PlatformWalkData *)state->platform_data)->thread32.th32ThreadID;
-	state->current_thread->process_id = ((struct PlatformWalkData *)state->platform_data)->thread32.th32OwnerProcessID;
+    state->current_thread->thread_id = ((struct PlatformWalkData*)state->platform_data)->thread32.th32ThreadID;
+    state->current_thread->process_id = ((struct PlatformWalkData*)state->platform_data)->thread32.th32OwnerProcessID;
 
-	tmpContext.ContextFlags = CONTEXT_FULL;
+    tmpContext.ContextFlags = CONTEXT_FULL;
 
-	if (sigContext) {
-		/* we're using the provided context instead of generating it */
-		memcpy(&tmpContext, sigContext, sizeof(CONTEXT));
-	} else if (state->current_thread->thread_id == GetCurrentThreadId()) {
-		/* return context for current thread */
-		RtlCaptureContext(&tmpContext);
-	} else {
-		/* generate context for target thread */
-		HANDLE thread_handle = OpenThread(THREAD_GET_CONTEXT|THREAD_QUERY_INFORMATION, FALSE, (DWORD)state->current_thread->thread_id);
-		if (thread_handle == NULL) {
-			return -4;
-		}
-		if (!GetThreadContext(thread_handle, &tmpContext)) {
-			result = GetLastError();
-			CloseHandle(thread_handle);
-			SetLastError(result);
-			/* failed to get the context */
-			return -5;
-		}
-		CloseHandle(thread_handle);
-	}
+    if (sigContext) {
+        /* we're using the provided context instead of generating it */
+        memcpy(&tmpContext, sigContext, sizeof(CONTEXT));
+    } else if (state->current_thread->thread_id == GetCurrentThreadId()) {
+        /* return context for current thread */
+        RtlCaptureContext(&tmpContext);
+    } else {
+        /* generate context for target thread */
+        HANDLE thread_handle = OpenThread(THREAD_GET_CONTEXT | THREAD_QUERY_INFORMATION, FALSE, (DWORD)state->current_thread->thread_id);
+        if (thread_handle == NULL) {
+            return -4;
+        }
+        if (!GetThreadContext(thread_handle, &tmpContext)) {
+            result = GetLastError();
+            CloseHandle(thread_handle);
+            SetLastError(result);
+            /* failed to get the context */
+            return -5;
+        }
+        CloseHandle(thread_handle);
+    }
 
-	memcpy(state->current_thread->context, &tmpContext, sizeof(CONTEXT));
+    memcpy(state->current_thread->context, &tmpContext, sizeof(CONTEXT));
 
-	/* assemble the callstack */
-	state->portLibrary->introspect_backtrace_thread(state->portLibrary, state->current_thread, state->heap, NULL);
-	state->portLibrary->introspect_backtrace_symbols(state->portLibrary, state->current_thread, state->heap);
+    /* assemble the callstack */
+    state->portLibrary->introspect_backtrace_thread(state->portLibrary, state->current_thread, state->heap, NULL);
+    state->portLibrary->introspect_backtrace_symbols(state->portLibrary, state->current_thread, state->heap);
 
-	if (state->current_thread->error != 0) {
-		RECORD_ERROR(state, state->current_thread->error, 1);
-	}
+    if (state->current_thread->error != 0) {
+        RECORD_ERROR(state, state->current_thread->error, 1);
+    }
 
-	return 0;
+    return 0;
 }
-
 
 /*
  * Creates an iterator for the native threads present within the process, either all native threads
@@ -354,79 +344,79 @@ setup_native_thread(J9ThreadWalkState *state, CONTEXT *sigContext)
  * is too small to contain even the context without stack trace. Errors are reported in the error,
  * and error_detail fields of the state structure. A brief textual description is in error_string.
  */
-J9PlatformThread *
-omrintrospect_threads_startDo_with_signal(struct OMRPortLibrary *portLibrary, J9Heap *heap, J9ThreadWalkState *state, void *signal_info)
+J9PlatformThread*
+omrintrospect_threads_startDo_with_signal(struct OMRPortLibrary* portLibrary, J9Heap* heap, J9ThreadWalkState* state, void* signal_info)
 {
-	struct J9Win32SignalInfo *sigFaultInfo = signal_info;
-	DWORD processId = GetCurrentProcessId();
-	struct PlatformWalkData *data;
-	int result = 0;
-	CONTEXT *signalContext = NULL;
-	state->heap = heap;
-	state->portLibrary = portLibrary;
-	state->current_thread = NULL;
+    struct J9Win32SignalInfo* sigFaultInfo = signal_info;
+    DWORD processId = GetCurrentProcessId();
+    struct PlatformWalkData* data;
+    int result = 0;
+    CONTEXT* signalContext = NULL;
+    state->heap = heap;
+    state->portLibrary = portLibrary;
+    state->current_thread = NULL;
 
-	/* likely can't operate in stack overflow conditions so inhibit construction of the backtrace */
-	if (sigFaultInfo != NULL) {
-		if (sigFaultInfo->ExceptionRecord != NULL && sigFaultInfo->ExceptionRecord->ExceptionCode == EXCEPTION_STACK_OVERFLOW) {
-			RECORD_ERROR(state, INVALID_STATE, -1);
-			return NULL;
-		}
-		signalContext = sigFaultInfo->ContextRecord;
-	}
+    /* likely can't operate in stack overflow conditions so inhibit construction of the backtrace */
+    if (sigFaultInfo != NULL) {
+        if (sigFaultInfo->ExceptionRecord != NULL && sigFaultInfo->ExceptionRecord->ExceptionCode == EXCEPTION_STACK_OVERFLOW) {
+            RECORD_ERROR(state, INVALID_STATE, -1);
+            return NULL;
+        }
+        signalContext = sigFaultInfo->ContextRecord;
+    }
 
-	data = (struct PlatformWalkData *)portLibrary->heap_allocate(portLibrary, heap, sizeof(struct PlatformWalkData));
-	state->platform_data = data;
+    data = (struct PlatformWalkData*)portLibrary->heap_allocate(portLibrary, heap, sizeof(struct PlatformWalkData));
+    state->platform_data = data;
 
-	if (!data) {
-		/* can't allocate space for platform data */
-		RECORD_ERROR(state, ALLOCATION_FAILURE, 0);
-		return NULL;
-	}
+    if (!data) {
+        /* can't allocate space for platform data */
+        RECORD_ERROR(state, ALLOCATION_FAILURE, 0);
+        return NULL;
+    }
 
-	data->walkStarted = FALSE;
+    data->walkStarted = FALSE;
 
-	/* suspend everything but this thread */
-	if (suspend_all_preemptive(data) == -1) {
-		result = GetLastError();
-		RECORD_ERROR(state, SUSPEND_FAILURE, result);
-		goto cleanup;
-	}
+    /* suspend everything but this thread */
+    if (suspend_all_preemptive(data) == -1) {
+        result = GetLastError();
+        RECORD_ERROR(state, SUSPEND_FAILURE, result);
+        goto cleanup;
+    }
 
-	/* required or the thread iterator functions fail */
-	data->thread32.dwSize = sizeof(THREADENTRY32);
-	/* grab the current thread and filter it for the iteration */
-	data->thread32.th32ThreadID = GetCurrentThreadId();
-	data->thread32.th32OwnerProcessID = processId;
-	data->filterThread = data->thread32.th32ThreadID;
+    /* required or the thread iterator functions fail */
+    data->thread32.dwSize = sizeof(THREADENTRY32);
+    /* grab the current thread and filter it for the iteration */
+    data->thread32.th32ThreadID = GetCurrentThreadId();
+    data->thread32.th32OwnerProcessID = processId;
+    data->filterThread = data->thread32.th32ThreadID;
 
-	/* make sure the dbg library functions and symbols are loaded and initialized */
-	if (0 != load_dbg_functions(portLibrary) || 0 != load_dbg_symbols(portLibrary)) {
-		result = GetLastError();
-		RECORD_ERROR(state, INITIALIZATION_ERROR, -2);
-		goto cleanup;
-	}
+    /* make sure the dbg library functions and symbols are loaded and initialized */
+    if (0 != load_dbg_functions(portLibrary) || 0 != load_dbg_symbols(portLibrary)) {
+        result = GetLastError();
+        RECORD_ERROR(state, INITIALIZATION_ERROR, -2);
+        goto cleanup;
+    }
 
-	if ((result = setup_native_thread(state, signalContext)) != 0) {
-		RECORD_ERROR(state, COLLECTION_FAILURE, result);
-		goto cleanup;
-	}
+    if ((result = setup_native_thread(state, signalContext)) != 0) {
+        RECORD_ERROR(state, COLLECTION_FAILURE, result);
+        goto cleanup;
+    }
 
-	return state->current_thread;
+    return state->current_thread;
 
 cleanup:
-	cleanup(state);
-	SetLastError(result);
-	return NULL;
+    cleanup(state);
+    SetLastError(result);
+    return NULL;
 }
 
 /* This function is identical to omrintrospect_threads_startDo_with_signal but omits the signal argument
  * and instead uses a live context for the calling thread.
  */
-J9PlatformThread *
-omrintrospect_threads_startDo(struct OMRPortLibrary *portLibrary, J9Heap *heap, J9ThreadWalkState *state)
+J9PlatformThread*
+omrintrospect_threads_startDo(struct OMRPortLibrary* portLibrary, J9Heap* heap, J9ThreadWalkState* state)
 {
-	return omrintrospect_threads_startDo_with_signal(portLibrary, heap, state, NULL);
+    return omrintrospect_threads_startDo_with_signal(portLibrary, heap, state, NULL);
 }
 
 /* This function is called repeatedly to get subsequent threads in the iteration. The only way to
@@ -437,79 +427,78 @@ omrintrospect_threads_startDo(struct OMRPortLibrary *portLibrary, J9Heap *heap, 
  * @return NULL if there is an error or if no more threads are available. Sets the error fields as
  * listed detailed for omrintrospect_threads_startDo_with_signal.
  */
-J9PlatformThread *
-omrintrospect_threads_nextDo(J9ThreadWalkState *state)
+J9PlatformThread*
+omrintrospect_threads_nextDo(J9ThreadWalkState* state)
 {
-	int result = 0;
-	struct PlatformWalkData *data = state->platform_data;
-	DWORD processId = GetCurrentProcessId();
+    int result = 0;
+    struct PlatformWalkData* data = state->platform_data;
+    DWORD processId = GetCurrentProcessId();
 
-	if (data == NULL) {
-		/* state is invalid */
-		RECORD_ERROR(state, INVALID_STATE, 0);
-		return NULL;
-	}
+    if (data == NULL) {
+        /* state is invalid */
+        RECORD_ERROR(state, INVALID_STATE, 0);
+        return NULL;
+    }
 
-	/* cleanup the previous threads */
-	freeThread(state, state->current_thread);
+    /* cleanup the previous threads */
+    freeThread(state, state->current_thread);
 
-	/* initialize the thread walk if not already done */
-	if (data->walkStarted == FALSE) {
-		result = Thread32First(data->snapshot, &data->thread32);
-		data->walkStarted = TRUE;
-	} else {
-		result = Thread32Next(data->snapshot, &data->thread32);
-	}
+    /* initialize the thread walk if not already done */
+    if (data->walkStarted == FALSE) {
+        result = Thread32First(data->snapshot, &data->thread32);
+        data->walkStarted = TRUE;
+    } else {
+        result = Thread32Next(data->snapshot, &data->thread32);
+    }
 
-	if (result == FALSE) {
-		result = -1;
-		goto cleanup;
-	}
+    if (result == FALSE) {
+        result = -1;
+        goto cleanup;
+    }
 
-	/* get the next thread in this process */
-	while (data->thread32.th32OwnerProcessID != processId || data->thread32.th32ThreadID == data->filterThread) {
-		if (Thread32Next(data->snapshot, &data->thread32) == FALSE) {
-			goto cleanup;
-		}
-	}
+    /* get the next thread in this process */
+    while (data->thread32.th32OwnerProcessID != processId || data->thread32.th32ThreadID == data->filterThread) {
+        if (Thread32Next(data->snapshot, &data->thread32) == FALSE) {
+            goto cleanup;
+        }
+    }
 
-	if ((result = setup_native_thread(state, NULL)) != 0) {
-		RECORD_ERROR(state, COLLECTION_FAILURE, result);
-		goto cleanup;
-	}
+    if ((result = setup_native_thread(state, NULL)) != 0) {
+        RECORD_ERROR(state, COLLECTION_FAILURE, result);
+        goto cleanup;
+    }
 
-	return state->current_thread;
+    return state->current_thread;
 
 cleanup:
-	if (result != 0) {
-		result = GetLastError();
-		if (result == ERROR_NO_MORE_FILES) {
-			/* this is a ligitimate end of thread list error value */
-			result = ERROR_SUCCESS;
-		} else {
-			RECORD_ERROR(state, COLLECTION_FAILURE, result);
-		}
-	}
+    if (result != 0) {
+        result = GetLastError();
+        if (result == ERROR_NO_MORE_FILES) {
+            /* this is a ligitimate end of thread list error value */
+            result = ERROR_SUCCESS;
+        } else {
+            RECORD_ERROR(state, COLLECTION_FAILURE, result);
+        }
+    }
 
-	SetLastError(result);
-	cleanup(state);
-	return NULL;
+    SetLastError(result);
+    cleanup(state);
+    return NULL;
 }
 
 int32_t
-omrintrospect_set_suspend_signal_offset(struct OMRPortLibrary *portLibrary, int32_t signalOffset)
+omrintrospect_set_suspend_signal_offset(struct OMRPortLibrary* portLibrary, int32_t signalOffset)
 {
-	return OMRPORT_ERROR_NOT_SUPPORTED_ON_THIS_PLATFORM;
+    return OMRPORT_ERROR_NOT_SUPPORTED_ON_THIS_PLATFORM;
 }
 
 int32_t
-omrintrospect_startup(struct OMRPortLibrary *portLibrary)
+omrintrospect_startup(struct OMRPortLibrary* portLibrary)
 {
-	return 0;
+    return 0;
 }
 
-void
-omrintrospect_shutdown(struct OMRPortLibrary *portLibrary)
+void omrintrospect_shutdown(struct OMRPortLibrary* portLibrary)
 {
-	return;
+    return;
 }

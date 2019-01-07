@@ -50,11 +50,10 @@ struct J9HookInterface;
 * @return intptr_t
 */
 intptr_t
-J9HookInitializeInterface(struct J9HookInterface **hookInterface, OMRPortLibrary *portLib, size_t interfaceSize);
+J9HookInitializeInterface(struct J9HookInterface** hookInterface, OMRPortLibrary* portLib, size_t interfaceSize);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* hookable_api_h */
-

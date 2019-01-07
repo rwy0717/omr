@@ -43,21 +43,16 @@
 
 #define JVM_INITIALIZATION_COLLECTIONS 4
 
-
 /**
  * Called at the start of a global collect.
  * We use this broadcast event to update target LOA ratio for this collect
  */
-void
-reportGlobalGCIncrementStart(J9HookInterface** hook, uintptr_t eventNum, void* eventData, void* userData)
+void reportGlobalGCIncrementStart(J9HookInterface** hook, uintptr_t eventNum, void* eventData, void* userData)
 {
-	MM_GlobalGCIncrementStartEvent* event = (MM_GlobalGCIncrementStartEvent*)eventData;
-	MM_EnvironmentBase* env = MM_EnvironmentBase::getEnvironment(event->currentThread);
+    MM_GlobalGCIncrementStartEvent* event = (MM_GlobalGCIncrementStartEvent*)eventData;
+    MM_EnvironmentBase* env = MM_EnvironmentBase::getEnvironment(event->currentThread);
 
-	((MM_MemoryPoolLargeObjects*)userData)->preCollect(env,
-													   env->_cycleState->_gcCode.isExplicitGC(),
-													   env->_cycleState->_gcCode.isAggressiveGC(),
-													   event->bytesRequested);
+    ((MM_MemoryPoolLargeObjects*)userData)->preCollect(env, env->_cycleState->_gcCode.isExplicitGC(), env->_cycleState->_gcCode.isAggressiveGC(), event->bytesRequested);
 }
 
 /**
@@ -66,272 +61,264 @@ reportGlobalGCIncrementStart(J9HookInterface** hook, uintptr_t eventNum, void* e
 MM_MemoryPoolLargeObjects*
 MM_MemoryPoolLargeObjects::newInstance(MM_EnvironmentBase* env, MM_MemoryPoolAddressOrderedListBase* largeObjectArea, MM_MemoryPoolAddressOrderedListBase* smallObjectArea)
 {
-	MM_MemoryPoolLargeObjects* memoryPool;
+    MM_MemoryPoolLargeObjects* memoryPool;
 
-	memoryPool = (MM_MemoryPoolLargeObjects*)env->getForge()->allocate(sizeof(MM_MemoryPoolLargeObjects), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
-	if (NULL != memoryPool) {
-		memoryPool = new (memoryPool) MM_MemoryPoolLargeObjects(env, largeObjectArea, smallObjectArea);
-		if (!memoryPool->initialize(env)) {
-			memoryPool->kill(env);
-			memoryPool = NULL;
-		}
-	}
-	return memoryPool;
+    memoryPool = (MM_MemoryPoolLargeObjects*)env->getForge()->allocate(sizeof(MM_MemoryPoolLargeObjects), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+    if (NULL != memoryPool) {
+        memoryPool = new (memoryPool) MM_MemoryPoolLargeObjects(env, largeObjectArea, smallObjectArea);
+        if (!memoryPool->initialize(env)) {
+            memoryPool->kill(env);
+            memoryPool = NULL;
+        }
+    }
+    return memoryPool;
 }
 
-bool
-MM_MemoryPoolLargeObjects::initialize(MM_EnvironmentBase* env)
+bool MM_MemoryPoolLargeObjects::initialize(MM_EnvironmentBase* env)
 {
-	if (!MM_MemoryPool::initialize(env)) {
-		return false;
-	}
+    if (!MM_MemoryPool::initialize(env)) {
+        return false;
+    }
 
-	/* it's important that the LOA is registered first - so that it's last in the memorypool chain */
-	registerMemoryPool(_memoryPoolLargeObjects);
-	registerMemoryPool(_memoryPoolSmallObjects);
+    /* it's important that the LOA is registered first - so that it's last in the memorypool chain */
+    registerMemoryPool(_memoryPoolLargeObjects);
+    registerMemoryPool(_memoryPoolSmallObjects);
 
-	/* Ensure we always expand the heap by at least largeObjectMinimumSize bytes */
-	_extensions->heapExpansionMinimumSize = OMR_MAX(_extensions->heapExpansionMinimumSize, _extensions->largeObjectMinimumSize);
+    /* Ensure we always expand the heap by at least largeObjectMinimumSize bytes */
+    _extensions->heapExpansionMinimumSize = OMR_MAX(_extensions->heapExpansionMinimumSize, _extensions->largeObjectMinimumSize);
 
+    J9HookInterface** mmPrivateHooks = J9_HOOK_INTERFACE(_extensions->privateHookInterface);
+    /* Register hook for global GC start - needed to trigger update of LOA
+     * ratio at start of a collect.
+     *
+     * THIS MUST HAPPEN AFTER VERBOSE GC PRINTS LOA SIZE. IT MUST NOT HAPPEN ON SCAVENGES.
+     */
+    (*mmPrivateHooks)->J9HookRegisterWithCallSite(mmPrivateHooks, J9HOOK_MM_PRIVATE_GLOBAL_GC_INCREMENT_START, reportGlobalGCIncrementStart, OMR_GET_CALLSITE(), (void*)this);
 
-	J9HookInterface** mmPrivateHooks = J9_HOOK_INTERFACE(_extensions->privateHookInterface);
-	/* Register hook for global GC start - needed to trigger update of LOA
-	 * ratio at start of a collect.
-	 *
-	 * THIS MUST HAPPEN AFTER VERBOSE GC PRINTS LOA SIZE. IT MUST NOT HAPPEN ON SCAVENGES.
-	 */
-	(*mmPrivateHooks)->J9HookRegisterWithCallSite(mmPrivateHooks, J9HOOK_MM_PRIVATE_GLOBAL_GC_INCREMENT_START, reportGlobalGCIncrementStart, OMR_GET_CALLSITE(), (void*)this);
-
-	uintptr_t minimumFreeEntrySize = OMR_MAX(_memoryPoolLargeObjects->getMinimumFreeEntrySize(), _memoryPoolSmallObjects->getMinimumFreeEntrySize());
-	/* this memoryPool can be used by scavenger, maximum tlh size should be max(_extensions->tlhMaximumSize, _extensions->scavengerScanCacheMaximumSize) */
+    uintptr_t minimumFreeEntrySize = OMR_MAX(_memoryPoolLargeObjects->getMinimumFreeEntrySize(), _memoryPoolSmallObjects->getMinimumFreeEntrySize());
+    /* this memoryPool can be used by scavenger, maximum tlh size should be max(_extensions->tlhMaximumSize, _extensions->scavengerScanCacheMaximumSize) */
 #if defined(OMR_GC_MODRON_SCAVENGER)
-	uintptr_t tlhMaximumSize = OMR_MAX(_extensions->tlhMaximumSize, _extensions->scavengerScanCacheMaximumSize);
+    uintptr_t tlhMaximumSize = OMR_MAX(_extensions->tlhMaximumSize, _extensions->scavengerScanCacheMaximumSize);
 #else /* OMR_GC_MODRON_SCAVENGER */
-	uintptr_t tlhMaximumSize = _extensions->tlhMaximumSize;
+    uintptr_t tlhMaximumSize = _extensions->tlhMaximumSize;
 #endif /* OMR_GC_MODRON_SCAVENGER */
-	_largeObjectAllocateStats = MM_LargeObjectAllocateStats::newInstance(env, (uint16_t)_extensions->largeObjectAllocationProfilingTopK, _extensions->largeObjectAllocationProfilingThreshold, _extensions->largeObjectAllocationProfilingVeryLargeObjectThreshold, (float)_extensions->largeObjectAllocationProfilingSizeClassRatio / (float)100.0,
-																		 _extensions->heap->getMaximumMemorySize(), tlhMaximumSize + minimumFreeEntrySize, _extensions->tlhMinimumSize);
+    _largeObjectAllocateStats = MM_LargeObjectAllocateStats::newInstance(env, (uint16_t)_extensions->largeObjectAllocationProfilingTopK, _extensions->largeObjectAllocationProfilingThreshold, _extensions->largeObjectAllocationProfilingVeryLargeObjectThreshold, (float)_extensions->largeObjectAllocationProfilingSizeClassRatio / (float)100.0,
+        _extensions->heap->getMaximumMemorySize(), tlhMaximumSize + minimumFreeEntrySize, _extensions->tlhMinimumSize);
 
-	if (NULL == _largeObjectAllocateStats) {
-		return false;
-	}
+    if (NULL == _largeObjectAllocateStats) {
+        return false;
+    }
 
-	Trc_MM_LOAResize_initialize(env->getLanguageVMThread(), _memoryPoolSmallObjects, _memoryPoolLargeObjects);
+    Trc_MM_LOAResize_initialize(env->getLanguageVMThread(), _memoryPoolSmallObjects, _memoryPoolLargeObjects);
 
-	_loaFreeRatioHistory = (double*)env->getForge()->allocate(_extensions->loaFreeHistorySize * sizeof(double), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+    _loaFreeRatioHistory = (double*)env->getForge()->allocate(_extensions->loaFreeHistorySize * sizeof(double), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
 
-	if (NULL == _loaFreeRatioHistory){
-		return false;
-	}
+    if (NULL == _loaFreeRatioHistory) {
+        return false;
+    }
 
-	/*
-	 * initialize _loaFreeRatioArray to 0 (even though initialy LOA shold have a free ratio of 1),
-	 * to prevent early contraction
-	 */
+    /*
+     * initialize _loaFreeRatioArray to 0 (even though initialy LOA shold have a free ratio of 1),
+     * to prevent early contraction
+     */
 
-	for (int i = 0; i < _extensions->loaFreeHistorySize; i++ ){
-		_loaFreeRatioHistory[i] = 0;
-	}
+    for (int i = 0; i < _extensions->loaFreeHistorySize; i++) {
+        _loaFreeRatioHistory[i] = 0;
+    }
 
-	return true;
+    return true;
 }
 
-void
-MM_MemoryPoolLargeObjects::tearDown(MM_EnvironmentBase* env)
+void MM_MemoryPoolLargeObjects::tearDown(MM_EnvironmentBase* env)
 {
-	J9HookInterface** mmPrivateHooks = J9_HOOK_INTERFACE(_extensions->privateHookInterface);
+    J9HookInterface** mmPrivateHooks = J9_HOOK_INTERFACE(_extensions->privateHookInterface);
 
-	/* Unregister the global GC hooks for this instance */
-	(*mmPrivateHooks)->J9HookUnregister(mmPrivateHooks, J9HOOK_MM_PRIVATE_GLOBAL_GC_INCREMENT_START, reportGlobalGCIncrementStart, (void*)this);
+    /* Unregister the global GC hooks for this instance */
+    (*mmPrivateHooks)->J9HookUnregister(mmPrivateHooks, J9HOOK_MM_PRIVATE_GLOBAL_GC_INCREMENT_START, reportGlobalGCIncrementStart, (void*)this);
 
-	if (NULL != _memoryPoolSmallObjects) {
-		_memoryPoolSmallObjects->kill(env);
-		_memoryPoolSmallObjects = NULL;
-	}
+    if (NULL != _memoryPoolSmallObjects) {
+        _memoryPoolSmallObjects->kill(env);
+        _memoryPoolSmallObjects = NULL;
+    }
 
-	if (NULL != _memoryPoolLargeObjects) {
-		_memoryPoolLargeObjects->kill(env);
-		_memoryPoolLargeObjects = NULL;
-	}
+    if (NULL != _memoryPoolLargeObjects) {
+        _memoryPoolLargeObjects->kill(env);
+        _memoryPoolLargeObjects = NULL;
+    }
 
-	if (NULL != _largeObjectAllocateStats) {
-		_largeObjectAllocateStats->kill(env);
-		_largeObjectAllocateStats = NULL;
-	}
-	if (NULL != _loaFreeRatioHistory){
-		env->getForge()->free(_loaFreeRatioHistory);
-	}
+    if (NULL != _largeObjectAllocateStats) {
+        _largeObjectAllocateStats->kill(env);
+        _largeObjectAllocateStats = NULL;
+    }
+    if (NULL != _loaFreeRatioHistory) {
+        env->getForge()->free(_loaFreeRatioHistory);
+    }
 
-
-	MM_MemoryPool::tearDown(env);
+    MM_MemoryPool::tearDown(env);
 }
 
-void
-MM_MemoryPoolLargeObjects::reset(Cause cause)
+void MM_MemoryPoolLargeObjects::reset(Cause cause)
 {
-	/* Reset aggregate (LOA + SOA) free space statistics in this memory pool ..*/
-	//to do do we really need aggregate stats in MPLO ?
-	MM_MemoryPool::reset(cause);
+    /* Reset aggregate (LOA + SOA) free space statistics in this memory pool ..*/
+    //to do do we really need aggregate stats in MPLO ?
+    MM_MemoryPool::reset(cause);
 
-	/* and in LOA and SOA */
-	_memoryPoolSmallObjects->reset();
-	_memoryPoolLargeObjects->reset();
+    /* and in LOA and SOA */
+    _memoryPoolSmallObjects->reset();
+    _memoryPoolLargeObjects->reset();
 
-	/* Reset size of smallest object which caused a AF in SOA */
-	_soaObjectSizeLWM = ((uintptr_t) - 1);
-	resetFreeEntryAllocateStats(_largeObjectAllocateStats);
-	resetLargeObjectAllocateStats();
+    /* Reset size of smallest object which caused a AF in SOA */
+    _soaObjectSizeLWM = ((uintptr_t)-1);
+    resetFreeEntryAllocateStats(_largeObjectAllocateStats);
+    resetLargeObjectAllocateStats();
 }
 
 /**
  * Perform any pre-collection work on pool.
  */
-void
-MM_MemoryPoolLargeObjects::preCollect(MM_EnvironmentBase* env, bool systemGC, bool aggressive, uintptr_t bytesRequested)
+void MM_MemoryPoolLargeObjects::preCollect(MM_EnvironmentBase* env, bool systemGC, bool aggressive, uintptr_t bytesRequested)
 {
-	bool debug = _extensions->debugLOAFreelist;
-	double newLOARatio;
+    bool debug = _extensions->debugLOAFreelist;
+    double newLOARatio;
 
-	/* Dont resize LOA if its a system GC */
-	if (!systemGC) {
-		if (aggressive) {
-			newLOARatio = resetTargetLOARatio(env);
-		} else {
-			newLOARatio = calculateTargetLOARatio(env, bytesRequested);
-		}
-		resetLOASize(env, newLOARatio);
-	}
+    /* Dont resize LOA if its a system GC */
+    if (!systemGC) {
+        if (aggressive) {
+            newLOARatio = resetTargetLOARatio(env);
+        } else {
+            newLOARatio = calculateTargetLOARatio(env, bytesRequested);
+        }
+        resetLOASize(env, newLOARatio);
+    }
 
-	if (debug) {
-		if (_memoryPoolSmallObjects->getApproximateFreeMemorySize() > 0) {
-			_memoryPoolSmallObjects->printCurrentFreeList(env, "SOA");
-		}
-		if (_memoryPoolLargeObjects->getApproximateFreeMemorySize() > 0) {
-			_memoryPoolLargeObjects->printCurrentFreeList(env, "LOA");
-		}
-	}
+    if (debug) {
+        if (_memoryPoolSmallObjects->getApproximateFreeMemorySize() > 0) {
+            _memoryPoolSmallObjects->printCurrentFreeList(env, "SOA");
+        }
+        if (_memoryPoolLargeObjects->getApproximateFreeMemorySize() > 0) {
+            _memoryPoolLargeObjects->printCurrentFreeList(env, "LOA");
+        }
+    }
 }
 
 /**
  * Perform resize LOA, currently it only tried to contract LOA.
  */
-void
-MM_MemoryPoolLargeObjects::resizeLOA(MM_EnvironmentBase* env)
+void MM_MemoryPoolLargeObjects::resizeLOA(MM_EnvironmentBase* env)
 {
-	_soaFreeBytesAfterLastGC = _memoryPoolSmallObjects->getApproximateFreeMemorySize();
+    _soaFreeBytesAfterLastGC = _memoryPoolSmallObjects->getApproximateFreeMemorySize();
 
-	float  minimumFreeRatio = ((float)_extensions->heapFreeMinimumRatioMultiplier) / ((float)_extensions->heapFreeMinimumRatioDivisor);
+    float minimumFreeRatio = ((float)_extensions->heapFreeMinimumRatioMultiplier) / ((float)_extensions->heapFreeMinimumRatioDivisor);
 
-	uintptr_t minimumSOAFreeRequired = uintptr_t (_soaSize * minimumFreeRatio);
+    uintptr_t minimumSOAFreeRequired = uintptr_t(_soaSize * minimumFreeRatio);
 
-	if ((_soaFreeBytesAfterLastGC < minimumSOAFreeRequired) && (LOA_EMPTY != _currentLOABase)) {
-		MM_HeapLinkedFreeHeader* moveListHead;
-		MM_HeapLinkedFreeHeader* moveListTail;
-		uintptr_t moveListMemoryCount;
-		uintptr_t moveListMemorySize;
-		uintptr_t spaceDelta;
-		void* newLOABase;
-		double oldLOARatio;
-		uintptr_t contractRequired;
+    if ((_soaFreeBytesAfterLastGC < minimumSOAFreeRequired) && (LOA_EMPTY != _currentLOABase)) {
+        MM_HeapLinkedFreeHeader* moveListHead;
+        MM_HeapLinkedFreeHeader* moveListTail;
+        uintptr_t moveListMemoryCount;
+        uintptr_t moveListMemorySize;
+        uintptr_t spaceDelta;
+        void* newLOABase;
+        double oldLOARatio;
+        uintptr_t contractRequired;
 
-		/* Calculate LOA size based on new loa ratio */
-		uintptr_t loaMinimumSize = MM_Math::roundToFloor(_extensions->heapAlignment,
-				(uintptr_t)((float)_memorySubSpace->getActiveMemorySize() * _extensions->largeObjectAreaMinimumRatio));
+        /* Calculate LOA size based on new loa ratio */
+        uintptr_t loaMinimumSize = MM_Math::roundToFloor(_extensions->heapAlignment,
+            (uintptr_t)((float)_memorySubSpace->getActiveMemorySize() * _extensions->largeObjectAreaMinimumRatio));
 
-		/* No point having a LOA less than minimum size of a free entry for pool */
-		loaMinimumSize = loaMinimumSize < _memoryPoolLargeObjects->getMinimumFreeEntrySize() ? 0 : loaMinimumSize;
+        /* No point having a LOA less than minimum size of a free entry for pool */
+        loaMinimumSize = loaMinimumSize < _memoryPoolLargeObjects->getMinimumFreeEntrySize() ? 0 : loaMinimumSize;
 
-		/* We are short on free memory, but try to be fair to both SOA and LOA.
-		 * largeObjectAreaInitialRatio is considered optimal and will be used as long as free SOA meets min free ratio requirement.
-		 * If, for example, SOA free is only 40% of the minimum, than we will contract LOA to 40% of the optimal size.
-		 */
+        /* We are short on free memory, but try to be fair to both SOA and LOA.
+         * largeObjectAreaInitialRatio is considered optimal and will be used as long as free SOA meets min free ratio requirement.
+         * If, for example, SOA free is only 40% of the minimum, than we will contract LOA to 40% of the optimal size.
+         */
 
-		uintptr_t newLOAsize = _soaFreeBytesAfterLastGC * (uintptr_t)( _extensions->largeObjectAreaInitialRatio / minimumFreeRatio);
+        uintptr_t newLOAsize = _soaFreeBytesAfterLastGC * (uintptr_t)(_extensions->largeObjectAreaInitialRatio / minimumFreeRatio);
 
-		Trc_MM_LOAResize_resizeLOA1(env->getLanguageVMThread(), newLOAsize);
+        Trc_MM_LOAResize_resizeLOA1(env->getLanguageVMThread(), newLOAsize);
 
-		if (newLOAsize < _loaSize){
+        if (newLOAsize < _loaSize) {
 
-			/* The above formula makes sense if LOA is completely free. But if LOA is already partially occupied than we want
-			 * to contract LOA even less (since LOA clearly shows being useful).
-			 *
-			 * The size we contract by is proportionate to free LOA ratio. If, for example, LOA is completely full (no free memory),
-			 * we will not contract LOA at all.
-			 *
-			 * We do not just take the current LOA occupancy, but we look into the history of several global GCs and take the highest LOA occupancy.
-			 *
-			 */
+            /* The above formula makes sense if LOA is completely free. But if LOA is already partially occupied than we want
+             * to contract LOA even less (since LOA clearly shows being useful).
+             *
+             * The size we contract by is proportionate to free LOA ratio. If, for example, LOA is completely full (no free memory),
+             * we will not contract LOA at all.
+             *
+             * We do not just take the current LOA occupancy, but we look into the history of several global GCs and take the highest LOA occupancy.
+             *
+             */
 
-			contractRequired = (uintptr_t)((_loaSize - newLOAsize) * _minLOAFreeRatio);
+            contractRequired = (uintptr_t)((_loaSize - newLOAsize) * _minLOAFreeRatio);
 
-			newLOAsize = _loaSize - contractRequired;
+            newLOAsize = _loaSize - contractRequired;
 
-			Trc_MM_LOAResize_resizeLOA2(env->getLanguageVMThread(), newLOAsize);
+            Trc_MM_LOAResize_resizeLOA2(env->getLanguageVMThread(), newLOAsize);
 
-			if ((double)newLOAsize/(double)_memorySubSpace->getActiveMemorySize() < _extensions->largeObjectAreaMinimumRatio){
+            if ((double)newLOAsize / (double)_memorySubSpace->getActiveMemorySize() < _extensions->largeObjectAreaMinimumRatio) {
 
-				contractRequired = (uintptr_t)((double)_loaSize - ((double)(_memorySubSpace->getActiveMemorySize() * _extensions->largeObjectAreaMinimumRatio)));
-				newLOAsize = _loaSize - contractRequired;
+                contractRequired = (uintptr_t)((double)_loaSize - ((double)(_memorySubSpace->getActiveMemorySize() * _extensions->largeObjectAreaMinimumRatio)));
+                newLOAsize = _loaSize - contractRequired;
 
-				Trc_MM_LOAResize_resizeLOA3(env->getLanguageVMThread(), newLOAsize);
-			}
+                Trc_MM_LOAResize_resizeLOA3(env->getLanguageVMThread(), newLOAsize);
+            }
 
-			/* If minimum required now zero then there is no storage available for transfer */
-			if (0 < contractRequired) {
+            /* If minimum required now zero then there is no storage available for transfer */
+            if (0 < contractRequired) {
 
+                /* LOA base may land in a middle of a live object, but it should be fine */
+                newLOABase = (void*)((uint8_t*)_currentLOABase + contractRequired);
 
-				/* LOA base may land in a middle of a live object, but it should be fine */
-				newLOABase = (void*)((uint8_t*)_currentLOABase + contractRequired);
+                newLOABase = (void*)MM_Math::roundToCeiling(_extensions->heapAlignment, (uintptr_t)newLOABase);
 
-				newLOABase = (void*)MM_Math::roundToCeiling(_extensions->heapAlignment, (uintptr_t)newLOABase);
+                _memoryPoolLargeObjects->removeFreeEntriesWithinRange(env, _currentLOABase, newLOABase,
+                    _memoryPoolSmallObjects->getMinimumFreeEntrySize(),
+                    moveListHead, moveListTail, moveListMemoryCount, moveListMemorySize);
 
-				_memoryPoolLargeObjects->removeFreeEntriesWithinRange(env, _currentLOABase, newLOABase,
-						_memoryPoolSmallObjects->getMinimumFreeEntrySize(),
-						moveListHead, moveListTail, moveListMemoryCount, moveListMemorySize);
+                if (NULL != moveListHead) {
+                    _memoryPoolSmallObjects->addFreeEntries(env, moveListHead, moveListTail, moveListMemoryCount, moveListMemorySize);
+                }
 
-				if (NULL != moveListHead) {
-					_memoryPoolSmallObjects->addFreeEntries(env, moveListHead, moveListTail, moveListMemoryCount, moveListMemorySize);
-				}
+                spaceDelta = (NULL != newLOABase) ? (uintptr_t)newLOABase - (uintptr_t)_currentLOABase : _loaSize;
+                oldLOARatio = _currentLOARatio;
 
-				spaceDelta = (NULL != newLOABase) ? (uintptr_t)newLOABase - (uintptr_t)_currentLOABase : _loaSize;
-				oldLOARatio = _currentLOARatio;
+                /* Does this leave a reasonable sized LOA ? */
+                if (!isSizeEnoughForLOA(env, (_loaSize > spaceDelta) ? (_loaSize - spaceDelta) : 0)) {
+                    /* No.. make LOA empty as not even big enough for one free chunk of LOA */
+                    spaceDelta = _loaSize;
+                    _soaSize += spaceDelta;
+                    _loaSize = 0;
+                    _currentLOABase = LOA_EMPTY;
+                    _currentLOARatio = 0;
+                } else {
+                    _soaSize += spaceDelta;
+                    _loaSize -= spaceDelta;
+                    _currentLOABase = newLOABase;
+                    _currentLOARatio = ((double)_loaSize) / (_loaSize + _soaSize);
 
-				/* Does this leave a reasonable sized LOA ? */
-				if (!isSizeEnoughForLOA(env, (_loaSize > spaceDelta) ? (_loaSize - spaceDelta) : 0)) {
-					/* No.. make LOA empty as not even big enough for one free chunk of LOA */
-					spaceDelta = _loaSize;
-					_soaSize += spaceDelta;
-					_loaSize = 0;
-					_currentLOABase = LOA_EMPTY;
-					_currentLOARatio = 0;
-				} else {
-					_soaSize += spaceDelta;
-					_loaSize -= spaceDelta;
-					_currentLOABase = newLOABase;
-					_currentLOARatio = ((double)_loaSize) / (_loaSize + _soaSize);
+                    /* Rounding during float operations may result in a new LOA ratio less than
+                     * minimum so fix up if necessary
+                     */
+                    if (_currentLOARatio < _extensions->largeObjectAreaMinimumRatio) {
+                        _currentLOARatio = _extensions->largeObjectAreaMinimumRatio;
+                    }
+                    assume0(0 != _currentLOARatio);
+                }
 
-					/* Rounding during float operations may result in a new LOA ratio less than
-					 * minimum so fix up if necessary
-					 */
-					if (_currentLOARatio < _extensions->largeObjectAreaMinimumRatio) {
-						_currentLOARatio = _extensions->largeObjectAreaMinimumRatio;
-					}
-					assume0(0 != _currentLOARatio);
-				}
+                Trc_MM_LOAResize_resizeLOA4(env->getLanguageVMThread(), oldLOARatio, _currentLOARatio);
 
-				Trc_MM_LOAResize_resizeLOA4(env->getLanguageVMThread(), oldLOARatio, _currentLOARatio);
+                _extensions->heap->getResizeStats()->setLastLoaResizeReason(LOA_CONTRACT_MIN_SOA);
+                _memorySubSpace->reportHeapResizeAttempt(env, spaceDelta, HEAP_LOA_CONTRACT);
 
-				_extensions->heap->getResizeStats()->setLastLoaResizeReason(LOA_CONTRACT_MIN_SOA);
-				_memorySubSpace->reportHeapResizeAttempt(env, spaceDelta , HEAP_LOA_CONTRACT);
-
-				/* Verify all pools in valid state after we are done */
-				assume0(_memoryPoolSmallObjects->isMemoryPoolValid(env, true));
-				assume0(_memoryPoolLargeObjects->isMemoryPoolValid(env, true));
-				assume0(_memoryPoolSmallObjects->isValidListOrdering());
-				assume0(_memoryPoolLargeObjects->isValidListOrdering());
-			}
-		}
-	}
+                /* Verify all pools in valid state after we are done */
+                assume0(_memoryPoolSmallObjects->isMemoryPoolValid(env, true));
+                assume0(_memoryPoolLargeObjects->isMemoryPoolValid(env, true));
+                assume0(_memoryPoolSmallObjects->isValidListOrdering());
+                assume0(_memoryPoolLargeObjects->isValidListOrdering());
+            }
+        }
+    }
 }
 
 /**
@@ -342,90 +329,88 @@ MM_MemoryPoolLargeObjects::resizeLOA(MM_EnvironmentBase* env)
  *
  * @return TRUE if a complete sweep is required; FALSE otherwise
  */
-bool
-MM_MemoryPoolLargeObjects::completeFreelistRebuildRequired(MM_EnvironmentBase* env)
+bool MM_MemoryPoolLargeObjects::completeFreelistRebuildRequired(MM_EnvironmentBase* env)
 {
-	uintptr_t soaFree = _memoryPoolSmallObjects->getApproximateFreeMemorySize();
-	uintptr_t minimumRequired = (_soaSize / _extensions->heapFreeMinimumRatioDivisor) * _extensions->heapFreeMinimumRatioMultiplier;
+    uintptr_t soaFree = _memoryPoolSmallObjects->getApproximateFreeMemorySize();
+    uintptr_t minimumRequired = (_soaSize / _extensions->heapFreeMinimumRatioDivisor) * _extensions->heapFreeMinimumRatioMultiplier;
 
-	return ((soaFree < minimumRequired) && (LOA_EMPTY != _currentLOABase));
+    return ((soaFree < minimumRequired) && (LOA_EMPTY != _currentLOABase));
 }
 
 double
 MM_MemoryPoolLargeObjects::calculateTargetLOARatio(MM_EnvironmentBase* env, uintptr_t allocSize)
 {
-	double newLOARatio = _currentLOARatio;
-	float maxLOAFreeRatio = ((float)_extensions->heapFreeMaximumRatioMultiplier) / ((float)_extensions->heapFreeMinimumRatioDivisor);
-	uintptr_t loaFreeBytes = _memoryPoolLargeObjects->getActualFreeMemorySize();
+    double newLOARatio = _currentLOARatio;
+    float maxLOAFreeRatio = ((float)_extensions->heapFreeMaximumRatioMultiplier) / ((float)_extensions->heapFreeMinimumRatioDivisor);
+    uintptr_t loaFreeBytes = _memoryPoolLargeObjects->getActualFreeMemorySize();
 
-	/*
-	 * shift elements to make room for current loa free Ratio
-	 */
-	for (int i = _extensions->loaFreeHistorySize - 1; i > 0 ; i--){
-		_loaFreeRatioHistory[i] = _loaFreeRatioHistory[i-1];
-	}
-	if (0 == _loaSize) {
-		_loaFreeRatioHistory[0] = (double)0;
-	} else {
-		_loaFreeRatioHistory[0] = (double)loaFreeBytes / (double)_loaSize;
-	}
+    /*
+     * shift elements to make room for current loa free Ratio
+     */
+    for (int i = _extensions->loaFreeHistorySize - 1; i > 0; i--) {
+        _loaFreeRatioHistory[i] = _loaFreeRatioHistory[i - 1];
+    }
+    if (0 == _loaSize) {
+        _loaFreeRatioHistory[0] = (double)0;
+    } else {
+        _loaFreeRatioHistory[0] = (double)loaFreeBytes / (double)_loaSize;
+    }
 
-	_minLOAFreeRatio = *std::min_element(_loaFreeRatioHistory, _loaFreeRatioHistory + _extensions->loaFreeHistorySize);
+    _minLOAFreeRatio = *std::min_element(_loaFreeRatioHistory, _loaFreeRatioHistory + _extensions->loaFreeHistorySize);
 
-	/* If we have had an allocation failure in the LOA then we need to consider
-	 * whether its time we expanded the LOA
-	 */
-	if (allocSize >= _extensions->largeObjectMinimumSize) {
-		/* If the allocation size is 1/5 times greater than current LOA size..expand LOA */
-		if (allocSize > _loaSize / LOA_EXPAND_TRGGER3) {
-			if (_currentLOARatio < _extensions->largeObjectAreaMaximumRatio) {
-				newLOARatio += LOA_RESIZE_AMOUNT_NORMAL;
-			}
-		} else if (_currentLOARatio >= _extensions->largeObjectAreaInitialRatio) {
-			if (_minLOAFreeRatio < LOA_EXPAND_TRIGGER1) {
-				if (_currentLOARatio < _extensions->largeObjectAreaMaximumRatio) {
-					newLOARatio += LOA_RESIZE_AMOUNT_NORMAL;
-				}
-			}
-		} else {
-			/* currentLOARatio < _extensions->largeObjectAreaInitialRatio */
-			if (_minLOAFreeRatio < LOA_EXPAND_TRIGGER2) {
-				assume0(_extensions->largeObjectAreaInitialRatio <= _extensions->largeObjectAreaMaximumRatio);
-				newLOARatio += LOA_RESIZE_AMOUNT_NORMAL;
-			}
-		}
-		/* Belt and braces check. Because _currentLOARatio is a float we need to check that
-		 * we have not exceeded maximum and if we have round down to maximum
-		 */
-		if (newLOARatio > _extensions->largeObjectAreaMaximumRatio) {
-			newLOARatio = _extensions->largeObjectAreaMaximumRatio;
-		}
+    /* If we have had an allocation failure in the LOA then we need to consider
+     * whether its time we expanded the LOA
+     */
+    if (allocSize >= _extensions->largeObjectMinimumSize) {
+        /* If the allocation size is 1/5 times greater than current LOA size..expand LOA */
+        if (allocSize > _loaSize / LOA_EXPAND_TRGGER3) {
+            if (_currentLOARatio < _extensions->largeObjectAreaMaximumRatio) {
+                newLOARatio += LOA_RESIZE_AMOUNT_NORMAL;
+            }
+        } else if (_currentLOARatio >= _extensions->largeObjectAreaInitialRatio) {
+            if (_minLOAFreeRatio < LOA_EXPAND_TRIGGER1) {
+                if (_currentLOARatio < _extensions->largeObjectAreaMaximumRatio) {
+                    newLOARatio += LOA_RESIZE_AMOUNT_NORMAL;
+                }
+            }
+        } else {
+            /* currentLOARatio < _extensions->largeObjectAreaInitialRatio */
+            if (_minLOAFreeRatio < LOA_EXPAND_TRIGGER2) {
+                assume0(_extensions->largeObjectAreaInitialRatio <= _extensions->largeObjectAreaMaximumRatio);
+                newLOARatio += LOA_RESIZE_AMOUNT_NORMAL;
+            }
+        }
+        /* Belt and braces check. Because _currentLOARatio is a float we need to check that
+         * we have not exceeded maximum and if we have round down to maximum
+         */
+        if (newLOARatio > _extensions->largeObjectAreaMaximumRatio) {
+            newLOARatio = _extensions->largeObjectAreaMaximumRatio;
+        }
 
-		if (_currentLOARatio != newLOARatio) {
-			_extensions->heap->getResizeStats()->setLastLoaResizeReason(LOA_EXPAND_FAILED_ALLOCATE);
-		}
-	} else if (_minLOAFreeRatio > maxLOAFreeRatio) {
-		if (_currentLOARatio >= _extensions->largeObjectAreaMinimumRatio) {
-			newLOARatio -= LOA_RESIZE_AMOUNT_NORMAL;
-			/* Ensure we do not contract below minimum */
-			if (newLOARatio < _extensions->largeObjectAreaMinimumRatio) {
-				newLOARatio = _extensions->largeObjectAreaMinimumRatio;
-			}
-			_extensions->heap->getResizeStats()->setLastLoaResizeReason(LOA_CONTRACT_UNDERUTILIZED);
-		}
+        if (_currentLOARatio != newLOARatio) {
+            _extensions->heap->getResizeStats()->setLastLoaResizeReason(LOA_EXPAND_FAILED_ALLOCATE);
+        }
+    } else if (_minLOAFreeRatio > maxLOAFreeRatio) {
+        if (_currentLOARatio >= _extensions->largeObjectAreaMinimumRatio) {
+            newLOARatio -= LOA_RESIZE_AMOUNT_NORMAL;
+            /* Ensure we do not contract below minimum */
+            if (newLOARatio < _extensions->largeObjectAreaMinimumRatio) {
+                newLOARatio = _extensions->largeObjectAreaMinimumRatio;
+            }
+            _extensions->heap->getResizeStats()->setLastLoaResizeReason(LOA_CONTRACT_UNDERUTILIZED);
+        }
 
-	} else if (newLOARatio < _extensions->largeObjectAreaMinimumRatio) {
-		newLOARatio = _extensions->largeObjectAreaMinimumRatio;
-		_extensions->heap->getResizeStats()->setLastLoaResizeReason(LOA_EXPAND_HEAP_ALIGNMENT);
-	}
+    } else if (newLOARatio < _extensions->largeObjectAreaMinimumRatio) {
+        newLOARatio = _extensions->largeObjectAreaMinimumRatio;
+        _extensions->heap->getResizeStats()->setLastLoaResizeReason(LOA_EXPAND_HEAP_ALIGNMENT);
+    }
 
-	if (newLOARatio != _currentLOARatio) {
-		Trc_MM_LOAResize_calculateTargetLOARatio(env->getLanguageVMThread(), newLOARatio < _currentLOARatio ? "decreased" : "increased", _currentLOARatio, newLOARatio);
-	}
+    if (newLOARatio != _currentLOARatio) {
+        Trc_MM_LOAResize_calculateTargetLOARatio(env->getLanguageVMThread(), newLOARatio < _currentLOARatio ? "decreased" : "increased", _currentLOARatio, newLOARatio);
+    }
 
-	return newLOARatio;
+    return newLOARatio;
 }
-
 
 /**
  * Reset the LOA ratio, and size to minimum size.
@@ -433,128 +418,123 @@ MM_MemoryPoolLargeObjects::calculateTargetLOARatio(MM_EnvironmentBase* env, uint
 double
 MM_MemoryPoolLargeObjects::resetTargetLOARatio(MM_EnvironmentBase* env)
 {
-	/* Nothing needs to be done if the LOA size is already at minimum size */
-	if (_currentLOARatio == _extensions->largeObjectAreaMinimumRatio) {
-		return _currentLOARatio;
-	}
+    /* Nothing needs to be done if the LOA size is already at minimum size */
+    if (_currentLOARatio == _extensions->largeObjectAreaMinimumRatio) {
+        return _currentLOARatio;
+    }
 
-	Trc_MM_LOAResize_resetTargetLOARatio(env->getLanguageVMThread(), _currentLOARatio, _extensions->largeObjectAreaMinimumRatio);
+    Trc_MM_LOAResize_resetTargetLOARatio(env->getLanguageVMThread(), _currentLOARatio, _extensions->largeObjectAreaMinimumRatio);
 
-	_extensions->heap->getResizeStats()->setLastLoaResizeReason(LOA_CONTRACT_AGGRESSIVE);
+    _extensions->heap->getResizeStats()->setLastLoaResizeReason(LOA_CONTRACT_AGGRESSIVE);
 
-	return _extensions->largeObjectAreaMinimumRatio;
+    return _extensions->largeObjectAreaMinimumRatio;
 }
 
-void
-MM_MemoryPoolLargeObjects::resetLOASize(MM_EnvironmentBase* env, double newLOARatio)
+void MM_MemoryPoolLargeObjects::resetLOASize(MM_EnvironmentBase* env, double newLOARatio)
 {
-	uintptr_t oldLOASize = _loaSize;
-	uintptr_t newLOASize, oldAreaSize;
-	HeapResizeType resizeType = HEAP_NO_RESIZE;
+    uintptr_t oldLOASize = _loaSize;
+    uintptr_t newLOASize, oldAreaSize;
+    HeapResizeType resizeType = HEAP_NO_RESIZE;
 
-	/* Has LOA changed in size ? */
-	if (_currentLOARatio != newLOARatio) {
+    /* Has LOA changed in size ? */
+    if (_currentLOARatio != newLOARatio) {
 
-		/* Get total size of owning subspace */
-		oldAreaSize = _memorySubSpace->getActiveMemorySize();
+        /* Get total size of owning subspace */
+        oldAreaSize = _memorySubSpace->getActiveMemorySize();
 
-		/* Calculate LOA size based on new loa ratio */
-		newLOASize = MM_Math::roundToFloor(_extensions->heapAlignment, (uintptr_t)(oldAreaSize * newLOARatio));
+        /* Calculate LOA size based on new loa ratio */
+        newLOASize = MM_Math::roundToFloor(_extensions->heapAlignment, (uintptr_t)(oldAreaSize * newLOARatio));
 
-		uintptr_t resizeSize = 0;
-		/* Does this leave a reasonable sized LOA ? */
-		if (!isSizeEnoughForLOA(env, newLOASize)) {
-			/* No.. make LOA empty as not even big enough for one free chunk */
-			_currentLOARatio = 0;
-			_soaSize = oldAreaSize;
-			_loaSize = 0;
-		} else {
-			_currentLOARatio = newLOARatio;
-			_loaSize = newLOASize;
-			/* ..and SOA is whats left after LOA allocation */
-			_soaSize = oldAreaSize - _loaSize;
-		}
+        uintptr_t resizeSize = 0;
+        /* Does this leave a reasonable sized LOA ? */
+        if (!isSizeEnoughForLOA(env, newLOASize)) {
+            /* No.. make LOA empty as not even big enough for one free chunk */
+            _currentLOARatio = 0;
+            _soaSize = oldAreaSize;
+            _loaSize = 0;
+        } else {
+            _currentLOARatio = newLOARatio;
+            _loaSize = newLOASize;
+            /* ..and SOA is whats left after LOA allocation */
+            _soaSize = oldAreaSize - _loaSize;
+        }
 
-		/* Rememeber if we expanded or contracted the LOA */
-		if ( _loaSize > oldLOASize) {
-			resizeType = HEAP_LOA_EXPAND;
-			resizeSize = newLOASize - oldLOASize;
-		} else if (_loaSize < oldLOASize) {
-			resizeType = HEAP_LOA_CONTRACT;
-			resizeSize = oldLOASize - newLOASize;
-		}
-		/* else, could be newLOASize == oldLOASize  (originally expand, but not big enough) */
+        /* Rememeber if we expanded or contracted the LOA */
+        if (_loaSize > oldLOASize) {
+            resizeType = HEAP_LOA_EXPAND;
+            resizeSize = newLOASize - oldLOASize;
+        } else if (_loaSize < oldLOASize) {
+            resizeType = HEAP_LOA_CONTRACT;
+            resizeSize = oldLOASize - newLOASize;
+        }
+        /* else, could be newLOASize == oldLOASize  (originally expand, but not big enough) */
 
-		/* and new LOA base if LOA ratio > 0 */
-		_currentLOABase = _currentLOARatio > 0 ? determineLOABase(env, _soaSize) : LOA_EMPTY;
+        /* and new LOA base if LOA ratio > 0 */
+        _currentLOABase = _currentLOARatio > 0 ? determineLOABase(env, _soaSize) : LOA_EMPTY;
 
-		Trc_MM_LOAResize_resetLOASize(env->getLanguageVMThread(), _currentLOABase);
+        Trc_MM_LOAResize_resetLOASize(env->getLanguageVMThread(), _currentLOABase);
 
-		_memorySubSpace->reportHeapResizeAttempt(env, resizeSize , resizeType);
-	}
+        _memorySubSpace->reportHeapResizeAttempt(env, resizeSize, resizeType);
+    }
 }
 
-void
-MM_MemoryPoolLargeObjects::resetHeapStatistics(bool memoryPoolCollected)
+void MM_MemoryPoolLargeObjects::resetHeapStatistics(bool memoryPoolCollected)
 {
-	/* Reset heap statistics for LOA an SOA */
-	_memoryPoolSmallObjects->resetHeapStatistics(memoryPoolCollected);
-	_memoryPoolLargeObjects->resetHeapStatistics(memoryPoolCollected);
+    /* Reset heap statistics for LOA an SOA */
+    _memoryPoolSmallObjects->resetHeapStatistics(memoryPoolCollected);
+    _memoryPoolLargeObjects->resetHeapStatistics(memoryPoolCollected);
 }
 
-void
-MM_MemoryPoolLargeObjects::mergeHeapStats(MM_HeapStats* heapStats, bool active)
+void MM_MemoryPoolLargeObjects::mergeHeapStats(MM_HeapStats* heapStats, bool active)
 {
-	/* Add in statistics for both LOA and SOA */
-	_memoryPoolSmallObjects->mergeHeapStats(heapStats, active);
-	_memoryPoolLargeObjects->mergeHeapStats(heapStats, active);
+    /* Add in statistics for both LOA and SOA */
+    _memoryPoolSmallObjects->mergeHeapStats(heapStats, active);
+    _memoryPoolLargeObjects->mergeHeapStats(heapStats, active);
 }
 
-void*
-MM_MemoryPoolLargeObjects::allocateObject(MM_EnvironmentBase* env, MM_AllocateDescription* allocDescription)
+void* MM_MemoryPoolLargeObjects::allocateObject(MM_EnvironmentBase* env, MM_AllocateDescription* allocDescription)
 {
-	OMRPORT_ACCESS_FROM_ENVIRONMENT(env);
-	bool debug = _extensions->debugLOAAllocate;
+    OMRPORT_ACCESS_FROM_ENVIRONMENT(env);
+    bool debug = _extensions->debugLOAAllocate;
 
-	void* addr = NULL;
-	uintptr_t sizeInBytesRequired = allocDescription->getContiguousBytes();
+    void* addr = NULL;
+    uintptr_t sizeInBytesRequired = allocDescription->getContiguousBytes();
 
-	/* First we try to allocate ALL objects in the SOA, even large ones
-	 * provided we have not already had a AF for a smaller object this
-	 * cycle.
-	 */
-	if (sizeInBytesRequired < _soaObjectSizeLWM) {
-		addr = _memoryPoolSmallObjects->allocateObject(env, allocDescription);
-	}
+    /* First we try to allocate ALL objects in the SOA, even large ones
+     * provided we have not already had a AF for a smaller object this
+     * cycle.
+     */
+    if (sizeInBytesRequired < _soaObjectSizeLWM) {
+        addr = _memoryPoolSmallObjects->allocateObject(env, allocDescription);
+    }
 
-	if (NULL == addr) {
-		_soaObjectSizeLWM = OMR_MIN(_soaObjectSizeLWM, sizeInBytesRequired);
+    if (NULL == addr) {
+        _soaObjectSizeLWM = OMR_MIN(_soaObjectSizeLWM, sizeInBytesRequired);
 
-		if (sizeInBytesRequired >= _extensions->largeObjectMinimumSize) {
+        if (sizeInBytesRequired >= _extensions->largeObjectMinimumSize) {
 
-			/* Retry allocation in LOA ..if we have one */
-			if (_loaSize > 0) {
-				addr = _memoryPoolLargeObjects->allocateObject(env, allocDescription);
+            /* Retry allocation in LOA ..if we have one */
+            if (_loaSize > 0) {
+                addr = _memoryPoolLargeObjects->allocateObject(env, allocDescription);
 
-				if (addr != NULL) {
-					allocDescription->setLOAAllocation(true);
-					if (debug) {
-						omrtty_printf("LOA allocate: object allocated at %p of size %zu bytes. SOA LWM is %zu bytes\n",
-									 addr, sizeInBytesRequired, _soaObjectSizeLWM);
-					}
-				}
-			}
-		}
-	}
+                if (addr != NULL) {
+                    allocDescription->setLOAAllocation(true);
+                    if (debug) {
+                        omrtty_printf("LOA allocate: object allocated at %p of size %zu bytes. SOA LWM is %zu bytes\n",
+                            addr, sizeInBytesRequired, _soaObjectSizeLWM);
+                    }
+                }
+            }
+        }
+    }
 
-	return addr;
+    return addr;
 }
 
-void*
-MM_MemoryPoolLargeObjects::allocateTLH(MM_EnvironmentBase* env, MM_AllocateDescription* allocDescription,
-									   uintptr_t maximumSizeInBytesRequired, void*& addrBase, void*& addrTop)
+void* MM_MemoryPoolLargeObjects::allocateTLH(MM_EnvironmentBase* env, MM_AllocateDescription* allocDescription,
+    uintptr_t maximumSizeInBytesRequired, void*& addrBase, void*& addrTop)
 {
-	return _memoryPoolSmallObjects->allocateTLH(env, allocDescription, maximumSizeInBytesRequired, addrBase, addrTop);
+    return _memoryPoolSmallObjects->allocateTLH(env, allocDescription, maximumSizeInBytesRequired, addrBase, addrTop);
 }
 
 /**
@@ -564,14 +544,13 @@ MM_MemoryPoolLargeObjects::allocateTLH(MM_EnvironmentBase* env, MM_AllocateDescr
  *
  * @return The leading address of the free entry whos top matches addr.
  */
-void*
-MM_MemoryPoolLargeObjects::findFreeEntryEndingAtAddr(MM_EnvironmentBase* env, void* addr)
+void* MM_MemoryPoolLargeObjects::findFreeEntryEndingAtAddr(MM_EnvironmentBase* env, void* addr)
 {
-	if (addr >= _currentLOABase) {
-		return _memoryPoolLargeObjects->findFreeEntryEndingAtAddr(env, addr);
-	} else {
-		return _memoryPoolSmallObjects->findFreeEntryEndingAtAddr(env, addr);
-	}
+    if (addr >= _currentLOABase) {
+        return _memoryPoolLargeObjects->findFreeEntryEndingAtAddr(env, addr);
+    } else {
+        return _memoryPoolSmallObjects->findFreeEntryEndingAtAddr(env, addr);
+    }
 }
 
 /**
@@ -579,13 +558,13 @@ MM_MemoryPoolLargeObjects::findFreeEntryEndingAtAddr(MM_EnvironmentBase* env, vo
  */
 uintptr_t
 MM_MemoryPoolLargeObjects::getAvailableContractionSizeForRangeEndingAt(MM_EnvironmentBase* env, MM_AllocateDescription* allocDescription,
-																	   void* lowAddr, void* highAddr)
+    void* lowAddr, void* highAddr)
 {
-	if (highAddr >= _currentLOABase) {
-		return _memoryPoolLargeObjects->getAvailableContractionSizeForRangeEndingAt(env, allocDescription, lowAddr, highAddr);
-	} else {
-		return _memoryPoolSmallObjects->getAvailableContractionSizeForRangeEndingAt(env, allocDescription, lowAddr, highAddr);
-	}
+    if (highAddr >= _currentLOABase) {
+        return _memoryPoolLargeObjects->getAvailableContractionSizeForRangeEndingAt(env, allocDescription, lowAddr, highAddr);
+    } else {
+        return _memoryPoolSmallObjects->getAvailableContractionSizeForRangeEndingAt(env, allocDescription, lowAddr, highAddr);
+    }
 }
 
 /**
@@ -596,11 +575,11 @@ MM_MemoryPoolLargeObjects::getAvailableContractionSizeForRangeEndingAt(MM_Enviro
 MM_MemoryPool*
 MM_MemoryPoolLargeObjects::getMemoryPool(void* addr)
 {
-	if (addr >= _currentLOABase) {
-		return _memoryPoolLargeObjects;
-	} else {
-		return _memoryPoolSmallObjects;
-	}
+    if (addr >= _currentLOABase) {
+        return _memoryPoolLargeObjects;
+    } else {
+        return _memoryPoolSmallObjects;
+    }
 }
 
 /**
@@ -611,11 +590,11 @@ MM_MemoryPoolLargeObjects::getMemoryPool(void* addr)
 MM_MemoryPool*
 MM_MemoryPoolLargeObjects::getMemoryPool(uintptr_t size)
 {
-	if (size >= _extensions->largeObjectMinimumSize) {
-		return _memoryPoolLargeObjects;
-	} else {
-		return _memoryPoolSmallObjects;
-	}
+    if (size >= _extensions->largeObjectMinimumSize) {
+        return _memoryPoolLargeObjects;
+    } else {
+        return _memoryPoolSmallObjects;
+    }
 }
 
 /**
@@ -630,20 +609,20 @@ MM_MemoryPoolLargeObjects::getMemoryPool(uintptr_t size)
 MM_MemoryPool*
 MM_MemoryPoolLargeObjects::getMemoryPool(MM_EnvironmentBase* env, void* addrBase, void* addrTop, void*& highAddr)
 {
-	if (addrBase < _currentLOABase && addrTop <= _currentLOABase) {
-		/* chunk wholly contained in SOA */
-		highAddr = NULL;
-		return _memoryPoolSmallObjects;
-	} else if (addrBase < _currentLOABase && addrTop > _currentLOABase) {
-		/* Range spans SOA/LOA boundary so split into 2 */
-		highAddr = _currentLOABase;
-		return _memoryPoolSmallObjects;
-	} else {
-		/* chunk wholly contained in LOA */
-		assume0(addrBase >= _currentLOABase);
-		highAddr = NULL;
-		return _memoryPoolLargeObjects;
-	}
+    if (addrBase < _currentLOABase && addrTop <= _currentLOABase) {
+        /* chunk wholly contained in SOA */
+        highAddr = NULL;
+        return _memoryPoolSmallObjects;
+    } else if (addrBase < _currentLOABase && addrTop > _currentLOABase) {
+        /* Range spans SOA/LOA boundary so split into 2 */
+        highAddr = _currentLOABase;
+        return _memoryPoolSmallObjects;
+    } else {
+        /* chunk wholly contained in LOA */
+        assume0(addrBase >= _currentLOABase);
+        highAddr = NULL;
+        return _memoryPoolLargeObjects;
+    }
 }
 
 /**
@@ -656,19 +635,19 @@ MM_MemoryPoolLargeObjects::getMemoryPool(MM_EnvironmentBase* env, void* addrBase
 uintptr_t
 MM_MemoryPoolLargeObjects::getActualFreeMemorySize()
 {
-	uintptr_t LOASize = _memoryPoolLargeObjects->getActualFreeMemorySize();
-	uintptr_t SOASize = _memoryPoolSmallObjects->getActualFreeMemorySize();
+    uintptr_t LOASize = _memoryPoolLargeObjects->getActualFreeMemorySize();
+    uintptr_t SOASize = _memoryPoolSmallObjects->getActualFreeMemorySize();
 
-	return LOASize + SOASize;
+    return LOASize + SOASize;
 }
 
 uintptr_t
 MM_MemoryPoolLargeObjects::getActualFreeEntryCount()
 {
-	uintptr_t LOACount = _memoryPoolLargeObjects->getActualFreeEntryCount();
-	uintptr_t SOACount = _memoryPoolSmallObjects->getActualFreeEntryCount();
+    uintptr_t LOACount = _memoryPoolLargeObjects->getActualFreeEntryCount();
+    uintptr_t SOACount = _memoryPoolSmallObjects->getActualFreeEntryCount();
 
-	return LOACount + SOACount;
+    return LOACount + SOACount;
 }
 
 /**
@@ -682,22 +661,20 @@ MM_MemoryPoolLargeObjects::getActualFreeEntryCount()
 uintptr_t
 MM_MemoryPoolLargeObjects::getApproximateFreeMemorySize()
 {
-	uintptr_t LOASize = _memoryPoolLargeObjects->getApproximateFreeMemorySize();
-	uintptr_t SOASize = _memoryPoolSmallObjects->getApproximateFreeMemorySize();
+    uintptr_t LOASize = _memoryPoolLargeObjects->getApproximateFreeMemorySize();
+    uintptr_t SOASize = _memoryPoolSmallObjects->getApproximateFreeMemorySize();
 
-	return LOASize + SOASize;
+    return LOASize + SOASize;
 }
-
 
 /**
  * Reset largest free entry in this memory pool
  *
  */
-void
-MM_MemoryPoolLargeObjects::resetLargestFreeEntry()
+void MM_MemoryPoolLargeObjects::resetLargestFreeEntry()
 {
-	_memoryPoolLargeObjects->resetLargestFreeEntry();
-	_memoryPoolSmallObjects->resetLargestFreeEntry();
+    _memoryPoolLargeObjects->resetLargestFreeEntry();
+    _memoryPoolSmallObjects->resetLargestFreeEntry();
 }
 
 /**
@@ -708,10 +685,10 @@ uintptr_t
 MM_MemoryPoolLargeObjects::getLargestFreeEntry()
 {
 
-	uintptr_t soaLargest = _memoryPoolSmallObjects->getLargestFreeEntry();
-	uintptr_t loaLargest = _memoryPoolLargeObjects->getLargestFreeEntry();
+    uintptr_t soaLargest = _memoryPoolSmallObjects->getLargestFreeEntry();
+    uintptr_t loaLargest = _memoryPoolLargeObjects->getLargestFreeEntry();
 
-	return OMR_MAX(soaLargest, loaLargest);
+    return OMR_MAX(soaLargest, loaLargest);
 }
 
 /**
@@ -721,14 +698,13 @@ MM_MemoryPoolLargeObjects::getLargestFreeEntry()
  *
  * @return The trailing address of the free entry whos top matches addr.
  */
-void*
-MM_MemoryPoolLargeObjects::findFreeEntryTopStartingAtAddr(MM_EnvironmentBase* env, void* addr)
+void* MM_MemoryPoolLargeObjects::findFreeEntryTopStartingAtAddr(MM_EnvironmentBase* env, void* addr)
 {
-	if (addr >= _currentLOABase) {
-		return _memoryPoolLargeObjects->findFreeEntryTopStartingAtAddr(env, addr);
-	} else {
-		return _memoryPoolSmallObjects->findFreeEntryTopStartingAtAddr(env, addr);
-	}
+    if (addr >= _currentLOABase) {
+        return _memoryPoolLargeObjects->findFreeEntryTopStartingAtAddr(env, addr);
+    } else {
+        return _memoryPoolSmallObjects->findFreeEntryTopStartingAtAddr(env, addr);
+    }
 }
 
 /**
@@ -737,17 +713,16 @@ MM_MemoryPoolLargeObjects::findFreeEntryTopStartingAtAddr(MM_EnvironmentBase* en
  *
  * @return The address of head of free chain
  */
-void*
-MM_MemoryPoolLargeObjects::getFirstFreeStartingAddr(MM_EnvironmentBase* env)
+void* MM_MemoryPoolLargeObjects::getFirstFreeStartingAddr(MM_EnvironmentBase* env)
 {
-	void* firstFree = _memoryPoolSmallObjects->getFirstFreeStartingAddr(env);
+    void* firstFree = _memoryPoolSmallObjects->getFirstFreeStartingAddr(env);
 
-	if (NULL != firstFree) {
-		return firstFree;
-	} else {
-		/* Nothing free in SOA.. so check LOA*/
-		return _memoryPoolLargeObjects->getFirstFreeStartingAddr(env);
-	}
+    if (NULL != firstFree) {
+        return firstFree;
+    } else {
+        /* Nothing free in SOA.. so check LOA*/
+        return _memoryPoolLargeObjects->getFirstFreeStartingAddr(env);
+    }
 }
 
 /**
@@ -756,24 +731,23 @@ MM_MemoryPoolLargeObjects::getFirstFreeStartingAddr(MM_EnvironmentBase* env)
  *
  * @return The address of next free entry or NULL
  */
-void*
-MM_MemoryPoolLargeObjects::getNextFreeStartingAddr(MM_EnvironmentBase* env, void* currentFree)
+void* MM_MemoryPoolLargeObjects::getNextFreeStartingAddr(MM_EnvironmentBase* env, void* currentFree)
 {
-	void* nextFree;
+    void* nextFree;
 
-	assume0(currentFree != NULL);
+    assume0(currentFree != NULL);
 
-	if (currentFree < _currentLOABase) {
-		nextFree = _memoryPoolSmallObjects->getNextFreeStartingAddr(env, currentFree);
+    if (currentFree < _currentLOABase) {
+        nextFree = _memoryPoolSmallObjects->getNextFreeStartingAddr(env, currentFree);
 
-		if (NULL == nextFree) {
-			nextFree = _memoryPoolLargeObjects->getFirstFreeStartingAddr(env);
-		}
-	} else {
-		nextFree = _memoryPoolLargeObjects->getNextFreeStartingAddr(env, currentFree);
-	}
+        if (NULL == nextFree) {
+            nextFree = _memoryPoolLargeObjects->getFirstFreeStartingAddr(env);
+        }
+    } else {
+        nextFree = _memoryPoolLargeObjects->getNextFreeStartingAddr(env, currentFree);
+    }
 
-	return nextFree;
+    return nextFree;
 }
 
 /**
@@ -788,92 +762,87 @@ MM_MemoryPoolLargeObjects::getNextFreeStartingAddr(MM_EnvironmentBase* env, void
  * @param dstBase Start of destination address to move into.
  *
  */
-void
-MM_MemoryPoolLargeObjects::moveHeap(MM_EnvironmentBase* env, void* srcBase, void* srcTop, void* dstBase)
+void MM_MemoryPoolLargeObjects::moveHeap(MM_EnvironmentBase* env, void* srcBase, void* srcTop, void* dstBase)
 {
-	assume(false, "MM_MemoryPoolLargeObjects::moveHeap not supported");
+    assume(false, "MM_MemoryPoolLargeObjects::moveHeap not supported");
 }
 
 /**
  * Lock any free list information from use.
  */
-void
-MM_MemoryPoolLargeObjects::lock(MM_EnvironmentBase* env)
+void MM_MemoryPoolLargeObjects::lock(MM_EnvironmentBase* env)
 {
-	_memoryPoolSmallObjects->lock(env);
-	_memoryPoolLargeObjects->lock(env);
+    _memoryPoolSmallObjects->lock(env);
+    _memoryPoolLargeObjects->lock(env);
 }
 
 /**
  * Unlock any free list information for use.
  */
-void
-MM_MemoryPoolLargeObjects::unlock(MM_EnvironmentBase* env)
+void MM_MemoryPoolLargeObjects::unlock(MM_EnvironmentBase* env)
 {
-	_memoryPoolLargeObjects->unlock(env);
-	_memoryPoolSmallObjects->unlock(env);
+    _memoryPoolLargeObjects->unlock(env);
+    _memoryPoolSmallObjects->unlock(env);
 }
 
 /**
  * @todo Provide function documentation
  */
-void*
-MM_MemoryPoolLargeObjects::collectorAllocate(MM_EnvironmentBase* env, MM_AllocateDescription* allocDescription, bool lockingRequired)
+void* MM_MemoryPoolLargeObjects::collectorAllocate(MM_EnvironmentBase* env, MM_AllocateDescription* allocDescription, bool lockingRequired)
 {
-	OMRPORT_ACCESS_FROM_ENVIRONMENT(env);
-	bool debug = _extensions->debugLOAAllocate;
+    OMRPORT_ACCESS_FROM_ENVIRONMENT(env);
+    bool debug = _extensions->debugLOAAllocate;
 
-	void* addr = NULL;
-	uintptr_t sizeInBytesRequired = allocDescription->getContiguousBytes();
+    void* addr = NULL;
+    uintptr_t sizeInBytesRequired = allocDescription->getContiguousBytes();
 
-	/* First we try to allocate ALL objects in the SOA, even large ones
-	 * provided we have not already had a AF for a smaller object this
-	 * cycle.
-	 */
-	if (sizeInBytesRequired < _soaObjectSizeLWM) {
-		addr = _memoryPoolSmallObjects->collectorAllocate(env, allocDescription, lockingRequired);
-	}
+    /* First we try to allocate ALL objects in the SOA, even large ones
+     * provided we have not already had a AF for a smaller object this
+     * cycle.
+     */
+    if (sizeInBytesRequired < _soaObjectSizeLWM) {
+        addr = _memoryPoolSmallObjects->collectorAllocate(env, allocDescription, lockingRequired);
+    }
 
-	if (NULL == addr) {
-		_soaObjectSizeLWM = OMR_MIN(_soaObjectSizeLWM, sizeInBytesRequired);
+    if (NULL == addr) {
+        _soaObjectSizeLWM = OMR_MIN(_soaObjectSizeLWM, sizeInBytesRequired);
 
-		/* We relax normal rule and allow small objects to be allocated in LOA if caller requests */
-		if (allocDescription->isCollectorAllocateSatisfyAnywhere() || sizeInBytesRequired >= _extensions->largeObjectMinimumSize) {
+        /* We relax normal rule and allow small objects to be allocated in LOA if caller requests */
+        if (allocDescription->isCollectorAllocateSatisfyAnywhere() || sizeInBytesRequired >= _extensions->largeObjectMinimumSize) {
 
-			/* Retry allocation in LOA ..if we have one */
-			if (_loaSize > 0) {
-				addr = _memoryPoolLargeObjects->collectorAllocate(env, allocDescription, lockingRequired);
+            /* Retry allocation in LOA ..if we have one */
+            if (_loaSize > 0) {
+                addr = _memoryPoolLargeObjects->collectorAllocate(env, allocDescription, lockingRequired);
 
-				if (NULL != addr) {
-					allocDescription->setLOAAllocation(true);
+                if (NULL != addr) {
+                    allocDescription->setLOAAllocation(true);
 
-					if (debug) {
-						omrtty_printf("LOA allocate(collector): normal object allocated at %p of size %zu bytes. SOA LWM is %zu bytes\n",
-									 addr, sizeInBytesRequired, _soaObjectSizeLWM);
-					}
-				}
-			}
-		}
-	}
+                    if (debug) {
+                        omrtty_printf("LOA allocate(collector): normal object allocated at %p of size %zu bytes. SOA LWM is %zu bytes\n",
+                            addr, sizeInBytesRequired, _soaObjectSizeLWM);
+                    }
+                }
+            }
+        }
+    }
 
-	return addr;
+    return addr;
 }
 
 /**
  * @todo Provide function documentation
  */
-void*
-MM_MemoryPoolLargeObjects::collectorAllocateTLH(MM_EnvironmentBase* env, MM_AllocateDescription* allocDescription, uintptr_t maximumSizeInBytesRequired,
-												void*& addrBase, void*& addrTop, bool lockingRequired)
+void* MM_MemoryPoolLargeObjects::collectorAllocateTLH(MM_EnvironmentBase* env, MM_AllocateDescription* allocDescription, uintptr_t maximumSizeInBytesRequired,
+    void*& addrBase, void*& addrTop, bool lockingRequired)
 {
-	void* base = _memoryPoolSmallObjects->collectorAllocateTLH(env, allocDescription, maximumSizeInBytesRequired, addrBase, addrTop, lockingRequired);
+    void* base = _memoryPoolSmallObjects->collectorAllocateTLH(env, allocDescription, maximumSizeInBytesRequired, addrBase, addrTop, lockingRequired);
 
-	/* We relax normal rule and allow TLH to be allocated in LOA if caller allows */
-	if ((NULL == base) && allocDescription->isCollectorAllocateSatisfyAnywhere()) {
-		base = _memoryPoolLargeObjects->collectorAllocateTLH(env, allocDescription, maximumSizeInBytesRequired, addrBase, addrTop, lockingRequired);
-	}
+    /* We relax normal rule and allow TLH to be allocated in LOA if caller allows */
+    if ((NULL == base) && allocDescription->isCollectorAllocateSatisfyAnywhere()) {
+        base = _memoryPoolLargeObjects->collectorAllocateTLH(env, allocDescription, maximumSizeInBytesRequired, addrBase, addrTop, lockingRequired);
+    }
 
-	return base;
+    return base;
 }
 
 /**
@@ -888,68 +857,66 @@ MM_MemoryPoolLargeObjects::collectorAllocateTLH(MM_EnvironmentBase* env, MM_Allo
  *
  */
 
-
-void
-MM_MemoryPoolLargeObjects::expandWithRange(MM_EnvironmentBase* env, uintptr_t expandSize, void* lowAddress, void* highAddress, bool canCoalesce)
+void MM_MemoryPoolLargeObjects::expandWithRange(MM_EnvironmentBase* env, uintptr_t expandSize, void* lowAddress, void* highAddress, bool canCoalesce)
 {
-	uintptr_t oldAreaSize, newLOASize;
+    uintptr_t oldAreaSize, newLOASize;
 
-	assume0(MM_Math::roundToCeiling(_extensions->heapAlignment, expandSize) == expandSize);
+    assume0(MM_Math::roundToCeiling(_extensions->heapAlignment, expandSize) == expandSize);
 
-	/* Get total size of owning subspace.. this will be post expand size */
-	oldAreaSize = _memorySubSpace->getActiveMemorySize();
+    /* Get total size of owning subspace.. this will be post expand size */
+    oldAreaSize = _memorySubSpace->getActiveMemorySize();
 
-	/* Is this the initial expand ? */
-	if (0 == _currentOldAreaSize) {
+    /* Is this the initial expand ? */
+    if (0 == _currentOldAreaSize) {
 
-		/* Work out initial SOA to LOA split */
-		newLOASize = (uintptr_t)(oldAreaSize * _currentLOARatio);
-		_loaSize = MM_Math::roundToFloor(_extensions->heapAlignment, newLOASize);
+        /* Work out initial SOA to LOA split */
+        newLOASize = (uintptr_t)(oldAreaSize * _currentLOARatio);
+        _loaSize = MM_Math::roundToFloor(_extensions->heapAlignment, newLOASize);
 
-		/* SOA is what is left after LOA allocation */
-		_soaSize = oldAreaSize - _loaSize;
+        /* SOA is what is left after LOA allocation */
+        _soaSize = oldAreaSize - _loaSize;
 
-		_currentLOABase = _loaSize > 0 ? determineLOABase(env, _soaSize) : LOA_EMPTY;
+        _currentLOABase = _loaSize > 0 ? determineLOABase(env, _soaSize) : LOA_EMPTY;
 
-		_memoryPoolSmallObjects->expandWithRange(env, _soaSize, lowAddress, _currentLOABase, canCoalesce);
+        _memoryPoolSmallObjects->expandWithRange(env, _soaSize, lowAddress, _currentLOABase, canCoalesce);
 
-		if (_loaSize > 0) {
-			_memoryPoolLargeObjects->expandWithRange(env, _loaSize, _currentLOABase, highAddress, canCoalesce);
-		}
+        if (_loaSize > 0) {
+            _memoryPoolLargeObjects->expandWithRange(env, _loaSize, _currentLOABase, highAddress, canCoalesce);
+        }
 
-		Trc_MM_LOAResize_expandWithRange1(env->getLanguageVMThread(), oldAreaSize, _currentLOARatio, _currentLOABase, _loaSize);
-	} else {
+        Trc_MM_LOAResize_expandWithRange1(env->getLanguageVMThread(), oldAreaSize, _currentLOARatio, _currentLOABase, _loaSize);
+    } else {
 
-		/* If LOA ratio has reduced to zero then we have an empty
-		 * LOA at the moment and all new storage goes to SOA
-		 */
-		if (0 == _currentLOARatio) {
-			_memoryPoolSmallObjects->expandWithRange(env, expandSize, lowAddress, highAddress, canCoalesce);
+        /* If LOA ratio has reduced to zero then we have an empty
+         * LOA at the moment and all new storage goes to SOA
+         */
+        if (0 == _currentLOARatio) {
+            _memoryPoolSmallObjects->expandWithRange(env, expandSize, lowAddress, highAddress, canCoalesce);
 
-			_currentLOABase = LOA_EMPTY;
-			_loaSize = 0;
-			_soaSize = oldAreaSize;
+            _currentLOABase = LOA_EMPTY;
+            _loaSize = 0;
+            _soaSize = oldAreaSize;
 
-		} else {
-			/* First add new storage to LOA */
-			_memoryPoolLargeObjects->expandWithRange(env, expandSize, lowAddress, highAddress, canCoalesce);
+        } else {
+            /* First add new storage to LOA */
+            _memoryPoolLargeObjects->expandWithRange(env, expandSize, lowAddress, highAddress, canCoalesce);
 
-			/* ..and then redistribute free memory between SOA and LOA */
-			redistributeFreeMemory(env, oldAreaSize);
+            /* ..and then redistribute free memory between SOA and LOA */
+            redistributeFreeMemory(env, oldAreaSize);
 
-			Trc_MM_LOAResize_expandWithRange2(env->getLanguageVMThread(), oldAreaSize, _currentLOARatio, _currentLOABase, _loaSize);
-		}
+            Trc_MM_LOAResize_expandWithRange2(env->getLanguageVMThread(), oldAreaSize, _currentLOARatio, _currentLOABase, _loaSize);
+        }
 
-		/* Reset SOA LWM.
-		 *
-		 * N.B We have to reset here as well as in reset() as heap can
-		 * expand outside a global GC, e.g when scaveneger expands
-		 * tenure space to continue collection.
-		 */
-		_soaObjectSizeLWM = ((uintptr_t) - 1);
-	}
+        /* Reset SOA LWM.
+         *
+         * N.B We have to reset here as well as in reset() as heap can
+         * expand outside a global GC, e.g when scaveneger expands
+         * tenure space to continue collection.
+         */
+        _soaObjectSizeLWM = ((uintptr_t)-1);
+    }
 
-	_currentOldAreaSize = oldAreaSize;
+    _currentOldAreaSize = oldAreaSize;
 }
 
 /**
@@ -964,38 +931,37 @@ MM_MemoryPoolLargeObjects::expandWithRange(MM_EnvironmentBase* env, uintptr_t ex
  *
  */
 
-void*
-MM_MemoryPoolLargeObjects::contractWithRange(MM_EnvironmentBase* env, uintptr_t contractSize, void* lowAddress, void* highAddress)
+void* MM_MemoryPoolLargeObjects::contractWithRange(MM_EnvironmentBase* env, uintptr_t contractSize, void* lowAddress, void* highAddress)
 {
-	/* Get current size of old area */
-	uintptr_t oldAreaSize = _memorySubSpace->getActiveMemorySize();
+    /* Get current size of old area */
+    uintptr_t oldAreaSize = _memorySubSpace->getActiveMemorySize();
 
-	/* Get the new old area size..cant ask MSS as size not updated yet */
-	oldAreaSize -= contractSize;
-	assume0((_currentOldAreaSize - contractSize) == oldAreaSize);
+    /* Get the new old area size..cant ask MSS as size not updated yet */
+    oldAreaSize -= contractSize;
+    assume0((_currentOldAreaSize - contractSize) == oldAreaSize);
 
-	/* First remove the memory from the appropraiate pool */
-	if (0 == _currentLOARatio) {
-		assume0((0 == _loaSize) && (LOA_EMPTY == _currentLOABase));
+    /* First remove the memory from the appropraiate pool */
+    if (0 == _currentLOARatio) {
+        assume0((0 == _loaSize) && (LOA_EMPTY == _currentLOABase));
 
-		/* No LOA so just remove memory from SOA and we are done */
-		_memoryPoolSmallObjects->contractWithRange(env, contractSize, lowAddress, highAddress);
-	} else {
+        /* No LOA so just remove memory from SOA and we are done */
+        _memoryPoolSmallObjects->contractWithRange(env, contractSize, lowAddress, highAddress);
+    } else {
 
-		assume0(lowAddress >= _currentLOABase);
+        assume0(lowAddress >= _currentLOABase);
 
-		/* First remove memory from LOA */
-		_memoryPoolLargeObjects->contractWithRange(env, contractSize, lowAddress, highAddress);
+        /* First remove memory from LOA */
+        _memoryPoolLargeObjects->contractWithRange(env, contractSize, lowAddress, highAddress);
 
-		redistributeFreeMemory(env, oldAreaSize);
+        redistributeFreeMemory(env, oldAreaSize);
 
-		Trc_MM_LOAResize_contractWithRange(env->getLanguageVMThread(), oldAreaSize, _currentLOARatio, _currentLOABase, _loaSize);
-	}
+        Trc_MM_LOAResize_contractWithRange(env->getLanguageVMThread(), oldAreaSize, _currentLOARatio, _currentLOABase, _loaSize);
+    }
 
-	/* ..and remmeber new old area size for next time */
-	_currentOldAreaSize = oldAreaSize;
+    /* ..and remmeber new old area size for next time */
+    _currentOldAreaSize = oldAreaSize;
 
-	return lowAddress;
+    return lowAddress;
 }
 
 /**
@@ -1004,63 +970,61 @@ MM_MemoryPoolLargeObjects::contractWithRange(MM_EnvironmentBase* env, uintptr_t 
  * @param newOldAreaSize Number of bytes in old area AFTER expansion/contraction
  *
  */
-void
-MM_MemoryPoolLargeObjects::redistributeFreeMemory(MM_EnvironmentBase* env, uintptr_t newOldAreaSize)
+void MM_MemoryPoolLargeObjects::redistributeFreeMemory(MM_EnvironmentBase* env, uintptr_t newOldAreaSize)
 {
-	uintptr_t count, size;
-	MM_HeapLinkedFreeHeader* freeListHead = NULL;
-	MM_HeapLinkedFreeHeader* freeListTail = NULL;
-	void* oldLOABase = _currentLOABase;
+    uintptr_t count, size;
+    MM_HeapLinkedFreeHeader* freeListHead = NULL;
+    MM_HeapLinkedFreeHeader* freeListTail = NULL;
+    void* oldLOABase = _currentLOABase;
 
-	/* Calculate new LOA size based on current LOA ratio */
-	_loaSize = MM_Math::roundToFloor(_extensions->heapAlignment, (uintptr_t)((float)newOldAreaSize * _currentLOARatio));
+    /* Calculate new LOA size based on current LOA ratio */
+    _loaSize = MM_Math::roundToFloor(_extensions->heapAlignment, (uintptr_t)((float)newOldAreaSize * _currentLOARatio));
 
-	assume0(_loaSize > 0);
+    assume0(_loaSize > 0);
 
-	/* ..and SOA is what's left after LOA allocation */
-	_soaSize = newOldAreaSize - _loaSize;
-	assume0(MM_Math::roundToFloor(_extensions->heapAlignment, _soaSize) == _soaSize);
+    /* ..and SOA is what's left after LOA allocation */
+    _soaSize = newOldAreaSize - _loaSize;
+    assume0(MM_Math::roundToFloor(_extensions->heapAlignment, _soaSize) == _soaSize);
 
-	/* .. and new LOA base */
-	_currentLOABase = determineLOABase(env, _soaSize);
+    /* .. and new LOA base */
+    _currentLOABase = determineLOABase(env, _soaSize);
 
-	if (oldLOABase < _currentLOABase) {
-		/* Take chunks away from LOA and give to SOA */
-		_memoryPoolLargeObjects->removeFreeEntriesWithinRange(env, oldLOABase, _currentLOABase,
-															  _memoryPoolSmallObjects->getMinimumFreeEntrySize(),
-															  freeListHead, freeListTail, count, size);
+    if (oldLOABase < _currentLOABase) {
+        /* Take chunks away from LOA and give to SOA */
+        _memoryPoolLargeObjects->removeFreeEntriesWithinRange(env, oldLOABase, _currentLOABase,
+            _memoryPoolSmallObjects->getMinimumFreeEntrySize(),
+            freeListHead, freeListTail, count, size);
 
-		if (NULL != freeListHead) {
-			_memoryPoolSmallObjects->addFreeEntries(env, freeListHead, freeListTail, count, size);
-		}
+        if (NULL != freeListHead) {
+            _memoryPoolSmallObjects->addFreeEntries(env, freeListHead, freeListTail, count, size);
+        }
 
-	} else if (oldLOABase > _currentLOABase) {
-		/* Take chunks away from SOA and give to LOA */
-		_memoryPoolSmallObjects->removeFreeEntriesWithinRange(env, _currentLOABase, oldLOABase,
-															  _memoryPoolLargeObjects->getMinimumFreeEntrySize(),
-															  freeListHead, freeListTail, count, size);
+    } else if (oldLOABase > _currentLOABase) {
+        /* Take chunks away from SOA and give to LOA */
+        _memoryPoolSmallObjects->removeFreeEntriesWithinRange(env, _currentLOABase, oldLOABase,
+            _memoryPoolLargeObjects->getMinimumFreeEntrySize(),
+            freeListHead, freeListTail, count, size);
 
-		if (NULL != freeListHead) {
-			_memoryPoolLargeObjects->addFreeEntries(env, freeListHead, freeListTail, count, size);
-		}
-	}
+        if (NULL != freeListHead) {
+            _memoryPoolLargeObjects->addFreeEntries(env, freeListHead, freeListTail, count, size);
+        }
+    }
 
-	/* Verify all pools in valid state after we are done */
-	assume0(_memoryPoolSmallObjects->isMemoryPoolValid(env, true));
-	assume0(_memoryPoolLargeObjects->isMemoryPoolValid(env, true));
+    /* Verify all pools in valid state after we are done */
+    assume0(_memoryPoolSmallObjects->isMemoryPoolValid(env, true));
+    assume0(_memoryPoolLargeObjects->isMemoryPoolValid(env, true));
 }
 
-bool
-MM_MemoryPoolLargeObjects::abandonHeapChunk(void* addrBase, void* addrTop)
+bool MM_MemoryPoolLargeObjects::abandonHeapChunk(void* addrBase, void* addrTop)
 {
-	Assert_MM_true(addrTop >= addrBase);
+    Assert_MM_true(addrTop >= addrBase);
 
-	/* Direct request to correct subpool */
-	if (addrBase < _currentLOABase) {
-		return _memoryPoolSmallObjects->abandonHeapChunk(addrBase, addrTop);
-	} else {
-		return _memoryPoolLargeObjects->abandonHeapChunk(addrBase, addrTop);
-	}
+    /* Direct request to correct subpool */
+    if (addrBase < _currentLOABase) {
+        return _memoryPoolSmallObjects->abandonHeapChunk(addrBase, addrTop);
+    } else {
+        return _memoryPoolLargeObjects->abandonHeapChunk(addrBase, addrTop);
+    }
 }
 
 /*
@@ -1072,86 +1036,81 @@ MM_MemoryPoolLargeObjects::abandonHeapChunk(void* addrBase, void* addrTop)
 uintptr_t*
 MM_MemoryPoolLargeObjects::determineLOABase(MM_EnvironmentBase* env, uintptr_t soaSize)
 {
-	uintptr_t sizeLeft = soaSize;
+    uintptr_t sizeLeft = soaSize;
 
-	/* SOA can't be bigger than size of subspace */
-	Assert_MM_true(soaSize <= _memorySubSpace->getActiveMemorySize());
+    /* SOA can't be bigger than size of subspace */
+    Assert_MM_true(soaSize <= _memorySubSpace->getActiveMemorySize());
 
-	MM_HeapRegionDescriptor* region;
-	GC_MemorySubSpaceRegionIterator regionIterator((MM_MemorySubSpace*)_memorySubSpace);
-	while ((region = regionIterator.nextRegion()) != NULL) {
-		uintptr_t regionSize = region->getSize();
-		if (sizeLeft >= regionSize) {
-			sizeLeft -= regionSize;
-		} else {
-			uintptr_t* loaBase = (uintptr_t*)((uint8_t*)region->getLowAddress() + sizeLeft);
-			loaBase = (uintptr_t*)MM_Math::roundToCeiling(_extensions->heapAlignment, (uintptr_t)loaBase);
-			Assert_MM_true(loaBase <= (uintptr_t*)region->getHighAddress());
-			return loaBase;
-		}
-	}
+    MM_HeapRegionDescriptor* region;
+    GC_MemorySubSpaceRegionIterator regionIterator((MM_MemorySubSpace*)_memorySubSpace);
+    while ((region = regionIterator.nextRegion()) != NULL) {
+        uintptr_t regionSize = region->getSize();
+        if (sizeLeft >= regionSize) {
+            sizeLeft -= regionSize;
+        } else {
+            uintptr_t* loaBase = (uintptr_t*)((uint8_t*)region->getLowAddress() + sizeLeft);
+            loaBase = (uintptr_t*)MM_Math::roundToCeiling(_extensions->heapAlignment, (uintptr_t)loaBase);
+            Assert_MM_true(loaBase <= (uintptr_t*)region->getHighAddress());
+            return loaBase;
+        }
+    }
 
-	/* Should never get here */
-	Assert_MM_unreachable();
+    /* Should never get here */
+    Assert_MM_unreachable();
 
-	return NULL;
+    return NULL;
 }
 
-void
-MM_MemoryPoolLargeObjects::mergeFreeEntryAllocateStats()
+void MM_MemoryPoolLargeObjects::mergeFreeEntryAllocateStats()
 {
-	_largeObjectAllocateStats->getFreeEntrySizeClassStats()->resetCounts();
-	_memoryPoolSmallObjects->mergeFreeEntryAllocateStats();
-	_memoryPoolLargeObjects->mergeFreeEntryAllocateStats();
-	_largeObjectAllocateStats->getFreeEntrySizeClassStats()->merge(_memoryPoolSmallObjects->getLargeObjectAllocateStats()->getFreeEntrySizeClassStats());
-	_largeObjectAllocateStats->getFreeEntrySizeClassStats()->merge(_memoryPoolLargeObjects->getLargeObjectAllocateStats()->getFreeEntrySizeClassStats());
+    _largeObjectAllocateStats->getFreeEntrySizeClassStats()->resetCounts();
+    _memoryPoolSmallObjects->mergeFreeEntryAllocateStats();
+    _memoryPoolLargeObjects->mergeFreeEntryAllocateStats();
+    _largeObjectAllocateStats->getFreeEntrySizeClassStats()->merge(_memoryPoolSmallObjects->getLargeObjectAllocateStats()->getFreeEntrySizeClassStats());
+    _largeObjectAllocateStats->getFreeEntrySizeClassStats()->merge(_memoryPoolLargeObjects->getLargeObjectAllocateStats()->getFreeEntrySizeClassStats());
 }
 
-void
-MM_MemoryPoolLargeObjects::mergeTlhAllocateStats()
+void MM_MemoryPoolLargeObjects::mergeTlhAllocateStats()
 {
-	_largeObjectAllocateStats->getTlhAllocSizeClassStats()->resetCounts();
-	_memoryPoolSmallObjects->mergeTlhAllocateStats();
-	_memoryPoolLargeObjects->mergeTlhAllocateStats();
-	_largeObjectAllocateStats->getTlhAllocSizeClassStats()->merge(_memoryPoolSmallObjects->getLargeObjectAllocateStats()->getTlhAllocSizeClassStats());
-	_largeObjectAllocateStats->getTlhAllocSizeClassStats()->merge(_memoryPoolLargeObjects->getLargeObjectAllocateStats()->getTlhAllocSizeClassStats());
+    _largeObjectAllocateStats->getTlhAllocSizeClassStats()->resetCounts();
+    _memoryPoolSmallObjects->mergeTlhAllocateStats();
+    _memoryPoolLargeObjects->mergeTlhAllocateStats();
+    _largeObjectAllocateStats->getTlhAllocSizeClassStats()->merge(_memoryPoolSmallObjects->getLargeObjectAllocateStats()->getTlhAllocSizeClassStats());
+    _largeObjectAllocateStats->getTlhAllocSizeClassStats()->merge(_memoryPoolLargeObjects->getLargeObjectAllocateStats()->getTlhAllocSizeClassStats());
 }
 
-void
-MM_MemoryPoolLargeObjects::mergeLargeObjectAllocateStats()
+void MM_MemoryPoolLargeObjects::mergeLargeObjectAllocateStats()
 {
-	_largeObjectAllocateStats->resetCurrent();
-	_memoryPoolSmallObjects->mergeLargeObjectAllocateStats();
-	_memoryPoolLargeObjects->mergeLargeObjectAllocateStats();
-	_largeObjectAllocateStats->mergeCurrent(_memoryPoolSmallObjects->getLargeObjectAllocateStats());
-	_largeObjectAllocateStats->mergeCurrent(_memoryPoolLargeObjects->getLargeObjectAllocateStats());
+    _largeObjectAllocateStats->resetCurrent();
+    _memoryPoolSmallObjects->mergeLargeObjectAllocateStats();
+    _memoryPoolLargeObjects->mergeLargeObjectAllocateStats();
+    _largeObjectAllocateStats->mergeCurrent(_memoryPoolSmallObjects->getLargeObjectAllocateStats());
+    _largeObjectAllocateStats->mergeCurrent(_memoryPoolLargeObjects->getLargeObjectAllocateStats());
 }
 
-void
-MM_MemoryPoolLargeObjects::averageLargeObjectAllocateStats(MM_EnvironmentBase* env, uintptr_t bytesAllocatedThisRound)
+void MM_MemoryPoolLargeObjects::averageLargeObjectAllocateStats(MM_EnvironmentBase* env, uintptr_t bytesAllocatedThisRound)
 {
-	_largeObjectAllocateStats->resetAverage();
-	_memoryPoolSmallObjects->averageLargeObjectAllocateStats(env, bytesAllocatedThisRound);
-	_memoryPoolLargeObjects->averageLargeObjectAllocateStats(env, bytesAllocatedThisRound);
-	_largeObjectAllocateStats->mergeAverage(_memoryPoolSmallObjects->getLargeObjectAllocateStats());
-	_largeObjectAllocateStats->mergeAverage(_memoryPoolLargeObjects->getLargeObjectAllocateStats());
+    _largeObjectAllocateStats->resetAverage();
+    _memoryPoolSmallObjects->averageLargeObjectAllocateStats(env, bytesAllocatedThisRound);
+    _memoryPoolLargeObjects->averageLargeObjectAllocateStats(env, bytesAllocatedThisRound);
+    _largeObjectAllocateStats->mergeAverage(_memoryPoolSmallObjects->getLargeObjectAllocateStats());
+    _largeObjectAllocateStats->mergeAverage(_memoryPoolLargeObjects->getLargeObjectAllocateStats());
 }
 
-void
-MM_MemoryPoolLargeObjects::resetLargeObjectAllocateStats()
+void MM_MemoryPoolLargeObjects::resetLargeObjectAllocateStats()
 {
-	_largeObjectAllocateStats->resetCurrent();
-	_largeObjectAllocateStats->getTlhAllocSizeClassStats()->resetCounts();
-	_memoryPoolSmallObjects->resetLargeObjectAllocateStats();
-	_memoryPoolLargeObjects->resetLargeObjectAllocateStats();
+    _largeObjectAllocateStats->resetCurrent();
+    _largeObjectAllocateStats->getTlhAllocSizeClassStats()->resetCounts();
+    _memoryPoolSmallObjects->resetLargeObjectAllocateStats();
+    _memoryPoolLargeObjects->resetLargeObjectAllocateStats();
 }
 
 #if defined(OMR_GC_IDLE_HEAP_MANAGER)
 uintptr_t
 MM_MemoryPoolLargeObjects::releaseFreeMemoryPages(MM_EnvironmentBase* env)
 {
-	uintptr_t releasedMemory = _memoryPoolSmallObjects->releaseFreeMemoryPages(env);
-	releasedMemory += _memoryPoolLargeObjects->releaseFreeMemoryPages(env);
-	return releasedMemory;
+    uintptr_t releasedMemory = _memoryPoolSmallObjects->releaseFreeMemoryPages(env);
+    releasedMemory += _memoryPoolLargeObjects->releaseFreeMemoryPages(env);
+    return releasedMemory;
 }
 #endif

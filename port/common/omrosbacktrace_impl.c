@@ -43,9 +43,9 @@
  * @return the number of frames in the backtrace.
  */
 uintptr_t
-omrintrospect_backtrace_thread_raw(struct OMRPortLibrary *portLibrary, J9PlatformThread *threadInfo, J9Heap *heap, void *signalInfo)
+omrintrospect_backtrace_thread_raw(struct OMRPortLibrary* portLibrary, J9PlatformThread* threadInfo, J9Heap* heap, void* signalInfo)
 {
-	return 0;
+    return 0;
 }
 
 /* This function takes a thread structure already populated with a backtrace by omrintrospect_backtrace_thread
@@ -63,8 +63,7 @@ omrintrospect_backtrace_thread_raw(struct OMRPortLibrary *portLibrary, J9Platfor
  * @return the number of frames for which a symbol was constructed.
  */
 uintptr_t
-omrintrospect_backtrace_symbols_raw(struct OMRPortLibrary *portLibrary, J9PlatformThread *threadInfo, J9Heap *heap)
+omrintrospect_backtrace_symbols_raw(struct OMRPortLibrary* portLibrary, J9PlatformThread* threadInfo, J9Heap* heap)
 {
-	return 0;
+    return 0;
 }
-

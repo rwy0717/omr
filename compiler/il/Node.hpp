@@ -24,36 +24,34 @@
 
 #include "il/OMRNode.hpp"
 
-#include <stddef.h>               // for NULL
-#include <stdint.h>               // for uint16_t
-#include "il/ILOpCodes.hpp"       // for ILOpCodes
-#include "infra/Annotations.hpp"  // for OMR_EXTENSIBLE
+#include <stddef.h> // for NULL
+#include <stdint.h> // for uint16_t
+#include "il/ILOpCodes.hpp" // for ILOpCodes
+#include "infra/Annotations.hpp" // for OMR_EXTENSIBLE
 
-namespace TR
-{
+namespace TR {
 
-class OMR_EXTENSIBLE Node : public OMR::NodeConnector
-{
+class OMR_EXTENSIBLE Node : public OMR::NodeConnector {
 
 public:
+    Node()
+        : OMR::NodeConnector()
+    {}
 
-   Node() : OMR::NodeConnector() {}
-
-   Node(TR::Node *originatingByteCodeNode, TR::ILOpCodes op,
+    Node(TR::Node* originatingByteCodeNode, TR::ILOpCodes op,
         uint16_t numChildren)
-      : OMR::NodeConnector(originatingByteCodeNode, op, numChildren)
-      {}
+        : OMR::NodeConnector(originatingByteCodeNode, op, numChildren)
+    {}
 
-   Node(Node *from, uint16_t numChildren = 0)
-      : OMR::NodeConnector(from, numChildren)
-      {}
+    Node(Node* from, uint16_t numChildren = 0)
+        : OMR::NodeConnector(from, numChildren)
+    {}
 
-   Node(Node& from)
-      : OMR::NodeConnector(from)
-      {}
-
+    Node(Node& from)
+        : OMR::NodeConnector(from)
+    {}
 };
 
-}
+} // namespace TR
 
 #endif

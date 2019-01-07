@@ -35,59 +35,57 @@
 #define OMR_SEGREGATEDHEAP_LENGTH 21
 #endif /* OMR_GC_SEGREGATED_HEAP */
 
-bool
-MM_StartupManagerImpl::handleOption(MM_GCExtensionsBase *extensions, char *option)
+bool MM_StartupManagerImpl::handleOption(MM_GCExtensionsBase* extensions, char* option)
 {
-	bool result = MM_StartupManager::handleOption(extensions, option);
+    bool result = MM_StartupManager::handleOption(extensions, option);
 
-	if (!result) {
+    if (!result) {
 #if defined(OMR_GC_SEGREGATED_HEAP)
-		if (0 == strncmp(option, OMR_SEGREGATEDHEAP, OMR_SEGREGATEDHEAP_LENGTH)) {
-			/* OMRTODO: when we have a flag in extensions to use a segregated heap,
-			 * perhaps we should set it to true here..
-			 */
-			_useSegregatedGC = true;
-			result = true;
-		}
+        if (0 == strncmp(option, OMR_SEGREGATEDHEAP, OMR_SEGREGATEDHEAP_LENGTH)) {
+            /* OMRTODO: when we have a flag in extensions to use a segregated heap,
+             * perhaps we should set it to true here..
+             */
+            _useSegregatedGC = true;
+            result = true;
+        }
 #endif /* OMR_GC_SEGREGATED_HEAP */
-	}
+    }
 
-	return result;
+    return result;
 }
 
-MM_ConfigurationLanguageInterface *
-MM_StartupManagerImpl::createConfigurationLanguageInterface(MM_EnvironmentBase *env)
+MM_ConfigurationLanguageInterface*
+MM_StartupManagerImpl::createConfigurationLanguageInterface(MM_EnvironmentBase* env)
 {
-	return MM_ConfigurationLanguageInterfaceImpl::newInstance(env);
+    return MM_ConfigurationLanguageInterfaceImpl::newInstance(env);
 }
 
-MM_CollectorLanguageInterface *
-MM_StartupManagerImpl::createCollectorLanguageInterface(MM_EnvironmentBase *env)
+MM_CollectorLanguageInterface*
+MM_StartupManagerImpl::createCollectorLanguageInterface(MM_EnvironmentBase* env)
 {
-	return MM_CollectorLanguageInterfaceImpl::newInstance(env);
+    return MM_CollectorLanguageInterfaceImpl::newInstance(env);
 }
 
-MM_VerboseManagerBase *
+MM_VerboseManagerBase*
 MM_StartupManagerImpl::createVerboseManager(MM_EnvironmentBase* env)
 {
-	return MM_VerboseManagerImpl::newInstance(env, env->getOmrVM());
+    return MM_VerboseManagerImpl::newInstance(env, env->getOmrVM());
 }
 
-char *
-MM_StartupManagerImpl::getOptions(void)
+char* MM_StartupManagerImpl::getOptions(void)
 {
-	return getenv("OMR_GC_OPTIONS");
+    return getenv("OMR_GC_OPTIONS");
 }
 
-MM_Configuration *
-MM_StartupManagerImpl::createConfiguration(MM_EnvironmentBase *env, MM_ConfigurationLanguageInterface *cli)
+MM_Configuration*
+MM_StartupManagerImpl::createConfiguration(MM_EnvironmentBase* env, MM_ConfigurationLanguageInterface* cli)
 {
 #if defined(OMR_GC_SEGREGATED_HEAP)
-	if (_useSegregatedGC) {
-		return MM_ConfigurationSegregated::newInstance(env, cli);
-	} else
+    if (_useSegregatedGC) {
+        return MM_ConfigurationSegregated::newInstance(env, cli);
+    } else
 #endif /* OMR_GC_SEGREGATED_HEAP */
-	{
-		return MM_ConfigurationFlat::newInstance(env, cli);
-	}
+    {
+        return MM_ConfigurationFlat::newInstance(env, cli);
+    }
 }

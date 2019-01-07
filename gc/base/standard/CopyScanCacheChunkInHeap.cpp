@@ -33,69 +33,66 @@
 #include "HeapLinkedFreeHeader.hpp"
 #include "MemorySubSpace.hpp"
 
-MM_CopyScanCacheChunkInHeap *
-MM_CopyScanCacheChunkInHeap::newInstance(MM_EnvironmentStandard *env, MM_CopyScanCacheChunk *nextChunk, MM_MemorySubSpace *memorySubSpace, MM_Collector *requestCollector,
-		MM_CopyScanCacheStandard **sublistTail, uintptr_t *entries)
+MM_CopyScanCacheChunkInHeap*
+MM_CopyScanCacheChunkInHeap::newInstance(MM_EnvironmentStandard* env, MM_CopyScanCacheChunk* nextChunk, MM_MemorySubSpace* memorySubSpace, MM_Collector* requestCollector,
+    MM_CopyScanCacheStandard** sublistTail, uintptr_t* entries)
 {
-	MM_GCExtensionsBase *extensions = env->getExtensions();
-	MM_CopyScanCacheChunkInHeap *chunk = NULL;
-	void *addrBase = NULL;
-	void *addrTop = NULL;
+    MM_GCExtensionsBase* extensions = env->getExtensions();
+    MM_CopyScanCacheChunkInHeap* chunk = NULL;
+    void* addrBase = NULL;
+    void* addrTop = NULL;
 
-	/*
-	 * Calculate size of memory to allocate in heap:
-	 * 1. create hole in allocated memory
-	 * 2. create MM_CopyScanCacheChunkInHeap
-	 * 3. create number of CopyScanCache objects
-	 *
-	 * with total size barely larger then tlhMinimumSize
-	 */
-	/* Headers size: HeapLinkedFreeHeader and CopyScanCacheChunkInHeap */
-	uintptr_t sizeToAllocate = sizeof(MM_HeapLinkedFreeHeader) + sizeof(MM_CopyScanCacheChunkInHeap);
-	uintptr_t numberOfCaches = 1;
+    /*
+     * Calculate size of memory to allocate in heap:
+     * 1. create hole in allocated memory
+     * 2. create MM_CopyScanCacheChunkInHeap
+     * 3. create number of CopyScanCache objects
+     *
+     * with total size barely larger then tlhMinimumSize
+     */
+    /* Headers size: HeapLinkedFreeHeader and CopyScanCacheChunkInHeap */
+    uintptr_t sizeToAllocate = sizeof(MM_HeapLinkedFreeHeader) + sizeof(MM_CopyScanCacheChunkInHeap);
+    uintptr_t numberOfCaches = 1;
 
-	if (sizeToAllocate < extensions->tlhMinimumSize) {
-		/* calculate number of caches to just barely exceed tlhMinimumSize */
-		numberOfCaches = ((extensions->tlhMinimumSize - sizeToAllocate) / sizeof(MM_CopyScanCacheStandard)) + 1;
-	}
+    if (sizeToAllocate < extensions->tlhMinimumSize) {
+        /* calculate number of caches to just barely exceed tlhMinimumSize */
+        numberOfCaches = ((extensions->tlhMinimumSize - sizeToAllocate) / sizeof(MM_CopyScanCacheStandard)) + 1;
+    }
 
-	/* total size required to allocate */
-	sizeToAllocate += numberOfCaches * sizeof(MM_CopyScanCacheStandard);
-	/* this is going to be allocated on the heap so ensure that the chunk we are allocating is adjusted for heap alignment (since object consumed sizes already have this requirement) */
-	sizeToAllocate = MM_Math::roundToCeiling(env->getObjectAlignmentInBytes(), sizeToAllocate);
+    /* total size required to allocate */
+    sizeToAllocate += numberOfCaches * sizeof(MM_CopyScanCacheStandard);
+    /* this is going to be allocated on the heap so ensure that the chunk we are allocating is adjusted for heap alignment (since object consumed sizes already have this requirement) */
+    sizeToAllocate = MM_Math::roundToCeiling(env->getObjectAlignmentInBytes(), sizeToAllocate);
 
-	/* Attempt to allocate in given subspace */
-	MM_AllocateDescription allocDescription(sizeToAllocate, 0, false, true);
-	addrBase = (MM_CopyScanCacheChunkInHeap *)memorySubSpace->collectorAllocate(env, requestCollector, &allocDescription);
+    /* Attempt to allocate in given subspace */
+    MM_AllocateDescription allocDescription(sizeToAllocate, 0, false, true);
+    addrBase = (MM_CopyScanCacheChunkInHeap*)memorySubSpace->collectorAllocate(env, requestCollector, &allocDescription);
 
-	if (NULL != addrBase) {
-		/* memory allocated */
-		addrTop = (void *)(((uint8_t *)addrBase) + sizeToAllocate);
+    if (NULL != addrBase) {
+        /* memory allocated */
+        addrTop = (void*)(((uint8_t*)addrBase) + sizeToAllocate);
 
-		/* create a hole */
-		MM_HeapLinkedFreeHeader::fillWithHoles(addrBase, sizeToAllocate);
+        /* create a hole */
+        MM_HeapLinkedFreeHeader::fillWithHoles(addrBase, sizeToAllocate);
 
-		/* create a CopyScanCacheChunkInHeap itself */
-		chunk = (MM_CopyScanCacheChunkInHeap *)((uintptr_t)addrBase + sizeof(MM_HeapLinkedFreeHeader));
-		new(chunk) MM_CopyScanCacheChunkInHeap(addrBase, addrTop, memorySubSpace);
-		chunk->_baseCache = (MM_CopyScanCacheStandard *)(chunk + 1);
-		if(chunk->initialize(env, numberOfCaches, nextChunk, OMR_SCAVENGER_CACHE_TYPE_HEAP, sublistTail)) {
-			*entries = numberOfCaches;
-		} else {
-			chunk->kill(env);
-			chunk = NULL;
-		}
-	}
-	return chunk;
+        /* create a CopyScanCacheChunkInHeap itself */
+        chunk = (MM_CopyScanCacheChunkInHeap*)((uintptr_t)addrBase + sizeof(MM_HeapLinkedFreeHeader));
+        new (chunk) MM_CopyScanCacheChunkInHeap(addrBase, addrTop, memorySubSpace);
+        chunk->_baseCache = (MM_CopyScanCacheStandard*)(chunk + 1);
+        if (chunk->initialize(env, numberOfCaches, nextChunk, OMR_SCAVENGER_CACHE_TYPE_HEAP, sublistTail)) {
+            *entries = numberOfCaches;
+        } else {
+            chunk->kill(env);
+            chunk = NULL;
+        }
+    }
+    return chunk;
 }
 
-void
-MM_CopyScanCacheChunkInHeap::kill(MM_EnvironmentBase *env)
+void MM_CopyScanCacheChunkInHeap::kill(MM_EnvironmentBase* env)
 {
-	tearDown(env);
+    tearDown(env);
 
-	/* return memory to pool */
-	_memorySubSpace->abandonHeapChunk(_addrBase, _addrTop);
+    /* return memory to pool */
+    _memorySubSpace->abandonHeapChunk(_addrBase, _addrTop);
 }
-
-

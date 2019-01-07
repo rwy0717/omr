@@ -31,10 +31,9 @@
 
 #if !defined(OMR_OS_WINDOWS)
 #if defined(OMRPORT_OMRSIG_SUPPORT)
-extern void omrsig_chain_at_shutdown_and_exit(struct OMRPortLibrary *portLibrary);
+extern void omrsig_chain_at_shutdown_and_exit(struct OMRPortLibrary* portLibrary);
 #endif /* defined(OMRPORT_OMRSIG_SUPPORT) */
 #endif /* !defined(OMR_OS_WINDOWS) */
-
 
 /**
  * Block until the portlibary has been exited and return the error code.
@@ -45,9 +44,9 @@ extern void omrsig_chain_at_shutdown_and_exit(struct OMRPortLibrary *portLibrary
  * @note Most implementations will be empty.
  */
 int32_t
-omrexit_get_exit_code(struct OMRPortLibrary *portLibrary)
+omrexit_get_exit_code(struct OMRPortLibrary* portLibrary)
 {
-	return 0;
+    return 0;
 }
 
 /**
@@ -60,25 +59,25 @@ omrexit_get_exit_code(struct OMRPortLibrary *portLibrary)
  * @param[in] exitCode The exit code to be used to terminate the process.
  */
 void OMRNORETURN
-omrexit_shutdown_and_exit(struct OMRPortLibrary *portLibrary, int32_t exitCode)
+omrexit_shutdown_and_exit(struct OMRPortLibrary* portLibrary, int32_t exitCode)
 {
 #if defined(OMR_OPT_CUDA)
-	/* Because we're exiting we don't expect the port library to be shutdown normally,
-	 * but we don't want to omit the cuda shutdown step because it resets the devices
-	 * (if any were discovered) avoiding resource leaks that may lead to trouble for
-	 * future processes. If CUDA support was never requested, this is effectively a nop.
-	 * The function is also idempotent so a subsequent call would do no harm.
-	 */
-	portLibrary->cuda_shutdown(portLibrary);
+    /* Because we're exiting we don't expect the port library to be shutdown normally,
+     * but we don't want to omit the cuda shutdown step because it resets the devices
+     * (if any were discovered) avoiding resource leaks that may lead to trouble for
+     * future processes. If CUDA support was never requested, this is effectively a nop.
+     * The function is also idempotent so a subsequent call would do no harm.
+     */
+    portLibrary->cuda_shutdown(portLibrary);
 #endif /* defined(OMR_OPT_CUDA) */
 
 #if !defined(OMR_OS_WINDOWS)
 #if defined(OMRPORT_OMRSIG_SUPPORT)
-	omrsig_chain_at_shutdown_and_exit(portLibrary);
+    omrsig_chain_at_shutdown_and_exit(portLibrary);
 #endif /* defined(OMRPORT_OMRSIG_SUPPORT) */
 #endif /* !defined(OMR_OS_WINDOWS) */
 
-	exit((int)exitCode);
+    exit((int)exitCode);
 }
 
 /**
@@ -91,8 +90,7 @@ omrexit_shutdown_and_exit(struct OMRPortLibrary *portLibrary, int32_t exitCode)
  *
  * @note Most implementations will be empty.
  */
-void
-omrexit_shutdown(struct OMRPortLibrary *portLibrary)
+void omrexit_shutdown(struct OMRPortLibrary* portLibrary)
 {
 }
 
@@ -111,9 +109,7 @@ omrexit_shutdown(struct OMRPortLibrary *portLibrary)
  * @note Most implementations will simply return success.
  */
 int32_t
-omrexit_startup(struct OMRPortLibrary *portLibrary)
+omrexit_startup(struct OMRPortLibrary* portLibrary)
 {
-	return 0;
+    return 0;
 }
-
-

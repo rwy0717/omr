@@ -35,40 +35,38 @@ class MM_EnvironmentBase;
  * @ingroup GC_Base
  */
 
-class MM_CardCleaner : public MM_BaseVirtual
-{
+class MM_CardCleaner : public MM_BaseVirtual {
 public:
 protected:
 private:
-
 public:
-	/**
-	 * Clean a range of addresses (typically within a span of a card)
-	 * The action for each object/slot found may is specific - subclass has to overload this method
-	 * Note that the caller does not clean the card.  It merely invokes the receiver if it is dirty
-	 * so the implementation must mark it as clean, if it has that responsibility.
-	 *
-	 * @param[in] env A thread (typically the thread initializing the GC)
-	 * @param[in] lowAddress low address of the range to be cleaned
-	 * @param[in] highAddress high address of the range to be cleaned 
-	 * @param cardToClean[in/out] The card which we are cleaning
-	 */	
-	virtual void clean(MM_EnvironmentBase *env, void *lowAddress, void *highAddress, Card *cardToClean) = 0;
-	
-	/**
-	 * Return the uintptr_t  corresponding to the VMState for this card cleaner.
-	 * @note All card cleanders must implement this method - the IDs are defined in @ref j9modron.h
-	 */
-	virtual uintptr_t getVMStateID() = 0;
-	
-	/**
-	 * Create a CardTable object.
-	 */
-	MM_CardCleaner()
-		: MM_BaseVirtual()
-	{
-		_typeId = __FUNCTION__;
-	}
+    /**
+     * Clean a range of addresses (typically within a span of a card)
+     * The action for each object/slot found may is specific - subclass has to overload this method
+     * Note that the caller does not clean the card.  It merely invokes the receiver if it is dirty
+     * so the implementation must mark it as clean, if it has that responsibility.
+     *
+     * @param[in] env A thread (typically the thread initializing the GC)
+     * @param[in] lowAddress low address of the range to be cleaned
+     * @param[in] highAddress high address of the range to be cleaned 
+     * @param cardToClean[in/out] The card which we are cleaning
+     */
+    virtual void clean(MM_EnvironmentBase* env, void* lowAddress, void* highAddress, Card* cardToClean) = 0;
+
+    /**
+     * Return the uintptr_t  corresponding to the VMState for this card cleaner.
+     * @note All card cleanders must implement this method - the IDs are defined in @ref j9modron.h
+     */
+    virtual uintptr_t getVMStateID() = 0;
+
+    /**
+     * Create a CardTable object.
+     */
+    MM_CardCleaner()
+        : MM_BaseVirtual()
+    {
+        _typeId = __FUNCTION__;
+    }
 
 protected:
 private:

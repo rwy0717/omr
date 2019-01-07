@@ -20,26 +20,23 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #ifndef LINKEDLIST_INCL
 #define LINKEDLIST_INCL
 
 #include "JitBuilder.hpp"
 
-typedef struct Element
-   {
-   struct Element *next;
-   int16_t key;
-   int32_t val;
-   } Element;
+typedef struct Element {
+    struct Element* next;
+    int16_t key;
+    int32_t val;
+} Element;
 
-typedef int32_t (LinkedListFunctionType)(Element *, int16_t);
+typedef int32_t(LinkedListFunctionType)(Element*, int16_t);
 
-class LinkedListMethod : public OMR::JitBuilder::MethodBuilder
-   {
-   public:
-   LinkedListMethod(OMR::JitBuilder::TypeDictionary *);
-   virtual bool buildIL();
-   };
+class LinkedListMethod : public OMR::JitBuilder::MethodBuilder {
+public:
+    LinkedListMethod(OMR::JitBuilder::TypeDictionary*);
+    virtual bool buildIL();
+};
 
 #endif // !defined(LINKEDLIST_INCL)

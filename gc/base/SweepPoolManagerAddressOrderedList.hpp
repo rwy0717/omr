@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 /**
  * @file
  * @ingroup GC_Base
@@ -38,24 +37,19 @@
 #include "MemoryPool.hpp"
 #include "SweepPoolManagerAddressOrderedListBase.hpp"
 
-class MM_SweepPoolManagerAddressOrderedList : public MM_SweepPoolManagerAddressOrderedListBase
-{
+class MM_SweepPoolManagerAddressOrderedList : public MM_SweepPoolManagerAddressOrderedListBase {
 private:
-
 protected:
-
 public:
+    static MM_SweepPoolManagerAddressOrderedList* newInstance(MM_EnvironmentBase* env);
 
-	static MM_SweepPoolManagerAddressOrderedList *newInstance(MM_EnvironmentBase *env);
-
-	/**
-	 * Create a SweepPoolManager object.
-	 */
-	MM_SweepPoolManagerAddressOrderedList(MM_EnvironmentBase *env)
-		: MM_SweepPoolManagerAddressOrderedListBase(env)
-	{
-		_typeId = __FUNCTION__;
-	}
-
+    /**
+     * Create a SweepPoolManager object.
+     */
+    MM_SweepPoolManagerAddressOrderedList(MM_EnvironmentBase* env)
+        : MM_SweepPoolManagerAddressOrderedListBase(env)
+    {
+        _typeId = __FUNCTION__;
+    }
 };
 #endif /* SWEEPPOOLMANAGERADDRESSORDEREDLIST_HPP_ */

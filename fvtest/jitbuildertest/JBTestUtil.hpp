@@ -43,9 +43,12 @@
  *       CloseStruct("MyStruct");
  *       }
  */
-#define DEFINE_TYPES(name) \
-   struct name : public OMR::JitBuilder::TypeDictionary { name(); }; \
-   inline name::name() : OMR::JitBuilder::TypeDictionary()
+#define DEFINE_TYPES(name)                                 \
+    struct name : public OMR::JitBuilder::TypeDictionary { \
+        name();                                            \
+    };                                                     \
+    inline name::name()                                    \
+        : OMR::JitBuilder::TypeDictionary()
 
 /*
  * A convenience macro for declaring a MethodBuilder class. `name` is the name
@@ -57,12 +60,12 @@
  *
  *    DECLARE_BUILDER(MyFunctionBuilder);
  */
-#define DECLARE_BUILDER(name) \
-   class name : public OMR::JitBuilder::MethodBuilder { \
-      public: \
-      name(OMR::JitBuilder::TypeDictionary *); \
-      virtual bool buildIL(); \
-   }
+#define DECLARE_BUILDER(name)                            \
+    class name : public OMR::JitBuilder::MethodBuilder { \
+    public:                                              \
+        name(OMR::JitBuilder::TypeDictionary*);          \
+        virtual bool buildIL();                          \
+    }
 
 /*
  * A convenience macro for defining the constructor of a declared builder class.
@@ -84,8 +87,9 @@
  *       DefineReturnType(NoType);
  *       }
  */
-#define DEFINE_BUILDER_CTOR(name) \
-   inline name::name(OMR::JitBuilder::TypeDictionary *types) : OMR::JitBuilder::MethodBuilder(types)
+#define DEFINE_BUILDER_CTOR(name)                             \
+    inline name::name(OMR::JitBuilder::TypeDictionary* types) \
+        : OMR::JitBuilder::MethodBuilder(types)
 
 /*
  * A convenience macro for defining the `buildIL()` function of a declared
@@ -114,7 +118,7 @@
  *       }
  */
 #define DEFINE_BUILDIL(name) \
-   inline bool name::buildIL()
+    inline bool name::buildIL()
 
 /*
  * `DEFINE_BUILDER` is a convenience macro for defining MethodBuilder class
@@ -166,38 +170,40 @@
  *       return true;
  *       }
  */
-#define DEFINE_BUILDER(name, returnType, ...) \
-   struct name : public OMR::JitBuilder::MethodBuilder \
-      { \
-      name(OMR::JitBuilder::TypeDictionary *types) : OMR::JitBuilder::MethodBuilder(types) \
-         { \
-         DefineLine(LINETOSTR(__LINE__)); \
-         DefineFile(__FILE__); \
-         DefineName(#name); \
-         DefineReturnType(returnType); \
-         std::vector<std::pair<const char *, OMR::JitBuilder::IlType *> > args = {__VA_ARGS__}; \
-         for (int i = 0, s = args.size(); i < s; ++i) \
-            { \
-            DefineParameter(args[i].first, args[i].second); \
-            } \
-         } \
-      bool buildIL(); \
-      template <typename T> OMR::JitBuilder::IlType * toIlType() { return typeDictionary()->toIlType<T>(); } \
-      OMR::JitBuilder::IlType * LookupStruct(const char *name) { return typeDictionary()->LookupStruct(name); } \
-      OMR::JitBuilder::IlType * LookupUnion(const char *name) { return typeDictionary()->LookupUnion(name); } \
-      OMR::JitBuilder::IlType * PointerTo(OMR::JitBuilder::IlType *type) { return typeDictionary()->PointerTo(type); } \
-      OMR::JitBuilder::IlType * PointerTo(const char *structName) { return typeDictionary()->PointerTo(structName); } \
-      OMR::JitBuilder::IlType * GetFieldType(const char *structName, const char *fieldName) { return typeDictionary()->GetFieldType(structName, fieldName); } \
-      OMR::JitBuilder::IlType * UnionFieldType(const char *unionName, const char *fieldName) { return typeDictionary()->UnionFieldType(unionName, fieldName); } \
-      }; \
-   inline bool name::buildIL()
+#define DEFINE_BUILDER(name, returnType, ...)                                                                                                                    \
+    struct name : public OMR::JitBuilder::MethodBuilder {                                                                                                        \
+        name(OMR::JitBuilder::TypeDictionary* types)                                                                                                             \
+            : OMR::JitBuilder::MethodBuilder(types)                                                                                                              \
+        {                                                                                                                                                        \
+            DefineLine(LINETOSTR(__LINE__));                                                                                                                     \
+            DefineFile(__FILE__);                                                                                                                                \
+            DefineName(#name);                                                                                                                                   \
+            DefineReturnType(returnType);                                                                                                                        \
+            std::vector<std::pair<const char*, OMR::JitBuilder::IlType*> > args = { __VA_ARGS__ };                                                               \
+            for (int i = 0, s = args.size(); i < s; ++i) {                                                                                                       \
+                DefineParameter(args[i].first, args[i].second);                                                                                                  \
+            }                                                                                                                                                    \
+        }                                                                                                                                                        \
+        bool buildIL();                                                                                                                                          \
+        template <typename T> OMR::JitBuilder::IlType* toIlType() { return typeDictionary()->toIlType<T>(); }                                                    \
+        OMR::JitBuilder::IlType* LookupStruct(const char* name) { return typeDictionary()->LookupStruct(name); }                                                 \
+        OMR::JitBuilder::IlType* LookupUnion(const char* name) { return typeDictionary()->LookupUnion(name); }                                                   \
+        OMR::JitBuilder::IlType* PointerTo(OMR::JitBuilder::IlType* type) { return typeDictionary()->PointerTo(type); }                                          \
+        OMR::JitBuilder::IlType* PointerTo(const char* structName) { return typeDictionary()->PointerTo(structName); }                                           \
+        OMR::JitBuilder::IlType* GetFieldType(const char* structName, const char* fieldName) { return typeDictionary()->GetFieldType(structName, fieldName); }   \
+        OMR::JitBuilder::IlType* UnionFieldType(const char* unionName, const char* fieldName) { return typeDictionary()->UnionFieldType(unionName, fieldName); } \
+    };                                                                                                                                                           \
+    inline bool name::buildIL()
 
 /*
  * A convenience macro for defining MethodBuilder parameter pairs. The first
  * argument to the macro is the name of the parameter, the second is the the
  * `OMR::JitBuilder::IlType` instance representing the type of the parameter.
  */
-#define PARAM(name, type) {name, type}
+#define PARAM(name, type) \
+    {                     \
+        name, type        \
+    }
 
 /**
  * @brief The JitBuilderTest class is a basic test fixture for JitBuilder test cases.
@@ -208,20 +214,18 @@
  *
  *    class MyTestCase : public JitBuilderTest {};
  */
-class JitBuilderTest : public ::testing::Test
-   {
-   public:
+class JitBuilderTest : public ::testing::Test {
+public:
+    static void SetUpTestCase()
+    {
+        ASSERT_TRUE(initializeJit()) << "Failed to initialize the JIT.";
+    }
 
-   static void SetUpTestCase()
-      {
-      ASSERT_TRUE(initializeJit()) << "Failed to initialize the JIT.";
-      }
-
-   static void TearDownTestCase()
-      {
-      shutdownJit();
-      }
-   };
+    static void TearDownTestCase()
+    {
+        shutdownJit();
+    }
+};
 
 /**
  * @brief try_compile is a convenience template function for invoking JitBuilder
@@ -268,14 +272,14 @@ class JitBuilderTest : public ::testing::Test
  */
 template <typename TypeDictionary, typename MethodBuilder, typename Function>
 void try_compile(Function& f)
-   {
-   TypeDictionary types;
-   MethodBuilder builder(&types);
-   void *entry;
-   int32_t rc = compileMethodBuilder(&builder, &entry);
-   ASSERT_EQ(0, rc) << "Failed to compile method " << builder.GetMethodName();
-   f = (Function)entry;
-   }
+{
+    TypeDictionary types;
+    MethodBuilder builder(&types);
+    void* entry;
+    int32_t rc = compileMethodBuilder(&builder, &entry);
+    ASSERT_EQ(0, rc) << "Failed to compile method " << builder.GetMethodName();
+    f = (Function)entry;
+}
 
 /**
  * @brief ASSERT_COMPILE is a convenience macro for invoking JitBuilder
@@ -298,9 +302,10 @@ void try_compile(Function& f)
  *
  *    myFunction(2); // execute the compiled body
  */
-#define ASSERT_COMPILE(TypeDictionary, MethodBuilder, function) do {\
-   try_compile<TypeDictionary,MethodBuilder>(function); \
-   ASSERT_FALSE(::testing::Test::HasFatalFailure()); \
-} while (0)
+#define ASSERT_COMPILE(TypeDictionary, MethodBuilder, function) \
+    do {                                                        \
+        try_compile<TypeDictionary, MethodBuilder>(function);   \
+        ASSERT_FALSE(::testing::Test::HasFatalFailure());       \
+    } while (0)
 
 #endif // JB_TEST_UTIL_HPP

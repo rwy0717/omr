@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 class MM_EnvironmentBase;
 
 #if !defined(OMRVMTHREADINTERFACE_HPP_)
@@ -31,13 +30,11 @@ class MM_EnvironmentBase;
  * @todo Provide class documentation
  * @ingroup GC_Base
  */
-class GC_OMRVMThreadInterface
-{
+class GC_OMRVMThreadInterface {
 public:
-	static void flushCachesForWalk(MM_EnvironmentBase *env);
-	static void flushCachesForGC(MM_EnvironmentBase *env);
-	static void flushNonAllocationCaches(MM_EnvironmentBase *env);
+    static void flushCachesForWalk(MM_EnvironmentBase* env);
+    static void flushCachesForGC(MM_EnvironmentBase* env);
+    static void flushNonAllocationCaches(MM_EnvironmentBase* env);
 };
 
 #endif /* OMRVMTHREADINTERFACE_HPP_ */
-

@@ -33,54 +33,53 @@
 
 class MM_EnvironmentBase;
 
-class MM_SizeClasses : public MM_BaseVirtual
-{
-/* Data members & types */
+class MM_SizeClasses : public MM_BaseVirtual {
+    /* Data members & types */
 public:
 protected:
 private:
-	uintptr_t* _smallCellSizes; /**< Array mapping size classes to the cell size of that size class. The array actually lives in the J9JavaVM. */
-	uintptr_t* _smallNumCells; /**< Array mapping size classes to the number of cells on a region of that size class. The array actually lives in the J9JavaVM. */
-	uintptr_t* _sizeClassIndex; /**< maps size request to size classes. The array actually lives in the OMR vm. */
-	
-/* Methods */
-public:
-	static MM_SizeClasses* newInstance(MM_EnvironmentBase* env);
-	virtual void kill(MM_EnvironmentBase *env);
-	
-	MMINLINE uintptr_t getCellSize(uintptr_t sizeClass) const
-	{
-		assume(sizeClass >= OMR_SIZECLASSES_MIN_SMALL && sizeClass <= OMR_SIZECLASSES_MAX_SMALL, "getCellSize: invalid sizeclass");
-		return _smallCellSizes[sizeClass];
-	}
+    uintptr_t* _smallCellSizes; /**< Array mapping size classes to the cell size of that size class. The array actually lives in the J9JavaVM. */
+    uintptr_t* _smallNumCells; /**< Array mapping size classes to the number of cells on a region of that size class. The array actually lives in the J9JavaVM. */
+    uintptr_t* _sizeClassIndex; /**< maps size request to size classes. The array actually lives in the OMR vm. */
 
-	MMINLINE uintptr_t getNumCells(uintptr_t sizeClass) const
-	{
-		assume(sizeClass >= OMR_SIZECLASSES_MIN_SMALL && sizeClass <= OMR_SIZECLASSES_MAX_SMALL, "getNumCells: invalid sizeclass");
-		return _smallNumCells[sizeClass];
-	}
-	
-	MMINLINE uintptr_t getSizeClassSmall(uintptr_t sizeInBytes) const 
-	{
-		return _sizeClassIndex[sizeInBytes / sizeof(uintptr_t)];
-	}
-	
-	MMINLINE uintptr_t getSizeClass(uintptr_t sizeInBytes) const
-	{
-		if (sizeInBytes > OMR_SIZECLASSES_MAX_SMALL_SIZE_BYTES) {
-			return OMR_SIZECLASSES_LARGE;
-		}
-		return _sizeClassIndex[sizeInBytes / sizeof(uintptr_t)];
-	}
-	
+    /* Methods */
+public:
+    static MM_SizeClasses* newInstance(MM_EnvironmentBase* env);
+    virtual void kill(MM_EnvironmentBase* env);
+
+    MMINLINE uintptr_t getCellSize(uintptr_t sizeClass) const
+    {
+        assume(sizeClass >= OMR_SIZECLASSES_MIN_SMALL && sizeClass <= OMR_SIZECLASSES_MAX_SMALL, "getCellSize: invalid sizeclass");
+        return _smallCellSizes[sizeClass];
+    }
+
+    MMINLINE uintptr_t getNumCells(uintptr_t sizeClass) const
+    {
+        assume(sizeClass >= OMR_SIZECLASSES_MIN_SMALL && sizeClass <= OMR_SIZECLASSES_MAX_SMALL, "getNumCells: invalid sizeclass");
+        return _smallNumCells[sizeClass];
+    }
+
+    MMINLINE uintptr_t getSizeClassSmall(uintptr_t sizeInBytes) const
+    {
+        return _sizeClassIndex[sizeInBytes / sizeof(uintptr_t)];
+    }
+
+    MMINLINE uintptr_t getSizeClass(uintptr_t sizeInBytes) const
+    {
+        if (sizeInBytes > OMR_SIZECLASSES_MAX_SMALL_SIZE_BYTES) {
+            return OMR_SIZECLASSES_LARGE;
+        }
+        return _sizeClassIndex[sizeInBytes / sizeof(uintptr_t)];
+    }
+
 protected:
-	bool initialize(MM_EnvironmentBase *env);
-	virtual void tearDown(MM_EnvironmentBase *env);
-	MM_SizeClasses(MM_EnvironmentBase* env)
-	{
-		_typeId = __FUNCTION__;
-	};
-	
+    bool initialize(MM_EnvironmentBase* env);
+    virtual void tearDown(MM_EnvironmentBase* env);
+    MM_SizeClasses(MM_EnvironmentBase* env)
+    {
+        _typeId = __FUNCTION__;
+    };
+
 private:
 };
 

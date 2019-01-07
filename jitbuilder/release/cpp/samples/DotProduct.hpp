@@ -20,24 +20,21 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #ifndef DOTPRODUCT_INCL
 #define DOTPRODUCT_INCL
 
 #include "JitBuilder.hpp"
 
-typedef void (DotProductFunctionType)(double *, double *, double *, int32_t);
+typedef void(DotProductFunctionType)(double*, double*, double*, int32_t);
 
-class DotProduct : public OMR::JitBuilder::MethodBuilder
-   {
-   private:
+class DotProduct : public OMR::JitBuilder::MethodBuilder {
+private:
+    void PrintString(IlBuilder* bldr, const char* s);
+    OMR::JitBuilder::IlType* pDouble;
 
-   void PrintString (IlBuilder *bldr, const char *s);
-   OMR::JitBuilder::IlType *pDouble;
-
-   public:
-   DotProduct(OMR::JitBuilder::TypeDictionary *);
-   virtual bool buildIL();
-   };
+public:
+    DotProduct(OMR::JitBuilder::TypeDictionary*);
+    virtual bool buildIL();
+};
 
 #endif // !defined(DOTPRODUCT_INCL)

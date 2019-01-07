@@ -25,8 +25,8 @@
 #define _GNU_SOURCE
 #endif /* defined(LINUX) && !defined(OMRZTPF) */
 #if defined(OMRZTPF)
-#include <tpf/c_cinfc.h>   /* for access to cinfc */
-#include <tpf/c_pi1dt.h>   /* for access to machine type. */
+#include <tpf/c_cinfc.h> /* for access to cinfc */
+#include <tpf/c_pi1dt.h> /* for access to machine type. */
 #endif /* defined(OMRZTPF) */
 
 #include <string.h>
@@ -56,7 +56,7 @@
  */
 
 const int S390UnsupportedMachineTypes[] = {
-	G5, MULTIPRISE7000
+    G5, MULTIPRISE7000
 };
 
 /* Fetch the current machine type from /proc/cpuinfo on zLinux platform
@@ -67,45 +67,43 @@ const int S390UnsupportedMachineTypes[] = {
 int32_t
 get390zLinuxMachineType(void)
 {
-	int machine = -1;
-#if (defined (LINUX) && defined(S390) && !defined(OMRZTPF))
-	int i;
-	char line[80];
-	const int LINE_SIZE = sizeof(line) - 1;
-	const char procHeader[] = "processor ";
-	const int PROC_LINE_SIZE = 69;
-	const int PROC_HEADER_SIZE = sizeof(procHeader) - 1;
+    int machine = -1;
+#if (defined(LINUX) && defined(S390) && !defined(OMRZTPF))
+    int i;
+    char line[80];
+    const int LINE_SIZE = sizeof(line) - 1;
+    const char procHeader[] = "processor ";
+    const int PROC_LINE_SIZE = 69;
+    const int PROC_HEADER_SIZE = sizeof(procHeader) - 1;
 
+    FILE* fp = fopen("/proc/cpuinfo", "r");
+    if (fp) {
+        while (fgets(line, LINE_SIZE, fp) > 0) {
+            int len = (int)strlen(line);
 
+            if (len > PROC_HEADER_SIZE && !memcmp(line, procHeader, PROC_HEADER_SIZE)) {
+                if (len == PROC_LINE_SIZE) {
+                    /* eg. processor 0: version = FF,  identification = 100003,  machine = 9672 */
+                    sscanf(line,
+                        "%*s %*d%*c %*s %*c %*s %*s %*c %*s %*s %*c %d",
+                        &machine);
+                }
+            }
+        }
+        fclose(fp);
+    }
 
-	FILE *fp = fopen("/proc/cpuinfo", "r");
-	if (fp) {
-		while (fgets(line, LINE_SIZE, fp) > 0) {
-			int len = (int)strlen(line);
-
-			if (len > PROC_HEADER_SIZE && !memcmp(line, procHeader, PROC_HEADER_SIZE)) {
-				if (len == PROC_LINE_SIZE) {
-					/* eg. processor 0: version = FF,  identification = 100003,  machine = 9672 */
-					sscanf(line,
-						   "%*s %*d%*c %*s %*c %*s %*s %*c %*s %*s %*c %d",
-						   &machine);
-				}
-			}
-		}
-		fclose(fp);
-	}
-
-	/* Scan list of unsupported machines - We do not initialize the JIT for such hardware. */
-	for (i = 0; i < sizeof(S390UnsupportedMachineTypes) / sizeof(int); ++i) {
-		if (machine == S390UnsupportedMachineTypes[i]) {
-			machine = -1; /* unsupported platform */
-		}
-	}
+    /* Scan list of unsupported machines - We do not initialize the JIT for such hardware. */
+    for (i = 0; i < sizeof(S390UnsupportedMachineTypes) / sizeof(int); ++i) {
+        if (machine == S390UnsupportedMachineTypes[i]) {
+            machine = -1; /* unsupported platform */
+        }
+    }
 #elif defined(OMRZTPF)
-        struct pi1dt *pid;
-        /* machine hardware name */
-        pid = (struct pi1dt *)cinfc_fast(CINFC_CMMPID);
-        machine = (int)(pid->pi1pids.pi1mslr.pi1mod);
+    struct pi1dt* pid;
+    /* machine hardware name */
+    pid = (struct pi1dt*)cinfc_fast(CINFC_CMMPID);
+    machine = (int)(pid->pi1pids.pi1mslr.pi1mod);
 #endif
-	return machine;
+    return machine;
 }

@@ -32,38 +32,38 @@
 #define TIMEOUT (60 * 1000)
 
 typedef struct testdata_t {
-	omrthread_monitor_t monitor;
-	volatile intptr_t rc;
+    omrthread_monitor_t monitor;
+    volatile intptr_t rc;
 } testdata_t;
 
 typedef struct testdata2_t {
-	omrthread_monitor_t monitor1;
-	omrthread_monitor_t monitor2;
-	volatile intptr_t rc;
+    omrthread_monitor_t monitor1;
+    omrthread_monitor_t monitor2;
+    volatile intptr_t rc;
 } testdata2_t;
 
 static void childForkHelper(int forkCount);
 static void waitNotifyStart(int forkCount);
-static void waitNotifyChild(testdata_t *, int[2]);
-static int waitNotifyMain(void *arg);
+static void waitNotifyChild(testdata_t*, int[2]);
+static int waitNotifyMain(void* arg);
 static void waitNotify2Start(int forkCount);
-static void waitNotify2Child(testdata2_t *, int[2]);
-static int waitNotify2aMain(void *arg);
-static int waitNotify2bMain(void *arg);
+static void waitNotify2Child(testdata2_t*, int[2]);
+static int waitNotify2aMain(void* arg);
+static int waitNotify2bMain(void* arg);
 static void attachDetachStart(int forkCount);
 
 static void
 childForkHelper(int forkCount)
 {
-	while (forkCount > 0) {
-		omrthread_lib_postForkChild();
-		omrthread_lib_preFork();
-		if (0 == fork()) {
-			forkCount = forkCount - 1;
-		} else {
-			exit(0);
-		}
-	}
+    while (forkCount > 0) {
+        omrthread_lib_postForkChild();
+        omrthread_lib_preFork();
+        if (0 == fork()) {
+            forkCount = forkCount - 1;
+        } else {
+            exit(0);
+        }
+    }
 }
 
 /**
@@ -76,7 +76,7 @@ childForkHelper(int forkCount)
  */
 TEST(ThreadForkResetTest, WaitNotify)
 {
-	waitNotifyStart(1);
+    waitNotifyStart(1);
 }
 
 /**
@@ -106,100 +106,100 @@ TEST(ThreadForkResetTest, WaitNotify)
 static void
 waitNotifyStart(int forkCount)
 {
-	omrthread_t t;
-	testdata_t testdata;
-	int pipedata[2];
+    omrthread_t t;
+    testdata_t testdata;
+    int pipedata[2];
 
-	/*
-	 * Pre-fork:
-	 * Initialize and enter the monitor, then begin the sibling thread.
-	 * The sibling thread cannot enter the monitor because it is already entered here.
-	 */
-	int pipeRC = pipe(pipedata);
-	EXPECT_TRUE(0 == pipeRC)  << "Failure occurred calling pipe";
+    /*
+     * Pre-fork:
+     * Initialize and enter the monitor, then begin the sibling thread.
+     * The sibling thread cannot enter the monitor because it is already entered here.
+     */
+    int pipeRC = pipe(pipedata);
+    EXPECT_TRUE(0 == pipeRC) << "Failure occurred calling pipe";
 
-	omrthread_monitor_init(&testdata.monitor, 0);
-	omrthread_monitor_enter(testdata.monitor);
-	ASSERT_NO_FATAL_FAILURE(createJoinableThread(&t, waitNotifyMain, &testdata));
+    omrthread_monitor_init(&testdata.monitor, 0);
+    omrthread_monitor_enter(testdata.monitor);
+    ASSERT_NO_FATAL_FAILURE(createJoinableThread(&t, waitNotifyMain, &testdata));
 
-	/*
-	 * Wait releases it, allowing the sibling thread to continue.
-	 * The sibling will do notify once its entered the monitor and then wait until after the fork.
-	 * The sibling's wait will release the monitor, allowing the parent to continue here.
-	 */
-	EXPECT_FALSE(J9THREAD_TIMED_OUT == omrthread_monitor_wait_timed(testdata.monitor, TIMEOUT, 0))
-			<< "Timed out waiting for sibling thread to enter monitor.";
+    /*
+     * Wait releases it, allowing the sibling thread to continue.
+     * The sibling will do notify once its entered the monitor and then wait until after the fork.
+     * The sibling's wait will release the monitor, allowing the parent to continue here.
+     */
+    EXPECT_FALSE(J9THREAD_TIMED_OUT == omrthread_monitor_wait_timed(testdata.monitor, TIMEOUT, 0))
+        << "Timed out waiting for sibling thread to enter monitor.";
 
-	omrthread_lib_preFork();
-	if (0 >= forkCount || 0 == fork()) {
-		childForkHelper(forkCount - 1);
-		/* Child process post-fork */
-		waitNotifyChild(&testdata, pipedata);
-	}
-	omrthread_lib_postForkParent();
+    omrthread_lib_preFork();
+    if (0 >= forkCount || 0 == fork()) {
+        childForkHelper(forkCount - 1);
+        /* Child process post-fork */
+        waitNotifyChild(&testdata, pipedata);
+    }
+    omrthread_lib_postForkParent();
 
-	/*
-	 * Parent process post-fork:
-	 * Notify the sibling that fork is done and it can now exit.
-	 * Then, the wait call will release the monitor to let the sibling thread finish.
-	 * Once the sibling thread done, it will notify again and exit the monitor to
-	 * let he parent destroy the monitor.
-	 */
-	ssize_t readBytes = read(pipedata[0], (int *)&testdata.rc, sizeof(testdata.rc));
-	EXPECT_TRUE(readBytes == sizeof(testdata.rc)) << "Didn't read back enough from pipe";
-	EXPECT_TRUE(0 == testdata.rc) << "Failure occurred in child process.";
-	close(pipedata[0]);
-	close(pipedata[1]);
-	EXPECT_TRUE(0 == omrthread_monitor_notify(testdata.monitor))
-			<< "Notifying monitor failed after fork: parent thread does not own monitor.";
-	EXPECT_TRUE(0 == omrthread_monitor_exit(testdata.monitor))
-			<< "Exiting monitor after fork failed: parent thread does not own monitor.";
+    /*
+     * Parent process post-fork:
+     * Notify the sibling that fork is done and it can now exit.
+     * Then, the wait call will release the monitor to let the sibling thread finish.
+     * Once the sibling thread done, it will notify again and exit the monitor to
+     * let he parent destroy the monitor.
+     */
+    ssize_t readBytes = read(pipedata[0], (int*)&testdata.rc, sizeof(testdata.rc));
+    EXPECT_TRUE(readBytes == sizeof(testdata.rc)) << "Didn't read back enough from pipe";
+    EXPECT_TRUE(0 == testdata.rc) << "Failure occurred in child process.";
+    close(pipedata[0]);
+    close(pipedata[1]);
+    EXPECT_TRUE(0 == omrthread_monitor_notify(testdata.monitor))
+        << "Notifying monitor failed after fork: parent thread does not own monitor.";
+    EXPECT_TRUE(0 == omrthread_monitor_exit(testdata.monitor))
+        << "Exiting monitor after fork failed: parent thread does not own monitor.";
 
-	VERBOSE_JOIN(t, J9THREAD_SUCCESS);
+    VERBOSE_JOIN(t, J9THREAD_SUCCESS);
 
-	EXPECT_TRUE(0 == omrthread_monitor_destroy(testdata.monitor))
-			<< "Destroying monitor failed: monitor still in use.";
-	EXPECT_TRUE(0 == testdata.rc) << "Failure occurred in sibling thread.";
+    EXPECT_TRUE(0 == omrthread_monitor_destroy(testdata.monitor))
+        << "Destroying monitor failed: monitor still in use.";
+    EXPECT_TRUE(0 == testdata.rc) << "Failure occurred in sibling thread.";
 }
 
 static void
-waitNotifyChild(testdata_t *testdata, int pipedata[2])
+waitNotifyChild(testdata_t* testdata, int pipedata[2])
 {
-	omrthread_lib_postForkChild();
-	testdata->rc = omrthread_monitor_enter(testdata->monitor);
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_monitor_exit(testdata->monitor);
-	}
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_monitor_exit(testdata->monitor);
-	}
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_monitor_destroy(testdata->monitor);
-	}
-	J9_IGNORE_RETURNVAL(write(pipedata[1], (int *)&testdata->rc, sizeof(testdata->rc)));
-	close(pipedata[0]);
-	close(pipedata[1]);
-	exit(0);
+    omrthread_lib_postForkChild();
+    testdata->rc = omrthread_monitor_enter(testdata->monitor);
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_monitor_exit(testdata->monitor);
+    }
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_monitor_exit(testdata->monitor);
+    }
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_monitor_destroy(testdata->monitor);
+    }
+    J9_IGNORE_RETURNVAL(write(pipedata[1], (int*)&testdata->rc, sizeof(testdata->rc)));
+    close(pipedata[0]);
+    close(pipedata[1]);
+    exit(0);
 }
 
 static int
-waitNotifyMain(void *arg)
+waitNotifyMain(void* arg)
 {
-	testdata_t *testdata = (testdata_t *)arg;
-	testdata->rc = omrthread_monitor_enter(testdata->monitor);
-	/* Notify enter is complete. */
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_monitor_notify(testdata->monitor);
-	}
-	/* Wait until after fork. */
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_monitor_wait_timed(testdata->monitor, TIMEOUT, 0);
-	}
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_monitor_exit(testdata->monitor);
-	}
+    testdata_t* testdata = (testdata_t*)arg;
+    testdata->rc = omrthread_monitor_enter(testdata->monitor);
+    /* Notify enter is complete. */
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_monitor_notify(testdata->monitor);
+    }
+    /* Wait until after fork. */
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_monitor_wait_timed(testdata->monitor, TIMEOUT, 0);
+    }
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_monitor_exit(testdata->monitor);
+    }
 
-	return 0;
+    return 0;
 }
 
 /**
@@ -214,7 +214,7 @@ waitNotifyMain(void *arg)
 
 TEST(ThreadForkResetTest, WaitNotify2)
 {
-	waitNotify2Start(2);
+    waitNotify2Start(2);
 }
 
 /*
@@ -258,209 +258,209 @@ TEST(ThreadForkResetTest, WaitNotify2)
 static void
 waitNotify2Start(int forkCount)
 {
-	omrthread_t t1;
-	omrthread_t t2;
-	testdata2_t testdata;
-	int pipedata[2];
+    omrthread_t t1;
+    omrthread_t t2;
+    testdata2_t testdata;
+    int pipedata[2];
 
-	/*
-	 * Pre-fork:
-	 * Initialize and enter the monitor, then begin the sibling thread.
-	 * The sibling thread cannot enter the monitor because it is already entered here.
-	 */
-	int pipeRC = pipe(pipedata);
-	EXPECT_TRUE(0 == pipeRC)  << "Failure occurred calling pipe";
+    /*
+     * Pre-fork:
+     * Initialize and enter the monitor, then begin the sibling thread.
+     * The sibling thread cannot enter the monitor because it is already entered here.
+     */
+    int pipeRC = pipe(pipedata);
+    EXPECT_TRUE(0 == pipeRC) << "Failure occurred calling pipe";
 
-	omrthread_monitor_init(&testdata.monitor1, 0);
-	omrthread_monitor_init(&testdata.monitor2, 0);
+    omrthread_monitor_init(&testdata.monitor1, 0);
+    omrthread_monitor_init(&testdata.monitor2, 0);
 
-	/*
-	 * Wait releases it, allowing the sibling thread to continue.
-	 * The sibling will do notify once its entered the monitor and then wait until after the fork.
-	 * The sibling's wait will release the monitor, allowing the parent to continue here.
-	 */
-	omrthread_monitor_enter(testdata.monitor1);
-	ASSERT_NO_FATAL_FAILURE(createJoinableThread(&t1, waitNotify2aMain, &testdata));
-	EXPECT_FALSE(J9THREAD_TIMED_OUT == omrthread_monitor_wait_timed(testdata.monitor1, TIMEOUT, 0))
-			<< "Timed out waiting for sibling thread 1 to enter monitor 1.";
-	EXPECT_TRUE(0 == omrthread_monitor_exit(testdata.monitor1))
-			<< "Exiting monitor 1 before fork failed: parent thread does not own monitor.";
+    /*
+     * Wait releases it, allowing the sibling thread to continue.
+     * The sibling will do notify once its entered the monitor and then wait until after the fork.
+     * The sibling's wait will release the monitor, allowing the parent to continue here.
+     */
+    omrthread_monitor_enter(testdata.monitor1);
+    ASSERT_NO_FATAL_FAILURE(createJoinableThread(&t1, waitNotify2aMain, &testdata));
+    EXPECT_FALSE(J9THREAD_TIMED_OUT == omrthread_monitor_wait_timed(testdata.monitor1, TIMEOUT, 0))
+        << "Timed out waiting for sibling thread 1 to enter monitor 1.";
+    EXPECT_TRUE(0 == omrthread_monitor_exit(testdata.monitor1))
+        << "Exiting monitor 1 before fork failed: parent thread does not own monitor.";
 
-	omrthread_monitor_enter(testdata.monitor2);
-	ASSERT_NO_FATAL_FAILURE(createJoinableThread(&t2, waitNotify2bMain, &testdata));
-	EXPECT_FALSE(J9THREAD_TIMED_OUT == omrthread_monitor_wait_timed(testdata.monitor2, TIMEOUT, 0))
-			<< "Timed out waiting for sibling thread 2 to enter monitor 2.";
+    omrthread_monitor_enter(testdata.monitor2);
+    ASSERT_NO_FATAL_FAILURE(createJoinableThread(&t2, waitNotify2bMain, &testdata));
+    EXPECT_FALSE(J9THREAD_TIMED_OUT == omrthread_monitor_wait_timed(testdata.monitor2, TIMEOUT, 0))
+        << "Timed out waiting for sibling thread 2 to enter monitor 2.";
 
-	omrthread_lib_preFork();
-	if (0 >= forkCount || 0 == fork()) {
-		childForkHelper(forkCount - 1);
-		/* Child process post-fork */
-		waitNotify2Child(&testdata, pipedata);
-	}
-	omrthread_lib_postForkParent();
+    omrthread_lib_preFork();
+    if (0 >= forkCount || 0 == fork()) {
+        childForkHelper(forkCount - 1);
+        /* Child process post-fork */
+        waitNotify2Child(&testdata, pipedata);
+    }
+    omrthread_lib_postForkParent();
 
-	/*
-	 * Parent process post-fork:
-	 * Notify the sibling that fork is done and it can now exit.
-	 * Then, the wait call will release the monitor to let the sibling thread finish.
-	 * Once the sibling thread done, it will notify again and exit the monitor to
-	 * let he parent destroy the monitor.
-	 */
-	ssize_t readBytes = read(pipedata[0], (int *)&testdata.rc, sizeof(testdata.rc));
-	EXPECT_TRUE(readBytes == sizeof(testdata.rc)) << "Didn't read back enough from pipe";
-	EXPECT_TRUE(0 == testdata.rc) << "Failure occurred in child process.";
-	close(pipedata[0]);
-	close(pipedata[1]);
-	EXPECT_TRUE(0 == omrthread_monitor_notify(testdata.monitor2))
-			<< "Notifying monitor 2 failed after fork: parent thread does not own monitor.";
-	EXPECT_TRUE(0 == omrthread_monitor_exit(testdata.monitor2))
-			<< "Exiting monitor 2 after fork failed: parent thread does not own monitor.";
+    /*
+     * Parent process post-fork:
+     * Notify the sibling that fork is done and it can now exit.
+     * Then, the wait call will release the monitor to let the sibling thread finish.
+     * Once the sibling thread done, it will notify again and exit the monitor to
+     * let he parent destroy the monitor.
+     */
+    ssize_t readBytes = read(pipedata[0], (int*)&testdata.rc, sizeof(testdata.rc));
+    EXPECT_TRUE(readBytes == sizeof(testdata.rc)) << "Didn't read back enough from pipe";
+    EXPECT_TRUE(0 == testdata.rc) << "Failure occurred in child process.";
+    close(pipedata[0]);
+    close(pipedata[1]);
+    EXPECT_TRUE(0 == omrthread_monitor_notify(testdata.monitor2))
+        << "Notifying monitor 2 failed after fork: parent thread does not own monitor.";
+    EXPECT_TRUE(0 == omrthread_monitor_exit(testdata.monitor2))
+        << "Exiting monitor 2 after fork failed: parent thread does not own monitor.";
 
-	VERBOSE_JOIN(t1, J9THREAD_SUCCESS);
-	VERBOSE_JOIN(t2, J9THREAD_SUCCESS);
+    VERBOSE_JOIN(t1, J9THREAD_SUCCESS);
+    VERBOSE_JOIN(t2, J9THREAD_SUCCESS);
 
-	EXPECT_TRUE(0 == omrthread_monitor_destroy(testdata.monitor1))
-			<< "Destroying monitor 1 failed: monitor still in use.";
-	EXPECT_TRUE(0 == omrthread_monitor_destroy(testdata.monitor2))
-			<< "Destroying monitor 2 failed: monitor still in use.";
-	EXPECT_TRUE(0 == testdata.rc) << "Failure occurred in sibling thread.";
+    EXPECT_TRUE(0 == omrthread_monitor_destroy(testdata.monitor1))
+        << "Destroying monitor 1 failed: monitor still in use.";
+    EXPECT_TRUE(0 == omrthread_monitor_destroy(testdata.monitor2))
+        << "Destroying monitor 2 failed: monitor still in use.";
+    EXPECT_TRUE(0 == testdata.rc) << "Failure occurred in sibling thread.";
 }
 
 static void
-waitNotify2Child(testdata2_t *testdata, int pipedata[2])
+waitNotify2Child(testdata2_t* testdata, int pipedata[2])
 {
-	omrthread_lib_postForkChild();
-	testdata->rc = omrthread_monitor_enter(testdata->monitor1);
-	if (0 == testdata->rc) {
-		if (J9THREAD_TIMED_OUT != omrthread_monitor_wait_timed(testdata->monitor1, START_DELAY, 0)) {
-			testdata->rc = 1;
-		}
-	}
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_monitor_exit(testdata->monitor1);
-	}
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_monitor_enter(testdata->monitor1);
-	}
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_monitor_notify_all(testdata->monitor1);
-	}
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_monitor_exit(testdata->monitor1);
-	}
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_monitor_exit(testdata->monitor2);
-	}
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_monitor_destroy(testdata->monitor1);
-	}
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_monitor_destroy(testdata->monitor2);
-	}
-	J9_IGNORE_RETURNVAL(write(pipedata[1], (int *)&testdata->rc, sizeof(testdata->rc)));
-	close(pipedata[0]);
-	close(pipedata[1]);
-	exit(0);
+    omrthread_lib_postForkChild();
+    testdata->rc = omrthread_monitor_enter(testdata->monitor1);
+    if (0 == testdata->rc) {
+        if (J9THREAD_TIMED_OUT != omrthread_monitor_wait_timed(testdata->monitor1, START_DELAY, 0)) {
+            testdata->rc = 1;
+        }
+    }
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_monitor_exit(testdata->monitor1);
+    }
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_monitor_enter(testdata->monitor1);
+    }
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_monitor_notify_all(testdata->monitor1);
+    }
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_monitor_exit(testdata->monitor1);
+    }
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_monitor_exit(testdata->monitor2);
+    }
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_monitor_destroy(testdata->monitor1);
+    }
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_monitor_destroy(testdata->monitor2);
+    }
+    J9_IGNORE_RETURNVAL(write(pipedata[1], (int*)&testdata->rc, sizeof(testdata->rc)));
+    close(pipedata[0]);
+    close(pipedata[1]);
+    exit(0);
 }
 
 static int
-waitNotify2aMain(void *arg)
+waitNotify2aMain(void* arg)
 {
-	testdata2_t *testdata = (testdata2_t *)arg;
-	testdata->rc = omrthread_monitor_enter(testdata->monitor1);
+    testdata2_t* testdata = (testdata2_t*)arg;
+    testdata->rc = omrthread_monitor_enter(testdata->monitor1);
 
-	/* Notify enter is complete. */
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_monitor_notify(testdata->monitor1);
-	}
-	/* Wait until after fork. */
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_monitor_wait_timed(testdata->monitor1, TIMEOUT, 0);
-	}
-	/* Notify done. */
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_monitor_notify(testdata->monitor1);
-	}
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_monitor_exit(testdata->monitor1);
-	}
+    /* Notify enter is complete. */
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_monitor_notify(testdata->monitor1);
+    }
+    /* Wait until after fork. */
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_monitor_wait_timed(testdata->monitor1, TIMEOUT, 0);
+    }
+    /* Notify done. */
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_monitor_notify(testdata->monitor1);
+    }
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_monitor_exit(testdata->monitor1);
+    }
 
-	return 0;
+    return 0;
 }
 
 static int
-waitNotify2bMain(void *arg)
+waitNotify2bMain(void* arg)
 {
-	testdata2_t *testdata = (testdata2_t *)arg;
-	testdata->rc = omrthread_monitor_enter(testdata->monitor2);
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_monitor_enter(testdata->monitor1);
-	}
-	/* Notify enter is complete. */
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_monitor_notify(testdata->monitor1);
-	}
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_monitor_notify(testdata->monitor2);
-	}
-	/* Wait until after fork. */
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_monitor_wait_timed(testdata->monitor2, TIMEOUT, 0);
-	}
-	/* Wait for sibling 1 to finish. */
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_monitor_wait_timed(testdata->monitor1, TIMEOUT, 0);
-	}
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_monitor_exit(testdata->monitor1);
-	}
-	if (0 == testdata->rc) {
-		testdata->rc = omrthread_monitor_exit(testdata->monitor2);
-	}
+    testdata2_t* testdata = (testdata2_t*)arg;
+    testdata->rc = omrthread_monitor_enter(testdata->monitor2);
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_monitor_enter(testdata->monitor1);
+    }
+    /* Notify enter is complete. */
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_monitor_notify(testdata->monitor1);
+    }
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_monitor_notify(testdata->monitor2);
+    }
+    /* Wait until after fork. */
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_monitor_wait_timed(testdata->monitor2, TIMEOUT, 0);
+    }
+    /* Wait for sibling 1 to finish. */
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_monitor_wait_timed(testdata->monitor1, TIMEOUT, 0);
+    }
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_monitor_exit(testdata->monitor1);
+    }
+    if (0 == testdata->rc) {
+        testdata->rc = omrthread_monitor_exit(testdata->monitor2);
+    }
 
-	return 0;
+    return 0;
 }
 
 TEST(ThreadForkResetTest, AttachDetach)
 {
-	attachDetachStart(1);
+    attachDetachStart(1);
 }
 
 static void
 attachDetachStart(int forkCount)
 {
-	testdata_t testdata;
-	int pipedata[2];
+    testdata_t testdata;
+    int pipedata[2];
 
-	/* Pre-fork */
-	int pipeRC = pipe(pipedata);
-	EXPECT_TRUE(0 == pipeRC)  << "Failure occurred calling pipe";
+    /* Pre-fork */
+    int pipeRC = pipe(pipedata);
+    EXPECT_TRUE(0 == pipeRC) << "Failure occurred calling pipe";
 
-	omrthread_lib_preFork();
-	if (0 >= forkCount || 0 == fork()) {
-		childForkHelper(forkCount - 1);
-		/* Post-fork child process. */
-		omrthread_t self = NULL;
+    omrthread_lib_preFork();
+    if (0 >= forkCount || 0 == fork()) {
+        childForkHelper(forkCount - 1);
+        /* Post-fork child process. */
+        omrthread_t self = NULL;
 
-		omrthread_lib_postForkChild();
-		testdata.rc = omrthread_attach_ex(&self, J9THREAD_ATTR_DEFAULT);
-		if (0 == testdata.rc) {
-			omrthread_detach(self);
-		}
+        omrthread_lib_postForkChild();
+        testdata.rc = omrthread_attach_ex(&self, J9THREAD_ATTR_DEFAULT);
+        if (0 == testdata.rc) {
+            omrthread_detach(self);
+        }
 
-		J9_IGNORE_RETURNVAL(write(pipedata[1], (int *)&testdata.rc, sizeof(testdata.rc)));
-		close(pipedata[0]);
-		close(pipedata[1]);
-		exit(0);
-	}
-	omrthread_lib_postForkParent();
+        J9_IGNORE_RETURNVAL(write(pipedata[1], (int*)&testdata.rc, sizeof(testdata.rc)));
+        close(pipedata[0]);
+        close(pipedata[1]);
+        exit(0);
+    }
+    omrthread_lib_postForkParent();
 
-	/* After fork, notify the sibling thread and wait for it to unlock the global mutex. */
-	ssize_t readBytes = read(pipedata[0], (int *)&testdata.rc, sizeof(testdata.rc));
-	EXPECT_TRUE(readBytes == sizeof(testdata.rc)) << "Didn't read back enough from pipe";
-	EXPECT_TRUE(0 == testdata.rc) << "Failure occurred in child process.";
-	close(pipedata[0]);
-	close(pipedata[1]);
+    /* After fork, notify the sibling thread and wait for it to unlock the global mutex. */
+    ssize_t readBytes = read(pipedata[0], (int*)&testdata.rc, sizeof(testdata.rc));
+    EXPECT_TRUE(readBytes == sizeof(testdata.rc)) << "Didn't read back enough from pipe";
+    EXPECT_TRUE(0 == testdata.rc) << "Failure occurred in child process.";
+    close(pipedata[0]);
+    close(pipedata[1]);
 }
 
 /**
@@ -472,7 +472,7 @@ attachDetachStart(int forkCount)
  */
 TEST(ThreadForkResetTest, GrandchildFork)
 {
-	waitNotifyStart(2);
-	waitNotify2Start(2);
-	attachDetachStart(2);
+    waitNotifyStart(2);
+    waitNotify2Start(2);
+    attachDetachStart(2);
 }

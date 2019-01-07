@@ -22,38 +22,40 @@
 #ifndef SCRATCHREGISTERMANAGER_INCL
 #define SCRATCHREGISTERMANAGER_INCL
 
-#include <stdint.h>                       // for int32_t
-#include "codegen/RegisterConstants.hpp"  // for TR_RegisterKinds, etc
-#include "env/TRMemory.hpp"               // for TR_Memory, etc
-#include "infra/List.hpp"                 // for List
+#include <stdint.h> // for int32_t
+#include "codegen/RegisterConstants.hpp" // for TR_RegisterKinds, etc
+#include "env/TRMemory.hpp" // for TR_Memory, etc
+#include "infra/List.hpp" // for List
 
-namespace TR { class CodeGenerator; }
-namespace TR { class Register; }
-namespace TR { class RegisterDependencyConditions; }
+namespace TR {
+class CodeGenerator;
+}
+namespace TR {
+class Register;
+}
+namespace TR {
+class RegisterDependencyConditions;
+}
 
-enum TR_ManagedScratchRegisterStates
-   {
-   msrUnassigned = 0x00,    // no register associated
-   msrAllocated  = 0x01,    // register has been allocated
-   msrDonated    = 0x02     // register was donated to the list (not allocated)
-   };
+enum TR_ManagedScratchRegisterStates {
+    msrUnassigned = 0x00, // no register associated
+    msrAllocated = 0x01, // register has been allocated
+    msrDonated = 0x02 // register was donated to the list (not allocated)
+};
 
-class TR_ManagedScratchRegister
-   {
+class TR_ManagedScratchRegister {
 public:
+    TR_ALLOC(TR_Memory::ScratchRegisterManager)
 
-   TR_ALLOC(TR_Memory::ScratchRegisterManager)
+    TR::Register* _reg;
+    int32_t _state;
 
-   TR::Register *_reg;
-   int32_t      _state;
-
-   TR_ManagedScratchRegister(TR::Register *preg, TR_ManagedScratchRegisterStates pstate)
-      {
-      _reg = preg;
-      _state = pstate;
-      }
-   };
-
+    TR_ManagedScratchRegister(TR::Register* preg, TR_ManagedScratchRegisterStates pstate)
+    {
+        _reg = preg;
+        _state = pstate;
+    }
+};
 
 /**
  * The scratch register manager addresses a peculiarity of internal control flow
@@ -97,43 +99,39 @@ public:
  * outside an internal control flow region (where you’d just use allocateRegister
  * and stopUsingRegister).
  */
-class TR_ScratchRegisterManager
-   {
+class TR_ScratchRegisterManager {
 
 protected:
+    TR::CodeGenerator* _cg;
 
-   TR::CodeGenerator *_cg;
+    /// No more than '_capacity' scratch registers will be allowed to be created.
+    ///
+    int32_t _capacity;
 
-   /// No more than '_capacity' scratch registers will be allowed to be created.
-   ///
-   int32_t _capacity;
+    /// Number of scratch registers available so far.
+    ///
+    int32_t _cursor;
 
-   /// Number of scratch registers available so far.
-   ///
-   int32_t _cursor;
-
-   List<TR_ManagedScratchRegister> _msrList;
+    List<TR_ManagedScratchRegister> _msrList;
 
 public:
+    TR_ALLOC(TR_Memory::ScratchRegisterManager)
 
-   TR_ALLOC(TR_Memory::ScratchRegisterManager)
+    TR_ScratchRegisterManager(int32_t capacity, TR::CodeGenerator* cg);
 
-   TR_ScratchRegisterManager(int32_t capacity, TR::CodeGenerator *cg);
+    TR::Register* findOrCreateScratchRegister(TR_RegisterKinds rk = TR_GPR);
+    bool donateScratchRegister(TR::Register* reg);
+    bool reclaimScratchRegister(TR::Register* reg);
 
-   TR::Register *findOrCreateScratchRegister(TR_RegisterKinds rk = TR_GPR);
-   bool donateScratchRegister(TR::Register *reg);
-   bool reclaimScratchRegister(TR::Register *reg);
+    int32_t getCapacity() { return _capacity; }
+    void setCapacity(int32_t c) { _capacity = c; }
 
-   int32_t getCapacity()          { return _capacity; }
-   void    setCapacity(int32_t c) { _capacity = c; }
+    int32_t numAvailableRegisters() { return _cursor; }
 
-   int32_t numAvailableRegisters() { return _cursor; }
+    void addScratchRegistersToDependencyList(TR::RegisterDependencyConditions* deps);
+    void stopUsingRegisters();
 
-   void addScratchRegistersToDependencyList(TR::RegisterDependencyConditions *deps);
-   void stopUsingRegisters();
-
-   List<TR_ManagedScratchRegister>& getManagedScratchRegisterList() { return _msrList; }
-
-   };
+    List<TR_ManagedScratchRegister>& getManagedScratchRegisterList() { return _msrList; }
+};
 
 #endif

@@ -45,77 +45,72 @@ struct ModronLnrlOptions;
  * 
  * These locks are not re-entrant
  */
-class MM_LightweightNonReentrantLock : public MM_BaseNonVirtual
-{
+class MM_LightweightNonReentrantLock : public MM_BaseNonVirtual {
 private:
-	bool _initialized; /**< initialized state */
-	char _nameBuf[MAX_LWNR_LOCK_NAME_SIZE]; /* LWNR lock name */
-	J9ThreadMonitorTracing *_tracing; /**< lock statistics */
-	MM_GCExtensionsBase *_extensions; /**< cache extensions for use in teardown() */
+    bool _initialized; /**< initialized state */
+    char _nameBuf[MAX_LWNR_LOCK_NAME_SIZE]; /* LWNR lock name */
+    J9ThreadMonitorTracing* _tracing; /**< lock statistics */
+    MM_GCExtensionsBase* _extensions; /**< cache extensions for use in teardown() */
 
 #if defined(J9MODRON_USE_CUSTOM_SPINLOCKS)
-	J9GCSpinlock _spinlock;
+    J9GCSpinlock _spinlock;
 #else /* J9MODRON_USE_CUSTOM_SPINLOCKS */
-	MUTEX _mutex;
+    MUTEX _mutex;
 #endif /* J9MODRON_USE_CUSTOM_SPINLOCKS */
 
 protected:
-
 public:
-
 private:
-
 protected:
-
 public:
-	bool initialize(MM_EnvironmentBase *env, ModronLnrlOptions *options, const char * name);
-	void tearDown() ;
+    bool initialize(MM_EnvironmentBase* env, ModronLnrlOptions* options, const char* name);
+    void tearDown();
 
-	/**
-	 * Acquire the lock.
-	 * A thread may enter a lock'ed region only once.
-	 * The thread will spin waiting for the lock to become free
-	 * if it is currently in use.
-	 * 
-	 * @return TRUE on success
-	 * @note Creates a load/store barrier.
-	 */
-	MMINLINE bool acquire() 
-	{
+    /**
+     * Acquire the lock.
+     * A thread may enter a lock'ed region only once.
+     * The thread will spin waiting for the lock to become free
+     * if it is currently in use.
+     * 
+     * @return TRUE on success
+     * @note Creates a load/store barrier.
+     */
+    MMINLINE bool acquire()
+    {
 #if defined(J9MODRON_USE_CUSTOM_SPINLOCKS)
-		omrgc_spinlock_acquire(&_spinlock, _tracing);
+        omrgc_spinlock_acquire(&_spinlock, _tracing);
 #else /* J9MODRON_USE_CUSTOM_SPINLOCKS */
-		MUTEX_ENTER(_mutex);
+        MUTEX_ENTER(_mutex);
 #endif /* J9MODRON_USE_CUSTOM_SPINLOCKS */
-		return true;
-	};
+        return true;
+    };
 
-	/**
-	 * Release the lock.
-	 * If the current thread is not the owner of the lock, the
-	 * mutex is unaffected, and an error is returned.
-	 * 
-	 * @return TRUE on success
-	 * @note Creates a store barrier.
-	 */
-	MMINLINE bool release() 
-	{
+    /**
+     * Release the lock.
+     * If the current thread is not the owner of the lock, the
+     * mutex is unaffected, and an error is returned.
+     * 
+     * @return TRUE on success
+     * @note Creates a store barrier.
+     */
+    MMINLINE bool release()
+    {
 #if defined(J9MODRON_USE_CUSTOM_SPINLOCKS)
-		omrgc_spinlock_release(&_spinlock);
+        omrgc_spinlock_release(&_spinlock);
 #else /* J9MODRON_USE_CUSTOM_SPINLOCKS */
-		MUTEX_EXIT(_mutex);
+        MUTEX_EXIT(_mutex);
 #endif /* J9MODRON_USE_CUSTOM_SPINLOCKS */
-		return true;
-	};
+        return true;
+    };
 
-	MM_LightweightNonReentrantLock() : 
-		MM_BaseNonVirtual(),
-		_initialized(false),
-		_tracing(NULL),
-		_extensions(NULL)
-	{
-		_typeId = __FUNCTION__;
-	};
+    MM_LightweightNonReentrantLock()
+        : MM_BaseNonVirtual()
+        , _initialized(false)
+        , _tracing(NULL)
+        , _extensions(NULL)
+    {
+        _typeId = __FUNCTION__;
+    };
 };
 
 #endif /* LIGHTWEIGHT_NON_REENTRANT_LOCK_HPP_ */

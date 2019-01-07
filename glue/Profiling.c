@@ -23,15 +23,14 @@
 #include "omr.h"
 #include "omrprofiler.h"
 
-void ex_omr_checkSampleStack(OMR_VMThread *omrVMThread, const void *context);
-void ex_omr_insertMethodEntryInMethodDictionary(OMR_VM *omrVM, const void *method);
+void ex_omr_checkSampleStack(OMR_VMThread* omrVMThread, const void* context);
+void ex_omr_insertMethodEntryInMethodDictionary(OMR_VM* omrVM, const void* method);
 
 /**
  * Get the number of method properties
  * @return Number of method properties
  */
-int
-OMR_Glue_GetMethodDictionaryPropertyNum(void)
+int OMR_Glue_GetMethodDictionaryPropertyNum(void)
 {
 #error implement number of method properties
 }
@@ -40,21 +39,18 @@ OMR_Glue_GetMethodDictionaryPropertyNum(void)
  * Get the method property names
  * @return Method property names
  */
-const char * const *
+const char* const*
 OMR_Glue_GetMethodDictionaryPropertyNames(void)
 {
 #error implement method property names
 }
 
-void
-ex_omr_checkSampleStack(OMR_VMThread *omrVMThread, const void *context)
+void ex_omr_checkSampleStack(OMR_VMThread* omrVMThread, const void* context)
 {
-	/* Please see example/glue/Profiling.c for a sample implementation. */
+    /* Please see example/glue/Profiling.c for a sample implementation. */
 }
 
-void
-ex_omr_insertMethodEntryInMethodDictionary(OMR_VM *omrVM, const void *method)
+void ex_omr_insertMethodEntryInMethodDictionary(OMR_VM* omrVM, const void* method)
 {
-	/* Please see example/glue/Profiling.c for a sample implementation. */
+    /* Please see example/glue/Profiling.c for a sample implementation. */
 }
-

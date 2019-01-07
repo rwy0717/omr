@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 /*
  * ===========================================================================
  * Module Information:
@@ -34,32 +33,31 @@
  * ===========================================================================
  */
 
-#if __TARGET_LIB__ == 0X22080000                                   /*ibm@28725*/
-#include <//'PP.ADLE370.OS39028.SCEEH.SYS.H(ipc)'>                 /*ibm@28725*/
-#else                                                              /*ibm@28725*/
+#if __TARGET_LIB__ == 0X22080000 /*ibm@28725*/
+#include < //'PP.ADLE370.OS39028.SCEEH.SYS.H(ipc)'>                 /*ibm@28725*/
+#else /*ibm@28725*/
 #include "prefixpath.h"
-#include PREFIXPATH(sys/ipc.h)                                  /*ibm@28725*/
-#endif                                                             /*ibm@28725*/
+#include PREFIXPATH(sys / ipc.h) /*ibm@28725*/
+#endif /*ibm@28725*/
 
 #if defined(IBM_ATOE)
-   #if !defined(IBM_ATOE_SYS_FTOK)
-      #define IBM_ATOE_SYS_FTOK
+#if !defined(IBM_ATOE_SYS_FTOK)
+#define IBM_ATOE_SYS_FTOK
 
-      #ifdef __cplusplus
-         extern "C" {
-      #endif
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-            int atoe_ftok(const char *, int);
+int atoe_ftok(const char*, int);
 
-      #ifdef __cplusplus
-         }
-      #endif
+#ifdef __cplusplus
+}
+#endif
 
-      #undef ftok
-      #define ftok atoe_ftok
+#undef ftok
+#define ftok atoe_ftok
 
-   #endif
+#endif
 #endif
 
 /* END OF FILE */
-

@@ -24,21 +24,17 @@
 
 TR::CodeCacheMemorySegment*
 OMR::CodeCacheMemorySegment::self()
-   {
-   return static_cast<TR::CodeCacheMemorySegment*>(this);
-   }
+{
+    return static_cast<TR::CodeCacheMemorySegment*>(this);
+}
 
+void OMR::CodeCacheMemorySegment::adjustAlloc(int64_t adjust)
+{
+    self()->setSegmentAlloc(self()->segmentAlloc() + adjust);
+}
 
-void
-OMR::CodeCacheMemorySegment::adjustAlloc(int64_t adjust)
-   {
-   self()->setSegmentAlloc(self()->segmentAlloc() + adjust);
-   }
-
-
-void
-OMR::CodeCacheMemorySegment::free(TR::CodeCacheManager *manager)
-   {
-   manager->freeMemory(_base);
-   new (static_cast<TR::CodeCacheMemorySegment *>(this)) TR::CodeCacheMemorySegment();
-   }
+void OMR::CodeCacheMemorySegment::free(TR::CodeCacheManager* manager)
+{
+    manager->freeMemory(_base);
+    new (static_cast<TR::CodeCacheMemorySegment*>(this)) TR::CodeCacheMemorySegment();
+}

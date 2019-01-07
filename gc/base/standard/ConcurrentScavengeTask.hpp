@@ -31,53 +31,51 @@
 
 #include "ParallelScavengeTask.hpp"
 
-class MM_ConcurrentScavengeTask : public MM_ParallelScavengeTask
-{
-	/* Data Members */
+class MM_ConcurrentScavengeTask : public MM_ParallelScavengeTask {
+    /* Data Members */
 private:
-	uintptr_t const _bytesToScan;	/**< The number of bytes that this must scan before it will stop trying to do more work */
-	volatile uintptr_t _bytesScanned;	/**< The number of bytes scanned by this */
+    uintptr_t const _bytesToScan; /**< The number of bytes that this must scan before it will stop trying to do more work */
+    volatile uintptr_t _bytesScanned; /**< The number of bytes scanned by this */
 protected:
 public:
+    enum ConcurrentAction {
+        SCAVENGE_ALL = 1,
+        SCAVENGE_ROOTS,
+        SCAVENGE_SCAN,
+        SCAVENGE_COMPLETE
+    };
 
-	enum ConcurrentAction {
-		SCAVENGE_ALL = 1,
-		SCAVENGE_ROOTS,
-		SCAVENGE_SCAN,
-		SCAVENGE_COMPLETE
-	};
+    /* _action should be private */
+    ConcurrentAction _action;
 
-	/* _action should be private */
-	ConcurrentAction _action;
-
-	/* Member Functions */
+    /* Member Functions */
 private:
 protected:
 public:
-	virtual uintptr_t getVMStateID()
-	{
-		return OMRVMSTATE_GC_CONCURRENT_SCAVENGER;
-	}
+    virtual uintptr_t getVMStateID()
+    {
+        return OMRVMSTATE_GC_CONCURRENT_SCAVENGER;
+    }
 
-	uintptr_t getBytesScanned()
-	{
-		return _bytesScanned;
-	}
-	virtual void run(MM_EnvironmentBase *env);
+    uintptr_t getBytesScanned()
+    {
+        return _bytesScanned;
+    }
+    virtual void run(MM_EnvironmentBase* env);
 
-	MM_ConcurrentScavengeTask(MM_EnvironmentBase *env,
-			MM_Dispatcher *dispatcher,
-			MM_Scavenger *scavenger,
-			ConcurrentAction action,
-			uintptr_t bytesToScan,
-			MM_CycleState *cycleState) :
-		MM_ParallelScavengeTask(env, dispatcher, scavenger, cycleState)
-		, _bytesToScan(bytesToScan)
-		, _bytesScanned(0)
-		, _action(action)
-	{
-		_typeId = __FUNCTION__;
-	};
+    MM_ConcurrentScavengeTask(MM_EnvironmentBase* env,
+        MM_Dispatcher* dispatcher,
+        MM_Scavenger* scavenger,
+        ConcurrentAction action,
+        uintptr_t bytesToScan,
+        MM_CycleState* cycleState)
+        : MM_ParallelScavengeTask(env, dispatcher, scavenger, cycleState)
+        , _bytesToScan(bytesToScan)
+        , _bytesScanned(0)
+        , _action(action)
+    {
+        _typeId = __FUNCTION__;
+    };
 };
 
 #endif /* OMR_GC_CONCURRENT_SCAVENGER */

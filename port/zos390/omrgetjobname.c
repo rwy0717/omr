@@ -42,31 +42,28 @@
  *       jobname.
  *
  */
-void
-omrget_jobname(struct OMRPortLibrary *portLibrary, char *jobname, uintptr_t length)
+void omrget_jobname(struct OMRPortLibrary* portLibrary, char* jobname, uintptr_t length)
 {
-	char *tmp_jobname = (char *)__malloc31(J9_MAX_JOBNAME);
-	char *ascname;
-	uintptr_t width;
+    char* tmp_jobname = (char*)__malloc31(J9_MAX_JOBNAME);
+    char* ascname;
+    uintptr_t width;
 
-	if (tmp_jobname) {
-		memset(tmp_jobname, '\0', J9_MAX_JOBNAME);
-		_JOBNAME(tmp_jobname);  /* requires <31bit address */
-		ascname = e2a_func(tmp_jobname, strlen(tmp_jobname));
+    if (tmp_jobname) {
+        memset(tmp_jobname, '\0', J9_MAX_JOBNAME);
+        _JOBNAME(tmp_jobname); /* requires <31bit address */
+        ascname = e2a_func(tmp_jobname, strlen(tmp_jobname));
 
-		if (ascname) {
-			width = strcspn(ascname, " ");
-			strncpy(jobname, ascname, width);
-			jobname[width] = '\0';
-			free(ascname);
-		}
-		free(tmp_jobname);
+        if (ascname) {
+            width = strcspn(ascname, " ");
+            strncpy(jobname, ascname, width);
+            jobname[width] = '\0';
+            free(ascname);
+        }
+        free(tmp_jobname);
 
-	} else {
-		if (length >= 5) {
-			strcpy(jobname, "%job");
-		}
-	}
+    } else {
+        if (length >= 5) {
+            strcpy(jobname, "%job");
+        }
+    }
 }
-
-

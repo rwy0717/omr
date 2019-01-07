@@ -27,8 +27,14 @@
  */
 #ifndef OMR_CPU_CONNECTOR
 #define OMR_CPU_CONNECTOR
-namespace OMR { namespace X86 { class CPU; } }
-namespace OMR { typedef OMR::X86::CPU CPUConnector; }
+namespace OMR {
+namespace X86 {
+class CPU;
+}
+} // namespace OMR
+namespace OMR {
+typedef OMR::X86::CPU CPUConnector;
+}
 #else
 #error OMR::X86::CPU expected to be a primary connector, but an OMR connector is already defined
 #endif
@@ -37,36 +43,33 @@ namespace OMR { typedef OMR::X86::CPU CPUConnector; }
 #include "compiler/env/OMRCPU.hpp"
 
 struct TR_X86CPUIDBuffer;
-namespace TR { class Compilation; }
+namespace TR {
+class Compilation;
+}
 
+namespace OMR {
 
-namespace OMR
-{
+namespace X86 {
 
-namespace X86
-{
-
-class CPU : public OMR::CPU
-   {
+class CPU : public OMR::CPU {
 protected:
-
-   CPU() : OMR::CPU() {}
+    CPU()
+        : OMR::CPU()
+    {}
 
 public:
+    TR_X86CPUIDBuffer* queryX86TargetCPUID(TR::Compilation* comp);
+    const char* getX86ProcessorVendorId(TR::Compilation* comp);
+    uint32_t getX86ProcessorSignature(TR::Compilation* comp);
+    uint32_t getX86ProcessorFeatureFlags(TR::Compilation* comp);
+    uint32_t getX86ProcessorFeatureFlags2(TR::Compilation* comp);
+    uint32_t getX86ProcessorFeatureFlags8(TR::Compilation* comp);
 
-   TR_X86CPUIDBuffer *queryX86TargetCPUID(TR::Compilation *comp);
-   const char *getX86ProcessorVendorId(TR::Compilation *comp);
-   uint32_t getX86ProcessorSignature(TR::Compilation *comp);
-   uint32_t getX86ProcessorFeatureFlags(TR::Compilation *comp);
-   uint32_t getX86ProcessorFeatureFlags2(TR::Compilation *comp);
-   uint32_t getX86ProcessorFeatureFlags8(TR::Compilation *comp);
+    bool testOSForSSESupport(TR::Compilation* comp);
+};
 
-   bool testOSForSSESupport(TR::Compilation *comp);
+} // namespace X86
 
-   };
-
-}
-
-}
+} // namespace OMR
 
 #endif

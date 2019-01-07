@@ -30,99 +30,90 @@
 #include "gtest/gtest.h"
 #include "ilgen/IlGeneratorMethodDetails_inlines.hpp"
 
-namespace TestCompiler
+namespace TestCompiler {
+
+FooMethodType* FooBarTest::_foo = 0;
+BarMethodType* FooBarTest::_bar = 0;
+TR::ResolvedMethod* FooBarTest::_barCompilee;
+
+void FooBarTest::compileTestMethods()
 {
+    int32_t rc = 0;
 
+    TR::TypeDictionary types;
 
-FooMethodType  * FooBarTest::_foo = 0;
-BarMethodType  * FooBarTest::_bar = 0;
-TR::ResolvedMethod * FooBarTest::_barCompilee;
+    //_bar = &FooBarTest::bar;
+    BarIlInjector barIlInjector(&types, this);
+    int32_t numberOfArguments = 1;
+    TR::IlType* Int32 = types.PrimitiveType(TR::Int32);
+    TR::IlType** argTypes = new TR::IlType*[numberOfArguments];
+    argTypes[0] = Int32;
+    bool argIsArray[1] = { false };
+    TR::ResolvedMethod barCompilee(__FILE__, LINETOSTR(__LINE__), "bar", numberOfArguments, argTypes, Int32, 0, &barIlInjector);
+    _barCompilee = &barCompilee;
+    TR::IlGeneratorMethodDetails barDetails(&barCompilee);
 
-void
-FooBarTest::compileTestMethods()
-   {
-   int32_t rc = 0;
+    _bar = (BarMethodType*)(compileMethod(barDetails, warm, rc));
+    barCompilee.setEntryPoint((void*)_bar);
 
-   TR::TypeDictionary types;
-
-   //_bar = &FooBarTest::bar;
-   BarIlInjector barIlInjector(&types, this);
-   int32_t numberOfArguments = 1;
-   TR::IlType *Int32 = types.PrimitiveType(TR::Int32);
-   TR::IlType **argTypes = new TR::IlType*[numberOfArguments];
-   argTypes[0] = Int32;
-   bool argIsArray[1] = { false };
-   TR::ResolvedMethod barCompilee(__FILE__, LINETOSTR(__LINE__), "bar", numberOfArguments, argTypes, Int32, 0, &barIlInjector);
-   _barCompilee = &barCompilee;
-   TR::IlGeneratorMethodDetails barDetails(&barCompilee);
-
-   _bar = (BarMethodType *) (compileMethod(barDetails, warm, rc));
-   barCompilee.setEntryPoint((void *)_bar);
-
-   FooIlInjector fooIlInjector(&types, this);
-   TR::ResolvedMethod fooCompilee(__FILE__, LINETOSTR(__LINE__), "foo", numberOfArguments, argTypes, Int32, 0, &fooIlInjector);
-   TR::IlGeneratorMethodDetails fooDetails(&fooCompilee);
-   _foo = (FooMethodType *) (compileMethod(fooDetails, warm, rc));
-
-   }
+    FooIlInjector fooIlInjector(&types, this);
+    TR::ResolvedMethod fooCompilee(__FILE__, LINETOSTR(__LINE__), "foo", numberOfArguments, argTypes, Int32, 0, &fooIlInjector);
+    TR::IlGeneratorMethodDetails fooDetails(&fooCompilee);
+    _foo = (FooMethodType*)(compileMethod(fooDetails, warm, rc));
+}
 
 const int32_t FooBarTest::_dataArraySize;
 int32_t FooBarTest::_dataArray[100];
 
 int32_t
 FooBarTest::foo(int32_t index)
-   {
-   int32_t newIndex = _bar(index);
-   if (newIndex < 0 || newIndex >= _dataArraySize)
-      return -1;
-   return _dataArray[newIndex];
-   }
+{
+    int32_t newIndex = _bar(index);
+    if (newIndex < 0 || newIndex >= _dataArraySize)
+        return -1;
+    return _dataArray[newIndex];
+}
 
 int32_t
 FooBarTest::bar(int32_t index)
-   {
-   if (index < 0 || index >= _dataArraySize)
-      return -1;
-   return _dataArray[index];
-   }
+{
+    if (index < 0 || index >= _dataArraySize)
+        return -1;
+    return _dataArray[index];
+}
 
+void FooBarTest::invokeTests()
+{
+    int32_t i;
 
-void
-FooBarTest::invokeTests()
-   {
-   int32_t i;
+    //   // First set of tests should map i to i
+    for (i = 0; i < _dataArraySize; i++)
+        _dataArray[i] = _dataArraySize - i;
 
-//   // First set of tests should map i to i
-   for (i=0;i < _dataArraySize;i++)
-      _dataArray[i] = _dataArraySize - i;
+    int32_t testID = 0, result;
+    OMR_CT_EXPECT_EQ(_foo, -1, _foo(0));
 
-   int32_t testID = 0, result;
-   OMR_CT_EXPECT_EQ(_foo, -1, _foo(0));
+    for (i = 1; i < _dataArraySize; i++, testID++) {
+        OMR_CT_EXPECT_EQ(_foo, i, _foo(i));
+    }
 
-   for (i = 1; i < _dataArraySize;i++,testID++)
-      {
-      OMR_CT_EXPECT_EQ(_foo, i, _foo(i));
-      }
+    // Second set of tests should map i to N-i
+    for (i = 0; i < _dataArraySize; i++ /*,testID++*/) {
+        OMR_CT_EXPECT_EQ(_bar, _dataArraySize - i, _bar(i));
+    }
 
-   // Second set of tests should map i to N-i
-   for (i = 0; i < _dataArraySize;i++/*,testID++*/)
-      {
-      OMR_CT_EXPECT_EQ(_bar, _dataArraySize - i, _bar(i));
-      }
+    // Third set of tests should map i to 1
+    for (int32_t i = 0; i < _dataArraySize; i++)
+        _dataArray[i] = 1;
+    for (i = 0; i < _dataArraySize; i++, testID++) {
+        OMR_CT_EXPECT_EQ(_foo, 1, _foo(i));
+    }
 
-   // Third set of tests should map i to 1
-   for (int32_t i=0;i < _dataArraySize;i++)
-      _dataArray[i] = 1;
-   for (i = 0;i < _dataArraySize;i++,testID++)
-      {
-      OMR_CT_EXPECT_EQ(_foo, 1, _foo(i));
-      }
-
-   OMR_CT_EXPECT_EQ(_foo, -1, _foo(-1));
-   OMR_CT_EXPECT_EQ(_foo, -1, _foo(INT_MIN));
-   OMR_CT_EXPECT_EQ(_foo, -1, _foo(_dataArraySize));
-   OMR_CT_EXPECT_EQ(_foo, -1, _foo(INT_MAX));
-   }
+    OMR_CT_EXPECT_EQ(_foo, -1, _foo(-1));
+    OMR_CT_EXPECT_EQ(_foo, -1, _foo(INT_MIN));
+    OMR_CT_EXPECT_EQ(_foo, -1, _foo(_dataArraySize));
+    OMR_CT_EXPECT_EQ(_foo, -1, _foo(INT_MAX));
+}
 
 } // namespace TestCompiler
 
@@ -133,8 +124,8 @@ FooBarTest::invokeTests()
 // Please remove this #ifdef after those functions are implemented.
 #if defined(TR_TARGET_X86) || defined(TR_TARGET_S390) && !defined(TR_TARGET_64BIT) && !defined(J9ZOS390)
 TEST(JITTest, FooBarTest)
-   {
-   ::TestCompiler::FooBarTest _fooBarTest;
-   _fooBarTest.RunTest();
-   }
+{
+    ::TestCompiler::FooBarTest _fooBarTest;
+    _fooBarTest.RunTest();
+}
 #endif

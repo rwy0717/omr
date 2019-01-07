@@ -20,15 +20,15 @@
 #############################################################################
 
 if(OMR_ENV_DATA64)
-	list(APPEND OMR_PLATFORM_DEFINITIONS
-		-DJ9HAMMER
-		-D_AMD64_
-	)
+    list(APPEND OMR_PLATFORM_DEFINITIONS
+        -DJ9HAMMER
+        -D_AMD64_
+    )
 else()
-	list(APPEND OMR_PLATFORM_DEFINITIONS
-		-DJ9X86
-		-D_X86_
-	)
+    list(APPEND OMR_PLATFORM_DEFINITIONS
+        -DJ9X86
+        -D_X86_
+    )
 endif()
 
 # Testarossa build variables. Longer term the distinction between TR and the rest
@@ -39,14 +39,14 @@ list(APPEND TR_COMPILE_DEFINITIONS -DTR_HOST_X86 -DTR_TARGET_X86)
 set(TR_HOST_ARCH    x)
 
 if(OMR_ENV_DATA64)
-	list(APPEND TR_COMPILE_DEFINITIONS -DTR_HOST_64BIT -DTR_TARGET_64BIT -DBITVECTOR_64BIT)
+    list(APPEND TR_COMPILE_DEFINITIONS -DTR_HOST_64BIT -DTR_TARGET_64BIT -DBITVECTOR_64BIT)
 
 
-	set(TR_HOST_SUBARCH amd64)
-	set(TR_HOST_BITS    64)
+    set(TR_HOST_SUBARCH amd64)
+    set(TR_HOST_BITS    64)
 else()
-	list(APPEND TR_COMPILE_DEFINITIONS -DTR_HOST_32BIT -DTR_TARGET_32BIT)
+    list(APPEND TR_COMPILE_DEFINITIONS -DTR_HOST_32BIT -DTR_TARGET_32BIT)
 
-	set(TR_HOST_SUBARCH i386)
-	set(TR_HOST_BITS    32)
+    set(TR_HOST_SUBARCH i386)
+    set(TR_HOST_BITS    32)
 endif()

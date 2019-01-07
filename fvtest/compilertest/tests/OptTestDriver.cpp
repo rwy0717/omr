@@ -29,9 +29,9 @@
 #include "ilgen/MethodInfo.hpp"
 
 TestCompiler::OptTestDriver::~OptTestDriver()
-   {
-   TR::Optimizer::setMockStrategy(NULL);
-   }
+{
+    TR::Optimizer::setMockStrategy(NULL);
+}
 
 /**
  * Fill the array \p strategy with optimizations.
@@ -39,41 +39,40 @@ TestCompiler::OptTestDriver::~OptTestDriver()
  * @param[out] strategy An array with at least
  * `_optimization.size() + 1` elements.
  */
-void TestCompiler::OptTestDriver::makeOptimizationStrategyArray(OptimizationStrategy *strategy)
-   {
-   for(unsigned int i = 0; i < _optimizations.size(); ++i)
-      {
-      strategy[i]._num = _optimizations[i]._num;
-      strategy[i]._options = _optimizations[i]._options;
-      }
+void TestCompiler::OptTestDriver::makeOptimizationStrategyArray(OptimizationStrategy* strategy)
+{
+    for (unsigned int i = 0; i < _optimizations.size(); ++i) {
+        strategy[i]._num = _optimizations[i]._num;
+        strategy[i]._options = _optimizations[i]._options;
+    }
 
-   strategy[_optimizations.size()]._num = OMR::endOpts;
-   strategy[_optimizations.size()]._options = 0;
-   }
+    strategy[_optimizations.size()]._num = OMR::endOpts;
+    strategy[_optimizations.size()]._options = 0;
+}
 
 /**
  * Similar to VerifyAndInvoke(), however the IL is not compiled
  * after IL verification, and tests are not invoked.
  */
 void TestCompiler::OptTestDriver::Verify()
-   {
-   OptimizationStrategy *strategy = new OptimizationStrategy[_optimizations.size() + 1];
-   makeOptimizationStrategyArray(strategy);
-   TR::Optimizer::setMockStrategy(strategy);
+{
+    OptimizationStrategy* strategy = new OptimizationStrategy[_optimizations.size() + 1];
+    makeOptimizationStrategyArray(strategy);
+    TR::Optimizer::setMockStrategy(strategy);
 
-   // To stop before codegen, throw an exception at the end of IL verification.
-   TR::IlVerifier *oldVerifier = _ilVer;
-   TR::NoCodegenVerifier noCodegenVerifier(oldVerifier);
-   setIlVerifier(&noCodegenVerifier);
+    // To stop before codegen, throw an exception at the end of IL verification.
+    TR::IlVerifier* oldVerifier = _ilVer;
+    TR::NoCodegenVerifier noCodegenVerifier(oldVerifier);
+    setIlVerifier(&noCodegenVerifier);
 
-   compileTestMethods();
+    compileTestMethods();
 
-   setIlVerifier(oldVerifier);
-   TR::Optimizer::setMockStrategy(NULL);
-   delete[] strategy;
+    setIlVerifier(oldVerifier);
+    TR::Optimizer::setMockStrategy(NULL);
+    delete[] strategy;
 
-   ASSERT_EQ(true, noCodegenVerifier.hasRun()) << "Did not run verifiers.";
-   }
+    ASSERT_EQ(true, noCodegenVerifier.hasRun()) << "Did not run verifiers.";
+}
 
 /**
  * This generates IL, runs the requested optimizations,
@@ -84,16 +83,16 @@ void TestCompiler::OptTestDriver::Verify()
  * added via addOptimization().
  */
 void TestCompiler::OptTestDriver::VerifyAndInvoke()
-   {
-   OptimizationStrategy *strategy = new OptimizationStrategy[_optimizations.size() + 1];
-   makeOptimizationStrategyArray(strategy);
-   TR::Optimizer::setMockStrategy(strategy);
+{
+    OptimizationStrategy* strategy = new OptimizationStrategy[_optimizations.size() + 1];
+    makeOptimizationStrategyArray(strategy);
+    TR::Optimizer::setMockStrategy(strategy);
 
-   RunTest();
+    RunTest();
 
-   TR::Optimizer::setMockStrategy(NULL);
-   delete[] strategy;
-   }
+    TR::Optimizer::setMockStrategy(NULL);
+    delete[] strategy;
+}
 
 /**
  * Append a single optimization to the list of optimizations to perform.
@@ -102,10 +101,10 @@ void TestCompiler::OptTestDriver::VerifyAndInvoke()
  * @param opt The optimization to perform.
  */
 void TestCompiler::OptTestDriver::addOptimization(OMR::Optimizations opt)
-   {
-   OptimizationStrategy strategy = {opt, OMR::MustBeDone};
-   _optimizations.push_back(strategy);
-   }
+{
+    OptimizationStrategy strategy = { opt, OMR::MustBeDone };
+    _optimizations.push_back(strategy);
+}
 
 /**
  * Append an optimization strategy to the list of optimizations to perform.
@@ -113,14 +112,14 @@ void TestCompiler::OptTestDriver::addOptimization(OMR::Optimizations opt)
  * @param opts An array of optimizations to perform. The last item in this
  * array must be `endOpts` or `endGroup`.
  */
-void TestCompiler::OptTestDriver::addOptimizations(const OptimizationStrategy *opts)
-   {
-   const OptimizationStrategy *end = opts;
-   while(end->_num != OMR::endOpts && end->_num != OMR::endGroup)
-      ++end;
+void TestCompiler::OptTestDriver::addOptimizations(const OptimizationStrategy* opts)
+{
+    const OptimizationStrategy* end = opts;
+    while (end->_num != OMR::endOpts && end->_num != OMR::endGroup)
+        ++end;
 
-   _optimizations.insert(_optimizations.end(), opts, end);
-   }
+    _optimizations.insert(_optimizations.end(), opts, end);
+}
 
 /**
  * @brief Compiles the method.
@@ -130,11 +129,11 @@ void TestCompiler::OptTestDriver::addOptimizations(const OptimizationStrategy *o
  * adds the IlVerifier, then compiles the method.
  */
 void TestCompiler::OptTestDriver::compileTestMethods()
-   {
-   TR::ResolvedMethod resolvedMethod = _methodInfo->ResolvedMethod();
-   TR::IlGeneratorMethodDetails details(&resolvedMethod);
-   details.setIlVerifier(_ilVer);
+{
+    TR::ResolvedMethod resolvedMethod = _methodInfo->ResolvedMethod();
+    TR::IlGeneratorMethodDetails details(&resolvedMethod);
+    details.setIlVerifier(_ilVer);
 
-   int32_t rc = 0;
-   _compiledMethod = compileMethod(details, warm, rc);
-   }
+    int32_t rc = 0;
+    _compiledMethod = compileMethod(details, warm, rc);
+}

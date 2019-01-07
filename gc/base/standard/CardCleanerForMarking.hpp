@@ -36,55 +36,54 @@
  * @ingroup GC_Modron_Standard
  */
 
-class MM_CardCleanerForMarking : public MM_CardCleaner
-{
+class MM_CardCleanerForMarking : public MM_CardCleaner {
 public:
 protected:
 private:
-	MM_MarkingScheme *_markingScheme;
+    MM_MarkingScheme* _markingScheme;
+
 public:
 protected:
-	/**
-	 * Clean a range of addresses (typically within a span of a card)
-	 * The class specifically is used for Incremental-Update style of marking
-	 *
-	 * @param[in] env A thread (typically the thread initializing the GC)
-	 * @param[in] lowAddress low address of the range to be cleaned
-	 * @param[in] highAddress high address of the range to be cleaned
-	 */
-	virtual void clean(MM_EnvironmentBase *envModron, void *lowAddress, void *highAddress, Card *cardToClean)
-	{
-		MM_EnvironmentStandard *env = MM_EnvironmentStandard::getEnvironment(envModron);
-		MM_GCExtensionsBase *extensions = env->getExtensions();
+    /**
+     * Clean a range of addresses (typically within a span of a card)
+     * The class specifically is used for Incremental-Update style of marking
+     *
+     * @param[in] env A thread (typically the thread initializing the GC)
+     * @param[in] lowAddress low address of the range to be cleaned
+     * @param[in] highAddress high address of the range to be cleaned
+     */
+    virtual void clean(MM_EnvironmentBase* envModron, void* lowAddress, void* highAddress, Card* cardToClean)
+    {
+        MM_EnvironmentStandard* env = MM_EnvironmentStandard::getEnvironment(envModron);
+        MM_GCExtensionsBase* extensions = env->getExtensions();
 
-		/* card may be marked dirty in WP overflow, so it is important to mark it clean before any scan */
-		*cardToClean = CARD_CLEAN;
-		/* previous line value MUST be physically written to memory (relevant for concurrent cleaning) - force such write if necessary */
-		MM_AtomicOperations::sync();
+        /* card may be marked dirty in WP overflow, so it is important to mark it clean before any scan */
+        *cardToClean = CARD_CLEAN;
+        /* previous line value MUST be physically written to memory (relevant for concurrent cleaning) - force such write if necessary */
+        MM_AtomicOperations::sync();
 
-		MM_HeapMapIterator markedObjectIterator(extensions, _markingScheme->getMarkMap(), (uintptr_t *)lowAddress, (uintptr_t *)highAddress);
-		omrobjectptr_t object = NULL;
-		while (NULL != (object = markedObjectIterator.nextObject())) {
-			_markingScheme->scanObject(env, object, SCAN_REASON_OVERFLOWED_OBJECT);
-		}
-	}
+        MM_HeapMapIterator markedObjectIterator(extensions, _markingScheme->getMarkMap(), (uintptr_t*)lowAddress, (uintptr_t*)highAddress);
+        omrobjectptr_t object = NULL;
+        while (NULL != (object = markedObjectIterator.nextObject())) {
+            _markingScheme->scanObject(env, object, SCAN_REASON_OVERFLOWED_OBJECT);
+        }
+    }
 
-	/**
-	 * @see MM_CardCleaner::getVMStateID()
-	 */
-	virtual uintptr_t getVMStateID() { return OMRVMSTATE_GC_CARD_CLEANER_FOR_MARKING; }
-	
+    /**
+     * @see MM_CardCleaner::getVMStateID()
+     */
+    virtual uintptr_t getVMStateID() { return OMRVMSTATE_GC_CARD_CLEANER_FOR_MARKING; }
+
 public:
-
-	/**
-	 * Create a CardCleaner object specific for Incremental-Update style of marking
-	 */
-	MM_CardCleanerForMarking(MM_MarkingScheme *markingScheme)
-		: MM_CardCleaner()
-		, _markingScheme(markingScheme)
-	{
-		_typeId = __FUNCTION__;
-	}
+    /**
+     * Create a CardCleaner object specific for Incremental-Update style of marking
+     */
+    MM_CardCleanerForMarking(MM_MarkingScheme* markingScheme)
+        : MM_CardCleaner()
+        , _markingScheme(markingScheme)
+    {
+        _typeId = __FUNCTION__;
+    }
 
 private:
 };

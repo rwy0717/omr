@@ -29,18 +29,18 @@
 extern "C" {
 #endif
 
-omr_error_t OMR_Initialize(void *languageVM, OMR_VM **vmSlot);
+omr_error_t OMR_Initialize(void* languageVM, OMR_VM** vmSlot);
 
 /* Warning: It is possible for OMR_Shutdown to be called from a different thread than OMR_Initialize, for example:
  * initial thread -> OMR_Initialize() -> new Thread() -> (in new thread) fork() -> (in child) OMR_Shutdown().
  *
  * The current thread might not be attached to any OMR components. In particular, it might not be omrthread_attach()ed.
  */
-omr_error_t OMR_Shutdown(OMR_VM *omrVM);
+omr_error_t OMR_Shutdown(OMR_VM* omrVM);
 
-omr_error_t OMR_Initialize_VM(OMR_VM **omrVMSlot, OMR_VMThread **omrVMThreadSlot, void *languageVM, void *languageVMThread);
+omr_error_t OMR_Initialize_VM(OMR_VM** omrVMSlot, OMR_VMThread** omrVMThreadSlot, void* languageVM, void* languageVMThread);
 
-omr_error_t OMR_Shutdown_VM(OMR_VM *omrVM, OMR_VMThread *omrVMThread);
+omr_error_t OMR_Shutdown_VM(OMR_VM* omrVM, OMR_VMThread* omrVMThread);
 
 /**
  * @brief Attach the current thread to OMR.
@@ -58,7 +58,7 @@ omr_error_t OMR_Shutdown_VM(OMR_VM *omrVM, OMR_VMThread *omrVMThread);
  * @param[in] threadName The new thread's name.
  * @return an OMR error code
  */
-omr_error_t OMR_Thread_Init(OMR_VM *omrVM, void *language_vm_thread, OMR_VMThread **threadSlot, const char *threadName);
+omr_error_t OMR_Thread_Init(OMR_VM* omrVM, void* language_vm_thread, OMR_VMThread** threadSlot, const char* threadName);
 
 /**
  * @brief Detach a thread from OMR.
@@ -76,18 +76,17 @@ omr_error_t OMR_Thread_Init(OMR_VM *omrVM, void *language_vm_thread, OMR_VMThrea
  * @param[in,out] omrVMThread An attached OMR_VMThread. omrVMThread is freed by this function.
  * @return an OMR error code
  */
-omr_error_t OMR_Thread_Free(OMR_VMThread *omrVMThread);
+omr_error_t OMR_Thread_Free(OMR_VMThread* omrVMThread);
 
 /**
  * @brief Helper for OMR_Thread_Init(). Use instead of OMR_Thread_Init() when certain that the current thread is not attached to OMR.
  */
-omr_error_t OMR_Thread_FirstInit(OMR_VM *omrVM, omrthread_t self, void *language_vm_thread, OMR_VMThread **threadSlot, const char *threadName);
+omr_error_t OMR_Thread_FirstInit(OMR_VM* omrVM, omrthread_t self, void* language_vm_thread, OMR_VMThread** threadSlot, const char* threadName);
 
 /**
  * @brief Helper for OMR_Thread_Free(). Use instead of OMR_Thread_Free() when certain that omrVMThread is only attached to OMR once.
  */
-omr_error_t OMR_Thread_LastFree(OMR_VMThread *omrVMThread);
-
+omr_error_t OMR_Thread_LastFree(OMR_VMThread* omrVMThread);
 
 #ifdef __cplusplus
 } /* extern "C" { */

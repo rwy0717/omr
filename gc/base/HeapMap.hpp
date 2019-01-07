@@ -82,211 +82,205 @@ class MM_HeapRegionDescriptor;
  * @todo Provide class documentation
  * @ingroup GC_Base_Core
  */
-class MM_HeapMap : public MM_BaseVirtual
-{
-/*
+class MM_HeapMap : public MM_BaseVirtual {
+    /*
  * Data members
  */
 private:
-	const bool _useCompressedHeapMap;	/* selects compressed/uncompressed heap map for realtime/nonrealtime contexts */
+    const bool _useCompressedHeapMap; /* selects compressed/uncompressed heap map for realtime/nonrealtime contexts */
 
 protected:
-	const uintptr_t _heapMapIndexShift;	/* number of low-order bits to be shifted out of heap address to obtain heap map slot index */
-	const uintptr_t _heapMapBitMask;	/* bit mask for capturing bit index within heap map slot from (unshifted) heap address */
-	const uintptr_t _heapMapBitShift;	/* number of low-order bits to be shifted out of captured bit index to obtain actual bit index */
+    const uintptr_t _heapMapIndexShift; /* number of low-order bits to be shifted out of heap address to obtain heap map slot index */
+    const uintptr_t _heapMapBitMask; /* bit mask for capturing bit index within heap map slot from (unshifted) heap address */
+    const uintptr_t _heapMapBitShift; /* number of low-order bits to be shifted out of captured bit index to obtain actual bit index */
 
-	MM_GCExtensionsBase *_extensions;
+    MM_GCExtensionsBase* _extensions;
 
-	void *_heapBase;
-	void *_heapTop;
-	
-	MM_MemoryHandle	_heapMapMemoryHandle;
-	uintptr_t _heapMapBaseDelta;
-	uintptr_t *_heapMapBits;
-	
-	uintptr_t _maxHeapSize;
+    void* _heapBase;
+    void* _heapTop;
+
+    MM_MemoryHandle _heapMapMemoryHandle;
+    uintptr_t _heapMapBaseDelta;
+    uintptr_t* _heapMapBits;
+
+    uintptr_t _maxHeapSize;
 
 public:
-	
-/*
+    /*
  * Function members
  */
 private:
 protected:
-	virtual bool initialize(MM_EnvironmentBase *env);
-	virtual void tearDown(MM_EnvironmentBase *env);
-	
-	uintptr_t getMaximumHeapMapSize(MM_EnvironmentBase *env);
-	uintptr_t convertHeapIndexToHeapMapIndex(MM_EnvironmentBase *env, uintptr_t size, uintptr_t roundTo);
-	
+    virtual bool initialize(MM_EnvironmentBase* env);
+    virtual void tearDown(MM_EnvironmentBase* env);
+
+    uintptr_t getMaximumHeapMapSize(MM_EnvironmentBase* env);
+    uintptr_t convertHeapIndexToHeapMapIndex(MM_EnvironmentBase* env, uintptr_t size, uintptr_t roundTo);
+
 public:
-	void kill(MM_EnvironmentBase *env);
-	
-	virtual bool heapAddRange(MM_EnvironmentBase *env, uintptr_t size, void *lowAddress, void *highAddress);
-	virtual bool heapRemoveRange(MM_EnvironmentBase *env, uintptr_t size, void *lowAddress, void *highAddress, void *lowValidAddress, void *highValidAddress);
-	
-	MMINLINE void *getHeapBase() { return _heapBase; }
+    void kill(MM_EnvironmentBase* env);
 
-	MMINLINE uintptr_t *getHeapMapBits() { return _heapMapBits; }
+    virtual bool heapAddRange(MM_EnvironmentBase* env, uintptr_t size, void* lowAddress, void* highAddress);
+    virtual bool heapRemoveRange(MM_EnvironmentBase* env, uintptr_t size, void* lowAddress, void* highAddress, void* lowValidAddress, void* highValidAddress);
 
-	MMINLINE uintptr_t getObjectGrain() { return ((uintptr_t)1) << _heapMapBitShift; };
-		
-	MMINLINE void
-	getSlotIndexAndMask(omrobjectptr_t objectPtr, uintptr_t *slotIndex, uintptr_t *bitMask)
-	{
-		uintptr_t slot = ((uintptr_t)objectPtr) - _heapMapBaseDelta;
-		// _heapBitMask is in order of 2^n -1, and val % 2^n = val & (2^n -1)
-		uintptr_t bitIndex = (slot & _heapMapBitMask) >> _heapMapBitShift;
-		*bitMask = (((uintptr_t)1) << bitIndex);
-		*slotIndex = slot >> _heapMapIndexShift;
-	}
+    MMINLINE void* getHeapBase() { return _heapBase; }
 
-	MMINLINE uintptr_t
-	getBitIndex(omrobjectptr_t objectPtr)
-	{
-		uintptr_t heapOffsetInBytes = ((uintptr_t)objectPtr) - _heapMapBaseDelta;
+    MMINLINE uintptr_t* getHeapMapBits() { return _heapMapBits; }
 
-		/* Calculate the starting mark bit location */
-		uintptr_t bitIndex = heapOffsetInBytes & _heapMapBitMask;
-		bitIndex >>= _heapMapBitShift;
+    MMINLINE uintptr_t getObjectGrain() { return ((uintptr_t)1) << _heapMapBitShift; };
 
-		return bitIndex;
-	}
-	
-	MMINLINE uintptr_t 
-	getSlotIndex(omrobjectptr_t objectPtr)
-	{
-		uintptr_t slotIndex = ((uintptr_t)objectPtr) - _heapMapBaseDelta;
-		slotIndex >>= _heapMapIndexShift;
-		return slotIndex;
-	}
+    MMINLINE void
+    getSlotIndexAndMask(omrobjectptr_t objectPtr, uintptr_t* slotIndex, uintptr_t* bitMask)
+    {
+        uintptr_t slot = ((uintptr_t)objectPtr) - _heapMapBaseDelta;
+        // _heapBitMask is in order of 2^n -1, and val % 2^n = val & (2^n -1)
+        uintptr_t bitIndex = (slot & _heapMapBitMask) >> _heapMapBitShift;
+        *bitMask = (((uintptr_t)1) << bitIndex);
+        *slotIndex = slot >> _heapMapIndexShift;
+    }
 
-	MMINLINE bool 
-	isBitSet(omrobjectptr_t objectPtr)
-	{
-		uintptr_t slotIndex, bitMask;
-		
-		/*  Just check if the lead bit of the object is set */
-		getSlotIndexAndMask(objectPtr, &slotIndex, &bitMask);
-	
-		return (_heapMapBits[slotIndex] & bitMask) ? true : false;
-	}
+    MMINLINE uintptr_t
+    getBitIndex(omrobjectptr_t objectPtr)
+    {
+        uintptr_t heapOffsetInBytes = ((uintptr_t)objectPtr) - _heapMapBaseDelta;
 
-	MMINLINE bool 
-	atomicSetBit(omrobjectptr_t objectPtr)
-	{
-		uintptr_t slotIndex, bitMask;
-		/* Ensure compiler does not optimize away assign into oldValue */
-		volatile uintptr_t *slotAddress;
-		uintptr_t oldValue;
-			
-		getSlotIndexAndMask(objectPtr, &slotIndex, &bitMask);
-		slotAddress = &(_heapMapBits[slotIndex]);
-		
-		do {
-			oldValue = *slotAddress;
-			if(oldValue & bitMask) {
-				return false;
-			}
-		} while(oldValue != MM_AtomicOperations::lockCompareExchange(slotAddress,
-																	 oldValue, 
-																	 oldValue | bitMask));
-		return true;
-	}
+        /* Calculate the starting mark bit location */
+        uintptr_t bitIndex = heapOffsetInBytes & _heapMapBitMask;
+        bitIndex >>= _heapMapBitShift;
 
-	MMINLINE void 
-	atomicSetSlot(uintptr_t slotIndex, uintptr_t slotValue)
-	{
-		/* Ensure compiler does not optimize away assign into oldValue */
-		volatile uintptr_t *slotAddress = &(_heapMapBits[slotIndex]);
-		uintptr_t oldValue;
-		
-		do {
-			oldValue = *slotAddress;
-		} while(oldValue != MM_AtomicOperations::lockCompareExchange(slotAddress,
-																	 oldValue, 
-																	 oldValue | slotValue));
-	}
+        return bitIndex;
+    }
 
-	MMINLINE uintptr_t 
-	getSlot(uintptr_t slotIndex)
-	{
-		return _heapMapBits[slotIndex];
-	}
-	
-	MMINLINE void 
-	setSlot(uintptr_t slotIndex, uintptr_t slotValue)
-	{
-		_heapMapBits[slotIndex] = slotValue;
-	}
+    MMINLINE uintptr_t
+    getSlotIndex(omrobjectptr_t objectPtr)
+    {
+        uintptr_t slotIndex = ((uintptr_t)objectPtr) - _heapMapBaseDelta;
+        slotIndex >>= _heapMapIndexShift;
+        return slotIndex;
+    }
 
-	MMINLINE bool 
-	setBit(omrobjectptr_t objectPtr)
-	{
-		uintptr_t slotIndex, bitMask;
-		uintptr_t *slotAddress;
-		
-		getSlotIndexAndMask(objectPtr, &slotIndex, &bitMask);
-		slotAddress = &(_heapMapBits[slotIndex]);
-		
-		if(*slotAddress & bitMask) {
-			return false;
-		}
-		*slotAddress |= bitMask;
-		return true;
-	}
+    MMINLINE bool
+    isBitSet(omrobjectptr_t objectPtr)
+    {
+        uintptr_t slotIndex, bitMask;
 
-	MMINLINE bool 
-	clearBit(omrobjectptr_t objectPtr)
-	{
-		uintptr_t slotIndex, bitMask;
-		uintptr_t *slotAddress;
-		
-		getSlotIndexAndMask(objectPtr, &slotIndex, &bitMask);
-		slotAddress = &(_heapMapBits[slotIndex]);
-	
-		/* If bit set then clear it */	
-		if(*slotAddress & bitMask) {
-			bitMask = ~bitMask;
-			*slotAddress &= bitMask;
-			return true;
-		}
-		
-		return false;
-	}
-	
-	uintptr_t numberBitsInRange(MM_EnvironmentBase *env, void *lowAddress, void *highAddress);
+        /*  Just check if the lead bit of the object is set */
+        getSlotIndexAndMask(objectPtr, &slotIndex, &bitMask);
 
-	/**
-	 * Set all heap map bits for a specified heap range either ON or OFF
-	 *
-	 * @param lowAddress - base of region of heap whoose heap map bits are to be set
-	 * @param highAddress - top of region of heap whoose heap map bits to be set
-	 * @param clear - if TRUE set BITS OFF; otherwise set bits ON
-	 * @return the amount of memory actually cleard
-	 */
-	uintptr_t setBitsInRange(MM_EnvironmentBase *env, void *lowAddress, void *highAddress, bool clear);
+        return (_heapMapBits[slotIndex] & bitMask) ? true : false;
+    }
 
-	/**
-	 * Set all heap map bits for a specified heap range either ON or OFF
-	 *
-	 * @param region, for which mark map should be set
-	 * @param clear - if TRUE set BITS OFF; otherwise set bits ON
-	 * @return the amount of memory actually cleard
-	 */
-	uintptr_t setBitsForRegion(MM_EnvironmentBase *env, MM_HeapRegionDescriptor *region, bool clear);
+    MMINLINE bool
+    atomicSetBit(omrobjectptr_t objectPtr)
+    {
+        uintptr_t slotIndex, bitMask;
+        /* Ensure compiler does not optimize away assign into oldValue */
+        volatile uintptr_t* slotAddress;
+        uintptr_t oldValue;
 
-	/**
-	 * Check if the mark map of a region is cleared.
-	 * @param env[in] GC thread
+        getSlotIndexAndMask(objectPtr, &slotIndex, &bitMask);
+        slotAddress = &(_heapMapBits[slotIndex]);
+
+        do {
+            oldValue = *slotAddress;
+            if (oldValue & bitMask) {
+                return false;
+            }
+        } while (oldValue != MM_AtomicOperations::lockCompareExchange(slotAddress, oldValue, oldValue | bitMask));
+        return true;
+    }
+
+    MMINLINE void
+    atomicSetSlot(uintptr_t slotIndex, uintptr_t slotValue)
+    {
+        /* Ensure compiler does not optimize away assign into oldValue */
+        volatile uintptr_t* slotAddress = &(_heapMapBits[slotIndex]);
+        uintptr_t oldValue;
+
+        do {
+            oldValue = *slotAddress;
+        } while (oldValue != MM_AtomicOperations::lockCompareExchange(slotAddress, oldValue, oldValue | slotValue));
+    }
+
+    MMINLINE uintptr_t
+    getSlot(uintptr_t slotIndex)
+    {
+        return _heapMapBits[slotIndex];
+    }
+
+    MMINLINE void
+    setSlot(uintptr_t slotIndex, uintptr_t slotValue)
+    {
+        _heapMapBits[slotIndex] = slotValue;
+    }
+
+    MMINLINE bool
+    setBit(omrobjectptr_t objectPtr)
+    {
+        uintptr_t slotIndex, bitMask;
+        uintptr_t* slotAddress;
+
+        getSlotIndexAndMask(objectPtr, &slotIndex, &bitMask);
+        slotAddress = &(_heapMapBits[slotIndex]);
+
+        if (*slotAddress & bitMask) {
+            return false;
+        }
+        *slotAddress |= bitMask;
+        return true;
+    }
+
+    MMINLINE bool
+    clearBit(omrobjectptr_t objectPtr)
+    {
+        uintptr_t slotIndex, bitMask;
+        uintptr_t* slotAddress;
+
+        getSlotIndexAndMask(objectPtr, &slotIndex, &bitMask);
+        slotAddress = &(_heapMapBits[slotIndex]);
+
+        /* If bit set then clear it */
+        if (*slotAddress & bitMask) {
+            bitMask = ~bitMask;
+            *slotAddress &= bitMask;
+            return true;
+        }
+
+        return false;
+    }
+
+    uintptr_t numberBitsInRange(MM_EnvironmentBase* env, void* lowAddress, void* highAddress);
+
+    /**
+     * Set all heap map bits for a specified heap range either ON or OFF
+     *
+     * @param lowAddress - base of region of heap whoose heap map bits are to be set
+     * @param highAddress - top of region of heap whoose heap map bits to be set
+     * @param clear - if TRUE set BITS OFF; otherwise set bits ON
+     * @return the amount of memory actually cleard
+     */
+    uintptr_t setBitsInRange(MM_EnvironmentBase* env, void* lowAddress, void* highAddress, bool clear);
+
+    /**
+     * Set all heap map bits for a specified heap range either ON or OFF
+     *
+     * @param region, for which mark map should be set
+     * @param clear - if TRUE set BITS OFF; otherwise set bits ON
+     * @return the amount of memory actually cleard
+     */
+    uintptr_t setBitsForRegion(MM_EnvironmentBase* env, MM_HeapRegionDescriptor* region, bool clear);
+
+    /**
+     * Check if the mark map of a region is cleared.
+     * @param env[in] GC thread
  	 * @param region for which mark map should be checked
-	 * @return true if cleared
-	 */
-	bool checkBitsForRegion(MM_EnvironmentBase *env, MM_HeapRegionDescriptor *region);
-	
-	/**
-	 * Create a HeapMap object.
-	 */
+     * @return true if cleared
+     */
+    bool checkBitsForRegion(MM_EnvironmentBase* env, MM_HeapRegionDescriptor* region);
+
+    /**
+     * Create a HeapMap object.
+     */
 #if defined(OMR_GC_SEGREGATED_HEAP)
 #define J9MODRON_HEAPMAP_SELECT_INDEX_SHIFT(compress) (compress ? ((J9MODRON_HEAPMAP_LOG_SIZEOF_UDATA) + (OMR_SIZECLASSES_LOG_SMALLEST)) : (J9MODRON_HEAPMAP_INDEX_SHIFT))
 #define J9MODRON_HEAPMAP_SELECT_BIT_MASK(compress) ((1 << (J9MODRON_HEAPMAP_SELECT_INDEX_SHIFT(compress))) - 1)
@@ -297,22 +291,22 @@ public:
 #define J9MODRON_HEAPMAP_SELECT_BIT_SHIFT(compress) (J9MODRON_HEAPMAP_BIT_SHIFT)
 #endif /* OMR_GC_SEGREGATED_HEAP */
 
-	MM_HeapMap(MM_EnvironmentBase *env, uintptr_t maxHeapSize, bool useCompressedHeapMap = false) :
-		MM_BaseVirtual()
-		,_useCompressedHeapMap(useCompressedHeapMap)
-		,_heapMapIndexShift(J9MODRON_HEAPMAP_SELECT_INDEX_SHIFT(useCompressedHeapMap))
-		,_heapMapBitMask(J9MODRON_HEAPMAP_SELECT_BIT_MASK(useCompressedHeapMap))
-		,_heapMapBitShift(J9MODRON_HEAPMAP_SELECT_BIT_SHIFT(useCompressedHeapMap))
-		,_extensions(env->getExtensions())
-		,_heapBase(NULL)
-		,_heapTop(NULL)
-		,_heapMapMemoryHandle()
-		,_heapMapBaseDelta(0)
-		,_heapMapBits(NULL)
-		,_maxHeapSize(maxHeapSize)
-	{
-		_typeId = __FUNCTION__;
-	}
+    MM_HeapMap(MM_EnvironmentBase* env, uintptr_t maxHeapSize, bool useCompressedHeapMap = false)
+        : MM_BaseVirtual()
+        , _useCompressedHeapMap(useCompressedHeapMap)
+        , _heapMapIndexShift(J9MODRON_HEAPMAP_SELECT_INDEX_SHIFT(useCompressedHeapMap))
+        , _heapMapBitMask(J9MODRON_HEAPMAP_SELECT_BIT_MASK(useCompressedHeapMap))
+        , _heapMapBitShift(J9MODRON_HEAPMAP_SELECT_BIT_SHIFT(useCompressedHeapMap))
+        , _extensions(env->getExtensions())
+        , _heapBase(NULL)
+        , _heapTop(NULL)
+        , _heapMapMemoryHandle()
+        , _heapMapBaseDelta(0)
+        , _heapMapBits(NULL)
+        , _maxHeapSize(maxHeapSize)
+    {
+        _typeId = __FUNCTION__;
+    }
 #undef J9MODRON_HEAPMAP_SELECT_INDEX_SHIFT
 #undef J9MODRON_HEAPMAP_SELECT_BIT_MASK
 #undef J9MODRON_HEAPMAP_SELECT_BIT_SHIFT

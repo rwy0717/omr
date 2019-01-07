@@ -29,7 +29,3 @@
 #if defined(TR_HOST_POWER)
 //#include "p/codegen/PPCTableOfConstants.hpp"
 #endif
-
-
-
-

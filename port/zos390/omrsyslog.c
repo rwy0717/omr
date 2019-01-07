@@ -29,7 +29,7 @@
 #include "atoe.h"
 #include <sys/__messag.h>
 
-uintptr_t writeToZOSLog(const char *message);
+uintptr_t writeToZOSLog(const char* message);
 
 /**
  * Write a message to the system log.
@@ -41,11 +41,11 @@ uintptr_t writeToZOSLog(const char *message);
  * @return Boolean: true on success, false on failure
  */
 uintptr_t
-omrsyslog_write(struct OMRPortLibrary *portLibrary, uintptr_t flags, const char *message)
+omrsyslog_write(struct OMRPortLibrary* portLibrary, uintptr_t flags, const char* message)
 {
-	if (NULL != portLibrary->portGlobals && TRUE == PPG_syslog_enabled) {
-		return writeToZOSLog(message);
-	}
+    if (NULL != portLibrary->portGlobals && TRUE == PPG_syslog_enabled) {
+        return writeToZOSLog(message);
+    }
 }
 
 /**
@@ -57,14 +57,14 @@ omrsyslog_write(struct OMRPortLibrary *portLibrary, uintptr_t flags, const char 
  * @return Boolean: true on success, false on failure
  */
 uintptr_t
-syslogOpen(struct OMRPortLibrary *portLibrary, uintptr_t flags)
+syslogOpen(struct OMRPortLibrary* portLibrary, uintptr_t flags)
 {
-	if (NULL != portLibrary->portGlobals) {
-		PPG_syslog_enabled = TRUE;
-		return TRUE;
-	}
+    if (NULL != portLibrary->portGlobals) {
+        PPG_syslog_enabled = TRUE;
+        return TRUE;
+    }
 
-	return FALSE;
+    return FALSE;
 }
 
 /**
@@ -75,55 +75,55 @@ syslogOpen(struct OMRPortLibrary *portLibrary, uintptr_t flags)
  * @return Boolean: true on success, false on failure
  */
 uintptr_t
-syslogClose(struct OMRPortLibrary *portLibrary)
+syslogClose(struct OMRPortLibrary* portLibrary)
 {
-	if (NULL != portLibrary->portGlobals) {
-		PPG_syslog_enabled = FALSE;
-		return TRUE;
-	}
+    if (NULL != portLibrary->portGlobals) {
+        PPG_syslog_enabled = FALSE;
+        return TRUE;
+    }
 
-	return FALSE;
+    return FALSE;
 }
 
 uintptr_t
-writeToZOSLog(const char *message)
+writeToZOSLog(const char* message)
 {
-	char *ebcdicbuf;
-	int rc;
-	struct __cons_msg2 cons;
-	int modcmd = 0;
-	unsigned int routeCodes[2] = {2, 0}; /* routing code 2 = Operator Information */
-	unsigned int descCodes[2] = {12, 0}; /* descriptor code 12 = Important Information, no operator action reqd */
+    char* ebcdicbuf;
+    int rc;
+    struct __cons_msg2 cons;
+    int modcmd = 0;
+    unsigned int routeCodes[2] = { 2, 0 }; /* routing code 2 = Operator Information */
+    unsigned int descCodes[2] = { 12, 0 }; /* descriptor code 12 = Important Information, no operator action reqd */
 
-	/* Convert from the internal ascii format to ebcdic */
-	ebcdicbuf = a2e_func((char *) message, strlen(message));
-	if (ebcdicbuf == NULL) {
-		return FALSE;
-	}
+    /* Convert from the internal ascii format to ebcdic */
+    ebcdicbuf = a2e_func((char*)message, strlen(message));
+    if (ebcdicbuf == NULL) {
+        return FALSE;
+    }
 
-	/* Re-implemented using _console2() instead of WTO, to provided proper multi-line messages. See
-	 * http://publib.boulder.ibm.com/infocenter/zos/v1r9/index.jsp?topic=/com.ibm.zos.r9.bpxbd00/consol2.htm
-	 */
-	cons.__cm2_format = __CONSOLE_FORMAT_2;
-	cons.__cm2_msglength = strlen(message);
-	cons.__cm2_msg = ebcdicbuf;
-	cons.__cm2_routcde = routeCodes;
-	cons.__cm2_descr = descCodes;
-	cons.__cm2_mcsflag = 0;
-	cons.__cm2_token = 0;
-	cons.__cm2_msgid = NULL;
-	cons.__cm2_dom_token = 0;
-	cons.__cm2_dom_msgid = NULL;
+    /* Re-implemented using _console2() instead of WTO, to provided proper multi-line messages. See
+     * http://publib.boulder.ibm.com/infocenter/zos/v1r9/index.jsp?topic=/com.ibm.zos.r9.bpxbd00/consol2.htm
+     */
+    cons.__cm2_format = __CONSOLE_FORMAT_2;
+    cons.__cm2_msglength = strlen(message);
+    cons.__cm2_msg = ebcdicbuf;
+    cons.__cm2_routcde = routeCodes;
+    cons.__cm2_descr = descCodes;
+    cons.__cm2_mcsflag = 0;
+    cons.__cm2_token = 0;
+    cons.__cm2_msgid = NULL;
+    cons.__cm2_dom_token = 0;
+    cons.__cm2_dom_msgid = NULL;
 
-	rc = __console2(&cons, NULL, &modcmd);
+    rc = __console2(&cons, NULL, &modcmd);
 
-	free(ebcdicbuf);
+    free(ebcdicbuf);
 
-	if (0 == rc) {
-		return TRUE;
-	} else {
-		return FALSE;
-	}
+    if (0 == rc) {
+        return TRUE;
+    } else {
+        return FALSE;
+    }
 }
 
 /**
@@ -134,14 +134,14 @@ writeToZOSLog(const char *message)
  * @return uintptr_t: the current logging options
  */
 uintptr_t
-omrsyslog_query(struct OMRPortLibrary *portLibrary)
+omrsyslog_query(struct OMRPortLibrary* portLibrary)
 {
-	uintptr_t options;
+    uintptr_t options;
 
-	/* query the logging options here */
-	options = PPG_syslog_flags;
+    /* query the logging options here */
+    options = PPG_syslog_flags;
 
-	return options;
+    return options;
 }
 
 /**
@@ -152,10 +152,8 @@ omrsyslog_query(struct OMRPortLibrary *portLibrary)
  *
  * @return void
  */
-void
-omrsyslog_set(struct OMRPortLibrary *portLibrary, uintptr_t options)
+void omrsyslog_set(struct OMRPortLibrary* portLibrary, uintptr_t options)
 {
-	/* set the logging options here */
-	PPG_syslog_flags = options;
+    /* set the logging options here */
+    PPG_syslog_flags = options;
 }
-

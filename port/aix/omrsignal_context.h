@@ -32,7 +32,7 @@
 #define J9SIG_VALUE_UDATA OMRPORT_SIG_VALUE_32
 #endif
 
-#define MAX_UNIX_SIGNAL_TYPES  SIGMAX32
+#define MAX_UNIX_SIGNAL_TYPES SIGMAX32
 
 /*
  * User context structure
@@ -41,22 +41,21 @@
  * follows the sigcontext structure.
  */
 typedef struct J9PlatformSignalInfo {
-	ucontext_t *context;
-	struct ld_info ldInfo[128];
+    ucontext_t* context;
+    struct ld_info ldInfo[128];
 } J9PlatformSignalInfo;
 
 typedef struct OMRUnixSignalInfo {
-	struct J9PlatformSignalInfo platformSignalInfo;
-	uint32_t portLibrarySignalType;
-	void *handlerAddress;
-	void *handlerAddress2;
-	siginfo_t *sigInfo;
+    struct J9PlatformSignalInfo platformSignalInfo;
+    uint32_t portLibrarySignalType;
+    void* handlerAddress;
+    void* handlerAddress2;
+    siginfo_t* sigInfo;
 } OMRUnixSignalInfo;
 
-uint32_t infoForFPR(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *info, int32_t index, const char **name, void **value);
-uint32_t infoForGPR(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *info, int32_t index, const char **name, void **value);
-uint32_t infoForModule(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *info, int32_t index, const char **name, void **value);
-uint32_t infoForControl(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *info, int32_t index, const char **name, void **value);
-uint32_t infoForSignal(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *info, int32_t index, const char **name, void **value);
-void fillInUnixSignalInfo(struct OMRPortLibrary *portLibrary, void *contextInfo, struct OMRUnixSignalInfo *j9Info);
-
+uint32_t infoForFPR(struct OMRPortLibrary* portLibrary, struct OMRUnixSignalInfo* info, int32_t index, const char** name, void** value);
+uint32_t infoForGPR(struct OMRPortLibrary* portLibrary, struct OMRUnixSignalInfo* info, int32_t index, const char** name, void** value);
+uint32_t infoForModule(struct OMRPortLibrary* portLibrary, struct OMRUnixSignalInfo* info, int32_t index, const char** name, void** value);
+uint32_t infoForControl(struct OMRPortLibrary* portLibrary, struct OMRUnixSignalInfo* info, int32_t index, const char** name, void** value);
+uint32_t infoForSignal(struct OMRPortLibrary* portLibrary, struct OMRUnixSignalInfo* info, int32_t index, const char** name, void** value);
+void fillInUnixSignalInfo(struct OMRPortLibrary* portLibrary, void* contextInfo, struct OMRUnixSignalInfo* j9Info);

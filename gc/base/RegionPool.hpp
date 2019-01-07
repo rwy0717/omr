@@ -39,27 +39,25 @@
  * 
  */
 
-class MM_RegionPool : public MM_BaseVirtual
-{
+class MM_RegionPool : public MM_BaseVirtual {
 private:
 protected:
-public:	
-	
-private:	
+public:
+private:
 protected:
 public:
-	virtual bool initialize(MM_EnvironmentBase *env);
-	virtual void tearDown(MM_EnvironmentBase *env);
-	void kill(MM_EnvironmentBase *env);
+    virtual bool initialize(MM_EnvironmentBase* env);
+    virtual void tearDown(MM_EnvironmentBase* env);
+    void kill(MM_EnvironmentBase* env);
 
-	/**
-	 * Create a RegionPool object.
-	 */
-	MM_RegionPool(MM_EnvironmentBase *env) :
-		MM_BaseVirtual()
-	{
-		_typeId = __FUNCTION__;
-	};
+    /**
+     * Create a RegionPool object.
+     */
+    MM_RegionPool(MM_EnvironmentBase* env)
+        : MM_BaseVirtual()
+    {
+        _typeId = __FUNCTION__;
+    };
 };
 
 #endif /* REGIONPOOL_HPP_ */

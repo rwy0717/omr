@@ -34,6 +34,6 @@
  * @param s2 pointer to the second operand string
  * @returns true if the string pointed to by s1 is 'less than' the one pointed to by s2
  */
-bool str_comparator(const char *s1, const char *s2);
+bool str_comparator(const char* s1, const char* s2);
 
 #endif

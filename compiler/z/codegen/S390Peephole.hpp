@@ -28,52 +28,46 @@
 #include "codegen/Instruction.hpp"
 #include "env/FilePointerDecl.hpp"
 
-class TR_S390Peephole
-   {
+class TR_S390Peephole {
 public:
-   TR_S390Peephole(TR::Compilation* comp, TR::CodeGenerator *cg);
+    TR_S390Peephole(TR::Compilation* comp, TR::CodeGenerator* cg);
 
 protected:
-   void printInfo(const char* info)
-      {
-      if (_outFile)
-         {
-         if ( !( !comp()->getOption(TR_TraceCG) && comp()->getOptions()->getTraceCGOption(TR_TraceCGPostBinaryEncoding) && comp()->getOptions()->getTraceCGOption(TR_TraceCGMixedModeDisassembly) )  )
-            {
-            trfprintf(_outFile, info);
+    void printInfo(const char* info)
+    {
+        if (_outFile) {
+            if (!(!comp()->getOption(TR_TraceCG) && comp()->getOptions()->getTraceCGOption(TR_TraceCGPostBinaryEncoding) && comp()->getOptions()->getTraceCGOption(TR_TraceCGMixedModeDisassembly))) {
+                trfprintf(_outFile, info);
             }
-         }
-      }
+        }
+    }
 
-   void printInst()
-      {
-      if (_outFile)
-         {
-         if ( !( !comp()->getOption(TR_TraceCG) && comp()->getOptions()->getTraceCGOption(TR_TraceCGPostBinaryEncoding) && comp()->getOptions()->getTraceCGOption(TR_TraceCGMixedModeDisassembly) )  )
-            {
-            comp()->getDebug()->print(_outFile, _cursor);
+    void printInst()
+    {
+        if (_outFile) {
+            if (!(!comp()->getOption(TR_TraceCG) && comp()->getOptions()->getTraceCGOption(TR_TraceCGPostBinaryEncoding) && comp()->getOptions()->getTraceCGOption(TR_TraceCGMixedModeDisassembly))) {
+                comp()->getDebug()->print(_outFile, _cursor);
             }
-         }
-      }
+        }
+    }
 
-   TR::Compilation * comp() { return TR::comp(); }
+    TR::Compilation* comp() { return TR::comp(); }
 
 protected:
-   TR_FrontEnd * _fe;
-   TR::FILE *_outFile;
-   TR::Instruction *_cursor;
-   TR::CodeGenerator *_cg;
-   };
+    TR_FrontEnd* _fe;
+    TR::FILE* _outFile;
+    TR::Instruction* _cursor;
+    TR::CodeGenerator* _cg;
+};
 
-class TR_S390PreRAPeephole : private TR_S390Peephole
-   {
+class TR_S390PreRAPeephole : private TR_S390Peephole {
 public:
-   TR_S390PreRAPeephole(TR::Compilation* comp, TR::CodeGenerator *cg);
+    TR_S390PreRAPeephole(TR::Compilation* comp, TR::CodeGenerator* cg);
 
-   void perform();
+    void perform();
 
 private:
-   /** \brief
+    /** \brief
     *     Attempts to reduce L[' '|FH|G] R,MR1  ST[' '|FH|G] R,MR2 sequences to MVC MR2, MR1
     *     to save a register and instruction.
     *
@@ -86,62 +80,60 @@ private:
     *  \return
     *     true if the reduction was successful; false otherwise.
     */
-   bool attemptLoadStoreReduction(TR::InstOpCode::Mnemonic storeOpCode, uint16_t size);
-   };
+    bool attemptLoadStoreReduction(TR::InstOpCode::Mnemonic storeOpCode, uint16_t size);
+};
 
-class TR_S390PostRAPeephole : private TR_S390Peephole
-   {
+class TR_S390PostRAPeephole : private TR_S390Peephole {
 public:
-   TR_S390PostRAPeephole(TR::Compilation* , TR::CodeGenerator *);
+    TR_S390PostRAPeephole(TR::Compilation*, TR::CodeGenerator*);
 
-   void perform();
+    void perform();
 
 private:
-   bool LLCReduction();
-   bool LGFRReduction();
-   bool AGIReduction();
-   bool ICMReduction();
-   bool replaceGuardedLoadWithSoftwareReadBarrier();
-   bool LAReduction();
-   bool NILHReduction();
-   bool duplicateNILHReduction();
-   bool unnecessaryNILHReduction();
-   bool clearsHighBitOfAddressInReg(TR::Instruction *inst, TR::Register *reg);
-   bool branchReduction();
-   bool forwardBranchTarget();
-   bool seekRegInFutureMemRef(int32_t ,TR::Register *);
-   bool LRReduction();
-   bool ConditionalBranchReduction(TR::InstOpCode::Mnemonic branchOPReplacement);
-   bool CompareAndBranchReduction();
-   bool LoadAndMaskReduction(TR::InstOpCode::Mnemonic LZOpCode);
-   bool removeMergedNullCHK();
-   bool trueCompEliminationForCompareAndBranch();
-   bool trueCompEliminationForCompare();
-   bool trueCompEliminationForLoadComp();
-   bool attemptZ7distinctOperants();
-   bool DeadStoreToSpillReduction();
-   bool tryMoveImmediate();
-   bool isBarrierToPeepHoleLookback(TR::Instruction *current);
+    bool LLCReduction();
+    bool LGFRReduction();
+    bool AGIReduction();
+    bool ICMReduction();
+    bool replaceGuardedLoadWithSoftwareReadBarrier();
+    bool LAReduction();
+    bool NILHReduction();
+    bool duplicateNILHReduction();
+    bool unnecessaryNILHReduction();
+    bool clearsHighBitOfAddressInReg(TR::Instruction* inst, TR::Register* reg);
+    bool branchReduction();
+    bool forwardBranchTarget();
+    bool seekRegInFutureMemRef(int32_t, TR::Register*);
+    bool LRReduction();
+    bool ConditionalBranchReduction(TR::InstOpCode::Mnemonic branchOPReplacement);
+    bool CompareAndBranchReduction();
+    bool LoadAndMaskReduction(TR::InstOpCode::Mnemonic LZOpCode);
+    bool removeMergedNullCHK();
+    bool trueCompEliminationForCompareAndBranch();
+    bool trueCompEliminationForCompare();
+    bool trueCompEliminationForLoadComp();
+    bool attemptZ7distinctOperants();
+    bool DeadStoreToSpillReduction();
+    bool tryMoveImmediate();
+    bool isBarrierToPeepHoleLookback(TR::Instruction* current);
 
-   /** \brief
+    /** \brief
     *     Attempts to reduce LHI R,0 instructions to XR R,R instruction to save 2 bytes of icache.
     *
     *  \return
     *     true if the reduction was successful; false otherwise.
     */
-   bool ReduceLHIToXR();
+    bool ReduceLHIToXR();
 
-   // DAA related Peephole optimizations
-   bool DAARemoveOutlinedLabelNop   (bool hasPadding);
-   bool DAARemoveOutlinedLabelNopCVB(bool hasPadding);
+    // DAA related Peephole optimizations
+    bool DAARemoveOutlinedLabelNop(bool hasPadding);
+    bool DAARemoveOutlinedLabelNopCVB(bool hasPadding);
 
-   bool DAAHandleMemoryReferenceSpill(bool hasPadding);
+    bool DAAHandleMemoryReferenceSpill(bool hasPadding);
 
-   bool revertTo32BitShift();
-   bool inlineEXtargetHelper(TR::Instruction *, TR::Instruction *);
-   bool inlineEXtarget();
-   void markBlockThatModifiesRegister(TR::Instruction *, TR::Register *);
-   void reloadLiteralPoolRegisterForCatchBlock();
-   };
+    bool revertTo32BitShift();
+    bool inlineEXtargetHelper(TR::Instruction*, TR::Instruction*);
+    bool inlineEXtarget();
+    void markBlockThatModifiesRegister(TR::Instruction*, TR::Register*);
+    void reloadLiteralPoolRegisterForCatchBlock();
+};
 #endif
-

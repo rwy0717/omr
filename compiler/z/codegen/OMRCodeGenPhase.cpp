@@ -24,106 +24,96 @@
 //give a different name to the codesection (csect) for this file. So it
 //doesn't conflict with another file with same name.
 
-#pragma csect(CODE,"OMRZCGPhase#C")
-#pragma csect(STATIC,"OMRZCGPhase#S")
-#pragma csect(TEST,"OMRZCGPhase#T")
-
+#pragma csect(CODE, "OMRZCGPhase#C")
+#pragma csect(STATIC, "OMRZCGPhase#S")
+#pragma csect(TEST, "OMRZCGPhase#T")
 
 #include "codegen/CodeGenPhase.hpp"
 
-#include "infra/Assert.hpp"                           // for TR_ASSERT
-#include "codegen/CodeGenerator.hpp"                  // for CodeGenerator, etc
-#include "compile/Compilation.hpp"                    // for Compilation, etc
+#include "infra/Assert.hpp" // for TR_ASSERT
+#include "codegen/CodeGenerator.hpp" // for CodeGenerator, etc
+#include "compile/Compilation.hpp" // for Compilation, etc
 #include "optimizer/LoadExtensions.hpp"
 #include "optimizer/OptimizationManager.hpp"
 #include "il/TreeTop.hpp"
 
-void
-OMR::Z::CodeGenPhase::performMarkLoadAsZeroOrSignExtensionPhase(TR::CodeGenerator * cg, TR::CodeGenPhase * phase)
-   {
-   if (TR::Compiler->target.cpu.isZ() && cg->getOptimizationPhaseIsComplete())
-      {
-      TR::Compilation* comp = cg->comp();
-      TR::OptimizationManager *manager = comp->getOptimizer()->getOptimization(OMR::loadExtensions);
-      TR_ASSERT(manager, "Load extensions optimization should be initialized.");
-      TR_LoadExtensions *loadExtensions = (TR_LoadExtensions *) manager->factory()(manager);
-      loadExtensions->perform();
-      delete loadExtensions;
-      }
-   }
-
-void
-OMR::Z::CodeGenPhase::performSetBranchOnCountFlagPhase(TR::CodeGenerator * cg, TR::CodeGenPhase *)
-   {
-   if (!cg->comp()->getOption(TR_DisableBranchOnCount))
-      {
-      TR::TreeTop * tt;
-      vcount_t visitCount = cg->comp()->incVisitCount();
-
-      for (tt = cg->comp()->getStartTree(); tt; tt = tt->getNextTreeTop())
-         {
-         cg->setBranchOnCountFlag(tt->getNode(), visitCount);
-         }
-      }
-   }
-
-void
-OMR::Z::CodeGenPhase::performPreRAPeepholePhase(TR::CodeGenerator * cg, TR::CodeGenPhase * phase)
-    {
-   TR::Compilation * comp = cg->comp();
-   phase->reportPhase(PreRAPeepholePhase);
-
-   TR::LexicalMemProfiler mp(phase->getName(), comp->phaseMemProfiler());
-   LexicalTimer pt(phase->getName(), comp->phaseTimer());
-
-   cg->doPreRAPeephole();
-
-   if (comp->getOption(TR_TraceCG))
-      comp->getDebug()->dumpMethodInstrs(comp->getOutFile(), "Pre Register Assignment Peephole Instructions", false);
+void OMR::Z::CodeGenPhase::performMarkLoadAsZeroOrSignExtensionPhase(TR::CodeGenerator* cg, TR::CodeGenPhase* phase)
+{
+    if (TR::Compiler->target.cpu.isZ() && cg->getOptimizationPhaseIsComplete()) {
+        TR::Compilation* comp = cg->comp();
+        TR::OptimizationManager* manager = comp->getOptimizer()->getOptimization(OMR::loadExtensions);
+        TR_ASSERT(manager, "Load extensions optimization should be initialized.");
+        TR_LoadExtensions* loadExtensions = (TR_LoadExtensions*)manager->factory()(manager);
+        loadExtensions->perform();
+        delete loadExtensions;
     }
+}
 
-void
-OMR::Z::CodeGenPhase::performPeepholePhase(TR::CodeGenerator * cg, TR::CodeGenPhase * phase)
-   {
-   TR::Compilation * comp = cg->comp();
-   phase->reportPhase(PeepholePhase);
+void OMR::Z::CodeGenPhase::performSetBranchOnCountFlagPhase(TR::CodeGenerator* cg, TR::CodeGenPhase*)
+{
+    if (!cg->comp()->getOption(TR_DisableBranchOnCount)) {
+        TR::TreeTop* tt;
+        vcount_t visitCount = cg->comp()->incVisitCount();
 
-   TR::LexicalMemProfiler mp(phase->getName(), comp->phaseMemProfiler());
-   LexicalTimer pt(phase->getName(), comp->phaseTimer());
+        for (tt = cg->comp()->getStartTree(); tt; tt = tt->getNextTreeTop()) {
+            cg->setBranchOnCountFlag(tt->getNode(), visitCount);
+        }
+    }
+}
 
-   cg->doPostRAPeephole();
+void OMR::Z::CodeGenPhase::performPreRAPeepholePhase(TR::CodeGenerator* cg, TR::CodeGenPhase* phase)
+{
+    TR::Compilation* comp = cg->comp();
+    phase->reportPhase(PreRAPeepholePhase);
 
-   if (comp->getOption(TR_TraceCG))
-      comp->getDebug()->dumpMethodInstrs(comp->getOutFile(), "Post Register Assignment Peephole Instructions", false);
-   }
+    TR::LexicalMemProfiler mp(phase->getName(), comp->phaseMemProfiler());
+    LexicalTimer pt(phase->getName(), comp->phaseTimer());
 
-int
-OMR::Z::CodeGenPhase::getNumPhases()
-   {
-   return static_cast<int>(TR::CodeGenPhase::LastOMRZPhase);
-   }
+    cg->doPreRAPeephole();
 
-const char *
+    if (comp->getOption(TR_TraceCG))
+        comp->getDebug()->dumpMethodInstrs(comp->getOutFile(), "Pre Register Assignment Peephole Instructions", false);
+}
+
+void OMR::Z::CodeGenPhase::performPeepholePhase(TR::CodeGenerator* cg, TR::CodeGenPhase* phase)
+{
+    TR::Compilation* comp = cg->comp();
+    phase->reportPhase(PeepholePhase);
+
+    TR::LexicalMemProfiler mp(phase->getName(), comp->phaseMemProfiler());
+    LexicalTimer pt(phase->getName(), comp->phaseTimer());
+
+    cg->doPostRAPeephole();
+
+    if (comp->getOption(TR_TraceCG))
+        comp->getDebug()->dumpMethodInstrs(comp->getOutFile(), "Post Register Assignment Peephole Instructions", false);
+}
+
+int OMR::Z::CodeGenPhase::getNumPhases()
+{
+    return static_cast<int>(TR::CodeGenPhase::LastOMRZPhase);
+}
+
+const char*
 OMR::Z::CodeGenPhase::getName()
-   {
-   return TR::CodeGenPhase::getName(_currentPhase);
-   }
+{
+    return TR::CodeGenPhase::getName(_currentPhase);
+}
 
-const char *
+const char*
 OMR::Z::CodeGenPhase::getName(PhaseValue phase)
-   {
-   switch (phase)
-      {
-      case markLoadAsZeroOrSignExtension:
-         return "markLoadAsZeroOrSignExtension";
-      case SetBranchOnCountFlagPhase:
-         return "SetBranchOnCountFlagPhase";
-      case PreRAPeepholePhase:
-         return "PreRegisterAllocationPeepholePhase";
-      case PeepholePhase:
-         return "PostRegisterAllocationPeepholePhase";
-      default:
-         // call parent class for common phases
-         return OMR::CodeGenPhase::getName(phase);
-      }
-   }
+{
+    switch (phase) {
+    case markLoadAsZeroOrSignExtension:
+        return "markLoadAsZeroOrSignExtension";
+    case SetBranchOnCountFlagPhase:
+        return "SetBranchOnCountFlagPhase";
+    case PreRAPeepholePhase:
+        return "PreRegisterAllocationPeepholePhase";
+    case PeepholePhase:
+        return "PostRegisterAllocationPeepholePhase";
+    default:
+        // call parent class for common phases
+        return OMR::CodeGenPhase::getName(phase);
+    }
+}

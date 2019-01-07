@@ -36,30 +36,25 @@
 uintptr_t
 MM_ParallelCompactTask::getVMStateID()
 {
-	return OMRVMSTATE_GC_COMPACT;
+    return OMRVMSTATE_GC_COMPACT;
 }
 
-void
-MM_ParallelCompactTask::run(MM_EnvironmentBase *env)
+void MM_ParallelCompactTask::run(MM_EnvironmentBase* env)
 {
-	_compactScheme->compact(env, _rebuildMarkBits, _aggressive);
+    _compactScheme->compact(env, _rebuildMarkBits, _aggressive);
 }
 
-void
-MM_ParallelCompactTask::setup(MM_EnvironmentBase *env)
+void MM_ParallelCompactTask::setup(MM_EnvironmentBase* env)
 {
-	env->_compactStats.clear();
+    env->_compactStats.clear();
 }
 
-void
-MM_ParallelCompactTask::cleanup(MM_EnvironmentBase *env)
+void MM_ParallelCompactTask::cleanup(MM_EnvironmentBase* env)
 {
-	MM_GlobalGCStats *finalGCStats;
+    MM_GlobalGCStats* finalGCStats;
 
-	finalGCStats = &MM_GCExtensionsBase::getExtensions(env->getOmrVM())->globalGCStats;
-	finalGCStats->compactStats.merge(&env->_compactStats);
+    finalGCStats = &MM_GCExtensionsBase::getExtensions(env->getOmrVM())->globalGCStats;
+    finalGCStats->compactStats.merge(&env->_compactStats);
 }
 
 #endif /* OMR_GC_MODRON_COMPACTION */
-
-

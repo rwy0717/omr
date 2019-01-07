@@ -20,17 +20,15 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #ifndef WORKLIST_INCL
 #define WORKLIST_INCL
 
 #include "JitBuilder.hpp"
 
-class WorklistMethod : public OMR::JitBuilder::MethodBuilder
-   {
-   public:
-   WorklistMethod(OMR::JitBuilder::TypeDictionary *);
-   virtual bool buildIL();
-   };
+class WorklistMethod : public OMR::JitBuilder::MethodBuilder {
+public:
+    WorklistMethod(OMR::JitBuilder::TypeDictionary*);
+    virtual bool buildIL();
+};
 
 #endif // !defined(WORKLIST_INCL)

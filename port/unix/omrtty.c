@@ -48,14 +48,13 @@
  * @internal @note Supported, portable format specifiers are described in the document entitled "PortLibrary printf"
  * in the "Inside J9" Lotus Notes database.
  */
-void
-omrtty_printf(struct OMRPortLibrary *portLibrary, const char *format, ...)
+void omrtty_printf(struct OMRPortLibrary* portLibrary, const char* format, ...)
 {
-	va_list args;
+    va_list args;
 
-	va_start(args, format);
-	portLibrary->tty_vprintf(portLibrary, format, args);
-	va_end(args);
+    va_start(args, format);
+    portLibrary->tty_vprintf(portLibrary, format, args);
+    va_end(args);
 }
 
 /**
@@ -75,9 +74,9 @@ omrtty_printf(struct OMRPortLibrary *portLibrary, const char *format, ...)
  * @note Most implementations will simply return success.
  */
 int32_t
-omrtty_startup(struct OMRPortLibrary *portLibrary)
+omrtty_startup(struct OMRPortLibrary* portLibrary)
 {
-	return 0;
+    return 0;
 }
 /**
  * PortLibrary shutdown.
@@ -89,8 +88,7 @@ omrtty_startup(struct OMRPortLibrary *portLibrary)
  *
  * @note Most implementations will be empty.
  */
-void
-omrtty_shutdown(struct OMRPortLibrary *portLibrary)
+void omrtty_shutdown(struct OMRPortLibrary* portLibrary)
 {
 }
 
@@ -104,19 +102,19 @@ omrtty_shutdown(struct OMRPortLibrary *portLibrary)
  * @return The number of characters read, -1 on error.
  */
 intptr_t
-omrtty_get_chars(struct OMRPortLibrary *portLibrary, char *s, uintptr_t length)
+omrtty_get_chars(struct OMRPortLibrary* portLibrary, char* s, uintptr_t length)
 {
-	/* PR94604 */
-	/* This was changed to NOT use fgetc, which uses buffering, which throws off the #bytes
-	 * returned by the FIONREAD ioctl call in available()
-	 */
-	intptr_t rc = -1;
-	/* CMVC 178203 - Restart system calls interrupted by EINTR */
-	do {
-		rc = read(STDIN_FILENO, s, length);
-	} while ((-1 == rc) && (EINTR == errno));
+    /* PR94604 */
+    /* This was changed to NOT use fgetc, which uses buffering, which throws off the #bytes
+     * returned by the FIONREAD ioctl call in available()
+     */
+    intptr_t rc = -1;
+    /* CMVC 178203 - Restart system calls interrupted by EINTR */
+    do {
+        rc = read(STDIN_FILENO, s, length);
+    } while ((-1 == rc) && (EINTR == errno));
 
-	return rc;
+    return rc;
 }
 
 /**
@@ -131,14 +129,13 @@ omrtty_get_chars(struct OMRPortLibrary *portLibrary, char *s, uintptr_t length)
  * @internal @note Supported, portable format specifiers are described in the document entitled "PortLibrary printf"
  * in the "Inside J9" Lotus Notes database.
  */
-void
-omrtty_err_printf(struct OMRPortLibrary *portLibrary, const char *format, ...)
+void omrtty_err_printf(struct OMRPortLibrary* portLibrary, const char* format, ...)
 {
-	va_list args;
+    va_list args;
 
-	va_start(args, format);
-	portLibrary->tty_err_vprintf(portLibrary, format, args);
-	va_end(args);
+    va_start(args, format);
+    portLibrary->tty_err_vprintf(portLibrary, format, args);
+    va_end(args);
 }
 
 /**
@@ -149,36 +146,36 @@ omrtty_err_printf(struct OMRPortLibrary *portLibrary, const char *format, ...)
  * @return number of characters remaining to be read.
  */
 intptr_t
-omrtty_available(struct OMRPortLibrary *portLibrary)
+omrtty_available(struct OMRPortLibrary* portLibrary)
 {
-	/* PR94604 */
-	int rc;
-	off_t curr, end;
-	int avail = 0;
+    /* PR94604 */
+    int rc;
+    off_t curr, end;
+    int avail = 0;
 
-	/* when redirected from a file */
-	curr = lseek(STDIN_FILENO, 0L, SEEK_CUR); /* don't use tell(), it doesn't exist on all platforms, i.e. linux */
-	if (curr != -1) {
-		end = lseek(STDIN_FILENO, 0L, SEEK_END);
-		lseek(STDIN_FILENO, curr, SEEK_SET);
-		if (end >= curr) {
-			return end - curr;
-		}
-	}
+    /* when redirected from a file */
+    curr = lseek(STDIN_FILENO, 0L, SEEK_CUR); /* don't use tell(), it doesn't exist on all platforms, i.e. linux */
+    if (curr != -1) {
+        end = lseek(STDIN_FILENO, 0L, SEEK_END);
+        lseek(STDIN_FILENO, curr, SEEK_SET);
+        if (end >= curr) {
+            return end - curr;
+        }
+    }
 
-	/* ioctl doesn't work for files on all platforms (i.e. SOLARIS) */
+    /* ioctl doesn't work for files on all platforms (i.e. SOLARIS) */
 
-	/* Historically, OMR has used an intptr_t as the output of an FIONREAD ioctl call. The claim was that some devices
-	 * may sometimes output a 64bit wide integer. However, this exposed us to issues with endianness and aliasing.
-	 * Meanwhile, documentation shows that the output is always an int, on every supported platform. If for some reason
-	 * this code isn't working, it may be related to FIONREAD putting out more than an integer.
-	 */ 
+    /* Historically, OMR has used an intptr_t as the output of an FIONREAD ioctl call. The claim was that some devices
+     * may sometimes output a 64bit wide integer. However, this exposed us to issues with endianness and aliasing.
+     * Meanwhile, documentation shows that the output is always an int, on every supported platform. If for some reason
+     * this code isn't working, it may be related to FIONREAD putting out more than an integer.
+     */
 
-	rc = ioctl(STDIN_FILENO, FIONREAD, &avail);
-	if (rc != -1) {
-		return avail;
-	}
-	return 0;
+    rc = ioctl(STDIN_FILENO, FIONREAD, &avail);
+    if (rc != -1) {
+        return avail;
+    }
+    return 0;
 }
 
 /**
@@ -193,10 +190,9 @@ omrtty_available(struct OMRPortLibrary *portLibrary)
  * @internal @note Supported, portable format specifiers are described in the document entitled "PortLibrary printf"
  * in the "Inside J9" Lotus Notes database.
  */
-void
-omrtty_vprintf(struct OMRPortLibrary *portLibrary, const char *format, va_list args)
+void omrtty_vprintf(struct OMRPortLibrary* portLibrary, const char* format, va_list args)
 {
-	portLibrary->file_vprintf(portLibrary, OMRPORT_TTY_ERR, format, args);
+    portLibrary->file_vprintf(portLibrary, OMRPORT_TTY_ERR, format, args);
 }
 
 /**
@@ -211,12 +207,10 @@ omrtty_vprintf(struct OMRPortLibrary *portLibrary, const char *format, va_list a
  * @internal @note Supported, portable format specifiers are described in the document entitled "PortLibrary printf"
  * in the "Inside J9" Lotus Notes database.
  */
-void
-omrtty_err_vprintf(struct OMRPortLibrary *portLibrary, const char *format, va_list args)
+void omrtty_err_vprintf(struct OMRPortLibrary* portLibrary, const char* format, va_list args)
 {
-	portLibrary->file_vprintf(portLibrary, OMRPORT_TTY_ERR, format, args);
+    portLibrary->file_vprintf(portLibrary, OMRPORT_TTY_ERR, format, args);
 }
-
 
 /**
  * This method allows the caller to "daemonize" the current process by closing handles
@@ -225,9 +219,7 @@ omrtty_err_vprintf(struct OMRPortLibrary *portLibrary, const char *format, va_li
  * @param[in] portLibrary The port library.
  *
  */
-void
-omrtty_daemonize(struct OMRPortLibrary *portLibrary)
+void omrtty_daemonize(struct OMRPortLibrary* portLibrary)
 {
-	/* no special handling of file handles, nothing to do */
+    /* no special handling of file handles, nothing to do */
 }
-

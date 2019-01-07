@@ -27,31 +27,32 @@
  */
 #ifndef OMR_DEBUG_ENV_CONNECTOR
 #define OMR_DEBUG_ENV_CONNECTOR
-namespace OMR { namespace Z { class DebugEnv; } }
-namespace OMR { typedef OMR::Z::DebugEnv DebugEnvConnector; }
+namespace OMR {
+namespace Z {
+class DebugEnv;
+}
+} // namespace OMR
+namespace OMR {
+typedef OMR::Z::DebugEnv DebugEnvConnector;
+}
 #else
 #error OMR::Z::DebugEnv expected to be a primary connector, but an OMR connector is already defined
 #endif
 
 #include "compiler/env/OMRDebugEnv.hpp"
-#include "infra/Annotations.hpp"  // for OMR_EXTENSIBLE
+#include "infra/Annotations.hpp" // for OMR_EXTENSIBLE
 
-namespace OMR
-{
+namespace OMR {
 
-namespace Z
-{
+namespace Z {
 
-class OMR_EXTENSIBLE DebugEnv : public OMR::DebugEnv
-   {
+class OMR_EXTENSIBLE DebugEnv : public OMR::DebugEnv {
 public:
+    DebugEnv();
+};
 
-   DebugEnv();
+} // namespace Z
 
-   };
-
-}
-
-}
+} // namespace OMR
 
 #endif

@@ -22,7 +22,9 @@
 #include "ddr/ir/ClassUDT.hpp"
 
 ClassUDT::ClassUDT(size_t size, bool isClass, unsigned int lineNumber)
-	: ClassType(size, lineNumber), _superClass(NULL), _isClass(isClass)
+    : ClassType(size, lineNumber)
+    , _superClass(NULL)
+    , _isClass(isClass)
 {
 }
 
@@ -30,30 +32,28 @@ ClassUDT::~ClassUDT()
 {
 }
 
-const string &
+const string&
 ClassUDT::getSymbolKindName() const
 {
-	static const string classKind("class");
-	static const string structKind("struct");
+    static const string classKind("class");
+    static const string structKind("struct");
 
-	return _isClass ? classKind : structKind;
+    return _isClass ? classKind : structKind;
 }
 
 DDR_RC
-ClassUDT::acceptVisitor(const TypeVisitor &visitor)
+ClassUDT::acceptVisitor(const TypeVisitor& visitor)
 {
-	return visitor.visitClass(this);
+    return visitor.visitClass(this);
 }
 
-bool
-ClassUDT::operator==(const Type & rhs) const
+bool ClassUDT::operator==(const Type& rhs) const
 {
-	return rhs.compareToClass(*this);
+    return rhs.compareToClass(*this);
 }
 
-bool
-ClassUDT::compareToClass(const ClassUDT &other) const
+bool ClassUDT::compareToClass(const ClassUDT& other) const
 {
-	return compareToClasstype(other)
-		&& (*_superClass == *other._superClass);
+    return compareToClasstype(other)
+        && (*_superClass == *other._superClass);
 }

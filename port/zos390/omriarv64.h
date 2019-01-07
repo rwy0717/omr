@@ -30,9 +30,9 @@
  * !! Do not modify these values without correspondent changes in getUserExtendedPrivateAreaMemoryType.s
  */
 typedef enum UserExtendedPrivateAreaType {
-	ZOS64_VMEM_ABOVE_BAR_GENERAL = 0,
-	ZOS64_VMEM_2_TO_32G = 1,
-	ZOS64_VMEM_2_TO_64G = 2
+    ZOS64_VMEM_ABOVE_BAR_GENERAL = 0,
+    ZOS64_VMEM_2_TO_32G = 1,
+    ZOS64_VMEM_2_TO_64G = 2
 } UserExtendedPrivateAreaType;
 
 #endif /* !defined(OMRIARV64_H_) */

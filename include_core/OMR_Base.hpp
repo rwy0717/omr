@@ -29,21 +29,19 @@
 
 #include "omrcomp.h"
 
-class OMR_Base
-{
+class OMR_Base {
 private:
 protected:
 public:
-	void *operator new(size_t size, void *memoryPtr)
-	{
-		return memoryPtr;
-	}
+    void* operator new(size_t size, void* memoryPtr)
+    {
+        return memoryPtr;
+    }
 
-	/**
-	 * Create OMR_Base object.
-	 */
-	OMR_Base() {}
-
+    /**
+     * Create OMR_Base object.
+     */
+    OMR_Base() {}
 };
 
 #endif /* OMR_BASE_HPP_ */

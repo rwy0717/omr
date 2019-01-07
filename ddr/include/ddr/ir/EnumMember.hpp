@@ -24,13 +24,12 @@
 
 #include "ddr/ir/Members.hpp"
 
-class EnumMember : public Members
-{
+class EnumMember : public Members {
 public:
-	int _value;
+    int _value;
 
-	EnumMember();
-	virtual ~EnumMember();
+    EnumMember();
+    virtual ~EnumMember();
 };
 
 #endif /* ENUMMEMBER_HPP */

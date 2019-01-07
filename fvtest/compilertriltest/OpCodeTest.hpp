@@ -31,35 +31,34 @@
 #include <iterator>
 #include <limits>
 
-namespace TRTest
-{
+namespace TRTest {
 
 // C++11 upgrade (Issue #1916).
 template <typename Ret, typename Left, typename Right>
 struct BinaryOpParamStruct {
-        Left lhs;
-        Right rhs;
-        std::string opcode;
-        Ret (*oracle)(Left, Right);
+    Left lhs;
+    Right rhs;
+    std::string opcode;
+    Ret (*oracle)(Left, Right);
 };
 
 // C++11 upgrade (Issue #1916).
 template <typename Ret, typename T>
 struct UnaryOpParamStruct {
-        T value;
-        std::string opcode;
-        Ret (*oracle)(T);
+    T value;
+    std::string opcode;
+    Ret (*oracle)(T);
 };
-
 
 /**
  * @brief Given an instance of UnaryOpParamType, returns an equivalent instance
  *    of UnaryOpParamStruct
  */
 template <typename Ret, typename T>
-UnaryOpParamStruct<Ret, T> to_struct(std::tuple<T , std::tuple<std::string, Ret (*)(T)>> param) {
+UnaryOpParamStruct<Ret, T> to_struct(std::tuple<T, std::tuple<std::string, Ret (*)(T)> > param)
+{
     UnaryOpParamStruct<Ret, T> s;
-    s.value  = std::get<0>(param);
+    s.value = std::get<0>(param);
     s.opcode = std::get<0>(std::get<1>(param));
     s.oracle = std::get<1>(std::get<1>(param));
     return s;
@@ -69,7 +68,8 @@ UnaryOpParamStruct<Ret, T> to_struct(std::tuple<T , std::tuple<std::string, Ret 
  *    of BinaryOpParamStruct
  */
 template <typename Ret, typename Left, typename Right>
-BinaryOpParamStruct<Ret, Left, Right> to_struct(std::tuple<std::tuple<Left,Right>, std::tuple<std::string, Ret (*)(Left,Right)>> param) {
+BinaryOpParamStruct<Ret, Left, Right> to_struct(std::tuple<std::tuple<Left, Right>, std::tuple<std::string, Ret (*)(Left, Right)> > param)
+{
     BinaryOpParamStruct<Ret, Left, Right> s;
     s.lhs = std::get<0>(std::get<0>(param));
     s.rhs = std::get<1>(std::get<0>(param));
@@ -81,15 +81,14 @@ BinaryOpParamStruct<Ret, Left, Right> to_struct(std::tuple<std::tuple<Left,Right
 //~ Opcode test fixtures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 template <typename Ret, typename... Args>
-class OpCodeTest : public JitTest, public ::testing::WithParamInterface< std::tuple<std::tuple<Args...>, std::tuple<std::string, Ret (*)(Args...)>> > {};
+class OpCodeTest : public JitTest, public ::testing::WithParamInterface<std::tuple<std::tuple<Args...>, std::tuple<std::string, Ret (*)(Args...)> > > {};
 
 template <typename T>
-class BinaryOpTest : public JitTest, public ::testing::WithParamInterface< std::tuple< std::tuple<T,T>, std::tuple<std::string, T (*)(T,T)>> > {};
+class BinaryOpTest : public JitTest, public ::testing::WithParamInterface<std::tuple<std::tuple<T, T>, std::tuple<std::string, T (*)(T, T)> > > {};
 
 template <typename Ret, typename T = Ret>
-class UnaryOpTest : public JitTest, public ::testing::WithParamInterface< std::tuple< T , std::tuple<std::string, Ret (*)(T)>> > {};
+class UnaryOpTest : public JitTest, public ::testing::WithParamInterface<std::tuple<T, std::tuple<std::string, Ret (*)(T)> > > {};
 
-
-} // namespace CompTest
+} // namespace TRTest
 
 #endif // OPCODETEST_HPP

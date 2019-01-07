@@ -32,15 +32,14 @@
 
 class TR_Memory;
 
-namespace TR{
+namespace TR {
 
 /**
  * ELFGenerator Abstract Base Class. This abstract base class provides
  * a way to share the commonalities between the building of different
  * kinds of ELF object files
 */
-class ELFGenerator
-{
+class ELFGenerator {
 public:
     /**
      * ELFGenerator constructor
@@ -49,36 +48,35 @@ public:
      * @param[in] codeSize the size of the code segment
     */
     ELFGenerator(TR::RawAllocator rawAllocator,
-                 uint8_t const * codeStart, size_t codeSize):
-                        _rawAllocator(rawAllocator),
-                        _codeStart(codeStart),
-                        _codeSize(codeSize),
-                        _header(NULL),
-                        _programHeader(NULL),
-                        _zeroSection(NULL),
-                        _textSection(NULL),
-                        _relaSection(NULL),
-                        _dynSymSection(NULL),
-                        _shStrTabSection(NULL),
-                        _dynStrSection(NULL)
-                        {
-                        }
-    
+        uint8_t const* codeStart, size_t codeSize)
+        : _rawAllocator(rawAllocator)
+        , _codeStart(codeStart)
+        , _codeSize(codeSize)
+        , _header(NULL)
+        , _programHeader(NULL)
+        , _zeroSection(NULL)
+        , _textSection(NULL)
+        , _relaSection(NULL)
+        , _dynSymSection(NULL)
+        , _shStrTabSection(NULL)
+        , _dynStrSection(NULL)
+    {
+    }
+
     /**
      * ELFGenerator destructor
     */
-    ~ELFGenerator() throw(){};
+    ~ELFGenerator() throw() {};
 
 protected:
-
 #if defined(TR_TARGET_64BIT)
     typedef Elf64_Ehdr ELFEHeader;
     typedef Elf64_Shdr ELFSectionHeader;
     typedef Elf64_Phdr ELFProgramHeader;
     typedef Elf64_Addr ELFAddress;
-    typedef Elf64_Sym  ELFSymbol;
+    typedef Elf64_Sym ELFSymbol;
     typedef Elf64_Rela ELFRela;
-    typedef Elf64_Off  ELFOffset;
+    typedef Elf64_Off ELFOffset;
 #define ELF_ST_INFO(bind, type) ELF64_ST_INFO(bind, type)
 #define ELF_ST_VISIBILITY(visibility) ELF64_ST_VISIBILITY(visibility)
 #define ELF_R_INFO(bind, type) ELF64_R_INFO(bind, type)
@@ -88,9 +86,9 @@ protected:
     typedef Elf32_Shdr ELFSectionHeader;
     typedef Elf32_Phdr ELFProgramHeader;
     typedef Elf32_Addr ELFAddress;
-    typedef Elf32_Sym  ELFSymbol;
+    typedef Elf32_Sym ELFSymbol;
     typedef Elf32_Rela ELFRela;
-    typedef Elf32_Off  ELFOffset;
+    typedef Elf32_Off ELFOffset;
 #define ELF_ST_INFO(bind, type) ELF32_ST_INFO(bind, type)
 #define ELF_ST_VISIBILITY(visibility) ELF32_ST_VISIBILITY(visibility)
 #define ELF_R_INFO(bind, type) ELF32_R_INFO(bind, type)
@@ -112,7 +110,7 @@ protected:
      * Sets up arch and OS specific information, along with ELFEHeader's e_ident member
     */
     void initializeELFHeaderForPlatform(void);
-    
+
     /**
      * This pure virtual method should be implemented by the derived classes to
      * correctly set up the trailer section and fill the CodeCacheSymbols to write
@@ -124,7 +122,7 @@ protected:
      * Set up the trailer zero section
     */
     void initializeZeroSection();
-    
+
     /**
      * Set up the trailer text section
      * @param[in] shName the section header name
@@ -133,12 +131,11 @@ protected:
      * @param[in] shSize the section header size
     */
     void initializeTextSection(
-                                uint32_t shName, 
-                                ELFAddress shAddress,
-                                ELFOffset shOffset, 
-                                uint32_t shSize
-                              );
-    
+        uint32_t shName,
+        ELFAddress shAddress,
+        ELFOffset shOffset,
+        uint32_t shSize);
+
     /**
      * Set up the trailer dynamic symbol section
      * @param[in] shName the section header name
@@ -147,11 +144,10 @@ protected:
      * @param[in] shLink the section header link
     */
     void initializeDynSymSection(
-                                uint32_t shName, 
-                                ELFOffset shOffset, 
-                                uint32_t shSize, 
-                                uint32_t shLink
-                                );
+        uint32_t shName,
+        ELFOffset shOffset,
+        uint32_t shSize,
+        uint32_t shLink);
 
     /**
      * Set up the trailer string table section
@@ -159,11 +155,10 @@ protected:
      * @param[in] shOffset the section header offset
      * @param[in] shSize the section header size
     */
-    void initializeStrTabSection( 
-                                uint32_t shName, 
-                                ELFOffset shOffset,  
-                                uint32_t shSize
-                                );
+    void initializeStrTabSection(
+        uint32_t shName,
+        ELFOffset shOffset,
+        uint32_t shSize);
 
     /**
      * Set up the trailer dynamic string section
@@ -172,10 +167,9 @@ protected:
      * @param[in] shSize the section header size
     */
     void initializeDynStrSection(
-                                uint32_t shName, 
-                                ELFOffset shOffset, 
-                                uint32_t shSize
-                                );
+        uint32_t shName,
+        ELFOffset shOffset,
+        uint32_t shSize);
 
     /**
      * Set up the trailer Rela section
@@ -183,12 +177,11 @@ protected:
      * @param[in] shOffset the section header offset
      * @param[in] shSize the section header size
     */
-    void initializeRelaSection( 
-                                uint32_t shName, 
-                                ELFOffset shOffset, 
-                                uint32_t shSize
-                              );
-    
+    void initializeRelaSection(
+        uint32_t shName,
+        ELFOffset shOffset,
+        uint32_t shSize);
+
     /**
      * Write the header, program header (if applicable), the different
      * section headers, code segment, ELFSymbols, and Rela entries to
@@ -199,26 +192,26 @@ protected:
      * @param[in] fp the name of the file to write to
      * @return bool indicating whether opening file to write to was successful
      */
-    bool emitELFFile(const char * filename);
+    bool emitELFFile(const char* filename);
 
     /**
      * Write the ELFEheader field to file
      * @param[in] fp the file stream ptr
      */
-    void writeHeaderToFile(::FILE *fp);
+    void writeHeaderToFile(::FILE* fp);
 
     /**
      * Write the ELFProgramHeader field to file
      * @param[in] fp the file stream ptr
      */
-    void writeProgramHeaderToFile(::FILE *fp);
+    void writeProgramHeaderToFile(::FILE* fp);
 
     /**
      * Write the Section header provided to file
      * @param[in] fp the file stream ptr
      * @param[in] shdr the section header to write to file
      */
-    void writeSectionHeaderToFile(::FILE *fp, ELFSectionHeader *shdr);
+    void writeSectionHeaderToFile(::FILE* fp, ELFSectionHeader* shdr);
 
     /**
      * Write the section name chars to file
@@ -226,66 +219,63 @@ protected:
      * @param[in] name the ptr to the first element of the char array
      * @param[in] size the size of the char array, which includes the null terminator
      */
-    void writeSectionNameToFile(::FILE *fp, char * name, uint32_t size);
+    void writeSectionNameToFile(::FILE* fp, char* name, uint32_t size);
 
     /**
      * Write the code segment to file
      * @param[in] fp the file stream ptr
      */
-    void writeCodeSegmentToFile(::FILE *fp);
+    void writeCodeSegmentToFile(::FILE* fp);
 
     /**
      * Write the ELFSymbols to file
      * @param[in] fp the file stream ptr
      */
-    void writeELFSymbolsToFile(::FILE *fp);
+    void writeELFSymbolsToFile(::FILE* fp);
 
     /**
      * Write the ELFRela entries to file, applicable for relocatable ELF
      * @param[in] fp the file stream ptr
      */
-    void writeRelaEntriesToFile(::FILE *fp);
+    void writeRelaEntriesToFile(::FILE* fp);
 
     TR::RawAllocator _rawAllocator; /**< the RawAllocator passed to the constructor */
-    
-    ELFEHeader       *_header;          /**< The ELFEHeader, required for all ELF files */
-    ELFProgramHeader *_programHeader;   /**< The ELFProgramHeader, required for executable ELF */
+
+    ELFEHeader* _header; /**< The ELFEHeader, required for all ELF files */
+    ELFProgramHeader* _programHeader; /**< The ELFProgramHeader, required for executable ELF */
 
     /**< The section headers and the sectionheader names */
-    ELFSectionHeader *_zeroSection;         
-    char              _zeroSectionName[1];
-    ELFSectionHeader *_textSection;
-    char              _textSectionName[6];    
-    ELFSectionHeader *_relaSection;
-    char              _relaSectionName[11];
-    ELFSectionHeader *_dynSymSection;
-    char              _dynSymSectionName[8];
-    ELFSectionHeader *_shStrTabSection;
-    char              _shStrTabSectionName[10];
-    ELFSectionHeader *_dynStrSection;
-    char              _dynStrSectionName[8];
+    ELFSectionHeader* _zeroSection;
+    char _zeroSectionName[1];
+    ELFSectionHeader* _textSection;
+    char _textSectionName[6];
+    ELFSectionHeader* _relaSection;
+    char _relaSectionName[11];
+    ELFSectionHeader* _dynSymSection;
+    char _dynSymSectionName[8];
+    ELFSectionHeader* _shStrTabSection;
+    char _shStrTabSectionName[10];
+    ELFSectionHeader* _dynStrSection;
+    char _dynStrSectionName[8];
 
-    uint32_t _elfTrailerSize;               /**< Size of the region of the ELF file that would be occupied by the trailer segment */
-    uint32_t _elfHeaderSize;                /**< Size of the region of the ELF file that would be occupied by the header segment */
-    uint32_t _totalELFSymbolNamesLength;    /**< Total length of the symbol names that would be written to file  */
-    struct TR::CodeCacheSymbol *_symbols;   /**< Chain of CodeCacheSymbol structures to be written */
-    uint32_t _numSymbols;                   /**< Number of symbols to be written */
-    uint8_t const * const _codeStart;       /**< base of code segment */
-    uint32_t _codeSize;                     /**< Size of the code segment */
+    uint32_t _elfTrailerSize; /**< Size of the region of the ELF file that would be occupied by the trailer segment */
+    uint32_t _elfHeaderSize; /**< Size of the region of the ELF file that would be occupied by the header segment */
+    uint32_t _totalELFSymbolNamesLength; /**< Total length of the symbol names that would be written to file  */
+    struct TR::CodeCacheSymbol* _symbols; /**< Chain of CodeCacheSymbol structures to be written */
+    uint32_t _numSymbols; /**< Number of symbols to be written */
+    uint8_t const* const _codeStart; /**< base of code segment */
+    uint32_t _codeSize; /**< Size of the code segment */
 
-    struct TR::CodeCacheRelocationInfo *_relocations; /**< Struct containing relocation info to be written */
-    uint32_t _numRelocations;                         /**< Number of relocations to write to file */
+    struct TR::CodeCacheRelocationInfo* _relocations; /**< Struct containing relocation info to be written */
+    uint32_t _numRelocations; /**< Number of relocations to write to file */
 
 }; //class ELFGenerator
-
 
 /**
  * ELFExecutableGenerator class. Used for generating executable ELF objects
 */
-class ELFExecutableGenerator : public ELFGenerator
-{
+class ELFExecutableGenerator : public ELFGenerator {
 public:
-
     /**
      * ELFExecutableGenerator constructor
      * @param[in] rawAllocator 
@@ -293,7 +283,7 @@ public:
      * @param[in] codeSize the size of the region of the code segment
     */
     ELFExecutableGenerator(TR::RawAllocator rawAllocator,
-                            uint8_t const * codeStart, size_t codeSize);
+        uint8_t const* codeStart, size_t codeSize);
 
     /**
      * ELFExecutableGenerator destructor
@@ -307,7 +297,7 @@ protected:
      * Initializes header for executable ELF and calls helper methods
     */
     virtual void initialize(void);
-    
+
     /**
      * Initializes ELF header struct members
     */
@@ -317,11 +307,10 @@ protected:
      * Initializes ELF Program Header, required for executable ELF
     */
     virtual void initializePHdr(void);
-    
+
     virtual void buildSectionHeaders(void);
 
 public:
-
     /**
      * This function is called when it is time to write symbols to file.
      * This function calls helper functions that initializes section headers and
@@ -332,30 +321,27 @@ public:
      * @param[in] totalELFSymbolNamesLength the sum of symbol name lengths + 1 for UNDEF
      * @return bool whether emitting ELF file succeeded
     */
-    bool emitELF(const char * filename,
-                CodeCacheSymbol *symbols, uint32_t numSymbols,
-                uint32_t totalELFSymbolNamesLength);
+    bool emitELF(const char* filename,
+        CodeCacheSymbol* symbols, uint32_t numSymbols,
+        uint32_t totalELFSymbolNamesLength);
 
 }; //class ELFExecutableGenerator
 
-
-class ELFRelocatableGenerator : public ELFGenerator
-{
+class ELFRelocatableGenerator : public ELFGenerator {
 public:
     ELFRelocatableGenerator(TR::RawAllocator rawAllocator,
-                            uint8_t const * codeStart, size_t codeSize);
+        uint8_t const* codeStart, size_t codeSize);
 
     ~ELFRelocatableGenerator() throw()
     {
     }
 
 protected:
-
     /**
      * Initializes header for relocatable ELF file
     */
     virtual void initialize(void);
-    
+
     /**
      * Initializes header struct members for relocatable ELF
     */
@@ -369,7 +355,6 @@ protected:
     virtual void buildSectionHeaders(void);
 
 public:
-
     /**
      * This function is called when it is time to write symbols to file.
      * This function calls helper functions that initializes section headers and
@@ -382,11 +367,11 @@ public:
      * @param[in] numRelocations the total number of relocations
      * @return bool whether emitting ELF file succeeded
     */
-    bool emitELF(const char * filename,
-                TR::CodeCacheSymbol *symbols, uint32_t numSymbols,
-                uint32_t totalELFSymbolNamesLength,
-                TR::CodeCacheRelocationInfo *relocations,
-                uint32_t numRelocations);
+    bool emitELF(const char* filename,
+        TR::CodeCacheSymbol* symbols, uint32_t numSymbols,
+        uint32_t totalELFSymbolNamesLength,
+        TR::CodeCacheRelocationInfo* relocations,
+        uint32_t numRelocations);
 
 }; //class ELFRelocatableGenerator
 

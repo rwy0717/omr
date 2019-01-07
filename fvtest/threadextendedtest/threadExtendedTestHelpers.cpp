@@ -21,22 +21,20 @@
 
 #include "threadExtendedTestHelpers.hpp"
 
-void
-thrExtendedTestSetUp(OMRPortLibrary *portLibrary)
+void thrExtendedTestSetUp(OMRPortLibrary* portLibrary)
 {
-	intptr_t rc = omrthread_attach_ex(NULL, J9THREAD_ATTR_DEFAULT);
-	ASSERT_EQ(0, rc) << "omrthread_attach_ex(NULL, J9THREAD_ATTR_DEFAULT) failed\n";
+    intptr_t rc = omrthread_attach_ex(NULL, J9THREAD_ATTR_DEFAULT);
+    ASSERT_EQ(0, rc) << "omrthread_attach_ex(NULL, J9THREAD_ATTR_DEFAULT) failed\n";
 
-	/* initialize port Library */
-	rc = (int)omrport_init_library(portLibrary, sizeof(OMRPortLibrary));
-	ASSERT_EQ(0, rc) << "omrport_init_library(&_OMRPortLibrary, sizeof(OMRPortLibrary)) failed\n";
+    /* initialize port Library */
+    rc = (int)omrport_init_library(portLibrary, sizeof(OMRPortLibrary));
+    ASSERT_EQ(0, rc) << "omrport_init_library(&_OMRPortLibrary, sizeof(OMRPortLibrary)) failed\n";
 }
 
-void
-thrExtendedTestTearDown(OMRPortLibrary *portLibrary)
+void thrExtendedTestTearDown(OMRPortLibrary* portLibrary)
 {
-	int rc = portLibrary->port_shutdown_library(portLibrary);
-	ASSERT_EQ(0, rc) << "port_shutdown_library() failed\n";
+    int rc = portLibrary->port_shutdown_library(portLibrary);
+    ASSERT_EQ(0, rc) << "port_shutdown_library() failed\n";
 
-	omrthread_detach(NULL);
+    omrthread_detach(NULL);
 }

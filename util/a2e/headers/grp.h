@@ -36,46 +36,46 @@
  * ===========================================================================
  */
 #if __TARGET_LIB__ == 0X22080000
-#include <//'PP.ADLE370.OS39028.SCEEH.H(grp)'>
+#include < //'PP.ADLE370.OS39028.SCEEH.H(grp)'>
 #else
 #include "prefixpath.h"
 #include PREFIXPATH(grp.h)
 #endif
 
 #if !defined(IBM_ATOE_GRP)
-   #define IBM_ATOE_GRP
+#define IBM_ATOE_GRP
 
-   /******************************************************************/
-   /*  Define prototypes for replacement functions.                  */
-   /******************************************************************/
+/******************************************************************/
+/*  Define prototypes for replacement functions.                  */
+/******************************************************************/
 
-   #ifdef __cplusplus
-      extern "C" {
-   #endif
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-   #if defined(IBM_ATOE)
-      struct group *atoe_getgrgid(gid_t);
-   #endif
+#if defined(IBM_ATOE)
+struct group* atoe_getgrgid(gid_t);
+#endif
 
-   #ifdef __cplusplus
-      }
-   #endif
+#ifdef __cplusplus
+}
+#endif
 
-   /******************************************************************/
-   /*  Undefine the functions                                        */
-   /******************************************************************/
+/******************************************************************/
+/*  Undefine the functions                                        */
+/******************************************************************/
 
-   #if defined(IBM_ATOE)
-      #undef getgrgid
-   #endif
+#if defined(IBM_ATOE)
+#undef getgrgid
+#endif
 
-   /******************************************************************/
-   /*  Redefine the functions                                        */
-   /******************************************************************/
+/******************************************************************/
+/*  Redefine the functions                                        */
+/******************************************************************/
 
-   #if defined(IBM_ATOE)
-      #define getgrgid        atoe_getgrgid
-   #endif
+#if defined(IBM_ATOE)
+#define getgrgid atoe_getgrgid
+#endif
 #endif
 
 /* END OF FILE */

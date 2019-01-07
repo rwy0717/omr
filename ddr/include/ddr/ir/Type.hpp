@@ -43,52 +43,51 @@ class UDT;
 class UnionUDT;
 struct FieldOverride;
 
-class Type
-{
+class Type {
 public:
-	static bool isStandardType(const char *type, size_t typeLen, bool *isSigned, size_t *bitWidth);
+    static bool isStandardType(const char* type, size_t typeLen, bool* isSigned, size_t* bitWidth);
 
-	bool _blacklisted;
-	bool _opaque;
-	string _name;
-	size_t _sizeOf; /* Size of type in bytes */
+    bool _blacklisted;
+    bool _opaque;
+    string _name;
+    size_t _sizeOf; /* Size of type in bytes */
 
-	explicit Type(size_t size);
-	virtual ~Type();
+    explicit Type(size_t size);
+    virtual ~Type();
 
-	bool isAnonymousType() const;
+    bool isAnonymousType() const;
 
-	virtual string getFullName() const;
-	virtual const string &getSymbolKindName() const;
-	string getTypeNameKey() const;
+    virtual string getFullName() const;
+    virtual const string& getSymbolKindName() const;
+    string getTypeNameKey() const;
 
-	/* Visitor pattern function to allow the scanner/generator/IR to dispatch functionality based on type. */
-	virtual DDR_RC acceptVisitor(const TypeVisitor &visitor);
+    /* Visitor pattern function to allow the scanner/generator/IR to dispatch functionality based on type. */
+    virtual DDR_RC acceptVisitor(const TypeVisitor& visitor);
 
-	/*
-	 * Insert this type into the map in 'ir' and return true if its
-	 * name doesn't clash; otherwise do nothing and return false.
-	 */
-	virtual bool insertUnique(Symbol_IR *ir);
+    /*
+     * Insert this type into the map in 'ir' and return true if its
+     * name doesn't clash; otherwise do nothing and return false.
+     */
+    virtual bool insertUnique(Symbol_IR* ir);
 
-	virtual NamespaceUDT *getNamespace();
-	virtual size_t getPointerCount();
-	virtual size_t getArrayDimensions();
-	virtual void addMacro(Macro *macro);
-	virtual vector<UDT *> *getSubUDTS();
-	virtual void renameFieldsAndMacros(const FieldOverride &fieldOverride, Type *replacementType);
-	virtual Type *getBaseType();
-	Type *getOpaqueType();
+    virtual NamespaceUDT* getNamespace();
+    virtual size_t getPointerCount();
+    virtual size_t getArrayDimensions();
+    virtual void addMacro(Macro* macro);
+    virtual vector<UDT*>* getSubUDTS();
+    virtual void renameFieldsAndMacros(const FieldOverride& fieldOverride, Type* replacementType);
+    virtual Type* getBaseType();
+    Type* getOpaqueType();
 
-	bool operator==(const Type & rhs) const;
-	virtual bool compareToClass(const ClassUDT &) const;
-	virtual bool compareToClasstype(const ClassType &) const;
-	virtual bool compareToEnum(const EnumUDT &) const;
-	virtual bool compareToNamespace(const NamespaceUDT &) const;
-	virtual bool compareToType(const Type &) const;
-	virtual bool compareToTypedef(const TypedefUDT &) const;
-	virtual bool compareToUDT(const UDT &) const;
-	virtual bool compareToUnion(const UnionUDT &) const;
+    bool operator==(const Type& rhs) const;
+    virtual bool compareToClass(const ClassUDT&) const;
+    virtual bool compareToClasstype(const ClassType&) const;
+    virtual bool compareToEnum(const EnumUDT&) const;
+    virtual bool compareToNamespace(const NamespaceUDT&) const;
+    virtual bool compareToType(const Type&) const;
+    virtual bool compareToTypedef(const TypedefUDT&) const;
+    virtual bool compareToUDT(const UDT&) const;
+    virtual bool compareToUnion(const UnionUDT&) const;
 };
 
 #endif /* TYPE_HPP */

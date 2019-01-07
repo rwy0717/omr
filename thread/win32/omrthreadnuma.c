@@ -36,25 +36,22 @@ static BOOLEAN isNumaAvailable = FALSE;
  *
  * This function must only be called *once*. It is called from omrthread_init().
  */
-void
-omrthread_numa_init(omrthread_library_t lib)
+void omrthread_numa_init(omrthread_library_t lib)
 {
-	isNumaAvailable = TRUE;
+    isNumaAvailable = TRUE;
 }
 
 /**
  * Closes the dynamic library for NUMA. Should only be called from omrthread_shutdown().
  */
-void
-omrthread_numa_shutdown(omrthread_library_t lib)
+void omrthread_numa_shutdown(omrthread_library_t lib)
 {
-	isNumaAvailable = FALSE;
+    isNumaAvailable = FALSE;
 }
 
-void
-omrthread_numa_set_enabled(BOOLEAN enabled)
+void omrthread_numa_set_enabled(BOOLEAN enabled)
 {
-	isNumaAvailable = enabled;
+    isNumaAvailable = enabled;
 }
 
 /**
@@ -71,62 +68,62 @@ omrthread_numa_set_enabled(BOOLEAN enabled)
 uintptr_t
 omrthread_numa_get_max_node(void)
 {
-	uintptr_t result = 0;
-	ULONG nodeNumber = 0;
-	if (isNumaAvailable && (GetNumaHighestNodeNumber(&nodeNumber)) && (nodeNumber > 1)) {
-		result = (uintptr_t)nodeNumber + 1;
-	}
-	return result;
+    uintptr_t result = 0;
+    ULONG nodeNumber = 0;
+    if (isNumaAvailable && (GetNumaHighestNodeNumber(&nodeNumber)) && (nodeNumber > 1)) {
+        result = (uintptr_t)nodeNumber + 1;
+    }
+    return result;
 }
 
 intptr_t
-omrthread_numa_set_node_affinity_nolock(omrthread_t thread, const uintptr_t *nodeList, uintptr_t nodeCount, uint32_t flags)
+omrthread_numa_set_node_affinity_nolock(omrthread_t thread, const uintptr_t* nodeList, uintptr_t nodeCount, uint32_t flags)
 {
-	intptr_t result = J9THREAD_NUMA_OK;
-	HANDLE processHandle = GetCurrentProcess();
-	DWORD_PTR processAffinityMask = 0;
-	DWORD_PTR systemAffinityMask = 0;
+    intptr_t result = J9THREAD_NUMA_OK;
+    HANDLE processHandle = GetCurrentProcess();
+    DWORD_PTR processAffinityMask = 0;
+    DWORD_PTR systemAffinityMask = 0;
 
-	if (isNumaAvailable && GetProcessAffinityMask(processHandle, &processAffinityMask, &systemAffinityMask)) {
-		/* go through the nodes and build a mask corresponding to the processors (or groups) on the user-provided nodes and take the intersection of these sets */
-		uintptr_t i = 0;
-		ULONGLONG mask = 0;
-		ULONGLONG comparableProcessAffinityMask = (ULONGLONG)processAffinityMask;
-		DWORD_PTR oldValue = 0;
-		HANDLE thisThread = GetCurrentThread();
+    if (isNumaAvailable && GetProcessAffinityMask(processHandle, &processAffinityMask, &systemAffinityMask)) {
+        /* go through the nodes and build a mask corresponding to the processors (or groups) on the user-provided nodes and take the intersection of these sets */
+        uintptr_t i = 0;
+        ULONGLONG mask = 0;
+        ULONGLONG comparableProcessAffinityMask = (ULONGLONG)processAffinityMask;
+        DWORD_PTR oldValue = 0;
+        HANDLE thisThread = GetCurrentThread();
 
-		for (i = 0; i < nodeCount; i++) {
-			UCHAR nodeNumber = (UCHAR)(nodeList[i] - 1);
-			ULONGLONG thisNodeMask = 0;
+        for (i = 0; i < nodeCount; i++) {
+            UCHAR nodeNumber = (UCHAR)(nodeList[i] - 1);
+            ULONGLONG thisNodeMask = 0;
 
-			if (GetNumaNodeProcessorMask(nodeNumber, &thisNodeMask)) {
-				mask |= (thisNodeMask & comparableProcessAffinityMask);
-			}
-		}
-		oldValue = SetThreadAffinityMask(thisThread, (DWORD_PTR)mask);
-		if (0 == oldValue) {
-			/* failure */
-			result = J9THREAD_NUMA_ERR;
-		}
-	}
-	return result;
+            if (GetNumaNodeProcessorMask(nodeNumber, &thisNodeMask)) {
+                mask |= (thisNodeMask & comparableProcessAffinityMask);
+            }
+        }
+        oldValue = SetThreadAffinityMask(thisThread, (DWORD_PTR)mask);
+        if (0 == oldValue) {
+            /* failure */
+            result = J9THREAD_NUMA_ERR;
+        }
+    }
+    return result;
 }
 
 intptr_t
-omrthread_numa_set_node_affinity(omrthread_t thread, const uintptr_t *numaNodes, uintptr_t nodeCount, uint32_t flags)
+omrthread_numa_set_node_affinity(omrthread_t thread, const uintptr_t* numaNodes, uintptr_t nodeCount, uint32_t flags)
 {
-	intptr_t result = J9THREAD_NUMA_ERR;
+    intptr_t result = J9THREAD_NUMA_ERR;
 
-	if (isNumaAvailable) {
-		if (NULL != thread) {
-			THREAD_LOCK(thread, 0);
-			result = omrthread_numa_set_node_affinity_nolock(thread, numaNodes, nodeCount, flags);
-			THREAD_UNLOCK(thread);
-		}
-	} else {
-		result = J9THREAD_NUMA_OK;	
-	} 
-	return result;
+    if (isNumaAvailable) {
+        if (NULL != thread) {
+            THREAD_LOCK(thread, 0);
+            result = omrthread_numa_set_node_affinity_nolock(thread, numaNodes, nodeCount, flags);
+            THREAD_UNLOCK(thread);
+        }
+    } else {
+        result = J9THREAD_NUMA_OK;
+    }
+    return result;
 }
 
 /**
@@ -140,11 +137,11 @@ omrthread_numa_set_node_affinity(omrthread_t thread, const uintptr_t *numaNodes,
  * NUMA is not available. Use omrthread_numa_get_max_node() to test for the availability of NUMA.
  */
 intptr_t
-omrthread_numa_get_node_affinity(omrthread_t thread, uintptr_t *numaNodes, uintptr_t *nodeCount)
+omrthread_numa_get_node_affinity(omrthread_t thread, uintptr_t* numaNodes, uintptr_t* nodeCount)
 {
-	/* Win32 does not allow us to get the affinity of a thread in terms of NUMA nodes (it can only return the "ideal processor" which is a
-	 * completely different level of granularity than this so just return an error.
-	 */
-	*nodeCount = 0;
-	return J9THREAD_NUMA_ERR_AFFINITY_NOT_SUPPORTED;
+    /* Win32 does not allow us to get the affinity of a thread in terms of NUMA nodes (it can only return the "ideal processor" which is a
+     * completely different level of granularity than this so just return an error.
+     */
+    *nodeCount = 0;
+    return J9THREAD_NUMA_ERR_AFFINITY_NOT_SUPPORTED;
 }

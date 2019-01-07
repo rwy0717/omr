@@ -20,13 +20,13 @@
 ###############################################################################
 
 if(OMR_ENV_DATA64)
-	list(APPEND OMR_PLATFORM_DEFINITIONS
-		-DPPC64
-	)
+    list(APPEND OMR_PLATFORM_DEFINITIONS
+        -DPPC64
+    )
 endif()
 
 list(APPEND OMR_PLATFORM_DEFINITIONS
-	-DPPC
+    -DPPC
 )
 
 # Testarossa build variables. Longer term the distinction between TR and the rest
@@ -36,8 +36,8 @@ set(TR_HOST_ARCH p)
 list(APPEND TR_COMPILE_DEFINITIONS TR_HOST_POWER TR_TARGET_POWER)
 
 if(OMR_ENV_DATA64)
-	set(TR_HOST_BITS    64)
-	list(APPEND TR_COMPILE_DEFINITIONS TR_HOST_64BIT TR_TARGET_64BIT BITVECTOR_64BIT)
+    set(TR_HOST_BITS    64)
+    list(APPEND TR_COMPILE_DEFINITIONS TR_HOST_64BIT TR_TARGET_64BIT BITVECTOR_64BIT)
 else()
-	message(FATAL_ERROR "JIT isn't ready to build with CMake on this platform: ")
+    message(FATAL_ERROR "JIT isn't ready to build with CMake on this platform: ")
 endif()

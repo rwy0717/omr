@@ -27,7 +27,7 @@
 # This module will determine the MSVC runtime names from the version of MSVC being used.
 
 if(OMR_MSVC_RUNTIME_)
-	return()
+    return()
 endif()
 set(OMR_MSVC_RUNTIME_ 1)
 
@@ -36,54 +36,54 @@ include(OmrAssert)
 # OMR_MSVC_CRT
 
 if(DEFINED ENV{MSVC_CRT})
-	set(msvc_crt "$ENV{MSVC_CRT}")
+    set(msvc_crt "$ENV{MSVC_CRT}")
 elseif(MSVC_VERSION EQUAL 1200) # VS 6
-	string(CONCAT msvc_crt
-		$<$<CONFIG:Debug>:MSVCR60D>
-		$<$<CONFIG:Release>:MSVCR60>
-	)
+    string(CONCAT msvc_crt
+        $<$<CONFIG:Debug>:MSVCR60D>
+        $<$<CONFIG:Release>:MSVCR60>
+    )
 elseif(MSVC_VERSION EQUAL 1300) # VS 7
-	string(CONCAT msvc_crt
-		$<$<CONFIG:Debug>:MSVCR70D>
-		$<$<CONFIG:Release>:MSVCR70>
-	)
+    string(CONCAT msvc_crt
+        $<$<CONFIG:Debug>:MSVCR70D>
+        $<$<CONFIG:Release>:MSVCR70>
+    )
 elseif(MSVC_VERSION EQUAL 1310) # VS 7.1
-	string(CONCAT msvc_crt
-		$<$<CONFIG:Debug>:MSVCR71D>
-		$<$<CONFIG:Release>:MSVCR71>
-	)
+    string(CONCAT msvc_crt
+        $<$<CONFIG:Debug>:MSVCR71D>
+        $<$<CONFIG:Release>:MSVCR71>
+    )
 elseif(MSVC_VERSION EQUAL 1400) # VS 8
-	string(CONCAT msvc_crt
-		$<$<CONFIG:Debug>:MSVCR80D>
-		$<$<CONFIG:Release>:MSVCR80>
-	)
+    string(CONCAT msvc_crt
+        $<$<CONFIG:Debug>:MSVCR80D>
+        $<$<CONFIG:Release>:MSVCR80>
+    )
 elseif(MSVC_VERSION EQUAL 1500) # VS 9
-	string(CONCAT msvc_crt
-		$<$<CONFIG:Debug>:MSVCR90D>
-		$<$<CONFIG:Release>:MSVCR90>
-	)
+    string(CONCAT msvc_crt
+        $<$<CONFIG:Debug>:MSVCR90D>
+        $<$<CONFIG:Release>:MSVCR90>
+    )
 elseif(MSVC_VERSION EQUAL 1600) # VS 10
-	string(CONCAT msvc_crt
-		$<$<CONFIG:Debug>:MSVCR100D>
-		$<$<CONFIG:Release>:MSVCR100>
-	)
+    string(CONCAT msvc_crt
+        $<$<CONFIG:Debug>:MSVCR100D>
+        $<$<CONFIG:Release>:MSVCR100>
+    )
 elseif(MSVC_VERSION EQUAL 1700) # VS 11
-	string(CONCAT msvc_crt
-		$<$<CONFIG:Debug>:MSVCR110D>
-		$<$<CONFIG:Release>:MSVCR110>
-	)
+    string(CONCAT msvc_crt
+        $<$<CONFIG:Debug>:MSVCR110D>
+        $<$<CONFIG:Release>:MSVCR110>
+    )
 elseif(MSVC_VERSION EQUAL 1800) # VS 12
-	string(CONCAT msvc_crt
-		$<$<CONFIG:Debug>:MSVCR120D>
-		$<$<CONFIG:Release>:MSVCR120>
-	)
+    string(CONCAT msvc_crt
+        $<$<CONFIG:Debug>:MSVCR120D>
+        $<$<CONFIG:Release>:MSVCR120>
+    )
 elseif(MSVC_VERSION GREATER 1800) # VS 14+
-	string(CONCAT msvc_crt
-		$<$<CONFIG:Debug>:UCRTBASED>
-		$<$<CONFIG:Release>:UCRTBASE>
-	)
+    string(CONCAT msvc_crt
+        $<$<CONFIG:Debug>:UCRTBASED>
+        $<$<CONFIG:Release>:UCRTBASE>
+    )
 else()
-	set(msvc_crt NOTFOUND)
+    set(msvc_crt NOTFOUND)
 endif()
 
 set(OMR_MSVC_CRT "${msvc_crt}" CACHE STRING "The MSVC runtime library")

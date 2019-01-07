@@ -24,38 +24,37 @@
 
 #include "threadTestLib.hpp"
 
-class CThread
-{
+class CThread {
 public:
-	CThread(omrthread_t self);
-	CThread(void);
-	virtual ~CThread(void);
-	virtual void Start(void);
+    CThread(omrthread_t self);
+    CThread(void);
+    virtual ~CThread(void);
+    virtual void Start(void);
 
-	/* disable assignment */
-	CThread& operator=(const CThread&);
+    /* disable assignment */
+    CThread& operator=(const CThread&);
 
-	bool Terminated(void);
-	omrthread_t GetId(void) const;
-	void Interrupt(void);
-	bool IsInterrupted(void);
-	void PriorityInterrupt(void);
-	bool IsPriorityInterrupted(void);
-	static CThread *Attach(void);
-	void Detach(void);
-	intptr_t Sleep(int64_t millis);
-	intptr_t SleepInterruptable(int64_t millis, intptr_t nanos);
-	omrthread_t getThread(void);
+    bool Terminated(void);
+    omrthread_t GetId(void) const;
+    void Interrupt(void);
+    bool IsInterrupted(void);
+    void PriorityInterrupt(void);
+    bool IsPriorityInterrupted(void);
+    static CThread* Attach(void);
+    void Detach(void);
+    intptr_t Sleep(int64_t millis);
+    intptr_t SleepInterruptable(int64_t millis, intptr_t nanos);
+    omrthread_t getThread(void);
 
 protected:
-	virtual intptr_t Run(void);
-	omrthread_t m_self;
-	int m_attachCount;
+    virtual intptr_t Run(void);
+    omrthread_t m_self;
+    int m_attachCount;
 
 private:
-	static int StartFunction(void *data);
-	CMonitor *m__exitlock;
-	volatile bool m__terminated;
+    static int StartFunction(void* data);
+    CMonitor* m__exitlock;
+    volatile bool m__terminated;
 };
 
 #endif /* J9THREADTEST_CTHREAD_HPP_INCLUDED */

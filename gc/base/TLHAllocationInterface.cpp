@@ -49,66 +49,63 @@
  * 
  * @return the new instance, or NULL on failure.
  */
-MM_TLHAllocationInterface *
-MM_TLHAllocationInterface::newInstance(MM_EnvironmentBase *env)
+MM_TLHAllocationInterface*
+MM_TLHAllocationInterface::newInstance(MM_EnvironmentBase* env)
 {
-	MM_TLHAllocationInterface *allocationInterface;
+    MM_TLHAllocationInterface* allocationInterface;
 
-	allocationInterface = (MM_TLHAllocationInterface *)env->getForge()->allocate(sizeof(MM_TLHAllocationInterface), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
-	if (NULL != allocationInterface) {
-		new(allocationInterface) MM_TLHAllocationInterface(env);
-		if (!allocationInterface->initialize(env)) {
-			allocationInterface->kill(env);
-			return NULL;
-		}
-	}
-	return allocationInterface;
+    allocationInterface = (MM_TLHAllocationInterface*)env->getForge()->allocate(sizeof(MM_TLHAllocationInterface), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+    if (NULL != allocationInterface) {
+        new (allocationInterface) MM_TLHAllocationInterface(env);
+        if (!allocationInterface->initialize(env)) {
+            allocationInterface->kill(env);
+            return NULL;
+        }
+    }
+    return allocationInterface;
 }
 
 /**
  * One time initialization of the receivers state.
  * @return true on successful initialization, false otherwise.
  */
-bool
-MM_TLHAllocationInterface::initialize(MM_EnvironmentBase *env)
+bool MM_TLHAllocationInterface::initialize(MM_EnvironmentBase* env)
 {
-	MM_GCExtensionsBase *extensions = env->getExtensions();
-	bool result = true;
+    MM_GCExtensionsBase* extensions = env->getExtensions();
+    bool result = true;
 
-	Assert_MM_true(NULL == _frequentObjectsStats);
+    Assert_MM_true(NULL == _frequentObjectsStats);
 
-	if (extensions->doFrequentObjectAllocationSampling){
-		_frequentObjectsStats = MM_FrequentObjectsStats::newInstance(env);
-		result = (NULL != _frequentObjectsStats);
-	}
+    if (extensions->doFrequentObjectAllocationSampling) {
+        _frequentObjectsStats = MM_FrequentObjectsStats::newInstance(env);
+        result = (NULL != _frequentObjectsStats);
+    }
 
-	if (result) {
-		reconnect(env, false);
-	}
+    if (result) {
+        reconnect(env, false);
+    }
 
-	return result;
+    return result;
 }
 
 /**
  * Internal clean up of the receivers state and resources.
  */
-void
-MM_TLHAllocationInterface::tearDown(MM_EnvironmentBase *env)
+void MM_TLHAllocationInterface::tearDown(MM_EnvironmentBase* env)
 {
-	if (NULL != _frequentObjectsStats) {
-		_frequentObjectsStats->kill(env);
-		_frequentObjectsStats = NULL;
-	}
+    if (NULL != _frequentObjectsStats) {
+        _frequentObjectsStats->kill(env);
+        _frequentObjectsStats = NULL;
+    }
 }
 
 /**
  * Clean up all state and resources held by the receiver.
  */
-void
-MM_TLHAllocationInterface::kill(MM_EnvironmentBase *env)
+void MM_TLHAllocationInterface::kill(MM_EnvironmentBase* env)
 {
-	tearDown(env);
-	env->getForge()->free(this);
+    tearDown(env);
+    env->getForge()->free(this);
 }
 
 /**
@@ -119,137 +116,128 @@ MM_TLHAllocationInterface::kill(MM_EnvironmentBase *env)
  * 
  * @param shouldFlush determines whether the existing cache information should be flushed back to the heap.
  */
- void
- MM_TLHAllocationInterface::reconnect(MM_EnvironmentBase *env, bool shouldFlush)
+void MM_TLHAllocationInterface::reconnect(MM_EnvironmentBase* env, bool shouldFlush)
 {
-	 MM_GCExtensionsBase *extensions = env->getExtensions();
+    MM_GCExtensionsBase* extensions = env->getExtensions();
 
-	 if(shouldFlush) {
-		extensions->allocationStats.merge(&_stats);
-		_stats.clear();
-		/* Since AllocationStats have been reset, reset the base */
-		_bytesAllocatedBase = 0;
-	}
-	
-	_tlhAllocationSupport.reconnect(env, shouldFlush);
+    if (shouldFlush) {
+        extensions->allocationStats.merge(&_stats);
+        _stats.clear();
+        /* Since AllocationStats have been reset, reset the base */
+        _bytesAllocatedBase = 0;
+    }
+
+    _tlhAllocationSupport.reconnect(env, shouldFlush);
 
 #if defined(OMR_GC_NON_ZERO_TLH)
-	_tlhAllocationSupportNonZero.reconnect(env, shouldFlush);
+    _tlhAllocationSupportNonZero.reconnect(env, shouldFlush);
 #endif /* defined(OMR_GC_NON_ZERO_TLH) */
 };
-
 
 /**
  * Attempt to allocate an object in this TLH.
  */
-void *
-MM_TLHAllocationInterface::allocateFromTLH(MM_EnvironmentBase *env, MM_AllocateDescription *allocDescription, bool shouldCollectOnFailure)
+void* MM_TLHAllocationInterface::allocateFromTLH(MM_EnvironmentBase* env, MM_AllocateDescription* allocDescription, bool shouldCollectOnFailure)
 {
-	void *result = NULL;
+    void* result = NULL;
 
 #if defined(OMR_GC_NON_ZERO_TLH)
-	/* If requested to skip zero init (NON_ZERO_TLH flag set), and we are in dual TLH (default TLH is batch cleared),
-	 * we have to redirect this allocation to the non zero TLH */
-	if (allocDescription->getNonZeroTLHFlag()) {
-		result = _tlhAllocationSupportNonZero.allocateFromTLH(env, allocDescription, shouldCollectOnFailure);
-	} else
+    /* If requested to skip zero init (NON_ZERO_TLH flag set), and we are in dual TLH (default TLH is batch cleared),
+     * we have to redirect this allocation to the non zero TLH */
+    if (allocDescription->getNonZeroTLHFlag()) {
+        result = _tlhAllocationSupportNonZero.allocateFromTLH(env, allocDescription, shouldCollectOnFailure);
+    } else
 #endif /* defined(OMR_GC_NON_ZERO_TLH) */
-	{
-		result = _tlhAllocationSupport.allocateFromTLH(env, allocDescription, shouldCollectOnFailure);
-	}
-	
-	return result;
+    {
+        result = _tlhAllocationSupport.allocateFromTLH(env, allocDescription, shouldCollectOnFailure);
+    }
+
+    return result;
 };
 
-void *
-MM_TLHAllocationInterface::allocateObject(MM_EnvironmentBase *env, MM_AllocateDescription *allocDescription, MM_MemorySpace *memorySpace, bool shouldCollectOnFailure)
+void* MM_TLHAllocationInterface::allocateObject(MM_EnvironmentBase* env, MM_AllocateDescription* allocDescription, MM_MemorySpace* memorySpace, bool shouldCollectOnFailure)
 {
-	void *result = NULL;
-	MM_AllocationContext *ac = env->getAllocationContext();
-	_bytesAllocatedBase = _stats.bytesAllocated();
+    void* result = NULL;
+    MM_AllocationContext* ac = env->getAllocationContext();
+    _bytesAllocatedBase = _stats.bytesAllocated();
 
-	if (NULL != ac) {
-		/* ensure that we are allowed to use the AI in this configuration in the Tarok case */
-		/* allocation contexts currently aren't supported with generational schemes */
-		Assert_MM_true(memorySpace->getTenureMemorySubSpace() == memorySpace->getDefaultMemorySubSpace());
-	}
+    if (NULL != ac) {
+        /* ensure that we are allowed to use the AI in this configuration in the Tarok case */
+        /* allocation contexts currently aren't supported with generational schemes */
+        Assert_MM_true(memorySpace->getTenureMemorySubSpace() == memorySpace->getDefaultMemorySubSpace());
+    }
 
-	/* Record the memory space from which the allocation takes place in the AD */
-	allocDescription->setMemorySpace(memorySpace);
-	if (allocDescription->getTenuredFlag()) {
-		Assert_MM_true(shouldCollectOnFailure);
-		MM_AllocationContext *cac = env->getCommonAllocationContext();
-		if (NULL != cac) {
-			result = cac->allocateObject(env, allocDescription, shouldCollectOnFailure);
-		} else if (NULL != ac) {
-			result = ac->allocateObject(env, allocDescription, shouldCollectOnFailure);
-		} else {
-			MM_MemorySubSpace *subspace = memorySpace->getTenureMemorySubSpace();
-			result = subspace->allocateObject(env, allocDescription, NULL, NULL, shouldCollectOnFailure);
-		}
-	} else {
-		result = allocateFromTLH(env, allocDescription, shouldCollectOnFailure);
+    /* Record the memory space from which the allocation takes place in the AD */
+    allocDescription->setMemorySpace(memorySpace);
+    if (allocDescription->getTenuredFlag()) {
+        Assert_MM_true(shouldCollectOnFailure);
+        MM_AllocationContext* cac = env->getCommonAllocationContext();
+        if (NULL != cac) {
+            result = cac->allocateObject(env, allocDescription, shouldCollectOnFailure);
+        } else if (NULL != ac) {
+            result = ac->allocateObject(env, allocDescription, shouldCollectOnFailure);
+        } else {
+            MM_MemorySubSpace* subspace = memorySpace->getTenureMemorySubSpace();
+            result = subspace->allocateObject(env, allocDescription, NULL, NULL, shouldCollectOnFailure);
+        }
+    } else {
+        result = allocateFromTLH(env, allocDescription, shouldCollectOnFailure);
 
-		if (NULL == result) {
-			if (NULL != ac) {
-				result = ac->allocateObject(env, allocDescription, shouldCollectOnFailure);
-			} else {
-				result = memorySpace->getDefaultMemorySubSpace()->allocateObject(env, allocDescription, NULL, NULL, shouldCollectOnFailure);
-			}
-		}
+        if (NULL == result) {
+            if (NULL != ac) {
+                result = ac->allocateObject(env, allocDescription, shouldCollectOnFailure);
+            } else {
+                result = memorySpace->getDefaultMemorySubSpace()->allocateObject(env, allocDescription, NULL, NULL, shouldCollectOnFailure);
+            }
+        }
+    }
 
-	}
-
-	if ((NULL != result) && !allocDescription->isCompletedFromTlh()) {
+    if ((NULL != result) && !allocDescription->isCompletedFromTlh()) {
 #if defined(OMR_GC_OBJECT_ALLOCATION_NOTIFY)
-		env->objectAllocationNotify((omrobjectptr_t)result);
+        env->objectAllocationNotify((omrobjectptr_t)result);
 #endif /* OMR_GC_OBJECT_ALLOCATION_NOTIFY */
-		_stats._allocationBytes += allocDescription->getContiguousBytes();
-		_stats._allocationCount += 1;
+        _stats._allocationBytes += allocDescription->getContiguousBytes();
+        _stats._allocationCount += 1;
+    }
 
-	}
+    env->_oolTraceAllocationBytes += (_stats.bytesAllocated() - _bytesAllocatedBase); /* Increment by bytes allocated */
 
-	env->_oolTraceAllocationBytes += (_stats.bytesAllocated() - _bytesAllocatedBase); /* Increment by bytes allocated */
-
-	return result;
+    return result;
 }
 
-void *
-MM_TLHAllocationInterface::allocateArray(MM_EnvironmentBase *env, MM_AllocateDescription *allocateDescription, MM_MemorySpace *memorySpace, bool shouldCollectOnFailure)
+void* MM_TLHAllocationInterface::allocateArray(MM_EnvironmentBase* env, MM_AllocateDescription* allocateDescription, MM_MemorySpace* memorySpace, bool shouldCollectOnFailure)
 {
-	return allocateObject(env, allocateDescription, memorySpace, shouldCollectOnFailure);
+    return allocateObject(env, allocateDescription, memorySpace, shouldCollectOnFailure);
 }
 
 #if defined(OMR_GC_ARRAYLETS)
-void *
-MM_TLHAllocationInterface::allocateArrayletSpine(MM_EnvironmentBase *env, MM_AllocateDescription *allocateDescription, MM_MemorySpace *memorySpace, bool shouldCollectOnFailure)
+void* MM_TLHAllocationInterface::allocateArrayletSpine(MM_EnvironmentBase* env, MM_AllocateDescription* allocateDescription, MM_MemorySpace* memorySpace, bool shouldCollectOnFailure)
 {
-	return allocateObject(env, allocateDescription, memorySpace, shouldCollectOnFailure);
+    return allocateObject(env, allocateDescription, memorySpace, shouldCollectOnFailure);
 }
-void *
-MM_TLHAllocationInterface::allocateArrayletLeaf(MM_EnvironmentBase *env, MM_AllocateDescription *allocateDescription, MM_MemorySpace *memorySpace, bool shouldCollectOnFailure)
+void* MM_TLHAllocationInterface::allocateArrayletLeaf(MM_EnvironmentBase* env, MM_AllocateDescription* allocateDescription, MM_MemorySpace* memorySpace, bool shouldCollectOnFailure)
 {
-	void *result = NULL;
-	MM_AllocationContext *ac = env->getAllocationContext();
-	MM_AllocationContext *cac = env->getCommonAllocationContext();
-	
-	if((NULL != cac) && (allocateDescription->getTenuredFlag())) {
-		result = cac->allocateArrayletLeaf(env, allocateDescription, shouldCollectOnFailure);
-	} else if (NULL != ac) {
-		/* ensure that we are allowed to use the AI in this configuration in the Tarok case */
-		/* allocation contexts currently aren't supported with generational schemes */
-		Assert_MM_true(memorySpace->getTenureMemorySubSpace() == memorySpace->getDefaultMemorySubSpace());
-		result = ac->allocateArrayletLeaf(env, allocateDescription, shouldCollectOnFailure);
-	} else {
-		result = memorySpace->getDefaultMemorySubSpace()->allocateArrayletLeaf(env, allocateDescription, NULL, NULL, shouldCollectOnFailure);
-	}
+    void* result = NULL;
+    MM_AllocationContext* ac = env->getAllocationContext();
+    MM_AllocationContext* cac = env->getCommonAllocationContext();
 
-	if (NULL != result) {
-		_stats._arrayletLeafAllocationBytes += env->getOmrVM()->_arrayletLeafSize;
-		_stats._arrayletLeafAllocationCount += 1;
-	}
+    if ((NULL != cac) && (allocateDescription->getTenuredFlag())) {
+        result = cac->allocateArrayletLeaf(env, allocateDescription, shouldCollectOnFailure);
+    } else if (NULL != ac) {
+        /* ensure that we are allowed to use the AI in this configuration in the Tarok case */
+        /* allocation contexts currently aren't supported with generational schemes */
+        Assert_MM_true(memorySpace->getTenureMemorySubSpace() == memorySpace->getDefaultMemorySubSpace());
+        result = ac->allocateArrayletLeaf(env, allocateDescription, shouldCollectOnFailure);
+    } else {
+        result = memorySpace->getDefaultMemorySubSpace()->allocateArrayletLeaf(env, allocateDescription, NULL, NULL, shouldCollectOnFailure);
+    }
 
-	return result;
+    if (NULL != result) {
+        _stats._arrayletLeafAllocationBytes += env->getOmrVM()->_arrayletLeafSize;
+        _stats._arrayletLeafAllocationCount += 1;
+    }
+
+    return result;
 }
 #endif /* OMR_GC_ARRAYLETS */
 
@@ -261,53 +249,50 @@ MM_TLHAllocationInterface::allocateArrayletLeaf(MM_EnvironmentBase *env, MM_Allo
  * AllocationDescription with the appropriate information.
  * @return true on successful TLH replenishment, false otherwise.
  */
-void *
-MM_TLHAllocationInterface::allocateTLH(MM_EnvironmentBase *env, MM_AllocateDescription *allocDescription, MM_MemorySubSpace *memorySubSpace, MM_MemoryPool *memoryPool)
+void* MM_TLHAllocationInterface::allocateTLH(MM_EnvironmentBase* env, MM_AllocateDescription* allocDescription, MM_MemorySubSpace* memorySubSpace, MM_MemoryPool* memoryPool)
 {
-	void *result = NULL;
+    void* result = NULL;
 
 #if defined(OMR_GC_NON_ZERO_TLH)
-	if (allocDescription->getNonZeroTLHFlag()) {
-		result = _tlhAllocationSupportNonZero.allocateTLH(env, allocDescription, memorySubSpace, memoryPool);
-	} else
+    if (allocDescription->getNonZeroTLHFlag()) {
+        result = _tlhAllocationSupportNonZero.allocateTLH(env, allocDescription, memorySubSpace, memoryPool);
+    } else
 #endif /* defined(OMR_GC_NON_ZERO_TLH) */
-	{
-		result = _tlhAllocationSupport.allocateTLH(env, allocDescription, memorySubSpace, memoryPool);
-	}
+    {
+        result = _tlhAllocationSupport.allocateTLH(env, allocDescription, memorySubSpace, memoryPool);
+    }
 
-	return result;
+    return result;
 }
 
-void
-MM_TLHAllocationInterface::flushCache(MM_EnvironmentBase *env)
+void MM_TLHAllocationInterface::flushCache(MM_EnvironmentBase* env)
 {
-	MM_GCExtensionsBase *extensions = env->getExtensions();
-	
-#if defined(OMR_GC_THREAD_LOCAL_HEAP)	
-	if (!_owningEnv->isInlineTLHAllocateEnabled()) {
-		/* Clear out realHeapAlloc field; tlh code below will take care of rest */
-		_owningEnv->enableInlineTLHAllocate();
-	}	
-#endif /* OMR_GC_THREAD_LOCAL_HEAP */		
-	
-	extensions->allocationStats.merge(&_stats);
-	_stats.clear();
-	/* Since AllocationStats have been reset, reset the base as well*/
-	_bytesAllocatedBase = 0;
-	_tlhAllocationSupport.flushCache(env);
+    MM_GCExtensionsBase* extensions = env->getExtensions();
+
+#if defined(OMR_GC_THREAD_LOCAL_HEAP)
+    if (!_owningEnv->isInlineTLHAllocateEnabled()) {
+        /* Clear out realHeapAlloc field; tlh code below will take care of rest */
+        _owningEnv->enableInlineTLHAllocate();
+    }
+#endif /* OMR_GC_THREAD_LOCAL_HEAP */
+
+    extensions->allocationStats.merge(&_stats);
+    _stats.clear();
+    /* Since AllocationStats have been reset, reset the base as well*/
+    _bytesAllocatedBase = 0;
+    _tlhAllocationSupport.flushCache(env);
 
 #if defined(OMR_GC_NON_ZERO_TLH)
-	_tlhAllocationSupportNonZero.flushCache(env);
+    _tlhAllocationSupportNonZero.flushCache(env);
 #endif /* defined(OMR_GC_NON_ZERO_TLH) */
 }
 
-void
-MM_TLHAllocationInterface::restartCache(MM_EnvironmentBase *env)
+void MM_TLHAllocationInterface::restartCache(MM_EnvironmentBase* env)
 {
-	_tlhAllocationSupport.restart(env);
+    _tlhAllocationSupport.restart(env);
 
 #if defined(OMR_GC_NON_ZERO_TLH)
-	_tlhAllocationSupportNonZero.restart(env);
+    _tlhAllocationSupportNonZero.restart(env);
 #endif /* defined(OMR_GC_NON_ZERO_TLH) */
 }
 

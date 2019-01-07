@@ -22,38 +22,38 @@
 #ifndef OMR_ILREFERENCE_INCL
 #define OMR_ILREFERENCE_INCL
 
-namespace TR { class SymbolReference; }
+namespace TR {
+class SymbolReference;
+}
 
-namespace OMR
-{
+namespace OMR {
 
-class IlReference
-   {
+class IlReference {
 public:
-   TR_ALLOC(TR_Memory::IlGenerator)
+    TR_ALLOC(TR_Memory::IlGenerator)
 
-   /**
+    /**
     * @brief really just a wrapper for a TR::SymbolReference
     */
-   IlReference(TR::SymbolReference *symRef)
-      : _symRef(symRef)
-      {
-      }
+    IlReference(TR::SymbolReference* symRef)
+        : _symRef(symRef)
+    {
+    }
 
-   /**
+    /**
     * @brief returns the wrapped TR::SymbolReference
     */
-   TR::SymbolReference *symRef()
-      {
-      return _symRef;
-      }
+    TR::SymbolReference* symRef()
+    {
+        return _symRef;
+    }
 
 protected:
-   /**
+    /**
     * @brief the wrapped TR::SymbolReference pointer
     */
-   TR::SymbolReference * _symRef;
-   };
+    TR::SymbolReference* _symRef;
+};
 
 } // namespace OMR
 

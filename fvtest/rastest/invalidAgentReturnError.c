@@ -26,13 +26,13 @@
  */
 
 omr_error_t
-OMRAgent_OnLoad(OMR_TI const *ti, OMR_VM *vm, char const *options, OMR_AgentCallbacks *agentCallbacks, ...)
+OMRAgent_OnLoad(OMR_TI const* ti, OMR_VM* vm, char const* options, OMR_AgentCallbacks* agentCallbacks, ...)
 {
-	return OMR_ERROR_OUT_OF_NATIVE_MEMORY;
+    return OMR_ERROR_OUT_OF_NATIVE_MEMORY;
 }
 
 omr_error_t
-OMRAgent_OnUnload(OMR_TI const *ti, OMR_VM *vm)
+OMRAgent_OnUnload(OMR_TI const* ti, OMR_VM* vm)
 {
-	return OMR_ERROR_ILLEGAL_ARGUMENT;
+    return OMR_ERROR_ILLEGAL_ARGUMENT;
 }

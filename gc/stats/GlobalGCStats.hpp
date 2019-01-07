@@ -41,55 +41,55 @@
  */
 class MM_GlobalGCStats {
 public:
-	uintptr_t gcCount; /**< Count of the number of GC cycles that have occurred */
-	MM_WorkPacketStats workPacketStats;
-	MM_SweepStats sweepStats;
+    uintptr_t gcCount; /**< Count of the number of GC cycles that have occurred */
+    MM_WorkPacketStats workPacketStats;
+    MM_SweepStats sweepStats;
 #if defined(OMR_GC_MODRON_COMPACTION)
-	MM_CompactStats compactStats;
+    MM_CompactStats compactStats;
 #endif /* OMR_GC_MODRON_COMPACTION */
 
-	uintptr_t fixHeapForWalkReason;
-	uint64_t fixHeapForWalkTime;
+    uintptr_t fixHeapForWalkReason;
+    uint64_t fixHeapForWalkTime;
 
-	MM_MarkStats markStats;
-	MM_ClassUnloadStats classUnloadStats;
-	MM_MetronomeStats metronomeStats; /**< Stats collected during one GC increment (quantum) */
+    MM_MarkStats markStats;
+    MM_ClassUnloadStats classUnloadStats;
+    MM_MetronomeStats metronomeStats; /**< Stats collected during one GC increment (quantum) */
 
-	uintptr_t finalizableCount; /**< count of objects pushed for finalization during one GC cycle */
+    uintptr_t finalizableCount; /**< count of objects pushed for finalization during one GC cycle */
 
-	MMINLINE void clear()
-	{
-		/* gcCount is not cleared as the value must persist across cycles */
+    MMINLINE void clear()
+    {
+        /* gcCount is not cleared as the value must persist across cycles */
 
-		workPacketStats.clear();
-		sweepStats.clear();
+        workPacketStats.clear();
+        sweepStats.clear();
 #if defined(OMR_GC_MODRON_COMPACTION)
-		compactStats.clear();
+        compactStats.clear();
 #endif /* OMR_GC_MODRON_COMPACTION */
 
-		fixHeapForWalkReason = FIXUP_NONE;
-		fixHeapForWalkTime = 0;
+        fixHeapForWalkReason = FIXUP_NONE;
+        fixHeapForWalkTime = 0;
 
-		markStats.clear();
-		classUnloadStats.clear();
-		metronomeStats.clearStart();
+        markStats.clear();
+        classUnloadStats.clear();
+        metronomeStats.clearStart();
 
-		finalizableCount = 0;
-	};
+        finalizableCount = 0;
+    };
 
-	MM_GlobalGCStats()
-		: gcCount(0)
-		, workPacketStats()
-		, sweepStats()
+    MM_GlobalGCStats()
+        : gcCount(0)
+        , workPacketStats()
+        , sweepStats()
 #if defined(OMR_GC_MODRON_COMPACTION)
-		, compactStats()
+        , compactStats()
 #endif /* OMR_GC_MODRON_COMPACTION */
-		, fixHeapForWalkReason(FIXUP_NONE)
-		, fixHeapForWalkTime(0)
-		, markStats()
-		, classUnloadStats()
-		, metronomeStats()
-		, finalizableCount(0) {};
+        , fixHeapForWalkReason(FIXUP_NONE)
+        , fixHeapForWalkTime(0)
+        , markStats()
+        , classUnloadStats()
+        , metronomeStats()
+        , finalizableCount(0) {};
 };
 
 #endif /* GLOBALGCSTATS_HPP_ */

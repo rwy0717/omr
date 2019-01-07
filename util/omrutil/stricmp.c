@@ -26,64 +26,56 @@
 #define tolower(c) (((c) >= 'A' && (c) <= 'Z') ? ((c) - 'A' + 'a') : (c))
 #define toupper(c) (((c) >= 'a' && (c) <= 'z') ? ((c) - 'a' + 'A') : (c))
 
-
-int
-j9_cmdla_tolower(int c)
+int j9_cmdla_tolower(int c)
 {
-	return tolower(c);
+    return tolower(c);
 }
 
-int
-j9_ascii_tolower(int c)
+int j9_ascii_tolower(int c)
 {
-	return tolower(c);
+    return tolower(c);
 }
 
-int
-j9_cmdla_toupper(int c)
+int j9_cmdla_toupper(int c)
 {
-	return toupper(c);
+    return toupper(c);
 }
 
-int
-j9_ascii_toupper(int c)
+int j9_ascii_toupper(int c)
 {
-	return toupper(c);
+    return toupper(c);
 }
 
-int
-j9_cmdla_stricmp(const char *s1, const char *s2)
+int j9_cmdla_stricmp(const char* s1, const char* s2)
 {
-	while (1) {
-		char c1 = *s1++;
-		char c2 = *s2++;
-		int diff = tolower(c1) - tolower(c2);
-		if (0 == diff) {
-			if ('\0' == c1) {
-				return 0;
-			}
-		} else {
-			return diff;
-		}
-	}
-	return 0;
+    while (1) {
+        char c1 = *s1++;
+        char c2 = *s2++;
+        int diff = tolower(c1) - tolower(c2);
+        if (0 == diff) {
+            if ('\0' == c1) {
+                return 0;
+            }
+        } else {
+            return diff;
+        }
+    }
+    return 0;
 }
 
-int
-j9_cmdla_strnicmp(const char *s1, const char *s2, size_t length)
+int j9_cmdla_strnicmp(const char* s1, const char* s2, size_t length)
 {
-	while (length-- > 0) {
-		char c1 = *s1++;
-		char c2 = *s2++;
-		int diff = tolower(c1) - tolower(c2);
-		if (0 == diff) {
-			if ('\0' == c1) {
-				return 0;
-			}
-		} else {
-			return diff;
-		}
-	}
-	return 0;
+    while (length-- > 0) {
+        char c1 = *s1++;
+        char c2 = *s2++;
+        int diff = tolower(c1) - tolower(c2);
+        if (0 == diff) {
+            if ('\0' == c1) {
+                return 0;
+            }
+        } else {
+            return diff;
+        }
+    }
+    return 0;
 }
-

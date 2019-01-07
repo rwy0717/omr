@@ -50,18 +50,18 @@ set(OMR_GC_TEST ${OMR_GC} CACHE BOOL "Enable the GC tests.")
 
 ## OMR_COMPILER is required for OMR_JITBUILDER and OMR_TEST_COMPILER
 if(NOT OMR_COMPILER)
-	if(OMR_JITBUILDER)
-		message(FATAL_ERROR "OMR_JITBUILDER is enabled but OMR_COMPILER is not enabled")
-	endif()
-	if(OMR_TEST_COMPILER)
-		message(FATAL_ERROR "OMR_TEST_COMPILER is enabled but OMR_COMPILER is not enabled")
-	endif()
+    if(OMR_JITBUILDER)
+        message(FATAL_ERROR "OMR_JITBUILDER is enabled but OMR_COMPILER is not enabled")
+    endif()
+    if(OMR_TEST_COMPILER)
+        message(FATAL_ERROR "OMR_TEST_COMPILER is enabled but OMR_COMPILER is not enabled")
+    endif()
 endif()
 
 ## Enable OMR_JITBUILDER_TEST if OMR_JITBUILDER is enabled.
 ## Do NOT force it since it is explicitly disabled on Windows for now.
 if(OMR_JITBUILDER)
-	set(OMR_JITBUILDER_TEST ON CACHE BOOL "")
+    set(OMR_JITBUILDER_TEST ON CACHE BOOL "")
 else()
     # if JitBuilder isn't enabled, the tests can't be built
     set(OMR_JITBUILDER_TEST OFF CACHE BOOL "" FORCE)
@@ -72,7 +72,7 @@ endif()
 ###
 
 set(OMR_TOOLS_IMPORTFILE "IMPORTFILE-NOTFOUND" CACHE FILEPATH
-	"Point it to the ImportTools.cmake file of a native build"
+    "Point it to the ImportTools.cmake file of a native build"
 )
 
 ###
@@ -155,13 +155,13 @@ set(OMRTHREAD_AIX_DEFAULT OFF)
 set(OMRTHREAD_ZOS_DEFAULT OFF)
 
 if(OMR_HOST_OS STREQUAL "win")
-	set(OMRTHREAD_WIN32_DEFAULT ON)
+    set(OMRTHREAD_WIN32_DEFAULT ON)
 elseif(OMR_HOST_OS STREQUAL "aix")
-	set(OMRTHREAD_AIX_DEFAULT ON)
+    set(OMRTHREAD_AIX_DEFAULT ON)
 elseif(OMR_HOST_OS STREQUAL "zos")
-	set(OMRTHREAD_ZOS_DEFAULT ON)
+    set(OMRTHREAD_ZOS_DEFAULT ON)
 else()
-	set(OMRTHREAD_UNIX_DEFAULT ON)
+    set(OMRTHREAD_UNIX_DEFAULT ON)
 endif()
 
 set(OMRTHREAD_LIB_AIX ${OMRTHREAD_AIX_DEFAULT} CACHE BOOL "TODO: Document")

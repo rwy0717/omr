@@ -24,17 +24,15 @@
  * @file
  * @ingroup GC_Modron_Standard
  */
- 
+
 #include "CompactFixHeapForWalkTask.hpp"
 #include "CompactScheme.hpp"
 
 #if defined(OMR_GC_MODRON_COMPACTION)
 
-void 
-MM_CompactFixHeapForWalkTask::run(MM_EnvironmentBase *env)
+void MM_CompactFixHeapForWalkTask::run(MM_EnvironmentBase* env)
 {
-	_compactScheme->parallelFixHeapForWalk(env);
+    _compactScheme->parallelFixHeapForWalk(env);
 }
- 
-#endif /* OMR_GC_MODRON_COMPACTION */
 
+#endif /* OMR_GC_MODRON_COMPACTION */

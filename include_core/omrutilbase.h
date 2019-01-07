@@ -44,7 +44,7 @@ extern "C" {
  * @return the value at memory location/address before the store was attempted
  */
 uintptr_t
-compareAndSwapUDATA(uintptr_t *location, uintptr_t oldValue, uintptr_t newValue);
+compareAndSwapUDATA(uintptr_t* location, uintptr_t oldValue, uintptr_t newValue);
 
 /**
  * @brief Store unsigned 32 bit value at memory location as an atomic operation.
@@ -59,7 +59,7 @@ compareAndSwapUDATA(uintptr_t *location, uintptr_t oldValue, uintptr_t newValue)
  * @return the value at memory location/address before the store was attempted
  */
 uint32_t
-compareAndSwapU32(uint32_t *location, uint32_t oldValue, uint32_t newValue);
+compareAndSwapU32(uint32_t* location, uint32_t oldValue, uint32_t newValue);
 
 /**
  * @brief Creates a load barrier. Causes the processor to discard any pre-fetched (and
@@ -72,8 +72,7 @@ compareAndSwapU32(uint32_t *location, uint32_t oldValue, uint32_t newValue);
  *
  * @return void
  */
-void
-issueReadBarrier(void);
+void issueReadBarrier(void);
 
 /**
  * @brief Creates a memory barrier. On a given processor, any load or store instructions
@@ -84,8 +83,7 @@ issueReadBarrier(void);
  *
  * @return void
  */
-void
-issueReadWriteBarrier(void);
+void issueReadWriteBarrier(void);
 
 /**
  * @brief Creates a store barrier. Provides the same ordering function as the sync instruction,
@@ -97,8 +95,7 @@ issueReadWriteBarrier(void);
  *
  * @return void
  */
-void
-issueWriteBarrier(void);
+void issueWriteBarrier(void);
 
 /**
  * @brief Add a number to the value at a specific memory location as an atomic operation.
@@ -110,7 +107,7 @@ issueWriteBarrier(void);
  * @return The value at memory location address after the add is completed
  */
 uintptr_t
-addAtomic(volatile uintptr_t *address, uintptr_t addend);
+addAtomic(volatile uintptr_t* address, uintptr_t addend);
 
 /**
  * @brief Subtracts a number from the value at a specific memory location as an atomic
@@ -123,7 +120,7 @@ addAtomic(volatile uintptr_t *address, uintptr_t addend);
  * @return The value at memory location address
  */
 uintptr_t
-subtractAtomic(volatile uintptr_t *address, uintptr_t value);
+subtractAtomic(volatile uintptr_t* address, uintptr_t value);
 
 /**
  * @brief Store value at memory location. Stores value at memory
@@ -137,7 +134,7 @@ subtractAtomic(volatile uintptr_t *address, uintptr_t value);
  * @note This method can spin indefinitely while attempting to write
  * the new value.
  */
-uintptr_t setAtomic(volatile uintptr_t *address, uintptr_t value);
+uintptr_t setAtomic(volatile uintptr_t* address, uintptr_t value);
 
 /* ---------------- cas8help.s ---------------- */
 #if !defined(OMR_ENV_DATA64) && (defined(AIXPPC) || defined(LINUXPPC))
@@ -154,10 +151,9 @@ uintptr_t setAtomic(volatile uintptr_t *address, uintptr_t value);
  * @return  The old value read from addr
  */
 uint64_t
-J9CAS8Helper(volatile uint64_t *addr, uint32_t compareLo, uint32_t compareHi, uint32_t swapLo, uint32_t swapHi);
+J9CAS8Helper(volatile uint64_t* addr, uint32_t compareLo, uint32_t compareHi, uint32_t swapLo, uint32_t swapHi);
 
 #endif /* !OMR_ENV_DATA64 && (AIXPPC || LINUXPPC) */
-
 
 /* ---------------- gettimebase.c ---------------- */
 
@@ -180,8 +176,7 @@ getTimebase(void);
  *
  * @return void
  */
-void
-J9ZOSRWB(void);
+void J9ZOSRWB(void);
 #endif /* defined(J9ZOS390) */
 
 #if defined(__cplusplus)

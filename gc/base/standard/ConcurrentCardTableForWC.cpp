@@ -28,9 +28,9 @@
 
 #include <string.h>
 #include <stdio.h>
-#include <stdlib.h> 
+#include <stdlib.h>
 
-#include "AtomicOperations.hpp" 
+#include "AtomicOperations.hpp"
 #include "CollectorLanguageInterface.hpp"
 #include "ConcurrentCardTableForWC.hpp"
 #include "ConcurrentGC.hpp"
@@ -48,20 +48,20 @@
  *
  * @return reference to new MM_ConcurrentCardTableForWC object or NULL
  */
-MM_ConcurrentCardTable *
-MM_ConcurrentCardTableForWC::newInstance(MM_EnvironmentBase *env, MM_Heap *heap, MM_MarkingScheme *markingScheme, MM_ConcurrentGC *collector)
+MM_ConcurrentCardTable*
+MM_ConcurrentCardTableForWC::newInstance(MM_EnvironmentBase* env, MM_Heap* heap, MM_MarkingScheme* markingScheme, MM_ConcurrentGC* collector)
 {
-	MM_ConcurrentCardTableForWC *cardTable;
-	
-	cardTable = (MM_ConcurrentCardTableForWC *)env->getForge()->allocate(sizeof(MM_ConcurrentCardTableForWC), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
-	if (NULL != cardTable) {
-		new(cardTable) MM_ConcurrentCardTableForWC(env, markingScheme, collector);
-		if (!cardTable->initialize(env, heap)) {
-			cardTable->kill(env);
-			return NULL;
-		}
-	}
-	return cardTable;
+    MM_ConcurrentCardTableForWC* cardTable;
+
+    cardTable = (MM_ConcurrentCardTableForWC*)env->getForge()->allocate(sizeof(MM_ConcurrentCardTableForWC), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+    if (NULL != cardTable) {
+        new (cardTable) MM_ConcurrentCardTableForWC(env, markingScheme, collector);
+        if (!cardTable->initialize(env, heap)) {
+            cardTable->kill(env);
+            return NULL;
+        }
+    }
+    return cardTable;
 }
 
 /**
@@ -71,70 +71,66 @@ MM_ConcurrentCardTableForWC::newInstance(MM_EnvironmentBase *env, MM_Heap *heap,
  *
  * @return TRUE if object initialized OK; FALSE otherwise
  */
-bool
-MM_ConcurrentCardTableForWC::initialize(MM_EnvironmentBase *env, MM_Heap *heap)
+bool MM_ConcurrentCardTableForWC::initialize(MM_EnvironmentBase* env, MM_Heap* heap)
 {
-	/* First call super class initialize */
-	if (!MM_ConcurrentCardTable::initialize(env, heap)) {
-		goto error_no_memory;
-	}	
-	
-	_callback = _collector->_concurrentDelegate.createSafepointCallback(env);
+    /* First call super class initialize */
+    if (!MM_ConcurrentCardTable::initialize(env, heap)) {
+        goto error_no_memory;
+    }
 
-	if (NULL == _callback) {
-		goto error_no_memory;
-	}
+    _callback = _collector->_concurrentDelegate.createSafepointCallback(env);
 
-	_callback->registerCallback(env, prepareCardTableAsyncEventHandler, this, true);
+    if (NULL == _callback) {
+        goto error_no_memory;
+    }
 
-	/* Override default card cleaning masks used by getNextDirtycard */
-	_concurrentCardCleanMask = CONCURRENT_CARD_CLEAN_MASK_FOR_WC;
-	_finalCardCleanMask = FINAL_CARD_CLEAN_MASK_FOR_WC;
-	
-	return true;
-	
+    _callback->registerCallback(env, prepareCardTableAsyncEventHandler, this, true);
+
+    /* Override default card cleaning masks used by getNextDirtycard */
+    _concurrentCardCleanMask = CONCURRENT_CARD_CLEAN_MASK_FOR_WC;
+    _finalCardCleanMask = FINAL_CARD_CLEAN_MASK_FOR_WC;
+
+    return true;
+
 error_no_memory:
-	return false;
+    return false;
 }
 
-void
-MM_ConcurrentCardTableForWC::tearDown(MM_EnvironmentBase *env)
+void MM_ConcurrentCardTableForWC::tearDown(MM_EnvironmentBase* env)
 {
-	MM_CardTable::tearDown(env);
-	_callback->kill(env);
-	_callback = NULL;
+    MM_CardTable::tearDown(env);
+    _callback->kill(env);
+    _callback = NULL;
 }
 
 /**
  * Aysnc callback routine to prepare card table for cleaning
  * 
  */
-void 
-MM_ConcurrentCardTableForWC::prepareCardTableAsyncEventHandler(OMR_VMThread *omrVMThread, void *userData)
+void MM_ConcurrentCardTableForWC::prepareCardTableAsyncEventHandler(OMR_VMThread* omrVMThread, void* userData)
 {
-	MM_ConcurrentCardTableForWC *cardTable  = (MM_ConcurrentCardTableForWC *)userData;
-	MM_EnvironmentBase *env = MM_EnvironmentBase::getEnvironment(omrVMThread);
+    MM_ConcurrentCardTableForWC* cardTable = (MM_ConcurrentCardTableForWC*)userData;
+    MM_EnvironmentBase* env = MM_EnvironmentBase::getEnvironment(omrVMThread);
 
-	cardTable->prepareCardTable(env);
+    cardTable->prepareCardTable(env);
 }
 
 /**
  * Prepare the card table for cleaning.
  * 
  */
-void
-MM_ConcurrentCardTableForWC::prepareCardTable(MM_EnvironmentBase *env)
+void MM_ConcurrentCardTableForWC::prepareCardTable(MM_EnvironmentBase* env)
 {
-	CardCleanPhase currentPhase = _cardCleanPhase;
-	
-	/* Check if another thread beat us to it */
-	if(cardTableNeedsPreparing(currentPhase)) {
-		if (getExclusiveCardTableAccess(env, currentPhase, true)) {
-			prepareCardsForCleaning(env);
-			releaseExclusiveCardTableAccess(env);
-		}	
-	}
-}	
+    CardCleanPhase currentPhase = _cardCleanPhase;
+
+    /* Check if another thread beat us to it */
+    if (cardTableNeedsPreparing(currentPhase)) {
+        if (getExclusiveCardTableAccess(env, currentPhase, true)) {
+            prepareCardsForCleaning(env);
+            releaseExclusiveCardTableAccess(env);
+        }
+    }
+}
 /**
  * Prepare cards for cleaning.
  * 
@@ -152,41 +148,40 @@ MM_ConcurrentCardTableForWC::prepareCardTable(MM_EnvironmentBase *env)
  * but any marked as CARD_DIRTY at final card cleaning time must be re-cleaned to ensure we don't
  * miss any object references. 
  */
-void
-MM_ConcurrentCardTableForWC::prepareCardsForCleaning(MM_EnvironmentBase *env)
+void MM_ConcurrentCardTableForWC::prepareCardsForCleaning(MM_EnvironmentBase* env)
 {
-	/* First call superclass which will set card cleaning range for next
-	 * phase of card cleaning
-	 */
-	MM_ConcurrentCardTable::prepareCardsForCleaning(env);
-		
-	/* Any cards to prepare  */
-	if (_firstCardInPhase >= _lastCardInPhase) {
-		/* No..so nothing to do */
-		return;
-	}	
-	
-	/* Now get assistance from all the gc slave threads to prepare the dirty cards
-	 * in the card table for cleaning by marking dirty cards as safe to clean.
-	 */ 
-	 
-	//ToDo make this more intelligent; no point using helpers if only a "few" cards
-	//to process. Also, may want to chop chunk up into less parts in 2nd phase 
-	//of concurrent card cleaning 		 
-	MM_ConcurrentPrepareCardTableTask prepareCardTableTask(env, 
-														  _dispatcher,
-														  this,
-														  _firstCardInPhase,
-														  _lastCardInPhase,
-														  MARK_DIRTY_CARD_SAFE); 
-	_dispatcher->run(env, &prepareCardTableTask);
-	
-	/* Remember we prepared some cards as we may need to 
-	 * reverse the process before final card cleaning 
-	 * if we dont actually get around to cleaning them all
-	 */ 
-	_cardTablePreparedForCleaning = true;
-}	
+    /* First call superclass which will set card cleaning range for next
+     * phase of card cleaning
+     */
+    MM_ConcurrentCardTable::prepareCardsForCleaning(env);
+
+    /* Any cards to prepare  */
+    if (_firstCardInPhase >= _lastCardInPhase) {
+        /* No..so nothing to do */
+        return;
+    }
+
+    /* Now get assistance from all the gc slave threads to prepare the dirty cards
+     * in the card table for cleaning by marking dirty cards as safe to clean.
+     */
+
+    //ToDo make this more intelligent; no point using helpers if only a "few" cards
+    //to process. Also, may want to chop chunk up into less parts in 2nd phase
+    //of concurrent card cleaning
+    MM_ConcurrentPrepareCardTableTask prepareCardTableTask(env,
+        _dispatcher,
+        this,
+        _firstCardInPhase,
+        _lastCardInPhase,
+        MARK_DIRTY_CARD_SAFE);
+    _dispatcher->run(env, &prepareCardTableTask);
+
+    /* Remember we prepared some cards as we may need to 
+     * reverse the process before final card cleaning 
+     * if we dont actually get around to cleaning them all
+     */
+    _cardTablePreparedForCleaning = true;
+}
 
 /**
  * Get exclusive control of the card table to prepare it for card cleaning.
@@ -196,36 +191,36 @@ MM_ConcurrentCardTableForWC::prepareCardsForCleaning(MM_EnvironmentBase *env)
  * @return TRUE if exclusive access acquired; FALSE otherwise
  */
 MMINLINE bool
-MM_ConcurrentCardTableForWC::getExclusiveCardTableAccess(MM_EnvironmentBase *env, CardCleanPhase currentPhase, bool threadAtSafePoint)
+MM_ConcurrentCardTableForWC::getExclusiveCardTableAccess(MM_EnvironmentBase* env, CardCleanPhase currentPhase, bool threadAtSafePoint)
 {
-	/* Because the WC CardTable requires exclusive access to prepare the cards for cleaning, we cannot gain
-	 * exclusive access to the card table if the thread is not at a safe point. Request async call back
-	 * on this thread if this is the case so we can prepare card table 
-	 */
-	if(!threadAtSafePoint) {
-		_callback->requestCallback(env);
-		return false;
-	}
+    /* Because the WC CardTable requires exclusive access to prepare the cards for cleaning, we cannot gain
+     * exclusive access to the card table if the thread is not at a safe point. Request async call back
+     * on this thread if this is the case so we can prepare card table 
+     */
+    if (!threadAtSafePoint) {
+        _callback->requestCallback(env);
+        return false;
+    }
 
-	/* Get the current global gc count */
-	uintptr_t gcCount = _extensions->globalGCStats.gcCount;
-	bool phaseChangeCompleted = false;
+    /* Get the current global gc count */
+    uintptr_t gcCount = _extensions->globalGCStats.gcCount;
+    bool phaseChangeCompleted = false;
 
-	env->acquireExclusiveVMAccess();
-	if ((gcCount != _extensions->globalGCStats.gcCount) || (currentPhase != _cardCleanPhase)) {
-		/* Nothing to do so get out  */
-		phaseChangeCompleted = true;
-	}
+    env->acquireExclusiveVMAccess();
+    if ((gcCount != _extensions->globalGCStats.gcCount) || (currentPhase != _cardCleanPhase)) {
+        /* Nothing to do so get out  */
+        phaseChangeCompleted = true;
+    }
 
-	if (phaseChangeCompleted) {
-		env->releaseExclusiveVMAccess();
-		return false;
-	}
+    if (phaseChangeCompleted) {
+        env->releaseExclusiveVMAccess();
+        return false;
+    }
 
     MM_AtomicOperations::lockCompareExchangeU32((volatile uint32_t*)&_cardCleanPhase,
-                                            (uint32_t) currentPhase,
-                                            (uint32_t) currentPhase + 1);
-	assume0(cardTableBeingPrepared(_cardCleanPhase));                                            
+        (uint32_t)currentPhase,
+        (uint32_t)currentPhase + 1);
+    assume0(cardTableBeingPrepared(_cardCleanPhase));
     return true;
 }
 
@@ -233,24 +228,24 @@ MM_ConcurrentCardTableForWC::getExclusiveCardTableAccess(MM_EnvironmentBase *env
  * Release exclusive control of the card table
  */
 MMINLINE void
-MM_ConcurrentCardTableForWC::releaseExclusiveCardTableAccess(MM_EnvironmentBase *env)
+MM_ConcurrentCardTableForWC::releaseExclusiveCardTableAccess(MM_EnvironmentBase* env)
 {
-	/* Cache the current value */
-	CardCleanPhase currentPhase = _cardCleanPhase;
-	
-	/* Finished initializing. Only one thread can be here but for 
-	 * consistency use atomic operation to update card cleaning phase
-	*/
-	assume0(cardCleaningInProgress((CardCleanPhase((uint32_t)currentPhase + 1))));
-	MM_AtomicOperations::lockCompareExchangeU32((volatile uint32_t*)&_cardCleanPhase,
-											(uint32_t) currentPhase,
-											(uint32_t) currentPhase + 1);
-											
-	/* Cancel any outstanding events on other threads */
-	_callback->cancelCallback(env);
-											
-	/* We are done so release exclusive now so mutators can restart */
-	env->releaseExclusiveVMAccess(); 										
+    /* Cache the current value */
+    CardCleanPhase currentPhase = _cardCleanPhase;
+
+    /* Finished initializing. Only one thread can be here but for 
+     * consistency use atomic operation to update card cleaning phase
+    */
+    assume0(cardCleaningInProgress((CardCleanPhase((uint32_t)currentPhase + 1))));
+    MM_AtomicOperations::lockCompareExchangeU32((volatile uint32_t*)&_cardCleanPhase,
+        (uint32_t)currentPhase,
+        (uint32_t)currentPhase + 1);
+
+    /* Cancel any outstanding events on other threads */
+    _callback->cancelCallback(env);
+
+    /* We are done so release exclusive now so mutators can restart */
+    env->releaseExclusiveVMAccess();
 }
 
 /**
@@ -263,31 +258,31 @@ MM_ConcurrentCardTableForWC::releaseExclusiveCardTableAccess(MM_EnvironmentBase 
  * @param chunkEnd Last card in the chunk
  * 
  * @return Number of active cards in the the chunk
- */ 
+ */
 uintptr_t
-MM_ConcurrentCardTableForWC::countCardsInRange(MM_EnvironmentBase *env, Card *chunkStart, Card *chunkEnd)
+MM_ConcurrentCardTableForWC::countCardsInRange(MM_EnvironmentBase* env, Card* chunkStart, Card* chunkEnd)
 {
-	uintptr_t cardsInRange = 0;
-	CleaningRange  *cleaningRange = _cleaningRanges;
-	
-	/* Find cleaning range that corresponds to start of card table range to be counted */
-	while (cleaningRange < _lastCleaningRange && cleaningRange->topCard < chunkStart) {
-		cleaningRange++;
-	}	
+    uintptr_t cardsInRange = 0;
+    CleaningRange* cleaningRange = _cleaningRanges;
 
-	/* Count all cards until we get to end of all cleaning ranges or end of 
-	 * chunk whose cards we are counting
-	 */		
-	while (cleaningRange < _lastCleaningRange && cleaningRange->baseCard < chunkEnd) {
-		Card *first = OMR_MAX(chunkStart, cleaningRange->baseCard);
-		Card *last = OMR_MIN(chunkEnd,cleaningRange->topCard);
-		/* Add cards in this cleaning range into total cards to be cleaned */
-		cardsInRange += (uintptr_t)(last - first);
-		cleaningRange++;
-	}
+    /* Find cleaning range that corresponds to start of card table range to be counted */
+    while (cleaningRange < _lastCleaningRange && cleaningRange->topCard < chunkStart) {
+        cleaningRange++;
+    }
 
-	return cardsInRange;	
-}	
+    /* Count all cards until we get to end of all cleaning ranges or end of 
+     * chunk whose cards we are counting
+     */
+    while (cleaningRange < _lastCleaningRange && cleaningRange->baseCard < chunkEnd) {
+        Card* first = OMR_MAX(chunkStart, cleaningRange->baseCard);
+        Card* last = OMR_MIN(chunkEnd, cleaningRange->topCard);
+        /* Add cards in this cleaning range into total cards to be cleaned */
+        cardsInRange += (uintptr_t)(last - first);
+        cleaningRange++;
+    }
+
+    return cardsInRange;
+}
 
 /**
  * Prepare a chunk of the card table for card cleaning.
@@ -304,102 +299,98 @@ MM_ConcurrentCardTableForWC::countCardsInRange(MM_EnvironmentBase *env, Card *ch
  * @param chunkEnd   - last card to be processed
  * @param action - defines what to do to each un-clean card, value is either MARK_DIRTY_CARD_SAFE or
  * MARK_SAFE_CARD_DIRTY.
- */ 
-void
-MM_ConcurrentCardTableForWC::prepareCardTableChunk(MM_EnvironmentBase *env, Card *chunkStart, Card *chunkEnd, CardAction action)
+ */
+void MM_ConcurrentCardTableForWC::prepareCardTableChunk(MM_EnvironmentBase* env, Card* chunkStart, Card* chunkEnd, CardAction action)
 {
-	uintptr_t prepareUnitFactor, prepareUnitSize;
-	
- 	/* Determine the size of card table work unit */ 
- 	prepareUnitFactor = env->_currentTask->getThreadCount();
- 	prepareUnitFactor = ((prepareUnitFactor == 1) ? 1 : prepareUnitFactor * PREPARE_PARALLEL_MULTIPLIER);
-	prepareUnitSize = countCardsInRange(env, chunkStart, chunkEnd);
-	prepareUnitSize = prepareUnitSize / prepareUnitFactor;
-	prepareUnitSize = prepareUnitSize > 0 ? MM_Math::roundToCeiling(PREPARE_UNIT_SIZE_ALIGNMENT, prepareUnitSize) : 
-                                            PREPARE_UNIT_SIZE_ALIGNMENT;												 
-	
-	/* Walk all card cleaning ranges to determine which cards should be prepared */
-	for (CleaningRange *range=_cleaningRanges; range < _lastCleaningRange; range++) {
-		
-		Card *prepareAddress;
-		uintptr_t prepareSizeRemaining;
-		uintptr_t currentPrepareSize;
-		/* Is this range strictly before the chunk we are looking for? */
-		if (chunkStart >= range->topCard){
-			/* Yes, so just skip to the next */
-			continue;
-		}
-		/* Is this range strictly after the chunk we are looking for? */
-		if (chunkEnd <= range->baseCard){
-			/* Yes, so our work is done */
-			break;
-		}
-		
-		/* Walk the segment in chunks the size of the heapPrepareUnit size */ 
-		prepareAddress = chunkStart > range->baseCard ? chunkStart : range->baseCard;
-		prepareSizeRemaining = chunkEnd > range->topCard ? range->topCard - prepareAddress :
-														  chunkEnd - prepareAddress;   	
+    uintptr_t prepareUnitFactor, prepareUnitSize;
 
-		while(prepareSizeRemaining > 0 ) {
-			/* Calculate the size of card table chunk to be processed next */
-			currentPrepareSize = (prepareUnitSize > prepareSizeRemaining) ? prepareSizeRemaining : prepareUnitSize;
-				
-			/* Check if the thread should clear the corresponding mark map range for the current heap range */ 
-			if(J9MODRON_HANDLE_NEXT_WORK_UNIT(env)) {
-				Card *firstCard,*endCard;
-				firstCard = prepareAddress;
-				endCard = prepareAddress + currentPrepareSize;
-				
-				for (Card *currentCard = firstCard; currentCard < endCard; currentCard++) {
-					/* Are we are on an uintptr_t boundary ?. If so scan the card table a uintptr_t
-					 * at a time until we find a slot which is non-zero or the end of card table
-					 * found. This is based on the premise that the card table will be mostly
-					 * empty and scanning an uintptr_t at a time will reduce the time taken to
-					 * scan the card table.
-					 */
-					if (((Card)CARD_CLEAN == *currentCard) &&
-						((uintptr_t)currentCard % sizeof(uintptr_t) == 0)) {
-						 uintptr_t *nextSlot= (uintptr_t *)currentCard;
-						while ( ((Card *)nextSlot < endCard) && (*nextSlot == SLOT_ALL_CLEAN) ) {
-							nextSlot++;
-						}
-						
-						/*
-						 * Either end of scan or a slot which contains a dirty card found. Reset scan ptr
-						 */
-						currentCard= (Card *)nextSlot; 
+    /* Determine the size of card table work unit */
+    prepareUnitFactor = env->_currentTask->getThreadCount();
+    prepareUnitFactor = ((prepareUnitFactor == 1) ? 1 : prepareUnitFactor * PREPARE_PARALLEL_MULTIPLIER);
+    prepareUnitSize = countCardsInRange(env, chunkStart, chunkEnd);
+    prepareUnitSize = prepareUnitSize / prepareUnitFactor;
+    prepareUnitSize = prepareUnitSize > 0 ? MM_Math::roundToCeiling(PREPARE_UNIT_SIZE_ALIGNMENT, prepareUnitSize) : PREPARE_UNIT_SIZE_ALIGNMENT;
 
-						/* End of card table reached ? */
-						if (currentCard >= endCard) {
-							break; 
-						}  
-					}
+    /* Walk all card cleaning ranges to determine which cards should be prepared */
+    for (CleaningRange* range = _cleaningRanges; range < _lastCleaningRange; range++) {
 
-					if (MARK_DIRTY_CARD_SAFE == action) {
-						/* Is next card dirty ? If so flag it as safe to clean */	
-						if ((Card)CARD_DIRTY == *currentCard) {
-							/* If card has marked objects we need to clean it */
-							if (cardHasMarkedObjects(env, currentCard)) {
-								*currentCard = (Card)CARD_CLEAN_SAFE;
-							} else {	
-								*currentCard = (Card)CARD_CLEAN;
-							}	
-						}
-					} else {
-						assume0(action == MARK_SAFE_CARD_DIRTY);
-						if ((Card)CARD_CLEAN_SAFE == *currentCard) {
-							*currentCard = (Card)CARD_DIRTY;
-						}
-					}
-				}
-			} /* of J9MODRON_HANDLE_NEXT_WORK_UNIT */	
-			
-			/* Move to the next address range in the segment */ 
-			prepareAddress += currentPrepareSize; 
-			prepareSizeRemaining -= currentPrepareSize; 
-		}	
-	}	
-} 
+        Card* prepareAddress;
+        uintptr_t prepareSizeRemaining;
+        uintptr_t currentPrepareSize;
+        /* Is this range strictly before the chunk we are looking for? */
+        if (chunkStart >= range->topCard) {
+            /* Yes, so just skip to the next */
+            continue;
+        }
+        /* Is this range strictly after the chunk we are looking for? */
+        if (chunkEnd <= range->baseCard) {
+            /* Yes, so our work is done */
+            break;
+        }
+
+        /* Walk the segment in chunks the size of the heapPrepareUnit size */
+        prepareAddress = chunkStart > range->baseCard ? chunkStart : range->baseCard;
+        prepareSizeRemaining = chunkEnd > range->topCard ? range->topCard - prepareAddress : chunkEnd - prepareAddress;
+
+        while (prepareSizeRemaining > 0) {
+            /* Calculate the size of card table chunk to be processed next */
+            currentPrepareSize = (prepareUnitSize > prepareSizeRemaining) ? prepareSizeRemaining : prepareUnitSize;
+
+            /* Check if the thread should clear the corresponding mark map range for the current heap range */
+            if (J9MODRON_HANDLE_NEXT_WORK_UNIT(env)) {
+                Card *firstCard, *endCard;
+                firstCard = prepareAddress;
+                endCard = prepareAddress + currentPrepareSize;
+
+                for (Card* currentCard = firstCard; currentCard < endCard; currentCard++) {
+                    /* Are we are on an uintptr_t boundary ?. If so scan the card table a uintptr_t
+                     * at a time until we find a slot which is non-zero or the end of card table
+                     * found. This is based on the premise that the card table will be mostly
+                     * empty and scanning an uintptr_t at a time will reduce the time taken to
+                     * scan the card table.
+                     */
+                    if (((Card)CARD_CLEAN == *currentCard) && ((uintptr_t)currentCard % sizeof(uintptr_t) == 0)) {
+                        uintptr_t* nextSlot = (uintptr_t*)currentCard;
+                        while (((Card*)nextSlot < endCard) && (*nextSlot == SLOT_ALL_CLEAN)) {
+                            nextSlot++;
+                        }
+
+                        /*
+                         * Either end of scan or a slot which contains a dirty card found. Reset scan ptr
+                         */
+                        currentCard = (Card*)nextSlot;
+
+                        /* End of card table reached ? */
+                        if (currentCard >= endCard) {
+                            break;
+                        }
+                    }
+
+                    if (MARK_DIRTY_CARD_SAFE == action) {
+                        /* Is next card dirty ? If so flag it as safe to clean */
+                        if ((Card)CARD_DIRTY == *currentCard) {
+                            /* If card has marked objects we need to clean it */
+                            if (cardHasMarkedObjects(env, currentCard)) {
+                                *currentCard = (Card)CARD_CLEAN_SAFE;
+                            } else {
+                                *currentCard = (Card)CARD_CLEAN;
+                            }
+                        }
+                    } else {
+                        assume0(action == MARK_SAFE_CARD_DIRTY);
+                        if ((Card)CARD_CLEAN_SAFE == *currentCard) {
+                            *currentCard = (Card)CARD_DIRTY;
+                        }
+                    }
+                }
+            } /* of J9MODRON_HANDLE_NEXT_WORK_UNIT */
+
+            /* Move to the next address range in the segment */
+            prepareAddress += currentPrepareSize;
+            prepareSizeRemaining -= currentPrepareSize;
+        }
+    }
+}
 
 /**
  * Initialize for final card cleaning.
@@ -408,31 +399,30 @@ MM_ConcurrentCardTableForWC::prepareCardTableChunk(MM_EnvironmentBase *env, Card
  * we managed to process them all, i.e. did we complete concurrent card cleaning pass. If
  * not we need to reset any prepared cards (i.e those set to CARD_CLEAN_SAFE) which were
  * not cleaned back to card_DIRTY so that they are rescanned during final card cleaning.
- */ 
-void
-MM_ConcurrentCardTableForWC::initializeFinalCardCleaning(MM_EnvironmentBase *env)
+ */
+void MM_ConcurrentCardTableForWC::initializeFinalCardCleaning(MM_EnvironmentBase* env)
 {
-	/* Did we get as far as preparing the card table for cleaning ? */
-	if (_cardTablePreparedForCleaning ) {
-		/* Yes..So we must reverse any cards that got prepared */
-		if (_currentCleaningRange < _lastCleaningRange) {
-			/* Get assistance from all gc slave threads to do the work */ 
-			MM_ConcurrentPrepareCardTableTask prepareCardTableTask(env, 
-																  _dispatcher,
-																  this,
-																  (Card *)_currentCleaningRange->nextCard,
-																  _lastCard,
-																  MARK_SAFE_CARD_DIRTY); 
-			_dispatcher->run(env, &prepareCardTableTask);
-		}	
-		
-		/* Reset for next cycle */
-		_cardTablePreparedForCleaning = false;
-	}
-	
-	/* Then call the superclass to complete regular initialization */
-	MM_ConcurrentCardTable::initializeFinalCardCleaning(env);
-}	
+    /* Did we get as far as preparing the card table for cleaning ? */
+    if (_cardTablePreparedForCleaning) {
+        /* Yes..So we must reverse any cards that got prepared */
+        if (_currentCleaningRange < _lastCleaningRange) {
+            /* Get assistance from all gc slave threads to do the work */
+            MM_ConcurrentPrepareCardTableTask prepareCardTableTask(env,
+                _dispatcher,
+                this,
+                (Card*)_currentCleaningRange->nextCard,
+                _lastCard,
+                MARK_SAFE_CARD_DIRTY);
+            _dispatcher->run(env, &prepareCardTableTask);
+        }
+
+        /* Reset for next cycle */
+        _cardTablePreparedForCleaning = false;
+    }
+
+    /* Then call the superclass to complete regular initialization */
+    MM_ConcurrentCardTable::initializeFinalCardCleaning(env);
+}
 
 #endif /* OMR_GC_MODRON_CONCURRENT_MARK */
 #endif /* AIXPPC || LINUXPPC */

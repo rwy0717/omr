@@ -24,30 +24,30 @@
 
 #include "codegen/OMRRealRegister.hpp"
 
-#include <stdint.h>                              // for uint16_t
-#include "codegen/RegisterConstants.hpp"         // for TR_RegisterKinds
+#include <stdint.h> // for uint16_t
+#include "codegen/RegisterConstants.hpp" // for TR_RegisterKinds
 
-namespace TR { class CodeGenerator; }
-namespace TR { class Register; }
-
-namespace TR
-{
-
-class OMR_EXTENSIBLE RealRegister : public OMR::RealRegisterConnector
-   {
-   public:
-
-   RealRegister(TR_RegisterKinds rk, uint16_t w, RegState s, TR::RealRegister::RegNum  ri, TR::RealRegister::RegMask m, TR::CodeGenerator *cg):
-      OMR::RealRegisterConnector(rk, w, s, (RegNum)ri, (RegMask)m, cg) {}
-
-   };
-
+namespace TR {
+class CodeGenerator;
+}
+namespace TR {
+class Register;
 }
 
-inline TR::RealRegister *toRealRegister(TR::Register *r)
-   {
-   return static_cast<TR::RealRegister *>(r);
-   }
+namespace TR {
 
+class OMR_EXTENSIBLE RealRegister : public OMR::RealRegisterConnector {
+public:
+    RealRegister(TR_RegisterKinds rk, uint16_t w, RegState s, TR::RealRegister::RegNum ri, TR::RealRegister::RegMask m, TR::CodeGenerator* cg)
+        : OMR::RealRegisterConnector(rk, w, s, (RegNum)ri, (RegMask)m, cg)
+    {}
+};
+
+} // namespace TR
+
+inline TR::RealRegister* toRealRegister(TR::Register* r)
+{
+    return static_cast<TR::RealRegister*>(r);
+}
 
 #endif

@@ -34,34 +34,33 @@ class SupersetFieldVisitor;
 class SupersetVisitor;
 class Symbol_IR;
 
-class JavaSupersetGenerator : public SupersetGenerator
-{
+class JavaSupersetGenerator : public SupersetGenerator {
 private:
-	set<string> _baseTypedefSet; /* Set of types renamed to "[U/I][SIZE]" */
-	unordered_map<string, string> _baseTypedefMap; /* Types remapped for assembled type names. */
-	unordered_map<string, string> _baseTypedefReplace; /* Type names which are replaced everywhere. */
-	intptr_t _file;
-	OMRPortLibrary *_portLibrary;
-	bool _printEmptyTypes;
-	string _pendingTypeHeading;
+    set<string> _baseTypedefSet; /* Set of types renamed to "[U/I][SIZE]" */
+    unordered_map<string, string> _baseTypedefMap; /* Types remapped for assembled type names. */
+    unordered_map<string, string> _baseTypedefReplace; /* Type names which are replaced everywhere. */
+    intptr_t _file;
+    OMRPortLibrary* _portLibrary;
+    bool _printEmptyTypes;
+    string _pendingTypeHeading;
 
-	void initBaseTypedefSet();
-	void convertJ9BaseTypedef(Type *type, string *name);
-	void replaceBaseTypedef(Type *type, string *name);
-	DDR_RC getFieldType(Field *field, string *assembledTypeName, string *simpleTypeName);
-	DDR_RC printType(Type *type, Type *superClass);
-	DDR_RC printPendingType();
-	DDR_RC printFieldMember(Field *field, const string &prefix);
-	DDR_RC printConstantMember(const string &name);
-	DDR_RC print(const string &text);
+    void initBaseTypedefSet();
+    void convertJ9BaseTypedef(Type* type, string* name);
+    void replaceBaseTypedef(Type* type, string* name);
+    DDR_RC getFieldType(Field* field, string* assembledTypeName, string* simpleTypeName);
+    DDR_RC printType(Type* type, Type* superClass);
+    DDR_RC printPendingType();
+    DDR_RC printFieldMember(Field* field, const string& prefix);
+    DDR_RC printConstantMember(const string& name);
+    DDR_RC print(const string& text);
 
-	friend class SupersetFieldVisitor;
-	friend class SupersetVisitor;
+    friend class SupersetFieldVisitor;
+    friend class SupersetVisitor;
 
 public:
-	explicit JavaSupersetGenerator(bool printEmptyTypes);
+    explicit JavaSupersetGenerator(bool printEmptyTypes);
 
-	DDR_RC printSuperset(OMRPortLibrary *portLibrary, Symbol_IR *ir, const char *supersetFile);
+    DDR_RC printSuperset(OMRPortLibrary* portLibrary, Symbol_IR* ir, const char* supersetFile);
 };
 
 #endif /* GENSUPERSET_HPP */

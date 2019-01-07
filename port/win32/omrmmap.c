@@ -34,7 +34,6 @@
  * still be available, but will simply read the file into allocated memory.
  */
 
-
 #include <windows.h>
 
 #include "omrport.h"
@@ -42,8 +41,6 @@
 #include "portnls.h"
 #include "ut_omrport.h"
 #include "protect_helpers.h"
-
-
 
 /**
  * Map a part of file into memory.
@@ -65,152 +62,152 @@
  *
  * @return                       A J9MmapHandle struct or NULL is an error has occurred
  */
-J9MmapHandle *
-omrmmap_map_file(struct OMRPortLibrary *portLibrary, intptr_t file, uint64_t offset, uintptr_t size, const char *mappingName, uint32_t flags, uint32_t categoryCode)
+J9MmapHandle*
+omrmmap_map_file(struct OMRPortLibrary* portLibrary, intptr_t file, uint64_t offset, uintptr_t size, const char* mappingName, uint32_t flags, uint32_t categoryCode)
 {
-	DWORD lastError = 0;
-	HANDLE mapping;
-	void *pointer = NULL;
-	DWORD flProtect = 0;
-	DWORD dwFileOffsetHigh = 0;
-	DWORD dwFileOffsetLow = 0;
-	char *lpName = NULL;
-	int lpNameSize = 0;
-	DWORD dwDesiredAccess = 0;
-	char *p;
-	int rwCount = 0;
-	int spCount = 0;
-	const char *errMsg;
-	char errBuf[512];
-	J9MmapHandle *returnVal;
-	OMRMemCategory *category;
+    DWORD lastError = 0;
+    HANDLE mapping;
+    void* pointer = NULL;
+    DWORD flProtect = 0;
+    DWORD dwFileOffsetHigh = 0;
+    DWORD dwFileOffsetLow = 0;
+    char* lpName = NULL;
+    int lpNameSize = 0;
+    DWORD dwDesiredAccess = 0;
+    char* p;
+    int rwCount = 0;
+    int spCount = 0;
+    const char* errMsg;
+    char errBuf[512];
+    J9MmapHandle* returnVal;
+    OMRMemCategory* category;
 
-	Trc_PRT_mmap_map_file_win32_entered(file, offset, size, mappingName, flags);
+    Trc_PRT_mmap_map_file_win32_entered(file, offset, size, mappingName, flags);
 
-	category = omrmem_get_category(portLibrary, categoryCode);
+    category = omrmem_get_category(portLibrary, categoryCode);
 
-	/* Check parameters */
-	if ((HANDLE)file == INVALID_HANDLE_VALUE) {
-		Trc_PRT_mmap_map_file_win32_invalidFile();
-		errMsg = portLibrary->nls_lookup_message(portLibrary,
-				 J9NLS_ERROR | J9NLS_DO_NOT_APPEND_NEWLINE,
-				 J9NLS_PORT_MMAP_INVALID_FILE_HANDLE,
-				 NULL);
-		portLibrary->str_printf(portLibrary, errBuf, sizeof(errBuf), errMsg, file);
-		portLibrary->error_set_last_error_with_message(portLibrary, OMRPORT_ERROR_MMAP_MAP_FILE_INVALIDFILE, errBuf);
-		return NULL;
-	}
+    /* Check parameters */
+    if ((HANDLE)file == INVALID_HANDLE_VALUE) {
+        Trc_PRT_mmap_map_file_win32_invalidFile();
+        errMsg = portLibrary->nls_lookup_message(portLibrary,
+            J9NLS_ERROR | J9NLS_DO_NOT_APPEND_NEWLINE,
+            J9NLS_PORT_MMAP_INVALID_FILE_HANDLE,
+            NULL);
+        portLibrary->str_printf(portLibrary, errBuf, sizeof(errBuf), errMsg, file);
+        portLibrary->error_set_last_error_with_message(portLibrary, OMRPORT_ERROR_MMAP_MAP_FILE_INVALIDFILE, errBuf);
+        return NULL;
+    }
 
-	/* Determine flag settings for system calls */
-	/* One, and only one, read/write option can be specified and zero or one shared/private option */
-	if (flags & OMRPORT_MMAP_FLAG_READ) {
-		flProtect = PAGE_READONLY;
-		dwDesiredAccess = FILE_MAP_READ;
-		rwCount++;
-	}
-	if (flags & OMRPORT_MMAP_FLAG_WRITE) {
-		flProtect = PAGE_READWRITE;
-		dwDesiredAccess = FILE_MAP_WRITE;
-		rwCount++;
-	}
-	if (flags & OMRPORT_MMAP_FLAG_COPYONWRITE) {
-		flProtect = PAGE_WRITECOPY;
-		dwDesiredAccess = FILE_MAP_COPY;
-		rwCount++;
-	}
-	if (flags & OMRPORT_MMAP_FLAG_SHARED) {
-		spCount++;
-	}
-	if (flags & OMRPORT_MMAP_FLAG_PRIVATE) {
-		dwDesiredAccess = FILE_MAP_COPY;
-		spCount++;
-	}
+    /* Determine flag settings for system calls */
+    /* One, and only one, read/write option can be specified and zero or one shared/private option */
+    if (flags & OMRPORT_MMAP_FLAG_READ) {
+        flProtect = PAGE_READONLY;
+        dwDesiredAccess = FILE_MAP_READ;
+        rwCount++;
+    }
+    if (flags & OMRPORT_MMAP_FLAG_WRITE) {
+        flProtect = PAGE_READWRITE;
+        dwDesiredAccess = FILE_MAP_WRITE;
+        rwCount++;
+    }
+    if (flags & OMRPORT_MMAP_FLAG_COPYONWRITE) {
+        flProtect = PAGE_WRITECOPY;
+        dwDesiredAccess = FILE_MAP_COPY;
+        rwCount++;
+    }
+    if (flags & OMRPORT_MMAP_FLAG_SHARED) {
+        spCount++;
+    }
+    if (flags & OMRPORT_MMAP_FLAG_PRIVATE) {
+        dwDesiredAccess = FILE_MAP_COPY;
+        spCount++;
+    }
 
-	if (1 != rwCount) {
-		Trc_PRT_mmap_map_file_win32_invalidFlags();
-		errMsg = portLibrary->nls_lookup_message(portLibrary,
-				 J9NLS_ERROR | J9NLS_DO_NOT_APPEND_NEWLINE,
-				 J9NLS_PORT_MMAP_INVALID_MEMORY_PROTECTION,
-				 NULL);
-		portLibrary->error_set_last_error_with_message(portLibrary, OMRPORT_ERROR_MMAP_MAP_FILE_INVALIDFLAGS, errMsg);
-		return NULL;
-	}
-	if (spCount > 1) {
-		Trc_PRT_mmap_map_file_win32_invalidFlags();
-		errMsg = portLibrary->nls_lookup_message(portLibrary,
-				 J9NLS_ERROR | J9NLS_DO_NOT_APPEND_NEWLINE,
-				 J9NLS_PORT_MMAP_INVALID_FLAG,
-				 NULL);
-		portLibrary->error_set_last_error_with_message(portLibrary, OMRPORT_ERROR_MMAP_MAP_FILE_INVALIDFLAGS, errMsg);
-		return NULL;
-	}
-	Trc_PRT_mmap_map_file_win32_flagsSet(flProtect, dwDesiredAccess);
+    if (1 != rwCount) {
+        Trc_PRT_mmap_map_file_win32_invalidFlags();
+        errMsg = portLibrary->nls_lookup_message(portLibrary,
+            J9NLS_ERROR | J9NLS_DO_NOT_APPEND_NEWLINE,
+            J9NLS_PORT_MMAP_INVALID_MEMORY_PROTECTION,
+            NULL);
+        portLibrary->error_set_last_error_with_message(portLibrary, OMRPORT_ERROR_MMAP_MAP_FILE_INVALIDFLAGS, errMsg);
+        return NULL;
+    }
+    if (spCount > 1) {
+        Trc_PRT_mmap_map_file_win32_invalidFlags();
+        errMsg = portLibrary->nls_lookup_message(portLibrary,
+            J9NLS_ERROR | J9NLS_DO_NOT_APPEND_NEWLINE,
+            J9NLS_PORT_MMAP_INVALID_FLAG,
+            NULL);
+        portLibrary->error_set_last_error_with_message(portLibrary, OMRPORT_ERROR_MMAP_MAP_FILE_INVALIDFLAGS, errMsg);
+        return NULL;
+    }
+    Trc_PRT_mmap_map_file_win32_flagsSet(flProtect, dwDesiredAccess);
 
-	/* Modify mappingName to create valid object mapping object name (change invalid chars to '_' */
-	if (mappingName != NULL) {
-		lpNameSize = (int)strlen(mappingName) + 1;
-		lpName = portLibrary->mem_allocate_memory(portLibrary, lpNameSize, OMR_GET_CALLSITE(), categoryCode);
-		if (lpName == NULL) {
-			errMsg = portLibrary->nls_lookup_message(portLibrary,
-					 J9NLS_ERROR | J9NLS_DO_NOT_APPEND_NEWLINE,
-					 J9NLS_PORT_FILE_MEMORY_ALLOCATE_FAILURE,
-					 NULL);
-			portLibrary->error_set_last_error_with_message(portLibrary, OMRPORT_ERROR_MMAP_MAP_FILE_MALLOCFAILED, errMsg);
-			return NULL;
-		}
-		portLibrary->str_printf(portLibrary, lpName, lpNameSize, "%s", mappingName);
-		for (p = lpName; *p != '\0'; p++) {
-			if (*p == '\\' || *p == ':' || *p == ' ') {
-				*p = '_';
-			}
-		}
-	}
-	Trc_PRT_mmap_map_file_win32_mappingName(mappingName, lpName);
+    /* Modify mappingName to create valid object mapping object name (change invalid chars to '_' */
+    if (mappingName != NULL) {
+        lpNameSize = (int)strlen(mappingName) + 1;
+        lpName = portLibrary->mem_allocate_memory(portLibrary, lpNameSize, OMR_GET_CALLSITE(), categoryCode);
+        if (lpName == NULL) {
+            errMsg = portLibrary->nls_lookup_message(portLibrary,
+                J9NLS_ERROR | J9NLS_DO_NOT_APPEND_NEWLINE,
+                J9NLS_PORT_FILE_MEMORY_ALLOCATE_FAILURE,
+                NULL);
+            portLibrary->error_set_last_error_with_message(portLibrary, OMRPORT_ERROR_MMAP_MAP_FILE_MALLOCFAILED, errMsg);
+            return NULL;
+        }
+        portLibrary->str_printf(portLibrary, lpName, lpNameSize, "%s", mappingName);
+        for (p = lpName; *p != '\0'; p++) {
+            if (*p == '\\' || *p == ':' || *p == ' ') {
+                *p = '_';
+            }
+        }
+    }
+    Trc_PRT_mmap_map_file_win32_mappingName(mappingName, lpName);
 
-	if (!(returnVal = (J9MmapHandle *)portLibrary->mem_allocate_memory(portLibrary, sizeof(J9MmapHandle), OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY))) {
-		if (lpName != NULL) {
-			portLibrary->mem_free_memory(portLibrary, lpName);
-		}
-		Trc_PRT_mmap_map_file_cannotallocatehandle();
-		return NULL;
-	}
+    if (!(returnVal = (J9MmapHandle*)portLibrary->mem_allocate_memory(portLibrary, sizeof(J9MmapHandle), OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY))) {
+        if (lpName != NULL) {
+            portLibrary->mem_free_memory(portLibrary, lpName);
+        }
+        Trc_PRT_mmap_map_file_cannotallocatehandle();
+        return NULL;
+    }
 
-	/* Call CreateFileMapping */
-	mapping = (HANDLE)CreateFileMapping((HANDLE)file, NULL, flProtect, 0, 0, (LPCTSTR)lpName);
-	if (lpName != NULL) {
-		portLibrary->mem_free_memory(portLibrary, lpName);
-		lpName = NULL;
-	}
-	if (mapping == NULL) {
-		portLibrary->mem_free_memory(portLibrary, returnVal);
-		lastError = GetLastError();
-		Trc_PRT_mmap_map_file_win32_badCreateFileMapping(lastError);
-		portLibrary->error_set_last_error(portLibrary, lastError, OMRPORT_ERROR_MMAP_MAP_FILE_CREATEMAPPINGOBJECTFAILED);
-		return NULL;
-	}
+    /* Call CreateFileMapping */
+    mapping = (HANDLE)CreateFileMapping((HANDLE)file, NULL, flProtect, 0, 0, (LPCTSTR)lpName);
+    if (lpName != NULL) {
+        portLibrary->mem_free_memory(portLibrary, lpName);
+        lpName = NULL;
+    }
+    if (mapping == NULL) {
+        portLibrary->mem_free_memory(portLibrary, returnVal);
+        lastError = GetLastError();
+        Trc_PRT_mmap_map_file_win32_badCreateFileMapping(lastError);
+        portLibrary->error_set_last_error(portLibrary, lastError, OMRPORT_ERROR_MMAP_MAP_FILE_CREATEMAPPINGOBJECTFAILED);
+        return NULL;
+    }
 
-	/* Call MapViewOfFile */
-	dwFileOffsetHigh = (DWORD)(offset >> 32);
-	dwFileOffsetLow = (DWORD)(offset & 0xFFFFFFFF);
-	Trc_PRT_mmap_map_file_win32_callingMapViewOfFile(mapping, dwFileOffsetHigh, dwFileOffsetLow);
-	pointer = MapViewOfFile(mapping, dwDesiredAccess, dwFileOffsetHigh, dwFileOffsetLow, size);
-	CloseHandle(mapping);
-	if (pointer == NULL) {
-		portLibrary->mem_free_memory(portLibrary, returnVal);
-		lastError = GetLastError();
-		Trc_PRT_mmap_map_file_win32_badMapViewOfFile(lastError);
-		portLibrary->error_set_last_error(portLibrary, lastError, OMRPORT_ERROR_MMAP_MAP_FILE_MAPPINGFAILED);
-		return NULL;
-	}
-	returnVal->pointer = pointer;
-	returnVal->size = size;
-	returnVal->category = category;
+    /* Call MapViewOfFile */
+    dwFileOffsetHigh = (DWORD)(offset >> 32);
+    dwFileOffsetLow = (DWORD)(offset & 0xFFFFFFFF);
+    Trc_PRT_mmap_map_file_win32_callingMapViewOfFile(mapping, dwFileOffsetHigh, dwFileOffsetLow);
+    pointer = MapViewOfFile(mapping, dwDesiredAccess, dwFileOffsetHigh, dwFileOffsetLow, size);
+    CloseHandle(mapping);
+    if (pointer == NULL) {
+        portLibrary->mem_free_memory(portLibrary, returnVal);
+        lastError = GetLastError();
+        Trc_PRT_mmap_map_file_win32_badMapViewOfFile(lastError);
+        portLibrary->error_set_last_error(portLibrary, lastError, OMRPORT_ERROR_MMAP_MAP_FILE_MAPPINGFAILED);
+        return NULL;
+    }
+    returnVal->pointer = pointer;
+    returnVal->size = size;
+    returnVal->category = category;
 
-	omrmem_categories_increment_counters(category, size);
+    omrmem_categories_increment_counters(category, size);
 
-	/* Completed, return */
-	Trc_PRT_mmap_map_file_win32_exiting(pointer, returnVal);
-	return returnVal;
+    /* Completed, return */
+    Trc_PRT_mmap_map_file_win32_exiting(pointer, returnVal);
+    return returnVal;
 }
 /**
  * UnMap previously mapped memory.
@@ -219,14 +216,13 @@ omrmmap_map_file(struct OMRPortLibrary *portLibrary, intptr_t file, uint64_t off
  *
  * @param[in] handle - A pointer to a J9MmapHandle structure returned by omrmmap_map_file.
  */
-void
-omrmmap_unmap_file(struct OMRPortLibrary *portLibrary, J9MmapHandle *handle)
+void omrmmap_unmap_file(struct OMRPortLibrary* portLibrary, J9MmapHandle* handle)
 {
-	if (handle != NULL) {
-		UnmapViewOfFile(handle->pointer);
-		omrmem_categories_decrement_counters(handle->category, handle->size);
-		portLibrary->mem_free_memory(portLibrary, handle);
-	}
+    if (handle != NULL) {
+        UnmapViewOfFile(handle->pointer);
+        omrmem_categories_decrement_counters(handle->category, handle->size);
+        portLibrary->mem_free_memory(portLibrary, handle);
+    }
 }
 /**
  * Synchronise updates to memory mapped file region with file on disk.  The call may wait for the file write
@@ -248,23 +244,23 @@ omrmmap_unmap_file(struct OMRPortLibrary *portLibrary, J9MmapHandle *handle)
 * @return                                          0 on success, -1 on failure.  Errors will be reported using the usual port library mechanism
  */
 intptr_t
-omrmmap_msync(struct OMRPortLibrary *portLibrary, void *start, uintptr_t length, uint32_t flags)
+omrmmap_msync(struct OMRPortLibrary* portLibrary, void* start, uintptr_t length, uint32_t flags)
 {
-	BOOL success;
-	DWORD lastError = 0;
+    BOOL success;
+    DWORD lastError = 0;
 
-	Trc_PRT_mmap_msync_win32_entered(start, length, flags);
+    Trc_PRT_mmap_msync_win32_entered(start, length, flags);
 
-	success = FlushViewOfFile(start, length);
-	if (!success) {
-		lastError = GetLastError();
-		Trc_PRT_mmap_msync_win32_badFlushViewOfFile(lastError);
-		portLibrary->error_set_last_error(portLibrary, lastError, OMRPORT_ERROR_MMAP_MSYNC_FAILED);
-		return -1;
-	}
+    success = FlushViewOfFile(start, length);
+    if (!success) {
+        lastError = GetLastError();
+        Trc_PRT_mmap_msync_win32_badFlushViewOfFile(lastError);
+        portLibrary->error_set_last_error(portLibrary, lastError, OMRPORT_ERROR_MMAP_MSYNC_FAILED);
+        return -1;
+    }
 
-	Trc_PRT_mmap_msync_win32_exiting();
-	return 0;
+    Trc_PRT_mmap_msync_win32_exiting();
+    return 0;
 }
 /**
  * PortLibrary shutdown.
@@ -275,8 +271,7 @@ omrmmap_msync(struct OMRPortLibrary *portLibrary, void *start, uintptr_t length,
  * should be destroyed here.
  *
  */
-void
-omrmmap_shutdown(struct OMRPortLibrary *portLibrary)
+void omrmmap_shutdown(struct OMRPortLibrary* portLibrary)
 {
 }
 /**
@@ -294,9 +289,9 @@ omrmmap_shutdown(struct OMRPortLibrary *portLibrary)
  * @note Most implementations will simply return success.
  */
 int32_t
-omrmmap_startup(struct OMRPortLibrary *portLibrary)
+omrmmap_startup(struct OMRPortLibrary* portLibrary)
 {
-	return 0;
+    return 0;
 }
 /**
  * Check the capabilities available for J9MMAP at runtime for the current platform.
@@ -310,46 +305,45 @@ omrmmap_startup(struct OMRPortLibrary *portLibrary)
  *
  */
 int32_t
-omrmmap_capabilities(struct OMRPortLibrary *portLibrary)
+omrmmap_capabilities(struct OMRPortLibrary* portLibrary)
 {
-	return (OMRPORT_MMAP_CAPABILITY_COPYONWRITE
-			| OMRPORT_MMAP_CAPABILITY_READ
-			| OMRPORT_MMAP_CAPABILITY_WRITE
-			| OMRPORT_MMAP_CAPABILITY_PROTECT
-			| OMRPORT_MMAP_CAPABILITY_MSYNC);
+    return (OMRPORT_MMAP_CAPABILITY_COPYONWRITE
+        | OMRPORT_MMAP_CAPABILITY_READ
+        | OMRPORT_MMAP_CAPABILITY_WRITE
+        | OMRPORT_MMAP_CAPABILITY_PROTECT
+        | OMRPORT_MMAP_CAPABILITY_MSYNC);
 }
 
 intptr_t
-omrmmap_protect(struct OMRPortLibrary *portLibrary, void *address, uintptr_t length, uintptr_t flags)
+omrmmap_protect(struct OMRPortLibrary* portLibrary, void* address, uintptr_t length, uintptr_t flags)
 {
-	return protect_memory(portLibrary, address, length, flags);
+    return protect_memory(portLibrary, address, length, flags);
 }
 
 uintptr_t
-omrmmap_get_region_granularity(struct OMRPortLibrary *portLibrary, void *address)
+omrmmap_get_region_granularity(struct OMRPortLibrary* portLibrary, void* address)
 {
-	return protect_region_granularity(portLibrary, address);
+    return protect_region_granularity(portLibrary, address);
 }
 
-void
-omrmmap_dont_need(struct OMRPortLibrary *portLibrary, const void *startAddress, size_t length)
+void omrmmap_dont_need(struct OMRPortLibrary* portLibrary, const void* startAddress, size_t length)
 {
-	size_t pageSize = portLibrary->mmap_get_region_granularity(portLibrary, (void *)startAddress);
+    size_t pageSize = portLibrary->mmap_get_region_granularity(portLibrary, (void*)startAddress);
 
-	Trc_PRT_mmap_dont_need(pageSize, startAddress, length);
+    Trc_PRT_mmap_dont_need(pageSize, startAddress, length);
 
-	if (pageSize > 0 && length >= pageSize) {
-		uintptr_t endAddress = (uintptr_t) startAddress + length;
-		uintptr_t roundedStart = ROUND_UP_TO_POWEROF2((uintptr_t) startAddress, pageSize);
-		size_t roundedLength = ROUND_DOWN_TO_POWEROF2(endAddress - roundedStart, pageSize);
-		Trc_PRT_mmap_dont_need_oscall(roundedStart, roundedLength);
-		if (roundedLength >= pageSize) {
-			if (!VirtualUnlock((LPVOID) roundedStart, roundedLength)) {
-				DWORD lastError = GetLastError();
-				if (ERROR_NOT_LOCKED != lastError) {
-					Trc_PRT_mmap_dont_need_virtual_unlock_failed((void *)roundedStart, roundedLength, lastError);
-				}
-			}
-		}
-	}
+    if (pageSize > 0 && length >= pageSize) {
+        uintptr_t endAddress = (uintptr_t)startAddress + length;
+        uintptr_t roundedStart = ROUND_UP_TO_POWEROF2((uintptr_t)startAddress, pageSize);
+        size_t roundedLength = ROUND_DOWN_TO_POWEROF2(endAddress - roundedStart, pageSize);
+        Trc_PRT_mmap_dont_need_oscall(roundedStart, roundedLength);
+        if (roundedLength >= pageSize) {
+            if (!VirtualUnlock((LPVOID)roundedStart, roundedLength)) {
+                DWORD lastError = GetLastError();
+                if (ERROR_NOT_LOCKED != lastError) {
+                    Trc_PRT_mmap_dont_need_virtual_unlock_failed((void*)roundedStart, roundedLength, lastError);
+                }
+            }
+        }
+    }
 }

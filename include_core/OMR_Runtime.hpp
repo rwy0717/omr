@@ -41,7 +41,7 @@ extern "C" {
  *
  * @return an OMR error code
  */
-omr_error_t attachVM(OMR_Runtime *runtime, OMR_VM *vm);
+omr_error_t attachVM(OMR_Runtime* runtime, OMR_VM* vm);
 
 /**
  * Internal: Detach a VM from the runtime.
@@ -51,8 +51,7 @@ omr_error_t attachVM(OMR_Runtime *runtime, OMR_VM *vm);
  *
  * @return an OMR error code
  */
-omr_error_t detachVM(OMR_Runtime *runtime, OMR_VM *vm);
-
+omr_error_t detachVM(OMR_Runtime* runtime, OMR_VM* vm);
 }
 
 #endif /* OMR_RUNTIME_HPP_ */

@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 /**
  * @file
  * @ingroup GC_Base_Core
@@ -42,15 +41,15 @@
 MM_NonVirtualMemory*
 MM_NonVirtualMemory::newInstance(MM_EnvironmentBase* env, uintptr_t heapAlignment, uintptr_t size, uint32_t memoryCategory)
 {
-	MM_NonVirtualMemory* vmem = (MM_NonVirtualMemory*)env->getForge()->allocate(sizeof(MM_NonVirtualMemory), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
-	if (vmem) {
-		new (vmem) MM_NonVirtualMemory(env, heapAlignment);
-		if (!vmem->initialize(env, size, NULL, NULL, 0, memoryCategory)) {
-			vmem->kill(env);
-			vmem = NULL;
-		}
-	}
-	return vmem;
+    MM_NonVirtualMemory* vmem = (MM_NonVirtualMemory*)env->getForge()->allocate(sizeof(MM_NonVirtualMemory), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+    if (vmem) {
+        new (vmem) MM_NonVirtualMemory(env, heapAlignment);
+        if (!vmem->initialize(env, size, NULL, NULL, 0, memoryCategory)) {
+            vmem->kill(env);
+            vmem = NULL;
+        }
+    }
+    return vmem;
 }
 
 #if (defined(AIXPPC) && (!defined(PPC64) || defined(OMR_GC_REALTIME))) || defined(J9ZOS39064) || defined(OMRZTPF)
@@ -59,59 +58,54 @@ MM_NonVirtualMemory::newInstance(MM_EnvironmentBase* env, uintptr_t heapAlignmen
  * @param size The number of bytes to allocate.
  * @return A pointer to the allocated memory.
  */
-void*
-MM_NonVirtualMemory::reserveMemory(J9PortVmemParams* params)
+void* MM_NonVirtualMemory::reserveMemory(J9PortVmemParams* params)
 {
-	uintptr_t bytesToAllocate = params->byteAmount;
-	/* should be params->alignmentInBytes but that requires a change in Port to go through, first, so use _heapAlignment for now */
-	uintptr_t alignment = _heapAlignment;
-	if (alignment > 0) {
-		bytesToAllocate += (alignment - 1);
-	}
-	_baseAddress = _extensions->getForge()->allocate(bytesToAllocate, OMR::GC::AllocationCategory::GC_HEAP, OMR_GET_CALLSITE());
-	void* addressToReturn = _baseAddress;
-	if ((NULL != _baseAddress) && (alignment > 0)) {
-		addressToReturn = (void*)(((uintptr_t)addressToReturn + alignment - 1) & ~(alignment - 1));
-	}
-	return addressToReturn;
+    uintptr_t bytesToAllocate = params->byteAmount;
+    /* should be params->alignmentInBytes but that requires a change in Port to go through, first, so use _heapAlignment for now */
+    uintptr_t alignment = _heapAlignment;
+    if (alignment > 0) {
+        bytesToAllocate += (alignment - 1);
+    }
+    _baseAddress = _extensions->getForge()->allocate(bytesToAllocate, OMR::GC::AllocationCategory::GC_HEAP, OMR_GET_CALLSITE());
+    void* addressToReturn = _baseAddress;
+    if ((NULL != _baseAddress) && (alignment > 0)) {
+        addressToReturn = (void*)(((uintptr_t)addressToReturn + alignment - 1) & ~(alignment - 1));
+    }
+    return addressToReturn;
 }
 
 /**
  * Frees the associated chunk of memory.
  */
-void
-MM_NonVirtualMemory::tearDown(MM_EnvironmentBase* env)
+void MM_NonVirtualMemory::tearDown(MM_EnvironmentBase* env)
 {
-	if (NULL != _baseAddress) {
-		_extensions->getForge()->free(_baseAddress);
-		_baseAddress = NULL;
-	}
+    if (NULL != _baseAddress) {
+        _extensions->getForge()->free(_baseAddress);
+        _baseAddress = NULL;
+    }
 }
 
 /**
  * Commit the address range into physical memory.
  * @return true if successful, false otherwise.
  */
-bool
-MM_NonVirtualMemory::commitMemory(void* address, uintptr_t size)
+bool MM_NonVirtualMemory::commitMemory(void* address, uintptr_t size)
 {
-	return true;
+    return true;
 }
 
 /**
  * Decommit the address range from physical memory.
  * @return true if successful, false otherwise.
  */
-bool
-MM_NonVirtualMemory::decommitMemory(void* address, uintptr_t size, void* lowValidAddress, void* highValidAddress)
+bool MM_NonVirtualMemory::decommitMemory(void* address, uintptr_t size, void* lowValidAddress, void* highValidAddress)
 {
-	return true;
+    return true;
 }
 
-bool
-MM_NonVirtualMemory::setNumaAffinity(uintptr_t numaNode, void* address, uintptr_t byteAmount)
+bool MM_NonVirtualMemory::setNumaAffinity(uintptr_t numaNode, void* address, uintptr_t byteAmount)
 {
-	return true;
+    return true;
 }
 
 #endif /* (defined(AIXPPC) && (!defined(PPC64) || defined(OMR_GC_REALTIME))) || defined(J9ZOS39064) || defined(OMRZTPF) */

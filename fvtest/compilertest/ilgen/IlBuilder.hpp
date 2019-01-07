@@ -24,23 +24,21 @@
 
 #include "ilgen/TestIlBuilder.hpp"
 
-namespace TR
-{
-   class IlBuilder : public TestCompiler::IlBuilder
-      {
-      public:
-         IlBuilder(TR::MethodBuilder *methodBuilder, TypeDictionary *types)
-            : TestCompiler::IlBuilder(methodBuilder, types)
-            { }
+namespace TR {
+class IlBuilder : public TestCompiler::IlBuilder {
+public:
+    IlBuilder(TR::MethodBuilder* methodBuilder, TypeDictionary* types)
+        : TestCompiler::IlBuilder(methodBuilder, types)
+    {}
 
-         IlBuilder(TR::IlBuilder *source)
-            : TestCompiler::IlBuilder(source)
-            { }
+    IlBuilder(TR::IlBuilder* source)
+        : TestCompiler::IlBuilder(source)
+    {}
 
-         IlBuilder(TestCompiler::TestDriver *test, TR::MethodBuilder *methodBuilder, TR::TypeDictionary *types)
-            : TestCompiler::IlBuilder(test, methodBuilder, types)
-            { }
-      };
+    IlBuilder(TestCompiler::TestDriver* test, TR::MethodBuilder* methodBuilder, TR::TypeDictionary* types)
+        : TestCompiler::IlBuilder(test, methodBuilder, types)
+    {}
+};
 
 } // namespace TR
 

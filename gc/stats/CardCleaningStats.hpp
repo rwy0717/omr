@@ -28,40 +28,39 @@
 
 #include "Base.hpp"
 
-class MM_CardCleaningStats : public MM_Base
-{
-/* Data Members */
+class MM_CardCleaningStats : public MM_Base {
+    /* Data Members */
 public:
-	uint64_t _cardCleaningTime; /**< Time spent cleaning cards in hi-res clock resolution. */
-	uintptr_t _cardsCleaned; /**< The number of cards cleaned */
-	
-/* Function Members */
+    uint64_t _cardCleaningTime; /**< Time spent cleaning cards in hi-res clock resolution. */
+    uintptr_t _cardsCleaned; /**< The number of cards cleaned */
+
+    /* Function Members */
 public:
-	/**
-	 * Reset the card cleaning statistics to their initial state.  Statistics should
-	 * be reset each for each local or global GC.
-	 */
-	void clear();
-	
-	/**
-	 * Add the specified interval to the amount of time attributed to card cleaning.
-	 * @param startTime The time scanning began, measured by omrtime_hires_clock()
-	 * @param endTime The time scanning ended, measured by omrtime_hires_clock()
-	 */
-	MMINLINE void addToCardCleaningTime(uint64_t startTime, uint64_t endTime) { _cardCleaningTime += (endTime - startTime);	}
-	
-	/**
-	 * Merges the results from the input MM_CardCleaningStats with the statistics contained within the receiver.
-	 * 
-	 * @param[in] statsToMerge	Card cleaning statistics to merge with the receiver
-	 */
-	void merge(MM_CardCleaningStats *statsToMerge);
-	
-	MM_CardCleaningStats() :
-		MM_Base()
-	{
-		clear();
-	}
+    /**
+     * Reset the card cleaning statistics to their initial state.  Statistics should
+     * be reset each for each local or global GC.
+     */
+    void clear();
+
+    /**
+     * Add the specified interval to the amount of time attributed to card cleaning.
+     * @param startTime The time scanning began, measured by omrtime_hires_clock()
+     * @param endTime The time scanning ended, measured by omrtime_hires_clock()
+     */
+    MMINLINE void addToCardCleaningTime(uint64_t startTime, uint64_t endTime) { _cardCleaningTime += (endTime - startTime); }
+
+    /**
+     * Merges the results from the input MM_CardCleaningStats with the statistics contained within the receiver.
+     * 
+     * @param[in] statsToMerge	Card cleaning statistics to merge with the receiver
+     */
+    void merge(MM_CardCleaningStats* statsToMerge);
+
+    MM_CardCleaningStats()
+        : MM_Base()
+    {
+        clear();
+    }
 };
 
 #endif /* !CARDCLEANINGSTATS_HPP_ */

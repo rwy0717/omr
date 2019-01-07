@@ -27,33 +27,36 @@
  */
 #ifndef OMR_REGISTER_DEPENDENCY_STRUCT_CONNECTOR
 #define OMR_REGISTER_DEPENDENCY_STRUCT_CONNECTOR
-namespace OMR { namespace Z { struct RegisterDependencyExt; } }
-namespace OMR { typedef OMR::Z::RegisterDependencyExt RegisterDependency; }
+namespace OMR {
+namespace Z {
+struct RegisterDependencyExt;
+}
+} // namespace OMR
+namespace OMR {
+typedef OMR::Z::RegisterDependencyExt RegisterDependency;
+}
 #else
 #error OMR::Z::RegisterDependencyExt expected to be a primary connector, but a OMR connector is already defined
 #endif
 
 #include "compiler/codegen/OMRRegisterDependencyStruct.hpp"
 
-#include <stddef.h>                   // for NULL
-#include "codegen/CodeGenerator.hpp"  // for CodeGenerator
-#include "codegen/RealRegister.hpp"   // for RealRegister, etc
-#include "codegen/Register.hpp"       // for Register
-#include "infra/Array.hpp"            // for TR_Array
-#include "infra/Assert.hpp"           // for TR_ASSERT
+#include <stddef.h> // for NULL
+#include "codegen/CodeGenerator.hpp" // for CodeGenerator
+#include "codegen/RealRegister.hpp" // for RealRegister, etc
+#include "codegen/Register.hpp" // for Register
+#include "infra/Array.hpp" // for TR_Array
+#include "infra/Assert.hpp" // for TR_ASSERT
 
-namespace OMR
-{
-namespace Z
-{
-struct RegisterDependencyExt : OMR::RegisterDependencyExt
-   {
-   TR::RealRegister::RegNum  _realRegister;
+namespace OMR {
+namespace Z {
+struct RegisterDependencyExt : OMR::RegisterDependencyExt {
+    TR::RealRegister::RegNum _realRegister;
 
-   TR::RealRegister::RegNum getRealRegister() {return _realRegister;}
-   TR::RealRegister::RegNum setRealRegister(TR::RealRegister::RegNum r) { return (_realRegister = r); }
-   };
-}
-}
+    TR::RealRegister::RegNum getRealRegister() { return _realRegister; }
+    TR::RealRegister::RegNum setRealRegister(TR::RealRegister::RegNum r) { return (_realRegister = r); }
+};
+} // namespace Z
+} // namespace OMR
 
 #endif

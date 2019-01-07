@@ -20,7 +20,7 @@
 #############################################################################
 
 list(APPEND OMR_PLATFORM_DEFINITIONS
-	-DJ9ARM
-	-DARMGNU
-	-DFIXUP_UNALIGNED
+    -DJ9ARM
+    -DARMGNU
+    -DFIXUP_UNALIGNED
 )

@@ -24,19 +24,17 @@
 
 #include "ilgen/TestMethodBuilder.hpp"
 
-namespace TR
-{
-   class MethodBuilder : public TestCompiler::MethodBuilder
-      {
-      public:
-         MethodBuilder(TR::TypeDictionary *types)
-            : TestCompiler::MethodBuilder(types)
-            { }
+namespace TR {
+class MethodBuilder : public TestCompiler::MethodBuilder {
+public:
+    MethodBuilder(TR::TypeDictionary* types)
+        : TestCompiler::MethodBuilder(types)
+    {}
 
-         MethodBuilder(TR::TypeDictionary *types, TestCompiler::TestDriver *test)
-            : TestCompiler::MethodBuilder(types, test)
-            { }
-      };
+    MethodBuilder(TR::TypeDictionary* types, TestCompiler::TestDriver* test)
+        : TestCompiler::MethodBuilder(types, test)
+    {}
+};
 
 } // namespace TR
 

@@ -21,8 +21,8 @@
 
 #include "codegen/MemoryReference.hpp"
 
-TR::MemoryReference *
+TR::MemoryReference*
 OMR::MemoryReference::self()
-   {
-   return static_cast<TR::MemoryReference *>(this);
-   }
+{
+    return static_cast<TR::MemoryReference*>(this);
+}

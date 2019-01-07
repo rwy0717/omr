@@ -23,12 +23,12 @@
 /* windows.h defined uintptr_t.  Ignore its definition */
 #define UDATA UDATA_win32_
 #include <windows.h>
-#undef UDATA	/* this is safe because our UDATA is a typedef, not a macro */
+#undef UDATA /* this is safe because our UDATA is a typedef, not a macro */
 
 #include "omrthread.h"
 
 uintptr_t
 omrthread_get_ras_tid(void)
 {
-	return (uintptr_t)GetCurrentThreadId();
+    return (uintptr_t)GetCurrentThreadId();
 }

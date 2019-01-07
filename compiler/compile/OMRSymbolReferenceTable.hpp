@@ -27,127 +27,126 @@
  */
 #ifndef OMR_SYMBOLREFERENCETABLE_CONNECTOR
 #define OMR_SYMBOLREFERENCETABLE_CONNECTOR
-namespace OMR { class SymbolReferenceTable; }
-namespace OMR { typedef OMR::SymbolReferenceTable SymbolReferenceTableConnector; }
+namespace OMR {
+class SymbolReferenceTable;
+}
+namespace OMR {
+typedef OMR::SymbolReferenceTable SymbolReferenceTableConnector;
+}
 #endif
 
 #include "il/symbol/ResolvedMethodSymbol.hpp"
 
-#include <map>                                 // for std::map
-#include <stddef.h>                            // for NULL, size_t
-#include <stdint.h>                            // for int32_t, etc
-#include "env/TRMemory.hpp"                    // for Allocator, etc
-#include "codegen/FrontEnd.hpp"                // for TR_FrontEnd
+#include <map> // for std::map
+#include <stddef.h> // for NULL, size_t
+#include <stdint.h> // for int32_t, etc
+#include "env/TRMemory.hpp" // for Allocator, etc
+#include "codegen/FrontEnd.hpp" // for TR_FrontEnd
 #include "env/KnownObjectTable.hpp"
 #include "codegen/RecognizedMethods.hpp"
 #include "codegen/RegisterConstants.hpp"
-#include "compile/AliasBuilder.hpp"            // for AliasBuilder
-#include "compile/Method.hpp"                  // for mcount_t
-#include "cs2/hashtab.h"                       // for HashTable, etc
-#include "env/jittypes.h"                      // for intptrj_t, uintptrj_t
-#include "il/DataTypes.hpp"                    // for DataTypes, etc
-#include "il/Symbol.hpp"                       // for Symbol
-#include "il/symbol/MethodSymbol.hpp"          // for MethodSymbol
-#include "il/symbol/RegisterMappedSymbol.hpp"  // for RegsiterMappedSymbol
-#include "infra/Array.hpp"                     // for TR_Array
-#include "infra/Assert.hpp"                    // for TR_ASSERT
-#include "infra/BitVector.hpp"                 // for TR_BitVector
-#include "infra/Flags.hpp"                     // for flags8_t
-#include "infra/Link.hpp"                      // for TR_Link, etc
-#include "infra/List.hpp"                      // for List, etc
+#include "compile/AliasBuilder.hpp" // for AliasBuilder
+#include "compile/Method.hpp" // for mcount_t
+#include "cs2/hashtab.h" // for HashTable, etc
+#include "env/jittypes.h" // for intptrj_t, uintptrj_t
+#include "il/DataTypes.hpp" // for DataTypes, etc
+#include "il/Symbol.hpp" // for Symbol
+#include "il/symbol/MethodSymbol.hpp" // for MethodSymbol
+#include "il/symbol/RegisterMappedSymbol.hpp" // for RegsiterMappedSymbol
+#include "infra/Array.hpp" // for TR_Array
+#include "infra/Assert.hpp" // for TR_ASSERT
+#include "infra/BitVector.hpp" // for TR_BitVector
+#include "infra/Flags.hpp" // for flags8_t
+#include "infra/Link.hpp" // for TR_Link, etc
+#include "infra/List.hpp" // for List, etc
 #include "runtime/Runtime.hpp"
 
+namespace OMR {
 
-namespace OMR
-{
+class SymbolReferenceTable {
 
-class SymbolReferenceTable
-   {
+public:
+    SymbolReferenceTable(size_t size, TR::Compilation* comp);
 
-   public:
+    TR_ALLOC(TR_Memory::SymbolReferenceTable)
 
-   SymbolReferenceTable(size_t size, TR::Compilation *comp);
+    TR::SymbolReferenceTable* self();
 
-   TR_ALLOC(TR_Memory::SymbolReferenceTable)
+    TR::Compilation* comp() { return _compilation; }
+    TR_FrontEnd* fe() { return _fe; }
+    TR_Memory* trMemory() { return _trMemory; }
+    TR_StackMemory trStackMemory() { return _trMemory; }
+    TR_HeapMemory trHeapMemory() { return _trMemory; }
 
-   TR::SymbolReferenceTable *self();
+    TR_Array<TR::SymbolReference*> baseArray;
 
-   TR::Compilation *comp() { return _compilation; }
-   TR_FrontEnd *fe() { return _fe; }
-   TR_Memory *trMemory() { return _trMemory; }
-   TR_StackMemory trStackMemory() { return _trMemory; }
-   TR_HeapMemory trHeapMemory() { return _trMemory; }
+    TR::AliasBuilder aliasBuilder;
 
-   TR_Array<TR::SymbolReference *> baseArray;
+    enum CommonNonhelperSymbol {
+        // Note: when using these enumerations to index into the symbol reference table
+        //       you must add _numHelperSymbols to the value
 
-   TR::AliasBuilder aliasBuilder;
+        arraySetSymbol,
+        arrayCopySymbol,
+        arrayCmpSymbol,
+        prefetchSymbol,
 
-   enum CommonNonhelperSymbol
-      {
-      // Note: when using these enumerations to index into the symbol reference table
-      //       you must add _numHelperSymbols to the value
+        killsAllMethodSymbol, // A dummy method whose alias set includes all
+        usesAllMethodSymbol, // A dummy method whose use only alias set includes all
 
-      arraySetSymbol,
-      arrayCopySymbol,
-      arrayCmpSymbol,
-      prefetchSymbol,
+        firstArrayShadowSymbol,
 
-      killsAllMethodSymbol,                           // A dummy method whose alias set includes all
-      usesAllMethodSymbol,                            // A dummy method whose use only alias set includes all
+        firstArrayletShadowSymbol = firstArrayShadowSymbol + TR::NumTypes,
 
-      firstArrayShadowSymbol,
+        firstCommonNonhelperNonArrayShadowSymbol = firstArrayletShadowSymbol + TR::NumTypes,
 
-      firstArrayletShadowSymbol = firstArrayShadowSymbol + TR::NumTypes,
+        contiguousArraySizeSymbol = firstCommonNonhelperNonArrayShadowSymbol,
+        discontiguousArraySizeSymbol,
+        arrayClassRomPtrSymbol,
+        classRomPtrSymbol,
+        javaLangClassFromClassSymbol,
+        classFromJavaLangClassSymbol,
+        addressOfClassOfMethodSymbol,
+        ramStaticsFromClassSymbol,
+        componentClassSymbol,
+        componentClassAsPrimitiveSymbol,
+        isArraySymbol,
+        isClassAndDepthFlagsSymbol,
+        initializeStatusFromClassSymbol,
+        isClassFlagsSymbol,
+        vftSymbol,
+        currentThreadSymbol,
+        recompilationCounterSymbol,
+        excpSymbol,
+        indexableSizeSymbol,
+        resolveCheckSymbol,
+        arrayTranslateSymbol,
+        arrayTranslateAndTestSymbol,
+        long2StringSymbol,
+        bitOpMemSymbol,
+        reverseLoadSymbol,
+        reverseStoreSymbol,
+        currentTimeMaxPrecisionSymbol,
+        headerFlagsSymbol,
+        singlePrecisionSQRTSymbol,
+        threadPrivateFlagsSymbol, // private flags slot on j9vmthread
+        arrayletSpineFirstElementSymbol, // address of contiguous arraylet spine first element
+        dltBlockSymbol, // DLT Block field in j9vmthread
+        countForRecompileSymbol, // global boolean indicating when methods should start counting for guarded recompilations
+        gcrPatchPointSymbol, // address where we need to patch GCR guard instruction
+        counterAddressSymbol, // address of invokation counter for indirect loads and stores
+        startPCSymbol, // startPC of the compiled method
+        compiledMethodSymbol, // J9Method of the compiled method
+        thisRangeExtensionSymbol,
+        profilingBufferCursorSymbol, // profilingBufferCursor slot on j9vmthread
+        profilingBufferEndSymbol, // profilingBufferEnd slot on j9vmthread
+        profilingBufferSymbol, // profilingBuffer on j9vmthread
+        osrBufferSymbol, // osrBuffer slot on j9vmthread
+        osrScratchBufferSymbol, //osrScratchBuffer slot on  j9vmthread
+        osrFrameIndexSymbol, // osrFrameIndex slot on j9vmthread
+        osrReturnAddressSymbol, // osrFrameIndex slot on j9vmthread
 
-      firstCommonNonhelperNonArrayShadowSymbol = firstArrayletShadowSymbol + TR::NumTypes,
-
-      contiguousArraySizeSymbol = firstCommonNonhelperNonArrayShadowSymbol,
-      discontiguousArraySizeSymbol,
-      arrayClassRomPtrSymbol,
-      classRomPtrSymbol,
-      javaLangClassFromClassSymbol,
-      classFromJavaLangClassSymbol,
-      addressOfClassOfMethodSymbol,
-      ramStaticsFromClassSymbol,
-      componentClassSymbol,
-      componentClassAsPrimitiveSymbol,
-      isArraySymbol,
-      isClassAndDepthFlagsSymbol,
-      initializeStatusFromClassSymbol,
-      isClassFlagsSymbol,
-      vftSymbol,
-      currentThreadSymbol,
-      recompilationCounterSymbol,
-      excpSymbol,
-      indexableSizeSymbol,
-      resolveCheckSymbol,
-      arrayTranslateSymbol,
-      arrayTranslateAndTestSymbol,
-      long2StringSymbol,
-      bitOpMemSymbol,
-      reverseLoadSymbol,
-      reverseStoreSymbol,
-      currentTimeMaxPrecisionSymbol,
-      headerFlagsSymbol,
-      singlePrecisionSQRTSymbol,
-      threadPrivateFlagsSymbol,  // private flags slot on j9vmthread
-      arrayletSpineFirstElementSymbol,// address of contiguous arraylet spine first element
-      dltBlockSymbol,            // DLT Block field in j9vmthread
-      countForRecompileSymbol,   // global boolean indicating when methods should start counting for guarded recompilations
-      gcrPatchPointSymbol,       // address where we need to patch GCR guard instruction
-      counterAddressSymbol,      // address of invokation counter for indirect loads and stores
-      startPCSymbol,             // startPC of the compiled method
-      compiledMethodSymbol,      // J9Method of the compiled method
-      thisRangeExtensionSymbol,
-      profilingBufferCursorSymbol,// profilingBufferCursor slot on j9vmthread
-      profilingBufferEndSymbol,  // profilingBufferEnd slot on j9vmthread
-      profilingBufferSymbol,     // profilingBuffer on j9vmthread
-      osrBufferSymbol,     // osrBuffer slot on j9vmthread
-      osrScratchBufferSymbol,    //osrScratchBuffer slot on  j9vmthread
-      osrFrameIndexSymbol,       // osrFrameIndex slot on j9vmthread
-      osrReturnAddressSymbol,       // osrFrameIndex slot on j9vmthread
-
-      /** \brief
+        /** \brief
        *
        *  A call with this symbol marks a place in the jitted code where OSR transition to the VM interpreter is supported.
        *  The transition target bytecode is the bytecode index on the call plus an induction offset which is stored on the
@@ -160,8 +159,8 @@ class SymbolReferenceTable
        *  \note
        *   The call is not to be codegen evaluated, it should be cleaned up before codegen.
        */
-      potentialOSRPointHelperSymbol,
-      /** \brief
+        potentialOSRPointHelperSymbol,
+        /** \brief
        *
        *  A call with this symbol marks a place that has been optimized with runtime assumptions. Such place needs protection of OSR
        *  points. When the assumption becomes wrong, the execution of jitted code with the assumption has to be transition to the VM
@@ -174,24 +173,24 @@ class SymbolReferenceTable
        *  \note
        *   The call is not to be codegen evaluated, it should be cleaned up before codegen.
        */
-      osrFearPointHelperSymbol,
-      lowTenureAddressSymbol,    // on j9vmthread
-      highTenureAddressSymbol,   // on j9vmthread
-      fragmentParentSymbol,
-      globalFragmentSymbol,
-      instanceShapeSymbol,
-      instanceDescriptionSymbol,
-      descriptionWordFromPtrSymbol,
-      classFromJavaLangClassAsPrimitiveSymbol,
-      javaVMSymbol,
-      heapBaseSymbol,
-      heapTopSymbol,
-      j9methodExtraFieldSymbol,
-      j9methodConstantPoolSymbol,
-      startPCLinkageInfoSymbol,
-      instanceShapeFromROMClassSymbol,
+        osrFearPointHelperSymbol,
+        lowTenureAddressSymbol, // on j9vmthread
+        highTenureAddressSymbol, // on j9vmthread
+        fragmentParentSymbol,
+        globalFragmentSymbol,
+        instanceShapeSymbol,
+        instanceDescriptionSymbol,
+        descriptionWordFromPtrSymbol,
+        classFromJavaLangClassAsPrimitiveSymbol,
+        javaVMSymbol,
+        heapBaseSymbol,
+        heapTopSymbol,
+        j9methodExtraFieldSymbol,
+        j9methodConstantPoolSymbol,
+        startPCLinkageInfoSymbol,
+        instanceShapeFromROMClassSymbol,
 
-      /** \brief
+        /** \brief
        *
        *  This symbol is used by the code generator to recognize and inline a call which emulates the following
        *  tree sequence:
@@ -213,9 +212,9 @@ class SymbolReferenceTable
        *  generators can emit an optimized instruction sequence to load the field atomically while conforming
        *  to the monent / monexit semantics.
        */
-      synchronizedFieldLoadSymbol,
+        synchronizedFieldLoadSymbol,
 
-      /** \brief
+        /** \brief
        *
        *  This symbol represents an intrinsic call of the following format:
        *
@@ -234,9 +233,9 @@ class SymbolReferenceTable
        *
        *  The data type of \c <value> indicates the width of the operation.
        */
-      atomicAddSymbol,
+        atomicAddSymbol,
 
-      /** \brief
+        /** \brief
        *
        *  This symbol represents an intrinsic call of the following format:
        *
@@ -256,11 +255,11 @@ class SymbolReferenceTable
        *
        *  The data type of \c <value> indicates the width of the operation.
        */
-      atomicFetchAndAddSymbol,
-      atomicFetchAndAdd32BitSymbol,
-      atomicFetchAndAdd64BitSymbol,
+        atomicFetchAndAddSymbol,
+        atomicFetchAndAdd32BitSymbol,
+        atomicFetchAndAdd64BitSymbol,
 
-      /** \brief
+        /** \brief
        *
        *  This symbol represents an intrinsic call of the following format:
        *
@@ -280,35 +279,35 @@ class SymbolReferenceTable
        *
        *  The data type of \c <value> indicates the width of the operation.
        */
-      atomicSwapSymbol,
-      atomicSwap32BitSymbol,
-      atomicSwap64BitSymbol,
-      atomicCompareAndSwapSymbol,
+        atomicSwapSymbol,
+        atomicSwap32BitSymbol,
+        atomicSwap64BitSymbol,
+        atomicCompareAndSwapSymbol,
 
-      // python symbols start here
-      pythonFrameCodeObjectSymbol,   // code object from the frame object
-      pythonFrameFastLocalsSymbol,   // fastlocals array base from the frame object
-      pythonFrameGlobalsSymbol,      // globals dict object from the frame object
-      pythonFrameBuiltinsSymbol,     // builtins dict object from the frame object
-      pythonCodeConstantsSymbol,     // the code constants tuple object
-      pythonCodeNumLocalsSymbol,     // number of local variables from the code object
-      pythonCodeNamesSymbol,         // names tuple object from the code object
-      pythonObjectTypeSymbol,        // type pointer from a python object
-      pythonTypeIteratorMethodSymbol,// used for the iterator method slot from a python type
-      pythonObjectRefCountSymbol,
+        // python symbols start here
+        pythonFrameCodeObjectSymbol, // code object from the frame object
+        pythonFrameFastLocalsSymbol, // fastlocals array base from the frame object
+        pythonFrameGlobalsSymbol, // globals dict object from the frame object
+        pythonFrameBuiltinsSymbol, // builtins dict object from the frame object
+        pythonCodeConstantsSymbol, // the code constants tuple object
+        pythonCodeNumLocalsSymbol, // number of local variables from the code object
+        pythonCodeNamesSymbol, // names tuple object from the code object
+        pythonObjectTypeSymbol, // type pointer from a python object
+        pythonTypeIteratorMethodSymbol, // used for the iterator method slot from a python type
+        pythonObjectRefCountSymbol,
 
-      firstPerCodeCacheHelperSymbol,
-      lastPerCodeCacheHelperSymbol = firstPerCodeCacheHelperSymbol + TR_numCCPreLoadedCode - 1,
+        firstPerCodeCacheHelperSymbol,
+        lastPerCodeCacheHelperSymbol = firstPerCodeCacheHelperSymbol + TR_numCCPreLoadedCode - 1,
 
-      lastCommonNonhelperSymbol
-      };
+        lastCommonNonhelperSymbol
+    };
 
-  CommonNonhelperSymbol getLastCommonNonhelperSymbol()
-      {
-      return lastCommonNonhelperSymbol;
-      }
+    CommonNonhelperSymbol getLastCommonNonhelperSymbol()
+    {
+        return lastCommonNonhelperSymbol;
+    }
 
-   /**
+    /**
     * Check whether the given symbol reference is the specified
     * "non-helper" symbol reference
     * @param[in] symRef the symbol reference to check
@@ -316,9 +315,9 @@ class SymbolReferenceTable
     * @returns `true` if symRef is the specified non-helper symbol;
     * `false` otherwise
     */
-   bool isNonHelper(TR::SymbolReference *symRef, CommonNonhelperSymbol nonHelper);
+    bool isNonHelper(TR::SymbolReference* symRef, CommonNonhelperSymbol nonHelper);
 
-   /**
+    /**
     * Check whether the given reference number is the specified
     * "non-helper" symbol.
     * @param[in] ref the reference number to check
@@ -326,322 +325,318 @@ class SymbolReferenceTable
     * @returns `true` if ref is the specified non-helper symbol;
     * `false` otherwise
     */
-   bool isNonHelper(int32_t ref, CommonNonhelperSymbol nonHelper);
+    bool isNonHelper(int32_t ref, CommonNonhelperSymbol nonHelper);
 
-   /**
+    /**
     * Check whether the given symbol reference is a "non-helper" symbol.
     * @param[in] symRef the symbol reference to check
     * @returns `true` if symRef is a non-helper reference;
     * `false` otherwise
     */
-   bool isNonHelper(TR::SymbolReference *symRef);
+    bool isNonHelper(TR::SymbolReference* symRef);
 
-   /**
+    /**
     * Check whether the given reference number is a "non-helper" symbol.
     * @param[in] ref the reference number to check
     * @returns `true` if ref is a non-helper reference;
     * `false` otherwise
     */
-   bool isNonHelper(int32_t ref);
+    bool isNonHelper(int32_t ref);
 
-   /**
+    /**
     * Retrieve the @ref CommonNonhelperSymbol for this symbol reference.
     * @param[in] symRef the symbol reference to check
     * @returns the @ref CommonNonhelperSymbol that this symbol reference
     * refers to or the value of getLastCommonNonhelperSymbol() if
     * the symbol reference does not refer to a non-helper
     */
-   CommonNonhelperSymbol getNonHelperSymbol(TR::SymbolReference *symRef);
+    CommonNonhelperSymbol getNonHelperSymbol(TR::SymbolReference* symRef);
 
-   /**
+    /**
     * Retrieve the `CommonNonhelperSymbol` for this reference number.
     * @param[in] ref the reference number to check
     * @returns the @ref CommonNonhelperSymbol that this symbol reference
     * refers to or the value of getLastCommonNonhelperSymbol() if
     * the symbol reference does not refer to a non-helper
     */
-   CommonNonhelperSymbol getNonHelperSymbol(int32_t ref);
+    CommonNonhelperSymbol getNonHelperSymbol(int32_t ref);
 
+    // Total number of symbols (known and dynamic) in the SRT
+    //
+    int32_t getNumSymRefs() { return baseArray.size(); }
+    void setNumSymRefs(int32_t n) { baseArray.setSize(n); }
 
-   // Total number of symbols (known and dynamic) in the SRT
-   //
-   int32_t getNumSymRefs()                            { return baseArray.size(); }
-   void    setNumSymRefs(int32_t n)                   { baseArray.setSize(n); }
+    // Number of known symbols with space reserved in the SRT
+    //
+    uint32_t getNumPredefinedSymbols() { return _numPredefinedSymbols; }
 
-   // Number of known symbols with space reserved in the SRT
-   //
-   uint32_t getNumPredefinedSymbols() { return _numPredefinedSymbols; }
+    int32_t getIndexOfFirstSymRef() { return 0; }
 
-   int32_t getIndexOfFirstSymRef()                    { return 0; }
+    // Add a symbol reference to the SRT and return its reference number
+    //
+    int32_t assignSymRefNumber(TR::SymbolReference* sf) { return baseArray.add(sf); }
 
-   // Add a symbol reference to the SRT and return its reference number
-   //
-   int32_t assignSymRefNumber(TR::SymbolReference *sf) { return baseArray.add(sf); }
+    int32_t getNumUnresolvedSymbols() { return _numUnresolvedSymbols; }
+    int32_t getNonhelperIndex(CommonNonhelperSymbol s);
+    int32_t getNumHelperSymbols() { return _numHelperSymbols; }
+    int32_t getArrayShadowIndex(TR::DataType t) { return _numHelperSymbols + firstArrayShadowSymbol + t; }
+    int32_t getArrayletShadowIndex(TR::DataType t) { return _numHelperSymbols + firstArrayletShadowSymbol + t; }
 
-   int32_t getNumUnresolvedSymbols()                  { return _numUnresolvedSymbols; }
-   int32_t getNonhelperIndex(CommonNonhelperSymbol s);
-   int32_t getNumHelperSymbols()                      { return _numHelperSymbols; }
-   int32_t getArrayShadowIndex(TR::DataType t)        { return _numHelperSymbols + firstArrayShadowSymbol + t; }
-   int32_t getArrayletShadowIndex(TR::DataType t) { return _numHelperSymbols + firstArrayletShadowSymbol + t; }
+    template <class BitVector>
+    void getAllSymRefs(BitVector& allSymRefs)
+    {
+        for (int32_t symRefNumber = getIndexOfFirstSymRef(); symRefNumber < getNumSymRefs(); symRefNumber++) {
+            TR::SymbolReference* symRef = getSymRef(symRefNumber);
+            if (symRef)
+                allSymRefs[symRefNumber] = true;
+        }
+    }
 
-   template <class BitVector>
-   void getAllSymRefs(BitVector &allSymRefs)
-      {
-      for (int32_t symRefNumber = getIndexOfFirstSymRef(); symRefNumber < getNumSymRefs(); symRefNumber++)
-         {
-         TR::SymbolReference *symRef = getSymRef(symRefNumber);
-         if (symRef)
-            allSymRefs[symRefNumber] = true;
-         }
-      }
+    // --------------------------------------------------------------------------
 
-   // --------------------------------------------------------------------------
+    TR::SymbolReference*& element(TR_RuntimeHelper s);
+    TR::SymbolReference*& element(CommonNonhelperSymbol s);
 
-   TR::SymbolReference * & element(TR_RuntimeHelper s);
-   TR::SymbolReference * & element(CommonNonhelperSymbol s);
+    TR::SymbolReference* getSymRef(CommonNonhelperSymbol i);
+    TR::SymbolReference* getSymRef(int32_t i) { return baseArray.element(i); }
 
-   TR::SymbolReference * getSymRef(CommonNonhelperSymbol i);
-   TR::SymbolReference * getSymRef(int32_t i) { return baseArray.element(i); }
+    TR::SymbolReference* createRuntimeHelper(TR_RuntimeHelper index, bool canGCandReturn, bool canGCandExcept, bool preservesAllRegisters);
+    TR::SymbolReference* findOrCreateRuntimeHelper(TR_RuntimeHelper index, bool canGCandReturn, bool canGCandExcept, bool preservesAllRegisters);
 
-   TR::SymbolReference * createRuntimeHelper(TR_RuntimeHelper index, bool canGCandReturn, bool canGCandExcept, bool preservesAllRegisters);
-   TR::SymbolReference * findOrCreateRuntimeHelper(TR_RuntimeHelper index, bool canGCandReturn, bool canGCandExcept, bool preservesAllRegisters);
+    TR::SymbolReference* findOrCreateCodeGenInlinedHelper(CommonNonhelperSymbol index);
+    TR::SymbolReference* findOrCreatePotentialOSRPointHelperSymbolRef();
+    TR::SymbolReference* findOrCreateOSRFearPointHelperSymbolRef();
+    TR::SymbolReference* findOrCreateInduceOSRSymbolRef(TR_RuntimeHelper induceOSRHelper);
 
-   TR::SymbolReference * findOrCreateCodeGenInlinedHelper(CommonNonhelperSymbol index);
-   TR::SymbolReference * findOrCreatePotentialOSRPointHelperSymbolRef();
-   TR::SymbolReference * findOrCreateOSRFearPointHelperSymbolRef();
-   TR::SymbolReference * findOrCreateInduceOSRSymbolRef(TR_RuntimeHelper induceOSRHelper);
+    TR::ParameterSymbol* createParameterSymbol(TR::ResolvedMethodSymbol* owningMethodSymbol, int32_t slot, TR::DataType);
+    TR::SymbolReference* findOrCreateAutoSymbol(TR::ResolvedMethodSymbol* owningMethodSymbol, int32_t slot, TR::DataType, bool isReference = true,
+        bool isInternalPointer = false, bool reuseAuto = true, bool isAdjunct = false, size_t size = 0);
+    TR::SymbolReference* createTemporary(TR::ResolvedMethodSymbol* owningMethodSymbol, TR::DataType, bool isInternalPointer = false, size_t size = 0);
+    TR::SymbolReference* createCoDependentTemporary(TR::ResolvedMethodSymbol* owningMethodSymbol, TR::DataType, bool isInternalPointer, size_t size,
+        TR::Symbol* coDependent, int32_t offset);
+    TR::SymbolReference* findStaticSymbol(TR_ResolvedMethod* owningMethod, int32_t cpIndex, TR::DataType);
 
-   TR::ParameterSymbol * createParameterSymbol(TR::ResolvedMethodSymbol * owningMethodSymbol, int32_t slot, TR::DataType);
-   TR::SymbolReference * findOrCreateAutoSymbol(TR::ResolvedMethodSymbol * owningMethodSymbol, int32_t slot, TR::DataType, bool isReference = true,
-         bool isInternalPointer = false, bool reuseAuto = true, bool isAdjunct = false, size_t size = 0);
-   TR::SymbolReference * createTemporary(TR::ResolvedMethodSymbol * owningMethodSymbol, TR::DataType, bool isInternalPointer = false, size_t size = 0);
-   TR::SymbolReference * createCoDependentTemporary(TR::ResolvedMethodSymbol * owningMethodSymbol, TR::DataType, bool isInternalPointer, size_t size,
-         TR::Symbol *coDependent, int32_t offset);
-   TR::SymbolReference * findStaticSymbol(TR_ResolvedMethod * owningMethod, int32_t cpIndex, TR::DataType);
+    // --------------------------------------------------------------------------
+    // OMR
+    // --------------------------------------------------------------------------
 
-   // --------------------------------------------------------------------------
-   // OMR
-   // --------------------------------------------------------------------------
+    TR::SymbolReference* findOrCreatePendingPushTemporary(TR::ResolvedMethodSymbol* owningMethodSymbol, int32_t stackDepth, TR::DataType, size_t size = 0);
+    TR::SymbolReference* createLocalPrimArray(int32_t objectSize, TR::ResolvedMethodSymbol* owningMethodSymbol, int32_t arrayType);
+    TR::Symbol* findOrCreateGenericIntShadowSymbol();
+    TR::Symbol* findGenericIntShadowSymbol() { return _genericIntShadowSymbol; }
 
-   TR::SymbolReference * findOrCreatePendingPushTemporary(TR::ResolvedMethodSymbol * owningMethodSymbol, int32_t stackDepth, TR::DataType, size_t size = 0);
-   TR::SymbolReference * createLocalPrimArray(int32_t objectSize, TR::ResolvedMethodSymbol * owningMethodSymbol, int32_t arrayType);
-   TR::Symbol           * findOrCreateGenericIntShadowSymbol();
-   TR::Symbol           * findGenericIntShadowSymbol() { return _genericIntShadowSymbol; }
+    int32_t getNumInternalPointers() { return _numInternalPointers; }
 
-   int32_t getNumInternalPointers() { return _numInternalPointers; }
+    TR::SymbolReference* methodSymRefFromName(TR::ResolvedMethodSymbol* owningMethodSymbol, char* className, char* methodName, char* signature, TR::MethodSymbol::Kinds kind, int32_t cpIndex = -1);
 
-   TR::SymbolReference * methodSymRefFromName(TR::ResolvedMethodSymbol *owningMethodSymbol, char *className, char *methodName, char *signature, TR::MethodSymbol::Kinds kind, int32_t cpIndex=-1);
+    TR::SymbolReference* createSymbolReference(TR::Symbol* sym, intptrj_t o = 0);
 
-   TR::SymbolReference *createSymbolReference(TR::Symbol *sym, intptrj_t o = 0);
+    TR::Symbol* findOrCreateConstantAreaSymbol();
+    TR::SymbolReference* findOrCreateConstantAreaSymbolReference();
+    bool isConstantAreaSymbolReference(TR::SymbolReference* symRef) { return _constantAreaSymbolReference && _constantAreaSymbolReference == symRef; }
+    bool isConstantAreaSymbol(TR::Symbol* sym) { return _constantAreaSymbol && _constantAreaSymbol == sym; }
 
-   TR::Symbol * findOrCreateConstantAreaSymbol();
-   TR::SymbolReference * findOrCreateConstantAreaSymbolReference();
-   bool  isConstantAreaSymbolReference(TR::SymbolReference *symRef) { return _constantAreaSymbolReference && _constantAreaSymbolReference == symRef; }
-   bool  isConstantAreaSymbol(TR::Symbol *sym) { return _constantAreaSymbol && _constantAreaSymbol == sym; }
+    bool isVtableEntrySymbolRef(TR::SymbolReference* s) { return _vtableEntrySymbolRefs.find(s); }
 
-   bool isVtableEntrySymbolRef(TR::SymbolReference * s) { return _vtableEntrySymbolRefs.find(s); }
+    TR::SymbolReference* createKnownStaticDataSymbolRef(void* counterAddress, TR::DataType type);
+    TR::SymbolReference* createKnownStaticDataSymbolRef(void* counterAddress, TR::DataType type, TR::KnownObjectTable::Index knownObjectIndex);
+    TR::SymbolReference* findOrCreateTransactionEntrySymbolRef(TR::ResolvedMethodSymbol* owningMethodSymbol);
+    TR::SymbolReference* findOrCreateTransactionExitSymbolRef(TR::ResolvedMethodSymbol* owningMethodSymbol);
+    TR::SymbolReference* findOrCreateTransactionAbortSymbolRef(TR::ResolvedMethodSymbol* owningMethodSymbol);
+    TR::SymbolReference* findOrCreatePrefetchSymbol();
+    TR::SymbolReference* findPrefetchSymbol() { return element(prefetchSymbol); }
+    TR::SymbolReference* findOrCreateStartPCSymbolRef();
+    TR::SymbolReference* findOrCreateAThrowSymbolRef(TR::ResolvedMethodSymbol* owningMethodSymbol);
+    TR::SymbolReference* findOrCreateCheckCastSymbolRef(TR::ResolvedMethodSymbol* owningMethodSymbol);
+    TR::SymbolReference* findOrCreateDivCheckSymbolRef(TR::ResolvedMethodSymbol* owningMethodSymbol);
+    TR::SymbolReference* findOrCreateOverflowCheckSymbolRef(TR::ResolvedMethodSymbol* owningMethodSymbol);
+    TR::SymbolReference* findOrCreateInstanceOfSymbolRef(TR::ResolvedMethodSymbol* owningMethodSymbol);
 
-   TR::SymbolReference * createKnownStaticDataSymbolRef(void *counterAddress, TR::DataType type);
-   TR::SymbolReference * createKnownStaticDataSymbolRef(void *counterAddress, TR::DataType type, TR::KnownObjectTable::Index knownObjectIndex);
-   TR::SymbolReference * findOrCreateTransactionEntrySymbolRef(TR::ResolvedMethodSymbol * owningMethodSymbol);
-   TR::SymbolReference * findOrCreateTransactionExitSymbolRef(TR::ResolvedMethodSymbol * owningMethodSymbol);
-   TR::SymbolReference * findOrCreateTransactionAbortSymbolRef(TR::ResolvedMethodSymbol * owningMethodSymbol);
-   TR::SymbolReference * findOrCreatePrefetchSymbol();
-   TR::SymbolReference * findPrefetchSymbol() { return element(prefetchSymbol); }
-   TR::SymbolReference * findOrCreateStartPCSymbolRef();
-   TR::SymbolReference * findOrCreateAThrowSymbolRef(TR::ResolvedMethodSymbol * owningMethodSymbol);
-   TR::SymbolReference * findOrCreateCheckCastSymbolRef(TR::ResolvedMethodSymbol * owningMethodSymbol);
-   TR::SymbolReference * findOrCreateDivCheckSymbolRef(TR::ResolvedMethodSymbol * owningMethodSymbol);
-   TR::SymbolReference * findOrCreateOverflowCheckSymbolRef(TR::ResolvedMethodSymbol * owningMethodSymbol);
-   TR::SymbolReference * findOrCreateInstanceOfSymbolRef(TR::ResolvedMethodSymbol * owningMethodSymbol);
+    // symbol
+    TR::SymbolReference* findOrCreateOSRReturnAddressSymbolRef();
 
-   // symbol
-   TR::SymbolReference * findOrCreateOSRReturnAddressSymbolRef();
+    // base recompilation
+    TR::SymbolReference* findOrCreateRecompilationCounterSymbolRef(void* counterAddress);
 
-   // base recompilation
-   TR::SymbolReference * findOrCreateRecompilationCounterSymbolRef(void *counterAddress);
+    TR::SymbolReference* findOrCreateMethodSymbol(mcount_t owningMethodIndex, int32_t cpIndex, TR_ResolvedMethod*, TR::MethodSymbol::Kinds, bool = false);
+    TR::SymbolReference* findOrCreateComputedStaticMethodSymbol(mcount_t owningMethodIndex, int32_t cpIndex, TR_ResolvedMethod* resolvedMethod);
+    TR::SymbolReference* findOrCreateStaticMethodSymbol(mcount_t owningMethodIndex, int32_t cpIndex, TR_ResolvedMethod* resolvedMethod);
+    TR::SymbolReference* findJavaLangClassFromClassSymbolRef();
 
-   TR::SymbolReference * findOrCreateMethodSymbol(mcount_t owningMethodIndex, int32_t cpIndex, TR_ResolvedMethod *, TR::MethodSymbol::Kinds, bool = false);
-   TR::SymbolReference * findOrCreateComputedStaticMethodSymbol(mcount_t owningMethodIndex, int32_t cpIndex, TR_ResolvedMethod * resolvedMethod);
-   TR::SymbolReference * findOrCreateStaticMethodSymbol(mcount_t owningMethodIndex, int32_t cpIndex, TR_ResolvedMethod * resolvedMethod);
-   TR::SymbolReference * findJavaLangClassFromClassSymbolRef();
+    // FE, CG, optimizer
+    TR::SymbolReference* findOrCreateNullCheckSymbolRef(TR::ResolvedMethodSymbol* owningMethodSymbol);
+    TR::SymbolReference* findVftSymbolRef();
+    TR::SymbolReference* findOrCreateVftSymbolRef();
+    TR::SymbolReference* findOrCreateArrayBoundsCheckSymbolRef(TR::ResolvedMethodSymbol* owningMethodSymbol);
 
-   // FE, CG, optimizer
-   TR::SymbolReference * findOrCreateNullCheckSymbolRef(TR::ResolvedMethodSymbol * owningMethodSymbol);
-   TR::SymbolReference * findVftSymbolRef();
-   TR::SymbolReference * findOrCreateVftSymbolRef();
-   TR::SymbolReference * findOrCreateArrayBoundsCheckSymbolRef(TR::ResolvedMethodSymbol * owningMethodSymbol);
+    // optimizer (EA)
+    TR::SymbolReference* createLocalObject(int32_t objectSize, TR::ResolvedMethodSymbol* owningMethodSymbol, TR::SymbolReference* classSymRef);
+    TR::SymbolReference* createLocalAddrArray(int32_t objectSize, TR::ResolvedMethodSymbol* owningMethodSymbol, TR::SymbolReference* classSymRef);
 
-   // optimizer (EA)
-   TR::SymbolReference * createLocalObject(int32_t objectSize, TR::ResolvedMethodSymbol * owningMethodSymbol, TR::SymbolReference *classSymRef);
-   TR::SymbolReference * createLocalAddrArray(int32_t objectSize, TR::ResolvedMethodSymbol * owningMethodSymbol, TR::SymbolReference *classSymRef);
+    // optimizer
+    TR::SymbolReference* findInstanceShapeSymbolRef();
+    TR::SymbolReference* findInstanceDescriptionSymbolRef();
+    TR::SymbolReference* findDescriptionWordFromPtrSymbolRef();
+    TR::SymbolReference* findClassFlagsSymbolRef();
+    TR::SymbolReference* findClassAndDepthFlagsSymbolRef();
+    TR::SymbolReference* findArrayComponentTypeSymbolRef();
+    TR::SymbolReference* findClassIsArraySymbolRef();
+    TR::SymbolReference* findHeaderFlagsSymbolRef() { return element(headerFlagsSymbol); }
+    TR::SymbolReference* createKnownStaticRefereneceSymbolRef(void* address, TR::KnownObjectTable::Index knownObjectIndex = TR::KnownObjectTable::UNKNOWN);
 
-   // optimizer
-   TR::SymbolReference * findInstanceShapeSymbolRef();
-   TR::SymbolReference * findInstanceDescriptionSymbolRef();
-   TR::SymbolReference * findDescriptionWordFromPtrSymbolRef();
-   TR::SymbolReference * findClassFlagsSymbolRef();
-   TR::SymbolReference * findClassAndDepthFlagsSymbolRef();
-   TR::SymbolReference * findArrayComponentTypeSymbolRef();
-   TR::SymbolReference * findClassIsArraySymbolRef();
-   TR::SymbolReference * findHeaderFlagsSymbolRef() { return element(headerFlagsSymbol); }
-   TR::SymbolReference * createKnownStaticRefereneceSymbolRef(void *address, TR::KnownObjectTable::Index knownObjectIndex=TR::KnownObjectTable::UNKNOWN);
+    TR::SymbolReference* findOrCreateArrayTranslateSymbol();
+    TR::SymbolReference* findOrCreateSinglePrecisionSQRTSymbol();
+    TR::SymbolReference* findOrCreateCurrentTimeMaxPrecisionSymbol();
+    TR::SymbolReference* findOrCreateArrayTranslateAndTestSymbol();
+    TR::SymbolReference* findOrCreatelong2StringSymbol();
+    TR::SymbolReference* findOrCreatebitOpMemSymbol();
 
-   TR::SymbolReference * findOrCreateArrayTranslateSymbol();
-   TR::SymbolReference * findOrCreateSinglePrecisionSQRTSymbol();
-   TR::SymbolReference * findOrCreateCurrentTimeMaxPrecisionSymbol();
-   TR::SymbolReference * findOrCreateArrayTranslateAndTestSymbol();
-   TR::SymbolReference * findOrCreatelong2StringSymbol();
-   TR::SymbolReference * findOrCreatebitOpMemSymbol();
+    // compilation, optimizer
+    TR::SymbolReference* findArrayClassRomPtrSymbolRef();
+    TR::SymbolReference* findClassRomPtrSymbolRef();
+    TR::SymbolReference* findClassFromJavaLangClassSymbolRef();
 
-   // compilation, optimizer
-   TR::SymbolReference * findArrayClassRomPtrSymbolRef();
-   TR::SymbolReference * findClassRomPtrSymbolRef();
-   TR::SymbolReference * findClassFromJavaLangClassSymbolRef();
+    // CG, optimizer
+    TR::SymbolReference* findThisRangeExtensionSymRef(TR::ResolvedMethodSymbol* owningMethodSymbol = 0);
 
-   // CG, optimizer
-   TR::SymbolReference * findThisRangeExtensionSymRef(TR::ResolvedMethodSymbol *owningMethodSymbol = 0);
+    TR::SymbolReference* findOrCreateSymRefWithKnownObject(TR::SymbolReference* original, uintptrj_t* referenceLocation);
+    TR::SymbolReference* findOrCreateSymRefWithKnownObject(TR::SymbolReference* original, uintptrj_t* referenceLocation, bool isArrayWithConstantElements);
+    TR::SymbolReference* findOrCreateSymRefWithKnownObject(TR::SymbolReference* original, TR::KnownObjectTable::Index objectIndex);
+    TR::SymbolReference* findOrCreateThisRangeExtensionSymRef(TR::ResolvedMethodSymbol* owningMethodSymbol = 0);
+    TR::SymbolReference* findOrCreateContiguousArraySizeSymbolRef();
+    TR::SymbolReference* findOrCreateNewArrayNoZeroInitSymbolRef(TR::ResolvedMethodSymbol* owningMethodSymbol);
+    TR::SymbolReference* findOrCreateNewObjectSymbolRef(TR::ResolvedMethodSymbol* owningMethodSymbol);
+    TR::SymbolReference* findOrCreateNewObjectNoZeroInitSymbolRef(TR::ResolvedMethodSymbol* owningMethodSymbol);
+    TR::SymbolReference* findOrCreateArrayStoreExceptionSymbolRef(TR::ResolvedMethodSymbol* owningMethodSymbol);
+    TR::SymbolReference* findOrCreateArrayShadowSymbolRef(TR::DataType, TR::Node* baseAddress = 0);
+    TR::SymbolReference* findOrCreateImmutableArrayShadowSymbolRef(TR::DataType);
+    TR::SymbolReference* createImmutableArrayShadowSymbolRef(TR::DataType, TR::Symbol* sym);
+    TR::SymbolReference* findOrCreateArrayletShadowSymbolRef(TR::DataType type);
+    TR::SymbolReference* findOrCreateAsyncCheckSymbolRef(TR::ResolvedMethodSymbol* owningMethodSymbol = 0);
+    TR::SymbolReference* findOrCreateExcpSymbolRef();
+    TR::SymbolReference* findOrCreateANewArrayNoZeroInitSymbolRef(TR::ResolvedMethodSymbol* owningMethodSymbol);
 
-   TR::SymbolReference * findOrCreateSymRefWithKnownObject(TR::SymbolReference *original, uintptrj_t *referenceLocation);
-   TR::SymbolReference * findOrCreateSymRefWithKnownObject(TR::SymbolReference *original, uintptrj_t *referenceLocation, bool isArrayWithConstantElements);
-   TR::SymbolReference * findOrCreateSymRefWithKnownObject(TR::SymbolReference *original, TR::KnownObjectTable::Index objectIndex);
-   TR::SymbolReference * findOrCreateThisRangeExtensionSymRef(TR::ResolvedMethodSymbol *owningMethodSymbol = 0);
-   TR::SymbolReference * findOrCreateContiguousArraySizeSymbolRef();
-   TR::SymbolReference * findOrCreateNewArrayNoZeroInitSymbolRef(TR::ResolvedMethodSymbol * owningMethodSymbol);
-   TR::SymbolReference * findOrCreateNewObjectSymbolRef(TR::ResolvedMethodSymbol * owningMethodSymbol);
-   TR::SymbolReference * findOrCreateNewObjectNoZeroInitSymbolRef(TR::ResolvedMethodSymbol * owningMethodSymbol);
-   TR::SymbolReference * findOrCreateArrayStoreExceptionSymbolRef(TR::ResolvedMethodSymbol * owningMethodSymbol);
-   TR::SymbolReference * findOrCreateArrayShadowSymbolRef(TR::DataType, TR::Node * baseAddress = 0);
-   TR::SymbolReference * findOrCreateImmutableArrayShadowSymbolRef(TR::DataType);
-   TR::SymbolReference * createImmutableArrayShadowSymbolRef(TR::DataType, TR::Symbol *sym);
-   TR::SymbolReference * findOrCreateArrayletShadowSymbolRef(TR::DataType type);
-   TR::SymbolReference * findOrCreateAsyncCheckSymbolRef(TR::ResolvedMethodSymbol * owningMethodSymbol = 0);
-   TR::SymbolReference * findOrCreateExcpSymbolRef();
-   TR::SymbolReference * findOrCreateANewArrayNoZeroInitSymbolRef(TR::ResolvedMethodSymbol * owningMethodSymbol);
+    // cg linkage, optimizer, base chtable
+    TR::SymbolReference* findObjectNewInstanceImplSymbol() { return _ObjectNewInstanceImplSymRef; }
 
-   // cg linkage, optimizer, base chtable
-   TR::SymbolReference * findObjectNewInstanceImplSymbol() { return _ObjectNewInstanceImplSymRef; }
+    // fe, cg
+    TR::SymbolReference* findOrCreateNewArraySymbolRef(TR::ResolvedMethodSymbol* owningMethodSymbol);
+    TR::SymbolReference* findOrCreateReportMethodEnterSymbolRef(TR::ResolvedMethodSymbol* owningMethodSymbol);
 
-   // fe, cg
-   TR::SymbolReference * findOrCreateNewArraySymbolRef(TR::ResolvedMethodSymbol * owningMethodSymbol);
-   TR::SymbolReference * findOrCreateReportMethodEnterSymbolRef(TR::ResolvedMethodSymbol * owningMethodSymbol);
+    TR::SymbolReference* findOrCreateIndexableSizeSymbolRef();
+    TR::SymbolReference* findOrCreateGCRPatchPointSymbolRef();
 
-   TR::SymbolReference * findOrCreateIndexableSizeSymbolRef();
-   TR::SymbolReference * findOrCreateGCRPatchPointSymbolRef();
+    // compilation
+    TR::SymbolReference* findAddressOfClassOfMethodSymbolRef();
+    TR::SymbolReference* findOrCreateVtableEntrySymbolRef(TR::ResolvedMethodSymbol* calleeSymbol, int32_t vtableSlot);
+    TR::SymbolReference* createIsOverriddenSymbolRef(TR::ResolvedMethodSymbol* calleeSymbol); /* never reuse is overridden symrefs */
 
-   // compilation
-   TR::SymbolReference * findAddressOfClassOfMethodSymbolRef();
-   TR::SymbolReference * findOrCreateVtableEntrySymbolRef(TR::ResolvedMethodSymbol * calleeSymbol, int32_t vtableSlot);
-   TR::SymbolReference * createIsOverriddenSymbolRef(TR::ResolvedMethodSymbol * calleeSymbol); /* never reuse is overridden symrefs */
+    // fe, base node
+    TR::SymbolReference* findOrCreateResolveCheckSymbolRef(TR::ResolvedMethodSymbol* owningMethodSymbol);
 
-   // fe, base node
-   TR::SymbolReference * findOrCreateResolveCheckSymbolRef(TR::ResolvedMethodSymbol * owningMethodSymbol);
+    TR::SymbolReference* findOrCreateVolatileReadLongSymbolRef(TR::ResolvedMethodSymbol* owningMethodSymbol);
+    TR::SymbolReference* findOrCreateVolatileWriteLongSymbolRef(TR::ResolvedMethodSymbol* owningMethodSymbol);
+    TR::SymbolReference* findOrCreateVolatileReadDoubleSymbolRef(TR::ResolvedMethodSymbol* owningMethodSymbol);
+    TR::SymbolReference* findOrCreateVolatileWriteDoubleSymbolRef(TR::ResolvedMethodSymbol* owningMethodSymbol);
+    TR::SymbolReference* findOrCreateMonitorEntrySymbolRef(TR::ResolvedMethodSymbol* owningMethodSymbol);
+    TR::SymbolReference* findOrCreateMonitorExitSymbolRef(TR::ResolvedMethodSymbol* owningMethodSymbol);
 
-   TR::SymbolReference * findOrCreateVolatileReadLongSymbolRef(TR::ResolvedMethodSymbol * owningMethodSymbol);
-   TR::SymbolReference * findOrCreateVolatileWriteLongSymbolRef(TR::ResolvedMethodSymbol * owningMethodSymbol);
-   TR::SymbolReference * findOrCreateVolatileReadDoubleSymbolRef(TR::ResolvedMethodSymbol * owningMethodSymbol);
-   TR::SymbolReference * findOrCreateVolatileWriteDoubleSymbolRef(TR::ResolvedMethodSymbol * owningMethodSymbol);
-   TR::SymbolReference * findOrCreateMonitorEntrySymbolRef(TR::ResolvedMethodSymbol * owningMethodSymbol);
-   TR::SymbolReference * findOrCreateMonitorExitSymbolRef(TR::ResolvedMethodSymbol * owningMethodSymbol);
+    // Z
+    TR::SymbolReference* findDLPStaticSymbolReference(TR::SymbolReference* staticSymbolReference);
+    TR::SymbolReference* findOrCreateDLPStaticSymbolReference(TR::SymbolReference* staticSymbolReference);
 
-   // Z
-   TR::SymbolReference * findDLPStaticSymbolReference(TR::SymbolReference * staticSymbolReference);
-   TR::SymbolReference * findOrCreateDLPStaticSymbolReference(TR::SymbolReference * staticSymbolReference);
+    TR::SymbolReference* findOrCreateGenericIntShadowSymbolReference(intptrj_t offset, bool allocateUseDefBitVector = false);
+    TR::SymbolReference* createGenericIntShadowSymbolReference(intptrj_t offset, bool allocateUseDefBitVector = false);
+    TR::SymbolReference* findOrCreateGenericIntArrayShadowSymbolReference(intptrj_t offset);
+    TR::SymbolReference* findOrCreateGenericIntNonArrayShadowSymbolReference(intptrj_t offset);
 
-   TR::SymbolReference * findOrCreateGenericIntShadowSymbolReference(intptrj_t offset, bool allocateUseDefBitVector = false);
-   TR::SymbolReference * createGenericIntShadowSymbolReference(intptrj_t offset, bool allocateUseDefBitVector = false);
-   TR::SymbolReference * findOrCreateGenericIntArrayShadowSymbolReference(intptrj_t offset);
-   TR::SymbolReference * findOrCreateGenericIntNonArrayShadowSymbolReference(intptrj_t offset);
+    TR::SymbolReference* findOrCreateArrayCopySymbol();
+    TR::SymbolReference* findOrCreateArraySetSymbol();
+    TR::SymbolReference* findOrCreateArrayCmpSymbol();
 
-   TR::SymbolReference * findOrCreateArrayCopySymbol();
-   TR::SymbolReference * findOrCreateArraySetSymbol();
-   TR::SymbolReference * findOrCreateArrayCmpSymbol();
+    TR::SymbolReference* findOrCreateClassSymbol(TR::ResolvedMethodSymbol* owningMethodSymbol, int32_t cpIndex, void* classObject, bool cpIndexOfStatic = false);
+    TR::SymbolReference* findOrCreateArrayShadowSymbolRef(TR::DataType type, TR::Node* baseArrayAddress, int32_t size, TR_FrontEnd* fe);
 
-   TR::SymbolReference * findOrCreateClassSymbol(TR::ResolvedMethodSymbol * owningMethodSymbol, int32_t cpIndex, void * classObject, bool cpIndexOfStatic = false);
-   TR::SymbolReference * findOrCreateArrayShadowSymbolRef(TR::DataType type, TR::Node * baseArrayAddress, int32_t size, TR_FrontEnd * fe);
+    TR::SymbolReference* findOrCreateCounterAddressSymbolRef();
+    TR::SymbolReference* findOrCreateCounterSymRef(char* name, TR::DataType d, void* address);
+    TR::SymbolReference* createRefinedArrayShadowSymbolRef(TR::DataType);
+    TR::SymbolReference* createRefinedArrayShadowSymbolRef(TR::DataType, TR::Symbol*); // TODO: to be changed to a special sym ref
+    bool isRefinedArrayShadow(TR::SymbolReference* symRef);
+    bool isImmutableArrayShadow(TR::SymbolReference* symRef);
 
-   TR::SymbolReference * findOrCreateCounterAddressSymbolRef();
-   TR::SymbolReference * findOrCreateCounterSymRef(char *name, TR::DataType d, void *address);
-   TR::SymbolReference * createRefinedArrayShadowSymbolRef(TR::DataType);
-   TR::SymbolReference * createRefinedArrayShadowSymbolRef(TR::DataType, TR::Symbol *); // TODO: to be changed to a special sym ref
-   bool                 isRefinedArrayShadow(TR::SymbolReference *symRef);
-   bool                 isImmutableArrayShadow(TR::SymbolReference *symRef);
-
-   /*
+    /*
     * --------------------------------------------------------------------------
     */
 
-   void makeAutoAvailableForIlGen(TR::SymbolReference * a);
-   TR::SymbolReference * findAvailableAuto(TR::DataType dataType, bool behavesLikeTemp, bool isAdjunct = false);
-   TR::SymbolReference * findAvailableAuto(List<TR::SymbolReference> &, TR::DataType dataType, bool behavesLikeTemp, bool isAdjunct = false);
-   void clearAvailableAutos() { _availableAutos.init(); }
+    void makeAutoAvailableForIlGen(TR::SymbolReference* a);
+    TR::SymbolReference* findAvailableAuto(TR::DataType dataType, bool behavesLikeTemp, bool isAdjunct = false);
+    TR::SymbolReference* findAvailableAuto(List<TR::SymbolReference>&, TR::DataType dataType, bool behavesLikeTemp, bool isAdjunct = false);
+    void clearAvailableAutos() { _availableAutos.init(); }
 
-   /*
+    /*
     * For union type support
     */
 
-   // Mark two symbol references as shared aliases of each other
-   void makeSharedAliases(TR::SymbolReference *sr1, TR::SymbolReference *sr2);
-   // Retrieve shared aliases bitvector for a given symbol reference
-   TR_BitVector *getSharedAliases(TR::SymbolReference *sr);
+    // Mark two symbol references as shared aliases of each other
+    void makeSharedAliases(TR::SymbolReference* sr1, TR::SymbolReference* sr2);
+    // Retrieve shared aliases bitvector for a given symbol reference
+    TR_BitVector* getSharedAliases(TR::SymbolReference* sr);
 
-   protected:
+protected:
+    TR::SymbolReference* findOrCreateCPSymbol(TR::ResolvedMethodSymbol*, int32_t, TR::DataType, bool, void*, TR::KnownObjectTable::Index knownObjectIndex = TR::KnownObjectTable::UNKNOWN);
 
-   TR::SymbolReference * findOrCreateCPSymbol(TR::ResolvedMethodSymbol *, int32_t, TR::DataType, bool, void *, TR::KnownObjectTable::Index knownObjectIndex = TR::KnownObjectTable::UNKNOWN);
+    bool shouldMarkBlockAsCold(TR_ResolvedMethod* owningMethod, bool isUnresolvedInCP);
+    void markBlockAsCold();
 
-   bool shouldMarkBlockAsCold(TR_ResolvedMethod * owningMethod, bool isUnresolvedInCP);
-   void markBlockAsCold();
+    char* strdup(const char* arg);
 
-   char *strdup(const char *arg);
+    TR::Symbol* _genericIntShadowSymbol;
 
-   TR::Symbol *                       _genericIntShadowSymbol;
+    TR::Symbol* _constantAreaSymbol;
+    TR::SymbolReference* _constantAreaSymbolReference;
 
-   TR::Symbol *                         _constantAreaSymbol;
-   TR::SymbolReference *                _constantAreaSymbolReference;
+    TR::SymbolReference* _ObjectNewInstanceImplSymRef;
 
-   TR::SymbolReference *                _ObjectNewInstanceImplSymRef;
+    TR_Array<TR_BitVector*> _knownObjectSymrefsByObjectIndex;
 
-   TR_Array<TR_BitVector *>            _knownObjectSymrefsByObjectIndex;
+    TR_Array<TR::SymbolReference*>* _unsafeSymRefs;
+    TR_Array<TR::SymbolReference*>* _unsafeVolatileSymRefs;
 
-   TR_Array<TR::SymbolReference *> *    _unsafeSymRefs;
-   TR_Array<TR::SymbolReference *> *    _unsafeVolatileSymRefs;
+    List<TR::SymbolReference> _availableAutos;
+    List<TR::SymbolReference> _vtableEntrySymbolRefs;
+    List<TR::SymbolReference> _classLoaderSymbolRefs;
+    List<TR::SymbolReference> _classStaticsSymbolRefs;
+    List<TR::SymbolReference> _classDLPStaticsSymbolRefs;
+    List<TR::SymbolReference> _debugCounterSymbolRefs;
 
-   List<TR::SymbolReference>            _availableAutos;
-   List<TR::SymbolReference>            _vtableEntrySymbolRefs;
-   List<TR::SymbolReference>            _classLoaderSymbolRefs;
-   List<TR::SymbolReference>            _classStaticsSymbolRefs;
-   List<TR::SymbolReference>            _classDLPStaticsSymbolRefs;
-   List<TR::SymbolReference>            _debugCounterSymbolRefs;
+    uint32_t _nextRegShadowIndex;
+    int32_t _numUnresolvedSymbols;
+    uint32_t _numHelperSymbols;
+    uint32_t _numPredefinedSymbols;
+    int32_t _numInternalPointers;
+    bool _hasImmutable;
+    bool _hasUserField;
 
-   uint32_t                            _nextRegShadowIndex;
-   int32_t                             _numUnresolvedSymbols;
-   uint32_t                            _numHelperSymbols;
-   uint32_t                            _numPredefinedSymbols;
-   int32_t                             _numInternalPointers;
-   bool                                _hasImmutable;
-   bool                                _hasUserField;
+    size_t _size_hint;
 
-   size_t                              _size_hint;
+    typedef CS2::CompoundHashKey<mcount_t, const char*> OwningMethodAndString;
+    typedef CS2::HashTable<OwningMethodAndString, TR::SymbolReference*, TR::Allocator> SymrefsByOwningMethodAndString;
 
-   typedef CS2::CompoundHashKey<mcount_t, const char *> OwningMethodAndString;
-   typedef CS2::HashTable<OwningMethodAndString, TR::SymbolReference *, TR::Allocator> SymrefsByOwningMethodAndString;
+    SymrefsByOwningMethodAndString _methodsBySignature;
 
-   SymrefsByOwningMethodAndString      _methodsBySignature;
+    // Aliasmap is keyed by a symbol reference's reference number
+    typedef TR::typed_allocator<std::pair<int32_t const, TR_BitVector*>, TR::Allocator> AliasMapAllocator;
+    typedef std::map<int32_t, TR_BitVector*, std::less<int32_t>, AliasMapAllocator> AliasMap;
+    AliasMap* _sharedAliasMap;
 
-   // Aliasmap is keyed by a symbol reference's reference number
-   typedef TR::typed_allocator<std::pair<int32_t const, TR_BitVector * >, TR::Allocator> AliasMapAllocator;
-   typedef std::map<int32_t, TR_BitVector *, std::less<int32_t>, AliasMapAllocator> AliasMap;
-   AliasMap                            *_sharedAliasMap;
+    TR_FrontEnd* _fe;
+    TR::Compilation* _compilation;
+    TR_Memory* _trMemory;
 
-   TR_FrontEnd *_fe;
-   TR::Compilation *_compilation;
-   TR_Memory *_trMemory;
-
-   // J9
+    // J9
 #define _numNonUserFieldClasses 4
+};
 
-   };
-
-}
+} // namespace OMR
 
 #endif

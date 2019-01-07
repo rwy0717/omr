@@ -26,19 +26,19 @@
  * Allocate and initialize a new instance of the receiver.
  * @return a new instance of the receiver, or NULL on failure.
  */
-MM_SweepPoolManagerAddressOrderedList *
-MM_SweepPoolManagerAddressOrderedList::newInstance(MM_EnvironmentBase *env)
+MM_SweepPoolManagerAddressOrderedList*
+MM_SweepPoolManagerAddressOrderedList::newInstance(MM_EnvironmentBase* env)
 {
-	MM_SweepPoolManagerAddressOrderedList *sweepPoolManager;
+    MM_SweepPoolManagerAddressOrderedList* sweepPoolManager;
 
-	sweepPoolManager = (MM_SweepPoolManagerAddressOrderedList *)env->getForge()->allocate(sizeof(MM_SweepPoolManagerAddressOrderedList), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
-	if (sweepPoolManager) {
-		new(sweepPoolManager) MM_SweepPoolManagerAddressOrderedList(env);
-		if (!sweepPoolManager->initialize(env)) {
-			sweepPoolManager->kill(env);
-			sweepPoolManager = NULL;
-		}
-	}
+    sweepPoolManager = (MM_SweepPoolManagerAddressOrderedList*)env->getForge()->allocate(sizeof(MM_SweepPoolManagerAddressOrderedList), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+    if (sweepPoolManager) {
+        new (sweepPoolManager) MM_SweepPoolManagerAddressOrderedList(env);
+        if (!sweepPoolManager->initialize(env)) {
+            sweepPoolManager->kill(env);
+            sweepPoolManager = NULL;
+        }
+    }
 
-	return sweepPoolManager;
+    return sweepPoolManager;
 }

@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #include "omrcfg.h"
 
 #if defined(OMR_GC_OBJECT_MAP)
@@ -34,158 +33,148 @@
 
 #include "MarkMap.hpp"
 
-MM_ObjectMap *
-MM_ObjectMap::newInstance(MM_EnvironmentBase *env)
+MM_ObjectMap*
+MM_ObjectMap::newInstance(MM_EnvironmentBase* env)
 {
-	MM_ObjectMap *objectMap;
+    MM_ObjectMap* objectMap;
 
-	objectMap = (MM_ObjectMap *)env->getForge()->allocate(sizeof(MM_ObjectMap), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
-	if (objectMap) {
-		new(objectMap) MM_ObjectMap(env);
-		if (!objectMap->initialize(env)) {
-			objectMap->kill(env);
-			objectMap= NULL;
-		}
-	}
+    objectMap = (MM_ObjectMap*)env->getForge()->allocate(sizeof(MM_ObjectMap), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+    if (objectMap) {
+        new (objectMap) MM_ObjectMap(env);
+        if (!objectMap->initialize(env)) {
+            objectMap->kill(env);
+            objectMap = NULL;
+        }
+    }
 
-	return objectMap;
+    return objectMap;
 }
 
-void
-MM_ObjectMap::kill(MM_EnvironmentBase *env)
+void MM_ObjectMap::kill(MM_EnvironmentBase* env)
 {
-	tearDown(env);
-	env->getForge()->free(this);
+    tearDown(env);
+    env->getForge()->free(this);
 }
 
-bool
-MM_ObjectMap::initialize(MM_EnvironmentBase *env)
+bool MM_ObjectMap::initialize(MM_EnvironmentBase* env)
 {
-	_objectMap = MM_MarkMap::newInstance(env, _extensions->heap->getMaximumPhysicalRange());
+    _objectMap = MM_MarkMap::newInstance(env, _extensions->heap->getMaximumPhysicalRange());
 
-	if (NULL == _objectMap) {
-		goto error_no_memory;
-	}
+    if (NULL == _objectMap) {
+        goto error_no_memory;
+    }
 
-	return true;
+    return true;
 
 error_no_memory:
-	return false;
+    return false;
 }
 
-void
-MM_ObjectMap::tearDown(MM_EnvironmentBase *env)
+void MM_ObjectMap::tearDown(MM_EnvironmentBase* env)
 {
-	if (_objectMap) {
-		_objectMap->kill(env);
-		_objectMap = NULL;
-	}
+    if (_objectMap) {
+        _objectMap->kill(env);
+        _objectMap = NULL;
+    }
 }
 
-bool
-MM_ObjectMap::heapAddRange(MM_EnvironmentBase *env, MM_MemorySubSpace *subspace, uintptr_t size, void *lowAddress, void *highAddress)
+bool MM_ObjectMap::heapAddRange(MM_EnvironmentBase* env, MM_MemorySubSpace* subspace, uintptr_t size, void* lowAddress, void* highAddress)
 {
-	bool result = true;
-	/* Record the range in which valid objects appear */
-	_heapBase = _extensions->heap->getHeapBase();
-	_heapTop = _extensions->heap->getHeapTop();
+    bool result = true;
+    /* Record the range in which valid objects appear */
+    _heapBase = _extensions->heap->getHeapBase();
+    _heapTop = _extensions->heap->getHeapTop();
 
-	_committedHeapBase = _heapBase;
-	_committedHeapTop = highAddress;
-	result = _objectMap->heapAddRange(env, size, lowAddress, highAddress);
+    _committedHeapBase = _heapBase;
+    _committedHeapTop = highAddress;
+    result = _objectMap->heapAddRange(env, size, lowAddress, highAddress);
 
-	return result;
+    return result;
 }
 
-bool
-MM_ObjectMap::heapRemoveRange(MM_EnvironmentBase *env, MM_MemorySubSpace *subspace, uintptr_t size, void *lowAddress, void *highAddress, void *lowValidAddress, void *highValidAddress)
+bool MM_ObjectMap::heapRemoveRange(MM_EnvironmentBase* env, MM_MemorySubSpace* subspace, uintptr_t size, void* lowAddress, void* highAddress, void* lowValidAddress, void* highValidAddress)
 {
-	bool result = true;
-	/* Record the range in which valid objects appear */
-	_heapBase = _extensions->heap->getHeapBase();
-	_heapTop = _extensions->heap->getHeapTop();
+    bool result = true;
+    /* Record the range in which valid objects appear */
+    _heapBase = _extensions->heap->getHeapBase();
+    _heapTop = _extensions->heap->getHeapTop();
 
-	_committedHeapBase = _heapBase;
-	_committedHeapTop = lowAddress;
-	result = _objectMap->heapAddRange(env, size, lowAddress, highAddress);
+    _committedHeapBase = _heapBase;
+    _committedHeapTop = lowAddress;
+    result = _objectMap->heapAddRange(env, size, lowAddress, highAddress);
 
-	return result;
+    return result;
 }
 
-
-bool
-MM_ObjectMap::markValidObjectNoAtomic(MM_EnvironmentBase *env, omrobjectptr_t objectPtr)
+bool MM_ObjectMap::markValidObjectNoAtomic(MM_EnvironmentBase* env, omrobjectptr_t objectPtr)
 {
-	return inlineMarkValidObjectNoAtomic(env, objectPtr);
+    return inlineMarkValidObjectNoAtomic(env, objectPtr);
 }
 
-bool
-MM_ObjectMap::markValidObject(MM_EnvironmentBase * env, omrobjectptr_t objectPtr)
+bool MM_ObjectMap::markValidObject(MM_EnvironmentBase* env, omrobjectptr_t objectPtr)
 {
-	return inlineMarkValidObject(env, objectPtr);
+    return inlineMarkValidObject(env, objectPtr);
 }
 
 uintptr_t
-MM_ObjectMap::setMarkBitsInRange(MM_EnvironmentBase *env, void *heapBase, void *heapTop, bool clear)
+MM_ObjectMap::setMarkBitsInRange(MM_EnvironmentBase* env, void* heapBase, void* heapTop, bool clear)
 {
-	return _objectMap->setBitsInRange(env, heapBase, heapTop, clear);
+    return _objectMap->setBitsInRange(env, heapBase, heapTop, clear);
 }
 
-void
-MM_ObjectMap::markValidObjectForRange(MM_EnvironmentBase *env, void *heapBase, void *heapTop)
+void MM_ObjectMap::markValidObjectForRange(MM_EnvironmentBase* env, void* heapBase, void* heapTop)
 {
 
-	if (heapBase == NULL || heapTop == NULL || (heapBase == heapTop))
-	{
-		return;
-	}
+    if (heapBase == NULL || heapTop == NULL || (heapBase == heapTop)) {
+        return;
+    }
 
-	/* We must atomically mark bits in the first and last bytes of the MarkMap belonging to this range.
-	 * TLH.  This is because other threads may be marking the same byte.
-	 * Internal MarkMap slots to this range cannot be written to by other threads. */
+    /* We must atomically mark bits in the first and last bytes of the MarkMap belonging to this range.
+     * TLH.  This is because other threads may be marking the same byte.
+     * Internal MarkMap slots to this range cannot be written to by other threads. */
 
-	GC_ObjectHeapIteratorAddressOrderedList objectHeapIterator(env->getExtensions(), (omrobjectptr_t)heapBase, heapTop, false, false);
-	uintptr_t slotIndexLow = 0;
-	uintptr_t slotIndexHigh = 0;
-	omrobjectptr_t object = NULL;
-	uintptr_t slotIndex = 0;
-	uintptr_t bitMask = 0;
-	uintptr_t markBlock = 0;
+    GC_ObjectHeapIteratorAddressOrderedList objectHeapIterator(env->getExtensions(), (omrobjectptr_t)heapBase, heapTop, false, false);
+    uintptr_t slotIndexLow = 0;
+    uintptr_t slotIndexHigh = 0;
+    omrobjectptr_t object = NULL;
+    uintptr_t slotIndex = 0;
+    uintptr_t bitMask = 0;
+    uintptr_t markBlock = 0;
 
-	/* Find the first and last slot we are marking in the mark map */
-	_objectMap->getSlotIndexAndMask(heapBase, &slotIndexLow, &bitMask);
-	/* Remove one off of the range of heapTop, since heapTop is a non-inclusive bound */
-	_objectMap->getSlotIndexAndMask((omrobjectptr_t) ((uintptr_t) heapTop - 1), &slotIndexHigh, &bitMask);
+    /* Find the first and last slot we are marking in the mark map */
+    _objectMap->getSlotIndexAndMask(heapBase, &slotIndexLow, &bitMask);
+    /* Remove one off of the range of heapTop, since heapTop is a non-inclusive bound */
+    _objectMap->getSlotIndexAndMask((omrobjectptr_t)((uintptr_t)heapTop - 1), &slotIndexHigh, &bitMask);
 
-	object = objectHeapIterator.nextObject();
-	_objectMap->getSlotIndexAndMask(object, &slotIndex , &bitMask);
+    object = objectHeapIterator.nextObject();
+    _objectMap->getSlotIndexAndMask(object, &slotIndex, &bitMask);
 
-	/* Atomically set the first slot */
-	while (object != NULL && slotIndex == slotIndexLow) {
-		markBlock |= bitMask;
-		object = objectHeapIterator.nextObject();
-		_objectMap->getSlotIndexAndMask(object, &slotIndex, &bitMask);
-	}
-	_objectMap->markBlockAtomic(slotIndexLow, markBlock);
+    /* Atomically set the first slot */
+    while (object != NULL && slotIndex == slotIndexLow) {
+        markBlock |= bitMask;
+        object = objectHeapIterator.nextObject();
+        _objectMap->getSlotIndexAndMask(object, &slotIndex, &bitMask);
+    }
+    _objectMap->markBlockAtomic(slotIndexLow, markBlock);
 
-	if (slotIndexLow != slotIndexHigh) {
+    if (slotIndexLow != slotIndexHigh) {
 
-		/* Mark the middle slots */
-		while (object != NULL && slotIndex != slotIndexHigh) {
-			this->inlineMarkValidObjectNoCheckNoAtomic(env, object);
-			object = objectHeapIterator.nextObject();
-			_objectMap->getSlotIndexAndMask(object, &slotIndex, &bitMask);
-		}
+        /* Mark the middle slots */
+        while (object != NULL && slotIndex != slotIndexHigh) {
+            this->inlineMarkValidObjectNoCheckNoAtomic(env, object);
+            object = objectHeapIterator.nextObject();
+            _objectMap->getSlotIndexAndMask(object, &slotIndex, &bitMask);
+        }
 
-		/* Atomically set the last slot */
-		markBlock = 0;
-		while (object != NULL && slotIndex == slotIndexHigh) {
-			markBlock |= bitMask;
-			object = objectHeapIterator.nextObject();
-			_objectMap->getSlotIndexAndMask(object, &slotIndex, &bitMask);
-		}
-		_objectMap->markBlockAtomic(slotIndexHigh, markBlock);
-	}
+        /* Atomically set the last slot */
+        markBlock = 0;
+        while (object != NULL && slotIndex == slotIndexHigh) {
+            markBlock |= bitMask;
+            object = objectHeapIterator.nextObject();
+            _objectMap->getSlotIndexAndMask(object, &slotIndex, &bitMask);
+        }
+        _objectMap->markBlockAtomic(slotIndexHigh, markBlock);
+    }
 }
 
 #endif /* defined(OMR_GC_OBJECT_MAP) */

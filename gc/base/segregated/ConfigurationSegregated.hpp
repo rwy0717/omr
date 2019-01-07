@@ -40,43 +40,42 @@ class MM_GlobalCollector;
 class MM_Heap;
 class MM_SegregatedAllocationTracker;
 
-class MM_ConfigurationSegregated : public MM_Configuration
-{
-	/*
-	 * Data members
-	 */
+class MM_ConfigurationSegregated : public MM_Configuration {
+    /*
+     * Data members
+     */
 public:
 protected:
 private:
-	static const uintptr_t SEGREGATED_REGION_SIZE_BYTES = (64 * 1024);
-	static const uintptr_t SEGREGATED_ARRAYLET_LEAF_SIZE_BYTES = OMR_SIZECLASSES_MAX_SMALL_SIZE_BYTES;
+    static const uintptr_t SEGREGATED_REGION_SIZE_BYTES = (64 * 1024);
+    static const uintptr_t SEGREGATED_ARRAYLET_LEAF_SIZE_BYTES = OMR_SIZECLASSES_MAX_SMALL_SIZE_BYTES;
 
-	/*
-	 * Function members
-	 */
+    /*
+     * Function members
+     */
 public:
-	static MM_Configuration *newInstance(MM_EnvironmentBase *env);
+    static MM_Configuration* newInstance(MM_EnvironmentBase* env);
 
-	virtual MM_GlobalCollector *createGlobalCollector(MM_EnvironmentBase *env);
-	virtual MM_Heap *createHeapWithManager(MM_EnvironmentBase *env, uintptr_t heapBytesRequested, MM_HeapRegionManager *regionManager);
-	virtual MM_HeapRegionManager *createHeapRegionManager(MM_EnvironmentBase *env);
-	virtual MM_MemorySpace *createDefaultMemorySpace(MM_EnvironmentBase *env, MM_Heap *heap, MM_InitializationParameters *parameters);
-	virtual J9Pool *createEnvironmentPool(MM_EnvironmentBase *env);
-	virtual MM_Dispatcher *createDispatcher(MM_EnvironmentBase *env, omrsig_handler_fn handler, void* handler_arg, uintptr_t defaultOSStackSize);
-	
-	virtual void defaultMemorySpaceAllocated(MM_GCExtensionsBase *extensions, void* defaultMemorySpace);
-	
-	MM_ConfigurationSegregated(MM_EnvironmentBase *env)
-		: MM_Configuration(env, gc_policy_metronome, mm_regionAlignment, SEGREGATED_REGION_SIZE_BYTES, SEGREGATED_ARRAYLET_LEAF_SIZE_BYTES, gc_modron_wrtbar_none, gc_modron_allocation_type_segregated)
-	{
-		_typeId = __FUNCTION__;
-	};
+    virtual MM_GlobalCollector* createGlobalCollector(MM_EnvironmentBase* env);
+    virtual MM_Heap* createHeapWithManager(MM_EnvironmentBase* env, uintptr_t heapBytesRequested, MM_HeapRegionManager* regionManager);
+    virtual MM_HeapRegionManager* createHeapRegionManager(MM_EnvironmentBase* env);
+    virtual MM_MemorySpace* createDefaultMemorySpace(MM_EnvironmentBase* env, MM_Heap* heap, MM_InitializationParameters* parameters);
+    virtual J9Pool* createEnvironmentPool(MM_EnvironmentBase* env);
+    virtual MM_Dispatcher* createDispatcher(MM_EnvironmentBase* env, omrsig_handler_fn handler, void* handler_arg, uintptr_t defaultOSStackSize);
+
+    virtual void defaultMemorySpaceAllocated(MM_GCExtensionsBase* extensions, void* defaultMemorySpace);
+
+    MM_ConfigurationSegregated(MM_EnvironmentBase* env)
+        : MM_Configuration(env, gc_policy_metronome, mm_regionAlignment, SEGREGATED_REGION_SIZE_BYTES, SEGREGATED_ARRAYLET_LEAF_SIZE_BYTES, gc_modron_wrtbar_none, gc_modron_allocation_type_segregated)
+    {
+        _typeId = __FUNCTION__;
+    };
 
 protected:
-	virtual bool initialize(MM_EnvironmentBase *env);
-	virtual void tearDown(MM_EnvironmentBase *env);
-	virtual MM_EnvironmentBase *allocateNewEnvironment(MM_GCExtensionsBase *extensions, OMR_VMThread *omrVMThread);
-	virtual bool initializeEnvironment(MM_EnvironmentBase *env);
+    virtual bool initialize(MM_EnvironmentBase* env);
+    virtual void tearDown(MM_EnvironmentBase* env);
+    virtual MM_EnvironmentBase* allocateNewEnvironment(MM_GCExtensionsBase* extensions, OMR_VMThread* omrVMThread);
+    virtual bool initializeEnvironment(MM_EnvironmentBase* env);
 
 private:
 };

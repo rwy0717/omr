@@ -25,9 +25,9 @@
 #include "ddr/ir/Symbol_IR.hpp"
 
 UDT::UDT(size_t size, unsigned int lineNumber)
-	: Type(size)
-	, _outerNamespace(NULL)
-	, _lineNumber(lineNumber)
+    : Type(size)
+    , _outerNamespace(NULL)
+    , _lineNumber(lineNumber)
 {
 }
 
@@ -38,49 +38,46 @@ UDT::~UDT()
 string
 UDT::getFullName() const
 {
-	return (NULL == _outerNamespace)
-			? _name
-			: (_outerNamespace->getFullName() + "::" + _name);
+    return (NULL == _outerNamespace)
+        ? _name
+        : (_outerNamespace->getFullName() + "::" + _name);
 }
 
-bool
-UDT::insertUnique(Symbol_IR *ir)
+bool UDT::insertUnique(Symbol_IR* ir)
 {
-	bool inserted = false;
-	if (!isAnonymousType()) {
-		string fullName = getFullName();
-		if (ir->_fullTypeNames.end() == ir->_fullTypeNames.find(fullName)) {
-			ir->_fullTypeNames.insert(fullName);
-			inserted = true;
-		}
-	}
-	return inserted;
+    bool inserted = false;
+    if (!isAnonymousType()) {
+        string fullName = getFullName();
+        if (ir->_fullTypeNames.end() == ir->_fullTypeNames.find(fullName)) {
+            ir->_fullTypeNames.insert(fullName);
+            inserted = true;
+        }
+    }
+    return inserted;
 }
 
-NamespaceUDT *
+NamespaceUDT*
 UDT::getNamespace()
 {
-	return _outerNamespace;
+    return _outerNamespace;
 }
 
-bool
-UDT::operator==(const Type & rhs) const
+bool UDT::operator==(const Type& rhs) const
 {
-	return rhs.compareToUDT(*this);
+    return rhs.compareToUDT(*this);
 }
 
-bool
-UDT::compareToUDT(const UDT &other) const
+bool UDT::compareToUDT(const UDT& other) const
 {
-	if (compareToType(other)) {
-		if (NULL != _outerNamespace) {
-			if (NULL != other._outerNamespace) {
-				return *_outerNamespace == *other._outerNamespace;
-			}
-		} else if (NULL == other._outerNamespace) {
-			return true;
-		}
-	}
+    if (compareToType(other)) {
+        if (NULL != _outerNamespace) {
+            if (NULL != other._outerNamespace) {
+                return *_outerNamespace == *other._outerNamespace;
+            }
+        } else if (NULL == other._outerNamespace) {
+            return true;
+        }
+    }
 
-	return false;
+    return false;
 }

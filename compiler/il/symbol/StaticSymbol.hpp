@@ -24,36 +24,34 @@
 
 #include "il/symbol/OMRStaticSymbol.hpp"
 
-#include <stdint.h>          // for uint32_t
-#include "il/DataTypes.hpp"  // for DataTypes
+#include <stdint.h> // for uint32_t
+#include "il/DataTypes.hpp" // for DataTypes
 
 /**
  * A symbol with an address
  */
-namespace TR
-{
+namespace TR {
 
-class OMR_EXTENSIBLE StaticSymbol : public OMR::StaticSymbolConnector
-   {
+class OMR_EXTENSIBLE StaticSymbol : public OMR::StaticSymbolConnector {
 
 protected:
+    StaticSymbol(TR::DataType d)
+        : OMR::StaticSymbolConnector(d)
+    {}
 
-   StaticSymbol(TR::DataType d) :
-      OMR::StaticSymbolConnector(d) { }
+    StaticSymbol(TR::DataType d, void* address)
+        : OMR::StaticSymbolConnector(d, address)
+    {}
 
-   StaticSymbol(TR::DataType d, void * address) :
-      OMR::StaticSymbolConnector(d,address) { }
-
-   StaticSymbol(TR::DataType d, uint32_t s) :
-      OMR::StaticSymbolConnector(d, s) { }
+    StaticSymbol(TR::DataType d, uint32_t s)
+        : OMR::StaticSymbolConnector(d, s)
+    {}
 
 private:
+    // When adding another class to the heirarchy, add it as a friend here
+    friend class OMR::StaticSymbol;
+};
 
-   // When adding another class to the heirarchy, add it as a friend here
-   friend class OMR::StaticSymbol;
-
-   };
-
-}
+} // namespace TR
 
 #endif

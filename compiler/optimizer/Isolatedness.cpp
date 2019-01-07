@@ -19,20 +19,24 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-#include <stddef.h>                                 // for NULL
-#include <stdint.h>                                 // for int32_t, etc
-#include "compile/Compilation.hpp"                  // for Compilation
-#include "il/Block.hpp"                             // for Block
-#include "il/TreeTop.hpp"                           // for TreeTop
-#include "il/TreeTop_inlines.hpp"                   // for TreeTop::getNode, etc
-#include "infra/BitVector.hpp"                      // for TR_BitVector
-#include "infra/Cfg.hpp"                            // for CFG
+#include <stddef.h> // for NULL
+#include <stdint.h> // for int32_t, etc
+#include "compile/Compilation.hpp" // for Compilation
+#include "il/Block.hpp" // for Block
+#include "il/TreeTop.hpp" // for TreeTop
+#include "il/TreeTop_inlines.hpp" // for TreeTop::getNode, etc
+#include "infra/BitVector.hpp" // for TR_BitVector
+#include "infra/Cfg.hpp" // for CFG
 #include "optimizer/Structure.hpp"
-#include "optimizer/DataFlowAnalysis.hpp"  // for TR_Isolatedness, etc
+#include "optimizer/DataFlowAnalysis.hpp" // for TR_Isolatedness, etc
 #include "optimizer/LocalAnalysis.hpp"
 
-namespace TR { class Node; }
-namespace TR { class Optimizer; }
+namespace TR {
+class Node;
+}
+namespace TR {
+class Optimizer;
+}
 
 // #define MAX_BLOCKS_FOR_STACK_ALLOCATION 16
 
@@ -44,33 +48,28 @@ namespace TR { class Optimizer; }
 //
 
 TR_DataFlowAnalysis::Kind TR_Isolatedness::getKind()
-   {
-   return Isolatedness;
-   }
+{
+    return Isolatedness;
+}
 
-TR_Isolatedness *TR_Isolatedness::asIsolatedness()
-   {
-   return this;
-   }
-
+TR_Isolatedness* TR_Isolatedness::asIsolatedness()
+{
+    return this;
+}
 
 int32_t TR_Isolatedness::getNumberOfBits()
-   {
-   return _latestness->getNumberOfBits();
-   }
+{
+    return _latestness->getNumberOfBits();
+}
 
+TR_Isolatedness::TR_Isolatedness(TR::Compilation* comp, TR::Optimizer* optimizer, TR_Structure* rootStructure, bool trace)
+    : TR_BackwardIntersectionBitVectorAnalysis(comp, comp->getFlowGraph(), optimizer, trace)
+{
+    _latestness = new (comp->allocator()) TR_Latestness(comp, optimizer, rootStructure, trace);
+    _supportedNodesAsArray = _latestness->_supportedNodesAsArray;
+    //_temp = NULL;
 
-
-
-
-TR_Isolatedness::TR_Isolatedness(TR::Compilation *comp, TR::Optimizer *optimizer, TR_Structure *rootStructure, bool trace)
-   : TR_BackwardIntersectionBitVectorAnalysis(comp, comp->getFlowGraph(), optimizer, trace)
-   {
-   _latestness = new (comp->allocator()) TR_Latestness(comp, optimizer, rootStructure, trace);
-   _supportedNodesAsArray = _latestness->_supportedNodesAsArray;
-   //_temp = NULL;
-
-   /*
+    /*
    if (trace())
       traceMsg("Starting Isolatedness\n");
 
@@ -79,22 +78,19 @@ TR_Isolatedness::TR_Isolatedness(TR::Compilation *comp, TR::Optimizer *optimizer
    if (trace())
       traceMsg("\nEnding Isolatedness\n");
    */
-   }
+}
 
 bool TR_Isolatedness::postInitializationProcessing()
-   {
-/*
+{
+    /*
    _outSetInfo = (TR_BitVector **)jitStackAlloc(_numberOfNodes*sizeof(TR_BitVector *));
    memset(_outSetInfo, 0, _numberOfNodes*sizeof(TR_BitVector *));
 
    for (int32_t i = 0; i<_numberOfNodes; i++)
       _outSetInfo[i] = new (trStackMemory()) TR_BitVector(_numberOfBits, stackAlloc, trMemory());
 */
-   return true;
-   }
-
-
-
+    return true;
+}
 
 #if 0
 // Overrides the implementation in the superclass as this analysis

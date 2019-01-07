@@ -23,21 +23,20 @@
 #include "gcTestHelpers.hpp"
 
 extern "C" {
-int omr_main_entry(int argc, char **argv, char **envp);
+int omr_main_entry(int argc, char** argv, char** envp);
 }
 
-GCTestEnvironment *gcTestEnv;
+GCTestEnvironment* gcTestEnv;
 
-int
-omr_main_entry(int argc, char **argv, char **envp)
+int omr_main_entry(int argc, char** argv, char** envp)
 {
-	::testing::InitGoogleTest(&argc, argv);
+    ::testing::InitGoogleTest(&argc, argv);
 
-	OMREventListener::setDefaultTestListener();
+    OMREventListener::setDefaultTestListener();
 
-	gcTestEnv = (GCTestEnvironment *)testing::AddGlobalTestEnvironment(new GCTestEnvironment(argc, argv));
-	gcTestEnv->GCTestSetUp();
-	int result = RUN_ALL_TESTS();
-	gcTestEnv->GCTestTearDown();
-	return result;
+    gcTestEnv = (GCTestEnvironment*)testing::AddGlobalTestEnvironment(new GCTestEnvironment(argc, argv));
+    gcTestEnv->GCTestSetUp();
+    int result = RUN_ALL_TESTS();
+    gcTestEnv->GCTestTearDown();
+    return result;
 }

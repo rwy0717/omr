@@ -26,21 +26,26 @@
 
 #include "ras/ILValidationStrategies.hpp"
 
-
-namespace TR { class BlockValidationRule; }
-namespace TR { class Compilation; }
-namespace TR { class MethodValidationRule; }
-namespace TR { class NodeValidationRule; }
+namespace TR {
+class BlockValidationRule;
+}
+namespace TR {
+class Compilation;
+}
+namespace TR {
+class MethodValidationRule;
+}
+namespace TR {
+class NodeValidationRule;
+}
 
 namespace TR {
 
+class ILValidator {
+public:
+    ILValidator(TR::Compilation* comp);
 
-class ILValidator
-   {
-   public:
-   ILValidator(TR::Compilation *comp);
-
-  /** \brief
+    /** \brief
    *     Used to validate the Method IL at different stages during Compilation.
    *
    *  \param
@@ -55,55 +60,51 @@ class ILValidator
    *     returns on success. Otherwise, compilation aborts.
    *
    */
-   void validate(const OMR::ILValidationStrategy *strategy);
+    void validate(const OMR::ILValidationStrategy* strategy);
 
-   private:
-   TR::Compilation* _comp;
-   TR::Compilation* comp() { return _comp; }
+private:
+    TR::Compilation* _comp;
+    TR::Compilation* comp() { return _comp; }
 
-   /**
+    /**
     * The Validation rules are categorized into three types based on the
     *  "scope" required to validate them.
     */
 
-   /**
+    /**
     * A MethodValidationRule would require information about
     * the entire Method(encapsulated as a TR::ResolvedMethodSymbol) in order
     * to find out if the IL satisifies the given condition.
     */
-   std::vector<TR::MethodValidationRule *> _methodValidationRules;
-   /**
+    std::vector<TR::MethodValidationRule*> _methodValidationRules;
+    /**
     * Used for checking properties across an extended Block.
     */
-   std::vector<TR::BlockValidationRule *> _blockValidationRules;
-   /**
+    std::vector<TR::BlockValidationRule*> _blockValidationRules;
+    /**
     * NodeValidationRules check whether a particular TR::Node has
     * some property. Meaning a NodeValidationRule doesn't need to keep track
     * of already encountered nodes or peek into other blocks to see whether
     * a particular Node is valid or not.
     */
-   std::vector<TR::NodeValidationRule *> _nodeValidationRules;
+    std::vector<TR::NodeValidationRule*> _nodeValidationRules;
 
-  /** \brief
+    /** \brief
    *     Selects the set of `ILValidationRules` corresponding to the given
    *     `OMR::ILValidationStrategy`.
    */
-   std::vector<TR::MethodValidationRule *>
-   getRequiredMethodValidationRules(const OMR::ILValidationStrategy *strategy);
+    std::vector<TR::MethodValidationRule*>
+    getRequiredMethodValidationRules(const OMR::ILValidationStrategy* strategy);
 
-   std::vector<TR::BlockValidationRule *>
-   getRequiredBlockValidationRules(const OMR::ILValidationStrategy *strategy);
+    std::vector<TR::BlockValidationRule*>
+    getRequiredBlockValidationRules(const OMR::ILValidationStrategy* strategy);
 
-   std::vector<TR::NodeValidationRule *>
-   getRequiredNodeValidationRules(const OMR::ILValidationStrategy *strategy);
+    std::vector<TR::NodeValidationRule*>
+    getRequiredNodeValidationRules(const OMR::ILValidationStrategy* strategy);
+};
 
+TR::ILValidator* createILValidatorObject(TR::Compilation* comp);
 
-   };
-
-   TR::ILValidator* createILValidatorObject(TR::Compilation *comp);
-
-}
-
+} // namespace TR
 
 #endif
-

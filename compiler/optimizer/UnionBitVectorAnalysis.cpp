@@ -19,9 +19,8 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-#include <stddef.h>                                      // for NULL
+#include <stddef.h> // for NULL
 #include "optimizer/DataFlowAnalysis.hpp"
-
 
 class TR_BitVector;
 
@@ -30,52 +29,50 @@ class TR_BitVector;
 // This file defines the methods in class UnionBitVectorAnalysis.
 //
 //
-template<class Container>void TR_UnionDFSetAnalysis<Container *>::compose(Container *firstBitVector, Container *secondBitVector)
-   {
-   *firstBitVector |= *secondBitVector;
-   }
+template <class Container> void TR_UnionDFSetAnalysis<Container*>::compose(Container* firstBitVector, Container* secondBitVector)
+{
+    *firstBitVector |= *secondBitVector;
+}
 
-template<class Container>void TR_UnionDFSetAnalysis<Container *>::inverseCompose(Container *firstBitVector, Container *secondBitVector)
-   {
-   *firstBitVector &= *secondBitVector;
-   }
+template <class Container> void TR_UnionDFSetAnalysis<Container*>::inverseCompose(Container* firstBitVector, Container* secondBitVector)
+{
+    *firstBitVector &= *secondBitVector;
+}
 
-template<class Container>void TR_UnionDFSetAnalysis<Container *>::initializeInSetInfo()
-   {
-   this->_currentInSetInfo->empty();
-   }
+template <class Container> void TR_UnionDFSetAnalysis<Container*>::initializeInSetInfo()
+{
+    this->_currentInSetInfo->empty();
+}
 
-template<class Container>void TR_UnionDFSetAnalysis<Container *>::initializeCurrentGenKillSetInfo()
-   {
-   this->_currentRegularGenSetInfo->empty();
-   this->_currentRegularKillSetInfo->setAll(this->_numberOfBits);
-   }
+template <class Container> void TR_UnionDFSetAnalysis<Container*>::initializeCurrentGenKillSetInfo()
+{
+    this->_currentRegularGenSetInfo->empty();
+    this->_currentRegularKillSetInfo->setAll(this->_numberOfBits);
+}
 
-template<class Container>Container * TR_UnionDFSetAnalysis<Container *>::initializeInfo(Container *info)
-   {
-   Container *result = info;
-   if (result == NULL)
-      this->allocateContainer(&result, true);
-   else
-      result->empty();
-   return result;
-   }
+template <class Container> Container* TR_UnionDFSetAnalysis<Container*>::initializeInfo(Container* info)
+{
+    Container* result = info;
+    if (result == NULL)
+        this->allocateContainer(&result, true);
+    else
+        result->empty();
+    return result;
+}
 
-template<class Container>Container * TR_UnionDFSetAnalysis<Container *>::inverseInitializeInfo(Container *info)
-   {
-   Container *result = info;
-   if (result == NULL)
-      this->allocateContainer(&result, false);
-   result->setAll(this->_numberOfBits);
-   return result;
-   }
+template <class Container> Container* TR_UnionDFSetAnalysis<Container*>::inverseInitializeInfo(Container* info)
+{
+    Container* result = info;
+    if (result == NULL)
+        this->allocateContainer(&result, false);
+    result->setAll(this->_numberOfBits);
+    return result;
+}
 
+template <class Container> TR_DataFlowAnalysis::Kind TR_UnionDFSetAnalysis<Container*>::getKind()
+{
+    return TR_DataFlowAnalysis::UnionDFSetAnalysis;
+}
 
-template<class Container>TR_DataFlowAnalysis::Kind TR_UnionDFSetAnalysis<Container *>::getKind()
-   {
-   return TR_DataFlowAnalysis::UnionDFSetAnalysis;
-   }
-
-
-template class TR_UnionDFSetAnalysis<TR_BitVector *>;
-template class TR_UnionDFSetAnalysis<TR_SingleBitContainer *>;
+template class TR_UnionDFSetAnalysis<TR_BitVector*>;
+template class TR_UnionDFSetAnalysis<TR_SingleBitContainer*>;

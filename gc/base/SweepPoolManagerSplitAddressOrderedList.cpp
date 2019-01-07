@@ -26,27 +26,26 @@
  * Allocate and initialize a new instance of the receiver.
  * @return a new instance of the receiver, or NULL on failure.
  */
-MM_SweepPoolManagerSplitAddressOrderedList *
-MM_SweepPoolManagerSplitAddressOrderedList::newInstance(MM_EnvironmentBase *env)
+MM_SweepPoolManagerSplitAddressOrderedList*
+MM_SweepPoolManagerSplitAddressOrderedList::newInstance(MM_EnvironmentBase* env)
 {
-	MM_SweepPoolManagerSplitAddressOrderedList *sweepPoolManager;
-	
-	sweepPoolManager = (MM_SweepPoolManagerSplitAddressOrderedList *)env->getForge()->allocate(sizeof(MM_SweepPoolManagerSplitAddressOrderedList), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
-	if (sweepPoolManager) {
-		new(sweepPoolManager) MM_SweepPoolManagerSplitAddressOrderedList(env);
-		if (!sweepPoolManager->initialize(env)) { 
-			sweepPoolManager->kill(env);        
-			sweepPoolManager = NULL;            
-		}                                       
-	}
+    MM_SweepPoolManagerSplitAddressOrderedList* sweepPoolManager;
 
-	return sweepPoolManager;
+    sweepPoolManager = (MM_SweepPoolManagerSplitAddressOrderedList*)env->getForge()->allocate(sizeof(MM_SweepPoolManagerSplitAddressOrderedList), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+    if (sweepPoolManager) {
+        new (sweepPoolManager) MM_SweepPoolManagerSplitAddressOrderedList(env);
+        if (!sweepPoolManager->initialize(env)) {
+            sweepPoolManager->kill(env);
+            sweepPoolManager = NULL;
+        }
+    }
+
+    return sweepPoolManager;
 }
 
-void
-MM_SweepPoolManagerSplitAddressOrderedList::poolPostProcess(MM_EnvironmentBase *envModron, MM_MemoryPool *memoryPool)
+void MM_SweepPoolManagerSplitAddressOrderedList::poolPostProcess(MM_EnvironmentBase* envModron, MM_MemoryPool* memoryPool)
 {
-	memoryPool->postProcess(envModron, MM_MemoryPool::forSweep);
+    memoryPool->postProcess(envModron, MM_MemoryPool::forSweep);
 }
 
 #endif /* defined(OMR_GC_MODRON_STANDARD) */

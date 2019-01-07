@@ -27,47 +27,52 @@
  */
 #ifndef OMR_CODE_METADATA_CONNECTOR
 #define OMR_CODE_METADATA_CONNECTOR
-namespace OMR { struct CodeMetaData; }
-namespace OMR { typedef OMR::CodeMetaData CodeMetaDataConnector; }
+namespace OMR {
+struct CodeMetaData;
+}
+namespace OMR {
+typedef OMR::CodeMetaData CodeMetaDataConnector;
+}
 #endif
 
-#include "env/jittypes.h"         // for uintptrj_t
-#include "infra/Annotations.hpp"  // for OMR_EXTENSIBLE
+#include "env/jittypes.h" // for uintptrj_t
+#include "infra/Annotations.hpp" // for OMR_EXTENSIBLE
 
-namespace TR { class CodeMetaData; }
-namespace TR { class Compilation; }
+namespace TR {
+class CodeMetaData;
+}
+namespace TR {
+class Compilation;
+}
 
 /**
  * CodeMetaData contains metadata information about a single method.
  */
 
-namespace OMR
-{
+namespace OMR {
 
-class OMR_EXTENSIBLE CodeMetaData
-   {
-   public:
+class OMR_EXTENSIBLE CodeMetaData {
+public:
+    TR::CodeMetaData* self();
 
-   TR::CodeMetaData *self();
-
-   /**
+    /**
     * @brief Constructor method to create metadata for a method.
     */
-   CodeMetaData(TR::Compilation *comp);
+    CodeMetaData(TR::Compilation* comp);
 
-   /**
+    /**
     * @brief Returns the address of allocated code memory within a code
     * cache for a method.
     */
-   uintptrj_t codeAllocStart() { return _codeAllocStart; }
+    uintptrj_t codeAllocStart() { return _codeAllocStart; }
 
-   /**
+    /**
     * @brief Returns the total size of code memory allocated for a method 
     * within a code cache.
     */
-   uint32_t codeAllocSize() { return _codeAllocSize; }
+    uint32_t codeAllocSize() { return _codeAllocSize; }
 
-   /**
+    /**
     * @brief Returns the starting address of compiled code for a
     * method when invoked from an interpreter.
     *
@@ -79,39 +84,38 @@ class OMR_EXTENSIBLE CodeMetaData
     * By default, the interpreter entry PC and compiled entry PC point 
     * to the same address.
     */
-   uintptrj_t interpreterEntryPC() { return _interpreterEntryPC; }
+    uintptrj_t interpreterEntryPC() { return _interpreterEntryPC; }
 
-   /**
+    /**
     * @brief Returns the starting address of compiled code for a
     * method when invoked from compiled code.
     * 
     * By default, the interpreter entry PC and compiled entry PC point 
     * to the same address.
     */
-   uintptrj_t compiledEntryPC() { return _compiledEntryPC; }
+    uintptrj_t compiledEntryPC() { return _compiledEntryPC; }
 
-   /**
+    /**
     * @brief Returns the end address of compiled code for a method.
     */
-   uintptrj_t compiledEndPC() { return _compiledEndPC; }
+    uintptrj_t compiledEndPC() { return _compiledEndPC; }
 
-   /**
+    /**
     * @brief Returns the compilation hotness level of a compiled method.
     */
-   TR_Hotness codeHotness() { return _hotness; }
+    TR_Hotness codeHotness() { return _hotness; }
 
-   protected:
+protected:
+    uintptrj_t _codeAllocStart;
+    uint32_t _codeAllocSize;
 
-   uintptrj_t _codeAllocStart;
-   uint32_t _codeAllocSize;
+    uintptrj_t _interpreterEntryPC;
+    uintptrj_t _compiledEntryPC;
+    uintptrj_t _compiledEndPC;
 
-   uintptrj_t _interpreterEntryPC;
-   uintptrj_t _compiledEntryPC;
-   uintptrj_t _compiledEndPC;
+    TR_Hotness _hotness;
+};
 
-   TR_Hotness _hotness;
-   };
-
-}
+} // namespace OMR
 
 #endif

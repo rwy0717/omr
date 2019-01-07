@@ -26,32 +26,32 @@ set(OMR_ENHANCED_WARNING_FLAG -Wall)
 list(APPEND OMR_PLATFORM_COMPILE_OPTIONS -pthread -fno-strict-aliasing)
 
 if(OMR_ENV_DATA64)
-	if (NOT (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64"))
-		list(APPEND OMR_PLATFORM_COMPILE_OPTIONS
-			-m64
-		)
-		list(APPEND OMR_PLATFORM_EXE_LINKER_OPTIONS
-			-m64
-		)
-		list(APPEND OMR_PLATFORM_SHARED_LINKER_OPTIONS
-			-m64
-		)
-	endif()
+    if (NOT (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64"))
+        list(APPEND OMR_PLATFORM_COMPILE_OPTIONS
+            -m64
+        )
+        list(APPEND OMR_PLATFORM_EXE_LINKER_OPTIONS
+            -m64
+        )
+        list(APPEND OMR_PLATFORM_SHARED_LINKER_OPTIONS
+            -m64
+        )
+    endif()
 else()
-	list(APPEND OMR_PLATFORM_COMPILE_OPTIONS
-		-m32
-		-msse2
-	)
-	list(APPEND OMR_PLATFORM_EXE_LINKER_OPTIONS
-		-m32
-	)
-	list(APPEND OMR_PLATFORM_SHARED_LINKER_OPTIONS
-		-m32
-	)
+    list(APPEND OMR_PLATFORM_COMPILE_OPTIONS
+        -m32
+        -msse2
+    )
+    list(APPEND OMR_PLATFORM_EXE_LINKER_OPTIONS
+        -m32
+    )
+    list(APPEND OMR_PLATFORM_SHARED_LINKER_OPTIONS
+        -m32
+    )
 endif()
 
 if(OMR_HOST_ARCH STREQUAL "s390")
-	list(APPEND OMR_PLATFORM_COMPILE_OPTIONS -march=z9-109)
+    list(APPEND OMR_PLATFORM_COMPILE_OPTIONS -march=z9-109)
 endif()
 
 # Testarossa build variables. Longer term the distinction between TR and the rest
@@ -62,13 +62,13 @@ endif()
 # TR_COMPILE_OPTIONS are variables appended to CMAKE_{C,CXX}_FLAGS, and so
 # apply to both C and C++ compilations.
 list(APPEND TR_COMPILE_OPTIONS
-	-Wno-write-strings #This warning swamps almost all other output
+    -Wno-write-strings #This warning swamps almost all other output
 )
 
 # TR_CXX_COMPILE_OPTIONS are appended to CMAKE_CXX_FLAGS, and so apply only to
 # C++ file compilation
 list(APPEND TR_CXX_COMPILE_OPTIONS
-	-std=c++0x
+    -std=c++0x
 )
 
 # TR_C_COMPILE_OPTIONS are appended to CMAKE_C_FLAGS, and so apply only to
@@ -87,7 +87,7 @@ set(SPP_FLAGS -x assembler-with-cpp -E -P)
 # so we have to detect Apple Clang here.
 # see ../../OmrDetectSystemInformation.cmake
 if(CMAKE_C_COMPILER_ID MATCHES "^(Apple)?Clang$")
-	set(OMR_PLATFORM_THREAD_LIBRARY pthread)
+    set(OMR_PLATFORM_THREAD_LIBRARY pthread)
 else()
-	set(OMR_PLATFORM_THREAD_LIBRARY -pthread)
+    set(OMR_PLATFORM_THREAD_LIBRARY -pthread)
 endif()

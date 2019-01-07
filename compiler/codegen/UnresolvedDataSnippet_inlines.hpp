@@ -24,6 +24,6 @@
 
 #include "codegen/UnresolvedDataSnippet.hpp"
 
-inline TR::UnresolvedDataSnippet * OMR::UnresolvedDataSnippet::self() { return static_cast<TR::UnresolvedDataSnippet*>(this); }
+inline TR::UnresolvedDataSnippet* OMR::UnresolvedDataSnippet::self() { return static_cast<TR::UnresolvedDataSnippet*>(this); }
 
 #endif

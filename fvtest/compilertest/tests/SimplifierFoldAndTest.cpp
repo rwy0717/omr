@@ -32,8 +32,7 @@
 #include "OptTestDriver.hpp"
 #include "ras/IlVerifier.hpp"
 
-namespace TestCompiler
-{
+namespace TestCompiler {
 
 /* An IlInjector. This will be used to create the IL that will be compiled.
  * Note that this can be an IlBuilder, or anything else that acts like an
@@ -41,63 +40,57 @@ namespace TestCompiler
  * Note that this is not an IlGenerator since ResolvedMethod requires an
  * IlInjector.
  */
-class SimplifierFoldAndIlInjector : public TR::IlInjector
-   {
-   public:
+class SimplifierFoldAndIlInjector : public TR::IlInjector {
+public:
+    TR_ALLOC(TR_Memory::IlGenerator)
 
-   TR_ALLOC(TR_Memory::IlGenerator)
+    SimplifierFoldAndIlInjector(TR::TypeDictionary* types, TestDriver* test)
+        : TR::IlInjector(types, test)
+    {
+    }
 
-   SimplifierFoldAndIlInjector(TR::TypeDictionary *types, TestDriver *test)
-   :
-      TR::IlInjector(types, test)
-      {
-      }
+    bool injectIL()
+    {
+        createBlocks(1);
 
-   bool injectIL()
-      {
-      createBlocks(1);
+        TR::SymbolReference* i = newTemp(Int64);
 
-      TR::SymbolReference* i = newTemp(Int64);
-
-      // int64_t i = ((int64_t) parameter) & 0xFFFFFFFF00000000ll;
-      storeToTemp(i,
+        // int64_t i = ((int64_t) parameter) & 0xFFFFFFFF00000000ll;
+        storeToTemp(i,
             createWithoutSymRef(TR::land, 2,
-                  iu2l
-                       (parameter(0, Int32)),
-                  lconst(0xFFFFFFFF00000000ll)));
+                iu2l(parameter(0, Int32)),
+                lconst(0xFFFFFFFF00000000ll)));
 
-      // return i;
-      returnValue(loadTemp(i));
+        // return i;
+        returnValue(loadTemp(i));
 
-      return true;
-      }
-   };
+        return true;
+    }
+};
 
 /* Information about the ILInjector. This describes its
  * signature (name and parameters) and declares the IlInjector.
  */
-class SimplifierFoldAndInfo : public TestCompiler::MethodInfo
-   {
-   public:
-   SimplifierFoldAndInfo(TestDriver *test)
-   :
-      _ilInjector(&_types, test)
-      {
-      // TODO: make it easier to access Int32/Int64/etc.
-      TR::IlType* Int32 = _types.PrimitiveType(TR::Int32);
-      TR::IlType* Int64 = _types.PrimitiveType(TR::Int64);
-      _args[0] = Int32;
-      DefineFunction(__FILE__, LINETOSTR(__LINE__), "simplifierFoldAnd", 1, _args, Int64);
-      DefineILInjector(&_ilInjector);
-      }
+class SimplifierFoldAndInfo : public TestCompiler::MethodInfo {
+public:
+    SimplifierFoldAndInfo(TestDriver* test)
+        : _ilInjector(&_types, test)
+    {
+        // TODO: make it easier to access Int32/Int64/etc.
+        TR::IlType* Int32 = _types.PrimitiveType(TR::Int32);
+        TR::IlType* Int64 = _types.PrimitiveType(TR::Int64);
+        _args[0] = Int32;
+        DefineFunction(__FILE__, LINETOSTR(__LINE__), "simplifierFoldAnd", 1, _args, Int64);
+        DefineILInjector(&_ilInjector);
+    }
 
-   typedef int64_t (*MethodType)(int32_t);
+    typedef int64_t (*MethodType)(int32_t);
 
-   private:
-   TR::TypeDictionary _types;
-   TestCompiler::SimplifierFoldAndIlInjector _ilInjector;
-   TR::IlType *_args[1];
-   };
+private:
+    TR::TypeDictionary _types;
+    TestCompiler::SimplifierFoldAndIlInjector _ilInjector;
+    TR::IlType* _args[1];
+};
 
 /* Verify the optimization was correctly applied.
  * A test failure is triggered by using `EXPECT_*`, and
@@ -108,65 +101,61 @@ class SimplifierFoldAndInfo : public TestCompiler::MethodInfo
  * is implemented by traversing the IL, and checking if
  * there are AND operations.
  */
-class SimplifierFoldAndIlVerifier : public TR::IlVerifier
-   {
-   public:
-   int32_t verifyNode(TR::Node *node)
-      {
-      switch(node->getOpCodeValue())
-         {
-         case TR::land:
-         case TR::iand:
-         case TR::band:
-         case TR::sand:
+class SimplifierFoldAndIlVerifier : public TR::IlVerifier {
+public:
+    int32_t verifyNode(TR::Node* node)
+    {
+        switch (node->getOpCodeValue()) {
+        case TR::land:
+        case TR::iand:
+        case TR::band:
+        case TR::sand:
             ADD_FAILURE() << "Found an AND operation: " << node->getOpCodeValue();
             return 1;
-         default:
+        default:
             break;
-         }
-      return 0;
-      }
+        }
+        return 0;
+    }
 
-   int32_t verify(TR::ResolvedMethodSymbol *sym)
-      {
-      for(TR::PreorderNodeIterator iter(sym->getFirstTreeTop(), sym->comp()); iter.currentTree(); ++iter)
-         {
-         int32_t rtn = verifyNode(iter.currentNode());
-         if(rtn)
-            return rtn;
-         }
+    int32_t verify(TR::ResolvedMethodSymbol* sym)
+    {
+        for (TR::PreorderNodeIterator iter(sym->getFirstTreeTop(), sym->comp()); iter.currentTree(); ++iter) {
+            int32_t rtn = verifyNode(iter.currentNode());
+            if (rtn)
+                return rtn;
+        }
 
-      return 0;
-      }
-   };
+        return 0;
+    }
+};
 
-class SimplifierFoldAndTest : public OptTestDriver
-   {
-   public:
-   SimplifierFoldAndTest()
-      {
-      /* Add an optimization.
+class SimplifierFoldAndTest : public OptTestDriver {
+public:
+    SimplifierFoldAndTest()
+    {
+        /* Add an optimization.
        * You can add as many optimizations as you need, in order,
        * using `addOptimization`, or add a group using
        * `addOptimizations(omrCompilationStrategies[warm])`.
        * This could also be done in test cases themselves.
        */
-      addOptimization(OMR::treeSimplification);
-      }
+        addOptimization(OMR::treeSimplification);
+    }
 
-   void invokeTests()
-      {
-      // Get the compiled method, cast to `SimplifierFoldAndInfo::MethodType`.
-      auto testCompiledMethod = getCompiledMethod<SimplifierFoldAndInfo::MethodType>();
+    void invokeTests()
+    {
+        // Get the compiled method, cast to `SimplifierFoldAndInfo::MethodType`.
+        auto testCompiledMethod = getCompiledMethod<SimplifierFoldAndInfo::MethodType>();
 
-      // Invoke the compiled method, and assert the output is correct.
-      ASSERT_EQ(0ll, testCompiledMethod(0));
-      ASSERT_EQ(0ll, testCompiledMethod(1));
-      ASSERT_EQ(0ll, testCompiledMethod(-1));
-      ASSERT_EQ(0ll, testCompiledMethod(-9));
-      ASSERT_EQ(0ll, testCompiledMethod(2147483647));
-      }
-   };
+        // Invoke the compiled method, and assert the output is correct.
+        ASSERT_EQ(0ll, testCompiledMethod(0));
+        ASSERT_EQ(0ll, testCompiledMethod(1));
+        ASSERT_EQ(0ll, testCompiledMethod(-1));
+        ASSERT_EQ(0ll, testCompiledMethod(-9));
+        ASSERT_EQ(0ll, testCompiledMethod(2147483647));
+    }
+};
 
 /* A test case.
  * 
@@ -176,25 +165,25 @@ class SimplifierFoldAndTest : public OptTestDriver
  * be defined within the same namespace as the class.
  */
 TEST_F(SimplifierFoldAndTest, SimplifierFoldAndTest)
-   {
-   // Set the MethodInfo. This contains the IlInjector and method signature.
-   SimplifierFoldAndInfo info(this);
-   setMethodInfo(&info);
+{
+    // Set the MethodInfo. This contains the IlInjector and method signature.
+    SimplifierFoldAndInfo info(this);
+    setMethodInfo(&info);
 
-   /* Set the Verifier. Multiple verifiers can be run using `AllIlVerifier`.
+    /* Set the Verifier. Multiple verifiers can be run using `AllIlVerifier`.
     * Other helpers are in `IlVerifierHelpers.hpp`.
     * This is called after optimizations are applied on the generated IL,
     * but before codegen takes place.
     */
-   SimplifierFoldAndIlVerifier ilVer;
-   setIlVerifier(&ilVer);
+    SimplifierFoldAndIlVerifier ilVer;
+    setIlVerifier(&ilVer);
 
-   /* To run the test, either use `Verify()` or `VerifyAndInvoke()`.
+    /* To run the test, either use `Verify()` or `VerifyAndInvoke()`.
     * The former generates IL, runs the selected optimizations,
     * verifies the optimized IL, then exits. The latter continues
     * to codegen, then runs the tests in `invokeTests`.
     */
-   VerifyAndInvoke();
-   }
-
+    VerifyAndInvoke();
 }
+
+} // namespace TestCompiler

@@ -28,90 +28,81 @@
 #include "EnvironmentBase.hpp"
 #include "Task.hpp"
 
-MM_Dispatcher *
-MM_Dispatcher::newInstance(MM_EnvironmentBase *env)
+MM_Dispatcher*
+MM_Dispatcher::newInstance(MM_EnvironmentBase* env)
 {
-	MM_Dispatcher *dispatcher;
-	
-	dispatcher = (MM_Dispatcher *)env->getForge()->allocate(sizeof(MM_Dispatcher), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
-	if (dispatcher) {
-		new(dispatcher) MM_Dispatcher(env);
-		if(!dispatcher->initialize(env)) {
-			dispatcher->kill(env);
-			return NULL;
-		}
-	}
-	return dispatcher;
+    MM_Dispatcher* dispatcher;
+
+    dispatcher = (MM_Dispatcher*)env->getForge()->allocate(sizeof(MM_Dispatcher), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+    if (dispatcher) {
+        new (dispatcher) MM_Dispatcher(env);
+        if (!dispatcher->initialize(env)) {
+            dispatcher->kill(env);
+            return NULL;
+        }
+    }
+    return dispatcher;
 }
 
-void
-MM_Dispatcher::kill(MM_EnvironmentBase *env)
+void MM_Dispatcher::kill(MM_EnvironmentBase* env)
 {
-	env->getForge()->free(this);
+    env->getForge()->free(this);
 }
 
-bool
-MM_Dispatcher::initialize(MM_EnvironmentBase *env)
+bool MM_Dispatcher::initialize(MM_EnvironmentBase* env)
 {
-	return true;
+    return true;
 }
 
-void
-MM_Dispatcher::prepareThreadsForTask(MM_EnvironmentBase *env, MM_Task *task, uintptr_t threadCount)
+void MM_Dispatcher::prepareThreadsForTask(MM_EnvironmentBase* env, MM_Task* task, uintptr_t threadCount)
 {
-	task->setThreadCount(1);
-	_task = task;
+    task->setThreadCount(1);
+    _task = task;
 }
 
-void
-MM_Dispatcher::acceptTask(MM_EnvironmentBase *env)
+void MM_Dispatcher::acceptTask(MM_EnvironmentBase* env)
 {
-	env->_currentTask = _task;
-	env->_currentTask->accept(env);
+    env->_currentTask = _task;
+    env->_currentTask->accept(env);
 }
 
-void
-MM_Dispatcher::completeTask(MM_EnvironmentBase *env)
+void MM_Dispatcher::completeTask(MM_EnvironmentBase* env)
 {
-	MM_Task *currentTask = env->_currentTask;
+    MM_Task* currentTask = env->_currentTask;
 
-	env->_currentTask = NULL;
-	_task = NULL;
+    env->_currentTask = NULL;
+    _task = NULL;
 
-	currentTask->complete(env);
+    currentTask->complete(env);
 }
 
-void
-MM_Dispatcher::cleanupAfterTask(MM_EnvironmentBase *env)
+void MM_Dispatcher::cleanupAfterTask(MM_EnvironmentBase* env)
 {
 }
 
-void
-MM_Dispatcher::run(MM_EnvironmentBase *env, MM_Task *task, uintptr_t newThreadCount)
+void MM_Dispatcher::run(MM_EnvironmentBase* env, MM_Task* task, uintptr_t newThreadCount)
 {
-	uintptr_t activeThreads = recomputeActiveThreadCountForTask(env, task, newThreadCount);
-	task->masterSetup(env);
-	prepareThreadsForTask(env, task, activeThreads);
-	acceptTask(env);
-	task->run(env);
-	completeTask(env);
-	cleanupAfterTask(env);
-	task->masterCleanup(env);
+    uintptr_t activeThreads = recomputeActiveThreadCountForTask(env, task, newThreadCount);
+    task->masterSetup(env);
+    prepareThreadsForTask(env, task, activeThreads);
+    acceptTask(env);
+    task->run(env);
+    completeTask(env);
+    cleanupAfterTask(env);
+    task->masterCleanup(env);
 }
 
-bool 
-MM_Dispatcher::startUpThreads() 
-{ 
-	return true; 
+bool MM_Dispatcher::startUpThreads()
+{
+    return true;
 }
 
-void 
-MM_Dispatcher::shutDownThreads() 
+void MM_Dispatcher::shutDownThreads()
 {
 }
 
 uintptr_t
-MM_Dispatcher::recomputeActiveThreadCountForTask(MM_EnvironmentBase *env, MM_Task *task, uintptr_t newThreadCount)
+MM_Dispatcher::recomputeActiveThreadCountForTask(MM_EnvironmentBase* env, MM_Task* task, uintptr_t newThreadCount)
 {
-	return 1;
+    return 1;
 }

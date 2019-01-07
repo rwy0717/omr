@@ -22,35 +22,35 @@
 #ifndef REORDER_INDEX_EXPR_INCL
 #define REORDER_INDEX_EXPR_INCL
 
-#include <stdint.h>                           // for int32_t
-#include "il/Node.hpp"                        // for vcount_t
-#include "optimizer/Optimization.hpp"         // for Optimization
-#include "optimizer/OptimizationManager.hpp"  // for OptimizationManager
+#include <stdint.h> // for int32_t
+#include "il/Node.hpp" // for vcount_t
+#include "optimizer/Optimization.hpp" // for Optimization
+#include "optimizer/OptimizationManager.hpp" // for OptimizationManager
 
 class TR_PrimaryInductionVariable;
 class TR_Structure;
-namespace TR { class Node; }
+namespace TR {
+class Node;
+}
 
-class TR_IndexExprManipulator: public TR::Optimization
-   {
-   public:
-   TR_IndexExprManipulator(TR::OptimizationManager *manager);
-   static TR::Optimization *create(TR::OptimizationManager *manager)
-      {
-      return new (manager->allocator()) TR_IndexExprManipulator(manager);
-      }
+class TR_IndexExprManipulator : public TR::Optimization {
+public:
+    TR_IndexExprManipulator(TR::OptimizationManager* manager);
+    static TR::Optimization* create(TR::OptimizationManager* manager)
+    {
+        return new (manager->allocator()) TR_IndexExprManipulator(manager);
+    }
 
-   virtual int32_t perform();
-   virtual const char * optDetailString() const throw();
+    virtual int32_t perform();
+    virtual const char* optDetailString() const throw();
 
-   void rewriteIndexExpression(TR_Structure *);
+    void rewriteIndexExpression(TR_Structure*);
 
-   private:
-   void rewriteIndexExpression(TR_PrimaryInductionVariable *primeIV,TR::Node *parent,TR::Node *node,bool parentIsAiadd);
-   vcount_t _visitCount;
-   bool    _somethingChanged;
-   bool    _debug;
-
+private:
+    void rewriteIndexExpression(TR_PrimaryInductionVariable* primeIV, TR::Node* parent, TR::Node* node, bool parentIsAiadd);
+    vcount_t _visitCount;
+    bool _somethingChanged;
+    bool _debug;
 };
 
 #endif

@@ -32,23 +32,23 @@
  */
 
 struct J9SignalHandlerRecord {
-	struct J9SignalHandlerRecord *previous;
-	struct OMRPortLibrary *portLibrary;
-	omrsig_handler_fn handler;
-	void *handler_arg;
-	jmp_buf	mark;			
-	uint32_t flags;
+    struct J9SignalHandlerRecord* previous;
+    struct OMRPortLibrary* portLibrary;
+    omrsig_handler_fn handler;
+    void* handler_arg;
+    jmp_buf mark;
+    uint32_t flags;
 };
 
 typedef struct J9CurrentSignal {
-	int	signal;
-	siginfo_t *sigInfo;
-	void *contextInfo;
-	uintptr_t breakingEventAddr;
-	uint32_t portLibSignalType;
-	DIB	*ptrDIB;
+    int signal;
+    siginfo_t* sigInfo;
+    void* contextInfo;
+    uintptr_t breakingEventAddr;
+    uint32_t portLibSignalType;
+    DIB* ptrDIB;
 } J9CurrentSignal;
 
-void masterSynchSignalHandler(int signal, siginfo_t * sigInfo, void *contextInfo, uintptr_t breakingEventAddr);
+void masterSynchSignalHandler(int signal, siginfo_t* sigInfo, void* contextInfo, uintptr_t breakingEventAddr);
 
 #endif

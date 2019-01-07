@@ -27,14 +27,14 @@
 
 #include "testEnvironment.hpp"
 
-extern PortEnvironment *omrTestEnv;
+extern PortEnvironment* omrTestEnv;
 
-void createThread(omrthread_t *newThread, uintptr_t suspend, omrthread_detachstate_t detachstate,
-				  omrthread_entrypoint_t entryProc, void *entryArg);
+void createThread(omrthread_t* newThread, uintptr_t suspend, omrthread_detachstate_t detachstate,
+    omrthread_entrypoint_t entryProc, void* entryArg);
 intptr_t joinThread(omrthread_t threadToJoin);
 bool handlerIsFunction(sighandler_t handler);
 #if !defined(OMR_OS_WINDOWS)
-bool handlerIsFunction(const struct sigaction *act);
+bool handlerIsFunction(const struct sigaction* act);
 #endif /* !defined(OMR_OS_WINDOWS) */
 
 #endif /* OMRSIGTESTHELPERS_H_INCLUDED */

@@ -26,7 +26,6 @@
  * @brief Memory Utilities
  */
 
-
 /*
  * This file contains code for the portability library memory management.
  * It wraps all memory allocations for RAS tracking.
@@ -55,97 +54,97 @@
 
 #include "omrmemtag_checks.h"
 
-static void setTagSumCheck(J9MemTag *tag, uint32_t eyeCatcher);
-static void *wrapBlockAndSetTags(struct OMRPortLibrary *portLibrary, void *memoryPointer, uintptr_t byteAmount, const char *callSite, const uint32_t category);
-static void *unwrapBlockAndCheckTags(struct OMRPortLibrary *portLibrary, void *memoryPointer);
+static void setTagSumCheck(J9MemTag* tag, uint32_t eyeCatcher);
+static void* wrapBlockAndSetTags(struct OMRPortLibrary* portLibrary, void* memoryPointer, uintptr_t byteAmount, const char* callSite, const uint32_t category);
+static void* unwrapBlockAndCheckTags(struct OMRPortLibrary* portLibrary, void* memoryPointer);
 
 /* Typedefs for basic allocators */
-typedef void *(*allocate_memory_func_t)(struct OMRPortLibrary *portLibrary, uintptr_t byteAmount);
-typedef void (*free_memory_func_t)(struct OMRPortLibrary *portLibrary, void *memoryPointer);
-typedef void (*advise_and_free_memory_func_t)(struct OMRPortLibrary *portLibrary, void *memoryPointer, uintptr_t memorySize);
-typedef void *(*reallocate_memory_func_t)(struct OMRPortLibrary *portLibrary, void *memoryPointer, uintptr_t byteAmount);
+typedef void* (*allocate_memory_func_t)(struct OMRPortLibrary* portLibrary, uintptr_t byteAmount);
+typedef void (*free_memory_func_t)(struct OMRPortLibrary* portLibrary, void* memoryPointer);
+typedef void (*advise_and_free_memory_func_t)(struct OMRPortLibrary* portLibrary, void* memoryPointer, uintptr_t memorySize);
+typedef void* (*reallocate_memory_func_t)(struct OMRPortLibrary* portLibrary, void* memoryPointer, uintptr_t byteAmount);
 
 static void
-setTagSumCheck(J9MemTag *tag, uint32_t eyeCatcher)
+setTagSumCheck(J9MemTag* tag, uint32_t eyeCatcher)
 {
-	tag->sumCheck = 0;
-	tag->eyeCatcher = eyeCatcher;
-	tag->sumCheck = checkTagSumCheck(tag, eyeCatcher);
+    tag->sumCheck = 0;
+    tag->eyeCatcher = eyeCatcher;
+    tag->sumCheck = checkTagSumCheck(tag, eyeCatcher);
 }
 
 BOOLEAN
-isLocatedInIgnoredRegion(struct OMRPortLibrary *portLibrary, void *memoryPointer);
+isLocatedInIgnoredRegion(struct OMRPortLibrary* portLibrary, void* memoryPointer);
 
 /* A correctly constructed header/footer will sumcheck to zero */
-static void *
-wrapBlockAndSetTags(struct OMRPortLibrary *portLibrary, void *memoryPointer, uintptr_t byteAmount, const char *callSite, const uint32_t categoryCode)
+static void*
+wrapBlockAndSetTags(struct OMRPortLibrary* portLibrary, void* memoryPointer, uintptr_t byteAmount, const char* callSite, const uint32_t categoryCode)
 {
-	J9MemTag *headerTag, *footerTag;
-	uint8_t *padding;
-	OMRMemCategory *category;
+    J9MemTag *headerTag, *footerTag;
+    uint8_t* padding;
+    OMRMemCategory* category;
 
-	/* Get the tags and adjust the memoryPointer */
-	headerTag = (J9MemTag *) memoryPointer;
-	footerTag = (J9MemTag *)((uint8_t *) memoryPointer + ROUNDED_FOOTER_OFFSET(byteAmount));
-	memoryPointer = (void *)((uint8_t *) memoryPointer + sizeof(J9MemTag));
-	padding = (uint8_t *)(((uintptr_t)memoryPointer) + byteAmount);
+    /* Get the tags and adjust the memoryPointer */
+    headerTag = (J9MemTag*)memoryPointer;
+    footerTag = (J9MemTag*)((uint8_t*)memoryPointer + ROUNDED_FOOTER_OFFSET(byteAmount));
+    memoryPointer = (void*)((uint8_t*)memoryPointer + sizeof(J9MemTag));
+    padding = (uint8_t*)(((uintptr_t)memoryPointer) + byteAmount);
 
-	while ((uintptr_t)padding != (uintptr_t)footerTag) {
-		*padding++ = J9MEMTAG_PADDING_BYTE;
-	}
+    while ((uintptr_t)padding != (uintptr_t)footerTag) {
+        *padding++ = J9MEMTAG_PADDING_BYTE;
+    }
 
-	category = omrmem_get_category(portLibrary, categoryCode);
-	omrmem_categories_increment_counters(category, ROUNDED_BYTE_AMOUNT(byteAmount));
+    category = omrmem_get_category(portLibrary, categoryCode);
+    omrmem_categories_increment_counters(category, ROUNDED_BYTE_AMOUNT(byteAmount));
 
-	/* Fill in the tags */
-	headerTag->allocSize = byteAmount;
-	headerTag->callSite = callSite;
-	headerTag->category = category;
+    /* Fill in the tags */
+    headerTag->allocSize = byteAmount;
+    headerTag->callSite = callSite;
+    headerTag->category = category;
 #if !defined(OMR_ENV_DATA64)
-	memset(headerTag->padding, J9MEMTAG_PADDING_BYTE, sizeof(headerTag->padding));
+    memset(headerTag->padding, J9MEMTAG_PADDING_BYTE, sizeof(headerTag->padding));
 #endif
-	setTagSumCheck(headerTag, J9MEMTAG_EYECATCHER_ALLOC_HEADER);
+    setTagSumCheck(headerTag, J9MEMTAG_EYECATCHER_ALLOC_HEADER);
 
-	footerTag->allocSize = byteAmount;
-	footerTag->callSite = callSite;
-	footerTag->category = category;
+    footerTag->allocSize = byteAmount;
+    footerTag->callSite = callSite;
+    footerTag->category = category;
 #if !defined(OMR_ENV_DATA64)
-	memset(footerTag->padding, J9MEMTAG_PADDING_BYTE, sizeof(footerTag->padding));
+    memset(footerTag->padding, J9MEMTAG_PADDING_BYTE, sizeof(footerTag->padding));
 #endif
-	setTagSumCheck(footerTag, J9MEMTAG_EYECATCHER_ALLOC_FOOTER);
+    setTagSumCheck(footerTag, J9MEMTAG_EYECATCHER_ALLOC_FOOTER);
 
-	return memoryPointer;
+    return memoryPointer;
 }
 
-static void *
-unwrapBlockAndCheckTags(struct OMRPortLibrary *portLibrary, void *memoryPointer)
+static void*
+unwrapBlockAndCheckTags(struct OMRPortLibrary* portLibrary, void* memoryPointer)
 {
-	J9MemTag *headerTag, *footerTag;
+    J9MemTag *headerTag, *footerTag;
 
-	/* get the tags */
-	headerTag = omrmem_get_header_tag(memoryPointer);
-	footerTag = omrmem_get_footer_tag(headerTag);
+    /* get the tags */
+    headerTag = omrmem_get_header_tag(memoryPointer);
+    footerTag = omrmem_get_footer_tag(headerTag);
 
-	/* Check the tags and update only if not corrupted*/
-	if ((checkTagSumCheck(headerTag, J9MEMTAG_EYECATCHER_ALLOC_HEADER) == 0)
-		&& (checkTagSumCheck(footerTag, J9MEMTAG_EYECATCHER_ALLOC_FOOTER) == 0)
-		&& (checkPadding(headerTag) == 0)) {
+    /* Check the tags and update only if not corrupted*/
+    if ((checkTagSumCheck(headerTag, J9MEMTAG_EYECATCHER_ALLOC_HEADER) == 0)
+        && (checkTagSumCheck(footerTag, J9MEMTAG_EYECATCHER_ALLOC_FOOTER) == 0)
+        && (checkPadding(headerTag) == 0)) {
 
-		omrmem_categories_decrement_counters(headerTag->category, ROUNDED_BYTE_AMOUNT(headerTag->allocSize));
+        omrmem_categories_decrement_counters(headerTag->category, ROUNDED_BYTE_AMOUNT(headerTag->allocSize));
 
-		/* Optimized freed header sumCheck setting */
-		headerTag->eyeCatcher = J9MEMTAG_EYECATCHER_FREED_HEADER;
-		headerTag->sumCheck = headerTag->sumCheck ^ J9MEMTAG_EYECATCHER_ALLOC_HEADER ^ J9MEMTAG_EYECATCHER_FREED_HEADER;
-		footerTag->eyeCatcher = J9MEMTAG_EYECATCHER_FREED_FOOTER;
-		footerTag->sumCheck = footerTag->sumCheck ^ J9MEMTAG_EYECATCHER_ALLOC_FOOTER ^ J9MEMTAG_EYECATCHER_FREED_FOOTER;
-	} else {
-		BOOLEAN memoryCorruptionDetected = FALSE;
+        /* Optimized freed header sumCheck setting */
+        headerTag->eyeCatcher = J9MEMTAG_EYECATCHER_FREED_HEADER;
+        headerTag->sumCheck = headerTag->sumCheck ^ J9MEMTAG_EYECATCHER_ALLOC_HEADER ^ J9MEMTAG_EYECATCHER_FREED_HEADER;
+        footerTag->eyeCatcher = J9MEMTAG_EYECATCHER_FREED_FOOTER;
+        footerTag->sumCheck = footerTag->sumCheck ^ J9MEMTAG_EYECATCHER_ALLOC_FOOTER ^ J9MEMTAG_EYECATCHER_FREED_FOOTER;
+    } else {
+        BOOLEAN memoryCorruptionDetected = FALSE;
 
-		portLibrary->portGlobals->corruptedMemoryBlock = memoryPointer;
-		Trc_Assert_PRT_memory_corruption_detected(memoryCorruptionDetected);
-	}
+        portLibrary->portGlobals->corruptedMemoryBlock = memoryPointer;
+        Trc_Assert_PRT_memory_corruption_detected(memoryCorruptionDetected);
+    }
 
-	return headerTag;
+    return headerTag;
 }
 
 /**
@@ -166,25 +165,24 @@ unwrapBlockAndCheckTags(struct OMRPortLibrary *portLibrary, void *memoryPointer)
  * the error handling code uses per thread buffers to store the last error.  If memory
  * can not be allocated the result would be an infinite loop.
  */
-void *
-omrmem_allocate_memory(struct OMRPortLibrary *portLibrary, uintptr_t byteAmount, const char *callSite, uint32_t category)
+void* omrmem_allocate_memory(struct OMRPortLibrary* portLibrary, uintptr_t byteAmount, const char* callSite, uint32_t category)
 {
-	void *pointer = NULL;
-	uintptr_t allocationByteAmount;
-	allocate_memory_func_t allocateFunction = omrmem_allocate_memory_basic;
+    void* pointer = NULL;
+    uintptr_t allocationByteAmount;
+    allocate_memory_func_t allocateFunction = omrmem_allocate_memory_basic;
 
-	/* note that this monitor is protecting a larger area than strictly required but this will make the trace points sane */
-	Trc_PRT_mem_omrmem_allocate_memory_Entry(byteAmount, callSite);
-	allocationByteAmount = ROUNDED_BYTE_AMOUNT(byteAmount);
+    /* note that this monitor is protecting a larger area than strictly required but this will make the trace points sane */
+    Trc_PRT_mem_omrmem_allocate_memory_Entry(byteAmount, callSite);
+    allocationByteAmount = ROUNDED_BYTE_AMOUNT(byteAmount);
 
-	pointer = allocateFunction(portLibrary, allocationByteAmount);
-	if (NULL == pointer) {
-		Trc_PRT_memory_alloc_returned_null_2(callSite, allocationByteAmount);
-	} else {
-		pointer = wrapBlockAndSetTags(portLibrary, pointer, byteAmount, callSite, category);
-	}
-	Trc_PRT_mem_omrmem_allocate_memory_Exit(pointer);
-	return pointer;
+    pointer = allocateFunction(portLibrary, allocationByteAmount);
+    if (NULL == pointer) {
+        Trc_PRT_memory_alloc_returned_null_2(callSite, allocationByteAmount);
+    } else {
+        pointer = wrapBlockAndSetTags(portLibrary, pointer, byteAmount, callSite, category);
+    }
+    Trc_PRT_mem_omrmem_allocate_memory_Exit(pointer);
+    return pointer;
 }
 
 /**
@@ -195,17 +193,16 @@ omrmem_allocate_memory(struct OMRPortLibrary *portLibrary, uintptr_t byteAmount,
  *
  * @note memoryPointer may be NULL. In that case, no action is taken.
  */
-void
-omrmem_free_memory(struct OMRPortLibrary *portLibrary, void *memoryPointer)
+void omrmem_free_memory(struct OMRPortLibrary* portLibrary, void* memoryPointer)
 {
-	free_memory_func_t freeFunction = omrmem_free_memory_basic;
-	Trc_PRT_mem_omrmem_free_memory_Entry(memoryPointer);
+    free_memory_func_t freeFunction = omrmem_free_memory_basic;
+    Trc_PRT_mem_omrmem_free_memory_Entry(memoryPointer);
 
-	if (memoryPointer != NULL) {
-		memoryPointer = unwrapBlockAndCheckTags(portLibrary, memoryPointer);
-		freeFunction(portLibrary, memoryPointer);
-	}
-	Trc_PRT_mem_omrmem_free_memory_Exit();
+    if (memoryPointer != NULL) {
+        memoryPointer = unwrapBlockAndCheckTags(portLibrary, memoryPointer);
+        freeFunction(portLibrary, memoryPointer);
+    }
+    Trc_PRT_mem_omrmem_free_memory_Exit();
 }
 
 /**
@@ -216,32 +213,31 @@ omrmem_free_memory(struct OMRPortLibrary *portLibrary, void *memoryPointer)
  *
  * @note memoryPointer may be NULL. In that case, no action is taken.
  */
-void
-omrmem_advise_and_free_memory(struct OMRPortLibrary *portLibrary, void *memoryPointer)
+void omrmem_advise_and_free_memory(struct OMRPortLibrary* portLibrary, void* memoryPointer)
 {
-	uintptr_t memorySize = 0;
-	advise_and_free_memory_func_t adviseAndFreeFunction = omrmem_advise_and_free_memory_basic;
-	Trc_PRT_mem_omrmem_advise_and_free_memory_Entry(memoryPointer);
+    uintptr_t memorySize = 0;
+    advise_and_free_memory_func_t adviseAndFreeFunction = omrmem_advise_and_free_memory_basic;
+    Trc_PRT_mem_omrmem_advise_and_free_memory_Entry(memoryPointer);
 
-	if (memoryPointer != NULL) {
-#if (defined(LINUX) || defined (AIXPPC) || defined(J9ZOS390) || defined(OSX))
+    if (memoryPointer != NULL) {
+#if (defined(LINUX) || defined(AIXPPC) || defined(J9ZOS390) || defined(OSX))
 
-		J9MemTag *headerTag = NULL;
-		headerTag = omrmem_get_header_tag(memoryPointer);
-		/* Check the header for signs of corruption before we use it in madvise.
-		 * No error is raised here b/c one will be raised in 'unwrapBlockAndCheckTags'
-		 * below.
-		 */
-		if ((checkTagSumCheck(headerTag, J9MEMTAG_EYECATCHER_ALLOC_HEADER) == 0) && (checkPadding(headerTag) == 0)) {
-			memorySize = ROUNDED_BYTE_AMOUNT(headerTag->allocSize);
-		} else {
-			memorySize = 0;
-		}
+        J9MemTag* headerTag = NULL;
+        headerTag = omrmem_get_header_tag(memoryPointer);
+        /* Check the header for signs of corruption before we use it in madvise.
+         * No error is raised here b/c one will be raised in 'unwrapBlockAndCheckTags'
+         * below.
+         */
+        if ((checkTagSumCheck(headerTag, J9MEMTAG_EYECATCHER_ALLOC_HEADER) == 0) && (checkPadding(headerTag) == 0)) {
+            memorySize = ROUNDED_BYTE_AMOUNT(headerTag->allocSize);
+        } else {
+            memorySize = 0;
+        }
 #endif /* (defined(LINUX) || defined (AIXPPC) || defined(J9ZOS390) || defined(OSX)) */
-		memoryPointer = unwrapBlockAndCheckTags(portLibrary, memoryPointer);
-		adviseAndFreeFunction(portLibrary, memoryPointer, memorySize);
-	}
-	Trc_PRT_mem_omrmem_advise_and_free_memory_Exit();
+        memoryPointer = unwrapBlockAndCheckTags(portLibrary, memoryPointer);
+        adviseAndFreeFunction(portLibrary, memoryPointer, memorySize);
+    }
+    Trc_PRT_mem_omrmem_advise_and_free_memory_Exit();
 }
 
 /**
@@ -270,39 +266,38 @@ omrmem_advise_and_free_memory(struct OMRPortLibrary *portLibrary, void *memoryPo
  * the error handling code uses per thread buffers to store the last error.  If memory
  * can not be allocated the result would be an infinite loop.
  */
-void *
-omrmem_reallocate_memory(struct OMRPortLibrary *portLibrary, void *memoryPointer, uintptr_t byteAmount, const char *callSite, uint32_t category)
+void* omrmem_reallocate_memory(struct OMRPortLibrary* portLibrary, void* memoryPointer, uintptr_t byteAmount, const char* callSite, uint32_t category)
 {
-	void *pointer = NULL;
-	uintptr_t allocationByteAmount;
-	reallocate_memory_func_t reallocateFunction = omrmem_reallocate_memory_basic;
+    void* pointer = NULL;
+    uintptr_t allocationByteAmount;
+    reallocate_memory_func_t reallocateFunction = omrmem_reallocate_memory_basic;
 
-	Trc_PRT_mem_omrmem_reallocate_memory_Entry(memoryPointer, byteAmount, callSite, category);
+    Trc_PRT_mem_omrmem_reallocate_memory_Entry(memoryPointer, byteAmount, callSite, category);
 
-	if (memoryPointer == NULL) {
-		pointer = omrmem_allocate_memory(portLibrary, byteAmount, NULL == callSite ? OMR_GET_CALLSITE() : callSite, category);
-	} else if (byteAmount == 0) {
-		omrmem_free_memory(portLibrary, memoryPointer);
-	} else {
-		memoryPointer = unwrapBlockAndCheckTags(portLibrary, memoryPointer);
-		if (NULL == callSite) {
-			/* Inherit the callsite from the original allocation */
-			callSite = ((J9MemTag *) memoryPointer)->callSite;
-		}
-		allocationByteAmount = ROUNDED_BYTE_AMOUNT(byteAmount);
+    if (memoryPointer == NULL) {
+        pointer = omrmem_allocate_memory(portLibrary, byteAmount, NULL == callSite ? OMR_GET_CALLSITE() : callSite, category);
+    } else if (byteAmount == 0) {
+        omrmem_free_memory(portLibrary, memoryPointer);
+    } else {
+        memoryPointer = unwrapBlockAndCheckTags(portLibrary, memoryPointer);
+        if (NULL == callSite) {
+            /* Inherit the callsite from the original allocation */
+            callSite = ((J9MemTag*)memoryPointer)->callSite;
+        }
+        allocationByteAmount = ROUNDED_BYTE_AMOUNT(byteAmount);
 
-		pointer = reallocateFunction(portLibrary, memoryPointer, allocationByteAmount);
-		if (NULL != pointer) {
-			pointer = wrapBlockAndSetTags(portLibrary, pointer, byteAmount, callSite, category);
-		}
-		if (NULL == pointer) {
-			Trc_PRT_mem_omrmem_reallocate_memory_failed_2(callSite, memoryPointer, allocationByteAmount);
-		}
-	}
+        pointer = reallocateFunction(portLibrary, memoryPointer, allocationByteAmount);
+        if (NULL != pointer) {
+            pointer = wrapBlockAndSetTags(portLibrary, pointer, byteAmount, callSite, category);
+        }
+        if (NULL == pointer) {
+            Trc_PRT_mem_omrmem_reallocate_memory_failed_2(callSite, memoryPointer, allocationByteAmount);
+        }
+    }
 
-	Trc_PRT_mem_omrmem_reallocate_memory_Exit(pointer);
+    Trc_PRT_mem_omrmem_reallocate_memory_Exit(pointer);
 
-	return pointer;
+    return pointer;
 }
 
 /**
@@ -316,19 +311,18 @@ omrmem_reallocate_memory(struct OMRPortLibrary *portLibrary, void *memoryPointer
  * @note Must deallocate portGlobals.
  * @note Most implementations will just deallocate portGlobals.
  */
-void
-omrmem_shutdown(struct OMRPortLibrary *portLibrary)
+void omrmem_shutdown(struct OMRPortLibrary* portLibrary)
 {
-	omrmem_shutdown_categories(portLibrary);
+    omrmem_shutdown_categories(portLibrary);
 
 #if defined(OMR_ENV_DATA64)
-	shutdown_memory32(portLibrary);
+    shutdown_memory32(portLibrary);
 #endif /* OMR_ENV_DATA64 */
 
-	if (NULL != portLibrary->portGlobals) {
-		omrmem_shutdown_basic(portLibrary);
-		portLibrary->portGlobals = NULL;
-	}
+    if (NULL != portLibrary->portGlobals) {
+        omrmem_shutdown_basic(portLibrary);
+        portLibrary->portGlobals = NULL;
+    }
 }
 
 /**
@@ -350,37 +344,37 @@ omrmem_shutdown(struct OMRPortLibrary *portLibrary)
  * @internal @note portLibrary->portGlobals must point to an aligned structure
  */
 int32_t
-omrmem_startup(struct OMRPortLibrary *portLibrary, uintptr_t portGlobalSize)
+omrmem_startup(struct OMRPortLibrary* portLibrary, uintptr_t portGlobalSize)
 {
-	uintptr_t categoryStartupRC = 0;
+    uintptr_t categoryStartupRC = 0;
 #if defined(OMR_ENV_DATA64)
-	uintptr_t memory32StartupRC = 0;
+    uintptr_t memory32StartupRC = 0;
 #endif /* OMR_ENV_DATA64 */
 
-	omrmem_startup_basic(portLibrary, portGlobalSize);
-	if (NULL == portLibrary->portGlobals) {
-		return OMRPORT_ERROR_STARTUP_MEM;
-	}
+    omrmem_startup_basic(portLibrary, portGlobalSize);
+    if (NULL == portLibrary->portGlobals) {
+        return OMRPORT_ERROR_STARTUP_MEM;
+    }
 
-	categoryStartupRC = omrmem_startup_categories(portLibrary);
-	if (categoryStartupRC != 0) {
-		omrmem_shutdown_basic(portLibrary);
-		portLibrary->portGlobals = NULL;
-		return OMRPORT_ERROR_STARTUP_MEM;
-	}
+    categoryStartupRC = omrmem_startup_categories(portLibrary);
+    if (categoryStartupRC != 0) {
+        omrmem_shutdown_basic(portLibrary);
+        portLibrary->portGlobals = NULL;
+        return OMRPORT_ERROR_STARTUP_MEM;
+    }
 
 #if defined(OMR_ENV_DATA64)
-	memory32StartupRC = startup_memory32(portLibrary);
+    memory32StartupRC = startup_memory32(portLibrary);
 
-	if (memory32StartupRC != 0) {
-		omrmem_shutdown_categories(portLibrary);
-		omrmem_shutdown_basic(portLibrary);
-		portLibrary->portGlobals = NULL;
-		return OMRPORT_ERROR_STARTUP_MEM;
-	}
+    if (memory32StartupRC != 0) {
+        omrmem_shutdown_categories(portLibrary);
+        omrmem_shutdown_basic(portLibrary);
+        portLibrary->portGlobals = NULL;
+        return OMRPORT_ERROR_STARTUP_MEM;
+    }
 #endif /* OMR_ENV_DATA64 */
 
-	return 0;
+    return 0;
 }
 
 /**
@@ -392,10 +386,9 @@ omrmem_startup(struct OMRPortLibrary *portLibrary, uintptr_t portGlobalSize)
  * @note This function is called prior to the portLibrary being initialized
  * @note Must be implemented for all platforms.
  */
-void *
-omrmem_allocate_portLibrary(uintptr_t byteAmount)
+void* omrmem_allocate_portLibrary(uintptr_t byteAmount)
 {
-	return omrmem_allocate_portLibrary_basic(byteAmount);
+    return omrmem_allocate_portLibrary_basic(byteAmount);
 }
 
 /**
@@ -405,10 +398,9 @@ omrmem_allocate_portLibrary(uintptr_t byteAmount)
  *
  * @note Must be implemented for all platforms.
  */
-void
-omrmem_deallocate_portLibrary(void *memoryPointer)
+void omrmem_deallocate_portLibrary(void* memoryPointer)
 {
-	omrmem_deallocate_portLibrary_basic(memoryPointer);
+    omrmem_deallocate_portLibrary_basic(memoryPointer);
 }
 
 /**
@@ -432,30 +424,29 @@ omrmem_deallocate_portLibrary(void *memoryPointer)
  * the error handling code uses per thread buffers to store the last error.  If memory
  * can not be allocated the result would be an infinite loop.
  */
-void *
-omrmem_allocate_memory32(struct OMRPortLibrary *portLibrary, uintptr_t byteAmount, const char *callSite, uint32_t category)
+void* omrmem_allocate_memory32(struct OMRPortLibrary* portLibrary, uintptr_t byteAmount, const char* callSite, uint32_t category)
 {
 
-	void *pointer = NULL;
+    void* pointer = NULL;
 #if defined(OMR_ENV_DATA64)
-	uintptr_t allocationByteAmount = byteAmount;
+    uintptr_t allocationByteAmount = byteAmount;
 #endif /* defined(OMR_ENV_DATA64) */
 
-	Trc_PRT_mem_omrmem_allocate_memory32_Entry(byteAmount);
+    Trc_PRT_mem_omrmem_allocate_memory32_Entry(byteAmount);
 
 #if defined(OMR_ENV_DATA64)
-	allocationByteAmount = ROUNDED_BYTE_AMOUNT(byteAmount);
-	pointer = allocate_memory32(portLibrary, allocationByteAmount, callSite);
-	if (NULL == pointer) {
-		Trc_PRT_mem_omrmem_allocate_memory32_returned_null(callSite, allocationByteAmount);
-	} else {
-		pointer = wrapBlockAndSetTags(portLibrary, pointer, byteAmount, callSite, category);
-	}
+    allocationByteAmount = ROUNDED_BYTE_AMOUNT(byteAmount);
+    pointer = allocate_memory32(portLibrary, allocationByteAmount, callSite);
+    if (NULL == pointer) {
+        Trc_PRT_mem_omrmem_allocate_memory32_returned_null(callSite, allocationByteAmount);
+    } else {
+        pointer = wrapBlockAndSetTags(portLibrary, pointer, byteAmount, callSite, category);
+    }
 #endif /* defined(OMR_ENV_DATA64) */
 
-	Trc_PRT_mem_omrmem_allocate_memory32_Exit(pointer);
+    Trc_PRT_mem_omrmem_allocate_memory32_Exit(pointer);
 
-	return pointer;
+    return pointer;
 }
 
 /**
@@ -466,20 +457,19 @@ omrmem_allocate_memory32(struct OMRPortLibrary *portLibrary, uintptr_t byteAmoun
  *
  * @note memoryPointer may be NULL. In that case, no action is taken.
  */
-void
-omrmem_free_memory32(struct OMRPortLibrary *portLibrary, void *memoryPointer)
+void omrmem_free_memory32(struct OMRPortLibrary* portLibrary, void* memoryPointer)
 {
 
-	Trc_PRT_mem_omrmem_free_memory32_Entry(memoryPointer);
+    Trc_PRT_mem_omrmem_free_memory32_Entry(memoryPointer);
 
 #if defined(OMR_ENV_DATA64)
-	if (memoryPointer != NULL) {
-		memoryPointer = unwrapBlockAndCheckTags(portLibrary, memoryPointer);
-		free_memory32(portLibrary, memoryPointer);
-	}
+    if (memoryPointer != NULL) {
+        memoryPointer = unwrapBlockAndCheckTags(portLibrary, memoryPointer);
+        free_memory32(portLibrary, memoryPointer);
+    }
 #endif /* (OMR_ENV_DATA64) */
 
-	Trc_PRT_mem_omrmem_free_memory32_Exit();
+    Trc_PRT_mem_omrmem_free_memory32_Exit();
 }
 
 /**
@@ -494,18 +484,17 @@ omrmem_free_memory32(struct OMRPortLibrary *portLibrary, void *memoryPointer)
  * 	OMRPORT_ENSURE_CAPACITY_FAILED: an error occurred.
  */
 uintptr_t
-omrmem_ensure_capacity32(struct OMRPortLibrary *portLibrary, uintptr_t byteAmount)
+omrmem_ensure_capacity32(struct OMRPortLibrary* portLibrary, uintptr_t byteAmount)
 {
-	uintptr_t retValue = OMRPORT_ENSURE_CAPACITY_FAILED;
+    uintptr_t retValue = OMRPORT_ENSURE_CAPACITY_FAILED;
 
-	Trc_PRT_mem_omrmem_ensure_capacity32_Entry(byteAmount);
+    Trc_PRT_mem_omrmem_ensure_capacity32_Entry(byteAmount);
 
 #if defined(OMR_ENV_DATA64)
-	retValue = ensure_capacity32(portLibrary, byteAmount);
+    retValue = ensure_capacity32(portLibrary, byteAmount);
 #endif /* (OMR_ENV_DATA64) */
 
-	Trc_PRT_mem_omrmem_ensure_capacity32_Exit(retValue);
+    Trc_PRT_mem_omrmem_ensure_capacity32_Exit(retValue);
 
-	return retValue;
+    return retValue;
 }
-

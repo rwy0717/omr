@@ -48,63 +48,62 @@
  *
  */
 uintptr_t
-pool_ensureCapacity(J9Pool *aPool, uintptr_t newCapacity)
+pool_ensureCapacity(J9Pool* aPool, uintptr_t newCapacity)
 {
-	uintptr_t numElements;
-	uintptr_t result = 0;
+    uintptr_t numElements;
+    uintptr_t result = 0;
 
-	Trc_pool_ensureCapacity_Entry(aPool, newCapacity);
+    Trc_pool_ensureCapacity_Entry(aPool, newCapacity);
 
-	numElements = pool_capacity(aPool);
+    numElements = pool_capacity(aPool);
 
-	/* mark each pool as POOL_NEVER_FREE_PUDDLES */
-	aPool->flags |= POOL_NEVER_FREE_PUDDLES;
+    /* mark each pool as POOL_NEVER_FREE_PUDDLES */
+    aPool->flags |= POOL_NEVER_FREE_PUDDLES;
 
-	if (newCapacity > numElements) {
-		J9PoolPuddleList *puddleList;
-		J9PoolPuddle *newPuddle, *lastPuddle;
-		uintptr_t newSize = newCapacity - numElements;
+    if (newCapacity > numElements) {
+        J9PoolPuddleList* puddleList;
+        J9PoolPuddle *newPuddle, *lastPuddle;
+        uintptr_t newSize = newCapacity - numElements;
 
-		puddleList = J9POOL_PUDDLELIST(aPool);
-		lastPuddle = J9POOLPUDDLELIST_NEXTPUDDLE(puddleList);
-		for (;;) {
-			if (lastPuddle->nextPuddle == 0) {
-				break;
-			}
-			lastPuddle = J9POOLPUDDLE_NEXTPUDDLE(lastPuddle);
-		}
-		while (newSize > 0) {
-			J9PoolPuddle *puddle;
+        puddleList = J9POOL_PUDDLELIST(aPool);
+        lastPuddle = J9POOLPUDDLELIST_NEXTPUDDLE(puddleList);
+        for (;;) {
+            if (lastPuddle->nextPuddle == 0) {
+                break;
+            }
+            lastPuddle = J9POOLPUDDLE_NEXTPUDDLE(lastPuddle);
+        }
+        while (newSize > 0) {
+            J9PoolPuddle* puddle;
 
-			if (newSize < aPool->elementsPerPuddle) {
-				newSize = aPool->elementsPerPuddle;
-			}
+            if (newSize < aPool->elementsPerPuddle) {
+                newSize = aPool->elementsPerPuddle;
+            }
 
-			newPuddle = poolPuddle_new(aPool);
-			if (newPuddle == 0) {
-				Trc_pool_ensureCapacity_OutOfMemory(newCapacity);
-				result = -1;
-			}
+            newPuddle = poolPuddle_new(aPool);
+            if (newPuddle == 0) {
+                Trc_pool_ensureCapacity_OutOfMemory(newCapacity);
+                result = -1;
+            }
 
-			/* Stick it at the end of the list. */
-			NNWSRP_SET(lastPuddle->nextPuddle, newPuddle);
-			NNWSRP_SET(newPuddle->prevPuddle, lastPuddle);
-			/* And also at the top of the available puddle list. */
-			puddle = WSRP_GET(puddleList->nextAvailablePuddle, J9PoolPuddle *);
-			if (puddle) {
-				NNWSRP_SET(newPuddle->nextAvailablePuddle, puddle);
-			}
-			NNWSRP_SET(puddleList->nextAvailablePuddle, newPuddle);
+            /* Stick it at the end of the list. */
+            NNWSRP_SET(lastPuddle->nextPuddle, newPuddle);
+            NNWSRP_SET(newPuddle->prevPuddle, lastPuddle);
+            /* And also at the top of the available puddle list. */
+            puddle = WSRP_GET(puddleList->nextAvailablePuddle, J9PoolPuddle*);
+            if (puddle) {
+                NNWSRP_SET(newPuddle->nextAvailablePuddle, puddle);
+            }
+            NNWSRP_SET(puddleList->nextAvailablePuddle, newPuddle);
 
-			lastPuddle = newPuddle;
-			newSize -= aPool->elementsPerPuddle;
-		}
-	}
+            lastPuddle = newPuddle;
+            newSize -= aPool->elementsPerPuddle;
+        }
+    }
 
-	Trc_pool_ensureCapacity_Exit(result);
-	return result;
+    Trc_pool_ensureCapacity_Exit(result);
+    return result;
 }
-
 
 /**
  * Returns the total capacity of a pool
@@ -116,25 +115,23 @@ pool_ensureCapacity(J9Pool *aPool, uintptr_t newCapacity)
  *
  */
 uintptr_t
-pool_capacity(J9Pool *aPool)
+pool_capacity(J9Pool* aPool)
 {
-	uintptr_t numElements = 0;
+    uintptr_t numElements = 0;
 
-	Trc_pool_capacity_Entry(aPool);
+    Trc_pool_capacity_Entry(aPool);
 
-	if (aPool) {
-		J9PoolPuddleList *puddleList = J9POOL_PUDDLELIST(aPool);
-		J9PoolPuddle *walk = J9POOLPUDDLELIST_NEXTPUDDLE(puddleList);
+    if (aPool) {
+        J9PoolPuddleList* puddleList = J9POOL_PUDDLELIST(aPool);
+        J9PoolPuddle* walk = J9POOLPUDDLELIST_NEXTPUDDLE(puddleList);
 
-		while (walk) {
-			numElements += aPool->elementsPerPuddle;
-			walk = J9POOLPUDDLE_NEXTPUDDLE(walk);
-		}
-	}
+        while (walk) {
+            numElements += aPool->elementsPerPuddle;
+            walk = J9POOLPUDDLE_NEXTPUDDLE(walk);
+        }
+    }
 
-	Trc_pool_capacity_Exit(numElements);
+    Trc_pool_capacity_Exit(numElements);
 
-	return numElements;
+    return numElements;
 }
-
-

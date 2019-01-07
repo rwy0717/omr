@@ -20,15 +20,15 @@
 #############################################################################
 
 list(APPEND OMR_PLATFORM_DEFINITIONS
-	-DOMR_OS_WINDOWS
-	-D_CRT_SECURE_NO_WARNINGS
-	-DCRTAPI1=_cdecl
-	-DCRTAPI2=_cdecl
-	-D_MT
-	-D_WINSOCKAPI_
-	-D_DLL
-	-D_HAS_EXCEPTIONS=0
-	-D_VARIADIC_MAX=10
-	-D_WIN32_WINNT=0x0501
-	-DWINVER=0x0501
+    -DOMR_OS_WINDOWS
+    -D_CRT_SECURE_NO_WARNINGS
+    -DCRTAPI1=_cdecl
+    -DCRTAPI2=_cdecl
+    -D_MT
+    -D_WINSOCKAPI_
+    -D_DLL
+    -D_HAS_EXCEPTIONS=0
+    -D_VARIADIC_MAX=10
+    -D_WIN32_WINNT=0x0501
+    -DWINVER=0x0501
 )

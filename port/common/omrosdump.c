@@ -27,8 +27,6 @@
  */
 #include "omrport.h"
 
-
-
 /**
  * Create a dump file of the OS state.
  *
@@ -48,10 +46,10 @@
  * @note if J9UNIQUE_DUMPS is set, filename will be unique.
  */
 uintptr_t
-omrdump_create(struct OMRPortLibrary *portLibrary, char *filename, char *dumpType, void *userData)
+omrdump_create(struct OMRPortLibrary* portLibrary, char* filename, char* dumpType, void* userData)
 {
-	/* noop */
-	return 1;
+    /* noop */
+    return 1;
 }
 
 /**
@@ -63,10 +61,10 @@ omrdump_create(struct OMRPortLibrary *portLibrary, char *filename, char *dumpTyp
  * On AIX, on error, it returns OMRPORT_ERROR_STARTUP_AIX_PROC_ATTR on failure.
  */
 int32_t
-omrdump_startup(struct OMRPortLibrary *portLibrary)
+omrdump_startup(struct OMRPortLibrary* portLibrary)
 {
-	/* noop */
-	return 0;
+    /* noop */
+    return 0;
 }
 
 /**
@@ -74,10 +72,7 @@ omrdump_startup(struct OMRPortLibrary *portLibrary)
  *
  * @param[in] portLibrary The port library.
  */
-void
-omrdump_shutdown(struct OMRPortLibrary *portLibrary)
+void omrdump_shutdown(struct OMRPortLibrary* portLibrary)
 {
-	/* noop */
+    /* noop */
 }
-
-

@@ -36,20 +36,19 @@ namespace Tril {
  * Tril methods that hides the details of how compilation is actually done.
  */
 class MethodCompiler {
-    public:
-
-        /**
+public:
+    /**
          * @brief Constructs an intance of the Tril method compiler
          * @param methodNode is the AST node representing the Tril method to be compiled
          */
-        explicit MethodCompiler(const ASTNode* methodNode)
-            : _method{methodNode},
-              _entry_point{NULL}
-        {}
+    explicit MethodCompiler(const ASTNode* methodNode)
+        : _method { methodNode }
+        , _entry_point { NULL }
+    {}
 
-        virtual ~MethodCompiler() = default;
+    virtual ~MethodCompiler() = default;
 
-        /**
+    /**
          * @brief Compiles the Tril method
          * @return a return code for the compiler
          *
@@ -66,40 +65,39 @@ class MethodCompiler {
          * is set if and only if compilation succeeds is enough to meet this
          * requirement.
          */
-        virtual int32_t compile() = 0;
+    virtual int32_t compile() = 0;
 
-        /**
+    /**
          * @brief Returns the entry point to the compiled body, or null if not yet compiled
          * @tparam T is the function pointer type of the entry point
          *
          * Specifying a type for T that is not a function pointer results in a
          * compilation error.
          */
-        template <typename T>
-        T getEntryPoint() {
-            static_assert( std::is_pointer<T>::value &&
-                           std::is_function<typename std::remove_pointer<T>::type>::value,
-                          "Attempted to get entry point using a non-function-pointer type.");
-            return reinterpret_cast<T>(_entry_point);
-        }
+    template <typename T>
+    T getEntryPoint()
+    {
+        static_assert(std::is_pointer<T>::value && std::is_function<typename std::remove_pointer<T>::type>::value,
+            "Attempted to get entry point using a non-function-pointer type.");
+        return reinterpret_cast<T>(_entry_point);
+    }
 
-    protected:
-
-        /**
+protected:
+    /**
          * @brief Sets the entry point to the compiled body
          *
          * This value can later be retrieved using `getEntryPoint<>()`
          */
-        void setEntryPoint(void* entry_point) { _entry_point = entry_point; }
+    void setEntryPoint(void* entry_point) { _entry_point = entry_point; }
 
-        /**
+    /**
          * @brief Returns the MethodInfo object for the Tril method to be compiled
          */
-        const Tril::MethodInfo& getMethodInfo() const { return _method; }
+    const Tril::MethodInfo& getMethodInfo() const { return _method; }
 
-    private:
-        Tril::MethodInfo _method;   // Tril method to be compiled
-        void* _entry_point;         // entry point to the compiled body
+private:
+    Tril::MethodInfo _method; // Tril method to be compiled
+    void* _entry_point; // entry point to the compiled body
 };
 
 } // namespace Tril

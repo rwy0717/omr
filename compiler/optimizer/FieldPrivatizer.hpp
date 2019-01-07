@@ -22,13 +22,13 @@
 #ifndef FIELDPRIV_INCL
 #define FIELDPRIV_INCL
 
-#include <stdint.h>                                     // for int32_t, etc
-#include "cs2/bitvectr.h"                               // for ABitVector
-#include "env/TRMemory.hpp"                             // for Allocator
-#include "il/Node.hpp"                                  // for Node, vcount_t
+#include <stdint.h> // for int32_t, etc
+#include "cs2/bitvectr.h" // for ABitVector
+#include "env/TRMemory.hpp" // for Allocator
+#include "il/Node.hpp" // for Node, vcount_t
 #include "il/SymbolReference.hpp"
 #include "infra/HashTab.hpp"
-#include "infra/List.hpp"                               // for List
+#include "infra/List.hpp" // for List
 #include "optimizer/OptimizationManager.hpp"
 #include "optimizer/IsolatedStoreElimination.hpp"
 #include "optimizer/LoopCanonicalizer.hpp"
@@ -39,9 +39,15 @@ class TR_PostDominators;
 class TR_RegisterCandidate;
 class TR_Structure;
 class TR_ValueNumberInfo;
-namespace TR { class Block; }
-namespace TR { class Optimization; }
-namespace TR { class TreeTop; }
+namespace TR {
+class Block;
+}
+namespace TR {
+class Optimization;
+}
+namespace TR {
+class TreeTop;
+}
 
 /*
  * Class TR_FieldPrivatizer
@@ -105,107 +111,105 @@ namespace TR { class TreeTop; }
  * the loop. So it's more general in that sense.
  */
 
-class TR_FieldPrivatizer : public TR_LoopTransformer
-   {
-   class TR_RemovedNode
-      {
-      public:
-      TR_RemovedNode(TR::Node *storeNode, TR::Node *removedSign) :
-                    _storeNode(storeNode), _removedSign(removedSign) {}
+class TR_FieldPrivatizer : public TR_LoopTransformer {
+    class TR_RemovedNode {
+    public:
+        TR_RemovedNode(TR::Node* storeNode, TR::Node* removedSign)
+            : _storeNode(storeNode)
+            , _removedSign(removedSign)
+        {}
 
-      TR::Node *_storeNode;
-      TR::Node *_removedSign;
-      };
+        TR::Node* _storeNode;
+        TR::Node* _removedSign;
+    };
 
-   public:
+public:
+    TR_FieldPrivatizer(TR::OptimizationManager* manager);
+    static TR::Optimization* create(TR::OptimizationManager* manager)
+    {
+        return new (manager->allocator()) TR_FieldPrivatizer(manager);
+    }
 
-   TR_FieldPrivatizer(TR::OptimizationManager *manager);
-   static TR::Optimization *create(TR::OptimizationManager *manager)
-      {
-      return new (manager->allocator()) TR_FieldPrivatizer(manager);
-      }
+    virtual int32_t perform();
+    virtual const char* optDetailString() const throw();
 
-   virtual int32_t perform();
-   virtual const char * optDetailString() const throw();
+    virtual int32_t detectCanonicalizedPredictableLoops(TR_Structure*, TR_BitVector**, int32_t);
+    bool storesBackMustBePlacedInExitBlock(TR::Block*, TR::Block*, TR_BitVector*);
+    void placeStoresBackInExits(List<TR::Block>*, List<TR::Block>*);
+    void placeStoresBackInExit(TR::Block*, bool);
+    void placeInitializersInLoopInvariantBlock(TR::Block*);
+    bool subtreeIsInvariantInLoop(TR::Node*);
+    bool bothSubtreesMatch(TR::Node*, TR::Node*);
+    TR::SymbolReference* getPrivatizedFieldAutoSymRef(TR::Node*);
+    void privatizeFields(TR::Node*, bool, vcount_t);
+    void privatizeNonEscapingLoop(TR_Structure*, TR::Block*, vcount_t);
+    void detectFieldsThatCannotBePrivatized(TR::Node*, vcount_t);
+    void detectFieldsThatCannotBePrivatized(TR_Structure*, vcount_t);
+    bool canPrivatizeFieldSymRef(TR::Node*);
+    bool containsEscapePoints(TR_Structure*, bool&);
+    void addPrivatizedRegisterCandidates(TR_Structure*);
+    bool isStringPeephole(TR::Node*, TR::TreeTop*);
+    void cleanupStringPeephole();
+    void placeStringEpiloguesBackInExit(TR::Block*, bool);
+    void placeStringEpilogueInExits(List<TR::Block>*, List<TR::Block>*);
+    void addStringInitialization(TR::Block*);
+    bool isFieldAliasAccessed(TR::SymbolReference* symRef);
 
-   virtual int32_t detectCanonicalizedPredictableLoops(TR_Structure *, TR_BitVector **, int32_t);
-   bool storesBackMustBePlacedInExitBlock(TR::Block *, TR::Block *, TR_BitVector *);
-   void placeStoresBackInExits(List<TR::Block> *, List<TR::Block> *);
-   void placeStoresBackInExit(TR::Block *, bool);
-   void placeInitializersInLoopInvariantBlock(TR::Block *);
-   bool subtreeIsInvariantInLoop(TR::Node *);
-   bool bothSubtreesMatch(TR::Node *, TR::Node *);
-   TR::SymbolReference *getPrivatizedFieldAutoSymRef(TR::Node *);
-   void privatizeFields(TR::Node *, bool, vcount_t);
-   void privatizeNonEscapingLoop(TR_Structure *, TR::Block *, vcount_t);
-   void detectFieldsThatCannotBePrivatized(TR::Node *, vcount_t);
-   void detectFieldsThatCannotBePrivatized(TR_Structure *, vcount_t);
-   bool canPrivatizeFieldSymRef(TR::Node *);
-   bool containsEscapePoints(TR_Structure *, bool &);
-   void addPrivatizedRegisterCandidates(TR_Structure *);
-   bool isStringPeephole(TR::Node *, TR::TreeTop *);
-   void cleanupStringPeephole();
-   void placeStringEpiloguesBackInExit(TR::Block *, bool);
-   void placeStringEpilogueInExits(List<TR::Block> *, List<TR::Block> *);
-   void addStringInitialization(TR::Block *);
-   bool isFieldAliasAccessed(TR::SymbolReference * symRef);
+    TR_BitVector *_privatizedFields, *_fieldsThatCannotBePrivatized;
+    TR_BitVector* _needToStoreBack;
+    List<TR::Node> _privatizedFieldNodes;
+    TR_HashTabInt _privatizedFieldSymRefs;
+    List<TR_RegisterCandidate> _privatizedRegCandidates;
+    TR::Block* _criticalEdgeBlock;
+    TR::SymbolReference *_stringSymRef, *_valueOfSymRef, *_tempStringSymRef, *_appendSymRef, *_toStringSymRef, *_initSymRef;
+    TR::TreeTop* _stringPeepholeTree;
+    TR_OpaqueClassBlock* _stringBufferClass;
+    TR_Structure* _currLoopStructure;
+    int32_t _counter;
+    List<TR::TreeTop> _appendCalls;
 
-   TR_BitVector *_privatizedFields, *_fieldsThatCannotBePrivatized;
-   TR_BitVector *_needToStoreBack;
-   List<TR::Node> _privatizedFieldNodes;
-   TR_HashTabInt              _privatizedFieldSymRefs;
-   List<TR_RegisterCandidate> _privatizedRegCandidates;
-   TR::Block *_criticalEdgeBlock;
-   TR::SymbolReference *_stringSymRef, *_valueOfSymRef, *_tempStringSymRef, *_appendSymRef, *_toStringSymRef, *_initSymRef;
-   TR::TreeTop *_stringPeepholeTree;
-   TR_OpaqueClassBlock *_stringBufferClass;
-   TR_Structure *_currLoopStructure;
-   int32_t _counter;
-   List<TR::TreeTop> _appendCalls;
+    TR_PostDominators* _postDominators;
 
-   TR_PostDominators *_postDominators;
+    // Element Privatization
+    // This Optimization looks to convert locally declared arrays/structs/etc in languages like C/C++ which are accessed using indirect loads/stores with direct loads/stores
+    // Ex:
+    // iiload  #57 shadow sym m[]
+    //   aadd
+    //     loadaddr #56 base ptr m
+    //     lconst 8
 
-   // Element Privatization
-   // This Optimization looks to convert locally declared arrays/structs/etc in languages like C/C++ which are accessed using indirect loads/stores with direct loads/stores
-   // Ex:
-   // iiload  #57 shadow sym m[]
-   //   aadd
-   //     loadaddr #56 base ptr m
-   //     lconst 8
+    // into:
+    // iload #103 temp
+    // where temp will have a stack offset equivalent to m + 8.
 
-   // into:
-   // iload #103 temp
-   // where temp will have a stack offset equivalent to m + 8.
+    // the second part of this optimization will be an alias refinement which will try to remove m and m[] from alias sets of temps if we are able to eliminate all references to m and m[] in the trees.
 
-   // the second part of this optimization will be an alias refinement which will try to remove m and m[] from alias sets of temps if we are able to eliminate all references to m and m[] in the trees.
+    struct EPCandidate {
+        EPCandidate(TR::Node* n, TR::TreeTop* tt, int32_t num)
+            : node(n)
+            , rootTT(tt)
+            , valueNum(num)
+        {}
+        TR::Node* node;
+        TR::TreeTop* rootTT;
+        int32_t valueNum;
+    };
 
-   struct EPCandidate
-      {
-      EPCandidate(TR::Node *n, TR::TreeTop *tt, int32_t num) : node(n), rootTT(tt), valueNum(num) { }
-      TR::Node *node;
-      TR::TreeTop *rootTT;
-      int32_t valueNum;
-      };
+    void elementPrivatization();
+    void findElementCandidates();
+    void privatizeElementCandidates();
 
+    void setVisitCount(vcount_t count) { _visitCount = count; }
+    TR::Node* walkTreeForLoadOrStoreNode(TR::Node* node);
+    bool isNodeInCorrectForm(TR::Node* node);
+    int64_t getOffSetFromAddressNode(TR::Node* addressNode);
 
-   void elementPrivatization();
-   void findElementCandidates();
-   void privatizeElementCandidates();
+private:
+    vcount_t _visitCount;
+    TR_ValueNumberInfo* _valueNumberInfo;
 
-   void setVisitCount(vcount_t count) { _visitCount = count; }
-   TR::Node* walkTreeForLoadOrStoreNode(TR::Node *node);
-   bool isNodeInCorrectForm(TR::Node *node);
-   int64_t getOffSetFromAddressNode(TR::Node *addressNode);
-
-   private:
-
-   vcount_t _visitCount;
-   TR_ValueNumberInfo *_valueNumberInfo;
-
-   TR::list<EPCandidate> _epCandidates;       // A list of candidates that are in the right form to be privatized.
-   CS2::ABitVector<TR::Allocator> _epValueNumbers;              // this bit vector is to keep track of value numbers that we know are 'safe' to transform.  Allowing us to catch move opportunities.
-
-   };
-
+    TR::list<EPCandidate> _epCandidates; // A list of candidates that are in the right form to be privatized.
+    CS2::ABitVector<TR::Allocator> _epValueNumbers; // this bit vector is to keep track of value numbers that we know are 'safe' to transform.  Allowing us to catch move opportunities.
+};
 
 #endif

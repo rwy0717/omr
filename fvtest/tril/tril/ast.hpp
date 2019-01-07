@@ -54,10 +54,11 @@
  * aliases for the underlying C++ types used to store values.
  */
 struct ASTValue {
-    public:
-
+public:
     // names for the different AST data types
-    enum ASTType {Integer, FloatingPoint, String} ;
+    enum ASTType { Integer,
+        FloatingPoint,
+        String };
 
     // aliases for the underlying C++ types used to store the different AST types
     typedef uint64_t Integer_t;
@@ -79,9 +80,24 @@ struct ASTValue {
      */
 
     // constructors
-    explicit ASTValue(Integer_t v) : _type{Integer}, next{NULL} { _value.integer = v; }
-    explicit ASTValue(FloatingPoint_t v) : _type{FloatingPoint}, next{NULL} { _value.floatingPoint = v; }
-    explicit ASTValue(String_t v) : _type{String}, next{NULL} { _value.str = v; }
+    explicit ASTValue(Integer_t v)
+        : _type { Integer }
+        , next { NULL }
+    {
+        _value.integer = v;
+    }
+    explicit ASTValue(FloatingPoint_t v)
+        : _type { FloatingPoint }
+        , next { NULL }
+    {
+        _value.floatingPoint = v;
+    }
+    explicit ASTValue(String_t v)
+        : _type { String }
+        , next { NULL }
+    {
+        _value.str = v;
+    }
 
     /**
      * @brief Return the contained value as the specified type
@@ -105,17 +121,20 @@ struct ASTValue {
      */
 
     template <typename T>
-    typename OMR::EnableIf<OMR::IsIntegral<T>::VALUE , T>::Type get() const {
+    typename OMR::EnableIf<OMR::IsIntegral<T>::VALUE, T>::Type get() const
+    {
         assert(Integer == _type);
         return static_cast<T>(_value.integer);
     }
     template <typename T>
-    typename OMR::EnableIf<OMR::IsFloatingPoint<T>::VALUE, T>::Type get() const {
+    typename OMR::EnableIf<OMR::IsFloatingPoint<T>::VALUE, T>::Type get() const
+    {
         assert(FloatingPoint == _type);
         return static_cast<T>(_value.floatingPoint);
     }
     template <typename T>
-    typename OMR::EnableIf<OMR::IsSame<String_t, T>::VALUE, T>::Type get() const {
+    typename OMR::EnableIf<OMR::IsSame<String_t, T>::VALUE, T>::Type get() const
+    {
         assert(String == _type);
         return static_cast<T>(_value.str);
     }
@@ -123,17 +142,29 @@ struct ASTValue {
     /**
      * @brief Return the contained value as its underlying integer type, if that is its type
      */
-    Integer_t getInteger() const { assert(Integer == _type); return _value.integer; }
+    Integer_t getInteger() const
+    {
+        assert(Integer == _type);
+        return _value.integer;
+    }
 
     /**
      * @brief Return the contained value as its underlying floating point type, if that is its type
      */
-    FloatingPoint_t getFloatingPoint() const { assert(FloatingPoint == _type); return _value.floatingPoint; }
+    FloatingPoint_t getFloatingPoint() const
+    {
+        assert(FloatingPoint == _type);
+        return _value.floatingPoint;
+    }
 
     /**
      * @brief Return the contained value as its underlying string type, if that is its type
      */
-    String_t getString() const { assert(String == _type); return _value.str; }
+    String_t getString() const
+    {
+        assert(String == _type);
+        return _value.str;
+    }
 
     /**
      * @brief Checks whether the type of the contained value and the specified type are compatible
@@ -153,15 +184,18 @@ struct ASTValue {
      */
 
     template <typename T>
-    typename OMR::EnableIf<OMR::IsIntegral<T>::VALUE , bool>::Type isCompatibleWith() const {
+    typename OMR::EnableIf<OMR::IsIntegral<T>::VALUE, bool>::Type isCompatibleWith() const
+    {
         return Integer == _type;
     }
     template <typename T>
-    typename OMR::EnableIf<OMR::IsFloatingPoint<T>::VALUE, bool>::Type isCompatibleWith() const {
+    typename OMR::EnableIf<OMR::IsFloatingPoint<T>::VALUE, bool>::Type isCompatibleWith() const
+    {
         return FloatingPoint == _type;
     }
     template <typename T>
-    typename OMR::EnableIf<OMR::IsSame<String_t, T>::VALUE, bool>::Type isCompatibleWith() const {
+    typename OMR::EnableIf<OMR::IsSame<String_t, T>::VALUE, bool>::Type isCompatibleWith() const
+    {
         return String == _type;
     }
 
@@ -171,8 +205,7 @@ struct ASTValue {
      */
     ASTType getType() const { return _type; }
 
-    private:
-
+private:
     // tag containing specifying the type of the contained value
     ASTType _type;
 
@@ -183,7 +216,7 @@ struct ASTValue {
         String_t str;
     } _value;
 
-    public:
+public:
     ASTValue* next;
 };
 
@@ -191,34 +224,42 @@ struct ASTValue {
  * Overloaded operators for ASTValue
  */
 
-inline bool operator == (const ASTValue& lhs, const ASTValue& rhs) {
-   if (lhs.getType() == rhs.getType()) {
-      switch (lhs.getType()) {
-         case ASTValue::Integer: return lhs.getInteger() == rhs.getInteger();
-         case ASTValue::FloatingPoint: return lhs.getFloatingPoint() == rhs.getFloatingPoint();
-         case ASTValue::String: return std::strcmp(lhs.getString(), rhs.getString()) == 0;
-      }
-   }
-   return false;
+inline bool operator==(const ASTValue& lhs, const ASTValue& rhs)
+{
+    if (lhs.getType() == rhs.getType()) {
+        switch (lhs.getType()) {
+        case ASTValue::Integer:
+            return lhs.getInteger() == rhs.getInteger();
+        case ASTValue::FloatingPoint:
+            return lhs.getFloatingPoint() == rhs.getFloatingPoint();
+        case ASTValue::String:
+            return std::strcmp(lhs.getString(), rhs.getString()) == 0;
+        }
+    }
+    return false;
 }
 
-inline bool operator != (const ASTValue& lhs, const ASTValue& rhs) {
-    return ! (lhs == rhs);
+inline bool operator!=(const ASTValue& lhs, const ASTValue& rhs)
+{
+    return !(lhs == rhs);
 }
 
 /**
  * @brief A struct representing arguments of nodes in the Tril AST
  */
 struct ASTNodeArg {
-    private:
+private:
     const char* _name;
     const ASTValue* _value;
 
-    public:
+public:
     ASTNodeArg* next;
 
     ASTNodeArg(const char* name, ASTValue* value, ASTNodeArg* next = NULL)
-        : _name{name}, _value{value}, next{next} {}
+        : _name { name }
+        , _value { value }
+        , next { next }
+    {}
 
     const char* getName() const { return _name; }
     const ASTValue* getValue() const { return _value; }
@@ -226,26 +267,31 @@ struct ASTNodeArg {
 
 // overloaded operators for ASTNodeArg
 
-bool operator == (const ASTNodeArg& lhs, const ASTNodeArg& rhs);
+bool operator==(const ASTNodeArg& lhs, const ASTNodeArg& rhs);
 
-inline bool operator != (const ASTNodeArg& lhs, const ASTNodeArg& rhs) {
-    return ! (lhs == rhs);
+inline bool operator!=(const ASTNodeArg& lhs, const ASTNodeArg& rhs)
+{
+    return !(lhs == rhs);
 }
 
 /**
  * @brief A struct representing nodes in the Tril AST
  */
 struct ASTNode {
-    private:
+private:
     const char* _name;
     ASTNodeArg* _args;
     ASTNode* _children;
 
-    public:
+public:
     ASTNode* next;
 
     ASTNode(const char* name, ASTNodeArg* args, ASTNode* children, ASTNode* next)
-        : _name{name}, _args{args}, _children{children}, next{next} {}
+        : _name { name }
+        , _args { args }
+        , _children { children }
+        , next { next }
+    {}
 
     const char* getName() const { return _name; }
 
@@ -259,7 +305,8 @@ struct ASTNode {
      * @param index is the index of the argument
      * @return the argument at the given index if found, NULL otherwise
      */
-    const ASTNodeArg* getArgument(int index) const {
+    const ASTNodeArg* getArgument(int index) const
+    {
         auto arg = _args;
 
         while (arg != NULL && index > 0) {
@@ -275,7 +322,8 @@ struct ASTNode {
      * @param name is the name for the argument
      * @return the argument with the given name if found, NULL otherwise
      */
-    const ASTNodeArg* getArgByName(const char* name) const {
+    const ASTNodeArg* getArgByName(const char* name) const
+    {
         auto arg = _args;
         while (arg) {
             if (arg->getName() != NULL && strcmp(name, arg->getName()) == 0) { // arg need not have a name
@@ -291,14 +339,18 @@ struct ASTNode {
      * @param index is the index of the positional argument
      * @return the positional argument at the given index if found, NULL otherwise
      */
-    const ASTNodeArg* getPositionalArg(int index) const {
+    const ASTNodeArg* getPositionalArg(int index) const
+    {
         auto arg = _args;
 
         while (arg != NULL) {
             const auto name = arg->getName();
             if (name == NULL || name[0] == '\0') {
-                if (index > 0) { --index; }
-                else { break; }
+                if (index > 0) {
+                    --index;
+                } else {
+                    break;
+                }
             }
             arg = arg->next;
         }
@@ -308,7 +360,8 @@ struct ASTNode {
     /**
      * @brief Returns the number of arguments the node has
      */
-    int argumentCount() const {
+    int argumentCount() const
+    {
         auto arg = _args;
         auto i = 0;
 

@@ -30,56 +30,56 @@
  */
 TEST_F(CudaTest, basic)
 {
-	OMRPORT_ACCESS_FROM_OMRPORT(getPortLibrary());
+    OMRPORT_ACCESS_FROM_OMRPORT(getPortLibrary());
 
-	int32_t rc = 0;
-	uint32_t deviceCount = 0;
+    int32_t rc = 0;
+    uint32_t deviceCount = 0;
 
-	rc = omrcuda_deviceGetCount(&deviceCount);
+    rc = omrcuda_deviceGetCount(&deviceCount);
 
-	ASSERT_EQ(0, rc) << "omrcuda_deviceGetCount failed";
+    ASSERT_EQ(0, rc) << "omrcuda_deviceGetCount failed";
 
-	outputComment(OMRPORTLIB, "omrcuda: found %d device%s\n", deviceCount, (1 == deviceCount) ? "" : "s");
+    outputComment(OMRPORTLIB, "omrcuda: found %d device%s\n", deviceCount, (1 == deviceCount) ? "" : "s");
 
-	uint32_t driverVersion = 0;
-	uint32_t runtimeVersion = 0;
+    uint32_t driverVersion = 0;
+    uint32_t runtimeVersion = 0;
 
-	if (0 != deviceCount) {
-		rc = omrcuda_driverGetVersion(&driverVersion);
+    if (0 != deviceCount) {
+        rc = omrcuda_driverGetVersion(&driverVersion);
 
-		ASSERT_EQ(0, rc) << "omrcuda_driverGetVersion failed";
+        ASSERT_EQ(0, rc) << "omrcuda_driverGetVersion failed";
 
-		rc = omrcuda_runtimeGetVersion(&runtimeVersion);
+        rc = omrcuda_runtimeGetVersion(&runtimeVersion);
 
-		ASSERT_EQ(0, rc) << "omrcuda_runtimeGetVersion failed";
-	}
+        ASSERT_EQ(0, rc) << "omrcuda_runtimeGetVersion failed";
+    }
 
-	J9CudaConfig *config = OMRPORTLIB->cuda_configData;
+    J9CudaConfig* config = OMRPORTLIB->cuda_configData;
 
-	ASSERT_NOT_NULL(config) << "omrcuda config data is missing";
-	ASSERT_NOT_NULL(config->getSummaryData) << "omrcuda getSummaryData is missing";
+    ASSERT_NOT_NULL(config) << "omrcuda config data is missing";
+    ASSERT_NOT_NULL(config->getSummaryData) << "omrcuda getSummaryData is missing";
 
-	J9CudaSummaryDescriptor summary;
+    J9CudaSummaryDescriptor summary;
 
-	rc = config->getSummaryData(OMRPORTLIB, &summary);
+    rc = config->getSummaryData(OMRPORTLIB, &summary);
 
-	ASSERT_EQ(0, rc) << "omrcuda getSummaryData failed";
-	ASSERT_EQ(deviceCount, summary.deviceCount);
-	ASSERT_EQ(normalizeVersion(driverVersion), summary.driverVersion);
-	ASSERT_EQ(normalizeVersion(runtimeVersion), summary.runtimeVersion);
-	ASSERT_NOT_NULL(config->getDeviceData) << "omrcuda getDeviceData is missing";
+    ASSERT_EQ(0, rc) << "omrcuda getSummaryData failed";
+    ASSERT_EQ(deviceCount, summary.deviceCount);
+    ASSERT_EQ(normalizeVersion(driverVersion), summary.driverVersion);
+    ASSERT_EQ(normalizeVersion(runtimeVersion), summary.runtimeVersion);
+    ASSERT_NOT_NULL(config->getDeviceData) << "omrcuda getDeviceData is missing";
 
-	for (uint32_t deviceId = 0; deviceId < deviceCount; ++deviceId) {
-		J9CudaDeviceDescriptor detail;
+    for (uint32_t deviceId = 0; deviceId < deviceCount; ++deviceId) {
+        J9CudaDeviceDescriptor detail;
 
-		rc = config->getDeviceData(OMRPORTLIB, deviceId, &detail);
+        rc = config->getDeviceData(OMRPORTLIB, deviceId, &detail);
 
-		ASSERT_EQ(0, rc) << "omrcuda getDeviceData failed";
-	}
+        ASSERT_EQ(0, rc) << "omrcuda getDeviceData failed";
+    }
 
-	for (uint32_t deviceId = 0; deviceId < deviceCount; ++deviceId) {
-		rc = omrcuda_deviceReset(deviceId);
+    for (uint32_t deviceId = 0; deviceId < deviceCount; ++deviceId) {
+        rc = omrcuda_deviceReset(deviceId);
 
-		ASSERT_EQ(0, rc) << "omrcuda omrcuda_deviceReset failed";
-	}
+        ASSERT_EQ(0, rc) << "omrcuda omrcuda_deviceReset failed";
+    }
 }

@@ -35,16 +35,14 @@
  *
  * This function must only be called *once*. It is called from omrthread_init().
  */
-void
-omrthread_numa_init(omrthread_library_t lib)
+void omrthread_numa_init(omrthread_library_t lib)
 {
 }
 
 /**
  * Closes the dynamic library for NUMA. Should only be called from omrthread_shutdown().
  */
-void
-omrthread_numa_shutdown(omrthread_library_t lib)
+void omrthread_numa_shutdown(omrthread_library_t lib)
 {
 }
 
@@ -52,8 +50,7 @@ omrthread_numa_shutdown(omrthread_library_t lib)
  * Sets the NUMA enabled status.
  * This applies to the entire process.
  */
-void
-omrthread_numa_set_enabled(BOOLEAN enabled)
+void omrthread_numa_set_enabled(BOOLEAN enabled)
 {
 }
 
@@ -71,8 +68,8 @@ omrthread_numa_set_enabled(BOOLEAN enabled)
 uintptr_t
 omrthread_numa_get_max_node(void)
 {
-	/* This is the common function, just return 0 */
-	return 0;
+    /* This is the common function, just return 0 */
+    return 0;
 }
 
 /**
@@ -86,9 +83,9 @@ omrthread_numa_get_max_node(void)
  * @see omrthread_numa_set_node_affinity(omrthread_t thread, const uintptr_t *nodeList, uintptr_t nodeCount, uint32_t flags)
  */
 intptr_t
-omrthread_numa_set_node_affinity_nolock(omrthread_t thread, const uintptr_t *nodeList, uintptr_t nodeCount, uint32_t flags)
+omrthread_numa_set_node_affinity_nolock(omrthread_t thread, const uintptr_t* nodeList, uintptr_t nodeCount, uint32_t flags)
 {
-	return 0;
+    return 0;
 }
 
 /**
@@ -114,10 +111,10 @@ omrthread_numa_set_node_affinity_nolock(omrthread_t thread, const uintptr_t *nod
  * Use omrthread_numa_get_max_node() to test for the availability of NUMA.
  */
 intptr_t
-omrthread_numa_set_node_affinity(omrthread_t thread, const uintptr_t *numaNodes, uintptr_t nodeCount, uint32_t flags)
+omrthread_numa_set_node_affinity(omrthread_t thread, const uintptr_t* numaNodes, uintptr_t nodeCount, uint32_t flags)
 {
-	/* This is the common function, just return 0 */
-	return 0;
+    /* This is the common function, just return 0 */
+    return 0;
 }
 
 /**
@@ -131,10 +128,10 @@ omrthread_numa_set_node_affinity(omrthread_t thread, const uintptr_t *numaNodes,
  * NUMA is not available. Use omrthread_numa_get_max_node() to test for the availability of NUMA.
  */
 intptr_t
-omrthread_numa_get_node_affinity(omrthread_t thread, uintptr_t *numaNodes, uintptr_t *nodeCount)
+omrthread_numa_get_node_affinity(omrthread_t thread, uintptr_t* numaNodes, uintptr_t* nodeCount)
 {
-	/* This is the common function, just return 0 */
-	/* since we know about 0 nodes, don't touch anything in the numaNodes array */
-	*nodeCount = 0;
-	return 0;
+    /* This is the common function, just return 0 */
+    /* since we know about 0 nodes, don't touch anything in the numaNodes array */
+    *nodeCount = 0;
+    return 0;
 }

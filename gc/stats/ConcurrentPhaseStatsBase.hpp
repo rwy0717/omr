@@ -36,51 +36,52 @@
 /**
   * @ingroup GC_Stats
  */
-class MM_ConcurrentPhaseStatsBase : public MM_Base
-{
-	/* Data Members */
+class MM_ConcurrentPhaseStatsBase : public MM_Base {
+    /* Data Members */
 private:
 protected:
 public:
-	uintptr_t _cycleID;	/**< The "_id" of the corresponding cycle */
-	uintptr_t _scanTargetInBytes;	/**< The number of bytes a given concurrent task was expected to scan before terminating */
-	uintptr_t _bytesScanned;	/**< The number of bytes a given concurrent task did scan before it terminated (can be lower than _scanTargetInBytes if the termination was asynchronously requested) */
-	bool _terminationWasRequested;	/**< todo: remove after downstream projects start using _terminationRequestType */
-	enum TerminationRequestType {
-		terminationRequest_None,
-		terminationRequest_ByGC,
-		terminationRequest_External
-	};
-	TerminationRequestType _terminationRequestType; /**< Reason for concurrent task termination, asynchronous external event or itself GC (work or survivor space exhausted etc). */
+    uintptr_t _cycleID; /**< The "_id" of the corresponding cycle */
+    uintptr_t _scanTargetInBytes; /**< The number of bytes a given concurrent task was expected to scan before terminating */
+    uintptr_t _bytesScanned; /**< The number of bytes a given concurrent task did scan before it terminated (can be lower than _scanTargetInBytes if the termination was asynchronously requested) */
+    bool _terminationWasRequested; /**< todo: remove after downstream projects start using _terminationRequestType */
+    enum TerminationRequestType {
+        terminationRequest_None,
+        terminationRequest_ByGC,
+        terminationRequest_External
+    };
+    TerminationRequestType _terminationRequestType; /**< Reason for concurrent task termination, asynchronous external event or itself GC (work or survivor space exhausted etc). */
 
-	/* Member Functions */
+    /* Member Functions */
 private:
 protected:
 public:
+    bool isTerminationRequested()
+    {
+        return terminationRequest_None != _terminationRequestType;
+    }
+    bool isTerminationRequestExternal()
+    {
+        return terminationRequest_External == _terminationRequestType;
+    }
 
-	bool isTerminationRequested() {
-		return terminationRequest_None != _terminationRequestType;
-	}
-	bool isTerminationRequestExternal() {
-		return terminationRequest_External == _terminationRequestType;
-	}
-	
-	void clear() {
-		_cycleID = 0;
-		_scanTargetInBytes = 0;
-		_bytesScanned = 0;
-		_terminationWasRequested = false;
-		_terminationRequestType = terminationRequest_None;
-	}
-	 
-	MM_ConcurrentPhaseStatsBase()
-		: MM_Base()
-		, _cycleID(0)
-		, _scanTargetInBytes(0)
-		, _bytesScanned(0)
-		, _terminationWasRequested(false)
-		, _terminationRequestType(terminationRequest_None)
-	{}
-}; 
+    void clear()
+    {
+        _cycleID = 0;
+        _scanTargetInBytes = 0;
+        _bytesScanned = 0;
+        _terminationWasRequested = false;
+        _terminationRequestType = terminationRequest_None;
+    }
+
+    MM_ConcurrentPhaseStatsBase()
+        : MM_Base()
+        , _cycleID(0)
+        , _scanTargetInBytes(0)
+        , _bytesScanned(0)
+        , _terminationWasRequested(false)
+        , _terminationRequestType(terminationRequest_None)
+    {}
+};
 
 #endif /* CONCURRENTPHASESTATSBASE_HPP_ */

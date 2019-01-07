@@ -27,25 +27,23 @@
 #include <stddef.h>
 #include "Base.hpp"
 
-class MM_BaseNonVirtual : public MM_Base
-{
+class MM_BaseNonVirtual : public MM_Base {
 private:
 protected:
-	/* Used by DDR to figure out runtime types, this is opt-in
-	 * and has to be done by the constructor of each subclass.
-	 * e.g. _typeId = __FUNCTION__;
-	 */
-	const char* _typeId;
-	
+    /* Used by DDR to figure out runtime types, this is opt-in
+     * and has to be done by the constructor of each subclass.
+     * e.g. _typeId = __FUNCTION__;
+     */
+    const char* _typeId;
+
 public:
-	
-	/**
-	 * Create a Base Non Virtual object.
-	 */
-	MM_BaseNonVirtual()
-	{
-		_typeId = NULL; // If NULL DDR will print the static (compile-time) type.
-	};
+    /**
+     * Create a Base Non Virtual object.
+     */
+    MM_BaseNonVirtual()
+    {
+        _typeId = NULL; // If NULL DDR will print the static (compile-time) type.
+    };
 };
 
 #endif /* BASENONVIRTUAL_HPP_ */

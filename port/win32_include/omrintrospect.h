@@ -30,8 +30,8 @@
 
 #include "omrintrospect_common.h"
 
-extern int32_t load_dbg_functions(struct OMRPortLibrary *portLibrary);
-extern int32_t load_dbg_symbols(struct OMRPortLibrary *portLibrary);
-extern void free_dbg_symbols(struct OMRPortLibrary *portLibrary);
+extern int32_t load_dbg_functions(struct OMRPortLibrary* portLibrary);
+extern int32_t load_dbg_symbols(struct OMRPortLibrary* portLibrary);
+extern void free_dbg_symbols(struct OMRPortLibrary* portLibrary);
 
 #endif

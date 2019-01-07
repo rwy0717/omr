@@ -26,31 +26,30 @@
 
 #include "omrTest.h"
 
-int
-main(int argc, char **argv, char **envp)
+int main(int argc, char** argv, char** envp)
 {
-	::testing::InitGoogleTest(&argc, argv);
-	OMREventListener::setDefaultTestListener();
-	return RUN_ALL_TESTS();
+    ::testing::InitGoogleTest(&argc, argv);
+    OMREventListener::setDefaultTestListener();
+    return RUN_ALL_TESTS();
 }
 
 TEST(UtilTest, detectVMDirectory)
 {
 #if defined(OMR_OS_WINDOWS)
-	void *token = NULL;
-	ASSERT_EQ(OMR_ERROR_NONE, OMR_Glue_GetVMDirectoryToken(&token));
+    void* token = NULL;
+    ASSERT_EQ(OMR_ERROR_NONE, OMR_Glue_GetVMDirectoryToken(&token));
 
-	wchar_t path[2048];
-	size_t pathMax = 2048;
-	wchar_t *pathEnd = NULL;
-	ASSERT_EQ(OMR_ERROR_NONE, detectVMDirectory(path, pathMax, &pathEnd));
-	ASSERT_TRUE((NULL == pathEnd) || (L'\0' == *pathEnd));
-	wprintf(L"VM Directory: '%s'\n", path);
+    wchar_t path[2048];
+    size_t pathMax = 2048;
+    wchar_t* pathEnd = NULL;
+    ASSERT_EQ(OMR_ERROR_NONE, detectVMDirectory(path, pathMax, &pathEnd));
+    ASSERT_TRUE((NULL == pathEnd) || (L'\0' == *pathEnd));
+    wprintf(L"VM Directory: '%s'\n", path);
 
-	if (NULL != pathEnd) {
-		size_t length = pathMax - wcslen(path) - 2;
-		_snwprintf(pathEnd, length, L"\\abc");
-		wprintf(L"Mangled VM Directory: '%s'\n", path);
-	}
+    if (NULL != pathEnd) {
+        size_t length = pathMax - wcslen(path) - 2;
+        _snwprintf(pathEnd, length, L"\\abc");
+        wprintf(L"Mangled VM Directory: '%s'\n", path);
+    }
 #endif /* defined(OMR_OS_WINDOWS) */
 }

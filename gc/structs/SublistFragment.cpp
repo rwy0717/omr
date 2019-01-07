@@ -41,23 +41,23 @@ extern "C" {
  * @return 0 on success, non-zero on failure 
  */
 uintptr_t
-allocateMemoryForSublistFragment(void *vmThreadRawPtr, J9VMGC_SublistFragment *fragmentPrimitive)
+allocateMemoryForSublistFragment(void* vmThreadRawPtr, J9VMGC_SublistFragment* fragmentPrimitive)
 {
-	OMR_VMThread *omrVMThread = (OMR_VMThread*) vmThreadRawPtr;
-	MM_SublistFragment fragment(fragmentPrimitive);
-	
-	MM_SublistFragment::flush(fragmentPrimitive);
-	MM_EnvironmentBase *env = MM_EnvironmentBase::getEnvironment(omrVMThread);
-	
-	bool result = ((MM_SublistPool *)fragmentPrimitive->parentList)->allocate(env, &fragment);
-	if (result) {
-		return 0;
-	} else {
+    OMR_VMThread* omrVMThread = (OMR_VMThread*)vmThreadRawPtr;
+    MM_SublistFragment fragment(fragmentPrimitive);
+
+    MM_SublistFragment::flush(fragmentPrimitive);
+    MM_EnvironmentBase* env = MM_EnvironmentBase::getEnvironment(omrVMThread);
+
+    bool result = ((MM_SublistPool*)fragmentPrimitive->parentList)->allocate(env, &fragment);
+    if (result) {
+        return 0;
+    } else {
 #if defined(OMR_GC_MODRON_SCAVENGER)
-		env->getExtensions()->setRememberedSetOverflowState();
+        env->getExtensions()->setRememberedSetOverflowState();
 #endif /* OMR_GC_MODRON_SCAVENGER */
-		return 1;
-	}
+        return 1;
+    }
 }
 
 } /* extern "C" */
@@ -69,29 +69,27 @@ allocateMemoryForSublistFragment(void *vmThreadRawPtr, J9VMGC_SublistFragment *f
  * 
  * @return Next free entry from the sublist.
  */
-void *
-MM_SublistFragment::allocate(MM_EnvironmentBase *env)
-{	
-	MM_SublistPool *parentList = (MM_SublistPool *)_fragment->parentList;
-	
-	/* Check if there is a free entry available in the fragment */
-	if(_fragment->fragmentCurrent < _fragment->fragmentTop){			
-		_fragment->count += 1;
-		
-		return _fragment->fragmentCurrent++;
-	}
-	
+void* MM_SublistFragment::allocate(MM_EnvironmentBase* env)
+{
+    MM_SublistPool* parentList = (MM_SublistPool*)_fragment->parentList;
 
-	/* There is no free entry available - attempt to allocate a new fragment from the sublist */
-	if(parentList->allocate(env, this)) {
-		_fragment->count += 1;
-		
-		/* A new fragment was obtained - return the next available slot */
-		return _fragment->fragmentCurrent++;
-	}
+    /* Check if there is a free entry available in the fragment */
+    if (_fragment->fragmentCurrent < _fragment->fragmentTop) {
+        _fragment->count += 1;
 
-	/* Failed to allocate from the fragment/sublist */
-	return NULL;
+        return _fragment->fragmentCurrent++;
+    }
+
+    /* There is no free entry available - attempt to allocate a new fragment from the sublist */
+    if (parentList->allocate(env, this)) {
+        _fragment->count += 1;
+
+        /* A new fragment was obtained - return the next available slot */
+        return _fragment->fragmentCurrent++;
+    }
+
+    /* Failed to allocate from the fragment/sublist */
+    return NULL;
 }
 
 /**
@@ -99,13 +97,12 @@ MM_SublistFragment::allocate(MM_EnvironmentBase *env)
  * and store <code>entry</code> into the new entry.
  * @return true if the operation completed successfully, false otherwise
  */
-bool
-MM_SublistFragment::add(MM_EnvironmentBase *env, uintptr_t entry)
+bool MM_SublistFragment::add(MM_EnvironmentBase* env, uintptr_t entry)
 {
-	uintptr_t *dest = (uintptr_t *)allocate(env);
-	if (dest != NULL) {
-		*dest = entry;
-		return true;	
-	}
-	return false;
+    uintptr_t* dest = (uintptr_t*)allocate(env);
+    if (dest != NULL) {
+        *dest = entry;
+        return true;
+    }
+    return false;
 }

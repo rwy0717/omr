@@ -26,8 +26,8 @@
 
 inline TR::Block*
 OMR::Block::self()
-   {
-   return static_cast<TR::Block*>(this);
-   }
+{
+    return static_cast<TR::Block*>(this);
+}
 
 #endif

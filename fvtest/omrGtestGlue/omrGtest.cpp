@@ -32,8 +32,8 @@
 
 #include "gtest-all.cc"
 
-#define toupper(c)     (islower(c) ? (c & _XUPPER_ASCII) : c)
-#define tolower(c)     (isupper(c) ? (c | _XLOWER_ASCII) : c)
+#define toupper(c) (islower(c) ? (c & _XUPPER_ASCII) : c)
+#define tolower(c) (isupper(c) ? (c | _XLOWER_ASCII) : c)
 
 #else
 #include "gtest-all.cc"

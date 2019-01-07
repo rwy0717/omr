@@ -48,30 +48,30 @@ static int32_t findError(int32_t errorCode);
 static int32_t
 findError(int32_t errorCode)
 {
-	switch (errorCode) {
-	case EACCES:
-		return OMRPORT_ERROR_FILE_NOPERMISSION;
-	case EEXIST:
-		return OMRPORT_ERROR_FILE_EXIST;
-	case EINTR:
-		return OMRPORT_ERROR_FILE_INTERRUPTED;
-	case EISDIR:
-		return OMRPORT_ERROR_FILE_ISDIR;
-	case EMFILE:
-		return OMRPORT_ERROR_FILE_PROCESS_MAX_OPEN;
-	case ENFILE:
-		return OMRPORT_ERROR_FILE_SYSTEMFULL;
-	case ENOENT:
-		return OMRPORT_ERROR_FILE_NOENT;
-	case ENOSPC:
-		return OMRPORT_ERROR_FILE_DISKFULL;
-	case ENXIO:
-		return OMRPORT_ERROR_FILE_XIO;
-	case EROFS:
-		return OMRPORT_ERROR_FILE_ROFS;
-	default:
-		return OMRPORT_ERROR_FILE_OPFAILED;
-	}
+    switch (errorCode) {
+    case EACCES:
+        return OMRPORT_ERROR_FILE_NOPERMISSION;
+    case EEXIST:
+        return OMRPORT_ERROR_FILE_EXIST;
+    case EINTR:
+        return OMRPORT_ERROR_FILE_INTERRUPTED;
+    case EISDIR:
+        return OMRPORT_ERROR_FILE_ISDIR;
+    case EMFILE:
+        return OMRPORT_ERROR_FILE_PROCESS_MAX_OPEN;
+    case ENFILE:
+        return OMRPORT_ERROR_FILE_SYSTEMFULL;
+    case ENOENT:
+        return OMRPORT_ERROR_FILE_NOENT;
+    case ENOSPC:
+        return OMRPORT_ERROR_FILE_DISKFULL;
+    case ENXIO:
+        return OMRPORT_ERROR_FILE_XIO;
+    case EROFS:
+        return OMRPORT_ERROR_FILE_ROFS;
+    default:
+        return OMRPORT_ERROR_FILE_OPFAILED;
+    }
 }
 
 /**
@@ -87,9 +87,9 @@ findError(int32_t errorCode)
  * @note If a multi-threaded application passes in a relative path the caller must synchronize on the current working directory, otherwise the behaviour is undefined
  */
 int32_t
-omrfile_attr(struct OMRPortLibrary *portLibrary, const char *path)
+omrfile_attr(struct OMRPortLibrary* portLibrary, const char* path)
 {
-	return -1;
+    return -1;
 }
 
 /**
@@ -113,9 +113,9 @@ omrfile_attr(struct OMRPortLibrary *portLibrary, const char *path)
  */
 
 int32_t
-omrfile_chmod(struct OMRPortLibrary *portLibrary, const char *path, int32_t mode)
+omrfile_chmod(struct OMRPortLibrary* portLibrary, const char* path, int32_t mode)
 {
-	return -1;
+    return -1;
 }
 
 /**
@@ -138,9 +138,9 @@ omrfile_chmod(struct OMRPortLibrary *portLibrary, const char *path, int32_t mode
  * 	and the operation has no effect
  */
 intptr_t
-omrfile_chown(struct OMRPortLibrary *portLibrary, const char *path, uintptr_t owner, uintptr_t group)
+omrfile_chown(struct OMRPortLibrary* portLibrary, const char* path, uintptr_t owner, uintptr_t group)
 {
-	return -1;
+    return -1;
 }
 
 /**
@@ -153,16 +153,16 @@ omrfile_chown(struct OMRPortLibrary *portLibrary, const char *path, uintptr_t ow
  * @internal @todo return negative portable return code on failure.
  */
 int32_t
-omrfile_close(struct OMRPortLibrary *portLibrary, intptr_t fd)
+omrfile_close(struct OMRPortLibrary* portLibrary, intptr_t fd)
 {
-	int32_t rc = 0;
+    int32_t rc = 0;
 
-	Trc_PRT_file_close_Entry(fd);
+    Trc_PRT_file_close_Entry(fd);
 
-	rc = (int32_t)close((int)fd);
+    rc = (int32_t)close((int)fd);
 
-	Trc_PRT_file_close_Exit(rc);
-	return rc;
+    Trc_PRT_file_close_Exit(rc);
+    return rc;
 }
 
 /**
@@ -179,10 +179,10 @@ omrfile_close(struct OMRPortLibrary *portLibrary, intptr_t fd)
  * the corresponding string.  It is here as a helper function for JCL.  Once omrerror
  * is integrated into the port library this function should probably disappear.
  */
-const char *
-omrfile_error_message(struct OMRPortLibrary *portLibrary)
+const char*
+omrfile_error_message(struct OMRPortLibrary* portLibrary)
 {
-	return portLibrary->error_last_error_message(portLibrary);
+    return portLibrary->error_last_error_message(portLibrary);
 }
 
 /**
@@ -191,10 +191,9 @@ omrfile_error_message(struct OMRPortLibrary *portLibrary)
  * @param[in] portLibrary The port library
  * @param[in] findhandle  Handle returned from @ref omrfile_findfirst.
  */
-void
-omrfile_findclose(struct OMRPortLibrary *portLibrary, uintptr_t findhandle)
+void omrfile_findclose(struct OMRPortLibrary* portLibrary, uintptr_t findhandle)
 {
-	return;
+    return;
 }
 
 /**
@@ -211,9 +210,9 @@ omrfile_findclose(struct OMRPortLibrary *portLibrary, uintptr_t findhandle)
  *
  */
 uintptr_t
-omrfile_findfirst(struct OMRPortLibrary *portLibrary, const char *path, char *resultbuf)
+omrfile_findfirst(struct OMRPortLibrary* portLibrary, const char* path, char* resultbuf)
 {
-	return (uintptr_t)-1;
+    return (uintptr_t)-1;
 }
 /**
  * Find the next filename and path matching a given handle.
@@ -226,9 +225,9 @@ omrfile_findfirst(struct OMRPortLibrary *portLibrary, const char *path, char *re
  * @internal @todo return negative portable return code on failure.
  */
 int32_t
-omrfile_findnext(struct OMRPortLibrary *portLibrary, uintptr_t findhandle, char *resultbuf)
+omrfile_findnext(struct OMRPortLibrary* portLibrary, uintptr_t findhandle, char* resultbuf)
 {
-	return -1;
+    return -1;
 }
 
 /**
@@ -243,9 +242,9 @@ omrfile_findnext(struct OMRPortLibrary *portLibrary, uintptr_t findhandle, char 
  *
  */
 int64_t
-omrfile_lastmod(struct OMRPortLibrary *portLibrary, const char *path)
+omrfile_lastmod(struct OMRPortLibrary* portLibrary, const char* path)
 {
-	return -1;
+    return -1;
 }
 /**
  * Answer the length in bytes of the file.
@@ -258,22 +257,22 @@ omrfile_lastmod(struct OMRPortLibrary *portLibrary, const char *path)
  * @note If a multi-threaded application passes in a relative path the caller must synchronize on the current working directory, otherwise the behaviour is undefined
  */
 int64_t
-omrfile_length(struct OMRPortLibrary *portLibrary, const char *path)
+omrfile_length(struct OMRPortLibrary* portLibrary, const char* path)
 {
-	intptr_t fd;
-	int64_t length;
+    intptr_t fd;
+    int64_t length;
 
-	Trc_PRT_file_length_Entry(path);
+    Trc_PRT_file_length_Entry(path);
 
-	fd = portLibrary->file_open(portLibrary, path, EsOpenRead, 0666);
-	if (-1 == fd) {
-		Trc_PRT_file_length_Exit(-1);
-		return -1;
-	}
-	length =  portLibrary->file_seek(portLibrary, fd, 0, EsSeekEnd);
-	portLibrary->file_close(portLibrary, fd);
-	Trc_PRT_file_length_Exit(length);
-	return length;
+    fd = portLibrary->file_open(portLibrary, path, EsOpenRead, 0666);
+    if (-1 == fd) {
+        Trc_PRT_file_length_Exit(-1);
+        return -1;
+    }
+    length = portLibrary->file_seek(portLibrary, fd, 0, EsSeekEnd);
+    portLibrary->file_close(portLibrary, fd);
+    Trc_PRT_file_length_Exit(length);
+    return length;
 }
 
 /**
@@ -285,21 +284,21 @@ omrfile_length(struct OMRPortLibrary *portLibrary, const char *path)
  * @return Length in bytes of the file on success, negative portable error code on failure
  */
 int64_t
-omrfile_flength(struct OMRPortLibrary *portLibrary, intptr_t fd)
+omrfile_flength(struct OMRPortLibrary* portLibrary, intptr_t fd)
 {
-	int64_t previousOffset = 0;
-	int64_t length = 0;
+    int64_t previousOffset = 0;
+    int64_t length = 0;
 
-	Trc_PRT_file_flength_Entry(fd);
+    Trc_PRT_file_flength_Entry(fd);
 
-	/* The file was opened at this place */
-	previousOffset = portLibrary->file_seek(portLibrary, fd, 0, EsSeekCur);
-	length = portLibrary->file_seek(portLibrary, fd, 0, EsSeekEnd);
-	/* Set the cursor back to where it was */
-	portLibrary->file_seek(portLibrary, fd, previousOffset, EsSeekSet);
+    /* The file was opened at this place */
+    previousOffset = portLibrary->file_seek(portLibrary, fd, 0, EsSeekCur);
+    length = portLibrary->file_seek(portLibrary, fd, 0, EsSeekEnd);
+    /* Set the cursor back to where it was */
+    portLibrary->file_seek(portLibrary, fd, previousOffset, EsSeekSet);
 
-	Trc_PRT_file_flength_Exit(length);
-	return length;
+    Trc_PRT_file_flength_Exit(length);
+    return length;
 }
 
 /**
@@ -317,9 +316,9 @@ omrfile_flength(struct OMRPortLibrary *portLibrary, intptr_t fd)
  * @internal @todo return negative portable return code on failure.
  */
 int32_t
-omrfile_mkdir(struct OMRPortLibrary *portLibrary, const char *path)
+omrfile_mkdir(struct OMRPortLibrary* portLibrary, const char* path)
 {
-	return -1;
+    return -1;
 }
 
 /**
@@ -336,9 +335,9 @@ omrfile_mkdir(struct OMRPortLibrary *portLibrary, const char *path)
  * @internal @todo return negative portable return code on failure.
  */
 int32_t
-omrfile_move(struct OMRPortLibrary *portLibrary, const char *pathExist, const char *pathNew)
+omrfile_move(struct OMRPortLibrary* portLibrary, const char* pathExist, const char* pathNew)
 {
-	return -1;
+    return -1;
 }
 
 /**
@@ -354,28 +353,28 @@ omrfile_move(struct OMRPortLibrary *portLibrary, const char *pathExist, const ch
  * @note If a multi-threaded application passes in a relative path the caller must synchronize on the current working directory, otherwise the behaviour is undefined
  */
 intptr_t
-omrfile_open(struct OMRPortLibrary *portLibrary, const char *path, int32_t flags, int32_t mode)
+omrfile_open(struct OMRPortLibrary* portLibrary, const char* path, int32_t flags, int32_t mode)
 {
-	int32_t fd = 0;
-	int32_t realFlags = EsTranslateOpenFlags(flags);
+    int32_t fd = 0;
+    int32_t realFlags = EsTranslateOpenFlags(flags);
 
-	Trc_PRT_file_open_Entry(path, flags, mode);
+    Trc_PRT_file_open_Entry(path, flags, mode);
 
-	if (-1 == realFlags) {
-		Trc_PRT_file_open_Exception1(path, flags);
-		Trc_PRT_file_open_Exit(-1);
-		return -1;
-	}
+    if (-1 == realFlags) {
+        Trc_PRT_file_open_Exception1(path, flags);
+        Trc_PRT_file_open_Exit(-1);
+        return -1;
+    }
 
-	fd = open(path, realFlags, mode);
+    fd = open(path, realFlags, mode);
 
-	if (-1 == fd) {
-		Trc_PRT_file_open_Exception2(path, errno, findError(errno));
-		portLibrary->error_set_last_error(portLibrary, errno, findError(errno));
-	}
+    if (-1 == fd) {
+        Trc_PRT_file_open_Exception2(path, errno, findError(errno));
+        portLibrary->error_set_last_error(portLibrary, errno, findError(errno));
+    }
 
-	Trc_PRT_file_open_Exit(fd);
-	return fd;
+    Trc_PRT_file_open_Exit(fd);
+    return fd;
 }
 
 /**
@@ -389,21 +388,21 @@ omrfile_open(struct OMRPortLibrary *portLibrary, const char *path, int32_t flags
  * @return The number of bytes read, or -1 on failure.
  */
 intptr_t
-omrfile_read(struct OMRPortLibrary *portLibrary, intptr_t fd, void *buf, intptr_t nbytes)
+omrfile_read(struct OMRPortLibrary* portLibrary, intptr_t fd, void* buf, intptr_t nbytes)
 {
-	intptr_t result;
+    intptr_t result;
 
-	if (nbytes == 0) {
-		return 0;
-	}
+    if (nbytes == 0) {
+        return 0;
+    }
 
-	result = read((int)fd, buf, nbytes);
-	if ((0 == result) || (-1 == result)) {
-		portLibrary->error_set_last_error(portLibrary, errno, findError(errno));
-		return -1;
-	} else {
-		return result;
-	}
+    result = read((int)fd, buf, nbytes);
+    if ((0 == result) || (-1 == result)) {
+        portLibrary->error_set_last_error(portLibrary, errno, findError(errno));
+        return -1;
+    } else {
+        return result;
+    }
 }
 
 /**
@@ -422,30 +421,30 @@ omrfile_read(struct OMRPortLibrary *portLibrary, intptr_t fd, void *buf, intptr_
  * can be returned when seeking beyond end of file.
  */
 int64_t
-omrfile_seek(struct OMRPortLibrary *portLibrary, intptr_t fd, int64_t offset, int32_t whence)
+omrfile_seek(struct OMRPortLibrary* portLibrary, intptr_t fd, int64_t offset, int32_t whence)
 {
-	int64_t result = 0;
-	off_t localOffset = (off_t)offset;
+    int64_t result = 0;
+    off_t localOffset = (off_t)offset;
 
-	Trc_PRT_file_seek_Entry(fd, offset, whence);
+    Trc_PRT_file_seek_Entry(fd, offset, whence);
 
-	if ((whence < EsSeekSet) || (whence > EsSeekEnd)) {
-		Trc_PRT_file_seek_Exit(-1);
-		return -1;
-	}
+    if ((whence < EsSeekSet) || (whence > EsSeekEnd)) {
+        Trc_PRT_file_seek_Exit(-1);
+        return -1;
+    }
 
-	/* If file offsets are 32 bit, truncate the seek to that range */
-	if (sizeof(off_t) < sizeof(int64_t)) {
-		if (offset > 0x7FFFFFFF) {
-			localOffset =  0x7FFFFFFF;
-		} else if (offset < -0x7FFFFFFF) {
-			localOffset = -0x7FFFFFFF;
-		}
-	}
+    /* If file offsets are 32 bit, truncate the seek to that range */
+    if (sizeof(off_t) < sizeof(int64_t)) {
+        if (offset > 0x7FFFFFFF) {
+            localOffset = 0x7FFFFFFF;
+        } else if (offset < -0x7FFFFFFF) {
+            localOffset = -0x7FFFFFFF;
+        }
+    }
 
-	result = (int64_t)lseek((int)fd, localOffset, whence);
-	Trc_PRT_file_seek_Exit(result);
-	return result;
+    result = (int64_t)lseek((int)fd, localOffset, whence);
+    Trc_PRT_file_seek_Exit(result);
+    return result;
 }
 
 /**
@@ -458,8 +457,7 @@ omrfile_seek(struct OMRPortLibrary *portLibrary, intptr_t fd, int64_t offset, in
  *
  * @note Most implementations will be empty.
  */
-void
-omrfile_shutdown(struct OMRPortLibrary *portLibrary)
+void omrfile_shutdown(struct OMRPortLibrary* portLibrary)
 {
 }
 /**
@@ -477,9 +475,9 @@ omrfile_shutdown(struct OMRPortLibrary *portLibrary)
  * @note Most implementations will simply return success.
  */
 int32_t
-omrfile_startup(struct OMRPortLibrary *portLibrary)
+omrfile_startup(struct OMRPortLibrary* portLibrary)
 {
-	return 0;
+    return 0;
 }
 /**
  * Synchronize a file's state with the state on disk.
@@ -491,9 +489,9 @@ omrfile_startup(struct OMRPortLibrary *portLibrary)
  * @internal @todo return negative portable return code on failure.
  */
 int32_t
-omrfile_sync(struct OMRPortLibrary *portLibrary, intptr_t fd)
+omrfile_sync(struct OMRPortLibrary* portLibrary, intptr_t fd)
 {
-	return -1;
+    return -1;
 }
 
 /**
@@ -509,9 +507,9 @@ omrfile_sync(struct OMRPortLibrary *portLibrary, intptr_t fd)
  * @internal @todo return negative portable return code on failure.
  */
 int32_t
-omrfile_unlink(struct OMRPortLibrary *portLibrary, const char *path)
+omrfile_unlink(struct OMRPortLibrary* portLibrary, const char* path)
 {
-	return -1;
+    return -1;
 }
 
 /**
@@ -528,11 +526,10 @@ omrfile_unlink(struct OMRPortLibrary *portLibrary, const char *path)
  * @internal @todo return negative portable return code on failure..
  */
 int32_t
-omrfile_unlinkdir(struct OMRPortLibrary *portLibrary, const char *path)
+omrfile_unlinkdir(struct OMRPortLibrary* portLibrary, const char* path)
 {
-	return -1;
+    return -1;
 }
-
 
 /**
  * Write to a file.
@@ -547,53 +544,51 @@ omrfile_unlinkdir(struct OMRPortLibrary *portLibrary, const char *path)
  * @return Number of bytes written on success, negative portable error code on failure.
  */
 intptr_t
-omrfile_write(struct OMRPortLibrary *portLibrary, intptr_t fd, const void *buf, intptr_t nbytes)
+omrfile_write(struct OMRPortLibrary* portLibrary, intptr_t fd, const void* buf, intptr_t nbytes)
 {
-	intptr_t rc;
+    intptr_t rc;
 
-	/* write will just do the right thing for OMRPORT_TTY_OUT and OMRPORT_TTY_ERR */
-	rc = write((int)fd, buf, nbytes);
+    /* write will just do the right thing for OMRPORT_TTY_OUT and OMRPORT_TTY_ERR */
+    rc = write((int)fd, buf, nbytes);
 
-	if (rc == -1) {
-		return portLibrary->error_set_last_error(portLibrary, errno, findError(errno));
-	}
+    if (rc == -1) {
+        return portLibrary->error_set_last_error(portLibrary, errno, findError(errno));
+    }
 
-	return rc;
+    return rc;
 }
 
 static int32_t
 EsTranslateOpenFlags(int32_t flags)
 {
-	int32_t realFlags = 0;
+    int32_t realFlags = 0;
 
-	if (flags & EsOpenAppend) {
-		realFlags |= O_APPEND;
-	}
-	if (flags & EsOpenTruncate) {
-		realFlags |= O_TRUNC;
-	}
-	if (flags & EsOpenCreate) {
-		realFlags |= O_CREAT;
-	}
-	if (flags & EsOpenCreateNew) {
-		realFlags |= O_EXCL | O_CREAT;
-	}
-	if (flags & EsOpenSync) {
-		realFlags |= O_SYNC;
-	}
-	if (flags & EsOpenRead) {
-		if (flags & EsOpenWrite) {
-			return (O_RDWR | realFlags);
-		}
-		return (O_RDONLY | realFlags);
-	}
-	if (flags & EsOpenWrite) {
-		return (O_WRONLY | realFlags);
-	}
-	return -1;
+    if (flags & EsOpenAppend) {
+        realFlags |= O_APPEND;
+    }
+    if (flags & EsOpenTruncate) {
+        realFlags |= O_TRUNC;
+    }
+    if (flags & EsOpenCreate) {
+        realFlags |= O_CREAT;
+    }
+    if (flags & EsOpenCreateNew) {
+        realFlags |= O_EXCL | O_CREAT;
+    }
+    if (flags & EsOpenSync) {
+        realFlags |= O_SYNC;
+    }
+    if (flags & EsOpenRead) {
+        if (flags & EsOpenWrite) {
+            return (O_RDWR | realFlags);
+        }
+        return (O_RDONLY | realFlags);
+    }
+    if (flags & EsOpenWrite) {
+        return (O_WRONLY | realFlags);
+    }
+    return -1;
 }
-
-
 
 /**
  * Write to a file.
@@ -608,37 +603,36 @@ EsTranslateOpenFlags(int32_t flags)
  * @internal @note Supported, portable format specifiers are described in the document entitled "PortLibrary printf"
  * in the "Inside J9" Lotus Notes database.
  */
-void
-omrfile_vprintf(struct OMRPortLibrary *portLibrary, intptr_t fd, const char *format, va_list args)
+void omrfile_vprintf(struct OMRPortLibrary* portLibrary, intptr_t fd, const char* format, va_list args)
 {
-	char localBuffer[256];
-	char *writeBuffer = NULL;
-	uintptr_t bufferSize = 0;
-	uintptr_t stringSize = 0;
+    char localBuffer[256];
+    char* writeBuffer = NULL;
+    uintptr_t bufferSize = 0;
+    uintptr_t stringSize = 0;
 
-	/* str_vprintf(.., NULL, ..) result is size of buffer required including the null terminator */
-	bufferSize = portLibrary->str_vprintf(portLibrary, NULL, 0, format, args);
+    /* str_vprintf(.., NULL, ..) result is size of buffer required including the null terminator */
+    bufferSize = portLibrary->str_vprintf(portLibrary, NULL, 0, format, args);
 
-	/* use local buffer if possible, allocate a buffer from system memory if local buffer not large enough */
-	if (sizeof(localBuffer) >= bufferSize) {
-		writeBuffer = localBuffer;
-	} else {
-		writeBuffer = portLibrary->mem_allocate_memory(portLibrary, bufferSize, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
-	}
+    /* use local buffer if possible, allocate a buffer from system memory if local buffer not large enough */
+    if (sizeof(localBuffer) >= bufferSize) {
+        writeBuffer = localBuffer;
+    } else {
+        writeBuffer = portLibrary->mem_allocate_memory(portLibrary, bufferSize, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
+    }
 
-	/* format and write out the buffer (truncate into local buffer as last resort) without null terminator */
-	if (NULL != writeBuffer) {
-		stringSize = portLibrary->str_vprintf(portLibrary, writeBuffer, bufferSize, format, args);
-		portLibrary->file_write_text(portLibrary, fd, writeBuffer, stringSize);
-		/* dispose of buffer if not on local */
-		if (writeBuffer != localBuffer) {
-			portLibrary->mem_free_memory(portLibrary, writeBuffer);
-		}
-	} else {
-		portLibrary->nls_printf(portLibrary, J9NLS_ERROR, J9NLS_PORT_FILE_MEMORY_ALLOCATE_FAILURE);
-		stringSize = portLibrary->str_vprintf(portLibrary, localBuffer, sizeof(localBuffer), format, args);
-		portLibrary->file_write_text(portLibrary, fd, localBuffer, stringSize);
-	}
+    /* format and write out the buffer (truncate into local buffer as last resort) without null terminator */
+    if (NULL != writeBuffer) {
+        stringSize = portLibrary->str_vprintf(portLibrary, writeBuffer, bufferSize, format, args);
+        portLibrary->file_write_text(portLibrary, fd, writeBuffer, stringSize);
+        /* dispose of buffer if not on local */
+        if (writeBuffer != localBuffer) {
+            portLibrary->mem_free_memory(portLibrary, writeBuffer);
+        }
+    } else {
+        portLibrary->nls_printf(portLibrary, J9NLS_ERROR, J9NLS_PORT_FILE_MEMORY_ALLOCATE_FAILURE);
+        stringSize = portLibrary->str_vprintf(portLibrary, localBuffer, sizeof(localBuffer), format, args);
+        portLibrary->file_write_text(portLibrary, fd, localBuffer, stringSize);
+    }
 }
 /**
  * Write to a file.
@@ -653,18 +647,17 @@ omrfile_vprintf(struct OMRPortLibrary *portLibrary, intptr_t fd, const char *for
  * @internal @note Supported, portable format specifiers are described in the document entitled "PortLibrary printf"
  * in the "Inside J9" Lotus Notes database.
  */
-void
-omrfile_printf(struct OMRPortLibrary *portLibrary, intptr_t fd, const char *format, ...)
+void omrfile_printf(struct OMRPortLibrary* portLibrary, intptr_t fd, const char* format, ...)
 {
-	va_list args;
+    va_list args;
 
-	Trc_PRT_file_printf_Entry(fd, format);
+    Trc_PRT_file_printf_Entry(fd, format);
 
-	va_start(args, format);
-	portLibrary->file_vprintf(portLibrary, fd, format, args);
-	va_end(args);
+    va_start(args, format);
+    portLibrary->file_vprintf(portLibrary, fd, format, args);
+    va_end(args);
 
-	Trc_PRT_file_printf_Exit();
+    Trc_PRT_file_printf_Exit();
 }
 /**
  * Set the length of a file to a specified value.
@@ -676,25 +669,25 @@ omrfile_printf(struct OMRPortLibrary *portLibrary, intptr_t fd, const char *form
  * @return 0 on success, negative portable error code on failure
  */
 int32_t
-omrfile_set_length(struct OMRPortLibrary *portLibrary, intptr_t fd, int64_t newLength)
+omrfile_set_length(struct OMRPortLibrary* portLibrary, intptr_t fd, int64_t newLength)
 {
-	off_t length  = (off_t)newLength;
-	int32_t result = 0;
+    off_t length = (off_t)newLength;
+    int32_t result = 0;
 
-	Trc_PRT_file_setlength_Entry(fd, newLength);
+    Trc_PRT_file_setlength_Entry(fd, newLength);
 
-	/* If file offsets are 32 bit, truncate the newLength to that range */
-	if (sizeof(off_t) < sizeof(int64_t)) {
-		if (newLength > 0x7FFFFFFF) {
-			length =  0x7FFFFFFF;
-		} else if (newLength < -0x7FFFFFFF) {
-			length = -0x7FFFFFFF;
-		}
-	}
+    /* If file offsets are 32 bit, truncate the newLength to that range */
+    if (sizeof(off_t) < sizeof(int64_t)) {
+        if (newLength > 0x7FFFFFFF) {
+            length = 0x7FFFFFFF;
+        } else if (newLength < -0x7FFFFFFF) {
+            length = -0x7FFFFFFF;
+        }
+    }
 
-	result =  ftruncate(fd, length);
-	Trc_PRT_file_setlength_Exit(result);
-	return result;
+    result = ftruncate(fd, length);
+    Trc_PRT_file_setlength_Exit(result);
+    return result;
 }
 /**
  * This function will acquire a lock of the requested type on the given file, starting at offset bytes
@@ -713,9 +706,9 @@ omrfile_set_length(struct OMRPortLibrary *portLibrary, intptr_t fd, int64_t newL
  * @return                                              0 on success, -1 on failure
  */
 int32_t
-omrfile_lock_bytes(struct OMRPortLibrary *portLibrary, intptr_t fd, int32_t lockFlags, uint64_t offset, uint64_t length)
+omrfile_lock_bytes(struct OMRPortLibrary* portLibrary, intptr_t fd, int32_t lockFlags, uint64_t offset, uint64_t length)
 {
-	return -1;
+    return -1;
 }
 /**
  * This function will release the lock on the given file, starting at offset bytes
@@ -729,9 +722,9 @@ omrfile_lock_bytes(struct OMRPortLibrary *portLibrary, intptr_t fd, int32_t lock
  * @return                                              0 on success, -1 on failure
  */
 int32_t
-omrfile_unlock_bytes(struct OMRPortLibrary *portLibrary, intptr_t fd, uint64_t offset, uint64_t length)
+omrfile_unlock_bytes(struct OMRPortLibrary* portLibrary, intptr_t fd, uint64_t offset, uint64_t length)
 {
-	return -1;
+    return -1;
 }
 
 /**
@@ -745,9 +738,9 @@ omrfile_unlock_bytes(struct OMRPortLibrary *portLibrary, intptr_t fd, uint64_t o
  *
  */
 int32_t
-omrfile_fstat(struct OMRPortLibrary *portLibrary, intptr_t fd, struct J9FileStat *buf)
+omrfile_fstat(struct OMRPortLibrary* portLibrary, intptr_t fd, struct J9FileStat* buf)
 {
-	return -1;
+    return -1;
 }
 
 /**
@@ -763,9 +756,9 @@ omrfile_fstat(struct OMRPortLibrary *portLibrary, intptr_t fd, struct J9FileStat
  * @note If a multi-threaded application passes in a relative path the caller must synchronize on the current working directory, otherwise the behavior is undefined
  */
 int32_t
-omrfile_stat(struct OMRPortLibrary *portLibrary, const char *path, uint32_t flags, struct J9FileStat *buf)
+omrfile_stat(struct OMRPortLibrary* portLibrary, const char* path, uint32_t flags, struct J9FileStat* buf)
 {
-	return -1;
+    return -1;
 }
 
 /**
@@ -781,9 +774,9 @@ omrfile_stat(struct OMRPortLibrary *portLibrary, const char *path, uint32_t flag
  * @note If a multi-threaded application passes in a relative path the caller must synchronize on the current working directory, otherwise the behavior is undefined
  */
 int32_t
-omrfile_stat_filesystem(struct OMRPortLibrary *portLibrary, const char *path, uint32_t flags, struct J9FileStatFilesystem *buf)
+omrfile_stat_filesystem(struct OMRPortLibrary* portLibrary, const char* path, uint32_t flags, struct J9FileStatFilesystem* buf)
 {
-	return -1;
+    return -1;
 }
 
 /**
@@ -797,9 +790,9 @@ omrfile_stat_filesystem(struct OMRPortLibrary *portLibrary, const char *path, ui
  *
  */
 intptr_t
-omrfile_convert_native_fd_to_omrfile_fd(struct OMRPortLibrary *portLibrary, intptr_t nativeFD)
+omrfile_convert_native_fd_to_omrfile_fd(struct OMRPortLibrary* portLibrary, intptr_t nativeFD)
 {
-	return nativeFD;
+    return nativeFD;
 }
 
 /**
@@ -813,7 +806,7 @@ omrfile_convert_native_fd_to_omrfile_fd(struct OMRPortLibrary *portLibrary, intp
  *
  */
 intptr_t
-omrfile_convert_omrfile_fd_to_native_fd(struct OMRPortLibrary *portLibrary, intptr_t omrfileFD)
+omrfile_convert_omrfile_fd_to_native_fd(struct OMRPortLibrary* portLibrary, intptr_t omrfileFD)
 {
-	return omrfileFD;
+    return omrfileFD;
 }

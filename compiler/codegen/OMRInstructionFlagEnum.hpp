@@ -28,6 +28,6 @@
 //
 NeedsGCMapBit,
 
-// Instruction requires an AOT relocation
-//
-NeedsAOTRelocation,
+    // Instruction requires an AOT relocation
+    //
+    NeedsAOTRelocation,

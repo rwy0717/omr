@@ -29,22 +29,22 @@
 #include "thread_api.h"
 #include "testHelper.hpp"
 
-extern ThreadTestEnvironment *omrTestEnv;
+extern ThreadTestEnvironment* omrTestEnv;
 
 #if defined(__cplusplus)
 extern "C" {
 #endif /* defined(__cplusplus) */
 
-#define VERBOSE_JOIN(_threadToJoin, _expectedRc) \
-	do { \
-		intptr_t _rc = 0; \
-		EXPECT_EQ((_expectedRc), _rc = omrthread_join(_threadToJoin)); \
-		if (_rc & J9THREAD_ERR_OS_ERRNO_SET) { \
-			omrTestEnv->log(LEVEL_ERROR, "omrthread_join() returned os_errno=%d\n", (int)omrthread_get_os_errno()); \
-		} \
-	} while(0)
+#define VERBOSE_JOIN(_threadToJoin, _expectedRc)                                                                    \
+    do {                                                                                                            \
+        intptr_t _rc = 0;                                                                                           \
+        EXPECT_EQ((_expectedRc), _rc = omrthread_join(_threadToJoin));                                              \
+        if (_rc & J9THREAD_ERR_OS_ERRNO_SET) {                                                                      \
+            omrTestEnv->log(LEVEL_ERROR, "omrthread_join() returned os_errno=%d\n", (int)omrthread_get_os_errno()); \
+        }                                                                                                           \
+    } while (0)
 
-void createJoinableThread(omrthread_t *newThread, omrthread_entrypoint_t entryProc, void *entryArg);
+void createJoinableThread(omrthread_t* newThread, omrthread_entrypoint_t entryProc, void* entryArg);
 
 #if defined(__cplusplus)
 }

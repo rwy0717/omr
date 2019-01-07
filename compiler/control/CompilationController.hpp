@@ -23,23 +23,23 @@
 #define COMPILATIONCONTROLLER_INCL
 
 #include "control/OptimizationPlan.hpp"
-#include "env/TRMemory.hpp"              // for TR_Memory, etc
+#include "env/TRMemory.hpp" // for TR_Memory, etc
 
 class TR_MethodEvent;
-namespace TR { class Recompilation; }
+namespace TR {
+class Recompilation;
+}
 
-namespace TR
-{
+namespace TR {
 
-class DefaultCompilationStrategy : public TR::CompilationStrategy
-   {
-   public:
-   TR_PERSISTENT_ALLOC(TR_Memory::PersistentInfo);
-   DefaultCompilationStrategy() {}
-   TR_OptimizationPlan *processEvent(TR_MethodEvent *event, bool *newPlanCreated);
-   void shutdown() {}
-   virtual bool enableSwitchToProfiling() { return true; }
-   };
+class DefaultCompilationStrategy : public TR::CompilationStrategy {
+public:
+    TR_PERSISTENT_ALLOC(TR_Memory::PersistentInfo);
+    DefaultCompilationStrategy() {}
+    TR_OptimizationPlan* processEvent(TR_MethodEvent* event, bool* newPlanCreated);
+    void shutdown() {}
+    virtual bool enableSwitchToProfiling() { return true; }
+};
 
-} // namesapce TR
+} // namespace TR
 #endif

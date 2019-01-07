@@ -26,21 +26,20 @@
 #include "ddr/error.hpp"
 
 /* This type represents both class and struct types */
-class ClassUDT : public ClassType
-{
+class ClassUDT : public ClassType {
 public:
-	ClassUDT *_superClass;
-	bool _isClass;
+    ClassUDT* _superClass;
+    bool _isClass;
 
-	explicit ClassUDT(size_t size, bool isClass = true, unsigned int lineNumber = 0);
-	virtual ~ClassUDT();
+    explicit ClassUDT(size_t size, bool isClass = true, unsigned int lineNumber = 0);
+    virtual ~ClassUDT();
 
-	virtual const string &getSymbolKindName() const;
+    virtual const string& getSymbolKindName() const;
 
-	virtual DDR_RC acceptVisitor(const TypeVisitor &visitor);
+    virtual DDR_RC acceptVisitor(const TypeVisitor& visitor);
 
-	bool operator==(const Type & rhs) const;
-	virtual bool compareToClass(const ClassUDT &) const;
+    bool operator==(const Type& rhs) const;
+    virtual bool compareToClass(const ClassUDT&) const;
 };
 
 #endif /* CLASSUDT_HPP */

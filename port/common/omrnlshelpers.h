@@ -27,9 +27,6 @@
 #include "omrport.h"
 #include "omrportpriv.h"
 
-void nls_determine_locale(struct OMRPortLibrary *portLibrary);
-
+void nls_determine_locale(struct OMRPortLibrary* portLibrary);
 
 #endif /* omrnlshelpers_h */
-
-

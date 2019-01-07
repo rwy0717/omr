@@ -31,15 +31,11 @@
 
 /* TODO: move out struct to omrosdump_helpers.c to complete refactoring */
 typedef struct MarkAllPagesWritableHeader {
-	uint32_t eyeCatcher;
-	uint32_t checksum;
-	uintptr_t size;
-	uintptr_t maxSize;
+    uint32_t eyeCatcher;
+    uint32_t checksum;
+    uintptr_t size;
+    uintptr_t maxSize;
 } MarkAllPagesWritableHeader;
 
-uintptr_t renameDump(struct OMRPortLibrary *portLibrary, char *filename, pid_t pid, int signalNumber);
-char *markAllPagesWritable(struct OMRPortLibrary *portLibrary);
-
-
-
-
+uintptr_t renameDump(struct OMRPortLibrary* portLibrary, char* filename, pid_t pid, int signalNumber);
+char* markAllPagesWritable(struct OMRPortLibrary* portLibrary);

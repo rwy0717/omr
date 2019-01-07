@@ -19,7 +19,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
-  
+
 #if !defined(VERBOSE_BUFFER_HPP_)
 #define VERBOSE_BUFFER_HPP_
 
@@ -44,69 +44,66 @@
  * flushed in the future.
  * @ingroup GC_verbose_output_agents
  */
-class MM_VerboseBuffer : public MM_Base
-{
-/*
+class MM_VerboseBuffer : public MM_Base {
+    /*
  * Member data
  */
 private:
-	char *_buffer; /**< Pointer to the base of the buffer */
-	char *_bufferAlloc; /**< Pointer to the next char in the buffer */
-	char *_bufferTop; /**< Pointer to the top of the buffer (non-inclusive) */
+    char* _buffer; /**< Pointer to the base of the buffer */
+    char* _bufferAlloc; /**< Pointer to the next char in the buffer */
+    char* _bufferTop; /**< Pointer to the top of the buffer (non-inclusive) */
 protected:
 public:
-
-/*
+    /*
  * Member functions
  */
 private:
-	bool initialize(MM_EnvironmentBase *env, uintptr_t size);
-	void tearDown(MM_EnvironmentBase *env);
+    bool initialize(MM_EnvironmentBase* env, uintptr_t size);
+    void tearDown(MM_EnvironmentBase* env);
 
-	/**
-	 * Ensure that there are at least spaceNeeded bytes left in the buffer.
-	 * @param env[in] the current thread
-	 * @param spaceNeeded[in] the minimum number of free bytes needed
-	 * @return true on success, false if the buffer could not be expanded
-	 */
-	bool ensureCapacity(MM_EnvironmentBase *env, uintptr_t spaceNeeded);
+    /**
+     * Ensure that there are at least spaceNeeded bytes left in the buffer.
+     * @param env[in] the current thread
+     * @param spaceNeeded[in] the minimum number of free bytes needed
+     * @return true on success, false if the buffer could not be expanded
+     */
+    bool ensureCapacity(MM_EnvironmentBase* env, uintptr_t spaceNeeded);
 
 protected:
-	
 public:
-	static MM_VerboseBuffer *newInstance(MM_EnvironmentBase *env, uintptr_t size);
-	virtual void kill(MM_EnvironmentBase *env);
+    static MM_VerboseBuffer* newInstance(MM_EnvironmentBase* env, uintptr_t size);
+    virtual void kill(MM_EnvironmentBase* env);
 
-	void reset();
-	
-	MMINLINE char *contents() { return _buffer; }
-	MMINLINE uintptr_t currentSize() { return _bufferAlloc - _buffer; }
-	MMINLINE uintptr_t freeSpace() { return _bufferTop - _bufferAlloc; }
-	MMINLINE uintptr_t totalSize() { return _bufferTop - _buffer; }
+    void reset();
 
-	/**
-	 * Append the specified NUL terminated string to the buffer.
-	 * @param env[in] the current thread
-	 * @param string[in] the string to append
-	 * @return true on success, false if the buffer could not be expanded
-	 */
-	bool add(MM_EnvironmentBase *env, const char *string);
-	
-	/**
-	 * Format the specified data and append it to the buffer.
-	 * @param env[in] the current thread
-	 * @param format[in] a format string; see omrstr_printf
-	 * @param args[in] a va_list describing the arguments to format
-	 * @return true on success, false if the buffer could not be expanded
-	 */
-	bool vprintf(MM_EnvironmentBase *env, const char *format, va_list args);
-	
-	MM_VerboseBuffer(MM_EnvironmentBase *env) :
-		MM_Base(),
-		_buffer(NULL),
-		_bufferAlloc(NULL),
-		_bufferTop(NULL)
-	{}
+    MMINLINE char* contents() { return _buffer; }
+    MMINLINE uintptr_t currentSize() { return _bufferAlloc - _buffer; }
+    MMINLINE uintptr_t freeSpace() { return _bufferTop - _bufferAlloc; }
+    MMINLINE uintptr_t totalSize() { return _bufferTop - _buffer; }
+
+    /**
+     * Append the specified NUL terminated string to the buffer.
+     * @param env[in] the current thread
+     * @param string[in] the string to append
+     * @return true on success, false if the buffer could not be expanded
+     */
+    bool add(MM_EnvironmentBase* env, const char* string);
+
+    /**
+     * Format the specified data and append it to the buffer.
+     * @param env[in] the current thread
+     * @param format[in] a format string; see omrstr_printf
+     * @param args[in] a va_list describing the arguments to format
+     * @return true on success, false if the buffer could not be expanded
+     */
+    bool vprintf(MM_EnvironmentBase* env, const char* format, va_list args);
+
+    MM_VerboseBuffer(MM_EnvironmentBase* env)
+        : MM_Base()
+        , _buffer(NULL)
+        , _bufferAlloc(NULL)
+        , _bufferTop(NULL)
+    {}
 };
 
 #endif /* VERBOSE_BUFFER_HPP_ */

@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #include <string.h>
 
 #include "StartupManager.hpp"
@@ -52,153 +51,150 @@
 #define OMR_XGCTHREADS_LENGTH 11
 
 uintptr_t
-MM_StartupManager::getUDATAValue(char *option, uintptr_t *outputValue)
+MM_StartupManager::getUDATAValue(char* option, uintptr_t* outputValue)
 {
-	char buffer[OMR_GC_BUFFER_SIZE];
-	int count = 0;
-	size_t optionLength = strlen(option);
+    char buffer[OMR_GC_BUFFER_SIZE];
+    int count = 0;
+    size_t optionLength = strlen(option);
 
-	/* make sure not to buffer overflow */
-	if (optionLength > (OMR_GC_BUFFER_SIZE - 1)) {
-		return -1;
-	}
+    /* make sure not to buffer overflow */
+    if (optionLength > (OMR_GC_BUFFER_SIZE - 1)) {
+        return -1;
+    }
 
-	while (true) {
-		char current = option[count];
-		if (('0' <= current) && ('9' >= current)) {
-			buffer[count] = current;
-		} else {
-			break;
-		}
-		count += 1;
-	}
-	buffer[count] = '\0';
+    while (true) {
+        char current = option[count];
+        if (('0' <= current) && ('9' >= current)) {
+            buffer[count] = current;
+        } else {
+            break;
+        }
+        count += 1;
+    }
+    buffer[count] = '\0';
 
-	*outputValue = (uintptr_t) atoi(buffer);
+    *outputValue = (uintptr_t)atoi(buffer);
 
-	return count;
+    return count;
 }
 
-bool
-MM_StartupManager::getUDATAMemoryValue(char *option, uintptr_t *convertedValue)
+bool MM_StartupManager::getUDATAMemoryValue(char* option, uintptr_t* convertedValue)
 {
-	size_t count = 0;
-	size_t optionLength = strlen(option);
-	uintptr_t actualValue = 0;
+    size_t count = 0;
+    size_t optionLength = strlen(option);
+    uintptr_t actualValue = 0;
 
-	count = getUDATAValue(option, &actualValue);
+    count = getUDATAValue(option, &actualValue);
 
-	/* if there was not at least one numeric value return failure */
-	if (count < 1) {
-		return false;
-	}
+    /* if there was not at least one numeric value return failure */
+    if (count < 1) {
+        return false;
+    }
 
-	/* if there is more than one character after the last numeric value
-	then this is a malformed option */
-	if (optionLength > (count + 1)) {
-		return false;
-	}
+    /* if there is more than one character after the last numeric value
+    then this is a malformed option */
+    if (optionLength > (count + 1)) {
+        return false;
+    }
 
-	switch (option[count]) {
-	case 'g':
-	case 'G':
-		/* intentional fall through */
-		actualValue *= 1024;
-	case 'm':
-	case 'M':
-		/* intentional fall through */
-		actualValue *= 1024;
-	case 'k':
-	case 'K':
-		/* intentional fall through */
-		actualValue *= 1024;
-	case 'b':
-	case 'B':
-		/* nothing */
-		break;
-	default:
-		return false;
-	}
+    switch (option[count]) {
+    case 'g':
+    case 'G':
+        /* intentional fall through */
+        actualValue *= 1024;
+    case 'm':
+    case 'M':
+        /* intentional fall through */
+        actualValue *= 1024;
+    case 'k':
+    case 'K':
+        /* intentional fall through */
+        actualValue *= 1024;
+    case 'b':
+    case 'B':
+        /* nothing */
+        break;
+    default:
+        return false;
+    }
 
-	*convertedValue = actualValue;
-	return true;
+    *convertedValue = actualValue;
+    return true;
 }
 
-bool
-MM_StartupManager::parseGcOptions(MM_GCExtensionsBase *extensions)
+bool MM_StartupManager::parseGcOptions(MM_GCExtensionsBase* extensions)
 {
-	OMRPORT_ACCESS_FROM_OMRVM(extensions->getOmrVM());
-	char *gcOptions = getOptions();
-	bool result = true;
-	if (NULL != gcOptions) {
-		size_t end = 0;
-		char *options = gcOptions;
+    OMRPORT_ACCESS_FROM_OMRVM(extensions->getOmrVM());
+    char* gcOptions = getOptions();
+    bool result = true;
+    if (NULL != gcOptions) {
+        size_t end = 0;
+        char* options = gcOptions;
 
-		do {
-			char option[OMR_GC_BUFFER_SIZE];
-			char *nextSpace = strchr(options, ' ');
-			if (NULL == nextSpace) {
-				/* handle last option */
-				end = strlen(options);
-				if (0 == end) {
-					/* ending in space so exit */
-					break;
-				}
-			} else {
-				end = (size_t)(nextSpace - options);
-				if (0 == end) {
-					/* starting with a space or multiple spaces in a row so skip to next character */
-					options += 1;
-					continue;
-				}
-			}
-			if (end > (OMR_GC_BUFFER_SIZE - 1)) {
-				omrtty_printf("Error parsing OMR GC options: '%s'\n", gcOptions);
-				result = false;
-				break;
-			}
-			strncpy(option, options, end);
-			option[end] = '\0';
-			if(!handleOption(extensions, option)) {
-				omrtty_printf("Error parsing OMR GC options: '%s'\n", gcOptions);
-				result = false;
-				break;
-			}
-			options = options + end;
-			if ('\0' == options[0]) {
-				/* finished string */
-				break;
-			}
-			/* move past the space */
-			options += 1;
-		} while (true);
-	}
+        do {
+            char option[OMR_GC_BUFFER_SIZE];
+            char* nextSpace = strchr(options, ' ');
+            if (NULL == nextSpace) {
+                /* handle last option */
+                end = strlen(options);
+                if (0 == end) {
+                    /* ending in space so exit */
+                    break;
+                }
+            } else {
+                end = (size_t)(nextSpace - options);
+                if (0 == end) {
+                    /* starting with a space or multiple spaces in a row so skip to next character */
+                    options += 1;
+                    continue;
+                }
+            }
+            if (end > (OMR_GC_BUFFER_SIZE - 1)) {
+                omrtty_printf("Error parsing OMR GC options: '%s'\n", gcOptions);
+                result = false;
+                break;
+            }
+            strncpy(option, options, end);
+            option[end] = '\0';
+            if (!handleOption(extensions, option)) {
+                omrtty_printf("Error parsing OMR GC options: '%s'\n", gcOptions);
+                result = false;
+                break;
+            }
+            options = options + end;
+            if ('\0' == options[0]) {
+                /* finished string */
+                break;
+            }
+            /* move past the space */
+            options += 1;
+        } while (true);
+    }
 
-	if (result) {
-		result = parseLanguageOptions(extensions);
-	}
+    if (result) {
+        result = parseLanguageOptions(extensions);
+    }
 
-	return result;
+    return result;
 }
 
-bool
-MM_StartupManager::loadGcOptions(MM_GCExtensionsBase *extensions)
+bool MM_StartupManager::loadGcOptions(MM_GCExtensionsBase* extensions)
 {
-	OMRPORT_ACCESS_FROM_OMRVM(extensions->getOmrVM());
+    OMRPORT_ACCESS_FROM_OMRVM(extensions->getOmrVM());
 
 #if defined(OMR_GC_MODRON_COMPACTION)
-	/* Disable compact by default. */
-	extensions->noCompactOnGlobalGC = 1;
-	extensions->compactOnGlobalGC = 0;
-	extensions->nocompactOnSystemGC = 1;
-	extensions->compactOnSystemGC = 0;
+    /* Disable compact by default. */
+    extensions->noCompactOnGlobalGC = 1;
+    extensions->compactOnGlobalGC = 0;
+    extensions->nocompactOnSystemGC = 1;
+    extensions->compactOnSystemGC = 0;
 #endif /* OMR_GC_MODRON_COMPACTION */
 
-	uintptr_t *pageSizes = omrvmem_supported_page_sizes();
-	uintptr_t *pageFlags = omrvmem_supported_page_flags();
+    uintptr_t* pageSizes = omrvmem_supported_page_sizes();
+    uintptr_t* pageFlags = omrvmem_supported_page_flags();
 
-	extensions->requestedPageSize = pageSizes[0];
-	extensions->requestedPageFlags = pageFlags[0];
+    extensions->requestedPageSize = pageSizes[0];
+    extensions->requestedPageFlags = pageFlags[0];
 
 #if defined(OMR_ENV_DATA64)
 #define HEAP_ALIGNMENT 1024
@@ -210,126 +206,121 @@ MM_StartupManager::loadGcOptions(MM_GCExtensionsBase *extensions)
 #endif /* OMR_GC_MODRON_CONCURRENT_MARK */
 #endif /* OMR_ENV_DATA64 */
 
-	extensions->heapAlignment = HEAP_ALIGNMENT;
+    extensions->heapAlignment = HEAP_ALIGNMENT;
 
-	assert(0 != defaultMinHeapSize);
-	assert(0 != defaultMaxHeapSize);
-	assert(defaultMinHeapSize <= defaultMaxHeapSize);
+    assert(0 != defaultMinHeapSize);
+    assert(0 != defaultMaxHeapSize);
+    assert(defaultMinHeapSize <= defaultMaxHeapSize);
 
-	/* Set defaults to support Standard GC in OMR */
-	extensions->initialMemorySize = defaultMinHeapSize;
-	extensions->minNewSpaceSize = 0;
-	extensions->newSpaceSize = 0;
-	extensions->maxNewSpaceSize = 0;
-	extensions->minOldSpaceSize = defaultMinHeapSize;
-	extensions->oldSpaceSize = defaultMinHeapSize;
-	extensions->maxOldSpaceSize = defaultMaxHeapSize;
-	extensions->memoryMax = defaultMaxHeapSize;
-	extensions->maxSizeDefaultMemorySpace = defaultMaxHeapSize;
+    /* Set defaults to support Standard GC in OMR */
+    extensions->initialMemorySize = defaultMinHeapSize;
+    extensions->minNewSpaceSize = 0;
+    extensions->newSpaceSize = 0;
+    extensions->maxNewSpaceSize = 0;
+    extensions->minOldSpaceSize = defaultMinHeapSize;
+    extensions->oldSpaceSize = defaultMinHeapSize;
+    extensions->maxOldSpaceSize = defaultMaxHeapSize;
+    extensions->memoryMax = defaultMaxHeapSize;
+    extensions->maxSizeDefaultMemorySpace = defaultMaxHeapSize;
 
-	/* Now override defaults with specified settings, if any */
-	bool result = parseGcOptions(extensions);
+    /* Now override defaults with specified settings, if any */
+    bool result = parseGcOptions(extensions);
 
-	return result;
+    return result;
 }
 
-bool
-MM_StartupManager::handleOption(MM_GCExtensionsBase *extensions, char *option)
+bool MM_StartupManager::handleOption(MM_GCExtensionsBase* extensions, char* option)
 {
-	OMRPORT_ACCESS_FROM_OMRVM(extensions->getOmrVM());
-	bool result = true;
-	if (0 == strncmp(option, OMR_XMS, OMR_XMS_LENGTH)) {
-		uintptr_t value = 0;
-		if (!getUDATAMemoryValue(option + OMR_XMS_LENGTH, &value)) {
-			result = false;
-		} else {
-			extensions->initialMemorySize = value;
-			extensions->minOldSpaceSize = value;
-			extensions->oldSpaceSize = value;
-		}
-	} else if (0 == strncmp(option, OMR_XMX, OMR_XMX_LENGTH)) {
-		uintptr_t value = 0;
-		if (!getUDATAMemoryValue(option + OMR_XMX_LENGTH, &value)) {
-			result = false;
-		} else {
-			extensions->maxOldSpaceSize = value;
-			extensions->memoryMax = value;
-			extensions->maxSizeDefaultMemorySpace = value;
-		}
-	}
+    OMRPORT_ACCESS_FROM_OMRVM(extensions->getOmrVM());
+    bool result = true;
+    if (0 == strncmp(option, OMR_XMS, OMR_XMS_LENGTH)) {
+        uintptr_t value = 0;
+        if (!getUDATAMemoryValue(option + OMR_XMS_LENGTH, &value)) {
+            result = false;
+        } else {
+            extensions->initialMemorySize = value;
+            extensions->minOldSpaceSize = value;
+            extensions->oldSpaceSize = value;
+        }
+    } else if (0 == strncmp(option, OMR_XMX, OMR_XMX_LENGTH)) {
+        uintptr_t value = 0;
+        if (!getUDATAMemoryValue(option + OMR_XMX_LENGTH, &value)) {
+            result = false;
+        } else {
+            extensions->maxOldSpaceSize = value;
+            extensions->memoryMax = value;
+            extensions->maxSizeDefaultMemorySpace = value;
+        }
+    }
 #if defined(OMR_GC_MODRON_COMPACTION)
-	else if (0 == strncmp(option, OMR_XCOMPACTGC, OMR_XCOMPACTGC_LENGTH)) {
-		extensions->noCompactOnGlobalGC = 0;
-		extensions->compactOnGlobalGC = 0;
-		extensions->nocompactOnSystemGC = 0;
-		extensions->compactOnSystemGC = 0;
-	}
+    else if (0 == strncmp(option, OMR_XCOMPACTGC, OMR_XCOMPACTGC_LENGTH)) {
+        extensions->noCompactOnGlobalGC = 0;
+        extensions->compactOnGlobalGC = 0;
+        extensions->nocompactOnSystemGC = 0;
+        extensions->compactOnSystemGC = 0;
+    }
 #endif /* OMR_GC_MODRON_COMPACTION */
-	else if (0 == strncmp(option, OMR_XVERBOSEGCLOG, OMR_XVERBOSEGCLOG_LENGTH)) {
-		verboseFileName = (char *) omrmem_allocate_memory(strlen(option+OMR_XVERBOSEGCLOG_LENGTH)+1, OMRMEM_CATEGORY_MM);
-		if (NULL == verboseFileName) {
-			result = false;
-		} else {
-			strcpy(verboseFileName, option + OMR_XVERBOSEGCLOG_LENGTH);
-		}
-	}
-	else if (0 == strncmp(option, OMR_XGCBUFFERED_LOGGING, OMR_XGCBUFFERED_LOGGING_LENGTH)) {
-		extensions->bufferedLogging = true;
-	}
+    else if (0 == strncmp(option, OMR_XVERBOSEGCLOG, OMR_XVERBOSEGCLOG_LENGTH)) {
+        verboseFileName = (char*)omrmem_allocate_memory(strlen(option + OMR_XVERBOSEGCLOG_LENGTH) + 1, OMRMEM_CATEGORY_MM);
+        if (NULL == verboseFileName) {
+            result = false;
+        } else {
+            strcpy(verboseFileName, option + OMR_XVERBOSEGCLOG_LENGTH);
+        }
+    } else if (0 == strncmp(option, OMR_XGCBUFFERED_LOGGING, OMR_XGCBUFFERED_LOGGING_LENGTH)) {
+        extensions->bufferedLogging = true;
+    }
 #if defined(OMR_GC_MORDON_SCAVENGER)
-	else if (0 == strncmp(option, OMR_XGCPOLICY, OMR_XGCPOLICY_LENGTH)) {
-		char *gcpolicy = option + OMR_XGCPOLICY_LENGTH;
-		if (0 == strncmp(gcpolicy, OMR_GCPOLICY_GENCON, OMR_GCPOLICY_GENCON_LENGTH)) {
-			/* this is disabled by default -- enable scavenger here */
-			extensions->scavengerEnabled = true;
-		} else {
-			result = false;
-		}
-	}
+    else if (0 == strncmp(option, OMR_XGCPOLICY, OMR_XGCPOLICY_LENGTH)) {
+        char* gcpolicy = option + OMR_XGCPOLICY_LENGTH;
+        if (0 == strncmp(gcpolicy, OMR_GCPOLICY_GENCON, OMR_GCPOLICY_GENCON_LENGTH)) {
+            /* this is disabled by default -- enable scavenger here */
+            extensions->scavengerEnabled = true;
+        } else {
+            result = false;
+        }
+    }
 #endif /* defined(OMR_GC_MORDON_SCAVENGER) */
-	else if (0 == strncmp(option, OMR_XGCTHREADS, OMR_XGCTHREADS_LENGTH)) {
-		uintptr_t forcedThreadCount = 0;
-		if (0 >= getUDATAValue(option + OMR_XGCTHREADS_LENGTH, &forcedThreadCount)) {
-			result = false;
-		} else {
-			extensions->gcThreadCount = forcedThreadCount;
-			extensions->gcThreadCountForced = true;
-		}
-	} else {
-		/* unknown option */
-		result = false;
-	}
+    else if (0 == strncmp(option, OMR_XGCTHREADS, OMR_XGCTHREADS_LENGTH)) {
+        uintptr_t forcedThreadCount = 0;
+        if (0 >= getUDATAValue(option + OMR_XGCTHREADS_LENGTH, &forcedThreadCount)) {
+            result = false;
+        } else {
+            extensions->gcThreadCount = forcedThreadCount;
+            extensions->gcThreadCountForced = true;
+        }
+    } else {
+        /* unknown option */
+        result = false;
+    }
 
-	return result;
+    return result;
 }
 
-void
-MM_StartupManager::tearDown(void)
+void MM_StartupManager::tearDown(void)
 {
-	OMRPORT_ACCESS_FROM_OMRVM(omrVM);
-	if (NULL != verboseFileName) {
-		omrmem_free_memory(verboseFileName);
-		verboseFileName = NULL;
-	}
+    OMRPORT_ACCESS_FROM_OMRVM(omrVM);
+    if (NULL != verboseFileName) {
+        omrmem_free_memory(verboseFileName);
+        verboseFileName = NULL;
+    }
 }
 
-bool
-MM_StartupManager::isVerboseEnabled(void)
+bool MM_StartupManager::isVerboseEnabled(void)
 {
-	return (NULL != verboseFileName);
+    return (NULL != verboseFileName);
 }
 
-char *
-MM_StartupManager::getVerboseFileName(void)
+char* MM_StartupManager::getVerboseFileName(void)
 {
-	return verboseFileName;
+    return verboseFileName;
 }
 
-MM_Configuration *
-MM_StartupManager::createConfiguration(MM_EnvironmentBase *env)
+MM_Configuration*
+MM_StartupManager::createConfiguration(MM_EnvironmentBase* env)
 {
-	/* When multiple configurations are supported, this call can return different
-	 * concrete implementations based on arguments previously parsed by handleOption().
-	 */
-	return MM_ConfigurationFlat::newInstance(env);
+    /* When multiple configurations are supported, this call can return different
+     * concrete implementations based on arguments previously parsed by handleOption().
+     */
+    return MM_ConfigurationFlat::newInstance(env);
 }

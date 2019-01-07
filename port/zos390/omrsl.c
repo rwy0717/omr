@@ -26,7 +26,6 @@
  * @brief shared library
  */
 
-
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
@@ -37,75 +36,74 @@
 #include "portnls.h"
 #include "ut_omrport.h"
 
-#define DMESSAGE(x)				/* printf x; */
+#define DMESSAGE(x) /* printf x; */
 
-
-static void getDLError(struct OMRPortLibrary *portLibrary, char *errBuf, uintptr_t bufLen);
+static void getDLError(struct OMRPortLibrary* portLibrary, char* errBuf, uintptr_t bufLen);
 
 uintptr_t
-omrsl_open_shared_library(struct OMRPortLibrary *portLibrary, char *name, uintptr_t *descriptor, uintptr_t flags)
+omrsl_open_shared_library(struct OMRPortLibrary* portLibrary, char* name, uintptr_t* descriptor, uintptr_t flags)
 {
-	void *handle;
-	char *openName = name;
-	char mangledName[EsMaxPath + 1];
-	char errBuf[512];
-	BOOLEAN decorate = OMR_ARE_ALL_BITS_SET(flags, OMRPORT_SLOPEN_DECORATE);
-	BOOLEAN openExec = OMR_ARE_ALL_BITS_SET(flags, OMRPORT_SLOPEN_OPEN_EXECUTABLE);
-	uintptr_t pathLength = 0;
-	uintptr_t dirNameLength = 0;
+    void* handle;
+    char* openName = name;
+    char mangledName[EsMaxPath + 1];
+    char errBuf[512];
+    BOOLEAN decorate = OMR_ARE_ALL_BITS_SET(flags, OMRPORT_SLOPEN_DECORATE);
+    BOOLEAN openExec = OMR_ARE_ALL_BITS_SET(flags, OMRPORT_SLOPEN_OPEN_EXECUTABLE);
+    uintptr_t pathLength = 0;
+    uintptr_t dirNameLength = 0;
 
-	Trc_PRT_sl_open_shared_library_Entry(name, flags);
+    Trc_PRT_sl_open_shared_library_Entry(name, flags);
 
-	/* No need to name mangle if a handle to the executable is requested for. */
-	if (!openExec && decorate) {
-		char *p = strrchr(name, '/');
-		if (p) {
-			/* the names specifies a path */
-			dirNameLength = (uintptr_t)p + 1 - (uintptr_t)name;
-			pathLength = portLibrary->str_printf(portLibrary, mangledName, (EsMaxPath + 1), "%.*slib%s.so", dirNameLength, name, p + 1);
-		} else {
-			pathLength = portLibrary->str_printf(portLibrary, mangledName, (EsMaxPath + 1), "lib%s.so", name);
-		}
-		if (pathLength >= EsMaxPath) {
-			Trc_PRT_sl_open_shared_library_Exit2(OMRPORT_SL_UNSUPPORTED);
-			return OMRPORT_SL_UNSUPPORTED;
-		}
-		openName = mangledName;
-	}
+    /* No need to name mangle if a handle to the executable is requested for. */
+    if (!openExec && decorate) {
+        char* p = strrchr(name, '/');
+        if (p) {
+            /* the names specifies a path */
+            dirNameLength = (uintptr_t)p + 1 - (uintptr_t)name;
+            pathLength = portLibrary->str_printf(portLibrary, mangledName, (EsMaxPath + 1), "%.*slib%s.so", dirNameLength, name, p + 1);
+        } else {
+            pathLength = portLibrary->str_printf(portLibrary, mangledName, (EsMaxPath + 1), "lib%s.so", name);
+        }
+        if (pathLength >= EsMaxPath) {
+            Trc_PRT_sl_open_shared_library_Exit2(OMRPORT_SL_UNSUPPORTED);
+            return OMRPORT_SL_UNSUPPORTED;
+        }
+        openName = mangledName;
+    }
 
-	Trc_PRT_sl_open_shared_library_Event1(openName);
+    Trc_PRT_sl_open_shared_library_Event1(openName);
 
-	/* dllload() can open a handle to the executable with its name itself (unlike NULL
-	 * on other platforms) provided the executable is itself built as a DLL (in XPLINK
-	 * mode), which anyway is required for enabling symbol resolution.
-	 */
-	handle = dllload(openName);
+    /* dllload() can open a handle to the executable with its name itself (unlike NULL
+     * on other platforms) provided the executable is itself built as a DLL (in XPLINK
+     * mode), which anyway is required for enabling symbol resolution.
+     */
+    handle = dllload(openName);
 
-	if ((NULL == handle) && !openExec && decorate && (0 != dirNameLength)) {
-		/* z/OS doesn't support dladdr so we can't search the dir of the portLib for the dll
-		 * as is the case on linux and macos. Instead, attempt to load the DLL with just its
-		 * name and not the full path. dllload will search the filesystem for the library */
-		openName +=  dirNameLength;
+    if ((NULL == handle) && !openExec && decorate && (0 != dirNameLength)) {
+        /* z/OS doesn't support dladdr so we can't search the dir of the portLib for the dll
+         * as is the case on linux and macos. Instead, attempt to load the DLL with just its
+         * name and not the full path. dllload will search the filesystem for the library */
+        openName += dirNameLength;
 
-		Trc_PRT_sl_open_shared_library_Event2(openName);
-		handle = dllload(openName);
-	}
+        Trc_PRT_sl_open_shared_library_Event2(openName);
+        handle = dllload(openName);
+    }
 
-	if (NULL == handle) {
-		getDLError(portLibrary, errBuf, sizeof(errBuf));
-		Trc_PRT_sl_open_shared_library_Event2(errBuf);
-		if (portLibrary->file_attr(portLibrary, openName) == EsIsFile) {
-			Trc_PRT_sl_open_shared_library_Exit2(OMRPORT_SL_INVALID);
-			return portLibrary->error_set_last_error_with_message(portLibrary, OMRPORT_SL_INVALID, errBuf);
-		} else {
-			Trc_PRT_sl_open_shared_library_Exit2(OMRPORT_SL_NOT_FOUND);
-			return portLibrary->error_set_last_error_with_message(portLibrary, OMRPORT_SL_NOT_FOUND, errBuf);
-		}
-	}
+    if (NULL == handle) {
+        getDLError(portLibrary, errBuf, sizeof(errBuf));
+        Trc_PRT_sl_open_shared_library_Event2(errBuf);
+        if (portLibrary->file_attr(portLibrary, openName) == EsIsFile) {
+            Trc_PRT_sl_open_shared_library_Exit2(OMRPORT_SL_INVALID);
+            return portLibrary->error_set_last_error_with_message(portLibrary, OMRPORT_SL_INVALID, errBuf);
+        } else {
+            Trc_PRT_sl_open_shared_library_Exit2(OMRPORT_SL_NOT_FOUND);
+            return portLibrary->error_set_last_error_with_message(portLibrary, OMRPORT_SL_NOT_FOUND, errBuf);
+        }
+    }
 
-	*descriptor = (uintptr_t)handle;
-	Trc_PRT_sl_open_shared_library_Exit1(*descriptor);
-	return 0;
+    *descriptor = (uintptr_t)handle;
+    Trc_PRT_sl_open_shared_library_Exit1(*descriptor);
+    return 0;
 }
 
 /**
@@ -117,19 +115,19 @@ omrsl_open_shared_library(struct OMRPortLibrary *portLibrary, char *name, uintpt
  * @return 0 on success, any other value on failure.
  */
 uintptr_t
-omrsl_close_shared_library(struct OMRPortLibrary *portLibrary, uintptr_t descriptor)
+omrsl_close_shared_library(struct OMRPortLibrary* portLibrary, uintptr_t descriptor)
 {
-	int error;
-	dllhandle *handle;
+    int error;
+    dllhandle* handle;
 
-	Trc_PRT_sl_close_shared_library_Entry(descriptor);
+    Trc_PRT_sl_close_shared_library_Entry(descriptor);
 
-	DMESSAGE(("\nClose library %x\n", *descriptor))
-	handle = (dllhandle *)descriptor;
-	error = dllfree(handle);
+    DMESSAGE(("\nClose library %x\n", *descriptor))
+    handle = (dllhandle*)descriptor;
+    error = dllfree(handle);
 
-	Trc_PRT_sl_close_shared_library_Exit(error);
-	return error;
+    Trc_PRT_sl_close_shared_library_Exit(error);
+    return error;
 }
 /**
  * Search for a function named 'name' taking argCount in the shared library 'descriptor'.
@@ -165,22 +163,22 @@ omrsl_close_shared_library(struct OMRPortLibrary *portLibrary, uintptr_t descrip
  * @note contents of func are undefined on failure.
  */
 uintptr_t
-omrsl_lookup_name(struct OMRPortLibrary *portLibrary, uintptr_t descriptor, char *name, uintptr_t *func, const char *argSignature)
+omrsl_lookup_name(struct OMRPortLibrary* portLibrary, uintptr_t descriptor, char* name, uintptr_t* func, const char* argSignature)
 {
-	void *address;
-	dllhandle *handle;
+    void* address;
+    dllhandle* handle;
 
-	Trc_PRT_sl_lookup_name_Entry(descriptor, name, argSignature);
+    Trc_PRT_sl_lookup_name_Entry(descriptor, name, argSignature);
 
-	handle = (dllhandle *)descriptor;
-	address = (void *)dllqueryfn(handle, name);
-	if (address == NULL) {
-		Trc_PRT_sl_lookup_name_Exit2(name, argSignature, handle, 1);
-		return 1;
-	}
-	*func = (uintptr_t)address;
-	Trc_PRT_sl_lookup_name_Exit1(*func);
-	return 0;
+    handle = (dllhandle*)descriptor;
+    address = (void*)dllqueryfn(handle, name);
+    if (address == NULL) {
+        Trc_PRT_sl_lookup_name_Exit2(name, argSignature, handle, 1);
+        return 1;
+    }
+    *func = (uintptr_t)address;
+    Trc_PRT_sl_lookup_name_Exit1(*func);
+    return 0;
 }
 /**
  * PortLibrary shutdown.
@@ -192,8 +190,7 @@ omrsl_lookup_name(struct OMRPortLibrary *portLibrary, uintptr_t descriptor, char
  *
  * @note Most implementations will be empty.
  */
-void
-omrsl_shutdown(struct OMRPortLibrary *portLibrary)
+void omrsl_shutdown(struct OMRPortLibrary* portLibrary)
 {
 }
 /**
@@ -211,30 +208,28 @@ omrsl_shutdown(struct OMRPortLibrary *portLibrary)
  * @note Most implementations will simply return success.
  */
 int32_t
-omrsl_startup(struct OMRPortLibrary *portLibrary)
+omrsl_startup(struct OMRPortLibrary* portLibrary)
 {
-	return 0;
+    return 0;
 }
 static void
-getDLError(struct OMRPortLibrary *portLibrary, char *errBuf, uintptr_t bufLen)
+getDLError(struct OMRPortLibrary* portLibrary, char* errBuf, uintptr_t bufLen)
 {
-	const char *error;
+    const char* error;
 
-	if (bufLen == 0) {
-		return;
-	}
+    if (bufLen == 0) {
+        return;
+    }
 
-	error = strerror(errno);
-	if (error == NULL || error[0] == '\0') {
-		/* just in case another thread consumed our error message */
-		error = portLibrary->nls_lookup_message(portLibrary,
-												J9NLS_ERROR | J9NLS_DO_NOT_APPEND_NEWLINE,
-												J9NLS_PORT_SL_UNKOWN_ERROR,
-												NULL);
-	}
+    error = strerror(errno);
+    if (error == NULL || error[0] == '\0') {
+        /* just in case another thread consumed our error message */
+        error = portLibrary->nls_lookup_message(portLibrary,
+            J9NLS_ERROR | J9NLS_DO_NOT_APPEND_NEWLINE,
+            J9NLS_PORT_SL_UNKOWN_ERROR,
+            NULL);
+    }
 
-	strncpy(errBuf, error, bufLen);
-	errBuf[bufLen - 1] = '\0';
+    strncpy(errBuf, error, bufLen);
+    errBuf[bufLen - 1] = '\0';
 }
-
-

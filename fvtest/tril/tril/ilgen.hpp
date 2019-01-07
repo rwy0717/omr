@@ -40,38 +40,39 @@ namespace Tril {
  * This class takes care of transformaing the Tril AST into Testarossa IL
  */
 class TRLangBuilder : public TR::IlInjector {
-    public:
-
-        /**
+public:
+    /**
          * @brief Constructs a Tril IL Generator
          * @param trees is the list of AST nodes representing the TR::Node instances to be generated
          * @param d is the type dictionary to be used this IL generator
          */
-        TRLangBuilder(const ASTNode* trees, TR::TypeDictionary* d)
-              : TR::IlInjector(d), _trees(trees) {}
+    TRLangBuilder(const ASTNode* trees, TR::TypeDictionary* d)
+        : TR::IlInjector(d)
+        , _trees(trees)
+    {}
 
-        bool injectIL(); /* override */
+    bool injectIL(); /* override */
 
-        /**
+    /**
          * @brief Given an AST structure, returns a TR::Node represented by the AST
          * @param tree the AST structure
          * @return TR::Node represented by the AST
          */
-        TR::Node* toTRNode(const ASTNode* const tree);
+    TR::Node* toTRNode(const ASTNode* const tree);
 
-        /**
+    /**
          * @brief Given an AST structure, generates a corresponding CFG
          * @param tree the AST structure that the CFG will be generated from
          * @return true if a fall-through edge needs to be added, false otherwise
          */
-        bool cfgFor(const ASTNode* const tree);
+    bool cfgFor(const ASTNode* const tree);
 
-    private:
-        TR::TypeDictionary _types;
-        const ASTNode* _trees;    // pointer to the AST node list representing Trees
-        std::map<std::string, TR::SymbolReference*> _symRefMap; // mapping of string names to symrefs
-        std::map<std::string, int> _blockMap;   // mapping of string names to basic block numbers
-        std::map<std::string, TR::Node*> _nodeMap;
+private:
+    TR::TypeDictionary _types;
+    const ASTNode* _trees; // pointer to the AST node list representing Trees
+    std::map<std::string, TR::SymbolReference*> _symRefMap; // mapping of string names to symrefs
+    std::map<std::string, int> _blockMap; // mapping of string names to basic block numbers
+    std::map<std::string, TR::Node*> _nodeMap;
 };
 
 } // namespace Tril

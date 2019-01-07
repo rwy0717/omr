@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 /**
  * @file
  * @ingroup GC_Base_Core
@@ -39,11 +38,10 @@
  * functionality down to the appropriate level, and not so high that all configurations must recognize it.
  * @return true on successful TLH replenishment, false otherwise.
  */
-void *
-MM_ObjectAllocationInterface::allocateTLH(MM_EnvironmentBase *env, MM_AllocateDescription *allocDescription, MM_MemorySubSpace *memorySubSpace, MM_MemoryPool *memoryPool)
+void* MM_ObjectAllocationInterface::allocateTLH(MM_EnvironmentBase* env, MM_AllocateDescription* allocDescription, MM_MemorySubSpace* memorySubSpace, MM_MemoryPool* memoryPool)
 {
-	assume0(0);  /* Temporary routine */
-	return NULL;
+    assume0(0); /* Temporary routine */
+    return NULL;
 }
 #endif /* OMR_GC_THREAD_LOCAL_HEAP */
 
@@ -56,10 +54,9 @@ MM_ObjectAllocationInterface::allocateTLH(MM_EnvironmentBase *env, MM_AllocateDe
  * 
  * @note The calling environment may not be the owning environment of the receiver.
  */
-void
-MM_ObjectAllocationInterface::flushCache(MM_EnvironmentBase *env)
+void MM_ObjectAllocationInterface::flushCache(MM_EnvironmentBase* env)
 {
-	/* Do nothing */
+    /* Do nothing */
 }
 
 /**
@@ -70,8 +67,7 @@ MM_ObjectAllocationInterface::flushCache(MM_EnvironmentBase *env)
  * @note The calling environment may not be the owning environment of the receiver.
  * @note The previous cache state is expected to have been flushed back to the heap. 
  */
-void
-MM_ObjectAllocationInterface::restartCache(MM_EnvironmentBase *env)
+void MM_ObjectAllocationInterface::restartCache(MM_EnvironmentBase* env)
 {
-	/* Do nothing */
+    /* Do nothing */
 }

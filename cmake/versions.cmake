@@ -28,19 +28,19 @@ set(VERSION_STRING "<Unknown>")
 
 find_package(Git)
 if(Git_FOUND)
-	execute_process(
-		COMMAND "${GIT_EXECUTABLE}" rev-parse --short HEAD
-		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-		RESULT_VARIABLE rc
-		OUTPUT_VARIABLE OMR_SHA
-		OUTPUT_STRIP_TRAILING_WHITESPACE
-	)
+    execute_process(
+        COMMAND "${GIT_EXECUTABLE}" rev-parse --short HEAD
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+        RESULT_VARIABLE rc
+        OUTPUT_VARIABLE OMR_SHA
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
 
-	if(NOT "${rc}" STREQUAL "0")
-		message(AUTHOR_WARNING "Failed to get OMR git SHA")
-	else()
-		set(VERSION_STRING "${OMR_SHA}")
-	endif()
+    if(NOT "${rc}" STREQUAL "0")
+        message(AUTHOR_WARNING "Failed to get OMR git SHA")
+    else()
+        set(VERSION_STRING "${OMR_SHA}")
+    endif()
 endif()
 
 

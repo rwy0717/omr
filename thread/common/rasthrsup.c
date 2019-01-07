@@ -33,6 +33,5 @@ uintptr_t
 omrthread_get_ras_tid(void)
 {
 #error omrthread_get_ras_tid() is not implemented on this platform
-	return 0;
+    return 0;
 }
-

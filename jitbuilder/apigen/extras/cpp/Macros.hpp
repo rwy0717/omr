@@ -18,60 +18,50 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #ifndef CPP_BINDING_RUNTIME_INCL
 #define CPP_BINDING_RUNTIME_INCL
 
-#define TOSTR(x)     #x
+#define TOSTR(x) #x
 #define LINETOSTR(x) TOSTR(x)
 
-#define ARG_SETUP(baretype, ptrImpl, byVarArg, parmArg)                 \
-   TR::baretype *ptrImpl = NULL;                                        \
-   TR::baretype **byVarArg = NULL;                                      \
-   if (parmArg)                                                         \
-      {                                                                 \
-      byVarArg = &ptrImpl;                                              \
-      if (*parmArg)                                                     \
-         ptrImpl = reinterpret_cast<TR::baretype *>((*parmArg)->_impl); \
-      }
+#define ARG_SETUP(baretype, ptrImpl, byVarArg, parmArg)                   \
+    TR::baretype* ptrImpl = NULL;                                         \
+    TR::baretype** byVarArg = NULL;                                       \
+    if (parmArg) {                                                        \
+        byVarArg = &ptrImpl;                                              \
+        if (*parmArg)                                                     \
+            ptrImpl = reinterpret_cast<TR::baretype*>((*parmArg)->_impl); \
+    }
 
-#define ARG_RETURN(baretype, ptrImpl, parmArg)         \
-   if (parmArg)                                        \
-      {                                                \
-      GET_CLIENT_OBJECT(clientObj, baretype, ptrImpl); \
-      *parmArg = clientObj;                            \
-      }
+#define ARG_RETURN(baretype, ptrImpl, parmArg)           \
+    if (parmArg) {                                       \
+        GET_CLIENT_OBJECT(clientObj, baretype, ptrImpl); \
+        *parmArg = clientObj;                            \
+    }
 
-
-#define ARRAY_ARG_SETUP(baretype, arraySize, arrayImpl, parmArg)               \
-   TR::baretype **arrayImpl = new TR::baretype *[arraySize];                   \
-   for (uint32_t i=0;i < arraySize;i++)                                        \
-      {                                                                        \
-      if (parmArg[i] != NULL)                                                  \
-         arrayImpl[i] = reinterpret_cast<TR::baretype *>((parmArg[i])->_impl); \
-      else                                                                     \
-         arrayImpl[i] = NULL;                                                  \
-      }
+#define ARRAY_ARG_SETUP(baretype, arraySize, arrayImpl, parmArg)                 \
+    TR::baretype** arrayImpl = new TR::baretype*[arraySize];                     \
+    for (uint32_t i = 0; i < arraySize; i++) {                                   \
+        if (parmArg[i] != NULL)                                                  \
+            arrayImpl[i] = reinterpret_cast<TR::baretype*>((parmArg[i])->_impl); \
+        else                                                                     \
+            arrayImpl[i] = NULL;                                                 \
+    }
 
 #define ARRAY_ARG_RETURN(baretype, arraySize, arrayImpl, parmArg) \
-   for (uint32_t i=0;i < arraySize;i++)                           \
-      {                                                           \
-      if (arrayImpl[i] != NULL)                                   \
-         {                                                        \
-         GET_CLIENT_OBJECT(clientObj, baretype, arrayImpl[i])     \
-         parmArg[i] = clientObj;                                  \
-         }                                                        \
-      else                                                        \
-         parmArg[i] = NULL;                                       \
-      }
-
+    for (uint32_t i = 0; i < arraySize; i++) {                    \
+        if (arrayImpl[i] != NULL) {                               \
+            GET_CLIENT_OBJECT(clientObj, baretype, arrayImpl[i])  \
+            parmArg[i] = clientObj;                               \
+        } else                                                    \
+            parmArg[i] = NULL;                                    \
+    }
 
 // This macro defines clientObj in the scope where macro is used
-#define GET_CLIENT_OBJECT(clientObj, baretype, implObj)            \
-   baretype *clientObj = NULL;                                     \
-   if (implObj != NULL)                                            \
-      {                                                            \
-      clientObj = reinterpret_cast<baretype *>(implObj->client()); \
-      }
+#define GET_CLIENT_OBJECT(clientObj, baretype, implObj)             \
+    baretype* clientObj = NULL;                                     \
+    if (implObj != NULL) {                                          \
+        clientObj = reinterpret_cast<baretype*>(implObj->client()); \
+    }
 
 #endif // defined(CPP_BINDING_RUNTIME_INCL)

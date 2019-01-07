@@ -24,10 +24,10 @@ include(OmrAssert)
 omr_assert(TEST DEFINED OMR_ARCH_POWER MESSAGE "OMR_HOST_OS configured as AIX but OMR_ARCH_POWER is not defined")
 
 set(OMR_PLATFORM_DEFINITIONS
-	-DRS6000
-	-DAIXPPC
-	-D_LARGE_FILES
-	-D_ALL_SOURCE
+    -DRS6000
+    -DAIXPPC
+    -D_LARGE_FILES
+    -D_ALL_SOURCE
 )
 
 # Testarossa build variables. Longer term the distinction between TR and the rest

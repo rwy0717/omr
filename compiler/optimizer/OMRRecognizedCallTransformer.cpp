@@ -25,53 +25,48 @@
 #include "il/Node_inlines.hpp"
 #include "il/TreeTop.hpp"
 #include "il/TreeTop_inlines.hpp"
-#include "infra/Checklist.hpp"       // for NodeChecklist, etc
+#include "infra/Checklist.hpp" // for NodeChecklist, etc
 #include "codegen/CodeGenerator.hpp" // for CodeGenerator
 #include "codegen/CodeGenerator_inlines.hpp"
 #include "optimizer/TransformUtil.hpp"
 
-TR::Optimization* OMR::RecognizedCallTransformer::create(TR::OptimizationManager *manager)
-   {
-   return new (manager->allocator()) TR::RecognizedCallTransformer(manager);
-   }
+TR::Optimization* OMR::RecognizedCallTransformer::create(TR::OptimizationManager* manager)
+{
+    return new (manager->allocator()) TR::RecognizedCallTransformer(manager);
+}
 
 int32_t OMR::RecognizedCallTransformer::perform()
-   {
-   TR::NodeChecklist visited(comp());
-   for (auto treetop = comp()->getMethodSymbol()->getFirstTreeTop(); treetop != NULL; treetop = treetop->getNextTreeTop())
-      {
-      if (treetop->getNode()->getNumChildren() > 0)
-         {
-         auto node = treetop->getNode()->getFirstChild();
-         if (node && node->getOpCode().isCall() && !visited.contains(node))
-            {
-            if (isInlineable(treetop) &&
-                performTransformation(comp(), "%s Transforming recognized call node [" POINTER_PRINTF_FORMAT "]\n", optDetailString(), node))
-               {
-               visited.add(node);
-               transform(treetop);
-               }
+{
+    TR::NodeChecklist visited(comp());
+    for (auto treetop = comp()->getMethodSymbol()->getFirstTreeTop(); treetop != NULL; treetop = treetop->getNextTreeTop()) {
+        if (treetop->getNode()->getNumChildren() > 0) {
+            auto node = treetop->getNode()->getFirstChild();
+            if (node && node->getOpCode().isCall() && !visited.contains(node)) {
+                if (isInlineable(treetop) && performTransformation(comp(), "%s Transforming recognized call node [" POINTER_PRINTF_FORMAT "]\n", optDetailString(), node)) {
+                    visited.add(node);
+                    transform(treetop);
+                }
             }
-         }
-      }
-   return 0;
-   }
+        }
+    }
+    return 0;
+}
 
 bool OMR::RecognizedCallTransformer::isInlineable(TR::TreeTop* treetop)
-   {
-   return cg()->isIntrinsicMethodSupported(treetop->getNode()->getFirstChild()->getSymbol()->castToMethodSymbol()->getMandatoryRecognizedMethod());
-   }
+{
+    return cg()->isIntrinsicMethodSupported(treetop->getNode()->getFirstChild()->getSymbol()->castToMethodSymbol()->getMandatoryRecognizedMethod());
+}
 
 void OMR::RecognizedCallTransformer::transform(TR::TreeTop* treetop)
-   {
-   auto node = treetop->getNode()->getFirstChild();
-   auto rm = node->getSymbol()->castToMethodSymbol()->getMandatoryRecognizedMethod();
-   TR_ASSERT(cg()->isIntrinsicMethodSupported(rm), "Only supported intrinsic method should reach here.");
-   TR::Node::recreate(node, cg()->ilOpCodeForIntrinsicMethod(rm));
-   TR::TransformUtil::removeTree(comp(), treetop);
-   }
+{
+    auto node = treetop->getNode()->getFirstChild();
+    auto rm = node->getSymbol()->castToMethodSymbol()->getMandatoryRecognizedMethod();
+    TR_ASSERT(cg()->isIntrinsicMethodSupported(rm), "Only supported intrinsic method should reach here.");
+    TR::Node::recreate(node, cg()->ilOpCodeForIntrinsicMethod(rm));
+    TR::TransformUtil::removeTree(comp(), treetop);
+}
 
 const char* OMR::RecognizedCallTransformer::optDetailString() const throw()
-   {
-   return "O^O RECOGNIZED CALL TRANSFORMER:";
-   }
+{
+    return "O^O RECOGNIZED CALL TRANSFORMER:";
+}

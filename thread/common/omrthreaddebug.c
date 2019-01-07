@@ -36,8 +36,8 @@
  * @returns retVal
  */
 intptr_t
-omrthread_debug_syscall(const char *func, intptr_t retVal)
+omrthread_debug_syscall(const char* func, intptr_t retVal)
 {
-	return retVal;
+    return retVal;
 }
 #endif

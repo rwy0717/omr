@@ -47,212 +47,209 @@ class MM_Packet;
  * @todo Provide class documentation
  * @ingroup GC_Base
  */
-class MM_WorkPackets: public MM_BaseVirtual
-{	
-	friend class MM_PacketListIterator;
+class MM_WorkPackets : public MM_BaseVirtual {
+    friend class MM_PacketListIterator;
 
-/* Data members / types */
+    /* Data members / types */
 public:
-protected:	
-	enum {
-		_slotsInPacket = 512,
-		_packetSize = _slotsInPacket * sizeof(void *),
-		_minPacketsInBlock = 4,
-		_initialBlocks = 5,
-		_increaseFactor = 5,
-		_maxPacketsBlocks = _initialBlocks * _increaseFactor,
-		_fullPacketThreshold = _slotsInPacket >> 4,
-		_satisfactoryCapacity = _slotsInPacket / 2,
-		_indexMask = 0xff,
-		_maxPacketSearch = 20
-	};
+protected:
+    enum {
+        _slotsInPacket = 512,
+        _packetSize = _slotsInPacket * sizeof(void*),
+        _minPacketsInBlock = 4,
+        _initialBlocks = 5,
+        _increaseFactor = 5,
+        _maxPacketsBlocks = _initialBlocks * _increaseFactor,
+        _fullPacketThreshold = _slotsInPacket >> 4,
+        _satisfactoryCapacity = _slotsInPacket / 2,
+        _indexMask = 0xff,
+        _maxPacketSearch = 20
+    };
 
-	uintptr_t _packetsPerBlock;
-	uintptr_t _maxPackets;
-	uintptr_t _activePackets;
-	uintptr_t _packetsBlocksTop;
-	omrthread_monitor_t _allocatingPackets;
-	MM_Packet *_packetsStart[_maxPacketsBlocks];
-	MM_PacketList _emptyPacketList;  /**< List for empty packets */
-	MM_PacketList _fullPacketList;  /**< List for full packets */
-	MM_PacketList _relativelyFullPacketList;  /**< List for relatively full packets */
-	MM_PacketList _nonEmptyPacketList;  /**< List for non empty packets */
-	MM_PacketList _deferredPacketList;  /**< List for deferred packets */
-	MM_PacketList _deferredFullPacketList;  /**< List for full deferred packets */
-	
-	OMRPortLibrary *_portLibrary;
+    uintptr_t _packetsPerBlock;
+    uintptr_t _maxPackets;
+    uintptr_t _activePackets;
+    uintptr_t _packetsBlocksTop;
+    omrthread_monitor_t _allocatingPackets;
+    MM_Packet* _packetsStart[_maxPacketsBlocks];
+    MM_PacketList _emptyPacketList; /**< List for empty packets */
+    MM_PacketList _fullPacketList; /**< List for full packets */
+    MM_PacketList _relativelyFullPacketList; /**< List for relatively full packets */
+    MM_PacketList _nonEmptyPacketList; /**< List for non empty packets */
+    MM_PacketList _deferredPacketList; /**< List for deferred packets */
+    MM_PacketList _deferredFullPacketList; /**< List for full deferred packets */
 
-	omrthread_monitor_t _inputListMonitor;
-	volatile uintptr_t _inputListWaitCount;
-	volatile uintptr_t _inputListDoneIndex;
+    OMRPortLibrary* _portLibrary;
 
-	MM_WorkPacketOverflow *_overflowHandler;
-	MM_GCExtensionsBase *_extensions;
+    omrthread_monitor_t _inputListMonitor;
+    volatile uintptr_t _inputListWaitCount;
+    volatile uintptr_t _inputListDoneIndex;
 
-	void emptyToOverflow(MM_EnvironmentBase *env, MM_Packet *packet, MM_OverflowType type);
-	virtual MM_Packet *getInputPacketFromOverflow(MM_EnvironmentBase *env);
-	bool initWorkPacketsBlock(MM_EnvironmentBase *env);
+    MM_WorkPacketOverflow* _overflowHandler;
+    MM_GCExtensionsBase* _extensions;
 
-	MM_Packet *getPacket(MM_EnvironmentBase *env, MM_PacketList *list);
-	MM_Packet *getLeastFullPacket(MM_EnvironmentBase *env, int requiredSlots);
+    void emptyToOverflow(MM_EnvironmentBase* env, MM_Packet* packet, MM_OverflowType type);
+    virtual MM_Packet* getInputPacketFromOverflow(MM_EnvironmentBase* env);
+    bool initWorkPacketsBlock(MM_EnvironmentBase* env);
 
-	virtual bool initialize(MM_EnvironmentBase *env);
-	virtual void tearDown(MM_EnvironmentBase *env);
-	
-	virtual MM_WorkPacketOverflow *createOverflowHandler(MM_EnvironmentBase *env, MM_WorkPackets *workPackets);
+    MM_Packet* getPacket(MM_EnvironmentBase* env, MM_PacketList* list);
+    MM_Packet* getLeastFullPacket(MM_EnvironmentBase* env, int requiredSlots);
+
+    virtual bool initialize(MM_EnvironmentBase* env);
+    virtual void tearDown(MM_EnvironmentBase* env);
+
+    virtual MM_WorkPacketOverflow* createOverflowHandler(MM_EnvironmentBase* env, MM_WorkPackets* workPackets);
 
 private:
-	
-/* Methods */
+    /* Methods */
 public:
-	static MM_WorkPackets  *newInstance(MM_EnvironmentBase *env);
-	void kill(MM_EnvironmentBase *env);
+    static MM_WorkPackets* newInstance(MM_EnvironmentBase* env);
+    void kill(MM_EnvironmentBase* env);
 
-	void reuseDeferredPackets(MM_EnvironmentBase *env);
+    void reuseDeferredPackets(MM_EnvironmentBase* env);
 
-	static uintptr_t getSlotsInPacket() { return _slotsInPacket; }
-	MM_Packet *getInputPacketNoWait(MM_EnvironmentBase *env);
-	virtual MM_Packet *getInputPacket(MM_EnvironmentBase *env);
-	virtual MM_Packet *getOutputPacket(MM_EnvironmentBase *env);
-	void putPacket(MM_EnvironmentBase *env, MM_Packet *packet);
-	void putOutputPacket(MM_EnvironmentBase *env, MM_Packet *packet);
-	
-	MM_Packet *getDeferredPacket(MM_EnvironmentBase *env);
-	void putDeferredPacket(MM_EnvironmentBase *env, MM_Packet *packet);
-	
-	/**
-	 * Returns TRUE if an input packet is available, FALSE otherwise.
-	 */
-	bool inputPacketAvailable(MM_EnvironmentBase *env);
-	
-	/**
-	 * Returns TRUE if all packets are empty, FALSE otherwise.
-	 * @ingroup GC_Base
-	 */
-	MMINLINE bool isAllPacketsEmpty()
-	{
-		return(_emptyPacketList.getCount() == _activePackets);
-	};
-	
-	/**
-	 * Returns TRUE if all non-deferred packets are empty, FALSE otherwise.
-	 */
-	MMINLINE bool tracingExhausted()
-	{
-		return(_emptyPacketList.getCount() + _deferredPacketList.getCount() + _deferredFullPacketList.getCount() == _activePackets);
-	};
-	
-	MMINLINE uintptr_t getThreadWaitCount() {
-		return _inputListWaitCount;
-	}
+    static uintptr_t getSlotsInPacket() { return _slotsInPacket; }
+    MM_Packet* getInputPacketNoWait(MM_EnvironmentBase* env);
+    virtual MM_Packet* getInputPacket(MM_EnvironmentBase* env);
+    virtual MM_Packet* getOutputPacket(MM_EnvironmentBase* env);
+    void putPacket(MM_EnvironmentBase* env, MM_Packet* packet);
+    void putOutputPacket(MM_EnvironmentBase* env, MM_Packet* packet);
 
-	/**
-	 * Returns number of non-empty packets 
-	 */
-	MMINLINE uintptr_t getNonEmptyPacketCount()
-	{
-		return(_activePackets - _emptyPacketList.getCount());
-	};
-	
-	/** Returns number of active packets
-	 */
-	MMINLINE uintptr_t getActivePacketCount()
-	{
-		return _activePackets;
-	};
-	
-	/**
-	 * Returns number of non-empty packets 
-	 */
-	MMINLINE uintptr_t getEmptyPacketCount()
-	{
-		return(_emptyPacketList.getCount());
-	};
+    MM_Packet* getDeferredPacket(MM_EnvironmentBase* env);
+    void putDeferredPacket(MM_EnvironmentBase* env, MM_Packet* packet);
 
-	/**
-	 * Returns number of deferred packets 
-	 */
-	MMINLINE uintptr_t getDeferredPacketCount()
-	{
-		return(_deferredPacketList.getCount() + _deferredFullPacketList.getCount());
-	};
+    /**
+     * Returns TRUE if an input packet is available, FALSE otherwise.
+     */
+    bool inputPacketAvailable(MM_EnvironmentBase* env);
 
+    /**
+     * Returns TRUE if all packets are empty, FALSE otherwise.
+     * @ingroup GC_Base
+     */
+    MMINLINE bool isAllPacketsEmpty()
+    {
+        return (_emptyPacketList.getCount() == _activePackets);
+    };
 
-	MMINLINE omrthread_monitor_t* getInputListMonitorPtr()
-	{
-		return &_inputListMonitor;
-	}
+    /**
+     * Returns TRUE if all non-deferred packets are empty, FALSE otherwise.
+     */
+    MMINLINE bool tracingExhausted()
+    {
+        return (_emptyPacketList.getCount() + _deferredPacketList.getCount() + _deferredFullPacketList.getCount() == _activePackets);
+    };
 
-	MMINLINE volatile uintptr_t* getInputListWaitCountPtr()
-	{
-		return &_inputListWaitCount;
-	}
+    MMINLINE uintptr_t getThreadWaitCount()
+    {
+        return _inputListWaitCount;
+    }
 
-	/**
-	 * Returns current value of overflow flag
-	 * @return true if flag is set
-	 */
-	bool getOverflowFlag();
-	
-	/**
-	 * Clear overflow flag
-	 */
-	void clearOverflowFlag();
+    /**
+     * Returns number of non-empty packets 
+     */
+    MMINLINE uintptr_t getNonEmptyPacketCount()
+    {
+        return (_activePackets - _emptyPacketList.getCount());
+    };
 
-	void resetAllPackets(MM_EnvironmentBase *env);
-	
-	void overflowItem(MM_EnvironmentBase *env, void *item, MM_OverflowType type);
+    /** Returns number of active packets
+     */
+    MMINLINE uintptr_t getActivePacketCount()
+    {
+        return _activePackets;
+    };
 
-	/**
-	 * Reset any state in the receiver in preparation for starting new work
-	 * @param env - the current thread
-	 */
-	void reset(MM_EnvironmentBase *env);
+    /**
+     * Returns number of non-empty packets 
+     */
+    MMINLINE uintptr_t getEmptyPacketCount()
+    {
+        return (_emptyPacketList.getCount());
+    };
 
-	/**
-	 * Handle Work Packet Overflow case
-	 * @param env current thread environment
-	 * @return true if overflow is triggered since previous Overflow handling
-	 */
-	bool handleWorkPacketOverflow(MM_EnvironmentBase *env);
+    /**
+     * Returns number of deferred packets 
+     */
+    MMINLINE uintptr_t getDeferredPacketCount()
+    {
+        return (_deferredPacketList.getCount() + _deferredFullPacketList.getCount());
+    };
 
-	/**
-	 * Create a WorkPackets object.
-	 */
-	MM_WorkPackets(MM_EnvironmentBase *env) :
-		MM_BaseVirtual(),
-		_packetsPerBlock(0),
-		_maxPackets(0),
-		_activePackets(0),
-		_packetsBlocksTop(0),
-		_allocatingPackets(NULL),
-		_emptyPacketList(env),
-		_fullPacketList(env),
-		_relativelyFullPacketList(env),
-		_nonEmptyPacketList(env),
-		_deferredPacketList(env),
-		_deferredFullPacketList(env),
-		_inputListMonitor(NULL),
-		_inputListWaitCount(0),
-		_inputListDoneIndex(0),
-		_overflowHandler(NULL)
-	{
-		_typeId = __FUNCTION__;
-	}
-	
+    MMINLINE omrthread_monitor_t* getInputListMonitorPtr()
+    {
+        return &_inputListMonitor;
+    }
+
+    MMINLINE volatile uintptr_t* getInputListWaitCountPtr()
+    {
+        return &_inputListWaitCount;
+    }
+
+    /**
+     * Returns current value of overflow flag
+     * @return true if flag is set
+     */
+    bool getOverflowFlag();
+
+    /**
+     * Clear overflow flag
+     */
+    void clearOverflowFlag();
+
+    void resetAllPackets(MM_EnvironmentBase* env);
+
+    void overflowItem(MM_EnvironmentBase* env, void* item, MM_OverflowType type);
+
+    /**
+     * Reset any state in the receiver in preparation for starting new work
+     * @param env - the current thread
+     */
+    void reset(MM_EnvironmentBase* env);
+
+    /**
+     * Handle Work Packet Overflow case
+     * @param env current thread environment
+     * @return true if overflow is triggered since previous Overflow handling
+     */
+    bool handleWorkPacketOverflow(MM_EnvironmentBase* env);
+
+    /**
+     * Create a WorkPackets object.
+     */
+    MM_WorkPackets(MM_EnvironmentBase* env)
+        : MM_BaseVirtual()
+        , _packetsPerBlock(0)
+        , _maxPackets(0)
+        , _activePackets(0)
+        , _packetsBlocksTop(0)
+        , _allocatingPackets(NULL)
+        , _emptyPacketList(env)
+        , _fullPacketList(env)
+        , _relativelyFullPacketList(env)
+        , _nonEmptyPacketList(env)
+        , _deferredPacketList(env)
+        , _deferredFullPacketList(env)
+        , _inputListMonitor(NULL)
+        , _inputListWaitCount(0)
+        , _inputListDoneIndex(0)
+        , _overflowHandler(NULL)
+    {
+        _typeId = __FUNCTION__;
+    }
+
 protected:
-	virtual MM_Packet *getPacketByOverflowing(MM_EnvironmentBase *env);
-	MM_Packet* getPacketByAdddingWorkPacketBlock(MM_EnvironmentBase *env);
-	virtual float getHeapCapacityFactor(MM_EnvironmentBase *env);
-	
-	/**
-	 * New packets are available; notify any waiting threads.
-	 * 
-	 * @param env - the current thread
-	 */
-	virtual void notifyWaitingThreads(MM_EnvironmentBase *env);
+    virtual MM_Packet* getPacketByOverflowing(MM_EnvironmentBase* env);
+    MM_Packet* getPacketByAdddingWorkPacketBlock(MM_EnvironmentBase* env);
+    virtual float getHeapCapacityFactor(MM_EnvironmentBase* env);
 
-	
+    /**
+     * New packets are available; notify any waiting threads.
+     * 
+     * @param env - the current thread
+     */
+    virtual void notifyWaitingThreads(MM_EnvironmentBase* env);
+
 private:
 };
 

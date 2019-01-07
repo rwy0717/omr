@@ -24,10 +24,10 @@
 
 #include "compile/OMRCompilation.hpp"
 
-TR::Compilation *
+TR::Compilation*
 OMR::Compilation::self()
-   {
-   return static_cast<TR::Compilation *>(this);
-   }
+{
+    return static_cast<TR::Compilation*>(this);
+}
 
 #endif

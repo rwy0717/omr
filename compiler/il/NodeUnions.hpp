@@ -22,16 +22,15 @@
 #ifndef NODEUNIONS_INCL
 #define NODEUNIONS_INCL
 
-#include <stddef.h>          // for size_t
-#include "il/NodeUtils.hpp"  // for CaseInfo, GlobalRegisterInfo, etc
+#include <stddef.h> // for size_t
+#include "il/NodeUtils.hpp" // for CaseInfo, GlobalRegisterInfo, etc
 
 /*
  * This file defines the unions picked up by TR::Node
  */
 
-struct UnionedWithChildren
-   {
-   /*
+struct UnionedWithChildren {
+    /*
     * To avoid bloating TR_Node, this struct should declare no
     * members outside the below union.
     *
@@ -41,22 +40,20 @@ struct UnionedWithChildren
     * TR::Node child union
     */
 
-   union
-      {
+    union {
 #ifdef SUPPORT_DFP
-      // Used to hold long double constatants
-      uint32_t                _constData[4];
+        // Used to hold long double constatants
+        uint32_t _constData[4];
 #endif
 
-      GlobalRegisterInfo                _globalRegisterInfo;
+        GlobalRegisterInfo _globalRegisterInfo;
 
-      // Offset to WCode literal pool for constants > 8 bytes
-      size_t                  _offset;
+        // Offset to WCode literal pool for constants > 8 bytes
+        size_t _offset;
 
-      ChildUnionMembers::RelocationInfo _relocationInfo;
-      ChildUnionMembers::CaseInfo       _caseInfo;
-      ChildUnionMembers::MonitorInfo    _monitorInfo;
-      };
-
-   };
+        ChildUnionMembers::RelocationInfo _relocationInfo;
+        ChildUnionMembers::CaseInfo _caseInfo;
+        ChildUnionMembers::MonitorInfo _monitorInfo;
+    };
+};
 #endif

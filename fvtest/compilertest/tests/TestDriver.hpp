@@ -25,26 +25,28 @@
 #include <stdint.h>
 #include "compile/CompilationTypes.hpp"
 
-namespace TR { class IlGeneratorMethodDetails; }
-namespace TR { class MethodBuilder; }
+namespace TR {
+class IlGeneratorMethodDetails;
+}
+namespace TR {
+class MethodBuilder;
+}
 
-extern "C" uint8_t *compileMethod(TR::IlGeneratorMethodDetails &, TR_Hotness, int32_t &);
+extern "C" uint8_t* compileMethod(TR::IlGeneratorMethodDetails&, TR_Hotness, int32_t&);
 
-namespace TestCompiler
-{
-#define TOSTR(x)     #x
+namespace TestCompiler {
+#define TOSTR(x) #x
 #define LINETOSTR(x) TOSTR(x)
 
-class TestDriver
-   {
-   public:
-   void RunTest();
-   virtual void compileTestMethods() = 0;
-   virtual void invokeTests() = 0;
+class TestDriver {
+public:
+    void RunTest();
+    virtual void compileTestMethods() = 0;
+    virtual void invokeTests() = 0;
 
-   int32_t compileMethodBuilder(TR::MethodBuilder *m, uint8_t **entry);
-   };
+    int32_t compileMethodBuilder(TR::MethodBuilder* m, uint8_t** entry);
+};
 
-}// namespace TestCompiler
+} // namespace TestCompiler
 
 #endif

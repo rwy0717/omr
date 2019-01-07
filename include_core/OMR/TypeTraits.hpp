@@ -23,8 +23,7 @@
 #if !defined(OMR_TYPETRAITS_HPP_)
 #define OMR_TYPETRAITS_HPP_
 
-namespace OMR
-{
+namespace OMR {
 
 ///
 /// Basic constants
@@ -32,13 +31,12 @@ namespace OMR
 
 /// Define an integral constant.
 template <typename T, T value>
-struct IntegralConstant
-{
-	typedef T ValueType;
+struct IntegralConstant {
+    typedef T ValueType;
 
-	static const ValueType VALUE = value;
+    static const ValueType VALUE = value;
 
-	ValueType operator()() const { return VALUE; }
+    ValueType operator()() const { return VALUE; }
 };
 
 template <typename T, T value>
@@ -52,9 +50,8 @@ struct FalseConstant : BoolConstant<false> {};
 struct TrueConstant : BoolConstant<true> {};
 
 template <typename T>
-struct TypeAlias
-{
-	typedef T Type;
+struct TypeAlias {
+    typedef T Type;
 };
 
 ///
@@ -197,10 +194,9 @@ template <bool B, typename T = void>
 struct EnableIf {};
 
 template <typename T>
-struct EnableIf<true, T>
-{
-	typedef T Type;
+struct EnableIf<true, T> {
+    typedef T Type;
 };
-}  // namespace OMR
+} // namespace OMR
 
 #endif // OMR_TYPETRAITS_HPP_

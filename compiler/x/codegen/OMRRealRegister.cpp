@@ -19,51 +19,51 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-#include "codegen/CodeGenerator.hpp"  // for CodeGenerator
-#include "codegen/Machine.hpp"        // for Machine
-#include "codegen/RealRegister.hpp"   // for RealRegister, etc
+#include "codegen/CodeGenerator.hpp" // for CodeGenerator
+#include "codegen/Machine.hpp" // for Machine
+#include "codegen/RealRegister.hpp" // for RealRegister, etc
 
-TR::RealRegister *
-OMR::X86::RealRegister::regMaskToRealRegister(TR_RegisterMask mask, TR_RegisterKinds rk, TR::CodeGenerator *cg)
-   {
-   TR::RealRegister::RegNum rr;
+TR::RealRegister*
+OMR::X86::RealRegister::regMaskToRealRegister(TR_RegisterMask mask, TR_RegisterKinds rk, TR::CodeGenerator* cg)
+{
+    TR::RealRegister::RegNum rr;
 
-   int32_t bitPos = TR::RealRegister::getBitPosInMask(mask);
+    int32_t bitPos = TR::RealRegister::getBitPosInMask(mask);
 
-   if (rk == TR_GPR)
-      rr = TR::RealRegister::FirstGPR;
-   else if (rk == TR_X87)
-      rr = TR::RealRegister::FirstFPR;
-   else if (rk == TR_FPR || rk == TR_VRF)
-      rr = TR::RealRegister::FirstXMMR;
-   else
-      TR_ASSERT(false, "Invalid TR_RegisterKinds value passed to OMR::X86::RealRegister::regMaskToRealRegister()");
+    if (rk == TR_GPR)
+        rr = TR::RealRegister::FirstGPR;
+    else if (rk == TR_X87)
+        rr = TR::RealRegister::FirstFPR;
+    else if (rk == TR_FPR || rk == TR_VRF)
+        rr = TR::RealRegister::FirstXMMR;
+    else
+        TR_ASSERT(false, "Invalid TR_RegisterKinds value passed to OMR::X86::RealRegister::regMaskToRealRegister()");
 
-   return cg->machine()->getRealRegister(TR::RealRegister::RegNum(rr+bitPos));
-   }
+    return cg->machine()->getRealRegister(TR::RealRegister::RegNum(rr + bitPos));
+}
 
 TR_RegisterMask
 OMR::X86::RealRegister::getAvailableRegistersMask(TR_RegisterKinds rk)
-   {
-   if (rk == TR_GPR)
-      return TR::RealRegister::AvailableGPRMask;
-   else if (rk == TR_X87)
-      return TR::RealRegister::AvailableFPRMask;
-   else if (rk == TR_FPR || rk == TR_VRF)
-      return TR::RealRegister::AvailableXMMRMask;
-   else // MMX: not used
-      return 0;
-   }
+{
+    if (rk == TR_GPR)
+        return TR::RealRegister::AvailableGPRMask;
+    else if (rk == TR_X87)
+        return TR::RealRegister::AvailableFPRMask;
+    else if (rk == TR_FPR || rk == TR_VRF)
+        return TR::RealRegister::AvailableXMMRMask;
+    else // MMX: not used
+        return 0;
+}
 
 TR::RealRegister::RegMask
 OMR::X86::RealRegister::getRealRegisterMask(TR_RegisterKinds rk, TR::RealRegister::RegNum idx)
-   {
-   if (rk == TR_GPR)
-      return TR::RealRegister::gprMask(idx);
-   else if (rk == TR_X87)
-      return TR::RealRegister::fprMask(idx);
-   else if (rk == TR_FPR || rk == TR_VRF)
-      return TR::RealRegister::xmmrMask(idx);
-   else // MMX: not used
-      return TR::RealRegister::mmrMask(idx);
-   }
+{
+    if (rk == TR_GPR)
+        return TR::RealRegister::gprMask(idx);
+    else if (rk == TR_X87)
+        return TR::RealRegister::fprMask(idx);
+    else if (rk == TR_FPR || rk == TR_VRF)
+        return TR::RealRegister::xmmrMask(idx);
+    else // MMX: not used
+        return TR::RealRegister::mmrMask(idx);
+}

@@ -24,15 +24,14 @@
 
 extern "C" int iconv_init(void);
 
-int
-iconv_initialization(void)
+int iconv_initialization(void)
 {
-	static int count = 0;
-	if (0 == count) {
-		iconv_init();
-		count = 1;
-	}
-	return 0;
+    static int count = 0;
+    if (0 == count) {
+        iconv_init();
+        count = 1;
+    }
+    return 0;
 }
 
 #endif

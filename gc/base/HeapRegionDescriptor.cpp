@@ -28,73 +28,65 @@
 #include "MemoryPool.hpp"
 #include "MemorySubSpace.hpp"
 
-MM_HeapRegionDescriptor::MM_HeapRegionDescriptor(MM_EnvironmentBase *env, void *lowAddress, void *highAddress)
-	: _regionsInSpan(0)
-	, _heapRegionDescriptorExtension(NULL)
-	, _lowAddress(lowAddress)
-	, _highAddress(highAddress)
-	, _previousRegion(NULL)
-	, _nextRegion(NULL)
-	, _previousRegionInSubSpace(NULL)
-	, _nextRegionInSubSpace(NULL)
-	, _nextInSet(NULL)
-	, _isAllocated(false)
-	, _memorySubSpace(NULL)
-	, _regionType(MM_HeapRegionDescriptor::RESERVED)
-	, _memoryPool(NULL)
-	, _numaNode(0)
-	, _regionProperties(MM_HeapRegionDescriptor::MANAGED)
+MM_HeapRegionDescriptor::MM_HeapRegionDescriptor(MM_EnvironmentBase* env, void* lowAddress, void* highAddress)
+    : _regionsInSpan(0)
+    , _heapRegionDescriptorExtension(NULL)
+    , _lowAddress(lowAddress)
+    , _highAddress(highAddress)
+    , _previousRegion(NULL)
+    , _nextRegion(NULL)
+    , _previousRegionInSubSpace(NULL)
+    , _nextRegionInSubSpace(NULL)
+    , _nextInSet(NULL)
+    , _isAllocated(false)
+    , _memorySubSpace(NULL)
+    , _regionType(MM_HeapRegionDescriptor::RESERVED)
+    , _memoryPool(NULL)
+    , _numaNode(0)
+    , _regionProperties(MM_HeapRegionDescriptor::MANAGED)
 {
-	_typeId = __FUNCTION__;
-	_headOfSpan = this;
+    _typeId = __FUNCTION__;
+    _headOfSpan = this;
 }
 
-void
-MM_HeapRegionDescriptor::associateWithSubSpace(MM_MemorySubSpace *subSpace)
+void MM_HeapRegionDescriptor::associateWithSubSpace(MM_MemorySubSpace* subSpace)
 {
-	Assert_MM_true(NULL != subSpace);
-	Assert_MM_true(NULL == _memorySubSpace);
-	_memorySubSpace = subSpace;
-	_memorySubSpace->registerRegion(this);
+    Assert_MM_true(NULL != subSpace);
+    Assert_MM_true(NULL == _memorySubSpace);
+    _memorySubSpace = subSpace;
+    _memorySubSpace->registerRegion(this);
 }
 
-void
-MM_HeapRegionDescriptor::disassociateWithSubSpace()
+void MM_HeapRegionDescriptor::disassociateWithSubSpace()
 {
-	if (NULL != _memorySubSpace) {
-		_memorySubSpace->unregisterRegion(this);
-		_memorySubSpace = NULL;
-	}
+    if (NULL != _memorySubSpace) {
+        _memorySubSpace->unregisterRegion(this);
+        _memorySubSpace = NULL;
+    }
 }
 
-bool 
-MM_HeapRegionDescriptor::initialize(MM_EnvironmentBase *env, MM_HeapRegionManager *regionManager)
+bool MM_HeapRegionDescriptor::initialize(MM_EnvironmentBase* env, MM_HeapRegionManager* regionManager)
 {
-	return true;
+    return true;
 }
 
-void 
-MM_HeapRegionDescriptor::tearDown(MM_EnvironmentBase *env)
+void MM_HeapRegionDescriptor::tearDown(MM_EnvironmentBase* env)
 {
-	
 }
 
-void
-MM_HeapRegionDescriptor::reinitialize(MM_EnvironmentBase *env, void *lowAddress, void *highAddress)
+void MM_HeapRegionDescriptor::reinitialize(MM_EnvironmentBase* env, void* lowAddress, void* highAddress)
 {
-	_lowAddress = lowAddress;
-	_highAddress = highAddress;
+    _lowAddress = lowAddress;
+    _highAddress = highAddress;
 }
 
-bool 
-MM_HeapRegionDescriptor::initializer(MM_EnvironmentBase *env, MM_HeapRegionManager *regionManager, MM_HeapRegionDescriptor *descriptor, void *lowAddress, void *highAddress)
+bool MM_HeapRegionDescriptor::initializer(MM_EnvironmentBase* env, MM_HeapRegionManager* regionManager, MM_HeapRegionDescriptor* descriptor, void* lowAddress, void* highAddress)
 {
-	new(descriptor) MM_HeapRegionDescriptor(env, lowAddress, highAddress);
-	return descriptor->initialize(env, regionManager);
+    new (descriptor) MM_HeapRegionDescriptor(env, lowAddress, highAddress);
+    return descriptor->initialize(env, regionManager);
 }
 
-void 
-MM_HeapRegionDescriptor::destructor(MM_EnvironmentBase *env, MM_HeapRegionManager *regionManager, MM_HeapRegionDescriptor *descriptor)
+void MM_HeapRegionDescriptor::destructor(MM_EnvironmentBase* env, MM_HeapRegionManager* regionManager, MM_HeapRegionDescriptor* descriptor)
 {
-	descriptor->tearDown(env);
+    descriptor->tearDown(env);
 }

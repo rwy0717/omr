@@ -39,7 +39,7 @@
 #include "portnls.h"
 #include "omrosdump_helpers.h"
 
-static intptr_t waitCore(char *path);
+static intptr_t waitCore(char* path);
 
 /*
  * @internal
@@ -57,80 +57,79 @@ static intptr_t waitCore(char *path);
  * @return 0 on success, otherwise non-zero and @ref filename contains error message.
  */
 uintptr_t
-renameDump(struct OMRPortLibrary *portLibrary, char *filename, pid_t pid, int signalNumber)
+renameDump(struct OMRPortLibrary* portLibrary, char* filename, pid_t pid, int signalNumber)
 {
-	char tempPath[PATH_MAX] = {'\0'};
-	char derivedAbsoluteCorePath[PATH_MAX] = {'\0'};
-	intptr_t waitCoreRC = -1;
-	char *lastSep = NULL;
-	intptr_t renameRC = -1;
-	struct stat attrBuf;
+    char tempPath[PATH_MAX] = { '\0' };
+    char derivedAbsoluteCorePath[PATH_MAX] = { '\0' };
+    intptr_t waitCoreRC = -1;
+    char* lastSep = NULL;
+    intptr_t renameRC = -1;
+    struct stat attrBuf;
 
-	portLibrary->str_printf(portLibrary, derivedAbsoluteCorePath, PATH_MAX, "/cores/core.%i", pid);
+    portLibrary->str_printf(portLibrary, derivedAbsoluteCorePath, PATH_MAX, "/cores/core.%i", pid);
 
-	/* Wait until the core file is created or timeout */
-	waitCoreRC = waitCore(derivedAbsoluteCorePath);
-	if (0 != waitCoreRC) {
-		/* The core file does not exist, bail */
-		portLibrary->str_printf(portLibrary,
-								filename,
-								EsMaxPath,
-								"The core file created by child process with pid = %i was not found. Expected to find core file with name \"%s\"",
-								pid,
-								derivedAbsoluteCorePath);
-		return 1;
-	}
+    /* Wait until the core file is created or timeout */
+    waitCoreRC = waitCore(derivedAbsoluteCorePath);
+    if (0 != waitCoreRC) {
+        /* The core file does not exist, bail */
+        portLibrary->str_printf(portLibrary,
+            filename,
+            EsMaxPath,
+            "The core file created by child process with pid = %i was not found. Expected to find core file with name \"%s\"",
+            pid,
+            derivedAbsoluteCorePath);
+        return 1;
+    }
 
+    /* Check that the path we found was to a regular file (not to an existing directory, pipe, symlink etc) */
+    if (0 == stat(derivedAbsoluteCorePath, &attrBuf)) {
+        if (!S_ISREG(attrBuf.st_mode)) {
+            portLibrary->nls_printf(portLibrary, J9NLS_ERROR | J9NLS_STDERR, J9NLS_PORT_DUMP_PATH_EXISTS, derivedAbsoluteCorePath);
+            return 1;
+        }
+    } else {
+        portLibrary->str_printf(portLibrary, filename, EsMaxPath, "Unable to read file status for core file path \"%s\"", derivedAbsoluteCorePath);
+        return 1;
+    }
 
-	/* Check that the path we found was to a regular file (not to an existing directory, pipe, symlink etc) */
-	if (0 == stat(derivedAbsoluteCorePath, &attrBuf)) {
-		if (!S_ISREG(attrBuf.st_mode)) {
-			portLibrary->nls_printf(portLibrary, J9NLS_ERROR | J9NLS_STDERR, J9NLS_PORT_DUMP_PATH_EXISTS, derivedAbsoluteCorePath);
-			return 1;
-		}
-	} else {
-		portLibrary->str_printf(portLibrary, filename, EsMaxPath, "Unable to read file status for core file path \"%s\"", derivedAbsoluteCorePath);
-		return 1;
-	}
+    /* Rename the file as required by the specified (or default) -Xdump agent file option */
+    if ('\0' != filename[0]) {
+        renameRC = rename(derivedAbsoluteCorePath, filename);
 
-	/* Rename the file as required by the specified (or default) -Xdump agent file option */
-	if ('\0' != filename[0]) {
-		renameRC = rename(derivedAbsoluteCorePath, filename);
+        if ((0 != renameRC) && (EXDEV == errno)) { /* Failed with 'cross device rename error' */
+            memset(tempPath, 0, PATH_MAX);
+            /* Retry, leaving the dump directory location unchanged */
+            lastSep = strrchr(derivedAbsoluteCorePath, DIR_SEPARATOR);
+            if (NULL != lastSep) {
+                size_t charsToCopy = lastSep - derivedAbsoluteCorePath + 1;
+                strncpy(tempPath, derivedAbsoluteCorePath, charsToCopy);
+            }
+            /* Using the dump agent requested file name */
+            lastSep = strrchr(filename, DIR_SEPARATOR);
+            if (NULL != lastSep) {
+                strcat(tempPath, lastSep + 1);
+            } else {
+                strcat(tempPath, filename);
+            }
+            /* Message warning that the -Xdump option was not fully honoured */
+            portLibrary->tty_printf(portLibrary, "Warning: unable to move dump to \"%s\" across file systems (check kernel core_pattern). Using alternate file location \"%s\"\n",
+                filename, tempPath);
+            /* Copy the new file destination back into the supplied filename for the RAS messages */
+            strncpy(filename, tempPath, EsMaxPath);
+            renameRC = rename(derivedAbsoluteCorePath, filename);
+        }
 
-		if ((0 != renameRC) && (EXDEV == errno)) { /* Failed with 'cross device rename error' */
-			memset(tempPath, 0, PATH_MAX);
-			/* Retry, leaving the dump directory location unchanged */
-			lastSep = strrchr(derivedAbsoluteCorePath, DIR_SEPARATOR);
-			if (NULL != lastSep) {
-				size_t charsToCopy = lastSep - derivedAbsoluteCorePath + 1;
-				strncpy(tempPath, derivedAbsoluteCorePath, charsToCopy);
-			}
-			/* Using the dump agent requested file name */
-			lastSep = strrchr(filename, DIR_SEPARATOR);
-			if (NULL != lastSep) {
-				strcat(tempPath, lastSep + 1);
-			} else {
-				strcat(tempPath, filename);
-			}
-			/* Message warning that the -Xdump option was not fully honoured */
-			portLibrary->tty_printf(portLibrary, "Warning: unable to move dump to \"%s\" across file systems (check kernel core_pattern). Using alternate file location \"%s\"\n",
-									filename, tempPath);
-			/* Copy the new file destination back into the supplied filename for the RAS messages */
-			strncpy(filename, tempPath, EsMaxPath);
-			renameRC = rename(derivedAbsoluteCorePath, filename);
-		}
+        if (0 != renameRC) {
+            portLibrary->tty_printf(portLibrary, "Attempt to rename \"%s\" to \"%s\" failed with error: %s\n", derivedAbsoluteCorePath, filename, strerror(errno));
+            return 1;
+        }
 
-		if (0 != renameRC) {
-			portLibrary->tty_printf(portLibrary, "Attempt to rename \"%s\" to \"%s\" failed with error: %s\n", derivedAbsoluteCorePath, filename, strerror(errno));
-			return 1;
-		}
+    } else {
+        /* Filename was empty */
+        strncpy(filename, derivedAbsoluteCorePath, EsMaxPath);
+    }
 
-	} else {
-		/* Filename was empty */
-		strncpy(filename, derivedAbsoluteCorePath, EsMaxPath);
-	}
-
-	return 0;
+    return 0;
 }
 
 /**
@@ -142,27 +141,27 @@ renameDump(struct OMRPortLibrary *portLibrary, char *filename, pid_t pid, int si
  *
  */
 static intptr_t
-waitCore(char *path)
+waitCore(char* path)
 {
-	int rc = 1;
-	time_t starttime;
-	FILE *fd;
-	starttime = time(NULL);
+    int rc = 1;
+    time_t starttime;
+    FILE* fd;
+    starttime = time(NULL);
 
-	while (0 != rc) {
-		fd = fopen(path, "r");
-		if (NULL == fd) {
-			/* Could not open the file */
-			rc = 1;
-			if (5 < difftime(time(NULL), starttime)) {
-				break;
-			}
-			usleep(100000);
-		} else {
-			/* Opened the file successfully, so we know it exists. Now close it */
-			fclose(fd);
-			rc = 0;
-		}
-	}
-	return rc;
+    while (0 != rc) {
+        fd = fopen(path, "r");
+        if (NULL == fd) {
+            /* Could not open the file */
+            rc = 1;
+            if (5 < difftime(time(NULL), starttime)) {
+                break;
+            }
+            usleep(100000);
+        } else {
+            /* Opened the file successfully, so we know it exists. Now close it */
+            fclose(fd);
+            rc = 0;
+        }
+    }
+    return rc;
 }

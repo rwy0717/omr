@@ -42,8 +42,8 @@ using std::tr1::unordered_map;
 #endif /* defined(OMR_HAVE_CXX11) */
 
 #if defined(J9ZOS390)
-#define toupper(c)     (islower(c) ? (c & _XUPPER_ASCII) : c)
-#define tolower(c)     (isupper(c) ? (c | _XLOWER_ASCII) : c)
+#define toupper(c) (islower(c) ? (c & _XUPPER_ASCII) : c)
+#define tolower(c) (isupper(c) ? (c | _XLOWER_ASCII) : c)
 #endif /* defined(J9ZOS390) */
 
 #endif /* DDR_UNORDERED_MAP */

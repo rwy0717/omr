@@ -29,6 +29,6 @@
  * @brief Helpers for protecting shared memory regions in the virtual address space (used by omrmmap and j9shmem).
  */
 
-intptr_t protect_memory(struct OMRPortLibrary *portLibrary, void *address, uintptr_t length, uintptr_t flags);
-uintptr_t protect_region_granularity(struct OMRPortLibrary *portLibrary, void *address);
+intptr_t protect_memory(struct OMRPortLibrary* portLibrary, void* address, uintptr_t length, uintptr_t flags);
+uintptr_t protect_region_granularity(struct OMRPortLibrary* portLibrary, void* address);
 #endif /*  protect_helpers_h */

@@ -27,23 +27,17 @@
 
 #if defined(OMR_GC_SEGREGATED_HEAP)
 
-void
-MM_SegregatedSweepTask::run(MM_EnvironmentBase *env)
+void MM_SegregatedSweepTask::run(MM_EnvironmentBase* env)
 {
-	_sweepScheme->sweep(env, _memoryPool, false);
+    _sweepScheme->sweep(env, _memoryPool, false);
 }
 
-void
-MM_SegregatedSweepTask::setup(MM_EnvironmentBase *env)
+void MM_SegregatedSweepTask::setup(MM_EnvironmentBase* env)
 {
-
 }
 
-void
-MM_SegregatedSweepTask::cleanup(MM_EnvironmentBase *envBase)
+void MM_SegregatedSweepTask::cleanup(MM_EnvironmentBase* envBase)
 {
-
 }
 
 #endif /* OMR_GC_SEGREGATED_HEAP */
-

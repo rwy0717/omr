@@ -29,42 +29,39 @@
 #include "omrport.h"
 #include "omrintrospect_common.h"
 
-
-J9PlatformThread *
-omrintrospect_threads_startDo_with_signal(struct OMRPortLibrary *portLibrary, J9Heap *heap, J9ThreadWalkState *state, void *signal_info)
+J9PlatformThread*
+omrintrospect_threads_startDo_with_signal(struct OMRPortLibrary* portLibrary, J9Heap* heap, J9ThreadWalkState* state, void* signal_info)
 {
-	RECORD_ERROR(state, UNSUPPORTED_PLATFORM, 0);
-	return NULL;
+    RECORD_ERROR(state, UNSUPPORTED_PLATFORM, 0);
+    return NULL;
 }
 
-J9PlatformThread *
-omrintrospect_threads_startDo(struct OMRPortLibrary *portLibrary, J9Heap *heap, J9ThreadWalkState *state)
+J9PlatformThread*
+omrintrospect_threads_startDo(struct OMRPortLibrary* portLibrary, J9Heap* heap, J9ThreadWalkState* state)
 {
-	return omrintrospect_threads_startDo_with_signal(portLibrary, heap, state, NULL);
+    return omrintrospect_threads_startDo_with_signal(portLibrary, heap, state, NULL);
 }
 
-
-J9PlatformThread *
-omrintrospect_threads_nextDo(J9ThreadWalkState *state)
+J9PlatformThread*
+omrintrospect_threads_nextDo(J9ThreadWalkState* state)
 {
-	RECORD_ERROR(state, UNSUPPORTED_PLATFORM, 0);
-	return NULL;
-}
-
-int32_t
-omrintrospect_set_suspend_signal_offset(struct OMRPortLibrary *portLibrary, int32_t signalOffset)
-{
-	return OMRPORT_ERROR_NOT_SUPPORTED_ON_THIS_PLATFORM;
+    RECORD_ERROR(state, UNSUPPORTED_PLATFORM, 0);
+    return NULL;
 }
 
 int32_t
-omrintrospect_startup(struct OMRPortLibrary *portLibrary)
+omrintrospect_set_suspend_signal_offset(struct OMRPortLibrary* portLibrary, int32_t signalOffset)
 {
-	return 0;
+    return OMRPORT_ERROR_NOT_SUPPORTED_ON_THIS_PLATFORM;
 }
 
-void
-omrintrospect_shutdown(struct OMRPortLibrary *portLibrary)
+int32_t
+omrintrospect_startup(struct OMRPortLibrary* portLibrary)
 {
-	return;
+    return 0;
+}
+
+void omrintrospect_shutdown(struct OMRPortLibrary* portLibrary)
+{
+    return;
 }

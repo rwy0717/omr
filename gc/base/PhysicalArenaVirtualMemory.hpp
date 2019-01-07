@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #if !defined(PHYSICALARENAVIRTUALMEMORY_HPP_)
 #define PHYSICALARENAVIRTUALMEMORY_HPP_
 
@@ -35,8 +34,8 @@ class MM_PhysicalSubArena;
 class MM_PhysicalSubArenaVirtualMemory;
 
 enum {
-	modron_pavm_attach_policy_none = 0,
-	modron_pavm_attach_policy_high_memory
+    modron_pavm_attach_policy_none = 0,
+    modron_pavm_attach_policy_high_memory
 };
 
 /**
@@ -46,43 +45,43 @@ enum {
 class MM_PhysicalArenaVirtualMemory : public MM_PhysicalArena {
 private:
 protected:
-	MM_PhysicalSubArenaVirtualMemory* _physicalSubArena;
+    MM_PhysicalSubArenaVirtualMemory* _physicalSubArena;
 
-	bool initialize(MM_EnvironmentBase* env);
+    bool initialize(MM_EnvironmentBase* env);
 
 public:
-	static MM_PhysicalArenaVirtualMemory* newInstance(MM_EnvironmentBase* env, MM_Heap* heap);
+    static MM_PhysicalArenaVirtualMemory* newInstance(MM_EnvironmentBase* env, MM_Heap* heap);
 
-	virtual bool inflate(MM_EnvironmentBase* env);
+    virtual bool inflate(MM_EnvironmentBase* env);
 
-	/**
-	 * Calculate the size of the range from the supplied address to the sub arenas high address.
-	 * @param address The base address of the range.
-	 * @return The size of the range.
-	 */
-	MMINLINE uintptr_t calculateOffsetToHighAddress(void* address)
-	{
-		return (uintptr_t)getHighAddress() - (uintptr_t)address;
-	};
+    /**
+     * Calculate the size of the range from the supplied address to the sub arenas high address.
+     * @param address The base address of the range.
+     * @return The size of the range.
+     */
+    MMINLINE uintptr_t calculateOffsetToHighAddress(void* address)
+    {
+        return (uintptr_t)getHighAddress() - (uintptr_t)address;
+    };
 
-	virtual bool attachSubArena(MM_EnvironmentBase* env, MM_PhysicalSubArena* subArena, uintptr_t size, uintptr_t attachPolicy);
-	virtual void detachSubArena(MM_EnvironmentBase* env, MM_PhysicalSubArena* subArena);
+    virtual bool attachSubArena(MM_EnvironmentBase* env, MM_PhysicalSubArena* subArena, uintptr_t size, uintptr_t attachPolicy);
+    virtual void detachSubArena(MM_EnvironmentBase* env, MM_PhysicalSubArena* subArena);
 
-	using MM_PhysicalArena::canExpand;
-	bool canExpand(MM_EnvironmentBase* env, MM_PhysicalSubArenaVirtualMemory* subArena, void* expandAddress, uintptr_t expandSize);
-	uintptr_t maxExpansion(MM_EnvironmentBase* env, MM_PhysicalSubArenaVirtualMemory* subArena, void* expandAddress);
-	uintptr_t getPhysicalMaximumExpandSizeHigh(MM_EnvironmentBase* env, void* address);
+    using MM_PhysicalArena::canExpand;
+    bool canExpand(MM_EnvironmentBase* env, MM_PhysicalSubArenaVirtualMemory* subArena, void* expandAddress, uintptr_t expandSize);
+    uintptr_t maxExpansion(MM_EnvironmentBase* env, MM_PhysicalSubArenaVirtualMemory* subArena, void* expandAddress);
+    uintptr_t getPhysicalMaximumExpandSizeHigh(MM_EnvironmentBase* env, void* address);
 
-	uintptr_t getPhysicalMaximumContractSizeLow(MM_EnvironmentBase* env, void* address);
+    uintptr_t getPhysicalMaximumContractSizeLow(MM_EnvironmentBase* env, void* address);
 
-	void* findAdjacentHighValidAddress(MM_EnvironmentBase* env);
+    void* findAdjacentHighValidAddress(MM_EnvironmentBase* env);
 
-	MM_PhysicalArenaVirtualMemory(MM_EnvironmentBase* env, MM_Heap* heap)
-		: MM_PhysicalArena(env, heap)
-		, _physicalSubArena(NULL)
-	{
-		_typeId = __FUNCTION__;
-	};
+    MM_PhysicalArenaVirtualMemory(MM_EnvironmentBase* env, MM_Heap* heap)
+        : MM_PhysicalArena(env, heap)
+        , _physicalSubArena(NULL)
+    {
+        _typeId = __FUNCTION__;
+    };
 };
 
 #endif /* PHYSICALARENAVIRTUALMEMORY_HPP_ */

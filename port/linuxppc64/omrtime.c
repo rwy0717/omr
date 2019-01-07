@@ -37,16 +37,16 @@
 #include <sys/time.h>
 #include <sys/utsname.h>
 
-#if !__GLIBC_PREREQ(2,4)
+#if !__GLIBC_PREREQ(2, 4)
 /* Compilation on RHEL 4 (for eventual 7.0 VM to Java 6.0 backport) */
 #include <asm/systemcfg.h>
-extern volatile struct systemcfg *systemcfgP_millis;
-extern volatile struct systemcfg *systemcfgP_nanos;
+extern volatile struct systemcfg* systemcfgP_millis;
+extern volatile struct systemcfg* systemcfgP_nanos;
 #else
 #include <sys/mman.h>
 #include <fcntl.h>
-extern volatile struct vdso_data *systemcfgP_millis;
-extern volatile struct vdso_data *systemcfgP_nanos;
+extern volatile struct vdso_data* systemcfgP_millis;
+extern volatile struct vdso_data* systemcfgP_nanos;
 #endif
 
 #include "omrport.h"
@@ -66,7 +66,7 @@ static const clockid_t J9TIME_NANO_CLOCK = CLOCK_MONOTONIC;
  * Creating the structure the same size as sizeof(vdso_data) when using asm/vdso_datapage.h
  */
 struct vdso_data {
-	uint64_t unused_1[12];
+    uint64_t unused_1[12];
 };
 
 /**
@@ -81,12 +81,12 @@ struct vdso_data {
 /*  technically, this should return int64_t since both timeval.tv_sec and timeval.tv_usec are long */
 
 uintptr_t
-omrtime_msec_clock(struct OMRPortLibrary *portLibrary)
+omrtime_msec_clock(struct OMRPortLibrary* portLibrary)
 {
-	struct timeval tp;
+    struct timeval tp;
 
-	gettimeofday(&tp, NULL);
-	return (tp.tv_sec * 1000) + (tp.tv_usec / 1000);
+    gettimeofday(&tp, NULL);
+    return (tp.tv_sec * 1000) + (tp.tv_usec / 1000);
 }
 /**
  * Query OS for timestamp.
@@ -98,25 +98,25 @@ omrtime_msec_clock(struct OMRPortLibrary *portLibrary)
  * @deprecated Use @ref omrtime_hires_clock and @ref omrtime_hires_delta
  */
 uintptr_t
-omrtime_usec_clock(struct OMRPortLibrary *portLibrary)
+omrtime_usec_clock(struct OMRPortLibrary* portLibrary)
 {
-	struct timeval tp;
+    struct timeval tp;
 
-	gettimeofday(&tp, NULL);
-	return (tp.tv_sec * 1000000) + tp.tv_usec;
+    gettimeofday(&tp, NULL);
+    return (tp.tv_sec * 1000000) + tp.tv_usec;
 }
 
 uint64_t
-omrtime_current_time_nanos(struct OMRPortLibrary *portLibrary, uintptr_t *success)
+omrtime_current_time_nanos(struct OMRPortLibrary* portLibrary, uintptr_t* success)
 {
-	struct timespec ts;
-	uint64_t nsec = 0;
-	*success = 0;
-	if (0 == clock_gettime(CLOCK_REALTIME, &ts)) {
-		nsec = ((uint64_t)ts.tv_sec * OMRTIME_NANOSECONDS_PER_SECOND) + (uint64_t)ts.tv_nsec;
-		*success = 1;
-	}
-	return nsec;
+    struct timespec ts;
+    uint64_t nsec = 0;
+    *success = 0;
+    if (0 == clock_gettime(CLOCK_REALTIME, &ts)) {
+        nsec = ((uint64_t)ts.tv_sec * OMRTIME_NANOSECONDS_PER_SECOND) + (uint64_t)ts.tv_nsec;
+        *success = 1;
+    }
+    return nsec;
 }
 
 /**
@@ -129,29 +129,29 @@ omrtime_current_time_nanos(struct OMRPortLibrary *portLibrary, uintptr_t *succes
  * @return 0 on failure, time value in milliseconds on success.
  */
 int64_t
-omrtime_current_time_millis(struct OMRPortLibrary *portLibrary)
+omrtime_current_time_millis(struct OMRPortLibrary* portLibrary)
 {
-	struct timeval tp;
+    struct timeval tp;
 
-	if (systemcfgP_millis) {
-		return __getMillis();
-	}
+    if (systemcfgP_millis) {
+        return __getMillis();
+    }
 
-	gettimeofday(&tp, NULL);
-	return ((int64_t)tp.tv_sec) * 1000 + tp.tv_usec / 1000;
+    gettimeofday(&tp, NULL);
+    return ((int64_t)tp.tv_sec) * 1000 + tp.tv_usec / 1000;
 }
 
 int64_t
-omrtime_nano_time(struct OMRPortLibrary *portLibrary)
+omrtime_nano_time(struct OMRPortLibrary* portLibrary)
 {
-	struct timespec ts;
-	int64_t hiresTime = 0;
+    struct timespec ts;
+    int64_t hiresTime = 0;
 
-	if (0 == clock_gettime(J9TIME_NANO_CLOCK, &ts)) {
-		hiresTime = ((int64_t)ts.tv_sec * OMRTIME_NANOSECONDS_PER_SECOND) + (int64_t)ts.tv_nsec;
-	}
+    if (0 == clock_gettime(J9TIME_NANO_CLOCK, &ts)) {
+        hiresTime = ((int64_t)ts.tv_sec * OMRTIME_NANOSECONDS_PER_SECOND) + (int64_t)ts.tv_nsec;
+    }
 
-	return hiresTime;
+    return hiresTime;
 }
 
 /**
@@ -163,16 +163,16 @@ omrtime_nano_time(struct OMRPortLibrary *portLibrary)
  * @return 0 on failure, time value on success.
  */
 uint64_t
-omrtime_hires_clock(struct OMRPortLibrary *portLibrary)
+omrtime_hires_clock(struct OMRPortLibrary* portLibrary)
 {
-	struct timeval tp;
+    struct timeval tp;
 
-	if (systemcfgP_nanos) {
-		return __getNanos();
-	}
+    if (systemcfgP_nanos) {
+        return __getNanos();
+    }
 
-	gettimeofday(&tp, NULL);
-	return ((int64_t)tp.tv_sec) * OMRTIME_HIRES_CLOCK_FREQUENCY + tp.tv_usec * (OMRTIME_HIRES_CLOCK_FREQUENCY / 1000000);
+    gettimeofday(&tp, NULL);
+    return ((int64_t)tp.tv_sec) * OMRTIME_HIRES_CLOCK_FREQUENCY + tp.tv_usec * (OMRTIME_HIRES_CLOCK_FREQUENCY / 1000000);
 }
 /**
  * Query OS for clock frequency
@@ -183,9 +183,9 @@ omrtime_hires_clock(struct OMRPortLibrary *portLibrary)
  * @return 0 on failure, number of ticks per second on success.
  */
 uint64_t
-omrtime_hires_frequency(struct OMRPortLibrary *portLibrary)
+omrtime_hires_frequency(struct OMRPortLibrary* portLibrary)
 {
-	return OMRTIME_HIRES_CLOCK_FREQUENCY;
+    return OMRTIME_HIRES_CLOCK_FREQUENCY;
 }
 /**
  * Calculate time difference between two hires clock timer values @ref omrtime_hires_clock.
@@ -210,21 +210,21 @@ omrtime_hires_frequency(struct OMRPortLibrary *portLibrary)
  *  \arg OMRPORT_TIME_DELTA_IN_NANOSECONDS return timer value in nanoseconds.
  */
 uint64_t
-omrtime_hires_delta(struct OMRPortLibrary *portLibrary, uint64_t startTime, uint64_t endTime, uint64_t requiredResolution)
+omrtime_hires_delta(struct OMRPortLibrary* portLibrary, uint64_t startTime, uint64_t endTime, uint64_t requiredResolution)
 {
-	uint64_t ticks;
+    uint64_t ticks;
 
-	/* modular arithmetic saves us, answer is always ...*/
-	ticks = endTime - startTime;
+    /* modular arithmetic saves us, answer is always ...*/
+    ticks = endTime - startTime;
 
-	if (OMRTIME_HIRES_CLOCK_FREQUENCY == requiredResolution) {
-		/* no conversion necessary */
-	} else if (OMRTIME_HIRES_CLOCK_FREQUENCY < requiredResolution) {
-		ticks = (uint64_t)((double)ticks * ((double)requiredResolution / (double)OMRTIME_HIRES_CLOCK_FREQUENCY));
-	} else {
-		ticks = (uint64_t)((double)ticks / ((double)OMRTIME_HIRES_CLOCK_FREQUENCY / (double)requiredResolution));
-	}
-	return ticks;
+    if (OMRTIME_HIRES_CLOCK_FREQUENCY == requiredResolution) {
+        /* no conversion necessary */
+    } else if (OMRTIME_HIRES_CLOCK_FREQUENCY < requiredResolution) {
+        ticks = (uint64_t)((double)ticks * ((double)requiredResolution / (double)OMRTIME_HIRES_CLOCK_FREQUENCY));
+    } else {
+        ticks = (uint64_t)((double)ticks / ((double)OMRTIME_HIRES_CLOCK_FREQUENCY / (double)requiredResolution));
+    }
+    return ticks;
 }
 /**
  * PortLibrary shutdown.
@@ -236,8 +236,7 @@ omrtime_hires_delta(struct OMRPortLibrary *portLibrary, uint64_t startTime, uint
  *
  * @note Most implementations will be empty.
  */
-void
-omrtime_shutdown(struct OMRPortLibrary *portLibrary)
+void omrtime_shutdown(struct OMRPortLibrary* portLibrary)
 {
 }
 
@@ -256,60 +255,60 @@ omrtime_shutdown(struct OMRPortLibrary *portLibrary)
  * @note Most implementations will simply return success.
  */
 int32_t
-omrtime_startup(struct OMRPortLibrary *portLibrary)
+omrtime_startup(struct OMRPortLibrary* portLibrary)
 {
-	int32_t rc = 0;
-	struct timespec ts;
+    int32_t rc = 0;
+    struct timespec ts;
 
-#if !__GLIBC_PREREQ(2,4)
-	systemcfgP_millis = systemcfg_init();
+#if !__GLIBC_PREREQ(2, 4)
+    systemcfgP_millis = systemcfg_init();
 #else
-	int procfd;
+    int procfd;
 
-	procfd = open("/proc/ppc64/systemcfg", O_RDONLY);
-	if (-1 != procfd) {
-		systemcfgP_millis = mmap(0, sizeof(struct vdso_data), PROT_READ, MAP_SHARED, procfd, 0);
-		close(procfd);
-		if (MAP_FAILED == systemcfgP_millis) {
-			systemcfgP_millis = NULL;
-		}
-	}
+    procfd = open("/proc/ppc64/systemcfg", O_RDONLY);
+    if (-1 != procfd) {
+        systemcfgP_millis = mmap(0, sizeof(struct vdso_data), PROT_READ, MAP_SHARED, procfd, 0);
+        close(procfd);
+        if (MAP_FAILED == systemcfgP_millis) {
+            systemcfgP_millis = NULL;
+        }
+    }
 #endif
 
-	/* cmvc 89134 - on some linux kernel versions the struct exists but the time is not filled in, null the pointer to cause the slower fallback code to be used */
-	if (systemcfgP_millis && omrtime_current_time_millis(portLibrary) == 0) {
-		systemcfgP_millis = NULL;
-	}
+    /* cmvc 89134 - on some linux kernel versions the struct exists but the time is not filled in, null the pointer to cause the slower fallback code to be used */
+    if (systemcfgP_millis && omrtime_current_time_millis(portLibrary) == 0) {
+        systemcfgP_millis = NULL;
+    }
 
-	/*
-	 * The Linux Kernels used in SLES11 and RHEL6 (both 2.6.32) have a bug that breaks our
-	 * implementation of __getNanos(). The issue is that the tb_to_xs field in the vdso struct
-	 * can change at runtime, which causes __getNanos() to sometimes report inaccurate time -
-	 * including time that can go backwards. SLES10 and RHEL5 do not have this issue.
-	 *
-	 * We work around this by falling back to the gettimeofday() implementation, which was
-	 * measured to be around 3x slower compared to __getNanos(), on newer Kernel versions.
-	 * Only use __getNanos() if we're on a 2.6 Kernel <= 2.6.18.
-	 *
-	 * Note: RHEL5 is 2.6.18 and SLES10 is 2.6.16.
-	 *
-	 * See CMVC 175622 for more details.
-	 */
-	systemcfgP_nanos = NULL;
-	if (NULL != systemcfgP_millis) {
-		struct OMROSKernelInfo kernelInfo = {0};
+    /*
+     * The Linux Kernels used in SLES11 and RHEL6 (both 2.6.32) have a bug that breaks our
+     * implementation of __getNanos(). The issue is that the tb_to_xs field in the vdso struct
+     * can change at runtime, which causes __getNanos() to sometimes report inaccurate time -
+     * including time that can go backwards. SLES10 and RHEL5 do not have this issue.
+     *
+     * We work around this by falling back to the gettimeofday() implementation, which was
+     * measured to be around 3x slower compared to __getNanos(), on newer Kernel versions.
+     * Only use __getNanos() if we're on a 2.6 Kernel <= 2.6.18.
+     *
+     * Note: RHEL5 is 2.6.18 and SLES10 is 2.6.16.
+     *
+     * See CMVC 175622 for more details.
+     */
+    systemcfgP_nanos = NULL;
+    if (NULL != systemcfgP_millis) {
+        struct OMROSKernelInfo kernelInfo = { 0 };
 
-		if (portLibrary->sysinfo_os_kernel_info(portLibrary, &kernelInfo)) {
-			if ((2 == kernelInfo.kernelVersion) && (6 == kernelInfo.majorRevision) && (18 >= kernelInfo.minorRevision)) {
-				systemcfgP_nanos = systemcfgP_millis;
-			}
-		}
-	}
+        if (portLibrary->sysinfo_os_kernel_info(portLibrary, &kernelInfo)) {
+            if ((2 == kernelInfo.kernelVersion) && (6 == kernelInfo.majorRevision) && (18 >= kernelInfo.minorRevision)) {
+                systemcfgP_nanos = systemcfgP_millis;
+            }
+        }
+    }
 
-	/* check if the clock is available */
-	if (0 != clock_getres(J9TIME_NANO_CLOCK, &ts)) {
-		rc = OMRPORT_ERROR_STARTUP_TIME;
-	}
+    /* check if the clock is available */
+    if (0 != clock_getres(J9TIME_NANO_CLOCK, &ts)) {
+        rc = OMRPORT_ERROR_STARTUP_TIME;
+    }
 
-	return rc;
+    return rc;
 }

@@ -24,6 +24,6 @@
  * definitions are permitted.
  */
 
-   UnknownARMProcessor,
-   ARMv6,
-   ARMv7,
+UnknownARMProcessor,
+    ARMv6,
+    ARMv7,

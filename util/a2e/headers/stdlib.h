@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 /*
  * ===========================================================================
  * Module Information:
@@ -34,65 +33,64 @@
  * ===========================================================================
  */
 
-#if __TARGET_LIB__ == 0X22080000                                   /*ibm@28725*/
-#include <//'PP.ADLE370.OS39028.SCEEH.H(stdlib)'>                  /*ibm@28725*/
-#else                                                              /*ibm@28725*/
+#if __TARGET_LIB__ == 0X22080000 /*ibm@28725*/
+#include < //'PP.ADLE370.OS39028.SCEEH.H(stdlib)'>                  /*ibm@28725*/
+#else /*ibm@28725*/
 #include "prefixpath.h"
-#include PREFIXPATH(stdlib.h)                                   /*ibm@28725*/
-#endif                                                             /*ibm@28725*/
+#include PREFIXPATH(stdlib.h) /*ibm@28725*/
+#endif /*ibm@28725*/
 
 #if defined(IBM_ATOE)
 
-	#if !defined(IBM_ATOE_STDLIB)
-		#define IBM_ATOE_STDLIB
+#if !defined(IBM_ATOE_STDLIB)
+#define IBM_ATOE_STDLIB
 
-		#ifdef __cplusplus
-            extern "C" {
-		#endif
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-        double     atoe_atof      (const char *);                       /*ibm@27140*/
-        int        atoe_atoi      (const char *);
-        int        atoe_atol      (const char *);                       /*ibm@3817*/
-        char*      atoe_getenv    (const char*);
-        int        atoe_putenv    (const char*);
-        char *     atoe_realpath  (const char*, char*);
-        double     atoe_strtod    (const char *,char **);
-        int        atoe_strtol    (const char *,char **, int);    /*ibm@3139*/
-        unsigned long atoe_strtoul (const char *,char **, int);    /*ibm@4968*/
-	unsigned long long atoe_strtoull( const char *, char **, int );
-        int        atoe_system    (const char *);
+double atoe_atof(const char*); /*ibm@27140*/
+int atoe_atoi(const char*);
+int atoe_atol(const char*); /*ibm@3817*/
+char* atoe_getenv(const char*);
+int atoe_putenv(const char*);
+char* atoe_realpath(const char*, char*);
+double atoe_strtod(const char*, char**);
+int atoe_strtol(const char*, char**, int); /*ibm@3139*/
+unsigned long atoe_strtoul(const char*, char**, int); /*ibm@4968*/
+unsigned long long atoe_strtoull(const char*, char**, int);
+int atoe_system(const char*);
 
-		#ifdef __cplusplus
-            }
-		#endif
+#ifdef __cplusplus
+}
+#endif
 
-                #undef atof                                       /*ibm@3817*/
-		#undef atoi
-                #undef atol                                       /*ibm@3817*/
-		#undef getenv
-		#undef putenv
-		#undef realpath
-		#undef strtod
-                #undef strtol                                     /*ibm@3139*/
-                #undef strtoul                                    /*ibm@4968*/
-		#undef strtoull
-		#undef system
+#undef atof /*ibm@3817*/
+#undef atoi
+#undef atol /*ibm@3817*/
+#undef getenv
+#undef putenv
+#undef realpath
+#undef strtod
+#undef strtol /*ibm@3139*/
+#undef strtoul /*ibm@4968*/
+#undef strtoull
+#undef system
 
-                #define atof	 atoe_atof                        /*ibm@3817*/
-		#define atoi	 atoe_atoi
-                #define atol	 atoe_atol                        /*ibm@3817*/
-		#define getenv	 atoe_getenv
-		#define putenv	 atoe_putenv
-		#define realpath atoe_realpath
-		#define strtod	 atoe_strtod
-                #define strtol   atoe_strtol                      /*ibm@3139*/
-                #define strtoul  atoe_strtoul                     /*ibm@4968*/
-		#define strtoull atoe_strtoull
-		#define system	 atoe_system
+#define atof atoe_atof /*ibm@3817*/
+#define atoi atoe_atoi
+#define atol atoe_atol /*ibm@3817*/
+#define getenv atoe_getenv
+#define putenv atoe_putenv
+#define realpath atoe_realpath
+#define strtod atoe_strtod
+#define strtol atoe_strtol /*ibm@3139*/
+#define strtoul atoe_strtoul /*ibm@4968*/
+#define strtoull atoe_strtoull
+#define system atoe_system
 
-	#endif
+#endif
 
 #endif
 
 /* END OF FILE */
-

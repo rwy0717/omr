@@ -46,24 +46,24 @@
 BOOLEAN
 zos_version_at_least(double min_release, double min_version)
 {
-	struct utsname sysinfo;
-	int rc;
+    struct utsname sysinfo;
+    int rc;
 
-	rc = uname(&sysinfo);
-	if (rc >= 0) {
-		double release;
-		double version;
+    rc = uname(&sysinfo);
+    if (rc >= 0) {
+        double release;
+        double version;
 
-		release = strtod(sysinfo.release, NULL);
-		version = strtod(sysinfo.version, NULL);
+        release = strtod(sysinfo.release, NULL);
+        version = strtod(sysinfo.version, NULL);
 
-		if (min_release < release) {
-			return TRUE;
-		} else if (min_release == release) {
-			if (min_version <= version) {
-				return TRUE;
-			}
-		}
-	}
-	return FALSE;
+        if (min_release < release) {
+            return TRUE;
+        } else if (min_release == release) {
+            if (min_version <= version) {
+                return TRUE;
+            }
+        }
+    }
+    return FALSE;
 }

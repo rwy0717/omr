@@ -22,20 +22,26 @@
 #ifndef COMPACTLOCALS_INCL
 #define COMPACTLOCALS_INCL
 
-#include <stdint.h>                           // for int32_t
-#include "il/Node.hpp"                        // for Node, vcount_t
-#include "infra/IGNode.hpp"                   // for TR_IGNode
-#include "infra/vector.hpp"                   // for TR::vector
-#include "optimizer/Optimization.hpp"         // for Optimization
-#include "optimizer/OptimizationManager.hpp"  // for OptimizationManager
+#include <stdint.h> // for int32_t
+#include "il/Node.hpp" // for Node, vcount_t
+#include "infra/IGNode.hpp" // for TR_IGNode
+#include "infra/vector.hpp" // for TR::vector
+#include "optimizer/Optimization.hpp" // for Optimization
+#include "optimizer/OptimizationManager.hpp" // for OptimizationManager
 
 class TR_BitVector;
 class TR_HashTabInt;
 class TR_InterferenceGraph;
 class TR_Liveness;
-namespace TR { class AutomaticSymbol; }
-namespace TR { class Block; }
-namespace TR { class ResolvedMethodSymbol; }
+namespace TR {
+class AutomaticSymbol;
+}
+namespace TR {
+class Block;
+}
+namespace TR {
+class ResolvedMethodSymbol;
+}
 template <class T> class TR_Array;
 
 /*
@@ -50,34 +56,33 @@ template <class T> class TR_Array;
  * Liveness information is used by this analysis.
  */
 
-class TR_CompactLocals : public TR::Optimization
-   {
-   TR_BitVector                   *_liveVars;
-   TR_BitVector                   *_prevLiveVars;
-   TR_BitVector                   *_temp;
-   TR::vector<TR_IGNode *, TR::Region&> *_localIndexToIGNode;
-   TR_InterferenceGraph           *_localsIG;
-   TR_HashTabInt                  *_visit;
-   TR_Array<TR::AutomaticSymbol *> *_callerLiveSyms;
+class TR_CompactLocals : public TR::Optimization {
+    TR_BitVector* _liveVars;
+    TR_BitVector* _prevLiveVars;
+    TR_BitVector* _temp;
+    TR::vector<TR_IGNode*, TR::Region&>* _localIndexToIGNode;
+    TR_InterferenceGraph* _localsIG;
+    TR_HashTabInt* _visit;
+    TR_Array<TR::AutomaticSymbol*>* _callerLiveSyms;
 
-   void processNodeInPreorder(TR::Node *root, vcount_t visitCount, TR_Liveness *liveLocals, TR::Block *block, bool directChildOfTreeTop);
-   void createInterferenceBetween(TR_BitVector *bv);
-   void createInterferenceBetween(TR_BitVector *bv1, TR_BitVector *bv2);
-   void createInterferenceBetweenLocals(int32_t localIndex);
-   void doCompactLocals();
+    void processNodeInPreorder(TR::Node* root, vcount_t visitCount, TR_Liveness* liveLocals, TR::Block* block, bool directChildOfTreeTop);
+    void createInterferenceBetween(TR_BitVector* bv);
+    void createInterferenceBetween(TR_BitVector* bv1, TR_BitVector* bv2);
+    void createInterferenceBetweenLocals(int32_t localIndex);
+    void doCompactLocals();
 
 public:
-   TR_CompactLocals(TR::OptimizationManager *manager);
-   static TR::Optimization *create(TR::OptimizationManager *manager)
-      {
-      return new (manager->allocator()) TR_CompactLocals(manager);
-      }
+    TR_CompactLocals(TR::OptimizationManager* manager);
+    static TR::Optimization* create(TR::OptimizationManager* manager)
+    {
+        return new (manager->allocator()) TR_CompactLocals(manager);
+    }
 
-   bool eligibleLocal(TR::AutomaticSymbol * localSym);
-   void assignColorsToSymbols(TR_BitVector *bv);
+    bool eligibleLocal(TR::AutomaticSymbol* localSym);
+    void assignColorsToSymbols(TR_BitVector* bv);
 
-   virtual int32_t perform();
-   virtual const char * optDetailString() const throw();
-   };
+    virtual int32_t perform();
+    virtual const char* optDetailString() const throw();
+};
 
 #endif

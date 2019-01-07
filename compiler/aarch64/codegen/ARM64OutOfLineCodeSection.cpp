@@ -21,23 +21,23 @@
 
 #include "codegen/ARM64OutOfLineCodeSection.hpp"
 
-TR_ARM64OutOfLineCodeSection::TR_ARM64OutOfLineCodeSection(TR::Node *callNode,
-                            TR::ILOpCodes callOp,
-                            TR::Register *targetReg,
-                            TR::LabelSymbol *entryLabel,
-                            TR::LabelSymbol *restartLabel,
-                            TR::CodeGenerator *cg) :
-                            TR_OutOfLineCodeSection(callNode, callOp, targetReg, entryLabel, restartLabel, cg)
-   {
-   generateARM64OutOfLineCodeSectionDispatch();
-   }
+TR_ARM64OutOfLineCodeSection::TR_ARM64OutOfLineCodeSection(TR::Node* callNode,
+    TR::ILOpCodes callOp,
+    TR::Register* targetReg,
+    TR::LabelSymbol* entryLabel,
+    TR::LabelSymbol* restartLabel,
+    TR::CodeGenerator* cg)
+    : TR_OutOfLineCodeSection(callNode, callOp, targetReg, entryLabel, restartLabel, cg)
+{
+    generateARM64OutOfLineCodeSectionDispatch();
+}
 
 void TR_ARM64OutOfLineCodeSection::assignRegisters(TR_RegisterKinds kindsToBeAssigned)
-   {
-   TR_ASSERT(false, "Not implemented yet.");
-   }
+{
+    TR_ASSERT(false, "Not implemented yet.");
+}
 
 void TR_ARM64OutOfLineCodeSection::generateARM64OutOfLineCodeSectionDispatch()
-   {
-   TR_ASSERT(false, "Not implemented yet.");
-   }
+{
+    TR_ASSERT(false, "Not implemented yet.");
+}

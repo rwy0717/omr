@@ -26,119 +26,117 @@
 #include <stdio.h>
 
 static bool
-stringMatches(const char *candidate, const char *pattern)
+stringMatches(const char* candidate, const char* pattern)
 {
-	for (;;) {
-		if ('*' == *pattern) {
-			/* match successively longer prefixes of candidate against the asterisk */
-			for (++pattern;; ++candidate) {
-				if (stringMatches(candidate, pattern)) {
-					return true;
-				} else if ('\0' == *candidate) {
-					break;
-				}
-			}
-			break;
-		} else if (*candidate != *pattern) {
-			/* no match */
-			break;
-		} else if ('\0' == *pattern) {
-			/* match: at the end of both the string and the pattern with no conflicts */
-			return true;
-		} else {
-			++candidate;
-			++pattern;
-		}
-	}
+    for (;;) {
+        if ('*' == *pattern) {
+            /* match successively longer prefixes of candidate against the asterisk */
+            for (++pattern;; ++candidate) {
+                if (stringMatches(candidate, pattern)) {
+                    return true;
+                } else if ('\0' == *candidate) {
+                    break;
+                }
+            }
+            break;
+        } else if (*candidate != *pattern) {
+            /* no match */
+            break;
+        } else if ('\0' == *pattern) {
+            /* match: at the end of both the string and the pattern with no conflicts */
+            return true;
+        } else {
+            ++candidate;
+            ++pattern;
+        }
+    }
 
-	return false;
+    return false;
 }
 
 static bool
-stringMatchesAny(const string &candidate, const set<string> &patterns)
+stringMatchesAny(const string& candidate, const set<string>& patterns)
 {
-	const char *c_candidate = candidate.c_str();
+    const char* c_candidate = candidate.c_str();
 
-	for (set<string>::const_iterator it = patterns.begin(); it != patterns.end(); ++it) {
-		const string &pattern = *it;
+    for (set<string>::const_iterator it = patterns.begin(); it != patterns.end(); ++it) {
+        const string& pattern = *it;
 
-		if (stringMatches(c_candidate, pattern.c_str())) {
-			return true;
-		}
-	}
+        if (stringMatches(c_candidate, pattern.c_str())) {
+            return true;
+        }
+    }
 
-	return false;
+    return false;
 }
 
-bool
-Scanner::checkBlacklistedType(const string &name) const
+bool Scanner::checkBlacklistedType(const string& name) const
 {
-	bool blacklisted = false;
+    bool blacklisted = false;
 
-	/* Implicitly blacklisted are non-empty names that don't start
-	 * with a letter or an underscore.
-	 */
-	if (!name.empty()) {
-		char start = name[0];
+    /* Implicitly blacklisted are non-empty names that don't start
+     * with a letter or an underscore.
+     */
+    if (!name.empty()) {
+        char start = name[0];
 
-		if (('_' == start)
-				|| (('A' <= start) && (start <= 'I'))
-				|| (('J' <= start) && (start <= 'R'))
-				|| (('S' <= start) && (start <= 'Z'))
-				|| (('a' <= start) && (start <= 'i'))
-				|| (('j' <= start) && (start <= 'r'))
-				|| (('s' <= start) && (start <= 'z'))) {
-			blacklisted = stringMatchesAny(name, _blacklistedTypes);
-		} else {
-			blacklisted = true;
-		}
-	}
+        if (('_' == start)
+            || (('A' <= start) && (start <= 'I'))
+            || (('J' <= start) && (start <= 'R'))
+            || (('S' <= start) && (start <= 'Z'))
+            || (('a' <= start) && (start <= 'i'))
+            || (('j' <= start) && (start <= 'r'))
+            || (('s' <= start) && (start <= 'z'))) {
+            blacklisted = stringMatchesAny(name, _blacklistedTypes);
+        } else {
+            blacklisted = true;
+        }
+    }
 
-	return blacklisted;
+    return blacklisted;
 }
 
-bool
-Scanner::checkBlacklistedFile(const string &name) const
+bool Scanner::checkBlacklistedFile(const string& name) const
 {
-	return stringMatchesAny(name, _blacklistedFiles);
+    return stringMatchesAny(name, _blacklistedFiles);
 }
 
 DDR_RC
-Scanner::loadBlacklist(const char *path)
+Scanner::loadBlacklist(const char* path)
 {
-	/* Load the blacklist file. The blacklist contains a list of types
-	 * to ignore and not add to the IR, such as system types.
-	 */
-	DDR_RC rc = DDR_RC_OK;
+    /* Load the blacklist file. The blacklist contains a list of types
+     * to ignore and not add to the IR, such as system types.
+     */
+    DDR_RC rc = DDR_RC_OK;
 
-	if (NULL != path) {
-		std::ifstream blackListInput(path, std::ios::in);
+    if (NULL != path) {
+        std::ifstream blackListInput(path, std::ios::in);
 
-		if (!blackListInput.is_open()) {
-			ERRMSG("Could not open %s", path);
-			rc = DDR_RC_ERROR;
-		} else {
-			string line;
+        if (!blackListInput.is_open()) {
+            ERRMSG("Could not open %s", path);
+            rc = DDR_RC_ERROR;
+        } else {
+            string line;
 
-			while (getline(blackListInput, line)) {
-				size_t end = line.find_last_not_of("\r\n");
+            while (getline(blackListInput, line)) {
+                size_t end = line.find_last_not_of("\r\n");
 
-				if ((string::npos == end) || (end < 5)) {
-					continue;
-				}
+                if ((string::npos == end) || (end < 5)) {
+                    continue;
+                }
 
-				string tag = line.substr(0, 5);
-				string pattern = line.substr(5, end);
+                string tag = line.substr(0, 5);
+                string pattern = line.substr(5, end);
 
-				if ("file:" == tag) {
-					_blacklistedFiles.insert(pattern);
-				} else if ("type:" == tag) {
-					_blacklistedTypes.insert(pattern);
-				}
-			}
-			blackListInput.close();
-		}
-	}
+                if ("file:" == tag) {
+                    _blacklistedFiles.insert(pattern);
+                } else if ("type:" == tag) {
+                    _blacklistedTypes.insert(pattern);
+                }
+            }
+            blackListInput.close();
+        }
+    }
 
-	return rc;
+    return rc;
 }

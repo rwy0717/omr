@@ -24,10 +24,10 @@
 
 #include "codegen/OMRInstruction.hpp"
 
-TR::Instruction *
+TR::Instruction*
 OMR::Instruction::self()
-   {
-   return static_cast<TR::Instruction *>(this);
-   }
+{
+    return static_cast<TR::Instruction*>(this);
+}
 
 #endif

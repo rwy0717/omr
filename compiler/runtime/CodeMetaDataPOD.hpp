@@ -24,15 +24,13 @@
 
 #include "runtime/OMRCodeMetaDataPOD.hpp"
 
-#include "infra/Annotations.hpp"           // for OMR_EXTENSIBLE
+#include "infra/Annotations.hpp" // for OMR_EXTENSIBLE
 
-namespace TR
-{
+namespace TR {
 
-struct OMR_EXTENSIBLE MethodMetaDataPOD : public OMR::MethodMetaDataPODConnector
-   {
-   };
+struct OMR_EXTENSIBLE MethodMetaDataPOD : public OMR::MethodMetaDataPODConnector {
+};
 
-}
+} // namespace TR
 
 #endif

@@ -29,14 +29,14 @@
 /*
  * These #ifndef's and classes must appear before including the OMR version of this file
  */
-namespace TR
-{
+namespace TR {
 
-   class OMR_EXTENSIBLE CodeCacheManager : public JitBuilder::CodeCacheManager
-      {
-      public:
-      CodeCacheManager(TR::RawAllocator rawAllocator) : JitBuilder::CodeCacheManager(rawAllocator) { }
-      };
+class OMR_EXTENSIBLE CodeCacheManager : public JitBuilder::CodeCacheManager {
+public:
+    CodeCacheManager(TR::RawAllocator rawAllocator)
+        : JitBuilder::CodeCacheManager(rawAllocator)
+    {}
+};
 
 } // namespace TR
 

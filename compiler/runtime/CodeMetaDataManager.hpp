@@ -24,23 +24,20 @@
 
 #include "runtime/OMRCodeMetaDataManager.hpp"
 
-#include "infra/Annotations.hpp"               // for OMR_EXTENSIBLE
+#include "infra/Annotations.hpp" // for OMR_EXTENSIBLE
 
-namespace TR
-{
+namespace TR {
 
-class OMR_EXTENSIBLE CodeMetaDataManager : public OMR::CodeMetaDataManagerConnector
-   {
-   public:
+class OMR_EXTENSIBLE CodeMetaDataManager : public OMR::CodeMetaDataManagerConnector {
+public:
+    CodeMetaDataManager()
+        : OMR::CodeMetaDataManagerConnector()
+    {}
+};
 
-   CodeMetaDataManager() :
-      OMR::CodeMetaDataManagerConnector() {}
-   };
+class OMR_EXTENSIBLE MetaDataHashTable : public OMR::MetaDataHashTableConnector {
+};
 
-class OMR_EXTENSIBLE MetaDataHashTable : public OMR::MetaDataHashTableConnector
-   {
-   };
-
-}
+} // namespace TR
 
 #endif

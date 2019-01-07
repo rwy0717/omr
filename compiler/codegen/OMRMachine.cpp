@@ -24,10 +24,9 @@
 //give a different name to the codesection (csect) for this file. So it
 //doesn't conflict with another file with same name.
 
-#pragma csect(CODE,"OMRMachine#C")
-#pragma csect(STATIC,"OMRMachine#S")
-#pragma csect(TEST,"OMRMachine#T")
-
+#pragma csect(CODE, "OMRMachine#C")
+#pragma csect(STATIC, "OMRMachine#S")
+#pragma csect(TEST, "OMRMachine#T")
 
 #include "codegen/OMRMachine.hpp"
 

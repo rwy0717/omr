@@ -34,14 +34,14 @@
  *         the method name could not be extracted.
  */
 std::string
-TestCompiler::OptionSetTest::getMethodFromLine(const std::string &line)
-   {
-   size_t sep = line.find_last_of(':');
-   size_t end = line.find_first_of(' ', sep);
-   if(sep == std::string::npos)
-      return "";
-   return line.substr(sep + 1, end - (sep + 1));
-   }
+TestCompiler::OptionSetTest::getMethodFromLine(const std::string& line)
+{
+    size_t sep = line.find_last_of(':');
+    size_t end = line.find_first_of(' ', sep);
+    if (sep == std::string::npos)
+        return "";
+    return line.substr(sep + 1, end - (sep + 1));
+}
 
 /**
  * Take a limit file \p limitFile, modify it by placing some methods
@@ -56,109 +56,105 @@ TestCompiler::OptionSetTest::getMethodFromLine(const std::string &line)
  *        which it should be in. If a method is not specified
  *        in this map, it is not placed in any set.
  */
-void
-TestCompiler::OptionSetTest::applyOptionSets(const char *limitFile, const char *optSetFile, const TestCompiler::MethodSets &methods)
-   {
-   std::ifstream in(limitFile);
-   ASSERT_TRUE(in.is_open());
+void TestCompiler::OptionSetTest::applyOptionSets(const char* limitFile, const char* optSetFile, const TestCompiler::MethodSets& methods)
+{
+    std::ifstream in(limitFile);
+    ASSERT_TRUE(in.is_open());
 
-   std::ofstream out(optSetFile);
-   ASSERT_TRUE(out.is_open());
-   delayUnlink(optSetFile);
+    std::ofstream out(optSetFile);
+    ASSERT_TRUE(out.is_open());
+    delayUnlink(optSetFile);
 
-   std::string line;
-   while(std::getline(in, line))
-      {
-      // Limitfiles have a leading newline, but no newline on the end
-      out << '\n';
+    std::string line;
+    while (std::getline(in, line)) {
+        // Limitfiles have a leading newline, but no newline on the end
+        out << '\n';
 
-      if(line.empty())
-         continue;
-
-      // Method successfully compiled
-      if(line[0] == '+')
-         {
-         std::string compMethod = getMethodFromLine(line);
-         auto search = methods.find(compMethod);
-         if(search != methods.end())
-            {
-            int set = search->second;
-            ASSERT_GE(set, 0);
-            ASSERT_LE(set, 9);
-            out << '+' << set << line.substr(1);
+        if (line.empty())
             continue;
-            }
-         }
 
-      // Normal line, output and continue
-      out << line;
-      }
-   }
+        // Method successfully compiled
+        if (line[0] == '+') {
+            std::string compMethod = getMethodFromLine(line);
+            auto search = methods.find(compMethod);
+            if (search != methods.end()) {
+                int set = search->second;
+                ASSERT_GE(set, 0);
+                ASSERT_LE(set, 9);
+                out << '+' << set << line.substr(1);
+                continue;
+            }
+        }
+
+        // Normal line, output and continue
+        out << line;
+    }
+}
 
 namespace TestCompiler {
 
 TEST_F(OptionSetTest, UseOptionSets)
-   {
-   const char *vlog = "useOptionSets.log";
-   const char *limitFile = "useOptionSets.limit";
-   const char *optSet = "useOptionSets.options";
+{
+    const char* vlog = "useOptionSets.log";
+    const char* limitFile = "useOptionSets.limit";
+    const char* optSet = "useOptionSets.options";
 
-   // Create limit file.
-   TestCompiler::MethodSets methodSets;
-   methodSets["iNeg"] = 2;
-   methodSets["iReturn"] = 3;
+    // Create limit file.
+    TestCompiler::MethodSets methodSets;
+    methodSets["iNeg"] = 2;
+    methodSets["iReturn"] = 3;
 
-   createAndCheckVLog(limitFile);
+    createAndCheckVLog(limitFile);
 
-   // Run with option sets.
-   applyOptionSets(limitFile, optSet, methodSets);
+    // Run with option sets.
+    applyOptionSets(limitFile, optSet, methodSets);
 
-   std::string limitArg = std::string(optSet)
-      + ",2(optlevel=hot)"
-      + ",3(optlevel=cold)";
+    std::string limitArg = std::string(optSet)
+        + ",2(optlevel=hot)"
+        + ",3(optlevel=cold)";
 
-   createVLog(vlog, limitArg.c_str());
+    createVLog(vlog, limitArg.c_str());
 
-   // Ensure option sets were follwed.
-   checkVLogForMethod(vlog, "iNeg", "hot");
-   checkVLogForMethod(vlog, "iReturn", "cold");
-   checkVLogForMethod(vlog, "iAbs", "warm");
-   }
+    // Ensure option sets were follwed.
+    checkVLogForMethod(vlog, "iNeg", "hot");
+    checkVLogForMethod(vlog, "iReturn", "cold");
+    checkVLogForMethod(vlog, "iAbs", "warm");
+}
 
 TEST_F(OptionSetTest, WithDefault)
-   {
-   const char *vlog = "optionSetsWithDefault.log";
-   const char *limitFile = "optionSetsWithDefault.limit";
-   const char *optSet = "optionSetsWithDefault.options";
+{
+    const char* vlog = "optionSetsWithDefault.log";
+    const char* limitFile = "optionSetsWithDefault.limit";
+    const char* optSet = "optionSetsWithDefault.options";
 
-   // Create limit file.
-   TestCompiler::MethodSets methodSets;
-   methodSets["iNeg"] = 1;
-   methodSets["i2l"] = 2;
-   methodSets["iReturn"] = 3;
-   methodSets["i2b"] = 3;
-   methodSets["i2s"] = 9;
+    // Create limit file.
+    TestCompiler::MethodSets methodSets;
+    methodSets["iNeg"] = 1;
+    methodSets["i2l"] = 2;
+    methodSets["iReturn"] = 3;
+    methodSets["i2b"] = 3;
+    methodSets["i2s"] = 9;
 
-   createAndCheckVLog(limitFile);
+    createAndCheckVLog(limitFile);
 
-   // Run with option sets.
-   applyOptionSets(limitFile, optSet, methodSets);
+    // Run with option sets.
+    applyOptionSets(limitFile, optSet, methodSets);
 
-   std::string limitArg = std::string(optSet)
-      + ",1(optlevel=hot)"
-      + ",3(optlevel=warm)"
-      + ",9(optlevel=warm)"
-      + ",optlevel=cold";
+    std::string limitArg = std::string(optSet)
+        + ",1(optlevel=hot)"
+        + ",3(optlevel=warm)"
+        + ",9(optlevel=warm)"
+        + ",optlevel=cold";
 
-   createVLog(vlog, limitArg.c_str());
+    createVLog(vlog, limitArg.c_str());
 
-   // Ensure option sets were follwed.
-   checkVLogForMethod(vlog, "iNeg", "hot");
-   checkVLogForMethod(vlog, "i2l", "cold");
-   checkVLogForMethod(vlog, "iReturn", "warm");
-   checkVLogForMethod(vlog, "i2b", "warm");
-   checkVLogForMethod(vlog, "i2s", "warm");
-   checkVLogForMethod(vlog, "iAbs", "cold");
-   }
-
+    // Ensure option sets were follwed.
+    checkVLogForMethod(vlog, "iNeg", "hot");
+    checkVLogForMethod(vlog, "i2l", "cold");
+    checkVLogForMethod(vlog, "iReturn", "warm");
+    checkVLogForMethod(vlog, "i2b", "warm");
+    checkVLogForMethod(vlog, "i2s", "warm");
+    checkVLogForMethod(vlog, "iAbs", "cold");
 }
+
+} // namespace TestCompiler

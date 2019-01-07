@@ -37,32 +37,31 @@
  */
 #ifdef __cplusplus
 extern "C" {
-#endif  /* __cplusplus */
+#endif /* __cplusplus */
 
-void qualifiedSize(uintptr_t *byteSize, const char **qualifier);
+void qualifiedSize(uintptr_t* byteSize, const char** qualifier);
 
 #if defined(OMR_GC_MODRON_COMPACTION)
-const char *getCompactionReasonAsString(CompactReason reason);
-const char *getCompactionPreventedReasonAsString(CompactPreventedReason reason);
+const char* getCompactionReasonAsString(CompactReason reason);
+const char* getCompactionPreventedReasonAsString(CompactPreventedReason reason);
 #endif /*OMR_GC_MODRON_COMPACTION*/
 
 #if defined(OMR_GC_REALTIME)
-const char *getGCReasonAsString(GCReason reason);
+const char* getGCReasonAsString(GCReason reason);
 #endif /* OMR_GC_REALTIME */
 
 #if defined(OMR_GC_MODRON_SCAVENGER)
-const char *getPercolateReasonAsString(PercolateReason mode);
+const char* getPercolateReasonAsString(PercolateReason mode);
 #endif /* OMR_GC_MODRON_SCAVENGER */
 
-const char *getExpandReasonAsString(ExpandReason reason);
-const char *getContractReasonAsString(ContractReason reason);
-const char *getLoaResizeReasonAsString(LoaResizeReason reason);
+const char* getExpandReasonAsString(ExpandReason reason);
+const char* getContractReasonAsString(ContractReason reason);
+const char* getLoaResizeReasonAsString(LoaResizeReason reason);
 
-const char *getSystemGCReasonAsString(uint32_t gcCode);
+const char* getSystemGCReasonAsString(uint32_t gcCode);
 
 #ifdef __cplusplus
 } /* extern "C" { */
-#endif  /* __cplusplus */
+#endif /* __cplusplus */
 
 #endif /* GCUTILS_H_ */
-

@@ -1,4 +1,4 @@
- /*******************************************************************************
+/*******************************************************************************
  * Copyright (c) 2017, 2017 IBM Corp. and others
  *
  * This program and the accompanying materials are made available under
@@ -46,25 +46,25 @@ struct OMR_VMThread;
  * @param childObject THe child object reference
  */
 MMINLINE void
-standardWriteBarrier(OMR_VMThread *omrThread, omrobjectptr_t parentObject, omrobjectptr_t childObject)
+standardWriteBarrier(OMR_VMThread* omrThread, omrobjectptr_t parentObject, omrobjectptr_t childObject)
 {
 #if defined(OMR_GC_MODRON_SCAVENGER) || defined(OMR_GC_MODRON_CONCURRENT_MARK)
-	MM_EnvironmentBase *env = MM_EnvironmentBase::getEnvironment(omrThread);
-	MM_GCExtensionsBase *extensions = env->getExtensions();
+    MM_EnvironmentBase* env = MM_EnvironmentBase::getEnvironment(omrThread);
+    MM_GCExtensionsBase* extensions = env->getExtensions();
 #if defined(OMR_GC_MODRON_SCAVENGER)
-	if (extensions->scavengerEnabled) {
-		if (extensions->isOld(parentObject) && !extensions->isOld(childObject)) {
-			if (extensions->objectModel.atomicSetRememberedState(parentObject, STATE_REMEMBERED)) {
-				/* The object has been successfully marked as REMEMBERED - allocate an entry in the remembered set */
-				extensions->scavenger->addToRememberedSetFragment((MM_EnvironmentStandard *)env, parentObject);
-			}
-		}
-	}
+    if (extensions->scavengerEnabled) {
+        if (extensions->isOld(parentObject) && !extensions->isOld(childObject)) {
+            if (extensions->objectModel.atomicSetRememberedState(parentObject, STATE_REMEMBERED)) {
+                /* The object has been successfully marked as REMEMBERED - allocate an entry in the remembered set */
+                extensions->scavenger->addToRememberedSetFragment((MM_EnvironmentStandard*)env, parentObject);
+            }
+        }
+    }
 #endif /* defined(OMR_GC_MODRON_SCAVENGER) */
 #if defined(OMR_GC_MODRON_CONCURRENT_MARK)
-	if (extensions->concurrentMark) {
-		extensions->cardTable->dirtyCard(env, parentObject);
-	}
+    if (extensions->concurrentMark) {
+        extensions->cardTable->dirtyCard(env, parentObject);
+    }
 #endif /* defined(OMR_GC_MODRON_CONCURRENT_MARK) */
 #endif /* defined(OMR_GC_MODRON_SCAVENGER) || defined(OMR_GC_MODRON_CONCURRENT_MARK) */
 }
@@ -80,12 +80,12 @@ standardWriteBarrier(OMR_VMThread *omrThread, omrobjectptr_t parentObject, omrob
  * @see standardWriteBarrier(OMR_VMThread *, omrobjectptr_t, omrobjectptr_t)
  */
 MMINLINE void
-standardWriteBarrierStore(OMR_VMThread *omrThread, omrobjectptr_t parentObject, fomrobject_t *parentSlot, omrobjectptr_t childObject)
+standardWriteBarrierStore(OMR_VMThread* omrThread, omrobjectptr_t parentObject, fomrobject_t* parentSlot, omrobjectptr_t childObject)
 {
-	GC_SlotObject slotObject(omrThread->_vm, parentSlot);
-	slotObject.writeReferenceToSlot(childObject);
+    GC_SlotObject slotObject(omrThread->_vm, parentSlot);
+    slotObject.writeReferenceToSlot(childObject);
 
-	standardWriteBarrier(omrThread, parentObject, childObject);
+    standardWriteBarrier(omrThread, parentObject, childObject);
 }
 
 #endif /* STANDARDWRITEBARRIER_HPP_ */

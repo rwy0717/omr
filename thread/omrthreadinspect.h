@@ -23,12 +23,10 @@
 #define root_omrthread_inspect_h
 
 /** This header is included from outside the thread library directory and needs to
-	forward to the generated types header.  We should revisit why upstream code is
-	reaching and move the declarations/prototypes into thread_api.h.
+    forward to the generated types header.  We should revisit why upstream code is
+    reaching and move the declarations/prototypes into thread_api.h.
  */
 
 #include "common/omrthreadinspect.h"
 
-#endif     /* root_omrthread_inspect_h */
-
-
+#endif /* root_omrthread_inspect_h */

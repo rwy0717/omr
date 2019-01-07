@@ -28,38 +28,37 @@
 #include <stddef.h>
 #include <stdint.h>
 
-namespace OMR
-{
+namespace OMR {
 
 inline size_t
 bytes(size_t n)
 {
-	return n;
+    return n;
 }
 
 inline size_t
 kibibytes(size_t n)
 {
-	return n * bytes(1024);
+    return n * bytes(1024);
 }
 
 inline size_t
 mebibytes(size_t n)
 {
-	return n * kibibytes(1024);
+    return n * kibibytes(1024);
 }
 
 inline size_t
 gibibytes(size_t n)
 {
-	return n * mebibytes(1024);
+    return n * mebibytes(1024);
 }
 
 /// True if x is a power of two.
 inline bool
 isPow2(size_t x)
 {
-	return x && ((x & (x - 1)) == 0);
+    return x && ((x & (x - 1)) == 0);
 }
 
 /// The maximum safe alignment, when aligning sizes up to UNALIGNED_SIZE_MAX.
@@ -73,7 +72,7 @@ static const size_t UNALIGNED_SIZE_MAX = (SIZE_MAX >> 1) + 1;
 inline bool
 alignedNoCheck(size_t size, size_t alignment)
 {
-	return (size & (alignment - 1)) == 0;
+    return (size & (alignment - 1)) == 0;
 }
 
 /// True if size is aligned to alignment.
@@ -81,8 +80,8 @@ alignedNoCheck(size_t size, size_t alignment)
 inline bool
 aligned(size_t size, size_t alignment)
 {
-	assert(isPow2(alignment));
-	return alignedNoCheck(size, alignment);
+    assert(isPow2(alignment));
+    return alignedNoCheck(size, alignment);
 }
 
 /// Round a size up to a multiple of alignment. No safety checks.
@@ -90,7 +89,7 @@ aligned(size_t size, size_t alignment)
 inline size_t
 alignNoCheck(size_t size, size_t alignment)
 {
-	return (size + (alignment - 1)) & ~(alignment - 1);
+    return (size + (alignment - 1)) & ~(alignment - 1);
 }
 
 /// Round a size up to a multiple of alignment.
@@ -102,9 +101,9 @@ alignNoCheck(size_t size, size_t alignment)
 inline size_t
 align(size_t size, size_t alignment)
 {
-	assert(isPow2(alignment));
-	assert(size <= SIZE_MAX - alignment + 1); // overflow check
-	return alignNoCheck(size, alignment);
+    assert(isPow2(alignment));
+    assert(size <= SIZE_MAX - alignment + 1); // overflow check
+    return alignNoCheck(size, alignment);
 }
 
 } // namespace OMR

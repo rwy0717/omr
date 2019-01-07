@@ -25,14 +25,14 @@
 
 #include "omrsrp.h"
 
-#define MIN_GRANULARITY		sizeof(uintptr_t)	/* default structure alignment */
-#define MALLOC_ALIGNMENT	sizeof(uintptr_t)	/* alignment enforced by malloc() */
+#define MIN_GRANULARITY sizeof(uintptr_t) /* default structure alignment */
+#define MALLOC_ALIGNMENT sizeof(uintptr_t) /* alignment enforced by malloc() */
 
 /* read this if a port library call becomes available that gives out the OS page size */
 #if 0
-#define OS_PAGE_SIZE		(EsGetAddressSpacePageSize())
+#define OS_PAGE_SIZE (EsGetAddressSpacePageSize())
 #else
-#define OS_PAGE_SIZE		4096
+#define OS_PAGE_SIZE 4096
 #endif
 
 /**
@@ -53,15 +53,12 @@ extern "C" {
 
 /* ---------------- pool.c ---------------- */
 
-
 /**
 * @brief
 * @param aPool
 * @return void
 */
-void
-pool_clear(J9Pool *aPool);
-
+void pool_clear(J9Pool* aPool);
 
 /**
 * @brief
@@ -70,16 +67,14 @@ pool_clear(J9Pool *aPool);
 * @param userData
 * @return void
 */
-void
-pool_do(J9Pool *aPool, void (*aFunction)(void *anElement, void *userData), void *userData);
+void pool_do(J9Pool* aPool, void (*aFunction)(void* anElement, void* userData), void* userData);
 
 /**
 * @brief
 * @param aPool
 * @return void
 */
-void
-pool_kill(J9Pool *aPool);
+void pool_kill(J9Pool* aPool);
 
 /**
 * @brief
@@ -94,34 +89,30 @@ pool_kill(J9Pool *aPool);
 * @param userData
 * @return J9Pool*
 */
-J9Pool *
+J9Pool*
 pool_new(uintptr_t structSize,
-		 uintptr_t minNumberElements,
-		 uintptr_t elementAlignment,
-		 uintptr_t poolFlags,
-		 const char *poolCreatorCallsite,
-		 uint32_t memoryCategory,
-		 omrmemAlloc_fptr_t memAlloc,
-		 omrmemFree_fptr_t memFree,
-		 void *userData);
+    uintptr_t minNumberElements,
+    uintptr_t elementAlignment,
+    uintptr_t poolFlags,
+    const char* poolCreatorCallsite,
+    uint32_t memoryCategory,
+    omrmemAlloc_fptr_t memAlloc,
+    omrmemFree_fptr_t memFree,
+    void* userData);
 
 /**
 * @brief
 * @param aPool
 * @return void *
 */
-void *
-pool_newElement(J9Pool *aPool);
-
+void* pool_newElement(J9Pool* aPool);
 
 /**
 * @brief
 * @param *lastHandle
 * @return void*
 */
-void *
-pool_nextDo(pool_state *lastHandle);
-
+void* pool_nextDo(pool_state* lastHandle);
 
 /**
 * @brief
@@ -129,8 +120,7 @@ pool_nextDo(pool_state *lastHandle);
 * @return uintptr_t
 */
 uintptr_t
-pool_numElements(J9Pool *aPool);
-
+pool_numElements(J9Pool* aPool);
 
 /**
 * @brief
@@ -138,17 +128,15 @@ pool_numElements(J9Pool *aPool);
 * @param *anElement
 * @return void
 */
-void
-pool_removeElement(J9Pool *aPool, void *anElement);
-
+void pool_removeElement(J9Pool* aPool, void* anElement);
 
 /**
 * @brief
 * @param *aPool
 * @return J9PoolPuddle
 */
-J9PoolPuddle *
-poolPuddle_new(J9Pool *aPool);
+J9PoolPuddle*
+poolPuddle_new(J9Pool* aPool);
 
 /**
 * @brief
@@ -156,8 +144,7 @@ poolPuddle_new(J9Pool *aPool);
 * @param *lastHandle
 * @return void*
 */
-void *
-pool_startDo(J9Pool *aPool, pool_state *lastHandle);
+void* pool_startDo(J9Pool* aPool, pool_state* lastHandle);
 
 /**
 * @brief
@@ -167,8 +154,7 @@ pool_startDo(J9Pool *aPool, pool_state *lastHandle);
 * @param followNextPointers
 * @return void*
 */
-void *
-poolPuddle_startDo(J9Pool *aPool, J9PoolPuddle *currentPuddle, pool_state *lastHandle, uintptr_t followNextPointers);
+void* poolPuddle_startDo(J9Pool* aPool, J9PoolPuddle* currentPuddle, pool_state* lastHandle, uintptr_t followNextPointers);
 
 /* ---------------- pool_cap.c ---------------- */
 
@@ -178,8 +164,7 @@ poolPuddle_startDo(J9Pool *aPool, J9PoolPuddle *currentPuddle, pool_state *lastH
 * @return uintptr_t
 */
 uintptr_t
-pool_capacity(J9Pool *aPool);
-
+pool_capacity(J9Pool* aPool);
 
 /**
 * @brief
@@ -188,8 +173,7 @@ pool_capacity(J9Pool *aPool);
 * @return uintptr_t
 */
 uintptr_t
-pool_ensureCapacity(J9Pool *aPool, uintptr_t newCapacity);
-
+pool_ensureCapacity(J9Pool* aPool, uintptr_t newCapacity);
 
 /**
 * @brief
@@ -197,7 +181,7 @@ pool_ensureCapacity(J9Pool *aPool, uintptr_t newCapacity);
 * @return uintptr_t
 */
 uintptr_t
-pool_includesElement(J9Pool *aPool, void *anElement);
+pool_includesElement(J9Pool* aPool, void* anElement);
 
 #ifdef __cplusplus
 }

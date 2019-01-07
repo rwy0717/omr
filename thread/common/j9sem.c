@@ -51,23 +51,22 @@
  * @see j9sem_destroy, j9sem_init, j9sem_post
  */
 intptr_t
-j9sem_init(j9sem_t *sp, int32_t initValue)
+j9sem_init(j9sem_t* sp, int32_t initValue)
 {
 #ifdef OMR_INTERP_HAS_SEMAPHORES
-	j9sem_t s;
-	intptr_t rc = -1;
-	omrthread_library_t lib = GLOBAL_DATA(default_library);
+    j9sem_t s;
+    intptr_t rc = -1;
+    omrthread_library_t lib = GLOBAL_DATA(default_library);
 
-	(*sp) = s = SEM_CREATE(lib, initValue);
-	if (s) {
-		rc = SEM_INIT(s, 0, initValue);
-	}
-	return rc;
+    (*sp) = s = SEM_CREATE(lib, initValue);
+    if (s) {
+        rc = SEM_INIT(s, 0, initValue);
+    }
+    return rc;
 #else
-	return -1;
+    return -1;
 #endif
 }
-
 
 /**
  * Release a semaphore by 1.
@@ -83,15 +82,14 @@ intptr_t
 j9sem_post(j9sem_t s)
 {
 #ifdef OMR_INTERP_HAS_SEMAPHORES
-	if (s) {
-		return SEM_POST(s);
-	}
-	return -1;
+    if (s) {
+        return SEM_POST(s);
+    }
+    return -1;
 #else
-	return -1;
+    return -1;
 #endif
 }
-
 
 /**
  * Wait on a semaphore.
@@ -108,17 +106,17 @@ intptr_t
 j9sem_wait(j9sem_t s)
 {
 #ifdef OMR_INTERP_HAS_SEMAPHORES
-	if (s) {
-		while (SEM_WAIT(s) != 0) {
-			/* loop until success */
-		}
-		return 0;
-	} else {
-		return -1;
-	}
+    if (s) {
+        while (SEM_WAIT(s) != 0) {
+            /* loop until success */
+        }
+        return 0;
+    } else {
+        return -1;
+    }
 
 #else
-	return -1;
+    return -1;
 #endif
 }
 
@@ -138,14 +136,14 @@ intptr_t
 j9sem_destroy(j9sem_t s)
 {
 #ifdef OMR_INTERP_HAS_SEMAPHORES
-	omrthread_library_t lib = GLOBAL_DATA(default_library);
-	int rval = 0;
-	if (s) {
-		rval = SEM_DESTROY(s);
-		SEM_FREE(lib, s);
-	}
-	return rval;
+    omrthread_library_t lib = GLOBAL_DATA(default_library);
+    int rval = 0;
+    if (s) {
+        rval = SEM_DESTROY(s);
+        SEM_FREE(lib, s);
+    }
+    return rval;
 #else
-	return -1;
+    return -1;
 #endif
 }

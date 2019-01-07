@@ -24,17 +24,15 @@
 
 #include "env/TestObjectModel.hpp"
 
+namespace TR {
 
-namespace TR
-{
+class ObjectModel : public TestCompiler::ObjectModelConnector {
+public:
+    ObjectModel()
+        : TestCompiler::ObjectModelConnector()
+    {}
+};
 
-class ObjectModel : public TestCompiler::ObjectModelConnector
-   {
-   public:
-
-   ObjectModel() : TestCompiler::ObjectModelConnector() {}
-   };
-
-}
+} // namespace TR
 
 #endif

@@ -26,48 +26,48 @@
  */
 TEST_F(CudaDeviceTest, peer)
 {
-	OMRPORT_ACCESS_FROM_OMRPORT(getPortLibrary());
+    OMRPORT_ACCESS_FROM_OMRPORT(getPortLibrary());
 
-	for (uint32_t deviceId = 0; deviceId < deviceCount; ++deviceId) {
-		uint32_t peerDeviceId = 0;
+    for (uint32_t deviceId = 0; deviceId < deviceCount; ++deviceId) {
+        uint32_t peerDeviceId = 0;
 
-		for (peerDeviceId = 0; peerDeviceId < deviceCount; ++peerDeviceId) {
-			BOOLEAN canAccess = FALSE;
-			int32_t rc = 0;
+        for (peerDeviceId = 0; peerDeviceId < deviceCount; ++peerDeviceId) {
+            BOOLEAN canAccess = FALSE;
+            int32_t rc = 0;
 
-			if (peerDeviceId == deviceId) {
-				continue;
-			}
+            if (peerDeviceId == deviceId) {
+                continue;
+            }
 
-			rc = omrcuda_deviceCanAccessPeer(deviceId, peerDeviceId, &canAccess);
+            rc = omrcuda_deviceCanAccessPeer(deviceId, peerDeviceId, &canAccess);
 
-			ASSERT_EQ(0, rc) << "omrcuda_deviceCanAccessPeer failed";
+            ASSERT_EQ(0, rc) << "omrcuda_deviceCanAccessPeer failed";
 
-			/* Toggle peer access on then off or, off then on. */
+            /* Toggle peer access on then off or, off then on. */
 
-			if (!canAccess) {
-				rc = omrcuda_deviceEnablePeerAccess(deviceId, peerDeviceId);
+            if (!canAccess) {
+                rc = omrcuda_deviceEnablePeerAccess(deviceId, peerDeviceId);
 
-				if (J9CUDA_ERROR_PEER_ACCESS_UNSUPPORTED == rc) {
-					continue;
-				}
+                if (J9CUDA_ERROR_PEER_ACCESS_UNSUPPORTED == rc) {
+                    continue;
+                }
 
-				ASSERT_EQ(0, rc) << "omrcuda_deviceEnablePeerAccess failed";
-			}
+                ASSERT_EQ(0, rc) << "omrcuda_deviceEnablePeerAccess failed";
+            }
 
-			rc = omrcuda_deviceDisablePeerAccess(deviceId, peerDeviceId);
+            rc = omrcuda_deviceDisablePeerAccess(deviceId, peerDeviceId);
 
-			ASSERT_EQ(0, rc) << "omrcuda_deviceDisablePeerAccess failed";
+            ASSERT_EQ(0, rc) << "omrcuda_deviceDisablePeerAccess failed";
 
-			testPeerTransfer(OMRPORTLIB, deviceId, peerDeviceId);
+            testPeerTransfer(OMRPORTLIB, deviceId, peerDeviceId);
 
-			if (canAccess) {
-				rc = omrcuda_deviceEnablePeerAccess(deviceId, peerDeviceId);
+            if (canAccess) {
+                rc = omrcuda_deviceEnablePeerAccess(deviceId, peerDeviceId);
 
-				ASSERT_EQ(0, rc) << "omrcuda_deviceEnablePeerAccess failed";
-			}
-		}
-	}
+                ASSERT_EQ(0, rc) << "omrcuda_deviceEnablePeerAccess failed";
+            }
+        }
+    }
 }
 
 /**
@@ -77,67 +77,66 @@ TEST_F(CudaDeviceTest, peer)
  * @param[in] deviceId      the current device
  * @param[in] peerDeviceId  the peer device
  */
-void
-CudaDeviceTest::testPeerTransfer(OMRPortLibrary *portLibrary, uint32_t deviceId, uint32_t peerDeviceId)
+void CudaDeviceTest::testPeerTransfer(OMRPortLibrary* portLibrary, uint32_t deviceId, uint32_t peerDeviceId)
 {
-	OMRPORT_ACCESS_FROM_OMRPORT(portLibrary);
+    OMRPORT_ACCESS_FROM_OMRPORT(portLibrary);
 
-	uintptr_t const BufferBytes = 2 * 1024 * 1024;
-	void *hostBuf = NULL;
-	int32_t rc = 0;
+    uintptr_t const BufferBytes = 2 * 1024 * 1024;
+    void* hostBuf = NULL;
+    int32_t rc = 0;
 
-	rc = omrcuda_hostAlloc(BufferBytes, J9CUDA_HOST_ALLOC_DEFAULT, &hostBuf);
+    rc = omrcuda_hostAlloc(BufferBytes, J9CUDA_HOST_ALLOC_DEFAULT, &hostBuf);
 
-	ASSERT_EQ(0, rc) << "omrcuda_hostAlloc failed";
-	ASSERT_NOT_NULL(hostBuf) << "allocated null host address";
+    ASSERT_EQ(0, rc) << "omrcuda_hostAlloc failed";
+    ASSERT_NOT_NULL(hostBuf) << "allocated null host address";
 
-	void *deviceBuf = NULL;
+    void* deviceBuf = NULL;
 
-	rc = omrcuda_deviceAlloc(deviceId, BufferBytes, &deviceBuf);
+    rc = omrcuda_deviceAlloc(deviceId, BufferBytes, &deviceBuf);
 
-	ASSERT_EQ(0, rc) << "omrcuda_deviceAlloc failed";
-	ASSERT_NOT_NULL(deviceBuf) << "allocated null device address";
+    ASSERT_EQ(0, rc) << "omrcuda_deviceAlloc failed";
+    ASSERT_NOT_NULL(deviceBuf) << "allocated null device address";
 
-	void *peerBuf = NULL;
+    void* peerBuf = NULL;
 
-	rc = omrcuda_deviceAlloc(peerDeviceId, BufferBytes, &peerBuf);
+    rc = omrcuda_deviceAlloc(peerDeviceId, BufferBytes, &peerBuf);
 
-	ASSERT_EQ(0, rc) << "omrcuda_deviceAlloc failed";
-	ASSERT_NOT_NULL(peerBuf) << "allocated null device address";
+    ASSERT_EQ(0, rc) << "omrcuda_deviceAlloc failed";
+    ASSERT_NOT_NULL(peerBuf) << "allocated null device address";
 
-	patternFill(hostBuf, BufferBytes, deviceId);
+    patternFill(hostBuf, BufferBytes, deviceId);
 
-	rc = omrcuda_memcpyHostToDevice(deviceId, deviceBuf, hostBuf, BufferBytes);
+    rc = omrcuda_memcpyHostToDevice(deviceId, deviceBuf, hostBuf, BufferBytes);
 
-	ASSERT_EQ(0, rc) << "omrcuda_memcpyHostToDevice failed";
+    ASSERT_EQ(0, rc) << "omrcuda_memcpyHostToDevice failed";
 
-	rc = omrcuda_memcpyPeer(peerDeviceId, peerBuf, deviceId, deviceBuf, BufferBytes);
+    rc = omrcuda_memcpyPeer(peerDeviceId, peerBuf, deviceId, deviceBuf, BufferBytes);
 
-	ASSERT_EQ(0, rc) << "omrcuda_memcpyPeer failed";
+    ASSERT_EQ(0, rc) << "omrcuda_memcpyPeer failed";
 
-	memset(hostBuf, 0, BufferBytes);
+    memset(hostBuf, 0, BufferBytes);
 
-	rc = omrcuda_memcpyDeviceToHost(peerDeviceId, hostBuf, peerBuf, BufferBytes);
+    rc = omrcuda_memcpyDeviceToHost(peerDeviceId, hostBuf, peerBuf, BufferBytes);
 
-	ASSERT_EQ(0, rc) << "omrcuda_memcpyDeviceToHost failed";
+    ASSERT_EQ(0, rc) << "omrcuda_memcpyDeviceToHost failed";
 
-	ASSERT_TRUE(patternVerify(hostBuf, BufferBytes, deviceId)) << "data transferred does not match expected pattern";
+    ASSERT_TRUE(patternVerify(hostBuf, BufferBytes, deviceId)) << "data transferred does not match expected pattern";
 
-	if (NULL != hostBuf) {
-		rc = omrcuda_hostFree(hostBuf);
+    if (NULL != hostBuf) {
+        rc = omrcuda_hostFree(hostBuf);
 
-		ASSERT_EQ(0, rc) << "omrcuda_hostFree failed";
-	}
+        ASSERT_EQ(0, rc) << "omrcuda_hostFree failed";
+    }
 
-	if (NULL != deviceBuf) {
-		rc = omrcuda_deviceFree(deviceId, deviceBuf);
+    if (NULL != deviceBuf) {
+        rc = omrcuda_deviceFree(deviceId, deviceBuf);
 
-		ASSERT_EQ(0, rc) << "omrcuda_deviceFree failed";
-	}
+        ASSERT_EQ(0, rc) << "omrcuda_deviceFree failed";
+    }
 
-	if (NULL != peerBuf) {
-		rc = omrcuda_deviceFree(peerDeviceId, peerBuf);
+    if (NULL != peerBuf) {
+        rc = omrcuda_deviceFree(peerDeviceId, peerBuf);
 
-		ASSERT_EQ(0, rc) << "omrcuda_deviceFree failed";
-	}
+        ASSERT_EQ(0, rc) << "omrcuda_deviceFree failed";
+    }
 }

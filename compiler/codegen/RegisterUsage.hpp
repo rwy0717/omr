@@ -22,26 +22,30 @@
 #ifndef OMR_REGISTER_USAGE_INCL
 #define OMR_REGISTER_USAGE_INCL
 
-#include "env/TRMemory.hpp"  // for TR_Memory, etc
-#include "il/Node.hpp"       // for ncount_t
+#include "env/TRMemory.hpp" // for TR_Memory, etc
+#include "il/Node.hpp" // for ncount_t
 
-namespace TR { class Register; }
-
-namespace OMR
-{
-
-class RegisterUsage
-   {
-   public:
-   TR_ALLOC(TR_Memory::Register)
-
-   RegisterUsage(TR::Register *v, ncount_t u): virtReg(v), useCount(u), mergeFuc(0) {}
-
-   TR::Register *   virtReg;
-   ncount_t     useCount;
-   ncount_t     mergeFuc;  // cache a virtual's original future use
-   };
-
+namespace TR {
+class Register;
 }
+
+namespace OMR {
+
+class RegisterUsage {
+public:
+    TR_ALLOC(TR_Memory::Register)
+
+    RegisterUsage(TR::Register* v, ncount_t u)
+        : virtReg(v)
+        , useCount(u)
+        , mergeFuc(0)
+    {}
+
+    TR::Register* virtReg;
+    ncount_t useCount;
+    ncount_t mergeFuc; // cache a virtual's original future use
+};
+
+} // namespace OMR
 
 #endif

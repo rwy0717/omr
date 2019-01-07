@@ -31,15 +31,14 @@ namespace TestCompiler {
 
 typedef std::map<const std::string, int> MethodSets;
 
-class OptionSetTest : public LimitFileTest
-   {
-   public:
-   void applyOptionSets(const char *limitFile, const char *newFile, const TestCompiler::MethodSets &methods);
+class OptionSetTest : public LimitFileTest {
+public:
+    void applyOptionSets(const char* limitFile, const char* newFile, const TestCompiler::MethodSets& methods);
 
-   private:
-   std::string getMethodFromLine(const std::string &line);
-   };
+private:
+    std::string getMethodFromLine(const std::string& line);
+};
 
-}
+} // namespace TestCompiler
 
 #endif // !defined(TEST_OPTIONSET_INCL)

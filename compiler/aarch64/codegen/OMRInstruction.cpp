@@ -26,105 +26,89 @@
 #include "codegen/Instruction.hpp"
 #include "codegen/RegisterDependency.hpp"
 
-namespace TR { class Register; }
+namespace TR {
+class Register;
+}
 
-OMR::ARM64::Instruction::Instruction(TR::CodeGenerator *cg, TR::InstOpCode::Mnemonic op, TR::Node *node)
-   : OMR::Instruction(cg, op, node),
-     _conditions(NULL)
-   {
-   self()->setBlockIndex(cg->getCurrentBlockIndex());
-   }
+OMR::ARM64::Instruction::Instruction(TR::CodeGenerator* cg, TR::InstOpCode::Mnemonic op, TR::Node* node)
+    : OMR::Instruction(cg, op, node)
+    , _conditions(NULL)
+{
+    self()->setBlockIndex(cg->getCurrentBlockIndex());
+}
 
+OMR::ARM64::Instruction::Instruction(TR::CodeGenerator* cg, TR::Instruction* precedingInstruction, TR::InstOpCode::Mnemonic op, TR::Node* node)
+    : OMR::Instruction(cg, precedingInstruction, op, node)
+    , _conditions(NULL)
+{
+    self()->setBlockIndex(cg->getCurrentBlockIndex());
+}
 
-OMR::ARM64::Instruction::Instruction(TR::CodeGenerator *cg, TR::Instruction *precedingInstruction, TR::InstOpCode::Mnemonic op, TR::Node *node)
-   : OMR::Instruction(cg, precedingInstruction, op, node),
-     _conditions(NULL)
-   {
-   self()->setBlockIndex(cg->getCurrentBlockIndex());
-   }
+OMR::ARM64::Instruction::Instruction(TR::CodeGenerator* cg, TR::InstOpCode::Mnemonic op, TR::RegisterDependencyConditions* cond, TR::Node* node)
+    : OMR::Instruction(cg, op, node)
+    , _conditions(cond)
+{
+    self()->setBlockIndex(cg->getCurrentBlockIndex());
+    if (cond)
+        cond->incRegisterTotalUseCounts(cg);
+}
 
+OMR::ARM64::Instruction::Instruction(TR::CodeGenerator* cg, TR::Instruction* precedingInstruction, TR::InstOpCode::Mnemonic op, TR::RegisterDependencyConditions* cond, TR::Node* node)
+    : OMR::Instruction(cg, precedingInstruction, op, node)
+    , _conditions(cond)
+{
+    self()->setBlockIndex(cg->getCurrentBlockIndex());
+    if (cond)
+        cond->incRegisterTotalUseCounts(cg);
+}
 
-OMR::ARM64::Instruction::Instruction(TR::CodeGenerator *cg, TR::InstOpCode::Mnemonic op, TR::RegisterDependencyConditions *cond, TR::Node *node)
-   : OMR::Instruction(cg, op, node),
-     _conditions(cond)
-   {
-   self()->setBlockIndex(cg->getCurrentBlockIndex());
-   if (cond)
-      cond->incRegisterTotalUseCounts(cg);
-   }
+void OMR::ARM64::Instruction::remove()
+{
+    self()->getPrev()->setNext(self()->getNext());
+    self()->getNext()->setPrev(self()->getPrev());
+}
 
+void OMR::ARM64::Instruction::ARM64NeedsGCMap(TR::CodeGenerator* cg, uint32_t mask)
+{
+    if (cg->comp()->useRegisterMaps())
+        self()->setNeedsGCMap(mask);
+}
 
-OMR::ARM64::Instruction::Instruction(TR::CodeGenerator *cg, TR::Instruction *precedingInstruction, TR::InstOpCode::Mnemonic op, TR::RegisterDependencyConditions *cond, TR::Node *node)
-   : OMR::Instruction(cg, precedingInstruction, op, node),
-     _conditions(cond)
-   {
-   self()->setBlockIndex(cg->getCurrentBlockIndex());
-   if (cond)
-      cond->incRegisterTotalUseCounts(cg);
-   }
-
-
-void
-OMR::ARM64::Instruction::remove()
-   {
-   self()->getPrev()->setNext(self()->getNext());
-   self()->getNext()->setPrev(self()->getPrev());
-   }
-
-
-void OMR::ARM64::Instruction::ARM64NeedsGCMap(TR::CodeGenerator *cg, uint32_t mask)
-   {
-   if (cg->comp()->useRegisterMaps())
-      self()->setNeedsGCMap(mask);
-   }
-
-
-TR::Register *
+TR::Register*
 OMR::ARM64::Instruction::getMemoryDataRegister()
-   {
-   return NULL;
-   }
+{
+    return NULL;
+}
 
+bool OMR::ARM64::Instruction::refsRegister(TR::Register* reg)
+{
+    TR::RegisterDependencyConditions* cond = OMR::ARM64::Instruction::getDependencyConditions();
+    return cond && cond->refsRegister(reg);
+}
 
-bool
-OMR::ARM64::Instruction::refsRegister(TR::Register * reg)
-   {
-   TR::RegisterDependencyConditions *cond = OMR::ARM64::Instruction::getDependencyConditions();
-   return cond && cond->refsRegister(reg);
-   }
+bool OMR::ARM64::Instruction::defsRegister(TR::Register* reg)
+{
+    TR::RegisterDependencyConditions* cond = OMR::ARM64::Instruction::getDependencyConditions();
+    return cond && cond->defsRegister(reg);
+}
 
+bool OMR::ARM64::Instruction::usesRegister(TR::Register* reg)
+{
+    TR::RegisterDependencyConditions* cond = OMR::ARM64::Instruction::getDependencyConditions();
+    return cond && cond->usesRegister(reg);
+}
 
-bool
-OMR::ARM64::Instruction::defsRegister(TR::Register * reg)
-   {
-   TR::RegisterDependencyConditions *cond = OMR::ARM64::Instruction::getDependencyConditions();
-   return cond && cond->defsRegister(reg);
-   }
+bool OMR::ARM64::Instruction::dependencyRefsRegister(TR::Register* reg)
+{
+    TR::RegisterDependencyConditions* cond = OMR::ARM64::Instruction::getDependencyConditions();
+    return cond && cond->refsRegister(reg);
+}
 
-
-bool
-OMR::ARM64::Instruction::usesRegister(TR::Register * reg)
-   {
-   TR::RegisterDependencyConditions *cond = OMR::ARM64::Instruction::getDependencyConditions();
-   return cond && cond->usesRegister(reg);
-   }
-
-
-bool
-OMR::ARM64::Instruction::dependencyRefsRegister(TR::Register * reg)
-   {
-   TR::RegisterDependencyConditions *cond = OMR::ARM64::Instruction::getDependencyConditions();
-   return cond && cond->refsRegister(reg);
-   }
-
-
-void
-OMR::ARM64::Instruction::assignRegisters(TR_RegisterKinds kindToBeAssigned)
-   {
-   TR::RegisterDependencyConditions *cond = OMR::ARM64::Instruction::getDependencyConditions();
-   if (cond)
-      {
-      cond->assignPostConditionRegisters(self(), kindToBeAssigned, self()->cg());
-      cond->assignPreConditionRegisters(self()->getPrev(), kindToBeAssigned, self()->cg());
-      }
-   }
+void OMR::ARM64::Instruction::assignRegisters(TR_RegisterKinds kindToBeAssigned)
+{
+    TR::RegisterDependencyConditions* cond = OMR::ARM64::Instruction::getDependencyConditions();
+    if (cond) {
+        cond->assignPostConditionRegisters(self(), kindToBeAssigned, self()->cg());
+        cond->assignPreConditionRegisters(self()->getPrev(), kindToBeAssigned, self()->cg());
+    }
+}

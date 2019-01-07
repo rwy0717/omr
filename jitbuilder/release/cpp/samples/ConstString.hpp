@@ -20,19 +20,17 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #ifndef CONSTSTRING_INCL
 #define CONSTSTRING_INCL
 
 #include "JitBuilder.hpp"
 
-typedef void (ConstStringFunctionType)();
+typedef void(ConstStringFunctionType)();
 
-class ConstStringMethod : public OMR::JitBuilder::MethodBuilder
-   {
-   public:
-   ConstStringMethod(OMR::JitBuilder::TypeDictionary *);
-   virtual bool buildIL();
-   };
+class ConstStringMethod : public OMR::JitBuilder::MethodBuilder {
+public:
+    ConstStringMethod(OMR::JitBuilder::TypeDictionary*);
+    virtual bool buildIL();
+};
 
 #endif // !defined(CONSTSTRING_INCL)

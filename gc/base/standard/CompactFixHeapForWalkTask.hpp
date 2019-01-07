@@ -41,25 +41,23 @@ class MM_EnvironmentBase;
  * @todo Provide class documentation
  * @ingroup GC_Modron_Standard
  */
-class MM_CompactFixHeapForWalkTask : public MM_ParallelTask
-{
+class MM_CompactFixHeapForWalkTask : public MM_ParallelTask {
 private:
-	MM_CompactScheme *_compactScheme;
+    MM_CompactScheme* _compactScheme;
 
 public:
-	virtual uintptr_t getVMStateID() { return OMRVMSTATE_GC_COMPACT_FIX_HEAP_FOR_WALK; };
-	
-	virtual void run(MM_EnvironmentBase *env);
+    virtual uintptr_t getVMStateID() { return OMRVMSTATE_GC_COMPACT_FIX_HEAP_FOR_WALK; };
 
-	MM_CompactFixHeapForWalkTask(MM_EnvironmentBase *env, MM_Dispatcher *dispatcher, MM_CompactScheme *compactScheme) :
-		MM_ParallelTask(env, dispatcher),
-		_compactScheme(compactScheme)
-	{
-		_typeId = __FUNCTION__;
-	}
+    virtual void run(MM_EnvironmentBase* env);
+
+    MM_CompactFixHeapForWalkTask(MM_EnvironmentBase* env, MM_Dispatcher* dispatcher, MM_CompactScheme* compactScheme)
+        : MM_ParallelTask(env, dispatcher)
+        , _compactScheme(compactScheme)
+    {
+        _typeId = __FUNCTION__;
+    }
 };
 
 #endif /* OMR_GC_MODRON_COMPACTION */
 
 #endif /* COMPACTFIXHEAPFORWALKTASK_HPP_ */
-

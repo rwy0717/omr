@@ -22,46 +22,47 @@
 #ifndef TR_DEADTREESELIMINATION_INCL
 #define TR_DEADTREESELIMINATION_INCL
 
-#include <stdint.h>                    // for int32_t, uint32_t
-#include "env/TRMemory.hpp"            // for Allocator, TR_Memory, etc
-#include "infra/List.hpp"              // for TR_ScratchList
-#include "optimizer/Optimization.hpp"  // for Optimization
+#include <stdint.h> // for int32_t, uint32_t
+#include "env/TRMemory.hpp" // for Allocator, TR_Memory, etc
+#include "infra/List.hpp" // for TR_ScratchList
+#include "optimizer/Optimization.hpp" // for Optimization
 
-namespace TR { class Block; }
-namespace TR { class OptimizationManager; }
-namespace TR { class TreeTop; }
-
-namespace OMR
-{
-
-class TreeInfo
-   {
-   public:
-   TR_ALLOC(TR_Memory::LocalOpts)
-
-   TreeInfo(TR::TreeTop *treeTop, int32_t height)
-      : _tree(treeTop),
-        _height(height)
-      {
-      }
-
-   TR::TreeTop *getTreeTop()  {return _tree;}
-   void setTreeTop(TR::TreeTop *tree)  {_tree = tree;}
-
-   int32_t getHeight()    {return _height;}
-   void setHeight(int32_t height) {_height = height;}
-
-   private:
-
-   int32_t _height;
-   TR::TreeTop *_tree;
-   };
-
+namespace TR {
+class Block;
+}
+namespace TR {
+class OptimizationManager;
+}
+namespace TR {
+class TreeTop;
 }
 
+namespace OMR {
 
-namespace TR
-{
+class TreeInfo {
+public:
+    TR_ALLOC(TR_Memory::LocalOpts)
+
+    TreeInfo(TR::TreeTop* treeTop, int32_t height)
+        : _tree(treeTop)
+        , _height(height)
+    {
+    }
+
+    TR::TreeTop* getTreeTop() { return _tree; }
+    void setTreeTop(TR::TreeTop* tree) { _tree = tree; }
+
+    int32_t getHeight() { return _height; }
+    void setHeight(int32_t height) { _height = height; }
+
+private:
+    int32_t _height;
+    TR::TreeTop* _tree;
+};
+
+} // namespace OMR
+
+namespace TR {
 
 /*
  * Class DeadTreesElimination
@@ -76,32 +77,28 @@ namespace TR
  * expressions and making the trees more compact.
  */
 
-class DeadTreesElimination : public TR::Optimization
-   {
-   public:
+class DeadTreesElimination : public TR::Optimization {
+public:
+    DeadTreesElimination(TR::OptimizationManager* manager);
+    static TR::Optimization* create(TR::OptimizationManager* manager);
 
-   DeadTreesElimination(TR::OptimizationManager *manager);
-   static TR::Optimization *create(TR::OptimizationManager *manager);
+    virtual int32_t perform();
+    virtual int32_t performOnBlock(TR::Block*);
+    virtual void prePerformOnBlocks();
 
-   virtual int32_t perform();
-   virtual int32_t performOnBlock(TR::Block *);
-   virtual void prePerformOnBlocks();
+    virtual const char* optDetailString() const throw();
 
-   virtual const char * optDetailString() const throw();
+protected:
+    virtual TR::TreeTop* findLastTreetop(TR::Block* block, TR::TreeTop* prevTree);
 
-   protected:
+private:
+    int32_t process(TR::TreeTop*, TR::TreeTop*);
 
-   virtual TR::TreeTop *findLastTreetop(TR::Block *block, TR::TreeTop *prevTree);
+    List<OMR::TreeInfo> _targetTrees;
+    bool _cannotBeEliminated;
+    bool _delayedRegStores;
+};
 
-   private:
-
-   int32_t process(TR::TreeTop *, TR::TreeTop *);
-
-   List<OMR::TreeInfo> _targetTrees;
-   bool _cannotBeEliminated;
-   bool _delayedRegStores;
-   };
-
-}
+} // namespace TR
 
 #endif

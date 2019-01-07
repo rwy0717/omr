@@ -42,13 +42,13 @@
  * list of available GC policies
  */
 typedef enum MM_GCPolicy {
-	gc_policy_undefined = OMR_GC_POLICY_ILLEGAL,
-	gc_policy_optthruput = OMR_GC_POLICY_OPTTHRUPUT,
-	gc_policy_optavgpause = OMR_GC_POLICY_OPTAVGPAUSE,
-	gc_policy_gencon = OMR_GC_POLICY_GENCON,
-	gc_policy_balanced = OMR_GC_POLICY_BALANCED,
-	gc_policy_metronome = OMR_GC_POLICY_METRONOME,
-	gc_policy_nogc = OMR_GC_POLICY_NOGC
+    gc_policy_undefined = OMR_GC_POLICY_ILLEGAL,
+    gc_policy_optthruput = OMR_GC_POLICY_OPTTHRUPUT,
+    gc_policy_optavgpause = OMR_GC_POLICY_OPTAVGPAUSE,
+    gc_policy_gencon = OMR_GC_POLICY_GENCON,
+    gc_policy_balanced = OMR_GC_POLICY_BALANCED,
+    gc_policy_metronome = OMR_GC_POLICY_METRONOME,
+    gc_policy_nogc = OMR_GC_POLICY_NOGC
 } MM_GCPolicy;
 
 #define OMR_GC_WRITE_BARRIER_TYPE_ILLEGAL 0x0
@@ -69,45 +69,45 @@ typedef enum MM_GCPolicy {
 #define OMR_GC_READ_BARRIER_TYPE_COUNT 0x4
 
 typedef enum MM_GCWriteBarrierType {
-	gc_modron_wrtbar_illegal = OMR_GC_WRITE_BARRIER_TYPE_ILLEGAL,
-	gc_modron_wrtbar_none = OMR_GC_WRITE_BARRIER_TYPE_NONE,
-	gc_modron_wrtbar_always = OMR_GC_WRITE_BARRIER_TYPE_ALWAYS,
-	gc_modron_wrtbar_oldcheck = OMR_GC_WRITE_BARRIER_TYPE_OLDCHECK,
-	gc_modron_wrtbar_cardmark = OMR_GC_WRITE_BARRIER_TYPE_CARDMARK,
-	gc_modron_wrtbar_cardmark_incremental = OMR_GC_WRITE_BARRIER_TYPE_CARDMARK_INCREMENTAL,
-	gc_modron_wrtbar_cardmark_and_oldcheck = OMR_GC_WRITE_BARRIER_TYPE_CARDMARK_AND_OLDCHECK,
-	gc_modron_wrtbar_satb = OMR_GC_WRITE_BARRIER_TYPE_SATB,
-	gc_modron_wrtbar_satb_and_oldcheck = OMR_GC_WRITE_BARRIER_TYPE_SATB_AND_OLDCHECK,
-	gc_modron_wrtbar_count = OMR_GC_WRITE_BARRIER_TYPE_COUNT
+    gc_modron_wrtbar_illegal = OMR_GC_WRITE_BARRIER_TYPE_ILLEGAL,
+    gc_modron_wrtbar_none = OMR_GC_WRITE_BARRIER_TYPE_NONE,
+    gc_modron_wrtbar_always = OMR_GC_WRITE_BARRIER_TYPE_ALWAYS,
+    gc_modron_wrtbar_oldcheck = OMR_GC_WRITE_BARRIER_TYPE_OLDCHECK,
+    gc_modron_wrtbar_cardmark = OMR_GC_WRITE_BARRIER_TYPE_CARDMARK,
+    gc_modron_wrtbar_cardmark_incremental = OMR_GC_WRITE_BARRIER_TYPE_CARDMARK_INCREMENTAL,
+    gc_modron_wrtbar_cardmark_and_oldcheck = OMR_GC_WRITE_BARRIER_TYPE_CARDMARK_AND_OLDCHECK,
+    gc_modron_wrtbar_satb = OMR_GC_WRITE_BARRIER_TYPE_SATB,
+    gc_modron_wrtbar_satb_and_oldcheck = OMR_GC_WRITE_BARRIER_TYPE_SATB_AND_OLDCHECK,
+    gc_modron_wrtbar_count = OMR_GC_WRITE_BARRIER_TYPE_COUNT
 } MM_GCWriteBarrierType;
 
 typedef enum MM_GCReadBarrierType {
-	gc_modron_readbar_illegal = OMR_GC_READ_BARRIER_TYPE_ILLEGAL,
-	gc_modron_readbar_none = OMR_GC_READ_BARRIER_TYPE_NONE,
-	gc_modron_readbar_range_check = OMR_GC_READ_BARRIER_TYPE_RANGE_CHECK,
-	gc_modron_readbar_always = OMR_GC_READ_BARRIER_TYPE_ALWAYS,
-	gc_modron_readbar_count = OMR_GC_READ_BARRIER_TYPE_COUNT
+    gc_modron_readbar_illegal = OMR_GC_READ_BARRIER_TYPE_ILLEGAL,
+    gc_modron_readbar_none = OMR_GC_READ_BARRIER_TYPE_NONE,
+    gc_modron_readbar_range_check = OMR_GC_READ_BARRIER_TYPE_RANGE_CHECK,
+    gc_modron_readbar_always = OMR_GC_READ_BARRIER_TYPE_ALWAYS,
+    gc_modron_readbar_count = OMR_GC_READ_BARRIER_TYPE_COUNT
 } MM_GCReadBarrierType;
 
 typedef enum MM_AlignmentType {
-	mm_heapAlignment = 1,
-	mm_regionAlignment
+    mm_heapAlignment = 1,
+    mm_regionAlignment
 } MM_AlignmentType;
 
 /**
  * Codes used to indicate why an object is being scanned.
  */
 typedef enum MM_MarkingSchemeScanReason {
-	SCAN_REASON_PACKET = 1, /**< Indicates the object being scanned came from a work packet */
-	SCAN_REASON_DIRTY_CARD = 2, /**< Indicates the object being scanned was found in a dirty card */
-	SCAN_REASON_REMEMBERED_SET_SCAN = 3, /**< Indicates the object being scanned was in a remembered set */
-	SCAN_REASON_OVERFLOWED_OBJECT = 4, /**< Indicates the object being scanned was in an overflowed region */
+    SCAN_REASON_PACKET = 1, /**< Indicates the object being scanned came from a work packet */
+    SCAN_REASON_DIRTY_CARD = 2, /**< Indicates the object being scanned was found in a dirty card */
+    SCAN_REASON_REMEMBERED_SET_SCAN = 3, /**< Indicates the object being scanned was in a remembered set */
+    SCAN_REASON_OVERFLOWED_OBJECT = 4, /**< Indicates the object being scanned was in an overflowed region */
 } MM_MarkingSchemeScanReason;
 
-#define OMR_GC_CYCLE_TYPE_DEFAULT     0
-#define OMR_GC_CYCLE_TYPE_GLOBAL      1
-#define OMR_GC_CYCLE_TYPE_SCAVENGE    2
-#define OMR_GC_CYCLE_TYPE_EPSILON	 6
+#define OMR_GC_CYCLE_TYPE_DEFAULT 0
+#define OMR_GC_CYCLE_TYPE_GLOBAL 1
+#define OMR_GC_CYCLE_TYPE_SCAVENGE 2
+#define OMR_GC_CYCLE_TYPE_EPSILON 6
 
 /* Core allocation flags defined for OMR are < OMR_GC_ALLOCATE_OBJECT_LANGUAGE_DEFINED_BASE */
 #define OMR_GC_ALLOCATE_OBJECT_NON_INSTRUMENTABLE 0x0
@@ -128,10 +128,10 @@ typedef enum MM_MarkingSchemeScanReason {
 #define OMR_GC_ALLOCATION_TYPE_COUNT 0x3
 
 typedef enum MM_GCAllocationType {
-	gc_modron_allocation_type_illegal = OMR_GC_ALLOCATION_TYPE_ILLEGAL,
-	gc_modron_allocation_type_tlh = OMR_GC_ALLOCATION_TYPE_TLH,
-	gc_modron_allocation_type_segregated = OMR_GC_ALLOCATION_TYPE_SEGREGATED,
-	gc_modron_allocation_type_count = OMR_GC_ALLOCATION_TYPE_COUNT,
+    gc_modron_allocation_type_illegal = OMR_GC_ALLOCATION_TYPE_ILLEGAL,
+    gc_modron_allocation_type_tlh = OMR_GC_ALLOCATION_TYPE_TLH,
+    gc_modron_allocation_type_segregated = OMR_GC_ALLOCATION_TYPE_SEGREGATED,
+    gc_modron_allocation_type_count = OMR_GC_ALLOCATION_TYPE_COUNT,
 } MM_GCAllocationType;
 
 /* Object-model related constants moved from builder (J9VMConstantValue.st / j9generated.h)
@@ -145,13 +145,13 @@ typedef enum MM_GCAllocationType {
  * J9_OBJECT_HEADER_SHAPE_MASK		/ OBJECT_HEADER_SHAPE_MASK
  * J9_OBJECT_HEADER_STACK_ALLOCATED	/ OBJECT_HEADER_STACK_ALLOCATED
  * */
-#define OBJECT_HEADER_AGE_MIN  1
-#define OBJECT_HEADER_AGE_MAX  14
+#define OBJECT_HEADER_AGE_MIN 1
+#define OBJECT_HEADER_AGE_MAX 14
 
 /**
  * #defines representing tags used in the Remembered Set
  */
-#define DEFERRED_RS_REMOVE_FLAG 			0x1
+#define DEFERRED_RS_REMOVE_FLAG 0x1
 
 #define J9_MU_WALK_DEBUGGER_REFS 0x1
 #define J9_MU_WALK_DEBUGGER_CLASS_REFS 0x2
@@ -177,9 +177,9 @@ typedef enum MM_GCAllocationType {
 #endif /* OMR_GC_MODRON_CONCURRENT_MARK */
 #endif /* OMR_ENV_DATA64 */
 
-#define MINIMUM_VM_SIZE ((uintptr_t) 1*1024*1024)
-#define MINIMUM_OLD_SPACE_SIZE ((uintptr_t) (MINIMUM_VM_SIZE/2))
-#define MINIMUM_NEW_SPACE_SIZE ((uintptr_t) (MINIMUM_VM_SIZE/4))
+#define MINIMUM_VM_SIZE ((uintptr_t)1 * 1024 * 1024)
+#define MINIMUM_OLD_SPACE_SIZE ((uintptr_t)(MINIMUM_VM_SIZE / 2))
+#define MINIMUM_NEW_SPACE_SIZE ((uintptr_t)(MINIMUM_VM_SIZE / 4))
 
 #define NO_FRAGMENTATION 0
 #define MICRO_FRAGMENTATION 1
@@ -190,9 +190,9 @@ typedef enum MM_GCAllocationType {
  * Used to describe how locks should be initialized when created.
  */
 struct ModronLnrlOptions {
-	uintptr_t spinCount1;
-	uintptr_t spinCount2;
-	uintptr_t spinCount3;
+    uintptr_t spinCount1;
+    uintptr_t spinCount2;
+    uintptr_t spinCount3;
 };
 
 /* Flag used to poison collected object pointers for debugging */
@@ -249,31 +249,31 @@ struct ModronLnrlOptions {
 #define PACKET_ARRAY_SPLIT_SHIFT 2
 #define PACKET_INVALID_OBJECT (UDATA_MAX << PACKET_ARRAY_SPLIT_SHIFT)
 
-#define OLDFREE_DESPERATE_RATIO_DIVISOR			100
-#define OLDFREE_DESPERATE_RATIO_MULTIPLIER		4
-#define OLDFREE_INSUFFICIENT					((uintptr_t)(1024 * 128))
-#define MINIMUM_TLHSIZE_MULTIPLIER				2
-#define MINIMUM_CONTRACTION_RATIO_DIVISOR		100
-#define MINIMUM_CONTRACTION_RATIO_MULTIPLIER	10
+#define OLDFREE_DESPERATE_RATIO_DIVISOR 100
+#define OLDFREE_DESPERATE_RATIO_MULTIPLIER 4
+#define OLDFREE_INSUFFICIENT ((uintptr_t)(1024 * 128))
+#define MINIMUM_TLHSIZE_MULTIPLIER 2
+#define MINIMUM_CONTRACTION_RATIO_DIVISOR 100
+#define MINIMUM_CONTRACTION_RATIO_MULTIPLIER 10
 
-#define DESIRED_SUBAREA_SIZE		((uintptr_t)(4*1024*1024))
+#define DESIRED_SUBAREA_SIZE ((uintptr_t)(4 * 1024 * 1024))
 
 typedef enum {
-	COMPACT_NONE = 0,
-	COMPACT_LARGE = 1,
-	COMPACT_FRAGMENTED = 2,
-	COMPACT_FORCED_GC = 4,
-	COMPACT_AVOID_DESPERATE = 5,
-	COMPACT_MEMORY_INSUFFICIENT = 6,
-	COMPACT_ALWAYS = 7,
-	COMPACT_ABORTED_SCAVENGE = 8,
-	COMPACT_CONTRACT = 11,
-	COMPACT_AGGRESSIVE= 12
+    COMPACT_NONE = 0,
+    COMPACT_LARGE = 1,
+    COMPACT_FRAGMENTED = 2,
+    COMPACT_FORCED_GC = 4,
+    COMPACT_AVOID_DESPERATE = 5,
+    COMPACT_MEMORY_INSUFFICIENT = 6,
+    COMPACT_ALWAYS = 7,
+    COMPACT_ABORTED_SCAVENGE = 8,
+    COMPACT_CONTRACT = 11,
+    COMPACT_AGGRESSIVE = 12
 } CompactReason;
 
 typedef enum {
-	COMPACT_PREVENTED_NONE = 0,
-	COMPACT_PREVENTED_CRITICAL_REGIONS
+    COMPACT_PREVENTED_NONE = 0,
+    COMPACT_PREVENTED_CRITICAL_REGIONS
 } CompactPreventedReason;
 
 /**
@@ -287,15 +287,15 @@ typedef enum {
  * @{
  */
 typedef enum {
-	CONCURRENT_OFF = 1,
-	CONCURRENT_INIT_RUNNING,
-	CONCURRENT_INIT_COMPLETE,
-	CONCURRENT_ROOT_TRACING,
-	/* ^ Value range reserved for client language v */
-	CONCURRENT_TRACE_ONLY = 28,
-	CONCURRENT_CLEAN_TRACE = 29,
-	CONCURRENT_EXHAUSTED = 30,
-	CONCURRENT_FINAL_COLLECTION = 31
+    CONCURRENT_OFF = 1,
+    CONCURRENT_INIT_RUNNING,
+    CONCURRENT_INIT_COMPLETE,
+    CONCURRENT_ROOT_TRACING,
+    /* ^ Value range reserved for client language v */
+    CONCURRENT_TRACE_ONLY = 28,
+    CONCURRENT_CLEAN_TRACE = 29,
+    CONCURRENT_EXHAUSTED = 30,
+    CONCURRENT_FINAL_COLLECTION = 31
 } ConcurrentStatus;
 
 /**
@@ -305,10 +305,10 @@ typedef enum {
  * @{
  */
 typedef enum {
-	NO_KICKOFF_REASON=1,
-	KICKOFF_THRESHOLD_REACHED,
-	NEXT_SCAVENGE_WILL_PERCOLATE,
-	LANGUAGE_DEFINED_REASON
+    NO_KICKOFF_REASON = 1,
+    KICKOFF_THRESHOLD_REACHED,
+    NEXT_SCAVENGE_WILL_PERCOLATE,
+    LANGUAGE_DEFINED_REASON
 } ConcurrentKickoffReason;
 
 /**
@@ -317,7 +317,7 @@ typedef enum {
  * to explain why a kickoff was triggered.
  */
 typedef enum {
-	NO_LANGUAGE_KICKOFF_REASON=1,
+    NO_LANGUAGE_KICKOFF_REASON = 1,
 } ConcurrentKickoffLanguageReason;
 
 /**
@@ -326,10 +326,10 @@ typedef enum {
  * @{
  */
 typedef enum {
-	ABORT_COLLECTION_INSUFFICENT_PROGRESS=1,
-	ABORT_COLLECTION_REMEMBERSET_OVERFLOW,
-	ABORT_COLLECTION_SCAVENGE_REMEMBEREDSET_OVERFLOW,
-	ABORT_COLLECTION_PREPARE_HEAP_FOR_WALK
+    ABORT_COLLECTION_INSUFFICENT_PROGRESS = 1,
+    ABORT_COLLECTION_REMEMBERSET_OVERFLOW,
+    ABORT_COLLECTION_SCAVENGE_REMEMBEREDSET_OVERFLOW,
+    ABORT_COLLECTION_PREPARE_HEAP_FOR_WALK
 } CollectionAbortReason;
 
 /**
@@ -338,22 +338,21 @@ typedef enum {
  * @ingroup GC_Base_Core
  * @{
  */
- typedef enum {
-		CARD_CLEANING_REASON_NONE=0,
-		TRACING_COMPLETED,
-		CARD_CLEANING_THRESHOLD_REACHED
+typedef enum {
+    CARD_CLEANING_REASON_NONE = 0,
+    TRACING_COMPLETED,
+    CARD_CLEANING_THRESHOLD_REACHED
 } ConcurrentCardCleaningReason;
-
 
 #if defined(OMR_GC_REALTIME)
 /* Reasons we are doing some GC work */
 typedef enum {
-	UNKOWN_REASON = 0,
-	TIME_TRIGGER,
-	WORK_TRIGGER,
-	OUT_OF_MEMORY_TRIGGER,
-	SYSTEM_GC_TRIGGER,
-	VM_SHUTDOWN
+    UNKOWN_REASON = 0,
+    TIME_TRIGGER,
+    WORK_TRIGGER,
+    OUT_OF_MEMORY_TRIGGER,
+    SYSTEM_GC_TRIGGER,
+    VM_SHUTDOWN
 } GCReason;
 #endif /* OMR_GC_REALTIME */
 
@@ -363,76 +362,76 @@ typedef enum {
  * @{
  */
 typedef enum {
-	NONE_SET = 1,
-	INSUFFICIENT_TENURE_SPACE,
-	FAILED_TENURE,
-	MAX_SCAVENGES,
-	RS_OVERFLOW,
-	UNLOADING_CLASSES,
-	EXPAND_FAILED,
-	ABORTED_SCAVENGE,
-	CRITICAL_REGIONS,
-	CONCURRENT_MARK_EXHAUSTED
+    NONE_SET = 1,
+    INSUFFICIENT_TENURE_SPACE,
+    FAILED_TENURE,
+    MAX_SCAVENGES,
+    RS_OVERFLOW,
+    UNLOADING_CLASSES,
+    EXPAND_FAILED,
+    ABORTED_SCAVENGE,
+    CRITICAL_REGIONS,
+    CONCURRENT_MARK_EXHAUSTED
 } PercolateReason;
 /**
  * @}
  */
 
 typedef enum {
-	HEAP_NO_RESIZE,
-	HEAP_EXPAND,
-	HEAP_CONTRACT,
-	HEAP_LOA_EXPAND,
-	HEAP_LOA_CONTRACT,
-	HEAP_RELEASE_FREE_PAGES
+    HEAP_NO_RESIZE,
+    HEAP_EXPAND,
+    HEAP_CONTRACT,
+    HEAP_LOA_EXPAND,
+    HEAP_LOA_CONTRACT,
+    HEAP_RELEASE_FREE_PAGES
 } HeapResizeType;
 
 typedef enum {
-	NO_CONTRACT = 1,
-	GC_RATIO_TOO_LOW,
-	FREE_SPACE_GREATER_MAXF,
-	SCAV_RATIO_TOO_LOW,
-	HEAP_RESIZE,
-	SATISFY_EXPAND,
-	FORCED_NURSERY_CONTRACT
+    NO_CONTRACT = 1,
+    GC_RATIO_TOO_LOW,
+    FREE_SPACE_GREATER_MAXF,
+    SCAV_RATIO_TOO_LOW,
+    HEAP_RESIZE,
+    SATISFY_EXPAND,
+    FORCED_NURSERY_CONTRACT
 } ContractReason;
 
 typedef enum {
-	NO_EXPAND = 1,
-	GC_RATIO_TOO_HIGH,
-	FREE_SPACE_LESS_MINF,
-	SCAV_RATIO_TOO_HIGH,
-	SATISFY_COLLECTOR,
-	EXPAND_DESPERATE,
-	FORCED_NURSERY_EXPAND,
-	HINT_PREVIOUS_RUNS
+    NO_EXPAND = 1,
+    GC_RATIO_TOO_HIGH,
+    FREE_SPACE_LESS_MINF,
+    SCAV_RATIO_TOO_HIGH,
+    SATISFY_COLLECTOR,
+    EXPAND_DESPERATE,
+    FORCED_NURSERY_EXPAND,
+    HINT_PREVIOUS_RUNS
 } ExpandReason;
 
 typedef enum {
-	NO_LOA_RESIZE = 1,
-	LOA_EXPAND_HEAP_ALIGNMENT,
-	LOA_EXPAND_FAILED_ALLOCATE,
-	LOA_EXPAND_LAST_RESIZE_REASON = LOA_EXPAND_FAILED_ALLOCATE,
-	LOA_CONTRACT_AGGRESSIVE,
-	LOA_CONTRACT_MIN_SOA,
-	LOA_CONTRACT_UNDERUTILIZED,
-	LOA_CONTRACT_LAST_RESIZE_REASON = LOA_CONTRACT_UNDERUTILIZED
+    NO_LOA_RESIZE = 1,
+    LOA_EXPAND_HEAP_ALIGNMENT,
+    LOA_EXPAND_FAILED_ALLOCATE,
+    LOA_EXPAND_LAST_RESIZE_REASON = LOA_EXPAND_FAILED_ALLOCATE,
+    LOA_CONTRACT_AGGRESSIVE,
+    LOA_CONTRACT_MIN_SOA,
+    LOA_CONTRACT_UNDERUTILIZED,
+    LOA_CONTRACT_LAST_RESIZE_REASON = LOA_CONTRACT_UNDERUTILIZED
 } LoaResizeReason;
 
 typedef enum {
-	FIXUP_NONE = 0,
-	FIXUP_CLASS_UNLOADING,
-	FIXUP_DEBUG_TOOLING
+    FIXUP_NONE = 0,
+    FIXUP_CLASS_UNLOADING,
+    FIXUP_DEBUG_TOOLING
 } FixUpReason;
 
 typedef enum {
-	NOT_REQUIRED = 1,
-	ABOUT_TO_GC,
-	COMPACTION_REQUIRED,
-	CONTRACTION_REQUIRED,
-	EXPANSION_REQUIRED,
-	LOA_RESIZE,
-	SYSTEM_GC
+    NOT_REQUIRED = 1,
+    ABOUT_TO_GC,
+    COMPACTION_REQUIRED,
+    CONTRACTION_REQUIRED,
+    EXPANSION_REQUIRED,
+    LOA_RESIZE,
+    SYSTEM_GC
 } SweepCompletionReason;
 
 /**
@@ -498,13 +497,13 @@ typedef enum {
 #define PREFERRED_HEAP_BASE 0x0
 #endif
 
-#define SUBALLOCATOR_INITIAL_SIZE (200*1024*1024)
-#define SUBALLOCATOR_COMMIT_SIZE (50*1024*1024)
+#define SUBALLOCATOR_INITIAL_SIZE (200 * 1024 * 1024)
+#define SUBALLOCATOR_COMMIT_SIZE (50 * 1024 * 1024)
 #if defined(AIXPPC)
 /* virtual memory is assigned in segment of 256M, so grab the entire segment */
-#define SUBALLOCATOR_ALIGNMENT (256*1024*1024)
+#define SUBALLOCATOR_ALIGNMENT (256 * 1024 * 1024)
 #else /* defined(AIXPPC) */
-#define SUBALLOCATOR_ALIGNMENT (8*1024*1024)
+#define SUBALLOCATOR_ALIGNMENT (8 * 1024 * 1024)
 #endif /* defined(AIXPPC) */
 
 #if defined(OMR_GC_REALTIME)

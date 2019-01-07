@@ -51,9 +51,7 @@ extern "C" {
 * @param lib
 * @return void
 */
-void
-omrthread_init(omrthread_library_t lib);
-
+void omrthread_init(omrthread_library_t lib);
 
 /* ---------------- omrthreadjlm.c ---------------- */
 
@@ -73,8 +71,7 @@ jlm_thread_init(omrthread_t thread);
  * @param thread
  * @return void
  */
-void
-jlm_thread_free(omrthread_library_t lib, omrthread_t thread);
+void jlm_thread_free(omrthread_library_t lib, omrthread_t thread);
 
 /**
  * @brief
@@ -91,8 +88,7 @@ jlm_monitor_init(omrthread_library_t lib, omrthread_monitor_t monitor);
  * @param monitor
  * @return void
  */
-void
-jlm_monitor_free(omrthread_library_t lib, omrthread_monitor_t monitor);
+void jlm_monitor_free(omrthread_library_t lib, omrthread_monitor_t monitor);
 
 /**
  * @brief
@@ -100,8 +96,7 @@ jlm_monitor_free(omrthread_library_t lib, omrthread_monitor_t monitor);
  * @param monitor
  * @return void
  */
-void
-jlm_monitor_clear(omrthread_library_t lib, omrthread_monitor_t monitor);
+void jlm_monitor_clear(omrthread_library_t lib, omrthread_monitor_t monitor);
 
 #endif /* OMR_THR_JLM */
 
@@ -112,8 +107,7 @@ jlm_monitor_clear(omrthread_library_t lib, omrthread_monitor_t monitor);
  * @param thread
  * @return void
  */
-void
-omrthread_tls_finalize(omrthread_t thread);
+void omrthread_tls_finalize(omrthread_t thread);
 
 /**
  * Run finalizers on any non-NULL TLS values for the current thread without locks.
@@ -121,8 +115,7 @@ omrthread_tls_finalize(omrthread_t thread);
  *
  * @param[in] omrthread_t thread
  */
-void
-omrthread_tls_finalizeNoLock(omrthread_t thread);
+void omrthread_tls_finalizeNoLock(omrthread_t thread);
 
 /* ---------------- thrprof.c ---------------- */
 
@@ -131,8 +124,7 @@ omrthread_tls_finalizeNoLock(omrthread_t thread);
 * @param thread
 * @return void
 */
-void
-paint_stack(omrthread_t thread);
+void paint_stack(omrthread_t thread);
 
 /**
  * @brief Return a monotonically increasing high resolution clock in nanoseconds.
@@ -142,30 +134,25 @@ uint64_t
 omrthread_get_hires_clock(void);
 
 /* ------------- omrthreadnuma.c ------------ */
-void
-omrthread_numa_init(omrthread_library_t threadLibrary);
+void omrthread_numa_init(omrthread_library_t threadLibrary);
 
-void
-omrthread_numa_shutdown(omrthread_library_t lib);
+void omrthread_numa_shutdown(omrthread_library_t lib);
 
 intptr_t
-omrthread_numa_set_node_affinity_nolock(omrthread_t thread, const uintptr_t *nodeList, uintptr_t nodeCount, uint32_t flags);
+omrthread_numa_set_node_affinity_nolock(omrthread_t thread, const uintptr_t* nodeList, uintptr_t nodeCount, uint32_t flags);
 
 #if defined(OMR_PORT_NUMA_SUPPORT)
-void
-omrthread_add_node_number_to_affinity_cache(omrthread_t thread, uintptr_t nodeNumber);
+void omrthread_add_node_number_to_affinity_cache(omrthread_t thread, uintptr_t nodeNumber);
 
 BOOLEAN
 omrthread_does_affinity_cache_contain_node(omrthread_t thread, uintptr_t nodeNumber);
 
-enum {J9THREAD_MAX_NUMA_NODE = 1024};
+enum { J9THREAD_MAX_NUMA_NODE = 1024 };
 #endif /* defined(OMR_PORT_NUMA_SUPPORT) */
-
 
 /* ------------- omrthreadmem.c ------------ */
 
-void
-omrthread_mem_init(omrthread_library_t threadLibrary);
+void omrthread_mem_init(omrthread_library_t threadLibrary);
 
 /**
  * Thin-wrapper for malloc that increments the OMRMEM_CATEGORY_THREADS memory
@@ -175,8 +162,7 @@ omrthread_mem_init(omrthread_library_t threadLibrary);
  * @param [in] memoryCategory Memory category
  * @return Pointer to allocated memory, or NULL if the allocation failed.
  */
-void *
-omrthread_allocate_memory(omrthread_library_t threadLibrary, uintptr_t size, uint32_t memoryCategory);
+void* omrthread_allocate_memory(omrthread_library_t threadLibrary, uintptr_t size, uint32_t memoryCategory);
 
 /**
  * Thin-wrapper for free that decrements the OMRMEM_CATEGORY_THREADS memory
@@ -184,8 +170,7 @@ omrthread_allocate_memory(omrthread_library_t threadLibrary, uintptr_t size, uin
  * @param [in] threadLibrary Thread library
  * @param [in] ptr Pointer to free.
  */
-void
-omrthread_free_memory(omrthread_library_t threadLibrary, void *ptr);
+void omrthread_free_memory(omrthread_library_t threadLibrary, void* ptr);
 
 /**
  * Updates memory category with an allocation
@@ -193,8 +178,7 @@ omrthread_free_memory(omrthread_library_t threadLibrary, void *ptr);
  * @param [in] category Category to be updated
  * @param [in] size Size of memory block allocated
  */
-void
-increment_memory_counter(OMRMemCategory *category, uintptr_t size);
+void increment_memory_counter(OMRMemCategory* category, uintptr_t size);
 
 /**
  * Updates memory category with a free.
@@ -202,8 +186,7 @@ increment_memory_counter(OMRMemCategory *category, uintptr_t size);
  * @param [in] category Category to be updated
  * @param [in] size Size of memory block freed
  */
-void
-decrement_memory_counter(OMRMemCategory *category, uintptr_t size);
+void decrement_memory_counter(OMRMemCategory* category, uintptr_t size);
 
 /**
  * @brief
@@ -213,8 +196,7 @@ decrement_memory_counter(OMRMemCategory *category, uintptr_t size);
  * @param memoryCategory
  * @return void*
  */
-void *
-omrthread_mallocWrapper(void *unused, uint32_t size, const char *callSite, uint32_t memoryCategory, uint32_t type, uint32_t *doInit);
+void* omrthread_mallocWrapper(void* unused, uint32_t size, const char* callSite, uint32_t memoryCategory, uint32_t type, uint32_t* doInit);
 
 /**
  * @brief
@@ -222,8 +204,7 @@ omrthread_mallocWrapper(void *unused, uint32_t size, const char *callSite, uint3
  * @param ptr
  * @return void
  */
-void
-omrthread_freeWrapper(void *unused, void *ptr, uint32_t type);
+void omrthread_freeWrapper(void* unused, void* ptr, uint32_t type);
 
 /* ------------- omrthreadpriority.c ------------ */
 /**
@@ -232,8 +213,7 @@ omrthread_freeWrapper(void *unused, void *ptr, uint32_t type);
  * @param omrthreadPriority[in]  The omrthread priority to map to the os priority
  * @return The priority value from the underlying global os priority_map
  */
-int
-omrthread_get_mapped_priority(omrthread_prio_t omrthreadPriority);
+int omrthread_get_mapped_priority(omrthread_prio_t omrthreadPriority);
 
 /* ------------- priority.c ------------ */
 
@@ -251,8 +231,7 @@ initialize_priority_map(void);
  * @param thread
  * @return void
  */
-void
-initialize_thread_priority(omrthread_t thread);
+void initialize_thread_priority(omrthread_t thread);
 
 /**
  * @brief
@@ -266,14 +245,13 @@ set_priority_spread(void);
  * @param [in] omrthread_rwmutex_t rwmutex to reset
  * @param [in] self Self thread
  */
-void
-omrthread_rwmutex_reset(omrthread_rwmutex_t rwmutex, omrthread_t self);
+void omrthread_rwmutex_reset(omrthread_rwmutex_t rwmutex, omrthread_t self);
 
 /**
  * @param omrthread_library_t Thread library
  * @return J9Pool*
  */
-J9Pool *
+J9Pool*
 omrthread_rwmutex_init_pool(omrthread_library_t library);
 #endif /* defined(OMR_THR_FORK_SUPPORT) */
 
@@ -282,5 +260,3 @@ omrthread_rwmutex_init_pool(omrthread_library_t library);
 #endif
 
 #endif /* thread_internal_h */
-
-

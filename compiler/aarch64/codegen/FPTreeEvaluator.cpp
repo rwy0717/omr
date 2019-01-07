@@ -27,522 +27,521 @@
 #include "il/Node.hpp"
 #include "il/Node_inlines.hpp"
 
-static void fpBitsMovHelper(TR::Node *node, TR::InstOpCode::Mnemonic op, TR::Register *trgReg, TR::CodeGenerator *cg)
-   {
-   TR::Node *child = node->getFirstChild();
-   TR::Register *srcReg = cg->evaluate(child);
+static void fpBitsMovHelper(TR::Node* node, TR::InstOpCode::Mnemonic op, TR::Register* trgReg, TR::CodeGenerator* cg)
+{
+    TR::Node* child = node->getFirstChild();
+    TR::Register* srcReg = cg->evaluate(child);
 
-   generateTrg1Src1Instruction(cg, op, node, trgReg, srcReg);
+    generateTrg1Src1Instruction(cg, op, node, trgReg, srcReg);
 
-   cg->decReferenceCount(child);
-   }
+    cg->decReferenceCount(child);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::ibits2fEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-   {
-   TR::Register *trgReg = cg->allocateSinglePrecisionRegister();
+TR::Register*
+OMR::ARM64::TreeEvaluator::ibits2fEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    TR::Register* trgReg = cg->allocateSinglePrecisionRegister();
 
-   fpBitsMovHelper(node, TR::InstOpCode::fmov_wtos, trgReg, cg);
+    fpBitsMovHelper(node, TR::InstOpCode::fmov_wtos, trgReg, cg);
 
-   node->setRegister(trgReg);
-   return trgReg;
-   }
+    node->setRegister(trgReg);
+    return trgReg;
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::fbits2iEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-   {
-   TR::Register *trgReg = cg->allocateRegister();
+TR::Register*
+OMR::ARM64::TreeEvaluator::fbits2iEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    TR::Register* trgReg = cg->allocateRegister();
 
-   fpBitsMovHelper(node, TR::InstOpCode::fmov_stow, trgReg, cg);
+    fpBitsMovHelper(node, TR::InstOpCode::fmov_stow, trgReg, cg);
 
-   node->setRegister(trgReg);
-   return trgReg;
-   }
+    node->setRegister(trgReg);
+    return trgReg;
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::lbits2dEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-   {
-   TR::Register *trgReg = cg->allocateRegister(TR_FPR);
+TR::Register*
+OMR::ARM64::TreeEvaluator::lbits2dEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    TR::Register* trgReg = cg->allocateRegister(TR_FPR);
 
-   fpBitsMovHelper(node, TR::InstOpCode::fmov_xtod, trgReg, cg);
+    fpBitsMovHelper(node, TR::InstOpCode::fmov_xtod, trgReg, cg);
 
-   node->setRegister(trgReg);
-   return trgReg;
-   }
+    node->setRegister(trgReg);
+    return trgReg;
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::dbits2lEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-   {
-   TR::Register *trgReg = cg->allocateRegister();
+TR::Register*
+OMR::ARM64::TreeEvaluator::dbits2lEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    TR::Register* trgReg = cg->allocateRegister();
 
-   fpBitsMovHelper(node, TR::InstOpCode::fmov_dtox, trgReg, cg);
+    fpBitsMovHelper(node, TR::InstOpCode::fmov_dtox, trgReg, cg);
 
-   node->setRegister(trgReg);
-   return trgReg;
-   }
+    node->setRegister(trgReg);
+    return trgReg;
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::fconstEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-   {
-   TR::Register *trgReg = cg->allocateSinglePrecisionRegister();
-   TR::Register *tmpReg = cg->allocateRegister();
+TR::Register*
+OMR::ARM64::TreeEvaluator::fconstEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    TR::Register* trgReg = cg->allocateSinglePrecisionRegister();
+    TR::Register* tmpReg = cg->allocateRegister();
 
-   union {
-      float f;
-      int32_t i;
-   } fvalue;
+    union {
+        float f;
+        int32_t i;
+    } fvalue;
 
-   fvalue.f = node->getFloat();
-   loadConstant32(cg, node, fvalue.i, tmpReg);
-   generateTrg1Src1Instruction(cg, TR::InstOpCode::fmov_wtos, node, trgReg, tmpReg);
-   cg->stopUsingRegister(tmpReg);
+    fvalue.f = node->getFloat();
+    loadConstant32(cg, node, fvalue.i, tmpReg);
+    generateTrg1Src1Instruction(cg, TR::InstOpCode::fmov_wtos, node, trgReg, tmpReg);
+    cg->stopUsingRegister(tmpReg);
 
-   return trgReg;
-   }
+    return trgReg;
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::dconstEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-   {
-   TR::Register *trgReg = cg->allocateRegister(TR_FPR);
-   TR::Register *tmpReg = cg->allocateRegister();
+TR::Register*
+OMR::ARM64::TreeEvaluator::dconstEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    TR::Register* trgReg = cg->allocateRegister(TR_FPR);
+    TR::Register* tmpReg = cg->allocateRegister();
 
-   union {
-      double d;
-      int64_t l;
-   } dvalue;
+    union {
+        double d;
+        int64_t l;
+    } dvalue;
 
-   dvalue.d = node->getDouble();
-   loadConstant64(cg, node, dvalue.l, tmpReg);
-   generateTrg1Src1Instruction(cg, TR::InstOpCode::fmov_xtod, node, trgReg, tmpReg);
-   cg->stopUsingRegister(tmpReg);
+    dvalue.d = node->getDouble();
+    loadConstant64(cg, node, dvalue.l, tmpReg);
+    generateTrg1Src1Instruction(cg, TR::InstOpCode::fmov_xtod, node, trgReg, tmpReg);
+    cg->stopUsingRegister(tmpReg);
 
-   return trgReg;
-   }
+    return trgReg;
+}
 
 // also handles floadi
-TR::Register *
-OMR::ARM64::TreeEvaluator::floadEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-   {
-   return commonLoadEvaluator(node, TR::InstOpCode::vldrimms, 4, cg);
-   }
+TR::Register*
+OMR::ARM64::TreeEvaluator::floadEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    return commonLoadEvaluator(node, TR::InstOpCode::vldrimms, 4, cg);
+}
 
 // also handles dloadi
-TR::Register *
-OMR::ARM64::TreeEvaluator::dloadEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-   {
-   return commonLoadEvaluator(node, TR::InstOpCode::vldrimmd, 8, cg);
-   }
+TR::Register*
+OMR::ARM64::TreeEvaluator::dloadEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    return commonLoadEvaluator(node, TR::InstOpCode::vldrimmd, 8, cg);
+}
 
 // also handles fstorei
-TR::Register *
-OMR::ARM64::TreeEvaluator::fstoreEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-   {
-   return commonLoadEvaluator(node, TR::InstOpCode::vstrimms, 4, cg);
-   }
+TR::Register*
+OMR::ARM64::TreeEvaluator::fstoreEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    return commonLoadEvaluator(node, TR::InstOpCode::vstrimms, 4, cg);
+}
 
 // also handles dstorei
-TR::Register *
-OMR::ARM64::TreeEvaluator::dstoreEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-   {
-   return commonLoadEvaluator(node, TR::InstOpCode::vstrimmd, 8, cg);
-   }
+TR::Register*
+OMR::ARM64::TreeEvaluator::dstoreEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    return commonLoadEvaluator(node, TR::InstOpCode::vstrimmd, 8, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::freturnEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-   {
-   return genericReturnEvaluator(node, cg->getProperties().getFloatReturnRegister(), TR_FPR, TR_FloatReturn, cg);
-   }
+TR::Register*
+OMR::ARM64::TreeEvaluator::freturnEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    return genericReturnEvaluator(node, cg->getProperties().getFloatReturnRegister(), TR_FPR, TR_FloatReturn, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::dreturnEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-   {
-   return genericReturnEvaluator(node, cg->getProperties().getDoubleReturnRegister(), TR_FPR, TR_DoubleReturn, cg);
-   }
+TR::Register*
+OMR::ARM64::TreeEvaluator::dreturnEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    return genericReturnEvaluator(node, cg->getProperties().getDoubleReturnRegister(), TR_FPR, TR_DoubleReturn, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::faddEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::faddEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::faddEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::faddEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::daddEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::daddEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::daddEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::daddEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::dsubEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::dsubEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::dsubEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::dsubEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::fsubEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::fsubEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::fsubEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::fsubEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::fmulEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::fmulEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::fmulEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::fmulEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::dmulEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::dmulEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::dmulEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::dmulEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::fdivEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::fdivEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::fdivEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::fdivEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::ddivEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::ddivEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::ddivEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::ddivEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::fremEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::fremEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::fremEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::fremEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::dremEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::dremEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::dremEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::dremEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::fabsEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::fabsEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::fabsEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::fabsEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::dabsEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::dabsEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::dabsEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::dabsEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::fnegEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::fnegEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::fnegEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::fnegEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::dnegEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::dnegEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::dnegEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::dnegEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::i2fEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::i2fEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::i2fEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::i2fEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::i2dEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::i2dEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::i2dEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::i2dEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::l2fEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::l2fEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::l2fEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::l2fEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::l2dEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::l2dEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::l2dEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::l2dEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::f2dEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::f2dEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::f2dEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::f2dEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::f2iEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::f2iEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::f2iEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::f2iEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::d2iEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::d2iEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::d2iEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::d2iEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::d2cEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::d2cEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::d2cEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::d2cEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::d2sEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::d2sEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::d2sEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::d2sEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::d2bEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::d2bEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::d2bEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::d2bEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::f2lEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::f2lEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::f2lEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::f2lEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::d2lEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::d2lEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::d2lEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::d2lEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::d2fEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::d2fEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::d2fEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::d2fEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::ifdcmpeqEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::ifdcmpeqEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::ifdcmpeqEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::ifdcmpeqEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::ifdcmpneEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::ifdcmpneEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::ifdcmpneEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::ifdcmpneEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::ifdcmpltEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::ifdcmpltEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::ifdcmpltEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::ifdcmpltEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::ifdcmpgeEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::ifdcmpgeEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::ifdcmpgeEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::ifdcmpgeEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::ifdcmpgtEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::ifdcmpgtEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::ifdcmpgtEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::ifdcmpgtEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::ifdcmpleEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::ifdcmpleEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::ifdcmpleEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::ifdcmpleEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::dcmpeqEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::dcmpeqEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::dcmpeqEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::dcmpeqEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::dcmpneEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::dcmpneEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::dcmpneEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::dcmpneEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::dcmpltEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::dcmpltEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::dcmpltEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::dcmpltEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::dcmplEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::dcmplEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::dcmplEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::dcmplEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
 // also handles dRegLoad
-TR::Register *
-OMR::ARM64::TreeEvaluator::fRegLoadEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-   {
-   TR::Register *globalReg = node->getRegister();
+TR::Register*
+OMR::ARM64::TreeEvaluator::fRegLoadEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    TR::Register* globalReg = node->getRegister();
 
-   if (globalReg == NULL)
-      {
-      if (node->getOpCodeValue() == TR::fRegLoad)
-         globalReg = cg->allocateSinglePrecisionRegister();
-      else
-         globalReg = cg->allocateRegister(TR_FPR);
-      node->setRegister(globalReg);
-      }
-   return globalReg;
-   }
+    if (globalReg == NULL) {
+        if (node->getOpCodeValue() == TR::fRegLoad)
+            globalReg = cg->allocateSinglePrecisionRegister();
+        else
+            globalReg = cg->allocateRegister(TR_FPR);
+        node->setRegister(globalReg);
+    }
+    return globalReg;
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::fmaxEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::fmaxEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::fmaxEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::fmaxEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::fminEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::fminEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::fminEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::fminEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::b2dEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::b2dEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::b2dEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::b2dEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::s2dEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::s2dEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::s2dEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::s2dEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::su2dEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::su2dEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::su2dEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::su2dEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::ifdcmpequEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::ifdcmpequEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::ifdcmpequEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::ifdcmpequEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::ifdcmpltuEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::ifdcmpltuEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::ifdcmpltuEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::ifdcmpltuEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::ifdcmpgeuEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::ifdcmpgeuEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::ifdcmpgeuEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::ifdcmpgeuEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::ifdcmpgtuEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::ifdcmpgtuEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::ifdcmpgtuEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::ifdcmpgtuEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::ifdcmpleuEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::ifdcmpleuEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::ifdcmpleuEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::ifdcmpleuEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::dcmpequEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::dcmpequEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::dcmpequEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::dcmpequEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::dcmpltuEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::dcmpltuEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::dcmpltuEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::dcmpltuEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::dcmpgeuEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::dcmpgeuEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::dcmpgeuEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::dcmpgeuEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::dcmpgtuEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::dcmpgtuEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::dcmpgtuEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::dcmpgtuEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::dcmpleuEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::dcmpleuEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::dcmpleuEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::dcmpleuEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}
 
-TR::Register *
-OMR::ARM64::TreeEvaluator::dcmpgEvaluator(TR::Node *node, TR::CodeGenerator *cg)
-	{
-	// TODO:ARM64: Enable TR::TreeEvaluator::dcmpgEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
-	return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
-	}
+TR::Register*
+OMR::ARM64::TreeEvaluator::dcmpgEvaluator(TR::Node* node, TR::CodeGenerator* cg)
+{
+    // TODO:ARM64: Enable TR::TreeEvaluator::dcmpgEvaluator in compiler/aarch64/codegen/TreeEvaluatorTable.hpp when Implemented.
+    return OMR::ARM64::TreeEvaluator::unImpOpEvaluator(node, cg);
+}

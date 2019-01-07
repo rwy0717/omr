@@ -24,19 +24,19 @@
 
 #include "optimizer/OMRRecognizedCallTransformer.hpp"
 
-namespace TR { class OptimizationManager; }
-
-namespace TR
-{
-
-class RecognizedCallTransformer : public OMR::RecognizedCallTransformer
-   {
-   public:
-
-   RecognizedCallTransformer(TR::OptimizationManager *manager) :
-      OMR::RecognizedCallTransformer(manager) {}
-   };
-
+namespace TR {
+class OptimizationManager;
 }
+
+namespace TR {
+
+class RecognizedCallTransformer : public OMR::RecognizedCallTransformer {
+public:
+    RecognizedCallTransformer(TR::OptimizationManager* manager)
+        : OMR::RecognizedCallTransformer(manager)
+    {}
+};
+
+} // namespace TR
 
 #endif

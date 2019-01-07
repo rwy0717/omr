@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #include "omrcomp.h"
 #include "modronopt.h"
 #include "ModronAssertions.h"
@@ -56,57 +55,53 @@
  ****************************************
  */
 
-void
-MM_MemoryPoolAddressOrderedListBase::acquireResetLock(MM_EnvironmentBase* env)
+void MM_MemoryPoolAddressOrderedListBase::acquireResetLock(MM_EnvironmentBase* env)
 {
-	_resetLock.acquire();
+    _resetLock.acquire();
 }
 
-void
-MM_MemoryPoolAddressOrderedListBase::releaseResetLock(MM_EnvironmentBase* env)
+void MM_MemoryPoolAddressOrderedListBase::releaseResetLock(MM_EnvironmentBase* env)
 {
-	_resetLock.release();
+    _resetLock.release();
 }
 
 /* (non-doxygen)
  * @see MM_MemoryPool::createFreeEntry()
  */
-bool
-MM_MemoryPoolAddressOrderedListBase::createFreeEntry(MM_EnvironmentBase* env, void* addrBase, void* addrTop,
-													  MM_HeapLinkedFreeHeader* previousFreeEntry, MM_HeapLinkedFreeHeader* nextFreeEntry)
+bool MM_MemoryPoolAddressOrderedListBase::createFreeEntry(MM_EnvironmentBase* env, void* addrBase, void* addrTop,
+    MM_HeapLinkedFreeHeader* previousFreeEntry, MM_HeapLinkedFreeHeader* nextFreeEntry)
 {
-	/* Sanity checks -- should never create an out of order link */
-	assume0((NULL == nextFreeEntry) || (nextFreeEntry > addrTop));
+    /* Sanity checks -- should never create an out of order link */
+    assume0((NULL == nextFreeEntry) || (nextFreeEntry > addrTop));
 
 #if defined(OMR_VALGRIND_MEMCHECK)
-	valgrindClearRange(env->getExtensions(),(uintptr_t) addrBase,(uintptr_t)addrTop - (uintptr_t)addrBase);
+    valgrindClearRange(env->getExtensions(), (uintptr_t)addrBase, (uintptr_t)addrTop - (uintptr_t)addrBase);
 #endif /* defined(OMR_VALGRIND_MEMCHECK) */
-	
-	if (internalRecycleHeapChunk(addrBase, addrTop, nextFreeEntry)) {
 
-		/* The range is big enough for the free list, so link the previous to it */
-		if (previousFreeEntry) {
-			assume0(previousFreeEntry < addrBase);
-			previousFreeEntry->setNext((MM_HeapLinkedFreeHeader*)addrBase);
-		}
-		return true;
-	}
+    if (internalRecycleHeapChunk(addrBase, addrTop, nextFreeEntry)) {
 
-	/* The range was not big enough for the free list, so link previous to next */
-	if (previousFreeEntry) {
-		assume0((NULL == nextFreeEntry) || (nextFreeEntry > previousFreeEntry));
-		previousFreeEntry->setNext(nextFreeEntry);
-	}
-	return false;
+        /* The range is big enough for the free list, so link the previous to it */
+        if (previousFreeEntry) {
+            assume0(previousFreeEntry < addrBase);
+            previousFreeEntry->setNext((MM_HeapLinkedFreeHeader*)addrBase);
+        }
+        return true;
+    }
+
+    /* The range was not big enough for the free list, so link previous to next */
+    if (previousFreeEntry) {
+        assume0((NULL == nextFreeEntry) || (nextFreeEntry > previousFreeEntry));
+        previousFreeEntry->setNext(nextFreeEntry);
+    }
+    return false;
 }
 
 /* (non-doxygen)
  * @see MM_MemoryPool::createFreeEntry()
  */
-bool
-MM_MemoryPoolAddressOrderedListBase::createFreeEntry(MM_EnvironmentBase* env, void* addrBase, void* addrTop)
+bool MM_MemoryPoolAddressOrderedListBase::createFreeEntry(MM_EnvironmentBase* env, void* addrBase, void* addrTop)
 {
-	return createFreeEntry(env, addrBase, addrTop, NULL, NULL);
+    return createFreeEntry(env, addrBase, addrTop, NULL, NULL);
 }
 
 /**
@@ -117,19 +112,17 @@ MM_MemoryPoolAddressOrderedListBase::createFreeEntry(MM_EnvironmentBase* env, vo
  * @param previousFreeEntry previous element of list (if any) this memory must be connected with
  * @return true if free memory element accepted
  */
-bool
-MM_MemoryPoolAddressOrderedListBase::connectInnerMemoryToPool(MM_EnvironmentBase* env, void* address, uintptr_t size, void* previousFreeEntry)
+bool MM_MemoryPoolAddressOrderedListBase::connectInnerMemoryToPool(MM_EnvironmentBase* env, void* address, uintptr_t size, void* previousFreeEntry)
 {
-	bool result = false;
+    bool result = false;
 
-	if (size >= getMinimumFreeEntrySize()) {
-		/* Build the free header */
-		createFreeEntry(env, (MM_HeapLinkedFreeHeader*)address, (uint8_t*)address + size, (MM_HeapLinkedFreeHeader*)previousFreeEntry, NULL);
-		result = true;
-	}
-	return result;
+    if (size >= getMinimumFreeEntrySize()) {
+        /* Build the free header */
+        createFreeEntry(env, (MM_HeapLinkedFreeHeader*)address, (uint8_t*)address + size, (MM_HeapLinkedFreeHeader*)previousFreeEntry, NULL);
+        result = true;
+    }
+    return result;
 }
-
 
 /**
  * Connect leading/trailing chunk free memory piece ("Connect")
@@ -138,18 +131,17 @@ MM_MemoryPoolAddressOrderedListBase::connectInnerMemoryToPool(MM_EnvironmentBase
  * @param size free memory size in bytes
  * @param nextFreeEntry next element of list (if any) this memory must be connected with
  */
-void
-MM_MemoryPoolAddressOrderedListBase::connectOuterMemoryToPool(MM_EnvironmentBase* env, void* address, uintptr_t size, void* nextFreeEntry)
+void MM_MemoryPoolAddressOrderedListBase::connectOuterMemoryToPool(MM_EnvironmentBase* env, void* address, uintptr_t size, void* nextFreeEntry)
 {
-	Assert_MM_true((NULL == nextFreeEntry) || (address < nextFreeEntry));
-	Assert_MM_true((NULL == address) || (size >= getMinimumFreeEntrySize()));
+    Assert_MM_true((NULL == nextFreeEntry) || (address < nextFreeEntry));
+    Assert_MM_true((NULL == address) || (size >= getMinimumFreeEntrySize()));
 
-	/* Build the free header */
-	createFreeEntry(env, (MM_HeapLinkedFreeHeader*)address, (uint8_t*)address + size, NULL, (MM_HeapLinkedFreeHeader*)nextFreeEntry);
+    /* Build the free header */
+    createFreeEntry(env, (MM_HeapLinkedFreeHeader*)address, (uint8_t*)address + size, NULL, (MM_HeapLinkedFreeHeader*)nextFreeEntry);
 
-	if (NULL == *_referenceHeapFreeList) {
-		*_referenceHeapFreeList = (MM_HeapLinkedFreeHeader*)nextFreeEntry;
-	}
+    if (NULL == *_referenceHeapFreeList) {
+        *_referenceHeapFreeList = (MM_HeapLinkedFreeHeader*)nextFreeEntry;
+    }
 }
 
 /**
@@ -159,13 +151,12 @@ MM_MemoryPoolAddressOrderedListBase::connectOuterMemoryToPool(MM_EnvironmentBase
  * @param address free memory start address
  * @param size free memory size in bytes
  */
-void
-MM_MemoryPoolAddressOrderedListBase::connectFinalMemoryToPool(MM_EnvironmentBase* env, void* address, uintptr_t size)
+void MM_MemoryPoolAddressOrderedListBase::connectFinalMemoryToPool(MM_EnvironmentBase* env, void* address, uintptr_t size)
 {
-	Assert_MM_true((NULL == address) || (size >= getMinimumFreeEntrySize()));
+    Assert_MM_true((NULL == address) || (size >= getMinimumFreeEntrySize()));
 
-	/* Build the free header */
-	createFreeEntry(env, (MM_HeapLinkedFreeHeader*)address, (uint8_t*)address + size);
+    /* Build the free header */
+    createFreeEntry(env, (MM_HeapLinkedFreeHeader*)address, (uint8_t*)address + size);
 }
 
 /**
@@ -175,47 +166,46 @@ MM_MemoryPoolAddressOrderedListBase::connectFinalMemoryToPool(MM_EnvironmentBase
  * @param address free memory start address
  * @param size free memory size in bytes
  */
-void
-MM_MemoryPoolAddressOrderedListBase::abandonMemoryInPool(MM_EnvironmentBase* env, void* address, uintptr_t size)
+void MM_MemoryPoolAddressOrderedListBase::abandonMemoryInPool(MM_EnvironmentBase* env, void* address, uintptr_t size)
 {
 #if defined(OMR_VALGRIND_MEMCHECK)
-	valgrindClearRange(env->getExtensions(),(uintptr_t) address,size);
+    valgrindClearRange(env->getExtensions(), (uintptr_t)address, size);
 #endif /* defined(OMR_VALGRIND_MEMCHECK) */
-	abandonHeapChunk((MM_HeapLinkedFreeHeader*)address, (uint8_t*)address + size);
+    abandonHeapChunk((MM_HeapLinkedFreeHeader*)address, (uint8_t*)address + size);
 }
 
 #if defined(OMR_GC_IDLE_HEAP_MANAGER)
 uintptr_t
 MM_MemoryPoolAddressOrderedListBase::releaseFreeEntryMemoryPages(MM_EnvironmentBase* env, MM_HeapLinkedFreeHeader* freeEntry)
 {
-	uintptr_t releasedMemory = 0;
-	MM_HeapLinkedFreeHeader* currentFreeEntry = freeEntry;
-	uintptr_t pageSize = env->getExtensions()->heap->getPageSize();
-	while (NULL != currentFreeEntry) {
-		/* skip entry less than page size */
-		if (pageSize <= currentFreeEntry->getSize()) {
-			uintptr_t addressBase = MM_Math::roundToCeiling(pageSize, (uintptr_t)currentFreeEntry + sizeof(MM_HeapLinkedFreeHeader));
-			/* release/decommit memory after Header */
-			uintptr_t totalFreePagesCount = (currentFreeEntry->getSize() - (addressBase - (uintptr_t)currentFreeEntry)) / pageSize;
-			if (0 < totalFreePagesCount) {
-				uintptr_t commitPagesCount = 0;
-				uintptr_t decommitPagesCount = 0;
-				if (0 < _extensions->idleMinimumFree) {
-					commitPagesCount = totalFreePagesCount * _extensions->idleMinimumFree / 100;
-				}
-				decommitPagesCount = totalFreePagesCount - commitPagesCount;
-				/* leave commited pages of memory aside header */
-				addressBase += commitPagesCount * pageSize;
-				/* now decommit pages of memory */
-				if (0 < decommitPagesCount) {
-					if (_extensions->heap->decommitMemory((void*)addressBase, decommitPagesCount * pageSize, NULL, currentFreeEntry->afterEnd())) {
-						releasedMemory += decommitPagesCount * pageSize;
-					}
-				}
-			}
-		}
-		currentFreeEntry = currentFreeEntry->getNext();
-	}
-	return releasedMemory;
+    uintptr_t releasedMemory = 0;
+    MM_HeapLinkedFreeHeader* currentFreeEntry = freeEntry;
+    uintptr_t pageSize = env->getExtensions()->heap->getPageSize();
+    while (NULL != currentFreeEntry) {
+        /* skip entry less than page size */
+        if (pageSize <= currentFreeEntry->getSize()) {
+            uintptr_t addressBase = MM_Math::roundToCeiling(pageSize, (uintptr_t)currentFreeEntry + sizeof(MM_HeapLinkedFreeHeader));
+            /* release/decommit memory after Header */
+            uintptr_t totalFreePagesCount = (currentFreeEntry->getSize() - (addressBase - (uintptr_t)currentFreeEntry)) / pageSize;
+            if (0 < totalFreePagesCount) {
+                uintptr_t commitPagesCount = 0;
+                uintptr_t decommitPagesCount = 0;
+                if (0 < _extensions->idleMinimumFree) {
+                    commitPagesCount = totalFreePagesCount * _extensions->idleMinimumFree / 100;
+                }
+                decommitPagesCount = totalFreePagesCount - commitPagesCount;
+                /* leave commited pages of memory aside header */
+                addressBase += commitPagesCount * pageSize;
+                /* now decommit pages of memory */
+                if (0 < decommitPagesCount) {
+                    if (_extensions->heap->decommitMemory((void*)addressBase, decommitPagesCount * pageSize, NULL, currentFreeEntry->afterEnd())) {
+                        releasedMemory += decommitPagesCount * pageSize;
+                    }
+                }
+            }
+        }
+        currentFreeEntry = currentFreeEntry->getNext();
+    }
+    return releasedMemory;
 }
 #endif

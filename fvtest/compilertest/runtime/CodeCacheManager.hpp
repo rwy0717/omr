@@ -24,14 +24,14 @@
 
 #include "runtime/TestCodeCacheManager.hpp"
 
-namespace TR
-{
+namespace TR {
 
-class OMR_EXTENSIBLE CodeCacheManager : public TestCompiler::CodeCacheManagerConnector
-   {
-   public:
-   CodeCacheManager(TR::RawAllocator rawAllocator) : TestCompiler::CodeCacheManagerConnector(rawAllocator) { }
-   };
+class OMR_EXTENSIBLE CodeCacheManager : public TestCompiler::CodeCacheManagerConnector {
+public:
+    CodeCacheManager(TR::RawAllocator rawAllocator)
+        : TestCompiler::CodeCacheManagerConnector(rawAllocator)
+    {}
+};
 
 } // namespace TR
 

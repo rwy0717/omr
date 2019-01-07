@@ -30,16 +30,16 @@
  *
  * @return pointer to string representing the page type.
  */
-const char *
+const char*
 getPageTypeString(uintptr_t pageFlags)
 {
-	if (0 != (OMRPORT_VMEM_PAGE_FLAG_PAGEABLE & pageFlags)) {
-		return "pageable";
-	} else if (0 != (OMRPORT_VMEM_PAGE_FLAG_FIXED & pageFlags)) {
-		return "nonpageable";
-	} else {
-		return "not used";
-	}
+    if (0 != (OMRPORT_VMEM_PAGE_FLAG_PAGEABLE & pageFlags)) {
+        return "pageable";
+    } else if (0 != (OMRPORT_VMEM_PAGE_FLAG_FIXED & pageFlags)) {
+        return "nonpageable";
+    } else {
+        return "not used";
+    }
 }
 
 /**
@@ -50,14 +50,14 @@ getPageTypeString(uintptr_t pageFlags)
  *
  * @return pointer to string representing the page type.
  */
-const char *
+const char*
 getPageTypeStringWithLeadingSpace(uintptr_t pageFlags)
 {
-	if (0 != (OMRPORT_VMEM_PAGE_FLAG_PAGEABLE & pageFlags)) {
-		return " pageable";
-	} else if (0 != (OMRPORT_VMEM_PAGE_FLAG_FIXED & pageFlags)) {
-		return " nonpageable";
-	} else {
-		return "";
-	}
+    if (0 != (OMRPORT_VMEM_PAGE_FLAG_PAGEABLE & pageFlags)) {
+        return " pageable";
+    } else if (0 != (OMRPORT_VMEM_PAGE_FLAG_FIXED & pageFlags)) {
+        return " nonpageable";
+    } else {
+        return "";
+    }
 }

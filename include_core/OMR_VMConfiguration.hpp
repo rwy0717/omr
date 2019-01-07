@@ -31,7 +31,6 @@
 #include "OMR_BaseNonVirtual.hpp"
 
 extern "C" {
-
 }
 
 #endif /* OMR_VMCONFIGURATION_HPP_ */

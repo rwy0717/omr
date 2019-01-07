@@ -24,32 +24,30 @@
 
 #include "ilgen/OMRIlBuilder.hpp"
 
-namespace TestCompiler
-{
+namespace TestCompiler {
 
 class TestDriver;
 
-class IlBuilder : public OMR::IlBuilder
-   {
+class IlBuilder : public OMR::IlBuilder {
 public:
-   TR_ALLOC(TR_Memory::IlGenerator)
+    TR_ALLOC(TR_Memory::IlGenerator)
 
-   IlBuilder(TR::MethodBuilder *methodBuilder, TR::TypeDictionary *types)
-      : OMR::IlBuilder(methodBuilder, types)
-      { }
+    IlBuilder(TR::MethodBuilder* methodBuilder, TR::TypeDictionary* types)
+        : OMR::IlBuilder(methodBuilder, types)
+    {}
 
-   IlBuilder(TR::IlBuilder *source)
-      : OMR::IlBuilder(source)
-      { }
+    IlBuilder(TR::IlBuilder* source)
+        : OMR::IlBuilder(source)
+    {}
 
-   IlBuilder(TestDriver *test, TR::MethodBuilder *methodBuilder, TR::TypeDictionary *types)
-      : OMR::IlBuilder(methodBuilder, types)
-      {
-      // need to explicitly initialize TestCompiler::IlInjector layer because
-      // it's hiding behind our OMR::IlBuilder base class
-      setMethodAndTest((TR::ResolvedMethod *)NULL, test);
-      }
-   };
+    IlBuilder(TestDriver* test, TR::MethodBuilder* methodBuilder, TR::TypeDictionary* types)
+        : OMR::IlBuilder(methodBuilder, types)
+    {
+        // need to explicitly initialize TestCompiler::IlInjector layer because
+        // it's hiding behind our OMR::IlBuilder base class
+        setMethodAndTest((TR::ResolvedMethod*)NULL, test);
+    }
+};
 
 } // namespace TestCompiler
 
