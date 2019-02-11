@@ -169,4 +169,4 @@ operator!=(T* lhs, Handle<U> rhs)
 } /* namespace GC */
 } /* namespace OMR */
 
-#endif // OMR_GC_HANDLE_HPP_
+#endif /* OMR_GC_HANDLE_HPP_ */
