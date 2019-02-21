@@ -356,6 +356,8 @@ TR_Method::isBigDecimalConvertersMethod(TR::Compilation * comp)
 #undef notImplemented
 #define notImplemented(A) TR_ASSERT(0, "TR_ResolvedMethod::%s is undefined for %p", (A), this )
 
+void *dummyPtr = NULL;
+
 TR_Method *  TR_ResolvedMethod::convertToMethod()                          { notImplemented("convertToMethod"); return 0; }
 uint32_t     TR_ResolvedMethod::numberOfParameters()                       { notImplemented("numberOfParameters"); return 0; }
 uint32_t     TR_ResolvedMethod::numberOfExplicitParameters()               { notImplemented("numberOfExplicitParameters"); return 0; }
@@ -453,7 +455,7 @@ char *       TR_ResolvedMethod::localName (uint32_t, uint32_t, int32_t&, TR_Memo
 char *       TR_ResolvedMethod::fieldNameChars(int32_t, int32_t &)         { notImplemented("fieldNameChars"); return 0; }
 char *       TR_ResolvedMethod::fieldSignatureChars(int32_t, int32_t &)    { notImplemented("fieldSignatureChars"); return 0; }
 char *       TR_ResolvedMethod::staticSignatureChars(int32_t, int32_t &)   { notImplemented("staticSignatureChars"); return 0; }
-void * &     TR_ResolvedMethod::addressOfClassOfMethod()                   { notImplemented("addressOfClassOfMethod"); return *(void **)0; }
+void * &     TR_ResolvedMethod::addressOfClassOfMethod()                   { notImplemented("addressOfClassOfMethod"); return dummyPtr; }
 uint32_t     TR_ResolvedMethod::vTableSlot(uint32_t)                       { notImplemented("vTableSlot"); return 0; }
 bool         TR_ResolvedMethod::virtualMethodIsOverridden()                { notImplemented("virtualMethodIsOverridden"); return false; }
 void         TR_ResolvedMethod::setVirtualMethodIsOverridden()             { notImplemented("setVirtualMethodIsOverridden"); }
