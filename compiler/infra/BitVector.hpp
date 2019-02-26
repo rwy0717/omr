@@ -326,12 +326,12 @@ class TR_BitVector
    // Get the value of the nth bit. The word returned is non-zero if the bit
    // is set and is zero if the bit is not set.
    //
-   int32_t get(int64_t n)
+   chunk_t get(int64_t n)
       {
       int32_t chunkIndex = getChunkIndex(n);
-      if (chunkIndex > _lastChunkWithNonZero)
+      if (_lastChunkWithNonZero < chunkIndex)
          return 0;
-      return (_chunks[chunkIndex] & getBitMask(n)) != 0;
+      return (_chunks[chunkIndex] & getBitMask((int32_t)n));
       }
 
    bool isSet(int64_t n)
