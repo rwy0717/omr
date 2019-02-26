@@ -331,7 +331,7 @@ class TR_BitVector
       int32_t chunkIndex = getChunkIndex(n);
       if (chunkIndex > _lastChunkWithNonZero)
          return 0;
-      return (_chunks[chunkIndex] & getBitMask(n)) != 0;
+      return (_chunks[chunkIndex] & getBitMask((int32_t)n)) != 0;
       }
 
    bool isSet(int64_t n)
@@ -351,7 +351,7 @@ class TR_BitVector
          _firstChunkWithNonZero = chunkIndex;
       if (chunkIndex > _lastChunkWithNonZero)
          _lastChunkWithNonZero = chunkIndex;
-      _chunks[chunkIndex] |= getBitMask(n);
+      _chunks[chunkIndex] |= getBitMask((int32_t)n);
 #if BV_SANITY_CHECK
       sanityCheck("set");
 #endif
@@ -381,7 +381,6 @@ class TR_BitVector
    void reset(int64_t n, bool updateLowHigh = true)
       {
       int32_t chunkIndex = getChunkIndex(n);
-      int32_t i;
       if (chunkIndex > _lastChunkWithNonZero || chunkIndex < _firstChunkWithNonZero)
          return;
       if (_chunks[chunkIndex]) {
@@ -399,7 +398,7 @@ class TR_BitVector
    // value had been set
    bool clear(int64_t n)
       {
-      bool rc = get(n);
+      bool rc = isSet(n);
       if (rc)
          reset(n);
 #if BV_SANITY_CHECK
@@ -619,14 +618,14 @@ class TR_BitVector
       {
       if (n <= 0)
          return;
-      int32_t i;
+      int64_t i;
       int32_t chunkIndex = getChunkIndex(n-1);
       if (chunkIndex >= _numChunks)
          setChunkSize(chunkIndex+1);
       for (i = chunkIndex-1; i >= 0; i--)
          _chunks[i] = (chunk_t)-1;
       for (i = getBitIndex(chunkIndex); i < n; i++)
-         _chunks[chunkIndex] |= getBitMask(i);
+         _chunks[chunkIndex] |= getBitMask((int32_t)i);
       _firstChunkWithNonZero = 0;
       if (_lastChunkWithNonZero < chunkIndex)
          _lastChunkWithNonZero = chunkIndex;
@@ -1230,8 +1229,8 @@ public:
   uint32_t wordSize() const { return BITS_IN_CHUNK; } // returns size of words in bits (ie size of a chunk)
   int32_t FirstOneWordIndex() const { return bv._firstChunkWithNonZero; }
   int32_t LastOneWordIndex() const { return bv._lastChunkWithNonZero; }
-  chunk_t WordAt (uint32_t wordIndex) const {
-     if (wordIndex >= bv._numChunks)
+  chunk_t WordAt (int32_t wordIndex) const {
+     if (wordIndex < 0 || wordIndex >= bv._numChunks)
         return 0;
      return bv._chunks[wordIndex];
   }
