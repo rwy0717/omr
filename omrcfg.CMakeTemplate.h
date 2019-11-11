@@ -28,6 +28,8 @@
 #if !defined(OMRCFG_H_)
 #define OMRCFG_H_
 
+#define THREAD_ASSERTS
+
 /**
  * @ddr_namespace: map_to_type=OmrBuildFlags
  * @ddr_options: valuesandbuildflags

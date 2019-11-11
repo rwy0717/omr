@@ -895,7 +895,7 @@ postForkResetLib(omrthread_t self)
 	memset(&lib->cumulativeThreadsInfo, 0, sizeof(lib->cumulativeThreadsInfo));
 #ifdef THREAD_ASSERTS
 	if (self != global_lock_owner) {
-		global_lock_owner = NULL;
+		global_lock_owner = UNOWNED;
 	}
 #endif /* THREAD_ASSERTS */
 }
