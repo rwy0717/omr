@@ -368,8 +368,8 @@ barrier_enter_r(barrier_r *barrier, uintptr_t deadline)
 }
 
 /*
- * This function updates the expected number of clients the barrier is waiting for. If all clients have already entered the barrier
- * the the update will fail.
+ * This function updates the expected number of clients the barrier is waiting for. If all clients have already entered
+ * the barrier the the update will fail.
  *
  * @param barrier the barrier to update
  * @param new_value the new number of entrants expected
@@ -635,13 +635,15 @@ sem_destroy_r(sem_t_r *sem)
 	/* prevent the semaphore from being acquired by subtracting initial value*/
 	do {
 		old_value = sem->sem_value;
-	} while (compareAndSwapUDATA((uintptr_t *)&sem->sem_value, old_value, old_value - sem->initial_value) != old_value);
+	} while (compareAndSwapUDATA((uintptr_t *)&sem->sem_value, old_value, old_value - sem->initial_value)
+	        != old_value);
 
 	if (old_value != sem->initial_value) {
 		/* undo the block and return error */
 		do {
 			old_value = sem->sem_value;
-		} while (compareAndSwapUDATA((uintptr_t *)&sem->sem_value, old_value, old_value + sem->initial_value) != old_value);
+		} while (compareAndSwapUDATA((uintptr_t *)&sem->sem_value, old_value, old_value + sem->initial_value)
+		        != old_value);
 
 		/* semaphore is still in use */
 		return -1;
@@ -764,10 +766,11 @@ upcall_handler(int signal, siginfo_t *siginfo, void *context_arg)
 #endif
 
 	/* check that this signal was queued by this process. */
-	if (siginfo->si_code != SI_QUEUE || siginfo->si_value.sival_ptr == NULL
+	if (siginfo->si_code != SI_QUEUE
+	        || siginfo->si_value.sival_ptr == NULL
 #ifndef J9ZOS390
-		/* pid is only valid on zOS if si_code <= 0. SI_QUEUE is > 0 */
-		|| siginfo->si_pid != pid
+	        /* pid is only valid on zOS if si_code <= 0. SI_QUEUE is > 0 */
+	        || siginfo->si_pid != pid
 #endif
 	) {
 		/* these are not the signals you are looking for */
@@ -792,7 +795,8 @@ upcall_handler(int signal, siginfo_t *siginfo, void *context_arg)
 		/* error set by another thread while we were in sem_timedwait_r(), don't do the backtrace */
 	} else {
 		/* construct the thread to pass back */
-		data->thread = state->portLibrary->heap_allocate(state->portLibrary, state->heap, sizeof(J9PlatformThread));
+		data->thread =
+		        state->portLibrary->heap_allocate(state->portLibrary, state->heap, sizeof(J9PlatformThread));
 		if (data->thread == NULL) {
 			data->error = ALLOCATION_FAILURE;
 		} else {
@@ -806,12 +810,14 @@ upcall_handler(int signal, siginfo_t *siginfo, void *context_arg)
 			data->thread->context = context;
 #ifdef J9ZOS390
 			data->thread->caa = _gtca();
-			data->thread->dsa = __dsa_prev(getdsa(), __EDCWCCWI_LOGICAL, __EDCWCCWI_DOWN, NULL, data->thread->caa, &format, NULL, NULL);
+			data->thread->dsa = __dsa_prev(getdsa(), __EDCWCCWI_LOGICAL, __EDCWCCWI_DOWN, NULL,
+			        data->thread->caa, &format, NULL, NULL);
 			data->thread->dsa_format = format;
 #endif /* J9ZOS390 */
 
 #ifdef LINUX
-			state->portLibrary->introspect_backtrace_thread(state->portLibrary, data->thread, state->heap, NULL);
+			state->portLibrary->introspect_backtrace_thread(
+			        state->portLibrary, data->thread, state->heap, NULL);
 			state->portLibrary->introspect_backtrace_symbols(state->portLibrary, data->thread, state->heap);
 #endif /* LINUX */
 		}
@@ -864,11 +870,8 @@ count_threads(struct PlatformWalkData *data)
 		 */
 		while ((file = readdir(proc)) != NULL) {
 			/* we need a directory who's name starts with a '.' - we filter out '.' and '..' */
-			if ((file->d_type == DT_DIR)
-				&& (file->d_name[0] == '.')
-				&& (file->d_name[1] != '\0')
-				&& (file->d_name[1] != '.'))
-			{
+			if ((file->d_type == DT_DIR) && (file->d_name[0] == '.') && (file->d_name[1] != '\0')
+			        && (file->d_name[1] != '.')) {
 				FILE *status = NULL;
 				/* The needed buffer size to store the path to status is calculated as:
 				 *  /proc/.<pid>/status\0
@@ -899,7 +902,8 @@ count_threads(struct PlatformWalkData *data)
 		/* add 1 to account for the initial thread */
 		thread_count++;
 	} else {
-		for (thread_count = 0; readdir(tids) != NULL; thread_count++);
+		for (thread_count = 0; readdir(tids) != NULL; thread_count++)
+			;
 		/* remove the count for . and .. */
 		thread_count -= 2;
 
@@ -922,8 +926,8 @@ count_threads(struct PlatformWalkData *data)
 
 	while (getthrds64(getpid(), &thread, sizeof(struct thrdentry64), &cursor, 1) == 1) {
 		/* we don't want to count threads that are being disposed of or are pooled for reuse.
-		 * Experimentation shows that threads can receive signals before they have a stack or complete construction
-		 * so those are included.
+		 * Experimentation shows that threads can receive signals before they have a stack or complete
+		 * construction so those are included.
 		 */
 		if (thread.ti_state != TSNONE && thread.ti_state != TSZOMB) {
 			count++;
@@ -964,7 +968,8 @@ count_threads(struct PlatformWalkData *data)
 	}
 
 	/* sanity check */
-	if (__e2a_l(((struct pgthb *)output_buffer)->id, 4) != 4 || strncmp(((struct pgthb *)output_buffer)->id, "gthb", 4)) {
+	if (__e2a_l(((struct pgthb *)output_buffer)->id, 4) != 4
+	        || strncmp(((struct pgthb *)output_buffer)->id, "gthb", 4)) {
 		return -2;
 	}
 
@@ -976,7 +981,8 @@ count_threads(struct PlatformWalkData *data)
 	data_offset = *(unsigned int *)((struct pgthb *)output_buffer)->offc;
 	data_offset = data_offset >> 8;
 
-	if (data_offset > ((struct pgthb *)output_buffer)->lenused || data_offset > output_size - sizeof(struct pgthc)) {
+	if (data_offset > ((struct pgthb *)output_buffer)->lenused
+	        || data_offset > output_size - sizeof(struct pgthc)) {
 		/* the thread's data is past the end of the populated buffer */
 		return -4;
 	}
@@ -1072,9 +1078,10 @@ suspend_all_preemptive(struct PlatformWalkData *data)
 				}
 			}
 
-			/* Allow the signals time to be dispatched so we don't overflow the signal queue. 10 is an arbitrary
-			 * number to see if we can avoid the added complexity of coordination between the signal handler and
-			 * this suspend logic. Testing shows 48 threads suspended on AIX5.3 at the point where we get EAGAIN.
+			/* Allow the signals time to be dispatched so we don't overflow the signal queue. 10 is an
+			 * arbitrary number to see if we can avoid the added complexity of coordination between the
+			 * signal handler and this suspend logic. Testing shows 48 threads suspended on AIX5.3 at the
+			 * point where we get EAGAIN.
 			 */
 			if ((i % 10) == 0) {
 				omrthread_yield();
@@ -1265,9 +1272,9 @@ resume_all_preempted(struct PlatformWalkData *data)
 	struct sigaction ign;
 
 	if (data->cleanupRequired) {
-		/* On AIX it seems that a signal can be unavailable to sigpending/sigwait but not yet have been delivered
-		 * to a thread. As a result we can't be sure that SIG_SUSPEND won't be delivered after we uninstall the handler
-		 * so we set it to ignore instead of default
+		/* On AIX it seems that a signal can be unavailable to sigpending/sigwait but not yet have been
+		 * delivered to a thread. As a result we can't be sure that SIG_SUSPEND won't be delivered after we
+		 * uninstall the handler so we set it to ignore instead of default
 		 */
 		ign.sa_sigaction = NULL;
 		ign.sa_handler = SIG_IGN;
@@ -1294,18 +1301,20 @@ resume_all_preempted(struct PlatformWalkData *data)
 #endif /* defined(OMR_CONFIGURABLE_SUSPEND_SIGNAL) */
 		/* clear out the signal queue so that any undispatched suspend signals are not left lying around */
 		while (sigpending(&set) == 0 && sigismember(&set, SUSPEND_SIG)) {
-			/* there is a suspend signal pending so swallow it. It is worth noting that sigwait isn't in the initial
-			 * set of posix signal safe functions, however the fact that it bypasses the installed signal handler is
-			 * too useful it ignore, so we risk it. It could be replaced with sigsuspend and some handler juggling if
-			 * need be but the added complexity isn't worth it until it's shown to be necessary
+			/* there is a suspend signal pending so swallow it. It is worth noting that sigwait isn't in the
+			 * initial set of posix signal safe functions, however the fact that it bypasses the installed
+			 * signal handler is too useful it ignore, so we risk it. It could be replaced with sigsuspend
+			 * and some handler juggling if need be but the added complexity isn't worth it until it's shown
+			 * to be necessary
 			 */
 			sigemptyset(&set);
 			sigaddset(&set, SUSPEND_SIG);
 #if defined(J9ZOS390)
 			sigwait(&set);
 #else
-			/* the pending signal may have been dispatched to another thread since we made the sigpending() call above,
-			 * so use a non-blocking sigtimedwait() call to clear it if it's still there, don't actually wait
+			/* the pending signal may have been dispatched to another thread since we made the sigpending()
+			 * call above, so use a non-blocking sigtimedwait() call to clear it if it's still there, don't
+			 * actually wait
 			 */
 			time_out.tv_sec = 0;
 			time_out.tv_nsec = 0;
@@ -1315,8 +1324,8 @@ resume_all_preempted(struct PlatformWalkData *data)
 
 		/* restore the old signal handler */
 		if ((data->oldHandler.sa_flags & SA_SIGINFO) == 0 && data->oldHandler.sa_handler == SIG_DFL) {
-			/* if there wasn't an old signal handler the set this to ignore. There shouldn't be any suspend signals
-			 * left but better safe than sorry
+			/* if there wasn't an old signal handler the set this to ignore. There shouldn't be any suspend
+			 * signals left but better safe than sorry
 			 */
 			data->oldHandler.sa_handler = SIG_IGN;
 		}
@@ -1325,7 +1334,8 @@ resume_all_preempted(struct PlatformWalkData *data)
 
 		/* release the threads from the upcall handler */
 		barrier_release_r(&data->release_barrier, timeout(data->state->deadline2));
-		/* make sure they've all exited. 1 means we block until all threads that have entered the barrier leave */
+		/* make sure they've all exited. 1 means we block until all threads that have entered the barrier leave
+		 */
 		if (0 != barrier_destroy_r(&data->release_barrier, 1)) {
 			RECORD_ERROR(state, RESUME_FAILURE, -1);
 		}
@@ -1388,8 +1398,8 @@ resume_all_preempted(struct PlatformWalkData *data)
 }
 
 /*
- * Sets up the native thread structures including the backtrace. If a context is specified it is used instead of grabbing
- * the context for the thread pointed to by state->current_thread.
+ * Sets up the native thread structures including the backtrace. If a context is specified it is used instead of
+ * grabbing the context for the thread pointed to by state->current_thread.
  *
  * @param state - state variable for controlling the thread walk
  * @param sigContext - context to use in place of live thread context
@@ -1408,14 +1418,16 @@ setup_native_thread(J9ThreadWalkState *state, thread_context *sigContext, int he
 
 	if (heapAllocate || sigContext) {
 		/* allocate the thread container*/
-		state->current_thread = (J9PlatformThread *)state->portLibrary->heap_allocate(state->portLibrary, state->heap, sizeof(J9PlatformThread));
+		state->current_thread = (J9PlatformThread *)state->portLibrary->heap_allocate(
+		        state->portLibrary, state->heap, sizeof(J9PlatformThread));
 		if (state->current_thread == NULL) {
 			return -1;
 		}
 		memset(state->current_thread, 0, sizeof(J9PlatformThread));
 
 		/* allocate space for the copy of the context */
-		state->current_thread->context = (thread_context *)state->portLibrary->heap_allocate(state->portLibrary, state->heap, size);
+		state->current_thread->context =
+		        (thread_context *)state->portLibrary->heap_allocate(state->portLibrary, state->heap, size);
 		if (state->current_thread->context == NULL) {
 			return -2;
 		}
@@ -1429,7 +1441,8 @@ setup_native_thread(J9ThreadWalkState *state, thread_context *sigContext, int he
 		/* copy the context */
 		if (sigContext) {
 			/* we're using the provided context instead of generating it */
-			memcpy(state->current_thread->context, ((OMRUnixSignalInfo *)sigContext)->platformSignalInfo.context, size);
+			memcpy(state->current_thread->context,
+			        ((OMRUnixSignalInfo *)sigContext)->platformSignalInfo.context, size);
 		} else if (state->current_thread->thread_id == omrthread_get_ras_tid()) {
 			/* return context for current thread */
 			getcontext((ucontext_t *)state->current_thread->context);
@@ -1443,21 +1456,24 @@ setup_native_thread(J9ThreadWalkState *state, thread_context *sigContext, int he
 
 	/* populate backtraces if not present */
 	if (state->current_thread->callstack == NULL) {
-		/* don't pass sigContext in here as we should have fixed up the thread already. It confuses heap/not heap allocations if we
-		 * pass it here.
+		/* don't pass sigContext in here as we should have fixed up the thread already. It confuses heap/not
+		 * heap allocations if we pass it here.
 		 */
 		SPECULATE_ERROR(state, FAULT_DURING_BACKTRACE, 2);
-		state->portLibrary->introspect_backtrace_thread(state->portLibrary, state->current_thread, state->heap, NULL);
+		state->portLibrary->introspect_backtrace_thread(
+		        state->portLibrary, state->current_thread, state->heap, NULL);
 		CLEAR_ERROR(state);
 
 #ifdef AIXPPC
 		if (state->current_thread->callstack == NULL && data->uninitializedThreads) {
 			/* if we encountered threads under construction while counting then this could be legitimate */
 			char *message = "no stack frames available, the thread may not have finished initialization";
-			char *symbol = (char *)state->portLibrary->heap_allocate(state->portLibrary, state->heap, strlen(message) + 1);
-			J9PlatformStackFrame *frame = (J9PlatformStackFrame *)state->portLibrary->heap_allocate(state->portLibrary, state->heap, sizeof(J9PlatformStackFrame));
-			/* we have to copy the message into heap allocated memory because we can't differentiate constant strings and alloc'd strings
-			 * when freeing thread data.
+			char *symbol = (char *)state->portLibrary->heap_allocate(
+			        state->portLibrary, state->heap, strlen(message) + 1);
+			J9PlatformStackFrame *frame = (J9PlatformStackFrame *)state->portLibrary->heap_allocate(
+			        state->portLibrary, state->heap, sizeof(J9PlatformStackFrame));
+			/* we have to copy the message into heap allocated memory because we can't differentiate
+			 * constant strings and alloc'd strings when freeing thread data.
 			 */
 			strcpy(symbol, message);
 			memset(frame, 0, sizeof(J9PlatformStackFrame));
@@ -1470,7 +1486,8 @@ setup_native_thread(J9ThreadWalkState *state, thread_context *sigContext, int he
 
 	if (state->current_thread->callstack && state->current_thread->callstack->symbol == NULL) {
 		SPECULATE_ERROR(state, FAULT_DURING_BACKTRACE, 3);
-		state->portLibrary->introspect_backtrace_symbols(state->portLibrary, state->current_thread, state->heap);
+		state->portLibrary->introspect_backtrace_symbols(
+		        state->portLibrary, state->current_thread, state->heap);
 		CLEAR_ERROR(state);
 	}
 
@@ -1536,7 +1553,8 @@ sigqueue_is_reliable(void)
  * and error_detail fields of the state structure. A brief textual description is in error_string.
  */
 J9PlatformThread *
-omrintrospect_threads_startDo_with_signal(struct OMRPortLibrary *portLibrary, J9Heap *heap, J9ThreadWalkState *state, void *signal_info)
+omrintrospect_threads_startDo_with_signal(
+        struct OMRPortLibrary *portLibrary, J9Heap *heap, J9ThreadWalkState *state, void *signal_info)
 {
 	int result = 0;
 	struct PlatformWalkData *data;
@@ -1553,7 +1571,8 @@ omrintrospect_threads_startDo_with_signal(struct OMRPortLibrary *portLibrary, J9
 	/* construct the walk state and thread structures */
 	state->heap = heap;
 	state->portLibrary = portLibrary;
-	data = (struct PlatformWalkData *)portLibrary->heap_allocate(portLibrary, heap, sizeof(struct PlatformWalkData));
+	data = (struct PlatformWalkData *)portLibrary->heap_allocate(
+	        portLibrary, heap, sizeof(struct PlatformWalkData));
 	state->platform_data = data;
 	state->current_thread = NULL;
 
@@ -1718,7 +1737,8 @@ omrintrospect_threads_nextDo(J9ThreadWalkState *state)
 #if !defined(J9OS_I5)
 	if (data->threadsOutstanding <= 0) {
 #else /* !defined(J9OS_I5) */
-	if ((data->threadsOutstanding <= 0) || (data->threadsOutstanding != data->threadCount - 1) && (data->thr == 0)) {
+	if ((data->threadsOutstanding <= 0)
+	        || (data->threadsOutstanding != data->threadCount - 1) && (data->thr == 0)) {
 #endif /* !defined(J9OS_I5) */
 		/* we've finished processing threads */
 		goto cleanup;
@@ -1733,7 +1753,7 @@ omrintrospect_threads_nextDo(J9ThreadWalkState *state)
 
 	if (result == -1 || data->error) {
 		/* failed to solicit thread context */
-		RECORD_ERROR(state, COLLECTION_FAILURE, result == -1? -1 : data->error);
+		RECORD_ERROR(state, COLLECTION_FAILURE, result == -1 ? -1 : data->error);
 		goto cleanup;
 	}
 
@@ -1772,13 +1792,17 @@ omrintrospect_threads_nextDo(J9ThreadWalkState *state)
 
 #else /* !defined(J9OS_I5) */
 	while (data->thr == pthread_self() || data->thr == 0) {
-		if ((result = pthread_getthrds_np(&data->thr, PTHRDSINFO_QUERY_TID, &data->pinfo, sizeof(data->pinfo), regbuf, &val)) != 0) {
+		if ((result = pthread_getthrds_np(
+		             &data->thr, PTHRDSINFO_QUERY_TID, &data->pinfo, sizeof(data->pinfo), regbuf, &val))
+		        != 0) {
 			RECORD_ERROR(state, COLLECTION_FAILURE, result);
 			goto cleanup;
 		}
 	}
 
-	if ((result = pthread_getthrds_np(&data->thr, PTHRDSINFO_QUERY_ALL, &data->pinfo, sizeof(data->pinfo), regbuf, &val)) != 0) {
+	if ((result = pthread_getthrds_np(
+	             &data->thr, PTHRDSINFO_QUERY_ALL, &data->pinfo, sizeof(data->pinfo), regbuf, &val))
+	        != 0) {
 		RECORD_ERROR(state, COLLECTION_FAILURE, result);
 		goto cleanup;
 	}
@@ -1816,11 +1840,10 @@ omrintrospect_set_suspend_signal_offset(struct OMRPortLibrary *portLibrary, int3
 {
 	int32_t result = OMRPORT_ERROR_NOT_SUPPORTED_ON_THIS_PLATFORM;
 #if defined(OMR_CONFIGURABLE_SUSPEND_SIGNAL)
-	if ((signalOffset < 0)
-		|| (signalOffset > (SIGRTMAX - SIGRTMIN))
+	if ((signalOffset < 0) || (signalOffset > (SIGRTMAX - SIGRTMIN))
 #if defined(SIG_RI_INTERRUPT_INDEX)
-		|| (SIG_RI_INTERRUPT_INDEX == signalOffset)
-#endif  /* defined(SIG_RI_INTERRUPT_INDEX) */
+	        || (SIG_RI_INTERRUPT_INDEX == signalOffset)
+#endif /* defined(SIG_RI_INTERRUPT_INDEX) */
 	) {
 		result = OMRPORT_ERROR_INVALID;
 	} else {

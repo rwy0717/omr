@@ -24,8 +24,7 @@
 
 #include "ddr/ir/Members.hpp"
 
-class EnumMember : public Members
-{
+class EnumMember : public Members {
 public:
 	int _value;
 

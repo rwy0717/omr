@@ -24,7 +24,7 @@
 /* windows.h defined uintptr_t.  Ignore its definition */
 #define UDATA UDATA_win_
 #include <windows.h>
-#undef UDATA	/* this is safe because our UDATA is a typedef, not a macro */
+#undef UDATA /* this is safe because our UDATA is a typedef, not a macro */
 #include <psapi.h>
 #endif /* defined(OMR_OS_WINDOWS) */
 
@@ -79,7 +79,9 @@ GCTestEnvironment::GCTestTearDown()
 {
 	ASSERT_NO_FATAL_FAILURE(clearParams());
 
-	ASSERT_EQ((uintptr_t)0, exampleVM._vmExclusiveAccessCount) << "GCTestTearDown(): _vmExclusiveAccessCount not 0, _vmExclusiveAccessCount=" << exampleVM._vmExclusiveAccessCount;
+	ASSERT_EQ((uintptr_t)0, exampleVM._vmExclusiveAccessCount) << "GCTestTearDown(): _vmExclusiveAccessCount not "
+	                                                              "0, _vmExclusiveAccessCount="
+	                                                           << exampleVM._vmExclusiveAccessCount;
 	if (NULL != exampleVM._vmAccessMutex) {
 		omrthread_rwmutex_destroy(exampleVM._vmAccessMutex);
 		exampleVM._vmAccessMutex = NULL;
@@ -90,7 +92,6 @@ GCTestEnvironment::GCTestTearDown()
 	/* Shut down VM */
 	omr_error_t rc = OMR_Shutdown(exampleVM._omrVM);
 	ASSERT_EQ(OMR_ERROR_NONE, rc) << "TearDown(): OMR_Shutdown failed, rc=" << rc;
-
 }
 
 void
@@ -118,14 +119,15 @@ printMemUsed(const char *where, OMRPortLibrary *portLib)
 	}
 
 	unsigned long size, resident, share, text, lib, data, dt;
-	int numOfTokens = sscanf(lineStr, "%ld %ld %ld %ld %ld %ld %ld", &size, &resident, &share, &text, &lib, &data, &dt);
+	int numOfTokens =
+	        sscanf(lineStr, "%ld %ld %ld %ld %ld %ld %ld", &size, &resident, &share, &text, &lib, &data, &dt);
 	if (7 != numOfTokens) {
 		gcTestEnv->log(LEVEL_ERROR, "%s: failed to query memory info from /proc/self/statm.\n", where);
 		return;
 	}
 
 	/* result in pages */
-	gcTestEnv->log(LEVEL_VERBOSE,"%s: phys: %ld; virt: %ld\n", where, resident, size);
+	gcTestEnv->log(LEVEL_VERBOSE, "%s: phys: %ld; virt: %ld\n", where, resident, size);
 	omrfile_close(fileDescriptor);
 #else
 	/* memory info not supported */

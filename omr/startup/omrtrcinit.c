@@ -33,7 +33,6 @@
 #undef UT_MODULE_UNLOADED
 #include "ut_omrti.h"
 
-
 #define OMR_TRACE_OPT_DELIM ':'
 #define OMR_TRACE_OPTS_SIZE 55
 
@@ -58,7 +57,8 @@
  */
 
 static omr_error_t freeTraceOptions(OMRPortLibrary *portLibrary, char *trcOpts[]);
-static omr_error_t getEnvVar(OMRPortLibrary *portLibrary, const char *envVar, char *buf, size_t bufLen, const char **envVarValue);
+static omr_error_t getEnvVar(
+        OMRPortLibrary *portLibrary, const char *envVar, char *buf, size_t bufLen, const char **envVarValue);
 static BOOLEAN keyNotNull(const char *key);
 static omr_error_t parseTraceOptions(OMRPortLibrary *portLibrary, char *trcOpts[], const char *traceOptString);
 static void reportOMRCommandLineError(OMRPortLibrary *portLibrary, const char *detailStr, va_list args);
@@ -73,9 +73,8 @@ omr_ras_initTraceEngine(OMR_VM *omrVM, const char *traceOptString, const char *d
 
 	rc = parseTraceOptions(OMRPORTLIB, trcOpts, traceOptString);
 	if (OMR_ERROR_NONE != rc) {
-		omrtty_printf(
-			"parseTraceOptions error, rc=%d, traceOptString=\"%s\"\n",
-			rc, (NULL == traceOptString) ? "(NULL)" : traceOptString);
+		omrtty_printf("parseTraceOptions error, rc=%d, traceOptString=\"%s\"\n", rc,
+		        (NULL == traceOptString) ? "(NULL)" : traceOptString);
 		goto done;
 	}
 
@@ -210,7 +209,8 @@ parseTraceOptions(OMRPortLibrary *portLibrary, char *trcOpts[], const char *trac
 				char *value = NULL;
 				char *nextKey = NULL;
 
-				/* ensure we have enough room in the trcOpts array for a key/value pair and the NULL terminator */
+				/* ensure we have enough room in the trcOpts array for a key/value pair and the NULL
+				 * terminator */
 				if ((optIndex + 3) > OMR_TRACE_OPTS_SIZE) {
 					rc = OMR_ERROR_ILLEGAL_ARGUMENT;
 					break;
@@ -278,22 +278,26 @@ done:
 		const char *traceDebugEnv = NULL;
 		char traceDebugBuf[2] = "";
 
-		if (OMR_ERROR_NONE == getEnvVar(OMRPORTLIB, "TRACEDEBUG", traceDebugBuf, sizeof(traceDebugBuf), &traceDebugEnv)) {
+		if (OMR_ERROR_NONE
+		        == getEnvVar(OMRPORTLIB, "TRACEDEBUG", traceDebugBuf, sizeof(traceDebugBuf), &traceDebugEnv)) {
 			if ((NULL != traceDebugEnv) && ('1' == traceDebugEnv[0]) && ('\0' == traceDebugEnv[1])) {
 				for (i = 0; i < optIndex; i += 2) {
 					omrtty_printf("%d: key = %s\n", i, (NULL == trcOpts[i]) ? NULL : trcOpts[i]);
-					omrtty_printf("%d: val = %s\n", i + 1, (NULL == trcOpts[i + 1]) ? NULL : trcOpts[i + 1]);
+					omrtty_printf("%d: val = %s\n", i + 1,
+					        (NULL == trcOpts[i + 1]) ? NULL : trcOpts[i + 1]);
 
-					assert(NULL != trcOpts[i]);			/* key must not be NULL */
-					assert('\0' != trcOpts[i][0]);		/* key must not be empty string */
-					assert((NULL == trcOpts[i + 1])		/* value must be NULL or non-empty string */
-						   || ('\0' != trcOpts[i + 1][0]));
+					assert(NULL != trcOpts[i]); /* key must not be NULL */
+					assert('\0' != trcOpts[i][0]); /* key must not be empty string */
+					assert((NULL == trcOpts[i + 1]) /* value must be NULL or non-empty string */
+					        || ('\0' != trcOpts[i + 1][0]));
 				}
 
-				assert(NULL == trcOpts[optIndex]);		/* The last element of trcOpts must be NULL */
-				assert(optIndex < OMR_TRACE_OPTS_SIZE); /* Don't write past the end of the trcOpts array */
+				assert(NULL == trcOpts[optIndex]); /* The last element of trcOpts must be NULL */
+				assert(optIndex < OMR_TRACE_OPTS_SIZE); /* Don't write past the end of the trcOpts array
+				                                         */
 				if (optIndex > 0) {
-					assert(trcOpts[0] == copyOfOptString);	/* trcOpts[0] must point to the start of the memory block */
+					assert(trcOpts[0] == copyOfOptString); /* trcOpts[0] must point to the start of
+					                                          the memory block */
 				}
 			}
 			if ((NULL != traceDebugEnv) && (traceDebugEnv != traceDebugBuf)) {
@@ -316,7 +320,6 @@ reportOMRCommandLineError(OMRPortLibrary *portLibrary, const char *detailStr, va
 
 	omrtty_err_printf("Invalid option: %s\n", buffer);
 }
-
 
 static omr_error_t
 getEnvVar(OMRPortLibrary *portLibrary, const char *envVar, char *buf, size_t bufLen, const char **envVarValue)
@@ -347,4 +350,3 @@ getEnvVar(OMRPortLibrary *portLibrary, const char *envVar, char *buf, size_t buf
 	}
 	return rc;
 }
-

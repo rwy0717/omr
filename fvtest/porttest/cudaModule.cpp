@@ -21,16 +21,10 @@
 
 #include "cudaTests.hpp"
 
-static const J9CudaFunctionAttribute
-functionAttributes[] = {
-	J9CUDA_FUNCTION_ATTRIBUTE_BINARY_VERSION,
-	J9CUDA_FUNCTION_ATTRIBUTE_CONST_SIZE_BYTES,
-	J9CUDA_FUNCTION_ATTRIBUTE_LOCAL_SIZE_BYTES,
-	J9CUDA_FUNCTION_ATTRIBUTE_MAX_THREADS_PER_BLOCK,
-	J9CUDA_FUNCTION_ATTRIBUTE_NUM_REGS,
-	J9CUDA_FUNCTION_ATTRIBUTE_PTX_VERSION,
-	J9CUDA_FUNCTION_ATTRIBUTE_SHARED_SIZE_BYTES
-};
+static const J9CudaFunctionAttribute functionAttributes[] = {J9CUDA_FUNCTION_ATTRIBUTE_BINARY_VERSION,
+        J9CUDA_FUNCTION_ATTRIBUTE_CONST_SIZE_BYTES, J9CUDA_FUNCTION_ATTRIBUTE_LOCAL_SIZE_BYTES,
+        J9CUDA_FUNCTION_ATTRIBUTE_MAX_THREADS_PER_BLOCK, J9CUDA_FUNCTION_ATTRIBUTE_NUM_REGS,
+        J9CUDA_FUNCTION_ATTRIBUTE_PTX_VERSION, J9CUDA_FUNCTION_ATTRIBUTE_SHARED_SIZE_BYTES};
 
 static uintptr_t
 variableDynamicSharedMemorySize(uint32_t blockSize, uintptr_t userData)
@@ -76,8 +70,8 @@ CudaDeviceTest::testFunction(OMRPortLibrary *portLibrary, uint32_t deviceId, J9C
 		uint32_t flags = J9CUDA_OCCUPANCY_DEFAULT;
 		uint32_t maxActiveBlocks = 0;
 
-		int32_t rc = omrcuda_funcMaxActiveBlocksPerMultiprocessor(deviceId, function, blockSize,
-					 dynamicSharedMemorySize, flags, &maxActiveBlocks);
+		int32_t rc = omrcuda_funcMaxActiveBlocksPerMultiprocessor(
+		        deviceId, function, blockSize, dynamicSharedMemorySize, flags, &maxActiveBlocks);
 
 		if (J9CUDA_ERROR_NOT_SUPPORTED != rc) {
 			ASSERT_EQ(0, rc) << "omrcuda_funcMaxActiveBlocksPerMultiprocessor() failed";
@@ -92,17 +86,15 @@ CudaDeviceTest::testFunction(OMRPortLibrary *portLibrary, uint32_t deviceId, J9C
 		uint32_t minGridSize = 0;
 		uint32_t maxBlockSize = 0;
 
-		int32_t rc = omrcuda_funcMaxPotentialBlockSize(deviceId, function,
-					 NULL, fixedDynamicSharedMemorySize,
-					 blockSizeLimit, flags, &minGridSize, &maxBlockSize);
+		int32_t rc = omrcuda_funcMaxPotentialBlockSize(deviceId, function, NULL, fixedDynamicSharedMemorySize,
+		        blockSizeLimit, flags, &minGridSize, &maxBlockSize);
 
 		if (J9CUDA_ERROR_NOT_SUPPORTED != rc) {
 			ASSERT_EQ(0, rc) << "omrcuda_funcMaxPotentialBlockSize(fixed) failed";
 		}
 
-		rc = omrcuda_funcMaxPotentialBlockSize(deviceId, function,
-											   variableDynamicSharedMemorySize, userData,
-											   blockSizeLimit, flags, &minGridSize, &maxBlockSize);
+		rc = omrcuda_funcMaxPotentialBlockSize(deviceId, function, variableDynamicSharedMemorySize, userData,
+		        blockSizeLimit, flags, &minGridSize, &maxBlockSize);
 
 		if (J9CUDA_ERROR_NOT_SUPPORTED != rc) {
 			ASSERT_EQ(0, rc) << "omrcuda_funcMaxPotentialBlockSize(variable) failed";

@@ -37,6 +37,4 @@ typedef struct OMRWin32SignalInfo {
 	char moduleName[_MAX_PATH];
 } OMRWin32SignalInfo;
 
-#endif     /* omrsignal_h */
-
-
+#endif /* omrsignal_h */

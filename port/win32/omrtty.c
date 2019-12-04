@@ -21,13 +21,12 @@
  *******************************************************************************/
 
 /**
-  * @file
-  * @ingroup Port
-  * @brief TTY output
-  *
-  * All VM output goes to stderr by default.  These routines provide the helpers for such output.
-  */
-
+ * @file
+ * @ingroup Port
+ * @brief TTY output
+ *
+ * All VM output goes to stderr by default.  These routines provide the helpers for such output.
+ */
 
 #include <windows.h>
 #include <stdio.h>
@@ -37,15 +36,11 @@
 
 /* private-prototypes */
 
-
 /* #define TTY_LOG_FILE "d:\\ive\\tty" */
 
 #ifdef TTY_LOG_FILE
 int32_t fd;
 #endif
-
-
-
 
 /**
  * PortLibrary startup.
@@ -130,8 +125,6 @@ omrtty_shutdown(struct OMRPortLibrary *portLibrary)
 	}
 }
 
-
-
 /**
  * Write characters to stderr.
  *
@@ -154,9 +147,6 @@ omrtty_printf(struct OMRPortLibrary *portLibrary, const char *format, ...)
 	va_end(args);
 }
 
-
-
-
 /**
  * Read characters from stdin into buffer.
  *
@@ -169,8 +159,8 @@ omrtty_printf(struct OMRPortLibrary *portLibrary, const char *format, ...)
 intptr_t
 omrtty_get_chars(struct OMRPortLibrary *portLibrary, char *s, uintptr_t length)
 {
-	DWORD	nCharsRead;
-	DWORD	result;
+	DWORD nCharsRead;
+	DWORD result;
 
 	result = ReadFile(PPG_tty_consoleInputHd, s, (DWORD)length, &nCharsRead, NULL);
 
@@ -184,8 +174,6 @@ omrtty_get_chars(struct OMRPortLibrary *portLibrary, char *s, uintptr_t length)
 	}
 	return nCharsRead;
 }
-
-
 
 /**
  * Output message to stderr.
@@ -209,8 +197,6 @@ omrtty_err_printf(struct OMRPortLibrary *portLibrary, const char *format, ...)
 	va_end(args);
 }
 
-
-
 /**
  * Determine the number of characters remaining to be read from stdin.
  *
@@ -228,16 +214,20 @@ omrtty_available(struct OMRPortLibrary *portLibrary)
 	} else {
 		/* this is probably because we aren't reading a pipe but a console */
 		if (ERROR_INVALID_HANDLE == GetLastError()) {
-			/* Note that this could be done on the stack if we believe that it might overflow (40 k) so dynamic allocation is safer for now */
+			/* Note that this could be done on the stack if we believe that it might overflow (40 k) so
+			 * dynamic allocation is safer for now */
 			/* The number of events being 2000 is consistent with other JDKs.
-			 * (If you put more than 999 chars into the buffer before hitting enter, you lock up standard input.)
+			 * (If you put more than 999 chars into the buffer before hitting enter, you lock up standard
+			 * input.)
 			 */
 #define EVENTS_TO_CAPTURE 2000
 			DWORD available = 0;
 
 			omrthread_monitor_enter(PPG_tty_consoleBufferMonitor);
 			if (NULL == PPG_tty_consoleEventBuffer) {
-				PPG_tty_consoleEventBuffer = portLibrary->mem_allocate_memory(portLibrary, EVENTS_TO_CAPTURE * sizeof(INPUT_RECORD), OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
+				PPG_tty_consoleEventBuffer = portLibrary->mem_allocate_memory(portLibrary,
+				        EVENTS_TO_CAPTURE * sizeof(INPUT_RECORD), OMR_GET_CALLSITE(),
+				        OMRMEM_CATEGORY_PORT_LIBRARY);
 				/* if we failed to make the buffer, just give up and say we found nothing */
 				if (NULL == PPG_tty_consoleEventBuffer) {
 					omrthread_monitor_exit(PPG_tty_consoleBufferMonitor);
@@ -245,14 +235,25 @@ omrtty_available(struct OMRPortLibrary *portLibrary)
 				}
 			}
 
-			if (PeekConsoleInput(PPG_tty_consoleInputHd, (INPUT_RECORD *)PPG_tty_consoleEventBuffer, EVENTS_TO_CAPTURE, &available)) {
+			if (PeekConsoleInput(PPG_tty_consoleInputHd, (INPUT_RECORD *)PPG_tty_consoleEventBuffer,
+			            EVENTS_TO_CAPTURE, &available)) {
 				int x = 0;
-				INPUT_RECORD *inputRecordPointer = (INPUT_RECORD *)PPG_tty_consoleEventBuffer;	/* provided to avoid some casting */
+				INPUT_RECORD *inputRecordPointer =
+				        (INPUT_RECORD *)PPG_tty_consoleEventBuffer; /* provided
+				                                                       to
+				                                                       avoid
+				                                                       some
+				                                                       casting
+				                                                     */
 				BOOL bytesCanBeRead = FALSE;
 
 				for (x = 0; x < (int)available; x++) {
-					if ((KEY_EVENT == inputRecordPointer[x].EventType) && (inputRecordPointer[x].Event.KeyEvent.bKeyDown) && ('\r' == inputRecordPointer[x].Event.KeyEvent.uChar.AsciiChar)) {
-						bytesCanBeRead = TRUE;	/* report true if we find a return char since we know that it is safe to read at least that one byte */
+					if ((KEY_EVENT == inputRecordPointer[x].EventType)
+					        && (inputRecordPointer[x].Event.KeyEvent.bKeyDown)
+					        && ('\r' == inputRecordPointer[x].Event.KeyEvent.uChar.AsciiChar)) {
+						bytesCanBeRead = TRUE; /* report true if we find a return char since we
+						                          know that it is safe to read at least that one
+						                          byte */
 						break;
 					}
 				}
@@ -336,6 +337,3 @@ omrtty_daemonize(struct OMRPortLibrary *portLibrary)
 #endif
 	}
 }
-
-
-

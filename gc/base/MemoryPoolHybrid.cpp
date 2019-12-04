@@ -28,13 +28,13 @@
 #include "GCExtensionsBase.hpp"
 #include "GlobalCollector.hpp"
 #include "Heap.hpp"
+#include "HeapLinkedFreeHeader.hpp"
+#include "HeapRegionDescriptor.hpp"
+#include "HeapRegionManager.hpp"
+#include "LargeObjectAllocateStats.hpp"
 #include "MemoryPool.hpp"
 #include "MemorySpace.hpp"
 #include "MemorySubSpace.hpp"
-#include "HeapRegionDescriptor.hpp"
-#include "HeapRegionManager.hpp"
-#include "HeapLinkedFreeHeader.hpp"
-#include "LargeObjectAllocateStats.hpp"
 #include "ParallelSweepChunk.hpp"
 #include "SweepHeapSectioning.hpp"
 #include "SweepPoolState.hpp"
@@ -42,8 +42,8 @@
 /**
  * Create and initialize a new instance of the receiver.
  */
-MM_MemoryPoolHybrid*
-MM_MemoryPoolHybrid::newInstance(MM_EnvironmentBase* env, uintptr_t minimumFreeEntrySize, uintptr_t maxSplit)
+MM_MemoryPoolHybrid *
+MM_MemoryPoolHybrid::newInstance(MM_EnvironmentBase *env, uintptr_t minimumFreeEntrySize, uintptr_t maxSplit)
 {
 	return newInstance(env, minimumFreeEntrySize, maxSplit, "Unknown");
 }
@@ -51,12 +51,14 @@ MM_MemoryPoolHybrid::newInstance(MM_EnvironmentBase* env, uintptr_t minimumFreeE
 /**
  * Create and initialize a new instance of the receiver.
  */
-MM_MemoryPoolHybrid*
-MM_MemoryPoolHybrid::newInstance(MM_EnvironmentBase* env, uintptr_t minimumFreeEntrySize, uintptr_t maxSplit, const char* name)
+MM_MemoryPoolHybrid *
+MM_MemoryPoolHybrid::newInstance(
+        MM_EnvironmentBase *env, uintptr_t minimumFreeEntrySize, uintptr_t maxSplit, const char *name)
 {
-	MM_MemoryPoolHybrid* memoryPool;
+	MM_MemoryPoolHybrid *memoryPool;
 
-	memoryPool = (MM_MemoryPoolHybrid*)env->getForge()->allocate(sizeof(MM_MemoryPoolHybrid), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+	memoryPool = (MM_MemoryPoolHybrid *)env->getForge()->allocate(
+	        sizeof(MM_MemoryPoolHybrid), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
 	if (memoryPool) {
 		memoryPool = new (memoryPool) MM_MemoryPoolHybrid(env, minimumFreeEntrySize, maxSplit, name);
 		if (!memoryPool->initialize(env)) {
@@ -71,17 +73,18 @@ MM_MemoryPoolHybrid::newInstance(MM_EnvironmentBase* env, uintptr_t minimumFreeE
  * Allocation
  ****************************************
  */
-MMINLINE MM_HeapLinkedFreeHeader*
-MM_MemoryPoolHybrid::internalAllocateFromList(MM_EnvironmentBase* env, uintptr_t sizeInBytesRequired, uintptr_t curFreeList, MM_HeapLinkedFreeHeader** previousFreeEntry, uintptr_t* largestFreeEntry)
+MMINLINE MM_HeapLinkedFreeHeader *
+MM_MemoryPoolHybrid::internalAllocateFromList(MM_EnvironmentBase *env, uintptr_t sizeInBytesRequired,
+        uintptr_t curFreeList, MM_HeapLinkedFreeHeader **previousFreeEntry, uintptr_t *largestFreeEntry)
 {
 	bool const compressed = compressObjectReferences();
 	uintptr_t walkCountCurrentList = 0;
-	J9ModronAllocateHint* allocateHintUsed = NULL;
-	MM_HeapLinkedFreeHeader* candidateHintEntry = NULL;
+	J9ModronAllocateHint *allocateHintUsed = NULL;
+	MM_HeapLinkedFreeHeader *candidateHintEntry = NULL;
 	uintptr_t candidateHintSize = 0;
 	uintptr_t currentFreeEntrySize = 0;
 
-	MM_HeapLinkedFreeHeader* currentFreeEntry = _heapFreeLists[curFreeList]._freeList;
+	MM_HeapLinkedFreeHeader *currentFreeEntry = _heapFreeLists[curFreeList]._freeList;
 	*previousFreeEntry = NULL;
 
 	/* Large object - use a hint if it is available */
@@ -103,7 +106,8 @@ MM_MemoryPoolHybrid::internalAllocateFromList(MM_EnvironmentBase* env, uintptr_t
 		}
 
 		if (sizeInBytesRequired <= currentFreeEntrySize) {
-			if (((walkCountCurrentList >= J9MODRON_ALLOCATION_MANAGER_HINT_MAX_WALK) || ((walkCountCurrentList > 1) && allocateHintUsed))) {
+			if (((walkCountCurrentList >= J9MODRON_ALLOCATION_MANAGER_HINT_MAX_WALK)
+			            || ((walkCountCurrentList > 1) && allocateHintUsed))) {
 				_heapFreeLists[curFreeList].addHint(candidateHintEntry, candidateHintSize);
 			}
 
@@ -127,19 +131,19 @@ MM_MemoryPoolHybrid::internalAllocateFromList(MM_EnvironmentBase* env, uintptr_t
 	return currentFreeEntry;
 }
 
-
-void*
-MM_MemoryPoolHybrid::internalAllocate(MM_EnvironmentBase* env, uintptr_t sizeInBytesRequired, bool lockingRequired, MM_LargeObjectAllocateStats* largeObjectAllocateStatsForFreeList)
+void *
+MM_MemoryPoolHybrid::internalAllocate(MM_EnvironmentBase *env, uintptr_t sizeInBytesRequired, bool lockingRequired,
+        MM_LargeObjectAllocateStats *largeObjectAllocateStatsForFreeList)
 {
 	bool const compressed = compressObjectReferences();
-	MM_HeapLinkedFreeHeader* currentFreeEntry = NULL;
-	MM_HeapLinkedFreeHeader* previousFreeEntry = NULL;
+	MM_HeapLinkedFreeHeader *currentFreeEntry = NULL;
+	MM_HeapLinkedFreeHeader *previousFreeEntry = NULL;
 	uintptr_t largestFreeEntry = 0;
 	uintptr_t suggestedFreeList = 0;
 	uintptr_t curFreeList = 0;
-	MM_HeapLinkedFreeHeader* recycleEntry = NULL;
+	MM_HeapLinkedFreeHeader *recycleEntry = NULL;
 	uintptr_t recycleEntrySize = 0;
-	void* addrBase = NULL;
+	void *addrBase = NULL;
 
 	/* first pass iterating if skipReserved = true */
 	bool skipReserved = true;
@@ -162,7 +166,8 @@ retry:
 				_heapFreeLists[curFreeList]._timesLocked += 1;
 			}
 
-			currentFreeEntry = internalAllocateFromList(env, sizeInBytesRequired, curFreeList, &previousFreeEntry, &largestFreeEntry);
+			currentFreeEntry = internalAllocateFromList(
+			        env, sizeInBytesRequired, curFreeList, &previousFreeEntry, &largestFreeEntry);
 			if (NULL != currentFreeEntry) {
 				/* found a freeEntry; will release lock only after we handle the remainder */
 				break;
@@ -198,7 +203,8 @@ retry:
 			goto retry;
 		}
 #endif /* OMR_GC_CONCURRENT_SWEEP) */
-		/* Since we failed to allocate, update the largest free entry so that outside callers will be able to skip this pool, next time, in Tarok configurations */
+		/* Since we failed to allocate, update the largest free entry so that outside callers will be able to
+		 * skip this pool, next time, in Tarok configurations */
 		setLargestFreeEntry(largestFreeEntry);
 		return NULL;
 	}
@@ -218,10 +224,11 @@ retry:
 	/* Determine what to do with the recycled portion of the free entry */
 	recycleEntrySize = currentFreeEntry->getSize() - sizeInBytesRequired;
 
-	addrBase = (void*)currentFreeEntry;
-	recycleEntry = (MM_HeapLinkedFreeHeader*)(((uint8_t*)currentFreeEntry) + sizeInBytesRequired);
+	addrBase = (void *)currentFreeEntry;
+	recycleEntry = (MM_HeapLinkedFreeHeader *)(((uint8_t *)currentFreeEntry) + sizeInBytesRequired);
 
-	if (recycleHeapChunk(env, recycleEntry, ((uint8_t*)recycleEntry) + recycleEntrySize, previousFreeEntry, currentFreeEntry->getNext(compressed), curFreeList)) {
+	if (recycleHeapChunk(env, recycleEntry, ((uint8_t *)recycleEntry) + recycleEntrySize, previousFreeEntry,
+	            currentFreeEntry->getNext(compressed), curFreeList)) {
 		_heapFreeLists[curFreeList].updateHint(currentFreeEntry, recycleEntry);
 		_largeObjectAllocateStatsForFreeList[curFreeList].incrementFreeEntrySizeClassStats(recycleEntrySize);
 	} else {
@@ -243,7 +250,8 @@ retry:
 		_currentThreadFreeList[env->getEnvironmentId() % _heapFreeListCount] = suggestedFreeList;
 	}
 
-	/* Collector object allocate stats for Survivor are not interesting (_largeObjectCollectorAllocateStatsForFreeList is null for Survivor) */
+	/* Collector object allocate stats for Survivor are not interesting
+	 * (_largeObjectCollectorAllocateStatsForFreeList is null for Survivor) */
 	if (NULL != largeObjectAllocateStatsForFreeList) {
 		largeObjectAllocateStatsForFreeList[curFreeList].allocateObject(sizeInBytesRequired);
 	}
@@ -258,14 +266,15 @@ retry:
 }
 
 bool
-MM_MemoryPoolHybrid::internalAllocateTLH(MM_EnvironmentBase* env, uintptr_t maximumSizeInBytesRequired, void*& addrBase, void*& addrTop, bool lockingRequired, MM_LargeObjectAllocateStats* largeObjectAllocateStatsForFreeList)
+MM_MemoryPoolHybrid::internalAllocateTLH(MM_EnvironmentBase *env, uintptr_t maximumSizeInBytesRequired, void *&addrBase,
+        void *&addrTop, bool lockingRequired, MM_LargeObjectAllocateStats *largeObjectAllocateStatsForFreeList)
 {
 	bool const compressed = compressObjectReferences();
 	uintptr_t freeEntrySize = 0;
-	void* topOfRecycledChunk = NULL;
-	MM_HeapLinkedFreeHeader* entryNext = NULL;
-	MM_HeapLinkedFreeHeader* freeEntry = NULL;
-	MM_HeapLinkedFreeHeader* previousFreeEntry = NULL;
+	void *topOfRecycledChunk = NULL;
+	MM_HeapLinkedFreeHeader *entryNext = NULL;
+	MM_HeapLinkedFreeHeader *freeEntry = NULL;
+	MM_HeapLinkedFreeHeader *previousFreeEntry = NULL;
 	uintptr_t consumedSize = 0;
 	uintptr_t recycleEntrySize = 0;
 	uintptr_t suggestedFreeList;
@@ -277,7 +286,6 @@ retry:
 
 	bool firstIteration = true;
 	bool jumpedToSuggested = false;
-
 
 	if (skipReserved) {
 		curFreeList = _currentThreadFreeList[env->getEnvironmentId() % _heapFreeListCount];
@@ -329,7 +337,8 @@ retry:
 			goto retry;
 		}
 #endif /* OMR_GC_CONCURRENT_SWEEP */
-		/* if we failed to allocate a TLH, this pool is either full or so heavily fragmented that it is effectively full */
+		/* if we failed to allocate a TLH, this pool is either full or so heavily fragmented that it is
+		 * effectively full */
 		setLargestFreeEntry(0);
 		return false;
 	}
@@ -358,15 +367,16 @@ retry:
 
 	_allocCount += 1;
 	_allocBytes += consumedSize;
-	/* Collector TLH allocate stats for Survivor are not interesting (_largeObjectCollectorAllocateStatsForFreeList is null for Survivor) */
+	/* Collector TLH allocate stats for Survivor are not interesting (_largeObjectCollectorAllocateStatsForFreeList
+	 * is null for Survivor) */
 	if (NULL != largeObjectAllocateStatsForFreeList) {
 		largeObjectAllocateStatsForFreeList[curFreeList].incrementTlhAllocSizeClassStats(consumedSize);
 	}
 
-	addrBase = (void*)freeEntry;
-	addrTop = (void*)(((uint8_t*)addrBase) + consumedSize);
+	addrBase = (void *)freeEntry;
+	addrTop = (void *)(((uint8_t *)addrBase) + consumedSize);
 
-	topOfRecycledChunk = ((uint8_t*)addrTop) + recycleEntrySize;
+	topOfRecycledChunk = ((uint8_t *)addrTop) + recycleEntrySize;
 	entryNext = freeEntry->getNext(compressed);
 
 	/* Recycle the remaining entry back onto the free list (if applicable) */
@@ -380,7 +390,7 @@ retry:
 		_allocDiscardedBytes += recycleEntrySize;
 		_heapFreeLists[curFreeList].removeHint(freeEntry);
 	} else {
-		_heapFreeLists[curFreeList].updateHint(freeEntry, (MM_HeapLinkedFreeHeader*)addrTop);
+		_heapFreeLists[curFreeList].updateHint(freeEntry, (MM_HeapLinkedFreeHeader *)addrTop);
 		_largeObjectAllocateStatsForFreeList[curFreeList].incrementFreeEntrySizeClassStats(recycleEntrySize);
 	}
 
@@ -396,25 +406,27 @@ retry:
  ****************************************
  */
 MMINLINE void
-MM_MemoryPoolHybrid::appendToReservedFreeList(MM_EnvironmentBase* env, void* address, uintptr_t size)
+MM_MemoryPoolHybrid::appendToReservedFreeList(MM_EnvironmentBase *env, void *address, uintptr_t size)
 {
 	bool const compressed = compressObjectReferences();
-	MM_HeapLinkedFreeHeader* freeListTail = getReservedFreeList()->_freeList;
+	MM_HeapLinkedFreeHeader *freeListTail = getReservedFreeList()->_freeList;
 	while ((NULL != freeListTail) && (NULL != freeListTail->getNext(compressed))) {
 		freeListTail = freeListTail->getNext(compressed);
 	}
 
-	connectInnerMemoryToPool(env, (MM_HeapLinkedFreeHeader*)address, size, (MM_HeapLinkedFreeHeader*)freeListTail);
+	connectInnerMemoryToPool(
+	        env, (MM_HeapLinkedFreeHeader *)address, size, (MM_HeapLinkedFreeHeader *)freeListTail);
 
 	if (NULL == freeListTail) {
-		getReservedFreeList()->_freeList = (MM_HeapLinkedFreeHeader*)address;
+		getReservedFreeList()->_freeList = (MM_HeapLinkedFreeHeader *)address;
 	}
 	getReservedFreeList()->_freeSize += size;
 	getReservedFreeList()->_freeCount += 1;
 }
 
 void
-MM_MemoryPoolHybrid::appendToFreeList(MM_EnvironmentBase* env, J9ModronFreeList* freeList, MM_HeapLinkedFreeHeader* freeListTail, MM_HeapLinkedFreeHeader* newFreeEntry)
+MM_MemoryPoolHybrid::appendToFreeList(MM_EnvironmentBase *env, J9ModronFreeList *freeList,
+        MM_HeapLinkedFreeHeader *freeListTail, MM_HeapLinkedFreeHeader *newFreeEntry)
 {
 	bool const compressed = compressObjectReferences();
 	setNextForFreeEntryInFreeList(freeList, freeListTail, newFreeEntry);
@@ -426,14 +438,16 @@ MM_MemoryPoolHybrid::appendToFreeList(MM_EnvironmentBase* env, J9ModronFreeList*
 }
 
 MMINLINE void
-MM_MemoryPoolHybrid::appendToFreeList(MM_EnvironmentBase* env, J9ModronFreeList* freeList, MM_HeapLinkedFreeHeader* freeListTail, void* lowAddress, uintptr_t size)
+MM_MemoryPoolHybrid::appendToFreeList(MM_EnvironmentBase *env, J9ModronFreeList *freeList,
+        MM_HeapLinkedFreeHeader *freeListTail, void *lowAddress, uintptr_t size)
 {
-	createFreeEntry(env, lowAddress, (uint8_t*)lowAddress+size);
-	appendToFreeList(env, freeList, freeListTail, (MM_HeapLinkedFreeHeader*)lowAddress);
+	createFreeEntry(env, lowAddress, (uint8_t *)lowAddress + size);
+	appendToFreeList(env, freeList, freeListTail, (MM_HeapLinkedFreeHeader *)lowAddress);
 }
 
 uintptr_t
-MM_MemoryPoolHybrid::coalesceExpandRangeWithLastFreeEntry(MM_HeapLinkedFreeHeader* lastFreeEntry, J9ModronFreeList* freelist, void* lowAddress, uintptr_t expandSize)
+MM_MemoryPoolHybrid::coalesceExpandRangeWithLastFreeEntry(
+        MM_HeapLinkedFreeHeader *lastFreeEntry, J9ModronFreeList *freelist, void *lowAddress, uintptr_t expandSize)
 {
 	uintptr_t expandedSize = expandSize;
 	if (NULL == lastFreeEntry) {
@@ -442,7 +456,7 @@ MM_MemoryPoolHybrid::coalesceExpandRangeWithLastFreeEntry(MM_HeapLinkedFreeHeade
 	uintptr_t size = lastFreeEntry->getSize();
 
 	/* Check if the range can be fused to the tail previous free entry */
-	if (lowAddress == (void*)(((uintptr_t)lastFreeEntry) + size)) {
+	if (lowAddress == (void *)(((uintptr_t)lastFreeEntry) + size)) {
 		expandedSize += size;
 		_largeObjectAllocateStats->decrementFreeEntrySizeClassStats(size);
 		lastFreeEntry->setSize(expandedSize);
@@ -459,7 +473,8 @@ MM_MemoryPoolHybrid::coalesceExpandRangeWithLastFreeEntry(MM_HeapLinkedFreeHeade
 }
 
 uintptr_t
-MM_MemoryPoolHybrid::coalesceNewFreeEntryWithLastFreeEntry(MM_HeapLinkedFreeHeader* lastFreeEntry, J9ModronFreeList* freelist, MM_HeapLinkedFreeHeader* newFreeEntry)
+MM_MemoryPoolHybrid::coalesceNewFreeEntryWithLastFreeEntry(
+        MM_HeapLinkedFreeHeader *lastFreeEntry, J9ModronFreeList *freelist, MM_HeapLinkedFreeHeader *newFreeEntry)
 {
 	uintptr_t expandedSize = newFreeEntry->getSize();
 	if (NULL == lastFreeEntry) {
@@ -468,7 +483,7 @@ MM_MemoryPoolHybrid::coalesceNewFreeEntryWithLastFreeEntry(MM_HeapLinkedFreeHead
 	uintptr_t size = lastFreeEntry->getSize();
 
 	/* Do we need to coalesce ?*/
-	if ((uint8_t*)lastFreeEntry->afterEnd() == (uint8_t*)newFreeEntry) {
+	if ((uint8_t *)lastFreeEntry->afterEnd() == (uint8_t *)newFreeEntry) {
 		_largeObjectAllocateStats->decrementFreeEntrySizeClassStats(size);
 		freelist->_freeSize += expandedSize;
 		expandedSize += size;
@@ -478,29 +493,32 @@ MM_MemoryPoolHybrid::coalesceNewFreeEntryWithLastFreeEntry(MM_HeapLinkedFreeHead
 }
 
 void
-MM_MemoryPoolHybrid::moveLastFreeEntryToReservedFreeList(MM_EnvironmentBase* env, J9ModronFreeList* fromFreeList, MM_HeapLinkedFreeHeader* previousFreeEntry, MM_HeapLinkedFreeHeader* freeEntry, J9ModronFreeList* toFreeList, MM_HeapLinkedFreeHeader* toFreeListTail)
+MM_MemoryPoolHybrid::moveLastFreeEntryToReservedFreeList(MM_EnvironmentBase *env, J9ModronFreeList *fromFreeList,
+        MM_HeapLinkedFreeHeader *previousFreeEntry, MM_HeapLinkedFreeHeader *freeEntry, J9ModronFreeList *toFreeList,
+        MM_HeapLinkedFreeHeader *toFreeListTail)
 {
 	bool const compressed = compressObjectReferences();
 	Assert_MM_true(NULL == freeEntry->getNext(compressed));
 	setNextForFreeEntryInFreeList(fromFreeList, previousFreeEntry, NULL);
-	
+
 	fromFreeList->_freeSize -= freeEntry->getSize();
 	fromFreeList->_freeCount -= 1;
 
 	setNextForFreeEntryInFreeList(toFreeList, toFreeListTail, freeEntry);
-	
+
 	toFreeList->_freeSize += freeEntry->getSize();
 	toFreeList->_freeCount += 1;
 }
 
 bool
-MM_MemoryPoolHybrid::tryContractWithRangeInFreelist(MM_EnvironmentBase* env, J9ModronFreeList* freeList, uintptr_t contractSize, void* lowAddress, void* highAddress)
+MM_MemoryPoolHybrid::tryContractWithRangeInFreelist(MM_EnvironmentBase *env, J9ModronFreeList *freeList,
+        uintptr_t contractSize, void *lowAddress, void *highAddress)
 {
 	bool const compressed = compressObjectReferences();
 	bool ret = false;
-	MM_HeapLinkedFreeHeader* previousFreeEntry = NULL;
-	MM_HeapLinkedFreeHeader* currentFreeEntry = NULL;
-	MM_HeapLinkedFreeHeader* nextFreeEntry = NULL;
+	MM_HeapLinkedFreeHeader *previousFreeEntry = NULL;
+	MM_HeapLinkedFreeHeader *currentFreeEntry = NULL;
+	MM_HeapLinkedFreeHeader *nextFreeEntry = NULL;
 
 	if (NULL != freeList->_freeList) {
 		currentFreeEntry = freeList->_freeList;
@@ -515,18 +533,18 @@ MM_MemoryPoolHybrid::tryContractWithRangeInFreelist(MM_EnvironmentBase* env, J9M
 			uintptr_t contractCount = 1;
 
 			_largeObjectAllocateStats->decrementFreeEntrySizeClassStats(currentFreeEntry->getSize());
-			Assert_MM_true((MM_HeapLinkedFreeHeader*)lowAddress < currentFreeEntry);
-			if (currentFreeEntry < (MM_HeapLinkedFreeHeader*)lowAddress) {
+			Assert_MM_true((MM_HeapLinkedFreeHeader *)lowAddress < currentFreeEntry);
+			if (currentFreeEntry < (MM_HeapLinkedFreeHeader *)lowAddress) {
 				if (createFreeEntry(env, currentFreeEntry, lowAddress, NULL, nextFreeEntry)) {
 					contractCount -= 1;
-					_largeObjectAllocateStats->incrementFreeEntrySizeClassStats(currentFreeEntry->getSize());
+					_largeObjectAllocateStats->incrementFreeEntrySizeClassStats(
+					        currentFreeEntry->getSize());
 				} else {
 					/* Abandon the leading entry - it is too small to be on the free list */
 					uintptr_t leadingSize = ((uintptr_t)lowAddress) - ((uintptr_t)currentFreeEntry);
 					totalContractSize += leadingSize;
 					currentFreeEntry = NULL;
 				}
-
 			}
 
 			Assert_MM_true((NULL == currentFreeEntry) || (previousFreeEntry < currentFreeEntry));
@@ -541,9 +559,9 @@ MM_MemoryPoolHybrid::tryContractWithRangeInFreelist(MM_EnvironmentBase* env, J9M
 	}
 	return ret;
 }
- 
+
 void
-MM_MemoryPoolHybrid::postProcess(MM_EnvironmentBase* env, Cause cause)
+MM_MemoryPoolHybrid::postProcess(MM_EnvironmentBase *env, Cause cause)
 {
 	bool const compressed = compressObjectReferences();
 	uintptr_t lastFreeListIndex = _heapFreeListCount - 1;
@@ -575,31 +593,31 @@ MM_MemoryPoolHybrid::postProcess(MM_EnvironmentBase* env, Cause cause)
 
 		/* remove largestFreeEntry from freeList, add it into reservedFreeList */
 		if (0 < _sweepPoolState->_largestFreeEntry) {
-			MM_HeapLinkedFreeHeader* largestFreeEntry;
+			MM_HeapLinkedFreeHeader *largestFreeEntry;
 			if (NULL == _sweepPoolState->_previousLargestFreeEntry) {
 				largestFreeEntry = _heapFreeLists[0]._freeList;
 				_heapFreeLists[0]._freeList = largestFreeEntry->getNext(compressed);
 			} else {
 				largestFreeEntry = _sweepPoolState->_previousLargestFreeEntry->getNext(compressed);
-				_sweepPoolState->_previousLargestFreeEntry->setNext(largestFreeEntry->getNext(compressed), compressed);
+				_sweepPoolState->_previousLargestFreeEntry->setNext(
+				        largestFreeEntry->getNext(compressed), compressed);
 			}
 			Assert_MM_true(_sweepPoolState->_largestFreeEntry == largestFreeEntry->getSize());
 			_heapFreeLists[0]._freeSize -= largestFreeEntry->getSize();
 			_heapFreeLists[0]._freeCount -= 1;
-			appendToReservedFreeList(env, (void*) largestFreeEntry, largestFreeEntry->getSize());
+			appendToReservedFreeList(env, (void *)largestFreeEntry, largestFreeEntry->getSize());
 		}
 
 		/* Free list splitting at sweep chunk granularity.
 		 * Faster but less precise splits compared to free list entry granularity.
 		 */
-		MM_GCExtensionsBase* extensions = env->getExtensions();
-		MM_ParallelSweepChunk* chunk = NULL;
+		MM_GCExtensionsBase *extensions = env->getExtensions();
+		MM_ParallelSweepChunk *chunk = NULL;
 		MM_SweepHeapSectioningIterator sectioningIterator(extensions->sweepHeapSectioning);
 		uintptr_t freeSize = _heapFreeLists[0]._freeSize;
 		uintptr_t freeCount = _heapFreeLists[0]._freeCount;
 		uintptr_t accumulatedFreeSize = 0;
 		uintptr_t accumulatedFreeHoles = 0;
-
 
 		/* Iterate over all the sweep chunks to find split candidates. */
 		uintptr_t processedChunkCount = 0;
@@ -623,15 +641,18 @@ MM_MemoryPoolHybrid::postProcess(MM_EnvironmentBase* env, Cause cause)
 			if (currentFreeListSize >= freeListSplitSize) {
 				/* Split here. */
 				/* Fill in the size and holes of the current free list. */
-				_heapFreeLists[currentFreeListIndex]._freeCount = chunk->_accumulatedFreeHoles - accumulatedFreeHoles;
+				_heapFreeLists[currentFreeListIndex]._freeCount = chunk->_accumulatedFreeHoles
+				        - accumulatedFreeHoles;
 				_heapFreeLists[currentFreeListIndex]._freeSize = currentFreeListSize;
 
 				/* Terminate the tail of the current free list. */
 				chunk->_splitCandidatePreviousEntry->setNext(NULL, compressed);
 				/**
-				 * Identify previous reserved entry from the previous LargestFreeEntry which is set during sweep
-				 * if previousLargestFreeEntry == splitCandidatePreviousEntry, it means largestFreeEntry == splitCandidateEntry and the largestFreeEntry is in the next free list
-				 * if previousLargestFreeEntry < splitCandidatePreviousEntry, it means the largestFreeEntry is in current freeList
+				 * Identify previous reserved entry from the previous LargestFreeEntry which is set
+				 * during sweep if previousLargestFreeEntry == splitCandidatePreviousEntry, it means
+				 * largestFreeEntry == splitCandidateEntry and the largestFreeEntry is in the next free
+				 * list if previousLargestFreeEntry < splitCandidatePreviousEntry, it means the
+				 * largestFreeEntry is in current freeList
 				 */
 
 				/* Set the head of the new free list. */
@@ -649,15 +670,15 @@ MM_MemoryPoolHybrid::postProcess(MM_EnvironmentBase* env, Cause cause)
 		_heapFreeLists[currentFreeListIndex]._freeCount = freeCount - accumulatedFreeHoles;
 	} else {
 
-	 	uintptr_t reservedFreeEntrySize = 0;
-	  	MM_HeapLinkedFreeHeader* previousReservedFreeEntry = NULL;
-	 	uintptr_t reservedFreeListIndex = 0;
+		uintptr_t reservedFreeEntrySize = 0;
+		MM_HeapLinkedFreeHeader *previousReservedFreeEntry = NULL;
+		uintptr_t reservedFreeListIndex = 0;
 		bool reservedFreeEntryAvaliable = false;
 		/* Free list splitting at free list entry granularity.
 		 * Slower but necessary when you don't have valid sweep chunks.
 		 */
-		MM_HeapLinkedFreeHeader* previousFreeList = NULL;
-		MM_HeapLinkedFreeHeader* currentFreeList = _heapFreeLists[0]._freeList;
+		MM_HeapLinkedFreeHeader *previousFreeList = NULL;
+		MM_HeapLinkedFreeHeader *currentFreeList = _heapFreeLists[0]._freeList;
 
 		_heapFreeLists[0]._freeCount = 0;
 		_heapFreeLists[0]._freeSize = 0;
@@ -676,7 +697,8 @@ MM_MemoryPoolHybrid::postProcess(MM_EnvironmentBase* env, Cause cause)
 			previousFreeList = currentFreeList;
 			currentFreeList = currentFreeList->getNext(compressed);
 
-			if ((_heapFreeLists[currentFreeListIndex]._freeSize >= freeListSplitSize) && (currentFreeListIndex < lastFreeListIndex)) {
+			if ((_heapFreeLists[currentFreeListIndex]._freeSize >= freeListSplitSize)
+			        && (currentFreeListIndex < lastFreeListIndex)) {
 				previousFreeList->setNext(NULL, compressed);
 				previousFreeList = NULL;
 				currentFreeListIndex += 1;
@@ -688,7 +710,7 @@ MM_MemoryPoolHybrid::postProcess(MM_EnvironmentBase* env, Cause cause)
 
 		if (reservedFreeEntryAvaliable) {
 			/* remove largestFreeEntry from freeList, add it into reservedFreeList */
-			MM_HeapLinkedFreeHeader* largestFreeEntry;
+			MM_HeapLinkedFreeHeader *largestFreeEntry;
 			if (NULL == previousReservedFreeEntry) {
 				largestFreeEntry = _heapFreeLists[reservedFreeListIndex]._freeList;
 				_heapFreeLists[reservedFreeListIndex]._freeList = largestFreeEntry->getNext(compressed);
@@ -698,9 +720,8 @@ MM_MemoryPoolHybrid::postProcess(MM_EnvironmentBase* env, Cause cause)
 			}
 			_heapFreeLists[currentFreeListIndex]._freeSize -= largestFreeEntry->getSize();
 			_heapFreeLists[currentFreeListIndex]._freeCount -= 1;
-			appendToReservedFreeList(env, (void*) largestFreeEntry, largestFreeEntry->getSize());
+			appendToReservedFreeList(env, (void *)largestFreeEntry, largestFreeEntry->getSize());
 		}
-
 	}
 
 	/* reset thread starting positions */
@@ -722,7 +743,8 @@ MM_MemoryPoolHybrid::postProcess(MM_EnvironmentBase* env, Cause cause)
  *
  */
 void
-MM_MemoryPoolHybrid::expandWithRange(MM_EnvironmentBase* env, uintptr_t expandSize, void* lowAddress, void* highAddress, bool canCoalesce)
+MM_MemoryPoolHybrid::expandWithRange(
+        MM_EnvironmentBase *env, uintptr_t expandSize, void *lowAddress, void *highAddress, bool canCoalesce)
 {
 	if (0 == expandSize) {
 		return;
@@ -735,32 +757,33 @@ MM_MemoryPoolHybrid::expandWithRange(MM_EnvironmentBase* env, uintptr_t expandSi
 	}
 
 	bool const compressed = compressObjectReferences();
-	MM_HeapLinkedFreeHeader* lastFreeEntry = NULL;
-	MM_HeapLinkedFreeHeader* perviousLastFreeEntry = NULL;
+	MM_HeapLinkedFreeHeader *lastFreeEntry = NULL;
+	MM_HeapLinkedFreeHeader *perviousLastFreeEntry = NULL;
 
-	MM_HeapLinkedFreeHeader* lastReservedFreeEntry = NULL;
+	MM_HeapLinkedFreeHeader *lastReservedFreeEntry = NULL;
 	uintptr_t expandedSize = expandSize;
-	J9ModronFreeList* reservedFreelist = getReservedFreeList();
-	J9ModronFreeList* lastFreelist = NULL;
+	J9ModronFreeList *reservedFreelist = getReservedFreeList();
+	J9ModronFreeList *lastFreelist = NULL;
 
 	/* this method only supports expand to higher address direction.
-	 * attempt to Coalesce with the last reserved free entry first, 
+	 * attempt to Coalesce with the last reserved free entry first,
 	 * it doesn't connect with reserved free entry, it may connect with the last free entry,
-	 * if the newly created entry is bigger than VeryLargeObjectThreshold, move or append the entry into reserved freelist.
-	 * otherwise append the entry into regular free list.
-	*/
+	 * if the newly created entry is bigger than VeryLargeObjectThreshold, move or append the entry into reserved
+	 * freelist. otherwise append the entry into regular free list.
+	 */
 	if (NULL != reservedFreelist->_freeList) {
 		lastReservedFreeEntry = reservedFreelist->_freeList;
 		while (lastReservedFreeEntry->getNext(compressed)) {
 			lastReservedFreeEntry = lastReservedFreeEntry->getNext(compressed);
 		}
 		if (canCoalesce) {
-			expandedSize = coalesceExpandRangeWithLastFreeEntry(lastReservedFreeEntry, reservedFreelist, lowAddress, expandSize);
+			expandedSize = coalesceExpandRangeWithLastFreeEntry(
+			        lastReservedFreeEntry, reservedFreelist, lowAddress, expandSize);
 		}
 	}
 
 	if (expandedSize == expandSize) {
-		uintptr_t index = _heapFreeListCount-1;
+		uintptr_t index = _heapFreeListCount - 1;
 		while ((NULL == _heapFreeLists[index]._freeList) && (0 != index)) {
 			index--;
 		}
@@ -771,17 +794,20 @@ MM_MemoryPoolHybrid::expandWithRange(MM_EnvironmentBase* env, uintptr_t expandSi
 				perviousLastFreeEntry = lastFreeEntry;
 				lastFreeEntry = lastFreeEntry->getNext(compressed);
 			}
-				
+
 			if (canCoalesce) {
-				expandedSize = coalesceExpandRangeWithLastFreeEntry(lastFreeEntry, lastFreelist, lowAddress, expandSize);
+				expandedSize = coalesceExpandRangeWithLastFreeEntry(
+				        lastFreeEntry, lastFreelist, lowAddress, expandSize);
 			}
 		}
 
-		uintptr_t reservedFreeEntryThreshold = env->getExtensions()->largeObjectAllocationProfilingVeryLargeObjectThreshold;
+		uintptr_t reservedFreeEntryThreshold =
+		        env->getExtensions()->largeObjectAllocationProfilingVeryLargeObjectThreshold;
 		if (reservedFreeEntryThreshold <= expandedSize) {
 			if (expandedSize != expandSize) {
 				/* move coalesced free entry to reserved freelist */
-				moveLastFreeEntryToReservedFreeList(env, lastFreelist, perviousLastFreeEntry, lastFreeEntry, reservedFreelist, lastReservedFreeEntry);
+				moveLastFreeEntryToReservedFreeList(env, lastFreelist, perviousLastFreeEntry,
+				        lastFreeEntry, reservedFreelist, lastReservedFreeEntry);
 			} else {
 				/* append to reserved freelist */
 				appendToFreeList(env, reservedFreelist, lastReservedFreeEntry, lowAddress, expandSize);
@@ -809,20 +835,22 @@ MM_MemoryPoolHybrid::expandWithRange(MM_EnvironmentBase* env, uintptr_t expandSi
  * @note The expectation is that the range consists ONLY of free elements (no live data appears).
  *
  */
-void*
-MM_MemoryPoolHybrid::contractWithRange(MM_EnvironmentBase* env, uintptr_t contractSize, void* lowAddress, void* highAddress)
+void *
+MM_MemoryPoolHybrid::contractWithRange(
+        MM_EnvironmentBase *env, uintptr_t contractSize, void *lowAddress, void *highAddress)
 {
 	if (0 == contractSize) {
 		return NULL;
 	}
 
-	/* try contract in reserved freelist first, if can not find the range in reserved freellist, then try contract in the last freelist */
+	/* try contract in reserved freelist first, if can not find the range in reserved freellist, then try contract
+	 * in the last freelist */
 	if (!tryContractWithRangeInFreelist(env, getReservedFreeList(), contractSize, lowAddress, highAddress)) {
-		uintptr_t index = _heapFreeListCount-1;
+		uintptr_t index = _heapFreeListCount - 1;
 		while ((NULL == _heapFreeLists[index]._freeList) && (0 != index)) {
 			index--;
 		}
-		J9ModronFreeList* freelist = &_heapFreeLists[index];
+		J9ModronFreeList *freelist = &_heapFreeLists[index];
 		tryContractWithRangeInFreelist(env, freelist, contractSize, lowAddress, highAddress);
 	}
 
@@ -840,25 +868,25 @@ MM_MemoryPoolHybrid::contractWithRange(MM_EnvironmentBase* env, uintptr_t contra
  *
  */
 void
-MM_MemoryPoolHybrid::addFreeEntries(MM_EnvironmentBase* env,
-													 MM_HeapLinkedFreeHeader*& freeListHead, MM_HeapLinkedFreeHeader*& freeListTail,
-													 uintptr_t freeListMemoryCount, uintptr_t freeListMemorySize)
+MM_MemoryPoolHybrid::addFreeEntries(MM_EnvironmentBase *env, MM_HeapLinkedFreeHeader *&freeListHead,
+        MM_HeapLinkedFreeHeader *&freeListTail, uintptr_t freeListMemoryCount, uintptr_t freeListMemorySize)
 {
 	bool const compressed = compressObjectReferences();
-	uintptr_t reservedFreeEntryThreshold = env->getExtensions()->largeObjectAllocationProfilingVeryLargeObjectThreshold;
-	MM_HeapLinkedFreeHeader* currentFreeEntry =NULL;
-	MM_HeapLinkedFreeHeader* nextFreeEntry = freeListHead->getNext(compressed);
+	uintptr_t reservedFreeEntryThreshold =
+	        env->getExtensions()->largeObjectAllocationProfilingVeryLargeObjectThreshold;
+	MM_HeapLinkedFreeHeader *currentFreeEntry = NULL;
+	MM_HeapLinkedFreeHeader *nextFreeEntry = freeListHead->getNext(compressed);
 
-	MM_HeapLinkedFreeHeader* lastFreeEntry = NULL;
-	MM_HeapLinkedFreeHeader* perviousLastFreeEntry = NULL;
-	J9ModronFreeList* lastFreelist = NULL;
+	MM_HeapLinkedFreeHeader *lastFreeEntry = NULL;
+	MM_HeapLinkedFreeHeader *perviousLastFreeEntry = NULL;
+	J9ModronFreeList *lastFreelist = NULL;
 
-	MM_HeapLinkedFreeHeader* lastReservedFreeEntry = NULL;
-	J9ModronFreeList* reservedFreelist = getReservedFreeList();
+	MM_HeapLinkedFreeHeader *lastReservedFreeEntry = NULL;
+	J9ModronFreeList *reservedFreelist = getReservedFreeList();
 	uintptr_t expandSize = freeListHead->getSize();
 	uintptr_t expandedSize = expandSize;
 
-	uintptr_t index = _heapFreeListCount-1;
+	uintptr_t index = _heapFreeListCount - 1;
 	while ((NULL == _heapFreeLists[index]._freeList) && (0 != index)) {
 		index--;
 	}
@@ -873,15 +901,16 @@ MM_MemoryPoolHybrid::addFreeEntries(MM_EnvironmentBase* env,
 
 	/* try to coalesce freeListHead with reservedFreelist first, then try to coalesce it with regular freelist,
 	 * if the newly created entry or the rest of free entries is bigger than ReservedFreeEntryThreshold,
-     * move or append it into reserved freelist, otherwise into regular freelist.
-     */
+	 * move or append it into reserved freelist, otherwise into regular freelist.
+	 */
 	if (NULL != reservedFreelist->_freeList) {
 		lastReservedFreeEntry = reservedFreelist->_freeList;
 		while (lastReservedFreeEntry->getNext(compressed)) {
 			lastReservedFreeEntry = lastReservedFreeEntry->getNext(compressed);
 		}
 
-		expandedSize = coalesceNewFreeEntryWithLastFreeEntry(lastReservedFreeEntry, reservedFreelist, freeListHead);
+		expandedSize =
+		        coalesceNewFreeEntryWithLastFreeEntry(lastReservedFreeEntry, reservedFreelist, freeListHead);
 	}
 
 	if (expandedSize == expandSize) {
@@ -891,7 +920,8 @@ MM_MemoryPoolHybrid::addFreeEntries(MM_EnvironmentBase* env,
 		if (reservedFreeEntryThreshold <= expandedSize) {
 			if (expandedSize != expandSize) {
 				/* move coalesced free entry to reserved freelist */
-				moveLastFreeEntryToReservedFreeList(env, lastFreelist, perviousLastFreeEntry, lastFreeEntry, reservedFreelist, lastReservedFreeEntry);
+				moveLastFreeEntryToReservedFreeList(env, lastFreelist, perviousLastFreeEntry,
+				        lastFreeEntry, reservedFreelist, lastReservedFreeEntry);
 			} else {
 				/* append to reserved freelist */
 				appendToFreeList(env, reservedFreelist, lastReservedFreeEntry, freeListHead);
@@ -937,34 +967,34 @@ MM_MemoryPoolHybrid::addFreeEntries(MM_EnvironmentBase* env,
  * @return TRUE if at least one chunk in specified range found; FALSE otherwise
  */
 bool
-MM_MemoryPoolHybrid::removeFreeEntriesWithinRange(MM_EnvironmentBase* env, void* lowAddress, void* highAddress,
-																   uintptr_t minimumSize,
-																   MM_HeapLinkedFreeHeader*& retListHead, MM_HeapLinkedFreeHeader*& retListTail,
-																   uintptr_t& retListMemoryCount, uintptr_t& retListMemorySize)
+MM_MemoryPoolHybrid::removeFreeEntriesWithinRange(MM_EnvironmentBase *env, void *lowAddress, void *highAddress,
+        uintptr_t minimumSize, MM_HeapLinkedFreeHeader *&retListHead, MM_HeapLinkedFreeHeader *&retListTail,
+        uintptr_t &retListMemoryCount, uintptr_t &retListMemorySize)
 {
 	bool const compressed = compressObjectReferences();
 	bool ret = false;
-	void* currentFreeEntryTop = NULL;
-	void* baseAddr = NULL;
-	void* topAddr = NULL;
-	MM_HeapLinkedFreeHeader* currentFreeEntry = NULL;
-	MM_HeapLinkedFreeHeader* previousFreeEntry = NULL;
-	MM_HeapLinkedFreeHeader* nextFreeEntry = NULL;
-	MM_HeapLinkedFreeHeader* tailFreeEntry = NULL;
+	void *currentFreeEntryTop = NULL;
+	void *baseAddr = NULL;
+	void *topAddr = NULL;
+	MM_HeapLinkedFreeHeader *currentFreeEntry = NULL;
+	MM_HeapLinkedFreeHeader *previousFreeEntry = NULL;
+	MM_HeapLinkedFreeHeader *nextFreeEntry = NULL;
+	MM_HeapLinkedFreeHeader *tailFreeEntry = NULL;
 
 	retListHead = NULL;
 	retListTail = NULL;
 	retListMemoryCount = 0;
 	retListMemorySize = 0;
-	/* remove any free entries(in regular freelists) with in range, append them to retList, then remove any reserved free entries, insert them into retList */
+	/* remove any free entries(in regular freelists) with in range, append them to retList, then remove any reserved
+	 * free entries, insert them into retList */
 
 	/* Find the first free entry, if any, within specified range */
 	uintptr_t currentFreeListIndex;
 	previousFreeEntry = NULL;
 
-	currentFreeEntry = (MM_HeapLinkedFreeHeader*)getFirstFreeStartingAddr(env, &currentFreeListIndex);
+	currentFreeEntry = (MM_HeapLinkedFreeHeader *)getFirstFreeStartingAddr(env, &currentFreeListIndex);
 	while (currentFreeEntry) {
-		currentFreeEntryTop = (void*)currentFreeEntry->afterEnd();
+		currentFreeEntryTop = (void *)currentFreeEntry->afterEnd();
 
 		/* Does this chunk fall within range ? */
 		if ((currentFreeEntry >= lowAddress) || (currentFreeEntryTop > lowAddress)) {
@@ -972,7 +1002,8 @@ MM_MemoryPoolHybrid::removeFreeEntriesWithinRange(MM_EnvironmentBase* env, void*
 		}
 
 		previousFreeEntry = currentFreeEntry;
-		currentFreeEntry = (MM_HeapLinkedFreeHeader*)getNextFreeStartingAddr(env, currentFreeEntry, &currentFreeListIndex);
+		currentFreeEntry = (MM_HeapLinkedFreeHeader *)getNextFreeStartingAddr(
+		        env, currentFreeEntry, &currentFreeListIndex);
 		if (NULL == previousFreeEntry->getNext(compressed)) {
 			previousFreeEntry = NULL;
 		}
@@ -982,7 +1013,8 @@ MM_MemoryPoolHybrid::removeFreeEntriesWithinRange(MM_EnvironmentBase* env, void*
 		Assert_MM_true(currentFreeEntry < highAddress);
 		/* Remember the next free entry after the current one which we are going to consume at least part of */
 		uintptr_t nextFreeListIndex = currentFreeListIndex;
-		nextFreeEntry = (MM_HeapLinkedFreeHeader*)getNextFreeStartingAddr(env, currentFreeEntry, &nextFreeListIndex);
+		nextFreeEntry =
+		        (MM_HeapLinkedFreeHeader *)getNextFreeStartingAddr(env, currentFreeEntry, &nextFreeListIndex);
 
 		/* Assume for now we will remove this entire free entry from the pool */
 		Assert_MM_true(_heapFreeLists[currentFreeListIndex]._freeSize >= currentFreeEntry->getSize());
@@ -991,12 +1023,11 @@ MM_MemoryPoolHybrid::removeFreeEntriesWithinRange(MM_EnvironmentBase* env, void*
 		_heapFreeLists[currentFreeListIndex]._freeCount -= 1;
 		_largeObjectAllocateStats->decrementFreeEntrySizeClassStats(currentFreeEntry->getSize());
 
-		baseAddr = (void*)currentFreeEntry;
+		baseAddr = (void *)currentFreeEntry;
 		topAddr = currentFreeEntryTop;
 
-
 		/* Determine what to do with any leading bytes of the free entry that are not being returned */
-		if (currentFreeEntry < (MM_HeapLinkedFreeHeader*)lowAddress) {
+		if (currentFreeEntry < (MM_HeapLinkedFreeHeader *)lowAddress) {
 			/* Space at the head that is not being returned - is it a valid free entry? */
 			if (createFreeEntry(env, currentFreeEntry, lowAddress, previousFreeEntry, NULL)) {
 				uintptr_t leadingSize = ((uintptr_t)lowAddress) - ((uintptr_t)currentFreeEntry);
@@ -1007,7 +1038,8 @@ MM_MemoryPoolHybrid::removeFreeEntriesWithinRange(MM_EnvironmentBase* env, void*
 				_largeObjectAllocateStats->incrementFreeEntrySizeClassStats(leadingSize);
 			} else {
 				/* reminder is not big enough for a free entry */
-				setNextForFreeEntryInFreeList(&_heapFreeLists[currentFreeListIndex], previousFreeEntry, NULL);
+				setNextForFreeEntryInFreeList(
+				        &_heapFreeLists[currentFreeListIndex], previousFreeEntry, NULL);
 			}
 			baseAddr = lowAddress;
 		} else {
@@ -1017,7 +1049,7 @@ MM_MemoryPoolHybrid::removeFreeEntriesWithinRange(MM_EnvironmentBase* env, void*
 		/* Append what's left if it's big enough to go on the list */
 		if (appendToList(env, baseAddr, topAddr, minimumSize, retListHead, retListTail)) {
 			++retListMemoryCount;
-			retListMemorySize += ((uint8_t*)topAddr - (uint8_t*)baseAddr);
+			retListMemorySize += ((uint8_t *)topAddr - (uint8_t *)baseAddr);
 		}
 
 		uintptr_t previousFreeListIndex = currentFreeListIndex;
@@ -1033,19 +1065,20 @@ MM_MemoryPoolHybrid::removeFreeEntriesWithinRange(MM_EnvironmentBase* env, void*
 			_heapFreeLists[currentFreeListIndex]._freeCount -= 1;
 			_largeObjectAllocateStats->decrementFreeEntrySizeClassStats(currentFreeEntry->getSize());
 
-			tailFreeEntry = (MM_HeapLinkedFreeHeader*)getNextFreeStartingAddr(env, currentFreeEntry, &currentFreeListIndex);
+			tailFreeEntry = (MM_HeapLinkedFreeHeader *)getNextFreeStartingAddr(
+			        env, currentFreeEntry, &currentFreeListIndex);
 
-			if (appendToList(env, (void*)currentFreeEntry, (void*)currentFreeEntry->afterEnd(),
-							 minimumSize, retListHead, retListTail)) {
+			if (appendToList(env, (void *)currentFreeEntry, (void *)currentFreeEntry->afterEnd(),
+			            minimumSize, retListHead, retListTail)) {
 				++retListMemoryCount;
 				retListMemorySize += currentFreeEntry->getSize();
 			}
 			currentFreeEntry = tailFreeEntry;
 		}
 
-
 		/* Kill all newly empty free lists */
-		for (uintptr_t i = previousFreeListIndex + 1; (i <= currentFreeListIndex) && (i < _heapFreeListCount); ++i) {
+		for (uintptr_t i = previousFreeListIndex + 1; (i <= currentFreeListIndex) && (i < _heapFreeListCount);
+		        ++i) {
 			_heapFreeLists[i]._freeList = NULL;
 			Assert_MM_true(0 == _heapFreeLists[i]._freeCount);
 			Assert_MM_true(0 == _heapFreeLists[i]._freeSize);
@@ -1055,12 +1088,12 @@ MM_MemoryPoolHybrid::removeFreeEntriesWithinRange(MM_EnvironmentBase* env, void*
 	}
 
 	/* check and update the reserved free list */
-	J9ModronFreeList* reservedFreelist = getReservedFreeList();
+	J9ModronFreeList *reservedFreelist = getReservedFreeList();
 	currentFreeEntry = reservedFreelist->_freeList;
 	previousFreeEntry = NULL;
 
 	while (currentFreeEntry) {
-		currentFreeEntryTop = (void*)currentFreeEntry->afterEnd();
+		currentFreeEntryTop = (void *)currentFreeEntry->afterEnd();
 
 		/* Does this chunk fall within range ? */
 		if (currentFreeEntry >= lowAddress || currentFreeEntryTop > lowAddress) {
@@ -1083,11 +1116,11 @@ MM_MemoryPoolHybrid::removeFreeEntriesWithinRange(MM_EnvironmentBase* env, void*
 	reservedFreelist->_freeCount -= 1;
 	_largeObjectAllocateStats->decrementFreeEntrySizeClassStats(currentFreeEntry->getSize());
 
-	baseAddr = (void*)currentFreeEntry;
+	baseAddr = (void *)currentFreeEntry;
 	topAddr = currentFreeEntryTop;
 
 	/* Determine what to do with any leading bytes of the free entry that are not being returned */
-	if (currentFreeEntry < (MM_HeapLinkedFreeHeader*)lowAddress) {
+	if (currentFreeEntry < (MM_HeapLinkedFreeHeader *)lowAddress) {
 		/* Space at the head that is not being returned - is it a valid free entry? */
 		if (createFreeEntry(env, currentFreeEntry, lowAddress, previousFreeEntry, NULL)) {
 			uintptr_t leadingSize = ((uintptr_t)lowAddress) - ((uintptr_t)currentFreeEntry);
@@ -1108,7 +1141,7 @@ MM_MemoryPoolHybrid::removeFreeEntriesWithinRange(MM_EnvironmentBase* env, void*
 	/* Insert what's left if it's big enough to go on the list */
 	if (insertToList(env, baseAddr, topAddr, minimumSize, retListHead, retListTail)) {
 		retListMemoryCount += 1;
-		retListMemorySize += ((uint8_t*)topAddr - (uint8_t*)baseAddr);
+		retListMemorySize += ((uint8_t *)topAddr - (uint8_t *)baseAddr);
 	}
 	currentFreeEntry = nextFreeEntry;
 	tailFreeEntry = nextFreeEntry;
@@ -1123,8 +1156,8 @@ MM_MemoryPoolHybrid::removeFreeEntriesWithinRange(MM_EnvironmentBase* env, void*
 
 		tailFreeEntry = currentFreeEntry->getNext(compressed);
 
-		if (insertToList(env, (void*)currentFreeEntry, (void*)currentFreeEntry->afterEnd(),
-						 minimumSize, retListHead, retListTail)) {
+		if (insertToList(env, (void *)currentFreeEntry, (void *)currentFreeEntry->afterEnd(), minimumSize,
+		            retListHead, retListTail)) {
 			retListMemoryCount += 1;
 			retListMemorySize += currentFreeEntry->getSize();
 		}

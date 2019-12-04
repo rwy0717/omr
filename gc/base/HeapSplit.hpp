@@ -23,9 +23,8 @@
 #if !defined(HEAPSPLIT_HPP_)
 #define HEAPSPLIT_HPP_
 
-#include "omrcomp.h"
-
 #include "Heap.hpp"
+#include "omrcomp.h"
 
 class MM_EnvironmentBase;
 class MM_HeapRegionManager;
@@ -35,34 +34,38 @@ class MM_PhysicalArena;
 
 #if defined(OMR_GC_MODRON_SCAVENGER)
 
-class MM_HeapSplit : public MM_Heap
-{
+class MM_HeapSplit : public MM_Heap {
 	/* Data Members */
 public:
 protected:
 private:
-	MM_HeapVirtualMemory *_lowExtent; /**< the sub-heap which represents the committed low range of the heap (old space) */
-	MM_HeapVirtualMemory *_highExtent; /**< the sub-heap which represents the committed high range of the heap (new space) */
-	
+	MM_HeapVirtualMemory *_lowExtent; /**< the sub-heap which represents the committed low range of the heap (old
+	                                     space) */
+	MM_HeapVirtualMemory *_highExtent; /**< the sub-heap which represents the committed high range of the heap (new
+	                                      space) */
+
 	/* Member Functions */
 public:
-	static MM_HeapSplit *newInstance(MM_EnvironmentBase *env, uintptr_t heapAlignment, uintptr_t lowExtentSize, uintptr_t highExtentSize, MM_HeapRegionManager *regionManager);
+	static MM_HeapSplit *newInstance(MM_EnvironmentBase *env, uintptr_t heapAlignment, uintptr_t lowExtentSize,
+	        uintptr_t highExtentSize, MM_HeapRegionManager *regionManager);
 	virtual void kill(MM_EnvironmentBase *env);
 	/**
 	 * Create a Heap object.
 	 */
-	MM_HeapSplit(MM_EnvironmentBase *env, uintptr_t lowExtentSize, uintptr_t highExtentSize, MM_HeapRegionManager *regionManager) :
-		MM_Heap(env, lowExtentSize + highExtentSize, regionManager)
+	MM_HeapSplit(MM_EnvironmentBase *env, uintptr_t lowExtentSize, uintptr_t highExtentSize,
+	        MM_HeapRegionManager *regionManager)
+	        : MM_Heap(env, lowExtentSize + highExtentSize, regionManager)
 	{
 		_typeId = __FUNCTION__;
 	};
-	
+
 	virtual uintptr_t getPageSize();
 	virtual uintptr_t getPageFlags();
 	virtual void *getHeapBase();
 	virtual void *getHeapTop();
 #if defined(OMR_GC_DOUBLE_MAP_ARRAYLETS)
-	virtual void *doubleMapArraylet(MM_EnvironmentBase *env, void* arrayletLeaves[], UDATA arrayletLeafCount, UDATA arrayletLeafSize, UDATA byteAmount, struct J9PortVmemIdentifier *newIdentifier, UDATA pageSize);
+	virtual void *doubleMapArraylet(MM_EnvironmentBase *env, void *arrayletLeaves[], UDATA arrayletLeafCount,
+	        UDATA arrayletLeafSize, UDATA byteAmount, struct J9PortVmemIdentifier *newIdentifier, UDATA pageSize);
 #endif /* defined(OMR_GC_DOUBLE_MAP_ARRAYLETS) */
 
 	virtual uintptr_t getMaximumPhysicalRange();
@@ -72,18 +75,20 @@ public:
 
 	virtual bool commitMemory(void *address, uintptr_t size);
 	virtual bool decommitMemory(void *address, uintptr_t size, void *lowValidAddress, void *highValidAddress);
-	
+
 	virtual uintptr_t calculateOffsetFromHeapBase(void *address);
-	
+
 	virtual bool initializeHeapRegionManager(MM_EnvironmentBase *env, MM_HeapRegionManager *manager);
 	virtual bool objectIsInGap(void *object);
+
 protected:
-	bool initialize(MM_EnvironmentBase *env, uintptr_t heapAlignment, uintptr_t lowExtentSize, uintptr_t highExtentSize, MM_HeapRegionManager *regionManager);
+	bool initialize(MM_EnvironmentBase *env, uintptr_t heapAlignment, uintptr_t lowExtentSize,
+	        uintptr_t highExtentSize, MM_HeapRegionManager *regionManager);
 	void tearDown(MM_EnvironmentBase *env);
+
 private:
 };
 
 #endif /* OMR_GC_MODRON_SCAVENGER */
 
 #endif /* HEAPSPLIT_HPP_ */
-

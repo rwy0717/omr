@@ -44,15 +44,13 @@ class MM_MemorySubSpaceSemiSpace;
 
 class MM_ScavengerDelegate : public MM_BaseVirtual {
 private:
-	MM_GCExtensionsBase* _extensions;
+	MM_GCExtensionsBase *_extensions;
 
 protected:
 public:
-
 private:
 protected:
 public:
-
 	void kill(MM_EnvironmentBase *env);
 
 	/* Read Barrier Verifier specific methods */
@@ -68,7 +66,7 @@ public:
 	 * @param[in] env The environment for the calling thread.
 	 * @param[in] scavengeSuccessful Indicates whether the scavenge cycle completed normally or aborted.
 	 */
-	void reportScavengeEnd(MM_EnvironmentBase * env, bool scavengeSuccessful);
+	void reportScavengeEnd(MM_EnvironmentBase *env, bool scavengeSuccessful);
 
 	/**
 	 * This method is called on the master GC thread when a scavenge cycle is started. Implementations of
@@ -76,7 +74,7 @@ public:
 	 *
 	 * @param[in] env The environment for the calling thread.
 	 */
-	void masterSetupForGC(MM_EnvironmentBase * env);
+	void masterSetupForGC(MM_EnvironmentBase *env);
 
 	/**
 	 * This method is called on each GC worker thread when a scavenge cycle is started. Implementations of
@@ -85,20 +83,20 @@ public:
 	 *
 	 * @param[in] env The environment for the calling thread.
 	 */
-	void workerSetupForGC_clearEnvironmentLangStats(MM_EnvironmentBase * env);
+	void workerSetupForGC_clearEnvironmentLangStats(MM_EnvironmentBase *env);
 
 	/**
 	 * This method is called on each GC worker thread when it completes its participation in a scavenge
 	 * cycle. It may be used to merge stats collected on each worker thread into global stats.
 	 */
-	void mergeGCStats_mergeLangStats(MM_EnvironmentBase * env);
+	void mergeGCStats_mergeLangStats(MM_EnvironmentBase *env);
 
 	/**
 	 * This method is called on the master GC thread when a scavenge cycle completes, successfully or otherwise.
 	 *
 	 * @param[in] env The environment for the calling thread.
 	 */
-	void masterThreadGarbageCollect_scavengeComplete(MM_EnvironmentBase * env);
+	void masterThreadGarbageCollect_scavengeComplete(MM_EnvironmentBase *env);
 
 	/**
 	 * This method is called on the master GC thread when a scavenge cycle completes successfully.
@@ -118,7 +116,8 @@ public:
 	 * @param[out] gcCode GC code to use for global collection
 	 * @return true if GC should percolate to global collection
 	 */
-	bool internalGarbageCollect_shouldPercolateGarbageCollect(MM_EnvironmentBase * env, PercolateReason * percolateReason, uint32_t * gcCode);
+	bool internalGarbageCollect_shouldPercolateGarbageCollect(
+	        MM_EnvironmentBase *env, PercolateReason *percolateReason, uint32_t *gcCode);
 
 	/**
 	 * An object scanner is required to locate and scan all object references associated with each root object
@@ -130,25 +129,27 @@ public:
 	 * @param[in] env The environment for the calling thread.
 	 * @param[in] objectPtr The object to be scanned
 	 * @param[in] allocSpace Space for in-place instantiation of scanner
-	 * @param[in] flags See GC_ObjectScanner::InstanceFlags. One of scanRoots or scanHeap will be set , but not both.
+	 * @param[in] flags See GC_ObjectScanner::InstanceFlags. One of scanRoots or scanHeap will be set , but not
+	 * both.
 	 * @return Pointer to object scanner, or NULL if object not to be scanned (eg, leaf object).
 	 * @see GC_ObjectScanner
 	 */
-	GC_ObjectScanner *getObjectScanner(MM_EnvironmentStandard *env, omrobjectptr_t objectPtr, void *allocSpace, uintptr_t flags);
+	GC_ObjectScanner *getObjectScanner(
+	        MM_EnvironmentStandard *env, omrobjectptr_t objectPtr, void *allocSpace, uintptr_t flags);
 
 	/**
 	 * Scavenger calls this method when required to force GC threads to flush any locally-held references into
 	 * associated global buffers.
-	 * 
+	 *
 	 * @param[in] env The environment for the calling thread.
 	 */
 	void flushReferenceObjects(MM_EnvironmentStandard *env);
-	
+
 	/**
-	 * An indirect referent is a refernce to an object in the heap that is not a root object and is not reachable from
-	 * any root object, for example, a Java Class object. This method is called to determine whether and object is associated
-	 * with any indirect objects that are currently in new space.
-	 * 
+	 * An indirect referent is a refernce to an object in the heap that is not a root object and is not reachable
+	 * from any root object, for example, a Java Class object. This method is called to determine whether and object
+	 * is associated with any indirect objects that are currently in new space.
+	 *
 	 * @param[in] env The environment for the calling thread.
 	 * @param[in] objectPtr Reference to the object that may have associated indirect referents.
 	 * @return true if the object has associated indirect referents.
@@ -167,11 +168,12 @@ public:
 	bool scavengeIndirectObjectSlots(MM_EnvironmentStandard *env, omrobjectptr_t objectPtr);
 
 	/**
-	 * If scavenger is unable to complete a cycle eg, because there is insufficient tenure space remaining to promote
-	 * an object from new space to tenure space), it must back out of the scavenge cycle and percolate the collection.
-	 * In that context, this method will be called for each root object and for each object reachable from a root
-	 * object. Implementation must identify all indirect objects associated with the root or reachable object and call
-	 * MM_Scavenger::backOutFixSlotWithoutCompression(slot) for each reference slot in each indirect object.
+	 * If scavenger is unable to complete a cycle eg, because there is insufficient tenure space remaining to
+	 * promote an object from new space to tenure space), it must back out of the scavenge cycle and percolate the
+	 * collection. In that context, this method will be called for each root object and for each object reachable
+	 * from a root object. Implementation must identify all indirect objects associated with the root or reachable
+	 * object and call MM_Scavenger::backOutFixSlotWithoutCompression(slot) for each reference slot in each indirect
+	 * object.
 	 *
 	 * Backout is a single-threaded operation at present.
 	 *
@@ -181,9 +183,9 @@ public:
 	void backOutIndirectObjectSlots(MM_EnvironmentStandard *env, omrobjectptr_t objectPtr);
 
 	/* This method must be implemented if an object may hold any object references that are live but not reachable
-	 * by traversing the reference graph from the root set or remembered set. In that case, this method should locate
-	 * all such objects and call MM_Scavenger::backOutObjectScan(..) for each such object that is in the remembered
-	 * set. For example,
+	 * by traversing the reference graph from the root set or remembered set. In that case, this method should
+	 * locate all such objects and call MM_Scavenger::backOutObjectScan(..) for each such object that is in the
+	 * remembered set. For example,
 	 *
 	 * if (_extensions->objectModel.isRemembered(indirectObject)) {
 	 *    _extensions->scavenger->backOutObjectScan(env, indirectObject);
@@ -198,61 +200,65 @@ public:
 	void backOutIndirectObjects(MM_EnvironmentStandard *env);
 
 	/**
-	 * This method is called during backout while undoing an object copy operation. This may involve restoring the scavenger
-	 * forwarding slot, which may have been overwritten in the original copy process, and backing out changes to object
-	 * flags in the forwarding slot. With the exception of the scavenger forwarding slot, all of the other bits of the
-	 * original copied object should be intact.
+	 * This method is called during backout while undoing an object copy operation. This may involve restoring the
+	 * scavenger forwarding slot, which may have been overwritten in the original copy process, and backing out
+	 * changes to object flags in the forwarding slot. With the exception of the scavenger forwarding slot, all of
+	 * the other bits of the original copied object should be intact.
 	 *
-	 * At minimum, if compressed pointers are enabled, this method must call MM_ForwardedHeader::restoreDestroyedOverlap()
-	 * to restore the (4-byte) slot overlapping the (8-byte) scavenger forwarding slot.
+	 * At minimum, if compressed pointers are enabled, this method must call
+	 * MM_ForwardedHeader::restoreDestroyedOverlap() to restore the (4-byte) slot overlapping the (8-byte) scavenger
+	 * forwarding slot.
 	 *
 	 * @param[in] env The environment for the calling thread.
-	 * @param[in] forwardedObject A forwarded header containing the original and destination addresses of the object.
+	 * @param[in] forwardedObject A forwarded header containing the original and destination addresses of the
+	 * object.
 	 */
 	void reverseForwardedObject(MM_EnvironmentBase *env, MM_ForwardedHeader *forwardedObject);
 
-#if defined (OMR_GC_COMPRESSED_POINTERS)
+#if defined(OMR_GC_COMPRESSED_POINTERS)
 	/**
 	 * This method is similar to reverseForwardedObject() but is called from a different context. The implementation
-	 * must first determine whether or not the compressed slot adjacent to the scavenger forwarding slot may contain an object
-	 * reference. In that case, this implementation must:
+	 * must first determine whether or not the compressed slot adjacent to the scavenger forwarding slot may contain
+	 * an object reference. In that case, this implementation must:
 	 *
-	 * 1- get the preserved adjacent slot value from the forwarded header (originalForwardedHeader->getPreservedOverlap())
-	 * 2- expand the preserved adjacent slot value to obtain an uncompressed pointer P to the referenced object (see GC_SlotObject)
-	 * 3- test whether the referenced object has object alignment and is in new space or tenure space (stop otherwise)
-	 * 4- instantiate a new MM_ForwardedHeader instance F using the referenced object pointer
-	 * 5- test whether F is a reverse forwarded object (F.isReverseForwardedPointer(), stop otherwise)
-	 * 6- call originalForwardedHeader->restoreDestroyedOverlap(T), where T is the compressed pointer for P (see GC_SlotObject)
+	 * 1- get the preserved adjacent slot value from the forwarded header
+	 * (originalForwardedHeader->getPreservedOverlap()) 2- expand the preserved adjacent slot value to obtain an
+	 * uncompressed pointer P to the referenced object (see GC_SlotObject) 3- test whether the referenced object has
+	 * object alignment and is in new space or tenure space (stop otherwise) 4- instantiate a new MM_ForwardedHeader
+	 * instance F using the referenced object pointer 5- test whether F is a reverse forwarded object
+	 * (F.isReverseForwardedPointer(), stop otherwise) 6- call originalForwardedHeader->restoreDestroyedOverlap(T),
+	 * where T is the compressed pointer for P (see GC_SlotObject)
 	 *
 	 * @param[in] env The environment for the calling thread.
-	 * @param[in] forwardedObject A forwarded header containing the original and destination addresses of the object.
+	 * @param[in] forwardedObject A forwarded header containing the original and destination addresses of the
+	 * object.
 	 * @param[in] subSpaceNew Pointer to new space
 	 */
-	void fixupDestroyedSlot(MM_EnvironmentBase *env, MM_ForwardedHeader *forwardedObject, MM_MemorySubSpaceSemiSpace *subSpaceNew);
+	void fixupDestroyedSlot(
+	        MM_EnvironmentBase *env, MM_ForwardedHeader *forwardedObject, MM_MemorySubSpaceSemiSpace *subSpaceNew);
 #endif /* OMR_GC_COMPRESSED_POINTERS */
 
 #if defined(OMR_GC_CONCURRENT_SCAVENGER)
 	/**
-	 * Enable/disable language specific thread local resource on Concurrent Scavenger cycle start/end 
+	 * Enable/disable language specific thread local resource on Concurrent Scavenger cycle start/end
 	 * @param[in] env The environment for the calling thread.
-	 */	 
+	 */
 	void switchConcurrentForThread(MM_EnvironmentBase *env);
 	/**
-	 * After aborted Concurrent Scavenger, handle indirect object references (off heap structures associated with object with refs to Nursery). 
-	 * Fixup should update slots to point to the forwarded version of the object and/or remove self forwarded bit in the object itself.
+	 * After aborted Concurrent Scavenger, handle indirect object references (off heap structures associated with
+	 * object with refs to Nursery). Fixup should update slots to point to the forwarded version of the object
+	 * and/or remove self forwarded bit in the object itself.
 	 */
 	void fixupIndirectObjectSlots(MM_EnvironmentStandard *env, omrobjectptr_t objectPtr);
-	
+
 	bool shouldYield() { return false; }
 #endif /* OMR_GC_CONCURRENT_SCAVENGER */
 
-	bool initialize(MM_EnvironmentBase* env) { return true; }
+	bool initialize(MM_EnvironmentBase *env) { return true; }
 
-	void tearDown(MM_EnvironmentBase* env) {}
+	void tearDown(MM_EnvironmentBase *env) {}
 
-	MM_ScavengerDelegate(MM_EnvironmentBase* env)
-		: MM_BaseVirtual()
-		, _extensions(env->getExtensions())
+	MM_ScavengerDelegate(MM_EnvironmentBase *env) : MM_BaseVirtual(), _extensions(env->getExtensions())
 	{
 		_typeId = __FUNCTION__;
 	}

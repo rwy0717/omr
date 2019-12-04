@@ -70,7 +70,7 @@ struct UtTraceFileIterator {
 
 omr_error_t
 omr_trc_getTraceFileIterator(OMRPortLibrary *portLib, char *fileName, UtTraceFileIterator **iteratorPtr,
-							 FormatStringCallback getFormatStringFn)
+        FormatStringCallback getFormatStringFn)
 {
 	OMRPORT_ACCESS_FROM_OMRPORT(portLib);
 	UtTraceFileIterator *iterator = NULL;
@@ -149,7 +149,6 @@ omr_trc_getTraceFileIterator(OMRPortLibrary *portLib, char *fileName, UtTraceFil
 	*iteratorPtr = iterator;
 
 	return OMR_ERROR_NONE;
-
 }
 
 /**
@@ -196,7 +195,7 @@ omr_trc_getTracePointIteratorForNextBuffer(UtTraceFileIterator *fileIterator, Ut
 	}
 
 	iterator->buffer = (OMR_TraceBuffer *)omrmem_allocate_memory(
-			fileIterator->header->bufferSize + offsetof(OMR_TraceBuffer, record), OMRMEM_CATEGORY_TRACE);
+	        fileIterator->header->bufferSize + offsetof(OMR_TraceBuffer, record), OMRMEM_CATEGORY_TRACE);
 	if (iterator->buffer == NULL) {
 		UT_DBGOUT_CHECKED(1, ("<UT> trcGetTracePointIteratorForBuffer cannot allocate iterator's buffer\n"));
 		omrmem_free_memory(iterator);
@@ -205,7 +204,8 @@ omr_trc_getTracePointIteratorForNextBuffer(UtTraceFileIterator *fileIterator, Ut
 	}
 
 	/* set up the iterator */
-	bytesRead = omrfile_read(fileIterator->traceFileHandle, &iterator->buffer->record, fileIterator->header->bufferSize);
+	bytesRead = omrfile_read(
+	        fileIterator->traceFileHandle, &iterator->buffer->record, fileIterator->header->bufferSize);
 	if (fileIterator->header->bufferSize != bytesRead) {
 		omrmem_free_memory(iterator->buffer);
 		omrmem_free_memory(iterator);
@@ -228,7 +228,8 @@ omr_trc_getTracePointIteratorForNextBuffer(UtTraceFileIterator *fileIterator, Ut
 	iterator->startPlatform = fileIterator->traceSection->startPlatform;
 	iterator->startSystem = fileIterator->traceSection->startSystem;
 	iterator->endPlatform = omrtime_hires_clock(); /* TODO - Is there a better timestamp we can use here? */
-	iterator->endSystem = ((uint64_t) omrtime_current_time_millis()); /* TODO - Is there a better timestamp we can use here? */
+	iterator->endSystem = ((uint64_t)omrtime_current_time_millis()); /* TODO - Is there a better timestamp we can
+	                                                                    use here? */
 	iterator->portLib = fileIterator->portLib;
 	iterator->getFormatStringFn = fileIterator->getFormatStringFn;
 
@@ -256,13 +257,15 @@ omr_trc_getTracePointIteratorForNextBuffer(UtTraceFileIterator *fileIterator, Ut
 	iterator->numberOfBytesInPlatformShort = (uint32_t)sizeof(short);
 
 	UT_DBGOUT_CHECKED(4,
-			("<UT> firstEntry: %d, offset of record: %ld buffer size: %d endianness %s\n", iterator->start, offsetof(OMR_TraceBuffer, record), fileIterator->header->bufferSize, (iterator->isBigEndian)?"bigEndian":"littleEndian"));
+	        ("<UT> firstEntry: %d, offset of record: %ld buffer size: %d endianness %s\n", iterator->start,
+	                offsetof(OMR_TraceBuffer, record), fileIterator->header->bufferSize,
+	                (iterator->isBigEndian) ? "bigEndian" : "littleEndian"));
 	UT_DBGOUT_CHECKED(2,
-			("<UT> omr_trc_getTracePointIteratorForNextBuffer: Thread %s returning iterator %p\n", iterator->buffer->record.threadName, iterator));
+	        ("<UT> omr_trc_getTracePointIteratorForNextBuffer: Thread %s returning iterator %p\n",
+	                iterator->buffer->record.threadName, iterator));
 
 	*bufferIteratorPtr = iterator;
 	return OMR_ERROR_NONE;
-
 }
 
 uint64_t
@@ -371,24 +374,26 @@ getU_64FromBuffer(UtTraceRecord *record, uint32_t offset, int32_t isBigEndian)
 
 	/* integer values are written out in platform endianess */
 	if (isBigEndian) {
-		ret = ((uint64_t)data[0] << 56) | ((uint64_t)data[1] << 48) | ((uint64_t)data[2] << 40) | ((uint64_t)data[3] << 32)
-			  | ((uint64_t)data[4] << 24) | ((uint64_t)data[5] << 16) | ((uint64_t)data[6] << 8) | ((uint64_t)data[7]);
+		ret = ((uint64_t)data[0] << 56) | ((uint64_t)data[1] << 48) | ((uint64_t)data[2] << 40)
+		        | ((uint64_t)data[3] << 32) | ((uint64_t)data[4] << 24) | ((uint64_t)data[5] << 16)
+		        | ((uint64_t)data[6] << 8) | ((uint64_t)data[7]);
 	} else {
-		ret = ((uint64_t)data[7] << 56) | ((uint64_t)data[6] << 48) | ((uint64_t)data[5] << 40) | ((uint64_t)data[4] << 32)
-			  | ((uint64_t)data[3] << 24) | ((uint64_t)data[2] << 16) | ((uint64_t)data[1] << 8) | ((uint64_t)data[0]);
+		ret = ((uint64_t)data[7] << 56) | ((uint64_t)data[6] << 48) | ((uint64_t)data[5] << 40)
+		        | ((uint64_t)data[4] << 32) | ((uint64_t)data[3] << 24) | ((uint64_t)data[2] << 16)
+		        | ((uint64_t)data[1] << 8) | ((uint64_t)data[0]);
 	}
 	return ret;
 }
 
-#define UT_TRACE_FORMATTER_64BIT_DATA		64
-#define UT_TRACE_FORMATTER_32BIT_DATA		32
-#define UT_TRACE_FORMATTER_8BIT_DATA		8
-#define UT_TRACE_FORMATTER_STRING_DATA	-1
+#define UT_TRACE_FORMATTER_64BIT_DATA 64
+#define UT_TRACE_FORMATTER_32BIT_DATA 32
+#define UT_TRACE_FORMATTER_8BIT_DATA 8
+#define UT_TRACE_FORMATTER_STRING_DATA -1
 
 static uint32_t
 readConsumeAndSPrintfParameter(OMRPortLibrary *portLib, char *rawParameterData, uint32_t rawParameterDataLength,
-							   uint32_t *offsetInParameterData, char *destBuffer, uint32_t destBufferLength, uint32_t *offsetInDestBuffer,
-							   const char *format, int32_t dataType, uint32_t nWidthAndPrecisions, int32_t isBigEndian)
+        uint32_t *offsetInParameterData, char *destBuffer, uint32_t destBufferLength, uint32_t *offsetInDestBuffer,
+        const char *format, int32_t dataType, uint32_t nWidthAndPrecisions, int32_t isBigEndian)
 {
 	uintptr_t temp = 0;
 	uint64_t u64data = 0;
@@ -416,11 +421,14 @@ readConsumeAndSPrintfParameter(OMRPortLibrary *portLib, char *rawParameterData, 
 	}
 
 	if (nWidthAndPrecisions == 1) {
-		precisionOrWidth1 = getU_32FromBuffer((UtTraceRecord *)rawParameterData, *offsetInParameterData, isBigEndian);
+		precisionOrWidth1 =
+		        getU_32FromBuffer((UtTraceRecord *)rawParameterData, *offsetInParameterData, isBigEndian);
 		*offsetInParameterData += 4;
 	} else if (nWidthAndPrecisions == 2) {
-		precisionOrWidth1 = getU_32FromBuffer((UtTraceRecord *)rawParameterData, *offsetInParameterData, isBigEndian);
-		precisionOrWidth2 = getU_32FromBuffer((UtTraceRecord *)rawParameterData, *offsetInParameterData, isBigEndian);
+		precisionOrWidth1 =
+		        getU_32FromBuffer((UtTraceRecord *)rawParameterData, *offsetInParameterData, isBigEndian);
+		precisionOrWidth2 =
+		        getU_32FromBuffer((UtTraceRecord *)rawParameterData, *offsetInParameterData, isBigEndian);
 		*offsetInParameterData += 8;
 	}
 
@@ -432,31 +440,35 @@ readConsumeAndSPrintfParameter(OMRPortLibrary *portLib, char *rawParameterData, 
 			if (temp > destBufferLength) {
 				/* can't write data to dest buffer - it's too full, be cautious and just return */
 				UT_DBGOUT_CHECKED(1,
-						("<UT> readConsumeAndSPrintfParameter destination buffer exhausted: %d [%s]\n", dataType, format));
+				        ("<UT> readConsumeAndSPrintfParameter destination buffer exhausted: %d [%s]\n",
+				                dataType, format));
 				return 0;
 			}
-			temp = omrstr_printf(destBuffer + (*offsetInDestBuffer), destBufferLength - (*offsetInDestBuffer),
-								 format, precisionOrWidth1, precisionOrWidth2, u64data);
+			temp = omrstr_printf(destBuffer + (*offsetInDestBuffer),
+			        destBufferLength - (*offsetInDestBuffer), format, precisionOrWidth1, precisionOrWidth2,
+			        u64data);
 		} else if (nWidthAndPrecisions == 1) {
 			temp = omrstr_printf(NULL, 0, format, precisionOrWidth1, u64data);
 			if (temp > destBufferLength) {
 				/* can't write data to dest buffer - it's too full, be cautious and just return */
 				UT_DBGOUT_CHECKED(1,
-						("<UT> readConsumeAndSPrintfParameter destination buffer exhausted: %d [%s]\n", dataType, format));
+				        ("<UT> readConsumeAndSPrintfParameter destination buffer exhausted: %d [%s]\n",
+				                dataType, format));
 				return 0;
 			}
-			temp = omrstr_printf(destBuffer + (*offsetInDestBuffer), destBufferLength - (*offsetInDestBuffer),
-								 format, precisionOrWidth1, u64data);
+			temp = omrstr_printf(destBuffer + (*offsetInDestBuffer),
+			        destBufferLength - (*offsetInDestBuffer), format, precisionOrWidth1, u64data);
 		} else {
 			temp = omrstr_printf(NULL, 0, format, u64data);
 			if (temp > destBufferLength) {
 				/* can't write data to dest buffer - it's too full, be cautious and just return */
 				UT_DBGOUT_CHECKED(1,
-						("<UT> readConsumeAndSPrintfParameter destination buffer exhausted: %d [%s]\n", dataType, format));
+				        ("<UT> readConsumeAndSPrintfParameter destination buffer exhausted: %d [%s]\n",
+				                dataType, format));
 				return 0;
 			}
-			temp = omrstr_printf(destBuffer + (*offsetInDestBuffer), destBufferLength - (*offsetInDestBuffer),
-								 format, u64data);
+			temp = omrstr_printf(destBuffer + (*offsetInDestBuffer),
+			        destBufferLength - (*offsetInDestBuffer), format, u64data);
 		}
 		*offsetInParameterData += 8;
 	} else if (dataType == UT_TRACE_FORMATTER_32BIT_DATA) {
@@ -467,31 +479,35 @@ readConsumeAndSPrintfParameter(OMRPortLibrary *portLib, char *rawParameterData, 
 			if (temp > destBufferLength) {
 				/* can't write data to dest buffer - it's too full, be cautious and just return */
 				UT_DBGOUT_CHECKED(1,
-						("<UT> readConsumeAndSPrintfParameter destination buffer exhausted: %d [%s]\n", dataType, format));
+				        ("<UT> readConsumeAndSPrintfParameter destination buffer exhausted: %d [%s]\n",
+				                dataType, format));
 				return 0;
 			}
-			temp = omrstr_printf(destBuffer + (*offsetInDestBuffer), destBufferLength - (*offsetInDestBuffer),
-								 format, precisionOrWidth1, precisionOrWidth2, u32data);
+			temp = omrstr_printf(destBuffer + (*offsetInDestBuffer),
+			        destBufferLength - (*offsetInDestBuffer), format, precisionOrWidth1, precisionOrWidth2,
+			        u32data);
 		} else if (nWidthAndPrecisions == 1) {
 			temp = omrstr_printf(NULL, 0, format, precisionOrWidth1, u32data);
 			if (temp > destBufferLength) {
 				/* can't write data to dest buffer - it's too full, be cautious and just return */
 				UT_DBGOUT_CHECKED(1,
-						("<UT> readConsumeAndSPrintfParameter destination buffer exhausted: %d [%s]\n", dataType, format));
+				        ("<UT> readConsumeAndSPrintfParameter destination buffer exhausted: %d [%s]\n",
+				                dataType, format));
 				return 0;
 			}
-			temp = omrstr_printf(destBuffer + (*offsetInDestBuffer), destBufferLength - (*offsetInDestBuffer),
-								 format, precisionOrWidth1, u32data);
+			temp = omrstr_printf(destBuffer + (*offsetInDestBuffer),
+			        destBufferLength - (*offsetInDestBuffer), format, precisionOrWidth1, u32data);
 		} else {
 			temp = omrstr_printf(NULL, 0, format, u32data);
 			if (temp > destBufferLength) {
 				/* can't write data to dest buffer - it's too full, be cautious and just return */
 				UT_DBGOUT_CHECKED(1,
-						("<UT> readConsumeAndSPrintfParameter destination buffer exhausted: %d [%s]\n", dataType, format));
+				        ("<UT> readConsumeAndSPrintfParameter destination buffer exhausted: %d [%s]\n",
+				                dataType, format));
 				return 0;
 			}
-			temp = omrstr_printf(destBuffer + (*offsetInDestBuffer), destBufferLength - (*offsetInDestBuffer),
-								 format, u32data);
+			temp = omrstr_printf(destBuffer + (*offsetInDestBuffer),
+			        destBufferLength - (*offsetInDestBuffer), format, u32data);
 		}
 		*offsetInParameterData += 4;
 	} else if (dataType == UT_TRACE_FORMATTER_8BIT_DATA) {
@@ -501,29 +517,32 @@ readConsumeAndSPrintfParameter(OMRPortLibrary *portLib, char *rawParameterData, 
 		if (temp > destBufferLength) {
 			/* can't write data to dest buffer - it's too full, be cautious and just return */
 			UT_DBGOUT_CHECKED(1,
-					("<UT> readConsumeAndSPrintfParameter destination buffer exhausted: %d [%s]\n", dataType, format));
+			        ("<UT> readConsumeAndSPrintfParameter destination buffer exhausted: %d [%s]\n",
+			                dataType, format));
 			return 0;
 		}
-		temp = omrstr_printf(destBuffer + (*offsetInDestBuffer), destBufferLength - (*offsetInDestBuffer),
-							 format, u8data);
+		temp = omrstr_printf(
+		        destBuffer + (*offsetInDestBuffer), destBufferLength - (*offsetInDestBuffer), format, u8data);
 		*offsetInParameterData += 1;
 	} else if (dataType == UT_TRACE_FORMATTER_STRING_DATA) {
 		/* handling a string */
 		/* any length already read is a false one - the trace engine will have modified the utf8 length field */
 		if (nWidthAndPrecisions == 1) {
 			*offsetInParameterData -= 4;
-			i16data = (int16_t)getU_16FromBuffer((UtTraceRecord *)rawParameterData, *offsetInParameterData, isBigEndian);
+			i16data = (int16_t)getU_16FromBuffer(
+			        (UtTraceRecord *)rawParameterData, *offsetInParameterData, isBigEndian);
 			*offsetInParameterData += 2;
 			strValue = rawParameterData + (*offsetInParameterData);
 			temp = omrstr_printf(NULL, 0, format, i16data, strValue);
 			if (temp > destBufferLength) {
 				/* can't write data to dest buffer - it's too full, be cautious and just return */
 				UT_DBGOUT_CHECKED(1,
-						("<UT> readConsumeAndSPrintfParameter destination buffer exhausted: %d [%s]\n", dataType, format));
+				        ("<UT> readConsumeAndSPrintfParameter destination buffer exhausted: %d [%s]\n",
+				                dataType, format));
 				return 0;
 			}
-			temp = omrstr_printf(destBuffer + (*offsetInDestBuffer), destBufferLength - (*offsetInDestBuffer),
-								 format, i16data, strValue);
+			temp = omrstr_printf(destBuffer + (*offsetInDestBuffer),
+			        destBufferLength - (*offsetInDestBuffer), format, i16data, strValue);
 		} else {
 			/* it's just a plain string */
 			strValue = rawParameterData + (*offsetInParameterData);
@@ -531,17 +550,19 @@ readConsumeAndSPrintfParameter(OMRPortLibrary *portLib, char *rawParameterData, 
 			if (temp > destBufferLength) {
 				/* can't write data to dest buffer - it's too full, be cautious and just return */
 				UT_DBGOUT_CHECKED(1,
-						("<UT> readConsumeAndSPrintfParameter destination buffer exhausted: %d [%s]\n", dataType, format));
+				        ("<UT> readConsumeAndSPrintfParameter destination buffer exhausted: %d [%s]\n",
+				                dataType, format));
 				return 0;
 			}
-			temp = omrstr_printf(destBuffer + (*offsetInDestBuffer), destBufferLength - (*offsetInDestBuffer),
-								 format, strValue);
+			temp = omrstr_printf(destBuffer + (*offsetInDestBuffer),
+			        destBufferLength - (*offsetInDestBuffer), format, strValue);
 			/* for the null in the parm data */
 			*offsetInParameterData += 1;
 		}
 		*offsetInParameterData += (uint32_t)temp;
 	} else {
-		UT_DBGOUT_CHECKED(1, ("<UT> bad byte width in readConsumeAndSPrintfParameter: %d [%s]\n", dataType, format));
+		UT_DBGOUT_CHECKED(
+		        1, ("<UT> bad byte width in readConsumeAndSPrintfParameter: %d [%s]\n", dataType, format));
 	}
 
 	*offsetInDestBuffer += (uint32_t)temp;
@@ -550,7 +571,7 @@ readConsumeAndSPrintfParameter(OMRPortLibrary *portLib, char *rawParameterData, 
 
 static uint32_t
 formatTracePointParameters(UtTracePointIterator *iter, char *destBuffer, uint32_t destBufferLength, const char *format,
-						   char *rawParameterData, uint32_t rawParameterDataLength)
+        char *rawParameterData, uint32_t rawParameterDataLength)
 {
 	uint32_t formatLength;
 	uint32_t offsetInFormat = 0, offsetInDestBuffer = 0, offsetInParameterData = 0;
@@ -565,7 +586,9 @@ formatTracePointParameters(UtTracePointIterator *iter, char *destBuffer, uint32_
 
 	if (destBuffer == NULL || destBufferLength == 0) {
 		UT_DBGOUT_CHECKED(1,
-				("<UT> formatTracePointParameters called with destination buffer %p and destination buffer length %u\n", destBuffer, destBufferLength));
+		        ("<UT> formatTracePointParameters called with destination buffer %p and destination buffer "
+		         "length %u\n",
+		                destBuffer, destBufferLength));
 		return 0;
 	}
 
@@ -577,11 +600,12 @@ formatTracePointParameters(UtTracePointIterator *iter, char *destBuffer, uint32_
 
 	/* walk the format string copying it char by char into the destination buffer */
 	for (offsetInFormat = 0, offsetInDestBuffer = 0; offsetInFormat <= formatLength;
-		 offsetInFormat++, offsetInDestBuffer++) {
+	        offsetInFormat++, offsetInDestBuffer++) {
 		if (format[offsetInFormat] == '%') {
 			if (format[offsetInFormat + 1] == '%') {
 				destBuffer[offsetInDestBuffer] = format[offsetInFormat];
-				offsetInFormat++; /* skip the percent, just write a single percent to the destination buffer */
+				offsetInFormat++; /* skip the percent, just write a single percent to the destination
+				                     buffer */
 			} else {
 				int32_t foundType = FALSE;
 				offsetInFormatBuffer = 0;
@@ -591,30 +615,32 @@ formatTracePointParameters(UtTracePointIterator *iter, char *destBuffer, uint32_
 
 				for (offsetOfType = 0; foundType == FALSE; offsetOfType++) {
 					/* have we read off the end? */
-					if (format[offsetInFormat + offsetOfType] == 'x' || format[offsetInFormat + offsetOfType] == 'X'
-						|| format[offsetInFormat + offsetOfType] == 'u'
-						|| format[offsetInFormat + offsetOfType] == 'i'
-						|| format[offsetInFormat + offsetOfType] == 'd'
-						|| format[offsetInFormat + offsetOfType] == 'f'
-						|| format[offsetInFormat + offsetOfType] == 'p'
-						|| format[offsetInFormat + offsetOfType] == 'P'
-						|| format[offsetInFormat + offsetOfType] == 'c'
-						|| format[offsetInFormat + offsetOfType] == 's'
-					) {
+					if (format[offsetInFormat + offsetOfType] == 'x'
+					        || format[offsetInFormat + offsetOfType] == 'X'
+					        || format[offsetInFormat + offsetOfType] == 'u'
+					        || format[offsetInFormat + offsetOfType] == 'i'
+					        || format[offsetInFormat + offsetOfType] == 'd'
+					        || format[offsetInFormat + offsetOfType] == 'f'
+					        || format[offsetInFormat + offsetOfType] == 'p'
+					        || format[offsetInFormat + offsetOfType] == 'P'
+					        || format[offsetInFormat + offsetOfType] == 'c'
+					        || format[offsetInFormat + offsetOfType] == 's') {
 						/* we found the type */
 						foundType = TRUE;
 						type = format[offsetInFormat + offsetOfType];
 					} else if (format[offsetInFormat + offsetOfType] == '*') {
 						numberOfStars++;
 					} else if (format[offsetInFormat + offsetOfType] == 'l') {
-						/* 64bit number - its actually 'll' but we'll give it benefit of doubt */
+						/* 64bit number - its actually 'll' but we'll give it benefit of doubt
+						 */
 						longModifierFound = TRUE;
 					} else if (format[offsetInFormat + offsetOfType] == 'z') {
 						/* platform udata width data */
 						platformUDATAWidthDataFound = TRUE;
 					}
 					/* this is both default behaviour and always needs to happen */
-					formatBuffer[offsetInFormatBuffer] = format[offsetInFormat + offsetInFormatBuffer];
+					formatBuffer[offsetInFormatBuffer] =
+					        format[offsetInFormat + offsetInFormatBuffer];
 					offsetInFormatBuffer++;
 				}
 				offsetInFormat += (offsetOfType - 1);
@@ -639,9 +665,10 @@ formatTracePointParameters(UtTracePointIterator *iter, char *destBuffer, uint32_
 						/* normal integer */
 						traceDataType = UT_TRACE_FORMATTER_32BIT_DATA;
 					}
-					readConsumeAndSPrintfParameter(iter->portLib, rawParameterData, rawParameterDataLength,
-												   &offsetInParameterData, destBuffer, destBufferLength, &offsetInDestBuffer,
-												   (const char *)formatBuffer, traceDataType, numberOfStars, iter->isBigEndian);
+					readConsumeAndSPrintfParameter(iter->portLib, rawParameterData,
+					        rawParameterDataLength, &offsetInParameterData, destBuffer,
+					        destBufferLength, &offsetInDestBuffer, (const char *)formatBuffer,
+					        traceDataType, numberOfStars, iter->isBigEndian);
 					break;
 				case 'p':
 				case 'P':
@@ -651,42 +678,48 @@ formatTracePointParameters(UtTracePointIterator *iter, char *destBuffer, uint32_
 						traceDataType = UT_TRACE_FORMATTER_32BIT_DATA;
 					}
 
-					readConsumeAndSPrintfParameter(iter->portLib, rawParameterData, rawParameterDataLength,
-												   &offsetInParameterData, destBuffer, destBufferLength, &offsetInDestBuffer,
-												   (const char *)formatBuffer, traceDataType, numberOfStars, iter->isBigEndian);
+					readConsumeAndSPrintfParameter(iter->portLib, rawParameterData,
+					        rawParameterDataLength, &offsetInParameterData, destBuffer,
+					        destBufferLength, &offsetInDestBuffer, (const char *)formatBuffer,
+					        traceDataType, numberOfStars, iter->isBigEndian);
 					break;
 				case 'c':
 					traceDataType = UT_TRACE_FORMATTER_8BIT_DATA;
-					readConsumeAndSPrintfParameter(iter->portLib, rawParameterData, rawParameterDataLength,
-												   &offsetInParameterData, destBuffer, destBufferLength, &offsetInDestBuffer,
-												   (const char *)formatBuffer, traceDataType, numberOfStars, iter->isBigEndian);
+					readConsumeAndSPrintfParameter(iter->portLib, rawParameterData,
+					        rawParameterDataLength, &offsetInParameterData, destBuffer,
+					        destBufferLength, &offsetInDestBuffer, (const char *)formatBuffer,
+					        traceDataType, numberOfStars, iter->isBigEndian);
 					break;
 				case 's':
 					traceDataType = UT_TRACE_FORMATTER_STRING_DATA;
-					readConsumeAndSPrintfParameter(iter->portLib, rawParameterData, rawParameterDataLength,
-												   &offsetInParameterData, destBuffer, destBufferLength, &offsetInDestBuffer,
-												   (const char *)formatBuffer, traceDataType, numberOfStars, iter->isBigEndian);
+					readConsumeAndSPrintfParameter(iter->portLib, rawParameterData,
+					        rawParameterDataLength, &offsetInParameterData, destBuffer,
+					        destBufferLength, &offsetInDestBuffer, (const char *)formatBuffer,
+					        traceDataType, numberOfStars, iter->isBigEndian);
 					break;
 				case 'f':
 					/* Floats are promoted to doubles by convention, so all %fs are 64bit */
 					traceDataType = UT_TRACE_FORMATTER_64BIT_DATA;
-					readConsumeAndSPrintfParameter(iter->portLib, rawParameterData, rawParameterDataLength,
-												   &offsetInParameterData, destBuffer, destBufferLength, &offsetInDestBuffer,
-												   (const char *)formatBuffer, traceDataType, numberOfStars, iter->isBigEndian);
+					readConsumeAndSPrintfParameter(iter->portLib, rawParameterData,
+					        rawParameterDataLength, &offsetInParameterData, destBuffer,
+					        destBufferLength, &offsetInDestBuffer, (const char *)formatBuffer,
+					        traceDataType, numberOfStars, iter->isBigEndian);
 					break;
 				default:
 					UT_DBGOUT_CHECKED(1,
-							("<UT> formatTracePointParameters unknown trace format type: %c [%s]\n", type, formatBuffer));
+					        ("<UT> formatTracePointParameters unknown trace format type: %c [%s]\n",
+					                type, formatBuffer));
 					break;
 				}
 				offsetInDestBuffer--;
-
 			}
 		} else {
 			if (offsetInDestBuffer > destBufferLength) {
 				/* return now before writing off the end */
 				UT_DBGOUT_CHECKED(1,
-							("<UT> formatTracePointParameters truncated output due to buffer exhaustion at format type: %c [%s]\n", type, formatBuffer));
+				        ("<UT> formatTracePointParameters truncated output due to buffer exhaustion at "
+				         "format type: %c [%s]\n",
+				                type, formatBuffer));
 				return offsetInDestBuffer;
 			}
 			destBuffer[offsetInDestBuffer] = format[offsetInFormat];
@@ -704,7 +737,7 @@ formatTracePointParameters(UtTracePointIterator *iter, char *destBuffer, uint32_
 
 static const char *
 parseTracePoint(OMRPortLibrary *portLib, UtTraceRecord *record, uint32_t offset, int tpLength,
-				uint64_t *timeStampMostSignificantBytes, UtTracePointIterator *iter, char *buffer, uint32_t bufferLength)
+        uint64_t *timeStampMostSignificantBytes, UtTracePointIterator *iter, char *buffer, uint32_t bufferLength)
 {
 	uint32_t traceId;
 	uint32_t timeStampLeastSignificantBytes;
@@ -726,7 +759,8 @@ parseTracePoint(OMRPortLibrary *portLib, UtTraceRecord *record, uint32_t offset,
 	OMRPORT_ACCESS_FROM_OMRPORT(portLib);
 
 	if (bufferLength == 0 || buffer == NULL) {
-		UT_DBGOUT_CHECKED(1, ("<UT> parseTracePoint called with unpopulated iterator formatted tracepoint buffer\n"));
+		UT_DBGOUT_CHECKED(
+		        1, ("<UT> parseTracePoint called with unpopulated iterator formatted tracepoint buffer\n"));
 		return NULL;
 	}
 
@@ -748,9 +782,10 @@ parseTracePoint(OMRPortLibrary *portLib, UtTraceRecord *record, uint32_t offset,
 
 	/* 0x0000nnnn8 == sequence wrap tracepoint */
 	if ((traceId == 0x0000) && (tpLength == UT_TRC_SEQ_WRAP_LENGTH)) {
-		/* read in the timer upper word, write it into iterator struct, and (recursively) return the next tracepoint parsed */
-		tempUpper = getU_32FromBuffer(record, offset + TRACEPOINT_RAW_DATA_TIMER_WRAP_UPPER_WORD_OFFSET,
-									  iter->isBigEndian);
+		/* read in the timer upper word, write it into iterator struct, and (recursively) return the next
+		 * tracepoint parsed */
+		tempUpper = getU_32FromBuffer(
+		        record, offset + TRACEPOINT_RAW_DATA_TIMER_WRAP_UPPER_WORD_OFFSET, iter->isBigEndian);
 		tempUpper <<= 32;
 		*timeStampMostSignificantBytes = tempUpper;
 		return omr_trc_formatNextTracePoint(iter, buffer, bufferLength);
@@ -771,22 +806,24 @@ parseTracePoint(OMRPortLibrary *portLib, UtTraceRecord *record, uint32_t offset,
 	}
 
 	/* otherwise all is well and we have a normal tracepoint */
-	timeStampLeastSignificantBytes = getU_32FromBuffer(record, offset + TRACEPOINT_RAW_DATA_TIMESTAMP_OFFSET,
-									 iter->isBigEndian);
-	modNameLength = getU_32FromBuffer(record, offset + TRACEPOINT_RAW_DATA_MODULE_NAME_LENGTH_OFFSET,
-									  iter->isBigEndian);
+	timeStampLeastSignificantBytes =
+	        getU_32FromBuffer(record, offset + TRACEPOINT_RAW_DATA_TIMESTAMP_OFFSET, iter->isBigEndian);
+	modNameLength =
+	        getU_32FromBuffer(record, offset + TRACEPOINT_RAW_DATA_MODULE_NAME_LENGTH_OFFSET, iter->isBigEndian);
 
 	/* Module name must not be longer than the tracepoint length - start of module name string */
 	/* modNameLength == 0 -- no modname - most likely partially overwritten - its unformattable as a result! */
 	if (modNameLength == 0 || tpLength < TRACEPOINT_RAW_DATA_MODULE_NAME_DATA_OFFSET
-		|| modNameLength > (uint32_t)(tpLength - TRACEPOINT_RAW_DATA_MODULE_NAME_DATA_OFFSET)) {
+	        || modNameLength > (uint32_t)(tpLength - TRACEPOINT_RAW_DATA_MODULE_NAME_DATA_OFFSET)) {
 		return omr_trc_formatNextTracePoint(iter, buffer, bufferLength);
 	}
 
-	modName = &tempPtr[offset + TRACEPOINT_RAW_DATA_MODULE_NAME_DATA_OFFSET]; /* the modName was written straight to buf as (char *) */
+	modName = &tempPtr[offset + TRACEPOINT_RAW_DATA_MODULE_NAME_DATA_OFFSET]; /* the modName was written straight to
+	                                                                             buf as (char *) */
 	if (!strncmp(modName, "INTERNALTRACECOMPONENT", 22)) {
 		if (traceId == UT_TRC_CONTEXT_ID) {
-			/* ignore and recurse - its just a thread id sitting in the buffer used for external trace tool */
+			/* ignore and recurse - its just a thread id sitting in the buffer used for external trace tool
+			 */
 			return omr_trc_formatNextTracePoint(iter, buffer, bufferLength);
 		}
 		modNameLength = 2;
@@ -835,24 +872,25 @@ parseTracePoint(OMRPortLibrary *portLib, UtTraceRecord *record, uint32_t offset,
 
 	nanos = (uint32_t)((millis * ONEMILLION) + (splitTimeRem * ONEMILLION / iter->timeConversion));
 
-	offsetOfParameters = (uint32_t) omrstr_printf(NULL, 0, "%02u:%02u:%02u:%09u GMT %.*s.%u - ", hours, minutes,
-						 seconds, nanos, modNameLength, modNameString, traceId);
+	offsetOfParameters = (uint32_t)omrstr_printf(NULL, 0, "%02u:%02u:%02u:%09u GMT %.*s.%u - ", hours, minutes,
+	        seconds, nanos, modNameLength, modNameString, traceId);
 
 	if (offsetOfParameters > bufferLength) {
 		UT_DBGOUT_CHECKED(1,
-				("<UT> parseTracePoint called with buffer length %d - too small for tracepoint details\n", bufferLength));
+		        ("<UT> parseTracePoint called with buffer length %d - too small for tracepoint details\n",
+		                bufferLength));
 		return NULL;
 	}
 
-	offsetOfParameters = (uint32_t) omrstr_printf(buffer, bufferLength, "%02u:%02u:%02u:%09u GMT %.*s.%u - ", hours,
-						 minutes, seconds, nanos, modNameLength, modNameString, traceId);
+	offsetOfParameters = (uint32_t)omrstr_printf(buffer, bufferLength, "%02u:%02u:%02u:%09u GMT %.*s.%u - ", hours,
+	        minutes, seconds, nanos, modNameLength, modNameString, traceId);
 
 	rawParameterData = tempPtr + offset + TRACEPOINT_RAW_DATA_MODULE_NAME_DATA_OFFSET + modNameLength;
 	rawParameterDataLength = tpLength - (TRACEPOINT_RAW_DATA_MODULE_NAME_DATA_OFFSET + modNameLength);
 
 	/* the parameters will be formatted as question marks if there is no data to populate them with */
-	if (!formatTracePointParameters(iter, buffer + offsetOfParameters, bufferLength - offsetOfParameters, formatString,
-									rawParameterData, rawParameterDataLength)) {
+	if (!formatTracePointParameters(iter, buffer + offsetOfParameters, bufferLength - offsetOfParameters,
+	            formatString, rawParameterData, rawParameterDataLength)) {
 		return NULL;
 	}
 
@@ -935,19 +973,25 @@ omr_trc_formatNextTracePoint(UtTracePointIterator *iter, char *buffer, uint32_t 
 
 			remainder = (uint32_t)(tpLength - (offset - iter->start));
 			UT_DBGOUT_CHECKED(4,
-					("<UT> getNextTracePointForIterator: remainder found at end of buffer: %d tplength = %d tracedata start: %llu end %llu\n", remainder, tpLength, iter->start, iter->end));
+			        ("<UT> getNextTracePointForIterator: remainder found at end of buffer: %d tplength = "
+			         "%d tracedata start: %llu end %llu\n",
+			                remainder, tpLength, iter->start, iter->end));
 
 			/* set the iterator's position to be before the incomplete data at the end of the buffer */
-			iter->currentPos =  iter->recordLength - remainder;
+			iter->currentPos = iter->recordLength - remainder;
 
-			/* check if the wrapped tracepoint takes us back past the tracepoint data end point (i.e. record.nextEntry) */
+			/* check if the wrapped tracepoint takes us back past the tracepoint data end point (i.e.
+			 * record.nextEntry) */
 			if (iter->currentPos < iter->end) {
 				return NULL; /* we are done, discard this partial tracepoint */
 			}
 
-			iter->tempBuffForWrappedTP = (char *)omrmem_allocate_memory(tpLength + 2, OMRMEM_CATEGORY_TRACE);
+			iter->tempBuffForWrappedTP =
+			        (char *)omrmem_allocate_memory(tpLength + 2, OMRMEM_CATEGORY_TRACE);
 			if (iter->tempBuffForWrappedTP == NULL) {
-				UT_DBGOUT_CHECKED(1, ("<UT> omr_trc_formatNextTracePoint: cannot allocate %d bytes\n", tpLength + 2));
+				UT_DBGOUT_CHECKED(1,
+				        ("<UT> omr_trc_formatNextTracePoint: cannot allocate %d bytes\n",
+				                tpLength + 2));
 				return NULL;
 			}
 
@@ -958,14 +1002,16 @@ omr_trc_formatNextTracePoint(UtTracePointIterator *iter, char *buffer, uint32_t 
 			/* get the start of the tracepoint from the end of the buffer */
 			memcpy(iter->tempBuffForWrappedTP, tempChrPtr + recordDataLength - remainder, remainder);
 			/* get the end of the tracepoint from the start of the buffer */
-			memcpy(iter->tempBuffForWrappedTP + remainder, tempChrPtr + recordDataStart, tpLength - remainder);
+			memcpy(iter->tempBuffForWrappedTP + remainder, tempChrPtr + recordDataStart,
+			        tpLength - remainder);
 
 			/* and parse the temp buffer */
-			returnString = parseTracePoint(iter->portLib, (UtTraceRecord *)iter->tempBuffForWrappedTP, 0, tpLength,
-										   &iter->currentUpperTimeWord, iter, buffer, bufferLength);
+			returnString = parseTracePoint(iter->portLib, (UtTraceRecord *)iter->tempBuffForWrappedTP, 0,
+			        tpLength, &iter->currentUpperTimeWord, iter, buffer, bufferLength);
 
 			UT_DBGOUT_CHECKED(1,
-					("<UT> getNextTracePointForIterator: recombined a tracepoint into %s\n", returnString ? returnString : "NULL"));
+			        ("<UT> getNextTracePointForIterator: recombined a tracepoint into %s\n",
+			                returnString ? returnString : "NULL"));
 			omrmem_free_memory(iter->tempBuffForWrappedTP);
 			iter->tempBuffForWrappedTP = NULL;
 			iter->processingIncompleteDueToPartialTracePoint = FALSE;
@@ -980,6 +1026,5 @@ omr_trc_formatNextTracePoint(UtTracePointIterator *iter, char *buffer, uint32_t 
 	/* parse the relevant section into a tracepoint */
 	iter->currentPos -= tpLength;
 	return parseTracePoint(iter->portLib, record, offset - tpLength, tpLength, &iter->currentUpperTimeWord, iter,
-						   buffer, bufferLength);
+	        buffer, bufferLength);
 }
-

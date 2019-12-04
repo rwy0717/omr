@@ -51,7 +51,8 @@
  * and error_detail fields of the state structure. A brief textual description is in error_string.
  */
 J9PlatformThread *
-omrintrospect_threads_startDo_with_signal(struct OMRPortLibrary *portLibrary, J9Heap *heap, J9ThreadWalkState *state, void *signal_info)
+omrintrospect_threads_startDo_with_signal(
+        struct OMRPortLibrary *portLibrary, J9Heap *heap, J9ThreadWalkState *state, void *signal_info)
 {
 	return NULL;
 }
@@ -83,7 +84,8 @@ omrintrospect_threads_nextDo(J9ThreadWalkState *state)
  * Adjust which signal is used to suspend threads. The signal used is SIGRTMIN+signalOffset.
  * @param portLibrary port library
  * @param signalOffset value in the range 0 to (SIGRTMAX-SIGRTMIN).
- * @return 0 if successful, OMRPORT_ERROR_NOT_SUPPORTED_ON_THIS_PLATFORM on non-Linux systems, OMRPORT_ERROR_INVALID if the signal is reserved or out of range.
+ * @return 0 if successful, OMRPORT_ERROR_NOT_SUPPORTED_ON_THIS_PLATFORM on non-Linux systems, OMRPORT_ERROR_INVALID if
+ * the signal is reserved or out of range.
  */
 int32_t
 omrintrospect_set_suspend_signal_offset(struct OMRPortLibrary *portLibrary, int32_t signalOffset)
@@ -111,4 +113,3 @@ omrintrospect_shutdown(struct OMRPortLibrary *portLibrary)
 {
 	return;
 }
-

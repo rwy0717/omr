@@ -23,10 +23,10 @@
 #define algorithm_test_internal_h
 
 /**
-* This file contains implementation-private function prototypes and
-* type definitions for the ALGORITHM_TEST module.
-*
-*/
+ * This file contains implementation-private function prototypes and
+ * type definitions for the ALGORITHM_TEST module.
+ *
+ */
 
 #include "omrport.h"
 
@@ -44,8 +44,8 @@ typedef struct PoolInputData {
 } PoolInputData;
 
 typedef struct HashtableInputData {
-	const char* hashtableName;
-	const uintptr_t* data;
+	const char *hashtableName;
+	const uintptr_t *data;
 	uintptr_t dataLength;
 	uint32_t listToTreeThreshold;
 	BOOLEAN forceCollisions;
@@ -55,60 +55,53 @@ typedef struct HashtableInputData {
 /* ---------------- avltest.c ---------------- */
 
 /**
-* @brief
-* @param *portLib
-* @param *testData
-* @return int32_t
-*/
-int32_t
-buildAndVerifyAVLTree(OMRPortLibrary *portLib, const char *success, const char *testData);
+ * @brief
+ * @param *portLib
+ * @param *testData
+ * @return int32_t
+ */
+int32_t buildAndVerifyAVLTree(OMRPortLibrary *portLib, const char *success, const char *testData);
 
 /* ---------------- pooltest.c ---------------- */
 
 /**
-* @brief
-* @param *portLib
-* @param *input
-* @return int32_t
-*/
-int32_t
-createAndVerifyPool(OMRPortLibrary *portLib, PoolInputData *input);
+ * @brief
+ * @param *portLib
+ * @param *input
+ * @return int32_t
+ */
+int32_t createAndVerifyPool(OMRPortLibrary *portLib, PoolInputData *input);
 
 /**
-* @brief
-* @param *portLib
-* @return int32_t
-*/
-int32_t
-testPoolPuddleListSharing(OMRPortLibrary *portLib);
+ * @brief
+ * @param *portLib
+ * @return int32_t
+ */
+int32_t testPoolPuddleListSharing(OMRPortLibrary *portLib);
 
 /* ---------------- hooktest.c ---------------- */
 
 /**
-* @brief
-* @param *portLib
-* @param *passCount
-* @param *failCount
-* @return int32_t
-*/
-int32_t
-verifyHookable(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount);
+ * @brief
+ * @param *portLib
+ * @param *passCount
+ * @param *failCount
+ * @return int32_t
+ */
+int32_t verifyHookable(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount);
 
 /* ---------------- hashtabletest.c ---------------- */
 
 /**
-* @brief
-* @param *portLib
-* @param *passCount
-* @param *failCount
-* @return int32_t
-*/
-int32_t
-verifyHashtable(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount);
+ * @brief
+ * @param *portLib
+ * @param *passCount
+ * @param *failCount
+ * @return int32_t
+ */
+int32_t verifyHashtable(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount);
 
-
-int32_t
-buildAndVerifyHashtable(OMRPortLibrary *portLib, HashtableInputData *inputData);
+int32_t buildAndVerifyHashtable(OMRPortLibrary *portLib, HashtableInputData *inputData);
 
 #ifdef __cplusplus
 }

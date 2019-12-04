@@ -29,8 +29,7 @@ class SupersetFieldVisitor;
 class SupersetVisitor;
 class Symbol_IR;
 
-class JavaSupersetGenerator : public SupersetGenerator
-{
+class JavaSupersetGenerator : public SupersetGenerator {
 private:
 	intptr_t _file;
 	OMRPortLibrary *_portLibrary;

@@ -25,38 +25,34 @@
 
 #if defined(OMR_GC_SEGREGATED_HEAP)
 
-#include "omrcfg.h"
-#include "omrcomp.h"
-#include "modronopt.h"
-#include "sizeclasses.h"
-
 #include "Debug.hpp"
 #include "EnvironmentBase.hpp"
 #include "HeapRegionDescriptorSegregated.hpp"
 #include "HeapRegionList.hpp"
 #include "HeapRegionQueue.hpp"
 #include "SizeClasses.hpp"
+#include "modronopt.h"
+#include "omrcfg.h"
+#include "omrcomp.h"
+#include "sizeclasses.h"
 
 /**
  * A HeapRegionList on which every Region stands for a contiguous range of regions (possibly of length one).
  */
-class MM_FreeHeapRegionList : public MM_HeapRegionList
-{
-/* Data members & types */		
-public:	
+class MM_FreeHeapRegionList : public MM_HeapRegionList {
+	/* Data members & types */
+public:
 protected:
 private:
-	
-/* Methods */	
+	/* Methods */
 public:
-
 	virtual void kill(MM_EnvironmentBase *env) = 0;
-	
+
 	virtual bool initialize(MM_EnvironmentBase *env) = 0;
 	virtual void tearDown(MM_EnvironmentBase *env) = 0;
 
-	MM_FreeHeapRegionList(MM_HeapRegionList::RegionListKind regionListKind, bool singleRegionsOnly) :
-		MM_HeapRegionList(regionListKind, singleRegionsOnly)
+	MM_FreeHeapRegionList(MM_HeapRegionList::RegionListKind regionListKind, bool singleRegionsOnly)
+	        : MM_HeapRegionList(regionListKind, singleRegionsOnly)
 	{
 		_typeId = __FUNCTION__;
 	}
@@ -64,17 +60,18 @@ public:
 	virtual void push(MM_HeapRegionDescriptorSegregated *region) = 0;
 	virtual void push(MM_HeapRegionQueue *src) = 0;
 	virtual void push(MM_FreeHeapRegionList *src) = 0;
-	
-	virtual MM_HeapRegionDescriptorSegregated* pop() = 0;
+
+	virtual MM_HeapRegionDescriptorSegregated *pop() = 0;
 
 	/*
-	 * This method must be used with care.  
+	 * This method must be used with care.
 	 * In particular, it is wrong to detach from a list
 	 * while iterating over it unless the detach stops further iteration.
 	 */
 	virtual void detach(MM_HeapRegionDescriptorSegregated *cur) = 0;
 
-	virtual MM_HeapRegionDescriptorSegregated *allocate(MM_EnvironmentBase *env, uintptr_t szClass, uintptr_t numRegions, uintptr_t maxExcess) = 0;
+	virtual MM_HeapRegionDescriptorSegregated *allocate(
+	        MM_EnvironmentBase *env, uintptr_t szClass, uintptr_t numRegions, uintptr_t maxExcess) = 0;
 
 	MM_HeapRegionDescriptorSegregated *allocate(MM_EnvironmentBase *env, uintptr_t szClass)
 	{
@@ -92,7 +89,7 @@ public:
 		}
 		return region;
 	}
-		
+
 	/* Methods inherited from HeapRegionList */
 	virtual bool isEmpty() { return 0 == _length; }
 	virtual uintptr_t getTotalRegions() = 0;

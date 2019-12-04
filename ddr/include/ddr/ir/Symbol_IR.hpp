@@ -48,7 +48,7 @@ class TypeReplaceVisitor;
 
 class Symbol_IR {
 private:
-	OMRPortLibrary * const _portLibrary;
+	OMRPortLibrary *const _portLibrary;
 
 	struct OverrideInfo {
 		set<string> opaqueTypeNames;
@@ -72,22 +72,12 @@ public:
 	unordered_map<string, set<Type *> > _typeMap;
 
 	explicit Symbol_IR(OMRPortLibrary *portLibrary)
-		: _portLibrary(portLibrary)
-		, _types()
-		, _fullTypeNames()
-		, _typeSet()
-		, _typeMap()
-	{
-	}
+	        : _portLibrary(portLibrary), _types(), _fullTypeNames(), _typeSet(), _typeMap()
+	{}
 
 	explicit Symbol_IR(Symbol_IR *other)
-		: _portLibrary(other->_portLibrary)
-		, _types()
-		, _fullTypeNames()
-		, _typeSet()
-		, _typeMap()
-	{
-	}
+	        : _portLibrary(other->_portLibrary), _types(), _fullTypeNames(), _typeSet(), _typeMap()
+	{}
 
 	~Symbol_IR();
 
@@ -96,8 +86,8 @@ public:
 	DDR_RC mergeIR(Symbol_IR *other);
 
 private:
-	template<typename T> void mergeTypes(vector<T *> *source, vector<T *> *other,
-		NamespaceUDT *outerNamespace, vector<Type *> *merged);
+	template <typename T>
+	void mergeTypes(vector<T *> *source, vector<T *> *other, NamespaceUDT *outerNamespace, vector<Type *> *merged);
 	void mergeFields(vector<Field *> *source, vector<Field *> *other, Type *type, vector<Type *> *merged);
 	void mergeEnums(vector<EnumMember *> *source, vector<EnumMember *> *other);
 	void addTypeToMap(Type *type);

@@ -23,13 +23,16 @@
 #include "avl_api.h"
 #include "ut_avl.h"
 
-static J9AVLTreeNode *deleteNode(J9AVLTree *tree, J9AVLTreeNode **walkPtr, J9WSRP *walkSRPPtr, J9AVLTreeNode *node, intptr_t *heightChange);
+static J9AVLTreeNode *deleteNode(
+        J9AVLTree *tree, J9AVLTreeNode **walkPtr, J9WSRP *walkSRPPtr, J9AVLTreeNode *node, intptr_t *heightChange);
 static J9AVLTreeNode *rotate(J9AVLTree *tree, J9AVLTreeNode *walk, intptr_t direction, intptr_t *heightChange);
 static J9AVLTreeNode *doubleRotate(J9AVLTree *tree, J9AVLTreeNode *walk, intptr_t direction, intptr_t *heightChange);
-static void rebalance(J9AVLTree *tree, J9AVLTreeNode **walkPtr, J9WSRP *walkSRPPtr, intptr_t direction, intptr_t *heightChange);
+static void rebalance(
+        J9AVLTree *tree, J9AVLTreeNode **walkPtr, J9WSRP *walkSRPPtr, intptr_t direction, intptr_t *heightChange);
 static J9AVLTreeNode *findRightMostLeaf(J9AVLTree *tree, J9WSRP *walkSRPPtr, intptr_t *heightChange);
 static J9AVLTreeNode *findNode(J9AVLTree *tree, J9AVLTreeNode *walk, uintptr_t search);
-static J9AVLTreeNode *insertNode(J9AVLTree *tree, J9AVLTreeNode **walkPtr, J9WSRP *walkSRPPtr, J9AVLTreeNode *node, intptr_t *heightChange);
+static J9AVLTreeNode *insertNode(
+        J9AVLTree *tree, J9AVLTreeNode **walkPtr, J9WSRP *walkSRPPtr, J9AVLTreeNode *node, intptr_t *heightChange);
 
 /**
  * Insert a node into an AVL tree
@@ -145,11 +148,11 @@ rotate(J9AVLTree *tree, J9AVLTreeNode *walk, intptr_t direction, intptr_t *heigh
 
 	if (direction < 0) {
 		heavyNodePtr = &walk->rightChild;
-		heavyNode    = AVL_NNSRP_GETNODE(*heavyNodePtr);
+		heavyNode = AVL_NNSRP_GETNODE(*heavyNodePtr);
 		graftNodePtr = &heavyNode->leftChild;
 	} else {
 		heavyNodePtr = &walk->leftChild;
-		heavyNode    = AVL_NNSRP_GETNODE(*heavyNodePtr);
+		heavyNode = AVL_NNSRP_GETNODE(*heavyNodePtr);
 		graftNodePtr = &heavyNode->rightChild;
 	}
 
@@ -212,23 +215,23 @@ doubleRotate(J9AVLTree *tree, J9AVLTreeNode *walk, intptr_t direction, intptr_t 
 	}
 
 	if (direction < 0) {
-		heavyNodePtr   = &walk->rightChild;
-		heavyNode      = AVL_NNSRP_GETNODE(*heavyNodePtr);
+		heavyNodePtr = &walk->rightChild;
+		heavyNode = AVL_NNSRP_GETNODE(*heavyNodePtr);
 
 		newrootNodePtr = &heavyNode->leftChild;
-		newrootNode    = AVL_NNSRP_GETNODE(*newrootNodePtr);
+		newrootNode = AVL_NNSRP_GETNODE(*newrootNodePtr);
 
-		graft1NodePtr  = &newrootNode->rightChild;
-		graft2NodePtr  = &newrootNode->leftChild;
+		graft1NodePtr = &newrootNode->rightChild;
+		graft2NodePtr = &newrootNode->leftChild;
 	} else {
-		heavyNodePtr   = &walk->leftChild;
-		heavyNode      = AVL_NNSRP_GETNODE(*heavyNodePtr);
+		heavyNodePtr = &walk->leftChild;
+		heavyNode = AVL_NNSRP_GETNODE(*heavyNodePtr);
 
 		newrootNodePtr = &heavyNode->rightChild;
-		newrootNode    = AVL_NNSRP_GETNODE(*newrootNodePtr);
+		newrootNode = AVL_NNSRP_GETNODE(*newrootNodePtr);
 
-		graft1NodePtr  = &newrootNode->leftChild;
-		graft2NodePtr  = &newrootNode->rightChild;
+		graft1NodePtr = &newrootNode->leftChild;
+		graft2NodePtr = &newrootNode->rightChild;
 	}
 
 	AVL_SRP_PTR_SETNODE(newrootNodePtr, AVL_SRP_GETNODE(*graft1NodePtr));
@@ -413,7 +416,7 @@ insertNode(J9AVLTree *tree, J9AVLTreeNode **walkPtr, J9WSRP *walkSRPPtr, J9AVLTr
 		rebalance(tree, walkPtr, walkSRPPtr, dir, heightChange);
 	}
 
-_done :
+_done:
 	Trc_AVL_insertNode_Recursive(find);
 	return find;
 }

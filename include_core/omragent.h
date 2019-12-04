@@ -78,7 +78,8 @@ typedef struct OMR_TI {
 	 * Create a trace record subscriber.
 	 *
 	 * The returned subscriptionID uniquely identifies the new subscriber.
-	 * The record subscriber must be shut down with a call to DeregisterRecordSubscriber() passing the same subscriptionID.
+	 * The record subscriber must be shut down with a call to DeregisterRecordSubscriber() passing the same
+	 * subscriptionID.
 	 *
 	 * The subscriber function will be called when a trace record is complete. The record will be passed to
 	 * the subscriber in subscription->data. The size of the record will be in subscription->dataLength.
@@ -96,9 +97,10 @@ typedef struct OMR_TI {
 	 *
 	 * @param[in] vmThread The current VM thread.
 	 * @param[in] description Description of the subscriber. May not be NULL.
-	 * @param[in] subscriberFunc Trace subscriber callback function. May not be NULL. This function will be passed records containing trace data
-	 * 			  as they are processed.
-	 * @param[in] alarmFunc Alarm callback function that's executed if the subscriber shuts down, returns an error or misbehaves. May be NULL.
+	 * @param[in] subscriberFunc Trace subscriber callback function. May not be NULL. This function will be passed
+	 * records containing trace data as they are processed.
+	 * @param[in] alarmFunc Alarm callback function that's executed if the subscriber shuts down, returns an error
+	 * or misbehaves. May be NULL.
 	 * @param[in] userData Data passed to subscriber and alarm callbacks. May be NULL.
 	 * @param[out] subscriptionID The returned subscription identifier.
 	 * @return An OMR error code, including the following:
@@ -107,8 +109,9 @@ typedef struct OMR_TI {
 	 * @retval OMR_ERROR_ILLEGAL_ARGUMENT description, subscriberFunc, or subscriptionID is NULL.
 	 * @retval OMR_ERROR_NOT_AVAILABLE The trace engine is not enabled.
 	 */
-	omr_error_t	(*RegisterRecordSubscriber)(OMR_VMThread *vmThread, char const *description,
-		utsSubscriberCallback subscriberFunc, utsSubscriberAlarmCallback alarmFunc, void *userData,	UtSubscription **subscriptionID);
+	omr_error_t (*RegisterRecordSubscriber)(OMR_VMThread *vmThread, char const *description,
+	        utsSubscriberCallback subscriberFunc, utsSubscriberAlarmCallback alarmFunc, void *userData,
+	        UtSubscription **subscriptionID);
 
 	/**
 	 * Shuts down the registered trace record subscriber.
@@ -156,11 +159,11 @@ typedef struct OMR_TI {
 	 * @param[in] vmThread the current OMR VM thread
 	 * @param[out] systemCpuLoad the system CPU load between the observed time period, it cannot be NULL
 	 * @return an OMR error code, 	return OMR_ERROR_NONE on successful call.
-	 * 								return OMR_ERROR_NOT_AVAILABLE if not supported or insufficient user privilege or vm->sysInfo is not initialized.
-	 * 								return OMR_ERROR_RETRY on the first call or if the interval between two calls is too small.
-	 * 								return OMR_ERROR_INTERNAL if the calculated CPU load is invalid.
-	 * 								return OMR_ERROR_ILLEGAL_ARGUMENT if systemCpuLoad is NULL.
-	 * 								return OMR_THREAD_NOT_ATTACHED if vmThread is NULL.
+	 * 								return OMR_ERROR_NOT_AVAILABLE if not supported or
+	 * insufficient user privilege or vm->sysInfo is not initialized. return OMR_ERROR_RETRY on the first call or if
+	 * the interval between two calls is too small. return OMR_ERROR_INTERNAL if the calculated CPU load is invalid.
+	 * return OMR_ERROR_ILLEGAL_ARGUMENT if systemCpuLoad is NULL. return OMR_THREAD_NOT_ATTACHED if vmThread is
+	 * NULL.
 	 */
 	omr_error_t (*GetSystemCpuLoad)(OMR_VMThread *vmThread, double *systemCpuLoad);
 
@@ -169,33 +172,36 @@ typedef struct OMR_TI {
 	 * @param[in] vmThread the current OMR VM thread
 	 * @param[out] processCpuLoad the process CPU load between the observed time period, it cannot be NULL.
 	 * @return an OMR error code, 	return OMR_ERROR_NONE on successful call.
-	 * 								return OMR_ERROR_NOT_AVAILABLE if not supported or insufficient user privilege or vm->sysInfo is not initialized.
-	 * 								return OMR_ERROR_RETRY on the first call or if the interval between two calls is too small.
-	 * 							  	return OMR_ERROR_INTERNAL if the calculated CPU load is invalid.
-	 * 							  	return OMR_ERROR_ILLEGAL_ARGUMENT if processCpuLoad is NULL.
-	 * 							  	return OMR_THREAD_NOT_ATTACHED if vmThread is NULL.
+	 * 								return OMR_ERROR_NOT_AVAILABLE if not supported or
+	 * insufficient user privilege or vm->sysInfo is not initialized. return OMR_ERROR_RETRY on the first call or if
+	 * the interval between two calls is too small. return OMR_ERROR_INTERNAL if the calculated CPU load is invalid.
+	 * return OMR_ERROR_ILLEGAL_ARGUMENT if processCpuLoad is NULL. return OMR_THREAD_NOT_ATTACHED if vmThread is
+	 * NULL.
 	 */
 	omr_error_t (*GetProcessCpuLoad)(OMR_VMThread *vmThread, double *processCpuLoad);
 
 	/**
-	  * Samples the values of the JVM memory categories and writes them into a buffer allocated by the user.
-	  *
-	  * @param[in] vmThread the current OMR VM thread
-	  * @param[in] max_categories Maximum number of categories to read into category_buffer
-	  * @param[out] categories_buffer Block of memory to write result into. 0th entry is the first root category. All other nodes can be walked from the root.
-	  * @param[out] written_count_ptr If not NULL, the number of categories written to the buffer is written to this address
-	  * @param[out] total_categories_ptr If not NULL, the total number of categories available is written to this address
-	  *
-	  * @return omr_error_t error code:
-	  * OMR_ERROR_NONE - success
-	  * OMR_ERROR_ILLEGAL_ARGUMENT - Illegal argument (categories_buffer, count_ptr & total_categories_ptr are all NULL)
-	  * OMR_ERROR_OUT_OF_MEMORY - Memory category data was truncated because category_buffer/max_categories was not large enough
-	  * OMR_ERROR_INTERNAL - GetMemoryCategories was unable to allocate memory for it's own use.
-	  * OMR_THREAD_NOT_ATTACHED - The vmThread parameter was NULL
-	  *
-	  */
-	omr_error_t (*GetMemoryCategories)(OMR_VMThread *vmThread, int32_t max_categories, OMR_TI_MemoryCategory *categories_buffer,
-			int32_t *written_count_ptr, int32_t *total_categories_ptr);
+	 * Samples the values of the JVM memory categories and writes them into a buffer allocated by the user.
+	 *
+	 * @param[in] vmThread the current OMR VM thread
+	 * @param[in] max_categories Maximum number of categories to read into category_buffer
+	 * @param[out] categories_buffer Block of memory to write result into. 0th entry is the first root category. All
+	 * other nodes can be walked from the root.
+	 * @param[out] written_count_ptr If not NULL, the number of categories written to the buffer is written to this
+	 * address
+	 * @param[out] total_categories_ptr If not NULL, the total number of categories available is written to this
+	 * address
+	 *
+	 * @return omr_error_t error code:
+	 * OMR_ERROR_NONE - success
+	 * OMR_ERROR_ILLEGAL_ARGUMENT - Illegal argument (categories_buffer, count_ptr & total_categories_ptr are all
+	 * NULL) OMR_ERROR_OUT_OF_MEMORY - Memory category data was truncated because category_buffer/max_categories was
+	 * not large enough OMR_ERROR_INTERNAL - GetMemoryCategories was unable to allocate memory for it's own use.
+	 * OMR_THREAD_NOT_ATTACHED - The vmThread parameter was NULL
+	 *
+	 */
+	omr_error_t (*GetMemoryCategories)(OMR_VMThread *vmThread, int32_t max_categories,
+	        OMR_TI_MemoryCategory *categories_buffer, int32_t *written_count_ptr, int32_t *total_categories_ptr);
 
 	/**
 	 * Adds all trace buffers containing data to the write queue, then prompts processing of the write
@@ -204,7 +210,8 @@ typedef struct OMR_TI {
 	 * @param[in] vmThread the current OMR VM thread
 	 * @return Return values with meaning specific to this function:
 	 * @retval OMR_ERROR_NONE - success
-	 * @retval OMR_ERROR_ILLEGAL_ARGUMENT - If another flush operation was in progress or no record subscribers are registered
+	 * @retval OMR_ERROR_ILLEGAL_ARGUMENT - If another flush operation was in progress or no record subscribers are
+	 * registered
 	 * @retval OMR_THREAD_NOT_ATTACHED - The vmThread parameter was NULL
 	 * @retval OMR_ERROR_NOT_AVAILABLE - No trace engine
 	 */
@@ -262,20 +269,21 @@ typedef struct OMR_TI {
 	 * @param[in] methodArray The methods for which descriptions are requested.
 	 *            Must not be NULL if methodArrayCount is non-zero.
 	 * @param[in] methodArrayCount The number of elements in methodArray.
-	 * @param[out] methodDescriptions A pre-allocated buffer where the requested method descriptions will be written.
-	 *             The buffer size must be at least (methodArrayCount x sizeofSampledMethodDesc) bytes, where
+	 * @param[out] methodDescriptions A pre-allocated buffer where the requested method descriptions will be
+	 * written. The buffer size must be at least (methodArrayCount x sizeofSampledMethodDesc) bytes, where
 	 *             sizeofSampledMethodDesc is retrieved using GetMethodProperties().
 	 *             Must not be NULL if methodArrayCount is non-zero.
-	 * @param[out] nameBuffer A preallocated buffer where string data for the requested method descriptions will be written.
-	 *             Must not be NULL if methodArrayCount and nameBytes are non-zero.
+	 * @param[out] nameBuffer A preallocated buffer where string data for the requested method descriptions will be
+	 * written. Must not be NULL if methodArrayCount and nameBytes are non-zero.
 	 * @param[in] nameBytes The size of nameBuffer, in bytes.
-	 * @param[out] firstRetryMethod If the return value is OMR_ERROR_RETRY, the first method that could not be retrieved
-	 *             due to lack of space in nameBuffer.
+	 * @param[out] firstRetryMethod If the return value is OMR_ERROR_RETRY, the first method that could not be
+	 * retrieved due to lack of space in nameBuffer.
 	 * @param[out] nameBytesRemaining If the return value is OMR_ERROR_RETRY, the number of nameBuffer bytes needed
 	 *             to fetch the remaining methods.
 	 *
 	 * @return An OMR error code.
-	 * @retval OMR_ERROR_NONE All available method descriptions were successfully retrieved. Some descriptions may have been unavailable.
+	 * @retval OMR_ERROR_NONE All available method descriptions were successfully retrieved. Some descriptions may
+	 * have been unavailable.
 	 * @retval OMR_THREAD_NOT_ATTACHED vmThread is NULL.
 	 * @retval OMR_ERROR_RETRY Some method descriptions could not be retrieved because nameBuffer was too small.
 	 * @retval OMR_ERROR_ILLEGAL_ARGUMENT A NULL pointer was passed in for a buffer that has a non-zero size.
@@ -284,16 +292,18 @@ typedef struct OMR_TI {
 	 * entry of methodArray where the error occurred.
 	 */
 	omr_error_t (*GetMethodDescriptions)(OMR_VMThread *vmThread, void **methodArray, size_t methodArrayCount,
-		OMR_SampledMethodDescription *methodDescriptions, char *nameBuffer, size_t nameBytes,
-		size_t *firstRetryMethod, size_t *nameBytesRemaining);
+	        OMR_SampledMethodDescription *methodDescriptions, char *nameBuffer, size_t nameBytes,
+	        size_t *firstRetryMethod, size_t *nameBytesRemaining);
 
 	/**
 	 * Retrieve the language-specific method properties.
 	 *
 	 * @param[in] vmThread The current OMR VM thread.
 	 * @param[out] numProperties The number of method properties. Must be non-NULL.
-	 * @param[out] propertyNames The ordered list of method property names. Must be non-NULL. Don't modify the data provided by this function.
-	 * @param[out] sizeofSampledMethodDesc The size, in bytes, of a method description returned from GetMethodDescriptions().
+	 * @param[out] propertyNames The ordered list of method property names. Must be non-NULL. Don't modify the data
+	 * provided by this function.
+	 * @param[out] sizeofSampledMethodDesc The size, in bytes, of a method description returned from
+	 * GetMethodDescriptions().
 	 *
 	 * @return An OMR error code.
 	 * @retval OMR_ERROR_NONE Success.
@@ -301,7 +311,8 @@ typedef struct OMR_TI {
 	 * @retval OMR_ERROR_NOT_AVAILABLE The method dictionary has not been enabled.
 	 * @retval OMR_ERROR_ILLEGAL_ARGUMENT A NULL pointer was passed in for an output parameter.
 	 */
-	omr_error_t (*GetMethodProperties)(OMR_VMThread *vmThread, size_t *numProperties, const char *const **propertyNames, size_t *sizeofSampledMethodDesc);
+	omr_error_t (*GetMethodProperties)(OMR_VMThread *vmThread, size_t *numProperties,
+	        const char *const **propertyNames, size_t *sizeofSampledMethodDesc);
 } OMR_TI;
 
 /*
@@ -364,7 +375,8 @@ typedef struct OMR_AgentCallbacks {
  * Required agent entry points:
  */
 #if defined(_MSC_VER)
-omr_error_t __cdecl OMRAgent_OnLoad(OMR_TI const *ti, OMR_VM *vm, char const *options, OMR_AgentCallbacks *agentCallbacks, ...);
+omr_error_t __cdecl OMRAgent_OnLoad(
+        OMR_TI const *ti, OMR_VM *vm, char const *options, OMR_AgentCallbacks *agentCallbacks, ...);
 omr_error_t __cdecl OMRAgent_OnUnload(OMR_TI const *ti, OMR_VM *vm);
 #else
 /**

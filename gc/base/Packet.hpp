@@ -20,22 +20,19 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #if !defined(PACKET_HPP_)
 #define PACKET_HPP_
 
-#include "omr.h"
-#include "modronbase.h"
-#include <string.h>
-
 #include "BaseNonVirtual.hpp"
+#include "modronbase.h"
+#include "omr.h"
+#include <string.h>
 
 #define PACKET_RETURNED 0x01
 
 class MM_EnvironmentBase;
 
-class MM_Packet : public MM_BaseNonVirtual
-{
+class MM_Packet : public MM_BaseNonVirtual {
 	/*
 	 * Data members
 	 */
@@ -46,6 +43,7 @@ private:
 	uintptr_t *_currentPtr;
 	uintptr_t _sublistIndex;
 	MM_EnvironmentBase *_owner;
+
 protected:
 public:
 	MM_Packet *_next;
@@ -55,94 +53,64 @@ public:
 	 * Function members
 	 */
 private:
-	MMINLINE uintptr_t getSublistIndex()
-	{
-		return _sublistIndex;
-	}
+	MMINLINE uintptr_t getSublistIndex() { return _sublistIndex; }
 
-	MMINLINE void setSublistIndex(uintptr_t sublistIndex)
-	{
-		_sublistIndex = sublistIndex;
-	}
+	MMINLINE void setSublistIndex(uintptr_t sublistIndex) { _sublistIndex = sublistIndex; }
 
 protected:
 public:
 	/**
 	 * Returns the number of free slots
 	 */
-	MMINLINE uintptr_t freeSlots()
-	{
-		return (uintptr_t)(_topPtr - _currentPtr);
-	}
+	MMINLINE uintptr_t freeSlots() { return (uintptr_t)(_topPtr - _currentPtr); }
 
 	/**
 	 * Sets the address of the owning threads env
 	 */
-	MMINLINE void setOwner(MM_EnvironmentBase *owner)
-	{
-		_owner = owner;
-	}
-	
+	MMINLINE void setOwner(MM_EnvironmentBase *owner) { _owner = owner; }
+
 	/**
 	 * Clears the address of the owning threads env
 	 */
-	MMINLINE void clearOwner()
-	{
-		_owner = NULL;
-	}
-	
+	MMINLINE void clearOwner() { _owner = NULL; }
+
 	/**
 	 * Low tags the address of the owning threads env so we know its no longer owned by
 	 * a thread but we do know which thread last used it for input/output
 	 */
-	MMINLINE void resetOwner()
-	{
-		_owner = (MM_EnvironmentBase *)((uintptr_t)_owner | PACKET_RETURNED);
-	}
-	
+	MMINLINE void resetOwner() { _owner = (MM_EnvironmentBase *)((uintptr_t)_owner | PACKET_RETURNED); }
+
 	void *peek(MM_EnvironmentBase *env);
-	
+
 	/**
 	 * Return the address of currentPtr for this packet.
-	 * 
+	 *
 	 * @note currently only used by realtime
 	 * @return the address of currentPtr
 	 */
-	uintptr_t **getCurrentAddr(MM_EnvironmentBase *env)
-	{
-		return &_currentPtr;
-	}
-	
+	uintptr_t **getCurrentAddr(MM_EnvironmentBase *env) { return &_currentPtr; }
+
 	/**
 	 * Return the address of topPtr for this packet.
-	 * 
+	 *
 	 * @note currently only used by realtime
 	 * @return the address of topPtr
 	 */
-	uintptr_t **getTopAddr(MM_EnvironmentBase *env)
-	{
-		return &_topPtr;
-	}
-	
+	uintptr_t **getTopAddr(MM_EnvironmentBase *env) { return &_topPtr; }
+
 	/**
 	 * Set _currentPtr equal to _topPtr so
 	 * the packet looks as if it is full.
-	 * 
+	 *
 	 * @note currently only used by realtime
 	 */
-	void setFull(MM_EnvironmentBase *env)
-	{
-		_currentPtr = _topPtr;
-	}
-	
-	MMINLINE bool isFull(MM_EnvironmentBase *env)
-	{
-		return (_currentPtr == _topPtr);
-	}
+	void setFull(MM_EnvironmentBase *env) { _currentPtr = _topPtr; }
+
+	MMINLINE bool isFull(MM_EnvironmentBase *env) { return (_currentPtr == _topPtr); }
 
 	MMINLINE void *pop(MM_EnvironmentBase *env)
 	{
-		if(_currentPtr > _basePtr) {
+		if (_currentPtr > _basePtr) {
 			void *result = (void *)*(--_currentPtr);
 			return result;
 		}
@@ -159,7 +127,7 @@ public:
 	 */
 	MMINLINE bool push(MM_EnvironmentBase *env, void *element)
 	{
-		if(_currentPtr < _topPtr) {
+		if (_currentPtr < _topPtr) {
 			*_currentPtr++ = (uintptr_t)element;
 			return true;
 		}
@@ -176,7 +144,7 @@ public:
 	 */
 	MMINLINE bool push(MM_EnvironmentBase *env, void *element1, void *element2)
 	{
-		if((_currentPtr + 1) < _topPtr) {
+		if ((_currentPtr + 1) < _topPtr) {
 			*_currentPtr++ = (uintptr_t)element2;
 			*_currentPtr++ = (uintptr_t)element1;
 			return true;
@@ -187,53 +155,47 @@ public:
 	/**
 	 * Returns TRUE if the packet is empty, FALSE otherwise
 	 */
-	MMINLINE bool isEmpty()
-	{
-		return _currentPtr == _basePtr;
-	}
-	
+	MMINLINE bool isEmpty() { return _currentPtr == _basePtr; }
+
 	/**
 	 * Zero the storage area for the packet.
 	 */
 	MMINLINE void clear(MM_EnvironmentBase *env)
 	{
-		memset(_basePtr, 0, ((uint8_t*)_topPtr-(uint8_t*)_basePtr));
+		memset(_basePtr, 0, ((uint8_t *)_topPtr - (uint8_t *)_basePtr));
 	}
 
-	bool initialize(MM_EnvironmentBase *env, MM_Packet *next, MM_Packet *previous, uintptr_t *baseAddress,  uintptr_t size);
+	bool initialize(
+	        MM_EnvironmentBase *env, MM_Packet *next, MM_Packet *previous, uintptr_t *baseAddress, uintptr_t size);
 
 	/**
 	 * Create a Packet object.
 	 */
-	MM_Packet() :
-		MM_BaseNonVirtual(),
-		_baseAddress(NULL),
-		_basePtr(NULL),
-		_topPtr(NULL),
-		_currentPtr(NULL),
-		_sublistIndex(0),
-		_owner(NULL),
-		_next(NULL),
-		_previous(NULL)
+	MM_Packet()
+	        : MM_BaseNonVirtual()
+	        , _baseAddress(NULL)
+	        , _basePtr(NULL)
+	        , _topPtr(NULL)
+	        , _currentPtr(NULL)
+	        , _sublistIndex(0)
+	        , _owner(NULL)
+	        , _next(NULL)
+	        , _previous(NULL)
 	{
 		_typeId = __FUNCTION__;
 	}
-		
+
 protected:
 	/*
-	 * Reset current packet to empty.  This should only be called 
-	 * when all current packet data is discarded.  
-	 * 
-	 * @NOTE If this is called without restarting all processing 
+	 * Reset current packet to empty.  This should only be called
+	 * when all current packet data is discarded.
+	 *
+	 * @NOTE If this is called without restarting all processing
 	 * it will likely cause incorrect behaviour
-	 * 
-	 */ 
-	MMINLINE void resetData(MM_EnvironmentBase *env)
-	{
-		_currentPtr = _baseAddress;
-	
-	}
-	
+	 *
+	 */
+	MMINLINE void resetData(MM_EnvironmentBase *env) { _currentPtr = _baseAddress; }
+
 	/*
 	 * Friends
 	 */

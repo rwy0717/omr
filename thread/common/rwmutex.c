@@ -25,7 +25,7 @@
 #include "threaddef.h"
 #include "thread_internal.h"
 
-#undef  ASSERT
+#undef ASSERT
 #define ASSERT(x) /**/
 
 typedef struct RWMutex {
@@ -34,13 +34,13 @@ typedef struct RWMutex {
 	omrthread_t writer;
 } RWMutex;
 
-#define ASSERT_RWMUTEX(m)\
-    ASSERT((m));\
-    ASSERT((m)->syncMon);
+#define ASSERT_RWMUTEX(m) \
+	ASSERT((m)); \
+	ASSERT((m)->syncMon);
 
-#define RWMUTEX_STATUS_IDLE(m)     ((m)->status == 0)
-#define RWMUTEX_STATUS_READING(m)  ((m)->status > 0)
-#define RWMUTEX_STATUS_WRITING(m)  ((m)->status < 0)
+#define RWMUTEX_STATUS_IDLE(m) ((m)->status == 0)
+#define RWMUTEX_STATUS_READING(m) ((m)->status > 0)
+#define RWMUTEX_STATUS_WRITING(m) ((m)->status < 0)
 
 /**
  * Acquire and initialize a new read/write mutex from the threading library.
@@ -347,8 +347,8 @@ omrthread_rwmutex_reset(omrthread_rwmutex_t rwmutex, omrthread_t self)
 J9Pool *
 omrthread_rwmutex_init_pool(omrthread_library_t library)
 {
-	return pool_new(sizeof(RWMutex), 0, 0, 0, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_THREADS, omrthread_mallocWrapper, omrthread_freeWrapper, library);
+	return pool_new(sizeof(RWMutex), 0, 0, 0, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_THREADS, omrthread_mallocWrapper,
+	        omrthread_freeWrapper, library);
 }
 
 #endif /* defined(OMR_THR_FORK_SUPPORT) */
-

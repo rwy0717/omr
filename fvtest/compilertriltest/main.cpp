@@ -32,20 +32,18 @@ omrthread_t TRTest::TestWithPortLib::current_thread = NULL;
 /**
  * @brief Global test environment to initialize and shutdown the port library
  */
-class JitTestEnvironment: public ::testing::Environment {
-   public:
-   virtual void SetUp() {
-      TRTest::TestWithPortLib::initPortLib();
-   }
+class JitTestEnvironment : public ::testing::Environment {
+public:
+	virtual void SetUp() { TRTest::TestWithPortLib::initPortLib(); }
 
-   virtual void TearDown() {
-      TRTest::TestWithPortLib::shutdownPortLib();
-   }
+	virtual void TearDown() { TRTest::TestWithPortLib::shutdownPortLib(); }
 };
 
-int omr_main_entry(int argc, char **argv, char **envp) {
-   ::testing::InitGoogleTest(&argc, argv);
-   OMREventListener::setDefaultTestListener();
-   ::testing::AddGlobalTestEnvironment(new JitTestEnvironment);
-   return RUN_ALL_TESTS();
+int
+omr_main_entry(int argc, char **argv, char **envp)
+{
+	::testing::InitGoogleTest(&argc, argv);
+	OMREventListener::setDefaultTestListener();
+	::testing::AddGlobalTestEnvironment(new JitTestEnvironment);
+	return RUN_ALL_TESTS();
 }

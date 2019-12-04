@@ -65,15 +65,15 @@ proc_setattr() function exists.
  * proc_getattr and proc_setattr are APIs that allow a privileged
  * user to set/unset attributes of any process (including self)
  */
-#define PA_IGNORE       0
-#define PA_ENABLE       1
-#define PA_DISABLE      2
+#define PA_IGNORE 0
+#define PA_ENABLE 1
+#define PA_DISABLE 2
 
 typedef struct {
-	uchar core_naming;  /* Unique core file name */
-	uchar core_mmap;    /* Dump mmap'ed regions in core file */
-	uchar core_shm;     /* Dump shared memory regions in core file */
-	uchar aixthread_hrt;/* Enable high res timers */
+	uchar core_naming; /* Unique core file name */
+	uchar core_mmap; /* Dump mmap'ed regions in core file */
+	uchar core_shm; /* Dump shared memory regions in core file */
+	uchar aixthread_hrt; /* Enable high res timers */
 } procattr_t;
 #endif
 #endif
@@ -122,12 +122,14 @@ omrdump_create(struct OMRPortLibrary *portLibrary, char *filename, char *dumpTyp
 			return rc;
 		}
 	} else {
-		portLibrary->tty_err_printf(portLibrary, "Note: \"Enable full CORE dump\" in smit is set to FALSE and as a result there will be limited threading information in core file.\n");
+		portLibrary->tty_err_printf(portLibrary,
+		        "Note: \"Enable full CORE dump\" in smit is set to FALSE and as a result there will be limited "
+		        "threading information in core file.\n");
 	}
 #endif /* aix_ppc */
 
 	if (NULL != filename) {
-		lastSep =  strrchr(filename, DIR_SEPARATOR);
+		lastSep = strrchr(filename, DIR_SEPARATOR);
 	}
 
 	/*
@@ -163,9 +165,9 @@ omrdump_create(struct OMRPortLibrary *portLibrary, char *filename, char *dumpTyp
 		 * CMVC 95748: don't use abort() after fork() on Linux as this seems to upset certain levels of glibc
 		 */
 #if defined(LINUX) || defined(OSX)
-#define J9_DUMP_SIGNAL  SIGSEGV
+#define J9_DUMP_SIGNAL SIGSEGV
 #else /* defined(LINUX) || defined(OSX) */
-#define J9_DUMP_SIGNAL  SIGABRT
+#define J9_DUMP_SIGNAL SIGABRT
 #endif /* defined(LINUX) || defined(OSX) */
 
 		/* Ensure we get default action (core) - reset primary&app handlers */
@@ -193,7 +195,8 @@ omrdump_create(struct OMRPortLibrary *portLibrary, char *filename, char *dumpTyp
 
 	/* We are now in the parent process. First check that the fork() worked OK (CMVC 130439) */
 	if (pid < 0) {
-		portLibrary->str_printf(portLibrary, filename, EsMaxPath, "insufficient system resources to generate dump, errno=%d \"%s\"", errno, strerror(errno));
+		portLibrary->str_printf(portLibrary, filename, EsMaxPath,
+		        "insufficient system resources to generate dump, errno=%d \"%s\"", errno, strerror(errno));
 		return 1;
 	}
 
@@ -239,7 +242,9 @@ omrdump_create(struct OMRPortLibrary *portLibrary, char *filename, char *dumpTyp
 
 		/* Apply suggested name */
 		if (rename(corepath, filename)) {
-			portLibrary->str_printf(portLibrary, filename, EsMaxPath, "cannot find core file: \"%s\". check \"ulimit -Hc\" is set high enough", strerror(errno));
+			portLibrary->str_printf(portLibrary, filename, EsMaxPath,
+			        "cannot find core file: \"%s\". check \"ulimit -Hc\" is set high enough",
+			        strerror(errno));
 			return 1;
 		}
 
@@ -329,12 +334,15 @@ omrdump_startup(struct OMRPortLibrary *portLibrary)
 	if (0 == portLibrary->sl_open_shared_library(portLibrary, NULL, &handle, 0)) {
 		int (*setattr)(pid_t pid, procattr_t * attr, size_t size) = NULL;
 
-		if (0 == portLibrary->sl_lookup_name(portLibrary, handle, "proc_setattr", (uintptr_t *)&setattr, "IPLp")) {
+		if (0
+		        == portLibrary->sl_lookup_name(
+		                portLibrary, handle, "proc_setattr", (uintptr_t *)&setattr, "IPLp")) {
 			procattr_t attr;
 			int rc = 0;
 
 			memset(&attr, PA_IGNORE, sizeof(procattr_t));
-			/* enable the flags that are required for including non-anonymous mmap regions and shared memory in core file */
+			/* enable the flags that are required for including non-anonymous mmap regions and shared memory
+			 * in core file */
 			attr.core_naming = PA_ENABLE;
 			attr.core_mmap = PA_ENABLE;
 			attr.core_shm = PA_ENABLE;
@@ -342,13 +350,15 @@ omrdump_startup(struct OMRPortLibrary *portLibrary)
 			rc = setattr(-1, &attr, sizeof(procattr_t));
 			if (0 != rc) {
 				if (ENOSYS == errno) {
-					/* CMVC 176613: we can get here if the machine was updated from 6100-04 to 6100-05 without a subsequent reboot,
-					 * in which case, behave the same as if we're running on an AIX version which does not support proc_setattr().
+					/* CMVC 176613: we can get here if the machine was updated from 6100-04 to
+					 * 6100-05 without a subsequent reboot, in which case, behave the same as if
+					 * we're running on an AIX version which does not support proc_setattr().
 					 */
 				} else {
 					int32_t error = errno; /* Save errno for past closing the shared library. */
 					portLibrary->sl_close_shared_library(portLibrary, handle);
-					portLibrary->error_set_last_error(portLibrary, error, OMRPORT_ERROR_STARTUP_AIX_PROC_ATTR);
+					portLibrary->error_set_last_error(
+					        portLibrary, error, OMRPORT_ERROR_STARTUP_AIX_PROC_ATTR);
 					return OMRPORT_ERROR_STARTUP_AIX_PROC_ATTR;
 				}
 			} else {
@@ -356,7 +366,8 @@ omrdump_startup(struct OMRPortLibrary *portLibrary)
 				portLibrary->portGlobals->control.aix_proc_attr = 0;
 			}
 		} else {
-			/* do not return error as we may be running on an AIX version which does not support proc_setattr() */
+			/* do not return error as we may be running on an AIX version which does not support
+			 * proc_setattr() */
 		}
 		portLibrary->sl_close_shared_library(portLibrary, handle);
 	}
@@ -369,5 +380,4 @@ omrdump_startup(struct OMRPortLibrary *portLibrary)
 
 void
 omrdump_shutdown(struct OMRPortLibrary *portLibrary)
-{
-}
+{}

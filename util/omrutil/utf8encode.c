@@ -72,7 +72,6 @@ encodeUTF8CharN(uintptr_t unicode, uint8_t *result, uint32_t bytesRemaining)
 	}
 }
 
-
 /**
  * Encode the Unicode character.
  *
@@ -91,7 +90,3 @@ encodeUTF8Char(uintptr_t unicode, uint8_t *result)
 {
 	return encodeUTF8CharN(unicode, result, 3);
 }
-
-
-
-

@@ -23,10 +23,9 @@
 #if !defined(GLOBALGCSTATS_HPP_)
 #define GLOBALGCSTATS_HPP_
 
-#include "omrcomp.h"
-#include "modronbase.h"
-
 #include "ClassUnloadStats.hpp"
+#include "modronbase.h"
+#include "omrcomp.h"
 #if defined(OMR_GC_MODRON_COMPACTION)
 #include "CompactStats.hpp"
 #endif /* OMR_GC_MODRON_COMPACTION */
@@ -78,18 +77,18 @@ public:
 	};
 
 	MM_GlobalGCStats()
-		: gcCount(0)
-		, workPacketStats()
-		, sweepStats()
+	        : gcCount(0)
+	        , workPacketStats()
+	        , sweepStats()
 #if defined(OMR_GC_MODRON_COMPACTION)
-		, compactStats()
+	        , compactStats()
 #endif /* OMR_GC_MODRON_COMPACTION */
-		, fixHeapForWalkReason(FIXUP_NONE)
-		, fixHeapForWalkTime(0)
-		, markStats()
-		, classUnloadStats()
-		, metronomeStats()
-		, finalizableCount(0) {};
+	        , fixHeapForWalkReason(FIXUP_NONE)
+	        , fixHeapForWalkTime(0)
+	        , markStats()
+	        , classUnloadStats()
+	        , metronomeStats()
+	        , finalizableCount(0){};
 };
 
 #endif /* GLOBALGCSTATS_HPP_ */

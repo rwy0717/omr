@@ -20,11 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-#include "StartupManager.hpp"
-#include "omr.h"
-#include "mminitcore.h"
-#include "objectdescription.h"
-
 #include "AllocateDescription.hpp"
 #include "AtomicOperations.hpp"
 #include "Collector.hpp"
@@ -36,15 +31,19 @@
 #include "GlobalCollector.hpp"
 #include "Heap.hpp"
 #include "HeapMemorySubSpaceIterator.hpp"
-#include "HeapRegionIterator.hpp"
 #include "HeapRegionDescriptor.hpp"
+#include "HeapRegionIterator.hpp"
 #include "MemoryPool.hpp"
 #include "MemorySpace.hpp"
 #include "ModronAssertions.h"
 #include "ObjectAllocationInterface.hpp"
 #include "ObjectModel.hpp"
 #include "ParallelDispatcher.hpp"
+#include "StartupManager.hpp"
 #include "VerboseManager.hpp"
+#include "mminitcore.h"
+#include "objectdescription.h"
+#include "omr.h"
 
 /* ****************
  * Internal helpers
@@ -145,18 +144,22 @@ heapCreationHelper(OMR_VM *omrVM, MM_StartupManager *startupManager, bool create
 		goto done;
 	}
 
-	extensions->configuration->prepareParameters(omrVM, extensions->initialMemorySize,
-		extensions->minNewSpaceSize, extensions->newSpaceSize, extensions->maxNewSpaceSize,
-		extensions->minOldSpaceSize, extensions->oldSpaceSize, extensions->maxOldSpaceSize,
-		extensions->maxSizeDefaultMemorySpace, MEMORY_TYPE_DISCARDABLE, &parameters);
+	extensions->configuration->prepareParameters(omrVM, extensions->initialMemorySize, extensions->minNewSpaceSize,
+	        extensions->newSpaceSize, extensions->maxNewSpaceSize, extensions->minOldSpaceSize,
+	        extensions->oldSpaceSize, extensions->maxOldSpaceSize, extensions->maxSizeDefaultMemorySpace,
+	        MEMORY_TYPE_DISCARDABLE, &parameters);
 
-	if (0 != omrthread_monitor_init_with_name(&extensions->gcExclusiveAccessMutex, 0, "GCExtensions::gcExclusiveAccessMutex")) {
+	if (0
+	        != omrthread_monitor_init_with_name(
+	                &extensions->gcExclusiveAccessMutex, 0, "GCExtensions::gcExclusiveAccessMutex")) {
 		omrtty_printf("Failed to create gcExclusiveAccessMutex.\n");
 		rc = OMR_ERROR_INTERNAL;
 		goto done;
 	}
 
-	if (0 != omrthread_monitor_init_with_name(&extensions->_lightweightNonReentrantLockPoolMutex, 0, "GCExtensions::_lightweightNonReentrantLockPoolMutex")) {
+	if (0
+	        != omrthread_monitor_init_with_name(&extensions->_lightweightNonReentrantLockPoolMutex, 0,
+	                "GCExtensions::_lightweightNonReentrantLockPoolMutex")) {
 		omrtty_printf("Failed to create _lightweightNonReentrantLockPoolMutex.\n");
 		rc = OMR_ERROR_INTERNAL;
 		goto done;
@@ -207,13 +210,13 @@ OMR_GC_InitializeHeap(OMR_VM *omrVM, MM_StartupManager *manager)
 }
 
 omr_error_t
-OMR_GC_IntializeHeapAndCollector(OMR_VM* omrVM, MM_StartupManager *manager)
+OMR_GC_IntializeHeapAndCollector(OMR_VM *omrVM, MM_StartupManager *manager)
 {
 	return heapCreationHelper(omrVM, manager, true);
 }
 
 omr_error_t
-OMR_GC_InitializeDispatcherThreads(OMR_VMThread* omrVMThread)
+OMR_GC_InitializeDispatcherThreads(OMR_VMThread *omrVMThread)
 {
 	MM_GCExtensionsBase *extensions = MM_GCExtensionsBase::getExtensions(omrVMThread->_vm);
 	omr_error_t rc = OMR_ERROR_NONE;
@@ -227,7 +230,7 @@ OMR_GC_InitializeDispatcherThreads(OMR_VMThread* omrVMThread)
 }
 
 omr_error_t
-OMR_GC_ShutdownDispatcherThreads(OMR_VMThread* omrVMThread)
+OMR_GC_ShutdownDispatcherThreads(OMR_VMThread *omrVMThread)
 {
 	MM_GCExtensionsBase *extensions = MM_GCExtensionsBase::getExtensions(omrVMThread->_vm);
 	omr_error_t rc = OMR_ERROR_NONE;
@@ -242,7 +245,7 @@ OMR_GC_ShutdownDispatcherThreads(OMR_VMThread* omrVMThread)
 }
 
 omr_error_t
-OMR_GC_InitializeCollector(OMR_VMThread* omrVMThread)
+OMR_GC_InitializeCollector(OMR_VMThread *omrVMThread)
 {
 	MM_GCExtensionsBase *extensions = MM_GCExtensionsBase::getExtensions(omrVMThread->_vm);
 	MM_EnvironmentBase *env = MM_EnvironmentBase::getEnvironment(omrVMThread);
@@ -272,13 +275,11 @@ OMR_GC_InitializeCollector(OMR_VMThread* omrVMThread)
 			MM_HeapRegionDescriptor *region = NULL;
 			MM_HeapRegionManager *regionManager = heap->getHeapRegionManager();
 			GC_HeapRegionIterator regionIterator(regionManager);
-			while(NULL != (region = regionIterator.nextRegion())) {
+			while (NULL != (region = regionIterator.nextRegion())) {
 				if (region->isCommitted()) {
 					globalCollector->heapAddRange(env,
-							env->getMemorySpace()->getDefaultMemorySubSpace(),
-							region->getSize(),
-							region->getLowAddress(),
-							region->getHighAddress());
+					        env->getMemorySpace()->getDefaultMemorySubSpace(), region->getSize(),
+					        region->getLowAddress(), region->getHighAddress());
 				}
 			}
 
@@ -291,7 +292,7 @@ OMR_GC_InitializeCollector(OMR_VMThread* omrVMThread)
 }
 
 omr_error_t
-OMR_GC_ShutdownCollector(OMR_VM* vm)
+OMR_GC_ShutdownCollector(OMR_VM *vm)
 {
 	MM_GCExtensionsBase *extensions = MM_GCExtensionsBase::getExtensions(vm);
 
@@ -307,7 +308,7 @@ OMR_GC_ShutdownCollector(OMR_VM* vm)
 }
 
 omr_error_t
-OMR_GC_ShutdownCollector(OMR_VMThread* vmThread)
+OMR_GC_ShutdownCollector(OMR_VMThread *vmThread)
 {
 	return OMR_GC_ShutdownCollector(vmThread->_vm);
 }
@@ -345,9 +346,9 @@ OMR_GC_ShutdownHeap(OMR_VM *omrVM)
 }
 
 omr_error_t
-OMR_GC_ShutdownHeapAndCollector(OMR_VM* omrVM) {
+OMR_GC_ShutdownHeapAndCollector(OMR_VM *omrVM)
+{
 	OMR_GC_ShutdownCollector(omrVM);
 	OMR_GC_ShutdownHeap(omrVM);
 	return OMR_ERROR_NONE;
 }
-

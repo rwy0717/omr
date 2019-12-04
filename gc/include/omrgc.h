@@ -27,10 +27,10 @@
  * @ddr_namespace: default
  */
 
-#include "omr.h"
-#include "objectdescription.h"
-#include "omrcomp.h"
 #include "j9nongenerated.h"
+#include "objectdescription.h"
+#include "omr.h"
+#include "omrcomp.h"
 
 /* Runtime API (C) */
 #ifdef __cplusplus
@@ -38,9 +38,10 @@ extern "C" {
 #endif
 
 /* Allocation description will be initialized in call */
-omrobjectptr_t OMR_GC_AllocateObject(OMR_VMThread * omrVMThread, uintptr_t allocationCategory, uintptr_t requiredSizeInBytes, uintptr_t objectAllocationFlags);
+omrobjectptr_t OMR_GC_AllocateObject(OMR_VMThread *omrVMThread, uintptr_t allocationCategory,
+        uintptr_t requiredSizeInBytes, uintptr_t objectAllocationFlags);
 
-omr_error_t OMR_GC_SystemCollect(OMR_VMThread* omrVMThread, uint32_t gcCode);
+omr_error_t OMR_GC_SystemCollect(OMR_VMThread *omrVMThread, uint32_t gcCode);
 
 #ifdef __cplusplus
 } /* extern "C" { */
@@ -49,8 +50,9 @@ omr_error_t OMR_GC_SystemCollect(OMR_VMThread* omrVMThread, uint32_t gcCode);
 /* Runtime API (C++) */
 #ifdef __cplusplus
 class MM_AllocateInitialization;
-/* Caller is expected to initialize the allocation description (MM_AllocateInitialization::getAllocateDescription()) prior to call */
-omrobjectptr_t OMR_GC_AllocateObject(OMR_VMThread * omrVMThread, MM_AllocateInitialization *allocator);
+/* Caller is expected to initialize the allocation description (MM_AllocateInitialization::getAllocateDescription())
+ * prior to call */
+omrobjectptr_t OMR_GC_AllocateObject(OMR_VMThread *omrVMThread, MM_AllocateInitialization *allocator);
 #endif
 
 #endif /* MM_OMRGCAPI_HPP_ */

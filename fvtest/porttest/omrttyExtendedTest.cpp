@@ -40,7 +40,8 @@
 /**
  * Verify that a call to omrtty_printf/omrtty_vprintf after a call to omrtty_daemonize does not crash.
  *
- * Call omrtty_daemonize, then call omrtty_printf/omrtty_vprintf. If we crash or print anything, then the test has failed.
+ * Call omrtty_daemonize, then call omrtty_printf/omrtty_vprintf. If we crash or print anything, then the test has
+ * failed.
  */
 #if defined(OMR_OS_WINDOWS)
 TEST(PortTtyTest, tty_daemonize_test)

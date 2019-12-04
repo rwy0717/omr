@@ -28,7 +28,4 @@
 
 // The entries in this file must be kept in sync with compiler/z/codegen/OMRCodeGenPhaseFunctionTable.hpp
 
-markLoadAsZeroOrSignExtension,
-SetBranchOnCountFlagPhase,
-PreRAPeepholePhase,
-LastOMRZPhase = PreRAPeepholePhase,
+markLoadAsZeroOrSignExtension, SetBranchOnCountFlagPhase, PreRAPeepholePhase, LastOMRZPhase = PreRAPeepholePhase,

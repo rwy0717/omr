@@ -23,43 +23,41 @@
 #include "codegen/CodeGenerator.hpp"
 #include "codegen/GenerateInstructions.hpp"
 
-TR_ARM64OutOfLineCodeSection::TR_ARM64OutOfLineCodeSection(TR::Node *callNode,
-                            TR::ILOpCodes callOp,
-                            TR::Register *targetReg,
-                            TR::LabelSymbol *entryLabel,
-                            TR::LabelSymbol *restartLabel,
-                            TR::CodeGenerator *cg) :
-                            TR_OutOfLineCodeSection(callNode, callOp, targetReg, entryLabel, restartLabel, cg)
-   {
-   generateARM64OutOfLineCodeSectionDispatch();
-   }
+TR_ARM64OutOfLineCodeSection::TR_ARM64OutOfLineCodeSection(TR::Node *callNode, TR::ILOpCodes callOp,
+        TR::Register *targetReg, TR::LabelSymbol *entryLabel, TR::LabelSymbol *restartLabel, TR::CodeGenerator *cg)
+        : TR_OutOfLineCodeSection(callNode, callOp, targetReg, entryLabel, restartLabel, cg)
+{
+	generateARM64OutOfLineCodeSectionDispatch();
+}
 
-void TR_ARM64OutOfLineCodeSection::assignRegisters(TR_RegisterKinds kindsToBeAssigned)
-   {
-   TR_UNIMPLEMENTED();
-   }
+void
+TR_ARM64OutOfLineCodeSection::assignRegisters(TR_RegisterKinds kindsToBeAssigned)
+{
+	TR_UNIMPLEMENTED();
+}
 
-void TR_ARM64OutOfLineCodeSection::generateARM64OutOfLineCodeSectionDispatch()
-   {
-   // Switch to cold helper instruction stream.
-   //
-   swapInstructionListsWithCompilation();
+void
+TR_ARM64OutOfLineCodeSection::generateARM64OutOfLineCodeSectionDispatch()
+{
+	// Switch to cold helper instruction stream.
+	//
+	swapInstructionListsWithCompilation();
 
-   generateLabelInstruction(_cg, TR::InstOpCode::label, _callNode, _entryLabel);
+	generateLabelInstruction(_cg, TR::InstOpCode::label, _callNode, _entryLabel);
 
-   TR::Register *resultReg = TR::TreeEvaluator::performCall(_callNode, _callNode->getOpCode().isCallIndirect(), _cg);
+	TR::Register *resultReg =
+	        TR::TreeEvaluator::performCall(_callNode, _callNode->getOpCode().isCallIndirect(), _cg);
 
-   if (_targetReg)
-      {
-      TR_ASSERT(resultReg, "resultReg must not be a NULL");
-      generateMovInstruction(_cg, _callNode, _targetReg, resultReg);
-      }
-   _cg->decReferenceCount(_callNode);
+	if (_targetReg) {
+		TR_ASSERT(resultReg, "resultReg must not be a NULL");
+		generateMovInstruction(_cg, _callNode, _targetReg, resultReg);
+	}
+	_cg->decReferenceCount(_callNode);
 
-   if (_restartLabel)
-      generateLabelInstruction(_cg, TR::InstOpCode::b, _callNode, _restartLabel);
+	if (_restartLabel)
+		generateLabelInstruction(_cg, TR::InstOpCode::b, _callNode, _restartLabel);
 
-   // Switch from cold helper instruction stream.
-   //
-   swapInstructionListsWithCompilation();
-   }
+	// Switch from cold helper instruction stream.
+	//
+	swapInstructionListsWithCompilation();
+}

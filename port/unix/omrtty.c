@@ -21,12 +21,12 @@
  *******************************************************************************/
 
 /**
-  * @file
-  * @ingroup Port
-  * @brief TTY output
-  *
-  * All VM output goes to stderr by default.  These routines provide the helpers for such output.
-  */
+ * @file
+ * @ingroup Port
+ * @brief TTY output
+ *
+ * All VM output goes to stderr by default.  These routines provide the helpers for such output.
+ */
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -91,8 +91,7 @@ omrtty_startup(struct OMRPortLibrary *portLibrary)
  */
 void
 omrtty_shutdown(struct OMRPortLibrary *portLibrary)
-{
-}
+{}
 
 /**
  * Read characters from stdin into buffer.
@@ -168,11 +167,11 @@ omrtty_available(struct OMRPortLibrary *portLibrary)
 
 	/* ioctl doesn't work for files on all platforms (i.e. SOLARIS) */
 
-	/* Historically, OMR has used an intptr_t as the output of an FIONREAD ioctl call. The claim was that some devices
-	 * may sometimes output a 64bit wide integer. However, this exposed us to issues with endianness and aliasing.
-	 * Meanwhile, documentation shows that the output is always an int, on every supported platform. If for some reason
-	 * this code isn't working, it may be related to FIONREAD putting out more than an integer.
-	 */ 
+	/* Historically, OMR has used an intptr_t as the output of an FIONREAD ioctl call. The claim was that some
+	 * devices may sometimes output a 64bit wide integer. However, this exposed us to issues with endianness and
+	 * aliasing. Meanwhile, documentation shows that the output is always an int, on every supported platform. If
+	 * for some reason this code isn't working, it may be related to FIONREAD putting out more than an integer.
+	 */
 
 	rc = ioctl(STDIN_FILENO, FIONREAD, &avail);
 	if (rc != -1) {
@@ -217,7 +216,6 @@ omrtty_err_vprintf(struct OMRPortLibrary *portLibrary, const char *format, va_li
 	portLibrary->file_vprintf(portLibrary, OMRPORT_TTY_ERR, format, args);
 }
 
-
 /**
  * This method allows the caller to "daemonize" the current process by closing handles
  * used by the port library
@@ -230,4 +228,3 @@ omrtty_daemonize(struct OMRPortLibrary *portLibrary)
 {
 	/* no special handling of file handles, nothing to do */
 }
-

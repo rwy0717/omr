@@ -25,10 +25,8 @@
  * @ingroup GC_Modron_Metronome
  */
 
-#include "omrcfg.h"
-#include "MemorySpacesAPI.h"
-
 #include "ConfigurationSegregated.hpp"
+
 #include "EnvironmentBase.hpp"
 #include "GCExtensionsBase.hpp"
 #include "GlobalAllocationManagerSegregated.hpp"
@@ -37,6 +35,7 @@
 #include "HeapVirtualMemory.hpp"
 #include "MemoryPoolSegregated.hpp"
 #include "MemorySpace.hpp"
+#include "MemorySpacesAPI.h"
 #include "MemorySubSpaceSegregated.hpp"
 #include "ParallelDispatcher.hpp"
 #include "PhysicalArenaRegionBased.hpp"
@@ -46,6 +45,7 @@
 #include "SegregatedAllocationTracker.hpp"
 #include "SegregatedGC.hpp"
 #include "SizeClasses.hpp"
+#include "omrcfg.h"
 
 #if defined(OMR_GC_SEGREGATED_HEAP)
 
@@ -63,10 +63,11 @@ MM_ConfigurationSegregated::newInstance(MM_EnvironmentBase *env)
 {
 	MM_ConfigurationSegregated *configuration;
 
-	configuration = (MM_ConfigurationSegregated *) env->getForge()->allocate(sizeof(MM_ConfigurationSegregated), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
-	if(NULL != configuration) {
-		new(configuration) MM_ConfigurationSegregated(env);
-		if(!configuration->initialize(env)) {
+	configuration = (MM_ConfigurationSegregated *)env->getForge()->allocate(
+	        sizeof(MM_ConfigurationSegregated), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+	if (NULL != configuration) {
+		new (configuration) MM_ConfigurationSegregated(env);
+		if (!configuration->initialize(env)) {
 			configuration->kill(env);
 			configuration = NULL;
 		}
@@ -97,9 +98,9 @@ MM_ConfigurationSegregated::initialize(MM_EnvironmentBase *env)
 }
 
 void
-MM_ConfigurationSegregated::tearDown(MM_EnvironmentBase* env)
+MM_ConfigurationSegregated::tearDown(MM_EnvironmentBase *env)
 {
-	MM_GCExtensionsBase* extensions = env->getExtensions();
+	MM_GCExtensionsBase *extensions = env->getExtensions();
 
 	if (NULL != extensions->defaultSizeClasses) {
 		extensions->defaultSizeClasses->kill(env);
@@ -110,13 +111,16 @@ MM_ConfigurationSegregated::tearDown(MM_EnvironmentBase* env)
 }
 
 MM_Heap *
-MM_ConfigurationSegregated::createHeapWithManager(MM_EnvironmentBase *env, uintptr_t heapBytesRequested, MM_HeapRegionManager *regionManager)
+MM_ConfigurationSegregated::createHeapWithManager(
+        MM_EnvironmentBase *env, uintptr_t heapBytesRequested, MM_HeapRegionManager *regionManager)
 {
-	return MM_HeapVirtualMemory::newInstance(env, env->getExtensions()->heapAlignment, heapBytesRequested, regionManager);
+	return MM_HeapVirtualMemory::newInstance(
+	        env, env->getExtensions()->heapAlignment, heapBytesRequested, regionManager);
 }
 
 MM_MemorySpace *
-MM_ConfigurationSegregated::createDefaultMemorySpace(MM_EnvironmentBase *env, MM_Heap *heap, MM_InitializationParameters *parameters)
+MM_ConfigurationSegregated::createDefaultMemorySpace(
+        MM_EnvironmentBase *env, MM_Heap *heap, MM_InitializationParameters *parameters)
 {
 	MM_GCExtensionsBase *extensions = env->getExtensions();
 	MM_MemoryPoolSegregated *memoryPool = NULL;
@@ -125,7 +129,7 @@ MM_ConfigurationSegregated::createDefaultMemorySpace(MM_EnvironmentBase *env, MM
 	MM_PhysicalArenaRegionBased *physicalArena = NULL;
 	MM_RegionPoolSegregated *regionPool = NULL;
 
-	if(NULL == (extensions->defaultSizeClasses = MM_SizeClasses::newInstance(env))) {
+	if (NULL == (extensions->defaultSizeClasses = MM_SizeClasses::newInstance(env))) {
 		return NULL;
 	}
 
@@ -135,38 +139,44 @@ MM_ConfigurationSegregated::createDefaultMemorySpace(MM_EnvironmentBase *env, MM
 	}
 
 	extensions->globalAllocationManager = MM_GlobalAllocationManagerSegregated::newInstance(env, regionPool);
-	if(NULL == extensions->globalAllocationManager) {
+	if (NULL == extensions->globalAllocationManager) {
 		return NULL;
 	}
 
-	if(NULL == (memoryPool = MM_MemoryPoolSegregated::newInstance(env, regionPool, MINIMUM_FREE_CHUNK_SIZE, (MM_GlobalAllocationManagerSegregated*)extensions->globalAllocationManager))) {
+	if (NULL
+	        == (memoryPool = MM_MemoryPoolSegregated::newInstance(env, regionPool, MINIMUM_FREE_CHUNK_SIZE,
+	                    (MM_GlobalAllocationManagerSegregated *)extensions->globalAllocationManager))) {
 		return NULL;
 	}
 
-	if(NULL == (physicalSubArena = MM_PhysicalSubArenaRegionBased::newInstance(env, heap))) {
+	if (NULL == (physicalSubArena = MM_PhysicalSubArenaRegionBased::newInstance(env, heap))) {
 		memoryPool->kill(env);
 		return NULL;
 	}
 
-	memorySubSpaceSegregated = MM_MemorySubSpaceSegregated::newInstance(env, physicalSubArena, memoryPool, true, parameters->_minimumSpaceSize, parameters->_initialOldSpaceSize, parameters->_maximumSpaceSize);
-	if(NULL == memorySubSpaceSegregated) {
+	memorySubSpaceSegregated = MM_MemorySubSpaceSegregated::newInstance(env, physicalSubArena, memoryPool, true,
+	        parameters->_minimumSpaceSize, parameters->_initialOldSpaceSize, parameters->_maximumSpaceSize);
+	if (NULL == memorySubSpaceSegregated) {
 		return NULL;
 	}
 
-	if(NULL == (physicalArena = MM_PhysicalArenaRegionBased::newInstance(env, heap))) {
+	if (NULL == (physicalArena = MM_PhysicalArenaRegionBased::newInstance(env, heap))) {
 		memorySubSpaceSegregated->kill(env);
 		return NULL;
 	}
 
-	return MM_MemorySpace::newInstance(env, heap, physicalArena, memorySubSpaceSegregated, parameters, MEMORY_SPACE_NAME_METRONOME, MEMORY_SPACE_DESCRIPTION_METRONOME);
+	return MM_MemorySpace::newInstance(env, heap, physicalArena, memorySubSpaceSegregated, parameters,
+	        MEMORY_SPACE_NAME_METRONOME, MEMORY_SPACE_DESCRIPTION_METRONOME);
 }
 
 void
-MM_ConfigurationSegregated::defaultMemorySpaceAllocated(MM_GCExtensionsBase *extensions, void* defaultMemorySpace)
+MM_ConfigurationSegregated::defaultMemorySpaceAllocated(MM_GCExtensionsBase *extensions, void *defaultMemorySpace)
 {
 	/* OMRTODO Fix the assumption that we are using SegregatedGC */
-	((MM_GlobalAllocationManagerSegregated *) extensions->globalAllocationManager)->setSweepScheme(((MM_SegregatedGC *) extensions->getGlobalCollector())->getSweepScheme());
-	((MM_GlobalAllocationManagerSegregated *) extensions->globalAllocationManager)->setMarkingScheme(((MM_SegregatedGC *) extensions->getGlobalCollector())->getMarkingScheme());
+	((MM_GlobalAllocationManagerSegregated *)extensions->globalAllocationManager)
+	        ->setSweepScheme(((MM_SegregatedGC *)extensions->getGlobalCollector())->getSweepScheme());
+	((MM_GlobalAllocationManagerSegregated *)extensions->globalAllocationManager)
+	        ->setMarkingScheme(((MM_SegregatedGC *)extensions->getGlobalCollector())->getMarkingScheme());
 }
 
 MM_EnvironmentBase *
@@ -181,8 +191,10 @@ MM_ConfigurationSegregated::createEnvironmentPool(MM_EnvironmentBase *env)
 	OMRPORT_ACCESS_FROM_OMRPORT(env->getPortLibrary());
 
 	uintptr_t numberOfElements = getConfigurationDelegate()->getInitialNumberOfPooledEnvironments(env);
-	/* number of elements, pool flags = 0, 0 selects default pool configuration (at least 1 element, puddle size rounded to OS page size) */
-	return pool_new(sizeof(MM_EnvironmentBase), numberOfElements, sizeof(uint64_t), 0, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_MM, POOL_FOR_PORT(OMRPORTLIB));
+	/* number of elements, pool flags = 0, 0 selects default pool configuration (at least 1 element, puddle size
+	 * rounded to OS page size) */
+	return pool_new(sizeof(MM_EnvironmentBase), numberOfElements, sizeof(uint64_t), 0, OMR_GET_CALLSITE(),
+	        OMRMEM_CATEGORY_MM, POOL_FOR_PORT(OMRPORTLIB));
 }
 
 bool
@@ -191,10 +203,14 @@ MM_ConfigurationSegregated::initializeEnvironment(MM_EnvironmentBase *env)
 	if (MM_Configuration::initializeEnvironment(env)) {
 		env->getExtensions()->globalAllocationManager->acquireAllocationContext(env);
 		if (env->getAllocationContext() != NULL) {
-			/* BEN TODO: VMDESIGN 1880: When allocation trackers are commonized, the setting of the allocation
-			 * tracker in the env should be done by the base configuration initializeEnvironment.
+			/* BEN TODO: VMDESIGN 1880: When allocation trackers are commonized, the setting of the
+			 * allocation tracker in the env should be done by the base configuration initializeEnvironment.
 			 */
-			env->_allocationTracker = ((MM_MemoryPoolSegregated *)env->getExtensions()->heap->getDefaultMemorySpace()->getDefaultMemorySubSpace()->getMemoryPool())->createAllocationTracker(env);
+			env->_allocationTracker = ((MM_MemoryPoolSegregated *)env->getExtensions()
+			                                   ->heap->getDefaultMemorySpace()
+			                                   ->getDefaultMemorySubSpace()
+			                                   ->getMemoryPool())
+			                                  ->createAllocationTracker(env);
 			return (NULL != env->_allocationTracker);
 		}
 	}
@@ -205,23 +221,27 @@ MM_HeapRegionManager *
 MM_ConfigurationSegregated::createHeapRegionManager(MM_EnvironmentBase *env)
 {
 	MM_GCExtensionsBase *extensions = env->getExtensions();
-	uintptr_t descriptorSize = sizeof(MM_HeapRegionDescriptorSegregated) + sizeof(uintptr_t *) * extensions->arrayletsPerRegion;
-	
-	MM_HeapRegionManagerTarok *heapRegionManager = MM_HeapRegionManagerTarok::newInstance(env, extensions->regionSize, descriptorSize, MM_HeapRegionDescriptorSegregated::initializer, MM_HeapRegionDescriptorSegregated::destructor);
+	uintptr_t descriptorSize = sizeof(MM_HeapRegionDescriptorSegregated)
+	        + sizeof(uintptr_t *) * extensions->arrayletsPerRegion;
+
+	MM_HeapRegionManagerTarok *heapRegionManager = MM_HeapRegionManagerTarok::newInstance(env,
+	        extensions->regionSize, descriptorSize, MM_HeapRegionDescriptorSegregated::initializer,
+	        MM_HeapRegionDescriptorSegregated::destructor);
 	return heapRegionManager;
 }
 
 /**
  * Create the global collector for a Standard configuration
  */
-MM_GlobalCollector*
-MM_ConfigurationSegregated::createGlobalCollector(MM_EnvironmentBase* env)
+MM_GlobalCollector *
+MM_ConfigurationSegregated::createGlobalCollector(MM_EnvironmentBase *env)
 {
 	return MM_SegregatedGC::newInstance(env);
 }
 
 MM_Dispatcher *
-MM_ConfigurationSegregated::createDispatcher(MM_EnvironmentBase *env, omrsig_handler_fn handler, void* handler_arg, uintptr_t defaultOSStackSize)
+MM_ConfigurationSegregated::createDispatcher(
+        MM_EnvironmentBase *env, omrsig_handler_fn handler, void *handler_arg, uintptr_t defaultOSStackSize)
 {
 	return MM_ParallelDispatcher::newInstance(env, handler, handler_arg, defaultOSStackSize);
 }

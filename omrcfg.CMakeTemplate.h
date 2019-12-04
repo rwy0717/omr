@@ -140,7 +140,6 @@
  */
 #cmakedefine OMR_ARCH_RISCV
 
-
 #cmakedefine OMR_ENV_DATA64
 #cmakedefine OMR_ENV_GCC
 #cmakedefine OMR_ENV_LITTLE_ENDIAN
@@ -174,14 +173,14 @@
 #cmakedefine OMR_PORT_ASYNC_HANDLER
 
 /**
- * The platform is able to attempt to reserve virtual memory via a call to omrvmem_reserve_memory at the address specified by the user.
- * ifRemoved: The platform is not able to reserve virtual memory at a specific address
+ * The platform is able to attempt to reserve virtual memory via a call to omrvmem_reserve_memory at the address
+ * specified by the user. ifRemoved: The platform is not able to reserve virtual memory at a specific address
  */
 #cmakedefine OMR_PORT_CAN_RESERVE_SPECIFIC_ADDRESS
 
 /**
- * This platform is able to associate memory with a specific node, as is relevant when the system has a Non Uniform Memory Access configuration.
- * ifRemoved: This platform is not able to associate memory with a specific node.
+ * This platform is able to associate memory with a specific node, as is relevant when the system has a Non Uniform
+ * Memory Access configuration. ifRemoved: This platform is not able to associate memory with a specific node.
  */
 #cmakedefine OMR_PORT_NUMA_SUPPORT
 
@@ -219,8 +218,8 @@
 #cmakedefine OMR_NOTIFY_POLICY_CONTROL
 
 /**
- * This flag enables new synchronization prototypes which  
- * -- prevent large number of threads to spin at a time on a monitor 
+ * This flag enables new synchronization prototypes which
+ * -- prevent large number of threads to spin at a time on a monitor
  * -- avoid the thundering herd problem on wake up
  *
  * The prototypes provide the following features

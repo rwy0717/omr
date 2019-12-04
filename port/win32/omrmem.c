@@ -26,7 +26,6 @@
  * @brief Memory Utilities
  */
 
-
 /*
  * This file contains code for the portability library memory management.
  */

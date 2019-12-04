@@ -25,57 +25,41 @@
 #include "omrcfg.h"
 #include "ModronAssertions.h"
 
-
 class MM_GCExtensionsBase;
 class MM_MemorySubSpace;
 
-class GC_ArrayletObjectModel
-{
+class GC_ArrayletObjectModel {
 	/*
 	 * Function members
 	 */
 private:
 protected:
 public:
-	bool
-	initialize(MM_GCExtensionsBase *extensions)
-	{
-		return true;
-	}
+	bool initialize(MM_GCExtensionsBase *extensions) { return true; }
 
 	void tearDown(MM_GCExtensionsBase *extensions) {}
 
-	MMINLINE fomrobject_t *
-	getArrayoidPointer(omrarrayptr_t arrayPtr)
-	{
-		return (fomrobject_t *) NULL;
-	}
+	MMINLINE fomrobject_t *getArrayoidPointer(omrarrayptr_t arrayPtr) { return (fomrobject_t *)NULL; }
 
-	MMINLINE void
-	expandArrayletSubSpaceRange(MM_MemorySubSpace * subSpace, void * rangeBase, void * rangeTop, uintptr_t largestDesirableArraySpineSize)
+	MMINLINE void expandArrayletSubSpaceRange(
+	        MM_MemorySubSpace *subSpace, void *rangeBase, void *rangeTop, uintptr_t largestDesirableArraySpineSize)
 	{
 		/* No-op */
 	}
-	
+
 	/**
 	 * Returns the size of an indexable object, in bytes, including the header.
 	 * @param arrayPtr Pointer to the indexable object whose size is required
 	 * @return Size of object in bytes including the header
 	 */
-	MMINLINE uintptr_t
-	getSizeInBytesWithHeader(omrarrayptr_t arrayPtr)
+	MMINLINE uintptr_t getSizeInBytesWithHeader(omrarrayptr_t arrayPtr)
 	{
 		Assert_MM_unimplemented();
 		return 0;
 	}
 #if defined(OMR_GC_DOUBLE_MAP_ARRAYLETS)
-	MMINLINE bool
-	isDoubleMappingEnabled()
-	{
-		return false;
-	}
+	MMINLINE bool isDoubleMappingEnabled() { return false; }
 #endif /* defined(OMR_GC_DOUBLE_MAP_ARRAYLETS) */
-
 };
 
 #endif /* ARRAYLETOBJECTMODEL_ */

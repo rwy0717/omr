@@ -44,38 +44,28 @@
 #include <sys/types.h>
 #include <vector>
 
-using std::string;
-using std::pair;
 using std::make_pair;
-using std::vector;
+using std::pair;
+using std::string;
 using std::stringstream;
+using std::vector;
 
 #define INVALID_OFFSET (~(uint32_t)0)
 
-class BlobBuildVisitor : public TypeVisitor
-{
+class BlobBuildVisitor : public TypeVisitor {
 private:
-	JavaBlobGenerator * const _gen;
+	JavaBlobGenerator *const _gen;
 	const bool _addFieldsOnly;
 	const size_t _baseOffset;
 	const string _prefix;
 
 public:
-	explicit BlobBuildVisitor(JavaBlobGenerator *gen)
-		: _gen(gen)
-		, _addFieldsOnly(false)
-		, _baseOffset(0)
-		, _prefix()
-	{
-	}
+	explicit BlobBuildVisitor(JavaBlobGenerator *gen) : _gen(gen), _addFieldsOnly(false), _baseOffset(0), _prefix()
+	{}
 
 	BlobBuildVisitor(JavaBlobGenerator *gen, size_t baseOffset, const string &prefix)
-		: _gen(gen)
-		, _addFieldsOnly(true)
-		, _baseOffset(baseOffset)
-		, _prefix(prefix)
-	{
-	}
+	        : _gen(gen), _addFieldsOnly(true), _baseOffset(baseOffset), _prefix(prefix)
+	{}
 
 	virtual DDR_RC visitType(Type *type) const;
 	virtual DDR_RC visitClass(ClassUDT *type) const;
@@ -85,17 +75,13 @@ public:
 	virtual DDR_RC visitUnion(UnionUDT *type) const;
 };
 
-class BlobEnumerateVisitor : public TypeVisitor
-{
+class BlobEnumerateVisitor : public TypeVisitor {
 private:
-	JavaBlobGenerator * const _gen;
+	JavaBlobGenerator *const _gen;
 	const bool _addFieldsOnly;
 
 public:
-	BlobEnumerateVisitor(JavaBlobGenerator *gen, bool addFieldsOnly)
-		: _gen(gen), _addFieldsOnly(addFieldsOnly)
-	{
-	}
+	BlobEnumerateVisitor(JavaBlobGenerator *gen, bool addFieldsOnly) : _gen(gen), _addFieldsOnly(addFieldsOnly) {}
 
 	virtual DDR_RC visitType(Type *type) const;
 	virtual DDR_RC visitClass(ClassUDT *type) const;
@@ -129,15 +115,15 @@ JavaBlobGenerator::BuildBlobInfo::initializeBitfieldFormat(uint8_t *bitfieldForm
 
 	memset(&bf, 0, sizeof(bf));
 
-	bf.x1 = 1;			/* 1 */
-	bf.x2 = 31768;		/* 111110000011000 */
-	bf.x3 = 3;			/* 000011 */
-	bf.x4 = 777;		/* 1100001001 */
+	bf.x1 = 1; /* 1 */
+	bf.x2 = 31768; /* 111110000011000 */
+	bf.x3 = 3; /* 000011 */
+	bf.x4 = 777; /* 1100001001 */
 
-	bf.x5 = 43;			/* 0101011 */
-	bf.x6 = 298;		/* 100101010 */
-	bf.x7 = 12;			/* 1100 */
-	bf.x8 = 1654;		/* 011001110110 */
+	bf.x5 = 43; /* 0101011 */
+	bf.x6 = 298; /* 100101010 */
+	bf.x7 = 12; /* 1100 */
+	bf.x8 = 1654; /* 011001110110 */
 
 	slot0 = ((uint32_t *)&bf)[0];
 	slot1 = ((uint32_t *)&bf)[1];
@@ -205,7 +191,7 @@ getBlobFullName(Type *type)
 void
 JavaBlobGenerator::copyStringTable()
 {
-	uint8_t * const stringData = _buildInfo.stringBuffer;
+	uint8_t *const stringData = _buildInfo.stringBuffer;
 	J9HashTableState state;
 
 	/* Iterate the table and copy each string to its already-assigned offset. */
@@ -224,7 +210,8 @@ JavaBlobGenerator::copyStringTable()
 }
 
 DDR_RC
-JavaBlobGenerator::stringTableOffset(BlobHeader *blobHeader, J9HashTable *stringTable, const char *cString, uint32_t *offset)
+JavaBlobGenerator::stringTableOffset(
+        BlobHeader *blobHeader, J9HashTable *stringTable, const char *cString, uint32_t *offset)
 {
 	DDR_RC rc = DDR_RC_OK;
 	StringTableEntry exemplar;
@@ -309,22 +296,25 @@ JavaBlobGenerator::genBinaryBlob(OMRPortLibrary *portLibrary, Symbol_IR *ir, con
 			amountWritten += wb;
 
 			/* write fields */
-			wb = omrfile_write(fd, &_buildInfo.blobFields[f_ix], sizeof(BlobField) * _buildInfo.blobStructs[s_ix].fieldCount);
+			wb = omrfile_write(fd, &_buildInfo.blobFields[f_ix],
+			        sizeof(BlobField) * _buildInfo.blobStructs[s_ix].fieldCount);
 			amountWritten += wb;
 			f_ix += _buildInfo.blobStructs[s_ix].fieldCount;
 
 			/* write constants */
-			wb = omrfile_write(fd, &_buildInfo.blobConsts[c_ix], sizeof(BlobConstant) * _buildInfo.blobStructs[s_ix].constantCount);
+			wb = omrfile_write(fd, &_buildInfo.blobConsts[c_ix],
+			        sizeof(BlobConstant) * _buildInfo.blobStructs[s_ix].constantCount);
 			amountWritten += wb;
 			c_ix += _buildInfo.blobStructs[s_ix].constantCount;
 		}
 
 		if (amountWritten != (intptr_t)_buildInfo.header.structDataSize) {
-			ERRMSG("Wrote %u fields, %u constants, %u structs.\nCounted %u fields, %u constants, %u structures.\n",
-				   f_ix, c_ix, (uint32_t)(_buildInfo.curBlobStruct - _buildInfo.blobStructs),
-				   _buildInfo.fieldCount, _buildInfo.constCount, _buildInfo.header.structureCount);
+			ERRMSG("Wrote %u fields, %u constants, %u structs.\nCounted %u fields, %u constants, %u "
+			       "structures.\n",
+			        f_ix, c_ix, (uint32_t)(_buildInfo.curBlobStruct - _buildInfo.blobStructs),
+			        _buildInfo.fieldCount, _buildInfo.constCount, _buildInfo.header.structureCount);
 			ERRMSG("Expected %u to be written, but %u was written.\n",
-					(uint32_t)_buildInfo.header.structDataSize, (uint32_t)amountWritten);
+			        (uint32_t)_buildInfo.header.structDataSize, (uint32_t)amountWritten);
 		}
 
 		/* write string data */
@@ -373,10 +363,8 @@ JavaBlobGenerator::buildBlobData(OMRPortLibrary *portLibrary, Symbol_IR *ir)
 	DDR_RC rc = DDR_RC_OK;
 
 	/* allocate hashtable */
-	_buildInfo.stringHash =
-		hashTableNew(portLibrary, OMR_GET_CALLSITE(), 0,
-					 sizeof(StringTableEntry), 0, 0, OMRMEM_CATEGORY_UNKNOWN,
-					 stringTableHash, stringTableEquals, NULL, NULL);
+	_buildInfo.stringHash = hashTableNew(portLibrary, OMR_GET_CALLSITE(), 0, sizeof(StringTableEntry), 0, 0,
+	        OMRMEM_CATEGORY_UNKNOWN, stringTableHash, stringTableEquals, NULL, NULL);
 
 	/* Allocate room for one extra class, field and constant
 	 * so our cursors always point at valid locations.
@@ -441,7 +429,8 @@ BlobBuildVisitor::visitEnum(EnumUDT *e) const
 		uint32_t constCount = 0;
 
 		if (!_addFieldsOnly) {
-			for (vector<EnumMember *>::iterator m = e->_enumMembers.begin(); m != e->_enumMembers.end(); ++m) {
+			for (vector<EnumMember *>::iterator m = e->_enumMembers.begin(); m != e->_enumMembers.end();
+			        ++m) {
 				EnumMember *literal = *m;
 
 				rc = _gen->addBlobConst(literal->_name, literal->_value, &constCount);
@@ -481,7 +470,8 @@ BlobBuildVisitor::visitUnion(UnionUDT *u) const
 		}
 
 		if ((DDR_RC_OK == rc) && !_addFieldsOnly) {
-			for (vector<EnumMember *>::iterator m = u->_enumMembers.begin(); m != u->_enumMembers.end(); ++m) {
+			for (vector<EnumMember *>::iterator m = u->_enumMembers.begin(); m != u->_enumMembers.end();
+			        ++m) {
 				EnumMember *literal = *m;
 
 				rc = _gen->addBlobConst(literal->_name, literal->_value, &constCount);
@@ -509,7 +499,8 @@ BlobBuildVisitor::visitUnion(UnionUDT *u) const
 				_gen->_buildInfo.curBlobStruct->constantCount += constCount;
 				_gen->_buildInfo.curBlobStruct->fieldCount += fieldCount;
 			} else {
-				rc = _gen->addBlobStruct(getBlobFullName(u), "", constCount, fieldCount, (uint32_t)u->_sizeOf);
+				rc = _gen->addBlobStruct(
+				        getBlobFullName(u), "", constCount, fieldCount, (uint32_t)u->_sizeOf);
 			}
 		}
 	}
@@ -550,7 +541,8 @@ BlobBuildVisitor::visitClass(ClassUDT *cu) const
 		}
 
 		if ((DDR_RC_OK == rc) && !_addFieldsOnly) {
-			for (vector<EnumMember *>::iterator m = cu->_enumMembers.begin(); m != cu->_enumMembers.end(); ++m) {
+			for (vector<EnumMember *>::iterator m = cu->_enumMembers.begin(); m != cu->_enumMembers.end();
+			        ++m) {
 				EnumMember *literal = *m;
 
 				rc = _gen->addBlobConst(literal->_name, literal->_value, &constCount);
@@ -585,7 +577,8 @@ BlobBuildVisitor::visitClass(ClassUDT *cu) const
 					superName = getBlobFullName(cu->_superClass);
 				}
 
-				rc = _gen->addBlobStruct(nameFormatted, superName, constCount, fieldCount, (uint32_t)cu->_sizeOf);
+				rc = _gen->addBlobStruct(
+				        nameFormatted, superName, constCount, fieldCount, (uint32_t)cu->_sizeOf);
 			}
 		}
 	}
@@ -689,11 +682,13 @@ JavaBlobGenerator::addBlobField(Field *field, uint32_t *fieldCount, size_t baseO
 		if (DDR_RC_OK == rc) {
 			string fieldName = prefix + field->_name;
 
-			rc = stringTableOffset(&_buildInfo.header, _buildInfo.stringHash, fieldName.c_str(), &nameOffset);
+			rc = stringTableOffset(
+			        &_buildInfo.header, _buildInfo.stringHash, fieldName.c_str(), &nameOffset);
 		}
 
 		if (DDR_RC_OK == rc) {
-			rc = stringTableOffset(&_buildInfo.header, _buildInfo.stringHash, typeName.c_str(), &typeOffset);
+			rc = stringTableOffset(
+			        &_buildInfo.header, _buildInfo.stringHash, typeName.c_str(), &typeOffset);
 		}
 
 		if (DDR_RC_OK == rc) {
@@ -702,7 +697,8 @@ JavaBlobGenerator::addBlobField(Field *field, uint32_t *fieldCount, size_t baseO
 			_buildInfo.curBlobField->typeOffset = typeOffset;
 			_buildInfo.curBlobField->offset = (uint32_t)adjustedOffset;
 
-			if ((uintptr_t)(_buildInfo.curBlobField - _buildInfo.blobFields) < (uintptr_t)_buildInfo.fieldCount) {
+			if ((uintptr_t)(_buildInfo.curBlobField - _buildInfo.blobFields)
+			        < (uintptr_t)_buildInfo.fieldCount) {
 				_buildInfo.curBlobField += 1;
 			} else {
 				ERRMSG("Adding more fields than enumerated");
@@ -741,7 +737,8 @@ JavaBlobGenerator::addBlobConst(const string &name, long long value, uint32_t *c
 }
 
 DDR_RC
-JavaBlobGenerator::addBlobStruct(const string &name, const string &superName, uint32_t constCount, uint32_t fieldCount, uint32_t size)
+JavaBlobGenerator::addBlobStruct(
+        const string &name, const string &superName, uint32_t constCount, uint32_t fieldCount, uint32_t size)
 {
 	if (!_printEmptyTypes && (0 == constCount) && (0 == fieldCount)) {
 		return DDR_RC_OK;
@@ -762,7 +759,8 @@ JavaBlobGenerator::addBlobStruct(const string &name, const string &superName, ui
 		_buildInfo.curBlobStruct->fieldCount += fieldCount;
 		_buildInfo.curBlobStruct->structSize = size;
 
-		if ((uintptr_t)(_buildInfo.curBlobStruct - _buildInfo.blobStructs) < (uintptr_t)_buildInfo.header.structureCount) {
+		if ((uintptr_t)(_buildInfo.curBlobStruct - _buildInfo.blobStructs)
+		        < (uintptr_t)_buildInfo.header.structureCount) {
 			_buildInfo.curBlobStruct += 1;
 			_buildInfo.curBlobStruct->constantCount = 0;
 			_buildInfo.curBlobStruct->fieldCount = 0;
@@ -775,18 +773,13 @@ JavaBlobGenerator::addBlobStruct(const string &name, const string &superName, ui
 	return rc;
 }
 
-class BlobFieldVisitor : public TypeVisitor
-{
+class BlobFieldVisitor : public TypeVisitor {
 private:
-	string * const _typePrefix;
-	string * const _typeSuffix;
+	string *const _typePrefix;
+	string *const _typeSuffix;
 
 public:
-	explicit BlobFieldVisitor(string *prefix, string *suffix)
-		: _typePrefix(prefix)
-		, _typeSuffix(suffix)
-	{
-	}
+	explicit BlobFieldVisitor(string *prefix, string *suffix) : _typePrefix(prefix), _typeSuffix(suffix) {}
 
 	virtual DDR_RC visitType(Type *type) const;
 	virtual DDR_RC visitClass(ClassUDT *type) const;
@@ -799,7 +792,7 @@ public:
 DDR_RC
 BlobFieldVisitor::visitType(Type *type) const
 {
-	const string & typeName = type->_name;
+	const string &typeName = type->_name;
 	bool isSigned = false;
 	size_t bitWidth = 0;
 
@@ -1039,7 +1032,8 @@ BlobEnumerateVisitor::visitClass(ClassUDT *type) const
 			} else if (NULL == fieldType) {
 				/* skip fields without a type */
 			} else if (fieldType->isAnonymousType()) {
-				/* Anonymous type members are added to the struct and not counted as fields themselves. */
+				/* Anonymous type members are added to the struct and not counted as fields themselves.
+				 */
 				rc = fieldType->acceptVisitor(fieldsOnly);
 				if (DDR_RC_OK != rc) {
 					break;
@@ -1101,7 +1095,8 @@ BlobEnumerateVisitor::visitUnion(UnionUDT *type) const
 			} else if (NULL == fieldType) {
 				/* skip fields without a type */
 			} else if (fieldType->isAnonymousType()) {
-				/* Anonymous type members are added to the struct and not counted as fields themselves. */
+				/* Anonymous type members are added to the struct and not counted as fields themselves.
+				 */
 				rc = fieldType->acceptVisitor(fieldsOnly);
 				if (DDR_RC_OK != rc) {
 					break;

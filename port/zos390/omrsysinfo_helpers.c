@@ -55,8 +55,8 @@ retrieveZOSMemoryStats(struct OMRPortLibrary *portLibrary, struct J9MemoryInfo *
 	memInfo->totalPhysical = ((uint64_t)rcep->rcepool * J9BYTES_PER_PAGE);
 	memInfo->availPhysical = ((uint64_t)rcep->rceafc * J9BYTES_PER_PAGE);
 	memInfo->totalSwap = ((uint64_t)asmvtp->asmslots * J9BYTES_PER_PAGE);
-	memInfo->availSwap = ((uint64_t)(asmvtp->asmslots - (asmvtp->asmvsc + asmvtp->asmnvsc
-									 + asmvtp->asmerrs)) * J9BYTES_PER_PAGE);
+	memInfo->availSwap = ((uint64_t)(asmvtp->asmslots - (asmvtp->asmvsc + asmvtp->asmnvsc + asmvtp->asmerrs))
+	        * J9BYTES_PER_PAGE);
 	rc = getZFSUserCacheUsed(&userCacheUsed);
 	if (0 == rc) {
 		memInfo->cached = userCacheUsed;
@@ -71,13 +71,8 @@ retrieveZOSMemoryStats(struct OMRPortLibrary *portLibrary, struct J9MemoryInfo *
 	memInfo->hostCached = memInfo->cached;
 	memInfo->hostBuffered = memInfo->buffered;
 
-	Trc_PRT_retrieveZOSMemoryStats_memUsageStats_v1(
-		memInfo->totalPhysical,
-		memInfo->availPhysical,
-		memInfo->totalSwap,
-		memInfo->availSwap,
-		memInfo->cached,
-		memInfo->buffered);
+	Trc_PRT_retrieveZOSMemoryStats_memUsageStats_v1(memInfo->totalPhysical, memInfo->availPhysical,
+	        memInfo->totalSwap, memInfo->availSwap, memInfo->cached, memInfo->buffered);
 
 	Trc_PRT_retrieveZOSMemoryStats_Exit(0);
 	return 0;
@@ -100,7 +95,8 @@ retrieveZOSProcessorStats(struct OMRPortLibrary *portLibrary, struct J9Processor
 	procInfo->procInfoArray[0].idleTime = cctp->ccvrbswt;
 	procInfo->procInfoArray[0].busyTime = (cctp->ccvrbstd * cctp->ccvcpuct) - cctp->ccvrbswt;
 
-	Trc_PRT_retrieveZOSProcessorStats_cpuUsageStats_v1(procInfo->procInfoArray[0].idleTime, procInfo->procInfoArray[0].busyTime);
+	Trc_PRT_retrieveZOSProcessorStats_cpuUsageStats_v1(
+	        procInfo->procInfoArray[0].idleTime, procInfo->procInfoArray[0].busyTime);
 
 	Trc_PRT_retrieveZOSProcessorStats_Exit(0);
 	return 0;

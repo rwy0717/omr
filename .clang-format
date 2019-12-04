@@ -1,8 +1,7 @@
 ---
 Language:        Cpp
-# BasedOnStyle:  Mozilla
 AccessModifierOffset: -8
-AlignAfterOpenBracket: true
+AlignAfterOpenBracket: false
 AlignConsecutiveAssignments: false
 AlignConsecutiveDeclarations: false
 AlignEscapedNewlines: DontAlign
@@ -14,21 +13,20 @@ AllowShortCaseLabelsOnASingleLine: true
 AllowShortFunctionsOnASingleLine: Inline
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
-# AlwaysBreakAfterDefinitionReturnType: false
-AlwaysBreakAfterReturnType: TopLevel
+AlwaysBreakAfterReturnType: TopLevelDefinitions
 AlwaysBreakBeforeMultilineStrings: false
 AlwaysBreakTemplateDeclarations: true
 BinPackArguments: true
-BinPackParameters: false
-BraceWrapping:   
-  AfterClass:      true
+BinPackParameters: true
+BraceWrapping:
+  AfterClass:      false
   AfterControlStatement: false
-  AfterEnum:       true
+  AfterEnum:       false
   AfterFunction:   true
-  AfterNamespace:  true
+  AfterNamespace:  false
   AfterObjCDeclaration: false
-  AfterStruct:     true
-  AfterUnion:      true
+  AfterStruct:     false
+  AfterUnion:      false
   AfterExternBlock: false
   BeforeCatch:     false
   BeforeElse:      false
@@ -38,15 +36,15 @@ BraceWrapping:
   SplitEmptyNamespace: false
 BreakBeforeBinaryOperators: NonAssignment
 BreakBeforeBraces: Custom
-BreakBeforeInheritanceComma: false
+BreakBeforeInheritanceComma: true
 BreakBeforeTernaryOperators: true
-BreakConstructorInitializersBeforeComma: false
+BreakConstructorInitializersBeforeComma: true
 BreakConstructorInitializers: BeforeColon
 BreakAfterJavaFieldAnnotations: false
 BreakStringLiterals: true
 ColumnLimit:     120
-CommentPragmas:  '^ IWYU pragma:'
-CompactNamespaces: true
+CommentPragmas:  '^ IWYU pragma:|SPDX-License-Identifier:|\|-'
+CompactNamespaces: false
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
 ConstructorInitializerIndentWidth: 8
 ContinuationIndentWidth: 8
@@ -59,14 +57,10 @@ ForEachMacros:
   - foreach
   - Q_FOREACH
   - BOOST_FOREACH
-IncludeBlocks:   Regroup
+IncludeBlocks:   Preserve
 IncludeCategories:
-  - Regex: '<OMR/Om/Config.hpp>'
-    Priority: -1
-  - Regex: '^<OMR/GC/.*>$'
-    Priority: 1
   - Regex: '.*'
-    Priority: 2
+    Priority: 1
 IncludeIsMainRegex: '(Test)?$'
 IndentCaseLabels: false
 IndentPPDirectives: None
@@ -84,15 +78,15 @@ ObjCBlockIndentWidth: 2
 ObjCSpaceAfterProperty: true
 ObjCSpaceBeforeProtocolList: false
 PenaltyBreakAssignment: 19
-PenaltyBreakBeforeFirstCallParameter: 19
-PenaltyBreakComment: 300
-PenaltyBreakFirstLessLess: 120
-PenaltyBreakString: 1000
+PenaltyBreakBeforeFirstCallParameter: 999999
+PenaltyBreakComment: 5
+PenaltyBreakFirstLessLess: 5
+PenaltyBreakString: 5
 PenaltyExcessCharacter: 1000000
-PenaltyReturnTypeOnItsOwnLine: 19
-PointerAlignment: Left
-ReflowComments:  false
-SortIncludes:    true
+PenaltyReturnTypeOnItsOwnLine: 400
+PointerAlignment: Right
+ReflowComments:  true
+SortIncludes:    false
 SortUsingDeclarations: true
 SpaceAfterCStyleCast: false
 SpaceAfterTemplateKeyword: true
@@ -108,7 +102,7 @@ SpacesInContainerLiterals: true
 SpacesInCStyleCastParentheses: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
-Standard:        Cpp11
+Standard:        Cpp03
 TabWidth:        8
 UseTab:          ForIndentation
 ...

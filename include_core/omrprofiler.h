@@ -55,7 +55,7 @@ typedef struct OMR_MethodDictionaryEntry {
  * @retval OMR_ERROR_FAILED_TO_ALLOCATE_MONITOR Unable to allocate the method dictionary's lock.
  * @retval OMR_ERROR_FAILED_TO_ATTACH_NATIVE_THREAD Unable to attach to the omrthread library.
  */
-omr_error_t omr_ras_initMethodDictionary(OMR_VM *vm, size_t numProperties, const char * const *propertyNames);
+omr_error_t omr_ras_initMethodDictionary(OMR_VM *vm, size_t numProperties, const char *const *propertyNames);
 
 /**
  * @brief Deallocate the VM's method dictionary.

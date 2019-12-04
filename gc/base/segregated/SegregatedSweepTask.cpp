@@ -20,10 +20,10 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
+#include "SegregatedSweepTask.hpp"
+
 #include "EnvironmentBase.hpp"
 #include "SweepSchemeSegregated.hpp"
-
-#include "SegregatedSweepTask.hpp"
 
 #if defined(OMR_GC_SEGREGATED_HEAP)
 
@@ -35,15 +35,10 @@ MM_SegregatedSweepTask::run(MM_EnvironmentBase *env)
 
 void
 MM_SegregatedSweepTask::setup(MM_EnvironmentBase *env)
-{
-
-}
+{}
 
 void
 MM_SegregatedSweepTask::cleanup(MM_EnvironmentBase *envBase)
-{
-
-}
+{}
 
 #endif /* OMR_GC_SEGREGATED_HEAP */
-

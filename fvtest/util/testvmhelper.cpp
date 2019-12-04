@@ -29,7 +29,7 @@ extern "C" omr_error_t
 omrTestVMInit(OMRTestVM *const testVM, OMRPortLibrary *portLibrary)
 {
 	omr_error_t rc = OMR_ERROR_NONE;
-	const char *nlsSearchPaths[] = { "./" };
+	const char *nlsSearchPaths[] = {"./"};
 	OMRPORT_ACCESS_FROM_OMRPORT(portLibrary);
 
 	/* HACK: Look for NLS catalog in the current directory */

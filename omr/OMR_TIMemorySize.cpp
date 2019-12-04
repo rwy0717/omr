@@ -24,7 +24,8 @@
 #include "omr.h"
 #include "omragent_internal.h"
 
-static omr_error_t getProcessMemorySizeHelper(OMR_VMThread *vmThread, J9VMemMemoryQuery queryType, uint64_t *processMemorySize);
+static omr_error_t getProcessMemorySizeHelper(
+        OMR_VMThread *vmThread, J9VMemMemoryQuery queryType, uint64_t *processMemorySize);
 
 extern "C" omr_error_t
 omrtiGetFreePhysicalMemorySize(OMR_VMThread *vmThread, uint64_t *freePhysicalMemorySize)

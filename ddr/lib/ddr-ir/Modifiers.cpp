@@ -29,19 +29,11 @@ using std::string;
 using std::stringstream;
 using std::vector;
 
-Modifiers::Modifiers()
-	: _arrayLengths()
-	, _modifierFlags(NO_MOD)
-	, _pointerCount(0)
-	, _referenceCount(0)
-{
-}
+Modifiers::Modifiers() : _arrayLengths(), _modifierFlags(NO_MOD), _pointerCount(0), _referenceCount(0) {}
 
-Modifiers::~Modifiers()
-{
-}
+Modifiers::~Modifiers() {}
 
-static const char * const MODIFIER_NAMES[] = { "const", "volatile", "unaligned", "restrict", "shared" };
+static const char *const MODIFIER_NAMES[] = {"const", "volatile", "unaligned", "restrict", "shared"};
 
 string
 Modifiers::getModifierNames() const
@@ -126,8 +118,6 @@ Modifiers::operator==(const Modifiers &type) const
 		}
 	}
 
-	return arrayLengthsEqual
-		&& (_modifierFlags == type._modifierFlags)
-		&& (_referenceCount == type._referenceCount)
-		&& (_pointerCount == type._pointerCount);
+	return arrayLengthsEqual && (_modifierFlags == type._modifierFlags) && (_referenceCount == type._referenceCount)
+	        && (_pointerCount == type._pointerCount);
 }

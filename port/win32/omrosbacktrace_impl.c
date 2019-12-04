@@ -31,7 +31,7 @@
 #include <tlhelp32.h>
 #include <Psapi.h>
 #include <DbgHelp.h>
-#undef UDATA	/* this is safe because our UDATA is a typedef, not a macro */
+#undef UDATA /* this is safe because our UDATA is a typedef, not a macro */
 #include "omrport.h"
 #include "omrsignal.h"
 #include "omrportpriv.h"
@@ -39,7 +39,6 @@
 #include "omrutil.h"
 #include "omrintrospect_common.h"
 #include "omrintrospect.h"
-
 
 static wchar_t *
 buildPDBPath(struct OMRPortLibrary *portLibrary, HANDLE process)
@@ -85,7 +84,8 @@ buildPDBPath(struct OMRPortLibrary *portLibrary, HANDLE process)
 				}
 
 				if (NULL == PPG_pdbData.searchPath) {
-					/* the constructed pdb path is empty, so just cat the first entry onto the null string */
+					/* the constructed pdb path is empty, so just cat the first entry onto the null
+					 * string */
 					if (moduleNameLen < maxPathLength) {
 						wcscat(PPG_pdbData.searchPath, modulePath);
 						pathLength = moduleNameLen;
@@ -94,7 +94,8 @@ buildPDBPath(struct OMRPortLibrary *portLibrary, HANDLE process)
 						break;
 					}
 				} else {
-					/* the constructed pdb path has entries, so search it to prevent adding the same entry again */
+					/* the constructed pdb path has entries, so search it to prevent adding the same
+					 * entry again */
 					if (wcsstr(PPG_pdbData.searchPath, modulePath) == NULL) {
 						/* path not found, so add it */
 						if (moduleNameLen + pathLength + 1 < maxPathLength) {
@@ -136,9 +137,9 @@ load_dbg_functions(struct OMRPortLibrary *portLibrary)
 
 	if (NULL == PPG_dbgHlpLibraryFunctions->hDbgHelpLib) {
 		/* see if the debug help library is already loaded, if not try to load it */
-		PPG_dbgHlpLibraryFunctions->hDbgHelpLib = (HMODULE) omrgetdbghelp_getDLL();
+		PPG_dbgHlpLibraryFunctions->hDbgHelpLib = (HMODULE)omrgetdbghelp_getDLL();
 		if (NULL == PPG_dbgHlpLibraryFunctions->hDbgHelpLib) {
-			PPG_dbgHlpLibraryFunctions->hDbgHelpLib = (HINSTANCE) omrgetdbghelp_loadDLL();
+			PPG_dbgHlpLibraryFunctions->hDbgHelpLib = (HINSTANCE)omrgetdbghelp_loadDLL();
 		}
 
 		if (NULL == PPG_dbgHlpLibraryFunctions->hDbgHelpLib) {
@@ -147,24 +148,34 @@ load_dbg_functions(struct OMRPortLibrary *portLibrary)
 		}
 
 		/* found and loaded the debug help library, so now locate the entry points we need */
-		PPG_dbgHlpLibraryFunctions->ImagehlpApiVersion =
-			(IMAGEHLPAPIVERSION) GetProcAddress(PPG_dbgHlpLibraryFunctions->hDbgHelpLib, "ImagehlpApiVersion");
+		PPG_dbgHlpLibraryFunctions->ImagehlpApiVersion = (IMAGEHLPAPIVERSION)GetProcAddress(
+		        PPG_dbgHlpLibraryFunctions->hDbgHelpLib, "ImagehlpApiVersion");
 
 		/* check which debug help library was loaded by this process */
 		globalDbgHelpVersionInfo = *(PPG_dbgHlpLibraryFunctions->ImagehlpApiVersion());
 
 		/* ensure that we can load the minimum required version of the dbghelp API */
 		if (globalDbgHelpVersionInfo.MajorVersion >= 4) {
-			PPG_dbgHlpLibraryFunctions->SymGetOptions = (SYMGETOPTIONS) GetProcAddress(PPG_dbgHlpLibraryFunctions->hDbgHelpLib, "SymGetOptions");
-			PPG_dbgHlpLibraryFunctions->SymSetOptions = (SYMSETOPTIONS) GetProcAddress(PPG_dbgHlpLibraryFunctions->hDbgHelpLib, "SymSetOptions");
-			PPG_dbgHlpLibraryFunctions->SymInitializeW = (SYMINITIALIZEW) GetProcAddress(PPG_dbgHlpLibraryFunctions->hDbgHelpLib, "SymInitializeW");
-			PPG_dbgHlpLibraryFunctions->SymCleanup = (SYMCLEANUP) GetProcAddress(PPG_dbgHlpLibraryFunctions->hDbgHelpLib, "SymCleanup");
-			PPG_dbgHlpLibraryFunctions->SymGetModuleBase64 = (SYMGETMODULEBASE64) GetProcAddress(PPG_dbgHlpLibraryFunctions->hDbgHelpLib, "SymGetModuleBase64");
-			PPG_dbgHlpLibraryFunctions->SymFunctionTableAccess64 = (SYMFUNCTIONTABLEACCESS64) GetProcAddress(PPG_dbgHlpLibraryFunctions->hDbgHelpLib, "SymFunctionTableAccess64");
-			PPG_dbgHlpLibraryFunctions->StackWalk64 = (STACKWALK64) GetProcAddress(PPG_dbgHlpLibraryFunctions->hDbgHelpLib, "StackWalk64");
-			PPG_dbgHlpLibraryFunctions->SymFromAddr = (SYMFROMADDR) GetProcAddress(PPG_dbgHlpLibraryFunctions->hDbgHelpLib, "SymFromAddr");
-			PPG_dbgHlpLibraryFunctions->SymGetLineFromAddr64 = (SYMGETLINEFROMADDR64) GetProcAddress(PPG_dbgHlpLibraryFunctions->hDbgHelpLib, "SymGetLineFromAddr64");
-			PPG_dbgHlpLibraryFunctions->SymGetModuleInfo64 = (SYMGETMODULEINFO64) GetProcAddress(PPG_dbgHlpLibraryFunctions->hDbgHelpLib, "SymGetModuleInfo64");
+			PPG_dbgHlpLibraryFunctions->SymGetOptions =
+			        (SYMGETOPTIONS)GetProcAddress(PPG_dbgHlpLibraryFunctions->hDbgHelpLib, "SymGetOptions");
+			PPG_dbgHlpLibraryFunctions->SymSetOptions =
+			        (SYMSETOPTIONS)GetProcAddress(PPG_dbgHlpLibraryFunctions->hDbgHelpLib, "SymSetOptions");
+			PPG_dbgHlpLibraryFunctions->SymInitializeW = (SYMINITIALIZEW)GetProcAddress(
+			        PPG_dbgHlpLibraryFunctions->hDbgHelpLib, "SymInitializeW");
+			PPG_dbgHlpLibraryFunctions->SymCleanup =
+			        (SYMCLEANUP)GetProcAddress(PPG_dbgHlpLibraryFunctions->hDbgHelpLib, "SymCleanup");
+			PPG_dbgHlpLibraryFunctions->SymGetModuleBase64 = (SYMGETMODULEBASE64)GetProcAddress(
+			        PPG_dbgHlpLibraryFunctions->hDbgHelpLib, "SymGetModuleBase64");
+			PPG_dbgHlpLibraryFunctions->SymFunctionTableAccess64 = (SYMFUNCTIONTABLEACCESS64)GetProcAddress(
+			        PPG_dbgHlpLibraryFunctions->hDbgHelpLib, "SymFunctionTableAccess64");
+			PPG_dbgHlpLibraryFunctions->StackWalk64 =
+			        (STACKWALK64)GetProcAddress(PPG_dbgHlpLibraryFunctions->hDbgHelpLib, "StackWalk64");
+			PPG_dbgHlpLibraryFunctions->SymFromAddr =
+			        (SYMFROMADDR)GetProcAddress(PPG_dbgHlpLibraryFunctions->hDbgHelpLib, "SymFromAddr");
+			PPG_dbgHlpLibraryFunctions->SymGetLineFromAddr64 = (SYMGETLINEFROMADDR64)GetProcAddress(
+			        PPG_dbgHlpLibraryFunctions->hDbgHelpLib, "SymGetLineFromAddr64");
+			PPG_dbgHlpLibraryFunctions->SymGetModuleInfo64 = (SYMGETMODULEINFO64)GetProcAddress(
+			        PPG_dbgHlpLibraryFunctions->hDbgHelpLib, "SymGetModuleInfo64");
 		} else {
 			/* wrong version of the library */
 			PPG_dbgHlpLibraryFunctions->hDbgHelpLib = NULL;
@@ -193,7 +204,8 @@ load_dbg_symbols(struct OMRPortLibrary *portLibrary)
 		/* save the current symbol options */
 		PPG_pdbData.symOptions = PPG_dbgHlpLibraryFunctions->SymGetOptions();
 		/* this gives a cut down version of the module list (much faster) */
-		PPG_dbgHlpLibraryFunctions->SymSetOptions(SYMOPT_DEFERRED_LOADS | SYMOPT_LOAD_LINES | SYMOPT_CASE_INSENSITIVE | SYMOPT_LOAD_ANYTHING);
+		PPG_dbgHlpLibraryFunctions->SymSetOptions(
+		        SYMOPT_DEFERRED_LOADS | SYMOPT_LOAD_LINES | SYMOPT_CASE_INSENSITIVE | SYMOPT_LOAD_ANYTHING);
 
 		/* initialize the PDB search path */
 		buildPDBPath(portLibrary, GetCurrentProcess());
@@ -210,7 +222,6 @@ load_dbg_symbols(struct OMRPortLibrary *portLibrary)
 	}
 	return 0;
 }
-
 
 /* This function frees loaded debug symbols and resets debug symbol options. PPG_pdbData.numberOfModules
  * set to 0 indicates that we have unloaded the debug symbols and reset the options.
@@ -232,7 +243,6 @@ free_dbg_symbols(struct OMRPortLibrary *portLibrary)
 	}
 }
 
-
 /* This function constructs a backtrace from a CPU context. Generally there are only one or two
  * values in the context that are actually used to construct the stack but these vary by platform
  * so arn't detailed here. If no heap is specified then this function will use malloc to allocate
@@ -247,7 +257,8 @@ free_dbg_symbols(struct OMRPortLibrary *portLibrary)
  * @return the number of frames in the backtrace.
  */
 uintptr_t
-omrintrospect_backtrace_thread_raw(struct OMRPortLibrary *portLibrary, J9PlatformThread *threadInfo, J9Heap *heap, void *signalInfo)
+omrintrospect_backtrace_thread_raw(
+        struct OMRPortLibrary *portLibrary, J9PlatformThread *threadInfo, J9Heap *heap, void *signalInfo)
 {
 	BOOLEAN rc = FALSE;
 	uintptr_t frameNumber = 0;
@@ -262,8 +273,10 @@ omrintrospect_backtrace_thread_raw(struct OMRPortLibrary *portLibrary, J9Platfor
 		return 0;
 	}
 
-	/* if it's a stack overflow then we need to supress generation of a backtrace or we'll overflow the stack buffer */
-	if (sigInfo != NULL && sigInfo->ExceptionRecord != NULL && sigInfo->ExceptionRecord->ExceptionCode == EXCEPTION_STACK_OVERFLOW) {
+	/* if it's a stack overflow then we need to supress generation of a backtrace or we'll overflow the stack buffer
+	 */
+	if (sigInfo != NULL && sigInfo->ExceptionRecord != NULL
+	        && sigInfo->ExceptionRecord->ExceptionCode == EXCEPTION_STACK_OVERFLOW) {
 		return 0;
 	}
 
@@ -324,27 +337,25 @@ omrintrospect_backtrace_thread_raw(struct OMRPortLibrary *portLibrary, J9Platfor
 		for (frameNumber = 0; rc != FALSE; frameNumber++) {
 			rc = PPG_dbgHlpLibraryFunctions->StackWalk64(
 #if defined(OMR_ENV_DATA64)
-					 IMAGE_FILE_MACHINE_AMD64,
+			        IMAGE_FILE_MACHINE_AMD64,
 #else
-					 IMAGE_FILE_MACHINE_I386,
+			        IMAGE_FILE_MACHINE_I386,
 #endif /* defined(OMR_ENV_DATA64) */
-					 process,
-					 thread,
-					 &stackFrame,
-					 &threadContext, /* thread context not needed for x86, however is required for AMD64 */
-					 NULL,
-					 PPG_dbgHlpLibraryFunctions->SymFunctionTableAccess64,
-					 PPG_dbgHlpLibraryFunctions->SymGetModuleBase64,
-					 NULL);
+			        process, thread, &stackFrame, &threadContext, /* thread context not needed for x86,
+			                                                         however is required for AMD64 */
+			        NULL, PPG_dbgHlpLibraryFunctions->SymFunctionTableAccess64,
+			        PPG_dbgHlpLibraryFunctions->SymGetModuleBase64, NULL);
 
 			if (rc == 0) {
 				break;
 			}
 
 			if (heap == NULL) {
-				*nextFrame = portLibrary->mem_allocate_memory(portLibrary, sizeof(J9PlatformStackFrame), OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
+				*nextFrame = portLibrary->mem_allocate_memory(portLibrary, sizeof(J9PlatformStackFrame),
+				        OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 			} else {
-				*nextFrame = portLibrary->heap_allocate(portLibrary, heap, sizeof(J9PlatformStackFrame));
+				*nextFrame =
+				        portLibrary->heap_allocate(portLibrary, heap, sizeof(J9PlatformStackFrame));
 			}
 
 			if (*nextFrame == NULL) {
@@ -359,8 +370,8 @@ omrintrospect_backtrace_thread_raw(struct OMRPortLibrary *portLibrary, J9Platfor
 			(*nextFrame)->symbol = NULL;
 
 			/*
-			 * this truncates from DWORD64 to uintptr_t on Win32 systems. However win32 is exclusively little endian so this
-			 * works as expected
+			 * this truncates from DWORD64 to uintptr_t on Win32 systems. However win32 is exclusively
+			 * little endian so this works as expected
 			 */
 			(*nextFrame)->instruction_pointer = (uintptr_t)stackFrame.AddrPC.Offset;
 			(*nextFrame)->stack_pointer = (uintptr_t)stackFrame.AddrStack.Offset;
@@ -380,13 +391,12 @@ omrintrospect_backtrace_thread_raw(struct OMRPortLibrary *portLibrary, J9Platfor
 	return frameNumber;
 }
 
-
-
 /* This function takes a thread structure already populated with a backtrace by omrintrospect_backtrace_thread
  * and looks up the symbols for the frames. The format of the string generated is:
  * 		symbol_name (statement_id instruction_pointer [module+offset])
  * If it isn't possible to determine any of the items in the string then they are omitted. If no heap is specified
- * then this function will use malloc to allocate the memory necessary for the symbols which must be freed by the caller.
+ * then this function will use malloc to allocate the memory necessary for the symbols which must be freed by the
+ * caller.
  *
  * @param portLbirary a pointer to an initialized port library
  * @param threadInfo a thread structure populated with a backtrace
@@ -446,7 +456,8 @@ omrintrospect_backtrace_symbols_raw(struct OMRPortLibrary *portLibrary, J9Platfo
 			line_info.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
 			module_info.SizeOfStruct = sizeof(IMAGEHLP_MODULE64);
 
-			rc = PPG_dbgHlpLibraryFunctions->SymGetModuleInfo64(process, frame->instruction_pointer, &module_info);
+			rc = PPG_dbgHlpLibraryFunctions->SymGetModuleInfo64(
+			        process, frame->instruction_pointer, &module_info);
 			if (rc == FALSE) {
 				module_name = "";
 			} else {
@@ -454,14 +465,16 @@ omrintrospect_backtrace_symbols_raw(struct OMRPortLibrary *portLibrary, J9Platfo
 				module_offset = frame->instruction_pointer - module_info.BaseOfImage;
 			}
 
-			rc = PPG_dbgHlpLibraryFunctions->SymFromAddr(process, (uint64_t)frame->instruction_pointer, &symbol_offset, symbol_info);
+			rc = PPG_dbgHlpLibraryFunctions->SymFromAddr(
+			        process, (uint64_t)frame->instruction_pointer, &symbol_offset, symbol_info);
 			if (rc == FALSE) {
 				symbol_name = "";
 			} else {
 				symbol_name = symbol_info->Name;
 			}
 
-			rc = PPG_dbgHlpLibraryFunctions->SymGetLineFromAddr64(process, (DWORD64)frame->instruction_pointer, &disp, &line_info);
+			rc = PPG_dbgHlpLibraryFunctions->SymGetLineFromAddr64(
+			        process, (DWORD64)frame->instruction_pointer, &disp, &line_info);
 			if (rc == FALSE) {
 				file_name = "";
 			} else {
@@ -477,23 +490,29 @@ omrintrospect_backtrace_symbols_raw(struct OMRPortLibrary *portLibrary, J9Platfo
 
 			/* symbol_name+offset (id, instruction_pointer [module+offset]) */
 			if (symbol_name[0] != '\0') {
-				cursor += omrstr_printf(portLibrary, cursor, sizeof(output_buf) - (cursor - output_buf), "%s", symbol_name);
-				cursor += omrstr_printf(portLibrary, cursor, sizeof(output_buf) - (cursor - output_buf), "+0x%x ", symbol_offset);
+				cursor += omrstr_printf(portLibrary, cursor, sizeof(output_buf) - (cursor - output_buf),
+				        "%s", symbol_name);
+				cursor += omrstr_printf(portLibrary, cursor, sizeof(output_buf) - (cursor - output_buf),
+				        "+0x%x ", symbol_offset);
 			}
 			*(cursor++) = '(';
 			if (file_name[0] != '\0') {
-				cursor += omrstr_printf(portLibrary, cursor, sizeof(output_buf) - (cursor - output_buf), "%s:%i, ", file_name, line_info.LineNumber);
+				cursor += omrstr_printf(portLibrary, cursor, sizeof(output_buf) - (cursor - output_buf),
+				        "%s:%i, ", file_name, line_info.LineNumber);
 			}
-			cursor += omrstr_printf(portLibrary, cursor, sizeof(output_buf) - (cursor - output_buf), "0x%p", frame->instruction_pointer);
+			cursor += omrstr_printf(portLibrary, cursor, sizeof(output_buf) - (cursor - output_buf), "0x%p",
+			        frame->instruction_pointer);
 			if (module_name[0] != '\0') {
-				cursor += omrstr_printf(portLibrary, cursor, sizeof(output_buf) - (cursor - output_buf), " [%s+0x%x]", module_name, module_offset);
+				cursor += omrstr_printf(portLibrary, cursor, sizeof(output_buf) - (cursor - output_buf),
+				        " [%s+0x%x]", module_name, module_offset);
 			}
 			*(cursor++) = ')';
 			*cursor = 0;
 
 			length = (cursor - output_buf) + 1;
 			if (heap == NULL) {
-				frame->symbol = portLibrary->mem_allocate_memory(portLibrary, length, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
+				frame->symbol = portLibrary->mem_allocate_memory(
+				        portLibrary, length, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 			} else {
 				frame->symbol = portLibrary->heap_allocate(portLibrary, heap, length);
 			}

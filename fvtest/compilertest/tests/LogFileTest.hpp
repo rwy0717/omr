@@ -28,26 +28,25 @@
 
 namespace TestCompiler {
 
-class LogFileTest : public ::testing::Test
-   {
-   public:
-   LogFileTest();
-   ~LogFileTest();
+class LogFileTest : public ::testing::Test {
+public:
+	LogFileTest();
+	~LogFileTest();
 
-   void forkAndCompile(std::string logFile, const char *logType = "traceFull");
-   void checkLogForKeywords(std::map<const char*, bool> keywords, const char *logFile);
-   void runKeywordTests(std::map<const char*, std::map<const char*, bool>> logFileChecks);
-   bool fileIsNotEmpty(std::string logFile);
-   std::map<const char*, bool> buildKeywordMap(std::vector<const char*> inputs);
+	void forkAndCompile(std::string logFile, const char *logType = "traceFull");
+	void checkLogForKeywords(std::map<const char *, bool> keywords, const char *logFile);
+	void runKeywordTests(std::map<const char *, std::map<const char *, bool> > logFileChecks);
+	bool fileIsNotEmpty(std::string logFile);
+	std::map<const char *, bool> buildKeywordMap(std::vector<const char *> inputs);
 
-   private:
-   std::vector<std::string> _logFiles;
+private:
+	std::vector<std::string> _logFiles;
 
-   bool fileExists(std::string name);
-   void createLog(std::string logFile, const char *logType);
-   void compileTests();
-   };
+	bool fileExists(std::string name);
+	void createLog(std::string logFile, const char *logType);
+	void compileTests();
+};
 
-}
+} // namespace TestCompiler
 
 #endif // !defined(TEST_LOGFILE_INCL)

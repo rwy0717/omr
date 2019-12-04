@@ -20,15 +20,15 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-#include "omrcfg.h"
-#include "omrport.h"
-#include "modronopt.h"
+#include "LockingHeapRegionQueue.hpp"
 
 #include "AllocateDescription.hpp"
 #include "AtomicOperations.hpp"
 #include "EnvironmentBase.hpp"
 #include "HeapRegionDescriptorSegregated.hpp"
-#include "LockingHeapRegionQueue.hpp"
+#include "modronopt.h"
+#include "omrcfg.h"
+#include "omrport.h"
 
 #if defined(OMR_GC_SEGREGATED_HEAP)
 
@@ -39,15 +39,18 @@
  * on the list.
  */
 MM_LockingHeapRegionQueue *
-MM_LockingHeapRegionQueue::newInstance(MM_EnvironmentBase *env, RegionListKind regionListKind, bool singleRegionsOnly, bool concurrentAccess, bool trackFreeBytes)
+MM_LockingHeapRegionQueue::newInstance(MM_EnvironmentBase *env, RegionListKind regionListKind, bool singleRegionsOnly,
+        bool concurrentAccess, bool trackFreeBytes)
 {
-	MM_LockingHeapRegionQueue *regionList = (MM_LockingHeapRegionQueue *)env->getForge()->allocate(sizeof(MM_LockingHeapRegionQueue), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+	MM_LockingHeapRegionQueue *regionList = (MM_LockingHeapRegionQueue *)env->getForge()->allocate(
+	        sizeof(MM_LockingHeapRegionQueue), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
 	if (regionList) {
-		new (regionList) MM_LockingHeapRegionQueue(regionListKind, singleRegionsOnly, concurrentAccess, trackFreeBytes);
+		new (regionList)
+		        MM_LockingHeapRegionQueue(regionListKind, singleRegionsOnly, concurrentAccess, trackFreeBytes);
 		if (!regionList->initialize(env)) {
 			regionList->kill(env);
 			return NULL;
-		}		
+		}
 	}
 	return regionList;
 }
@@ -65,10 +68,10 @@ MM_LockingHeapRegionQueue::initialize(MM_EnvironmentBase *env)
 	if (_needLock && (0 != omrthread_monitor_init_with_name(&_lockMonitor, 0, "RegionList lock monitor"))) {
 		return false;
 	}
-	
+
 	return true;
 }
-	
+
 void
 MM_LockingHeapRegionQueue::tearDown(MM_EnvironmentBase *env)
 {
@@ -100,7 +103,7 @@ MM_LockingHeapRegionQueue::showList(MM_EnvironmentBase *env)
 {
 	OMRPORT_ACCESS_FROM_OMRPORT(env->getPortLibrary());
 	uintptr_t index = 0;
-	uintptr_t count = 0;	
+	uintptr_t count = 0;
 	lock();
 	omrtty_printf("LockingHeapRegionList 0x%x: ", this);
 	for (MM_HeapRegionDescriptorSegregated *cur = _head; cur != NULL; cur = cur->getNext()) {

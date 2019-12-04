@@ -33,7 +33,8 @@
 
 #define MINIMUM_CPU_LOAD_INTERVAL J9CONST_I64(1000000)
 #define MAXIMUM_NEGATIVE_ELAPSED_TIME_COUNT 3
-#define UTSINTERFACE_FROM_OMRVMTHREAD(vmThread) ((vmThread)->_vm->_trcEngine? &(vmThread)->_vm->_trcEngine->omrTraceIntfS : NULL)
+#define UTSINTERFACE_FROM_OMRVMTHREAD(vmThread) \
+	((vmThread)->_vm->_trcEngine ? &(vmThread)->_vm->_trcEngine->omrTraceIntfS : NULL)
 
 typedef enum OMRSysInfoCalculateCpuLoadError {
 	OK,
@@ -43,16 +44,25 @@ typedef enum OMRSysInfoCalculateCpuLoadError {
 } OMRSysInfoCalculateCpuLoadError;
 
 static uint32_t indexFromCategoryCode(uintptr_t categories_mapping_size, uint32_t cc);
-static uintptr_t omrtiGetMemoryCategoriesCallback(uint32_t categoryCode, const char *categoryName, uintptr_t liveBytes, uintptr_t liveAllocations, BOOLEAN isRoot, uint32_t parentCategoryCode, OMRMemCategoryWalkState *state);
-static uintptr_t omrtiCountMemoryCategoriesCallback(uint32_t categoryCode, const char *categoryName, uintptr_t liveBytes, uintptr_t liveAllocations, BOOLEAN isRoot, uint32_t parentCategoryCode, OMRMemCategoryWalkState *state);
-static uintptr_t omrtiCalculateSlotsForCategoriesMappingCallback(uint32_t categoryCode, const char *categoryName, uintptr_t liveBytes, uintptr_t liveAllocations, BOOLEAN isRoot, uint32_t parentCategoryCode, OMRMemCategoryWalkState *state);
+static uintptr_t omrtiGetMemoryCategoriesCallback(uint32_t categoryCode, const char *categoryName, uintptr_t liveBytes,
+        uintptr_t liveAllocations, BOOLEAN isRoot, uint32_t parentCategoryCode, OMRMemCategoryWalkState *state);
+static uintptr_t omrtiCountMemoryCategoriesCallback(uint32_t categoryCode, const char *categoryName,
+        uintptr_t liveBytes, uintptr_t liveAllocations, BOOLEAN isRoot, uint32_t parentCategoryCode,
+        OMRMemCategoryWalkState *state);
+static uintptr_t omrtiCalculateSlotsForCategoriesMappingCallback(uint32_t categoryCode, const char *categoryName,
+        uintptr_t liveBytes, uintptr_t liveAllocations, BOOLEAN isRoot, uint32_t parentCategoryCode,
+        OMRMemCategoryWalkState *state);
 static void fillInChildAndSiblingCategories(OMR_TI_MemoryCategory *categories_buffer, int32_t written_count);
 static void fillInCategoryDeepCounters(OMR_TI_MemoryCategory *category);
 
-static omr_error_t getOMRSysInfoProcessCpuTime(OMR_VM *omrVM, OMRSysInfoProcessCpuTime *sysInfo, OMRSysInfoCpuLoadCallStatus *status);
-static OMRSysInfoCalculateCpuLoadError calculateProcessCpuLoad(OMRSysInfoProcessCpuTime const *endRecord, OMRSysInfoProcessCpuTime const *startRecord, double *cpuLoad);
-static omr_error_t getOMRSysInfoSystemCpuTime(OMR_VM *omrVM, J9SysinfoCPUTime *sysInfo, OMRSysInfoCpuLoadCallStatus *status);
-static OMRSysInfoCalculateCpuLoadError calculateSystemCpuLoad(J9SysinfoCPUTime const *endRecord, J9SysinfoCPUTime const *startRecord, double *cpuLoad);
+static omr_error_t getOMRSysInfoProcessCpuTime(
+        OMR_VM *omrVM, OMRSysInfoProcessCpuTime *sysInfo, OMRSysInfoCpuLoadCallStatus *status);
+static OMRSysInfoCalculateCpuLoadError calculateProcessCpuLoad(
+        OMRSysInfoProcessCpuTime const *endRecord, OMRSysInfoProcessCpuTime const *startRecord, double *cpuLoad);
+static omr_error_t getOMRSysInfoSystemCpuTime(
+        OMR_VM *omrVM, J9SysinfoCPUTime *sysInfo, OMRSysInfoCpuLoadCallStatus *status);
+static OMRSysInfoCalculateCpuLoadError calculateSystemCpuLoad(
+        J9SysinfoCPUTime const *endRecord, J9SysinfoCPUTime const *startRecord, double *cpuLoad);
 static int64_t computeTimeInterval(const int64_t endNS, const int64_t startNS);
 
 omr_error_t
@@ -101,8 +111,8 @@ omrtiUnbindCurrentThread(OMR_VMThread *vmThread)
 }
 
 omr_error_t
-omrtiRegisterRecordSubscriber(OMR_VMThread *vmThread, char const *description,
-	utsSubscriberCallback subscriberFunc, utsSubscriberAlarmCallback alarmFunc, void *userData, UtSubscription **subscriptionID)
+omrtiRegisterRecordSubscriber(OMR_VMThread *vmThread, char const *description, utsSubscriberCallback subscriberFunc,
+        utsSubscriberAlarmCallback alarmFunc, void *userData, UtSubscription **subscriptionID)
 {
 	omr_error_t rc = OMR_ERROR_NONE;
 
@@ -123,14 +133,15 @@ omrtiRegisterRecordSubscriber(OMR_VMThread *vmThread, char const *description,
 		 * thread was bound to the OMR_VM after trace shutdown, so it has a valid OMR_VMThread, but
 		 * is not attached to the trace engine.
 		 *
-		 * In practice, this is unlikely to occur because we unload agents before shutting down the trace engine.
+		 * In practice, this is unlikely to occur because we unload agents before shutting down the trace
+		 * engine.
 		 */
 		OMR_TraceInterface *serverf = UTSINTERFACE_FROM_OMRVMTHREAD(vmThread);
 		if (NULL == serverf) {
 			rc = OMR_ERROR_NOT_AVAILABLE;
 		} else {
-			rc = serverf->RegisterRecordSubscriber(OMR_TRACE_THREAD_FROM_VMTHREAD(vmThread), description, subscriberFunc,
-												   alarmFunc, userData, (UtSubscription **)subscriptionID);
+			rc = serverf->RegisterRecordSubscriber(OMR_TRACE_THREAD_FROM_VMTHREAD(vmThread), description,
+			        subscriberFunc, alarmFunc, userData, (UtSubscription **)subscriptionID);
 		}
 	}
 	OMR_TI_RETURN(vmThread, rc);
@@ -158,12 +169,14 @@ omrtiDeregisterRecordSubscriber(OMR_VMThread *vmThread, UtSubscription *subscrip
 		 * thread was bound to the OMR_VM after trace shutdown, so it has a valid OMR_VMThread, but
 		 * is not attached to the trace engine.
 		 *
-		 * In practice, this is unlikely to occur because we unload agents before shutting down the trace engine.
+		 * In practice, this is unlikely to occur because we unload agents before shutting down the trace
+		 * engine.
 		 */
 		OMR_TraceInterface *serverf = UTSINTERFACE_FROM_OMRVMTHREAD(vmThread);
 		/* if there is no server, no work needs to be done */
 		if (NULL != serverf) {
-			rc = serverf->DeregisterRecordSubscriber(OMR_TRACE_THREAD_FROM_VMTHREAD(vmThread), subscriptionID);
+			rc = serverf->DeregisterRecordSubscriber(
+			        OMR_TRACE_THREAD_FROM_VMTHREAD(vmThread), subscriptionID);
 		}
 	}
 	OMR_TI_RETURN(vmThread, rc);
@@ -258,7 +271,8 @@ computeTimeInterval(const int64_t endNS, const int64_t startNS)
  * This function fills in a record of J9SysinfoCPUTime or sets systemCpuLoadCallStatus
  * @param[in] omrVM the current OMR VM
  * @param[in,out] sysInfo record of J9SysinfoCPUTime, it cannot be NULL
- * @param[in,out] status whether GetSystemCpuLoad is supported on this platform or user have sufficient rights, it cannot be NULL
+ * @param[in,out] status whether GetSystemCpuLoad is supported on this platform or user have sufficient rights, it
+ * cannot be NULL
  * @return OMR error code
  */
 static omr_error_t
@@ -271,15 +285,9 @@ getOMRSysInfoSystemCpuTime(OMR_VM *omrVM, J9SysinfoCPUTime *systemCpuTime, OMRSy
 	portLibraryStatus = omrsysinfo_get_CPU_utilization(systemCpuTime);
 	if (0 != portLibraryStatus) {
 		switch (portLibraryStatus) {
-		case OMRPORT_ERROR_SYSINFO_INSUFFICIENT_PRIVILEGE:
-			*status = INSUFFICIENT_PRIVILEGE;
-			break;
-		case OMRPORT_ERROR_SYSINFO_NOT_SUPPORTED:
-			*status = UNSUPPORTED;
-			break;
-		default:
-			*status = CPU_LOAD_ERROR_VALUE;
-			break;
+		case OMRPORT_ERROR_SYSINFO_INSUFFICIENT_PRIVILEGE: *status = INSUFFICIENT_PRIVILEGE; break;
+		case OMRPORT_ERROR_SYSINFO_NOT_SUPPORTED: *status = UNSUPPORTED; break;
+		default: *status = CPU_LOAD_ERROR_VALUE; break;
 		}
 		rc = OMR_ERROR_NOT_AVAILABLE;
 	}
@@ -290,11 +298,13 @@ getOMRSysInfoSystemCpuTime(OMR_VM *omrVM, J9SysinfoCPUTime *systemCpuTime, OMRSy
  * This function returns a record of getOMRSysInfoProcessCpuTime or sets processCpuLoadCallStatus
  * @param[in] omrVM the current OMR VM
  * @param[in,out] vm record of OMRSysInfoProcessCpuTime, it cannot be NULL
- * @param[in,out] status whether GetProcessCpuLoad is supported on this platform or user have sufficient rights, it cannot be NULL
+ * @param[in,out] status whether GetProcessCpuLoad is supported on this platform or user have sufficient rights, it
+ * cannot be NULL
  * @return OMR error code
  */
 static omr_error_t
-getOMRSysInfoProcessCpuTime(OMR_VM *omrVM, OMRSysInfoProcessCpuTime *processCpuTime, OMRSysInfoCpuLoadCallStatus *status)
+getOMRSysInfoProcessCpuTime(
+        OMR_VM *omrVM, OMRSysInfoProcessCpuTime *processCpuTime, OMRSysInfoCpuLoadCallStatus *status)
 {
 	OMRPORT_ACCESS_FROM_OMRVM(omrVM);
 	omr_error_t rc = OMR_ERROR_NONE;
@@ -303,15 +313,9 @@ getOMRSysInfoProcessCpuTime(OMR_VM *omrVM, OMRSysInfoProcessCpuTime *processCpuT
 
 	if (0 != portLibraryStatus) {
 		switch (portLibraryStatus) {
-		case OMRPORT_ERROR_SYSINFO_INSUFFICIENT_PRIVILEGE:
-			*status = INSUFFICIENT_PRIVILEGE;
-			break;
-		case OMRPORT_ERROR_SYSINFO_NOT_SUPPORTED:
-			*status = UNSUPPORTED;
-			break;
-		default:
-			*status = CPU_LOAD_ERROR_VALUE;
-			break;
+		case OMRPORT_ERROR_SYSINFO_INSUFFICIENT_PRIVILEGE: *status = INSUFFICIENT_PRIVILEGE; break;
+		case OMRPORT_ERROR_SYSINFO_NOT_SUPPORTED: *status = UNSUPPORTED; break;
+		default: *status = CPU_LOAD_ERROR_VALUE; break;
 		}
 		rc = OMR_ERROR_NOT_AVAILABLE;
 	} else {
@@ -320,13 +324,9 @@ getOMRSysInfoProcessCpuTime(OMR_VM *omrVM, OMRSysInfoProcessCpuTime *processCpuT
 
 		if (0 != getProcessTimeStatus) {
 			switch (getProcessTimeStatus) {
-			case -1:
-				*status = UNSUPPORTED;
-				break;
+			case -1: *status = UNSUPPORTED; break;
 			case -2: /* fall through */
-			default:
-				*status = CPU_LOAD_ERROR_VALUE;
-				break;
+			default: *status = CPU_LOAD_ERROR_VALUE; break;
 			}
 			rc = OMR_ERROR_NOT_AVAILABLE;
 		} else {
@@ -374,7 +374,8 @@ calculateSystemCpuLoad(J9SysinfoCPUTime const *endRecord, J9SysinfoCPUTime const
  * @return a OMRSysInfoCalculateCpuLoadError error code
  */
 static OMRSysInfoCalculateCpuLoadError
-calculateProcessCpuLoad(OMRSysInfoProcessCpuTime const *endRecord, OMRSysInfoProcessCpuTime const *startRecord, double *cpuLoad)
+calculateProcessCpuLoad(
+        OMRSysInfoProcessCpuTime const *endRecord, OMRSysInfoProcessCpuTime const *startRecord, double *cpuLoad)
 {
 	OMRSysInfoCalculateCpuLoadError rc = OK;
 	int64_t timestampDelta = computeTimeInterval(endRecord->timestampNS, startRecord->timestampNS);
@@ -389,7 +390,8 @@ calculateProcessCpuLoad(OMRSysInfoProcessCpuTime const *endRecord, OMRSysInfoPro
 		int64_t userCpuTimeDelta = endRecord->userCpuTimeNS - startRecord->userCpuTimeNS;
 		int64_t processTimeDelta = systemCpuTimeDelta + userCpuTimeDelta;
 		if (processTimeDelta < systemCpuTimeDelta) {
-			/* operation processTimeDelta = systemCpuTimeDelta + userCpuTimeDelta overflow, set cpuLoad to 1 in this case */
+			/* operation processTimeDelta = systemCpuTimeDelta + userCpuTimeDelta overflow, set cpuLoad to 1
+			 * in this case */
 			*cpuLoad = 1.0;
 		} else {
 			double result = (double)processTimeDelta / (double)(endRecord->numberOfCpus * timestampDelta);
@@ -417,49 +419,66 @@ omrtiGetSystemCpuLoad(OMR_VMThread *vmThread, double *systemCpuLoad)
 	} else {
 		OMR_SysInfo *curSysInfo = vmThread->_vm->sysInfo;
 		if ((SUPPORTED == curSysInfo->systemCpuLoadCallStatus)
-			|| (NO_HISTORY == curSysInfo->systemCpuLoadCallStatus)
-		) {
+		        || (NO_HISTORY == curSysInfo->systemCpuLoadCallStatus)) {
 			J9SysinfoCPUTime newestSystemCpuTime;
-			ret = getOMRSysInfoSystemCpuTime(vmThread->_vm, &newestSystemCpuTime, &curSysInfo->systemCpuLoadCallStatus);
+			ret = getOMRSysInfoSystemCpuTime(
+			        vmThread->_vm, &newestSystemCpuTime, &curSysInfo->systemCpuLoadCallStatus);
 			if (OMR_ERROR_NONE != ret) {
 				/* it is not supported on this platform or user has insufficient rights */
 				ret = OMR_ERROR_NOT_AVAILABLE;
 			} else if (NO_HISTORY == curSysInfo->systemCpuLoadCallStatus) {
 				/* first call to this method */
-				memcpy(&curSysInfo->oldestSystemCpuTime, &newestSystemCpuTime, sizeof(J9SysinfoCPUTime));
-				memcpy(&curSysInfo->interimSystemCpuTime, &newestSystemCpuTime, sizeof(J9SysinfoCPUTime));
+				memcpy(&curSysInfo->oldestSystemCpuTime, &newestSystemCpuTime,
+				        sizeof(J9SysinfoCPUTime));
+				memcpy(&curSysInfo->interimSystemCpuTime, &newestSystemCpuTime,
+				        sizeof(J9SysinfoCPUTime));
 				curSysInfo->systemCpuLoadCallStatus = SUPPORTED;
 				ret = OMR_ERROR_RETRY;
 			} else {
 				OMRSysInfoCalculateCpuLoadError rc = OK;
-				rc = calculateSystemCpuLoad(&newestSystemCpuTime, &curSysInfo->interimSystemCpuTime, systemCpuLoad);
+				rc = calculateSystemCpuLoad(
+				        &newestSystemCpuTime, &curSysInfo->interimSystemCpuTime, systemCpuLoad);
 				if (OK == rc) {
-					/* discard the oldestSystemCpuTime, replace it with interimSystemCpuTime and save newestSystemCpuTime as the new interimSystemCpuTime. */
-					memcpy(&curSysInfo->oldestSystemCpuTime, &curSysInfo->interimSystemCpuTime, sizeof(J9SysinfoCPUTime));
-					memcpy(&curSysInfo->interimSystemCpuTime, &newestSystemCpuTime, sizeof(J9SysinfoCPUTime));
+					/* discard the oldestSystemCpuTime, replace it with interimSystemCpuTime and
+					 * save newestSystemCpuTime as the new interimSystemCpuTime. */
+					memcpy(&curSysInfo->oldestSystemCpuTime, &curSysInfo->interimSystemCpuTime,
+					        sizeof(J9SysinfoCPUTime));
+					memcpy(&curSysInfo->interimSystemCpuTime, &newestSystemCpuTime,
+					        sizeof(J9SysinfoCPUTime));
 				} else {
-					/* interimSystemCpuTime or newestSystemCpuTime is not valid, or the elapsed time between them is too small. */
+					/* interimSystemCpuTime or newestSystemCpuTime is not valid, or the elapsed time
+					 * between them is too small. */
 					if (NEGATIVE_INTERVAL == rc) {
-						/* discard the interimSystemCpuLoad and replace it with newestSystemCpuTime. */
-						memcpy(&curSysInfo->interimSystemCpuTime, &newestSystemCpuTime, sizeof(J9SysinfoCPUTime));
+						/* discard the interimSystemCpuLoad and replace it with
+						 * newestSystemCpuTime. */
+						memcpy(&curSysInfo->interimSystemCpuTime, &newestSystemCpuTime,
+						        sizeof(J9SysinfoCPUTime));
 					}
 					/* attempt to recompute using the oldestSystemCpuTime. */
-					rc = calculateSystemCpuLoad(&newestSystemCpuTime, &curSysInfo->oldestSystemCpuTime, systemCpuLoad);
+					rc = calculateSystemCpuLoad(
+					        &newestSystemCpuTime, &curSysInfo->oldestSystemCpuTime, systemCpuLoad);
 					if (OK == rc) {
 						curSysInfo->systemCpuTimeNegativeElapsedTimeCount = 0;
 					} else if (NEGATIVE_INTERVAL == rc) {
 						/* discard oldSystemCpuLoad and replace it with newestSystemCpuTime. */
-						memcpy(&curSysInfo->oldestSystemCpuTime, &newestSystemCpuTime, sizeof(J9SysinfoCPUTime));
+						memcpy(&curSysInfo->oldestSystemCpuTime, &newestSystemCpuTime,
+						        sizeof(J9SysinfoCPUTime));
 						curSysInfo->systemCpuTimeNegativeElapsedTimeCount = 0;
 						ret = OMR_ERROR_INTERNAL;
 					} else if (ELAPSED_TIME_TOO_SMALL == rc) {
-						/* return OMR_ERROR_RETRY if interval between endRcord and oldestSystemCpuTime is still too small */
+						/* return OMR_ERROR_RETRY if interval between endRcord and
+						 * oldestSystemCpuTime is still too small */
 						curSysInfo->systemCpuTimeNegativeElapsedTimeCount = 0;
 						ret = OMR_ERROR_RETRY;
 					} else if (ELAPSED_TIME_NEGATIVE == rc) {
-						if (MAXIMUM_NEGATIVE_ELAPSED_TIME_COUNT == curSysInfo->systemCpuTimeNegativeElapsedTimeCount) {
-							/* if this case found consecutively for MAXIMUM_NEGATIVE_ELAPSED_TIME_COUNT times, discard the oldestSystemCpuTime and replace it with newestSystemCpuTime. */
-							memcpy(&curSysInfo->oldestSystemCpuTime, &newestSystemCpuTime, sizeof(J9SysinfoCPUTime));
+						if (MAXIMUM_NEGATIVE_ELAPSED_TIME_COUNT
+						        == curSysInfo->systemCpuTimeNegativeElapsedTimeCount) {
+							/* if this case found consecutively for
+							 * MAXIMUM_NEGATIVE_ELAPSED_TIME_COUNT times, discard the
+							 * oldestSystemCpuTime and replace it with newestSystemCpuTime.
+							 */
+							memcpy(&curSysInfo->oldestSystemCpuTime, &newestSystemCpuTime,
+							        sizeof(J9SysinfoCPUTime));
 							curSysInfo->systemCpuTimeNegativeElapsedTimeCount = 0;
 						} else {
 							curSysInfo->systemCpuTimeNegativeElapsedTimeCount += 1;
@@ -493,49 +512,67 @@ omrtiGetProcessCpuLoad(OMR_VMThread *vmThread, double *processCpuLoad)
 	} else {
 		OMR_SysInfo *curSysInfo = vmThread->_vm->sysInfo;
 		if ((SUPPORTED == curSysInfo->processCpuLoadCallStatus)
-			|| (NO_HISTORY == curSysInfo->processCpuLoadCallStatus)
-		) {
+		        || (NO_HISTORY == curSysInfo->processCpuLoadCallStatus)) {
 			OMRSysInfoProcessCpuTime newestProcessCpuTime;
-			ret = getOMRSysInfoProcessCpuTime(vmThread->_vm, &newestProcessCpuTime, &curSysInfo->processCpuLoadCallStatus);
+			ret = getOMRSysInfoProcessCpuTime(
+			        vmThread->_vm, &newestProcessCpuTime, &curSysInfo->processCpuLoadCallStatus);
 			if (OMR_ERROR_NONE != ret) {
 				/* it is not supported on the platform or user has insufficient rights*/
 				ret = OMR_ERROR_NOT_AVAILABLE;
 			} else if (NO_HISTORY == curSysInfo->processCpuLoadCallStatus) {
 				/* first call to this method */
-				memcpy(&curSysInfo->oldestProcessCpuTime, &newestProcessCpuTime, sizeof(OMRSysInfoProcessCpuTime));
-				memcpy(&curSysInfo->interimProcessCpuTime, &newestProcessCpuTime, sizeof(OMRSysInfoProcessCpuTime));
+				memcpy(&curSysInfo->oldestProcessCpuTime, &newestProcessCpuTime,
+				        sizeof(OMRSysInfoProcessCpuTime));
+				memcpy(&curSysInfo->interimProcessCpuTime, &newestProcessCpuTime,
+				        sizeof(OMRSysInfoProcessCpuTime));
 				curSysInfo->processCpuLoadCallStatus = SUPPORTED;
 				ret = OMR_ERROR_RETRY;
 			} else {
 				OMRSysInfoCalculateCpuLoadError rc = OK;
-				rc = calculateProcessCpuLoad(&newestProcessCpuTime, &curSysInfo->interimProcessCpuTime, processCpuLoad);
+				rc = calculateProcessCpuLoad(
+				        &newestProcessCpuTime, &curSysInfo->interimProcessCpuTime, processCpuLoad);
 				if (OK == rc) {
-					/* discard the oldestProcessCpuTime and replace it with interimProcessCpuTime, save newestProcessCpuTime as the new interimProcessCpuTime. */
-					memcpy(&curSysInfo->oldestProcessCpuTime, &curSysInfo->interimProcessCpuTime, sizeof(OMRSysInfoProcessCpuTime));
-					memcpy(&curSysInfo->interimProcessCpuTime, &newestProcessCpuTime, sizeof(OMRSysInfoProcessCpuTime));
+					/* discard the oldestProcessCpuTime and replace it with interimProcessCpuTime,
+					 * save newestProcessCpuTime as the new interimProcessCpuTime. */
+					memcpy(&curSysInfo->oldestProcessCpuTime, &curSysInfo->interimProcessCpuTime,
+					        sizeof(OMRSysInfoProcessCpuTime));
+					memcpy(&curSysInfo->interimProcessCpuTime, &newestProcessCpuTime,
+					        sizeof(OMRSysInfoProcessCpuTime));
 				} else {
-					/* interimProcessCpuTime or newestProcessCpuTime is not valid, or the elapsed time between them is too small. */
+					/* interimProcessCpuTime or newestProcessCpuTime is not valid, or the elapsed
+					 * time between them is too small. */
 					if (NEGATIVE_INTERVAL == rc) {
-						/* discard the interimProcessCpuLoad and replace it with the newestProcessCpuTime */
-						memcpy(&curSysInfo->interimProcessCpuTime, &newestProcessCpuTime, sizeof(OMRSysInfoProcessCpuTime));
+						/* discard the interimProcessCpuLoad and replace it with the
+						 * newestProcessCpuTime */
+						memcpy(&curSysInfo->interimProcessCpuTime, &newestProcessCpuTime,
+						        sizeof(OMRSysInfoProcessCpuTime));
 					}
 					/* attempt to recompute using oldestProcessCpuTime. */
-					rc = calculateProcessCpuLoad(&newestProcessCpuTime, &curSysInfo->oldestProcessCpuTime, processCpuLoad);
+					rc = calculateProcessCpuLoad(&newestProcessCpuTime,
+					        &curSysInfo->oldestProcessCpuTime, processCpuLoad);
 					if (OK == rc) {
 						curSysInfo->processCpuTimeNegativeElapsedTimeCount = 0;
 					} else if (NEGATIVE_INTERVAL == rc) {
-						/* discard the oldProcessCpuLoad and replace it with newestProcessCpuTime */
-						memcpy(&curSysInfo->oldestProcessCpuTime, &newestProcessCpuTime, sizeof(OMRSysInfoProcessCpuTime));
+						/* discard the oldProcessCpuLoad and replace it with
+						 * newestProcessCpuTime */
+						memcpy(&curSysInfo->oldestProcessCpuTime, &newestProcessCpuTime,
+						        sizeof(OMRSysInfoProcessCpuTime));
 						curSysInfo->processCpuTimeNegativeElapsedTimeCount = 0;
 						ret = OMR_ERROR_INTERNAL;
 					} else if (ELAPSED_TIME_TOO_SMALL == rc) {
-						/* return OMR_ERROR_RETRY if interval between newestProcessCpuTime and oldestProcessCpuTime is still too small */
+						/* return OMR_ERROR_RETRY if interval between newestProcessCpuTime and
+						 * oldestProcessCpuTime is still too small */
 						curSysInfo->processCpuTimeNegativeElapsedTimeCount = 0;
 						ret = OMR_ERROR_RETRY;
 					} else if (ELAPSED_TIME_NEGATIVE == rc) {
-						if (MAXIMUM_NEGATIVE_ELAPSED_TIME_COUNT == curSysInfo->processCpuTimeNegativeElapsedTimeCount) {
-							/* if this case found consecutively for MAXIMUM_NEGATIVE_ELAPSED_TIME_COUNT times, discard the oldestProcessCpuTime and replace it with newestProcessCpuTime. */
-							memcpy(&curSysInfo->oldestProcessCpuTime, &newestProcessCpuTime, sizeof(OMRSysInfoProcessCpuTime));
+						if (MAXIMUM_NEGATIVE_ELAPSED_TIME_COUNT
+						        == curSysInfo->processCpuTimeNegativeElapsedTimeCount) {
+							/* if this case found consecutively for
+							 * MAXIMUM_NEGATIVE_ELAPSED_TIME_COUNT times, discard the
+							 * oldestProcessCpuTime and replace it with
+							 * newestProcessCpuTime. */
+							memcpy(&curSysInfo->oldestProcessCpuTime, &newestProcessCpuTime,
+							        sizeof(OMRSysInfoProcessCpuTime));
 							curSysInfo->processCpuTimeNegativeElapsedTimeCount = 0;
 						} else {
 							curSysInfo->processCpuTimeNegativeElapsedTimeCount += 1;
@@ -551,7 +588,6 @@ omrtiGetProcessCpuLoad(OMR_VMThread *vmThread, double *processCpuLoad)
 	}
 	OMR_TI_RETURN(vmThread, ret);
 }
-
 
 typedef struct omrtiGetMemoryCategoriesState {
 	OMR_TI_MemoryCategory *categories_buffer;
@@ -569,16 +605,17 @@ static uint32_t
 indexFromCategoryCode(uintptr_t categories_mapping_size, uint32_t cc)
 {
 	/* Start the port library codes from the last element (total_categories - 1) */
-	return ((cc) > OMRMEM_LANGUAGE_CATEGORY_LIMIT) ?
-		   ((((uint32_t)categories_mapping_size) - 1) - (OMRMEM_OMR_CATEGORY_INDEX_FROM_CODE(cc))) : (cc);
+	return ((cc) > OMRMEM_LANGUAGE_CATEGORY_LIMIT)
+	        ? ((((uint32_t)categories_mapping_size) - 1) - (OMRMEM_OMR_CATEGORY_INDEX_FROM_CODE(cc)))
+	        : (cc);
 }
 
 /**
  * Callback used by omrtiGetMemoryCategories with omrmem_walk_categories
  */
 static uintptr_t
-omrtiGetMemoryCategoriesCallback(uint32_t categoryCode, const char *categoryName, uintptr_t liveBytes, uintptr_t liveAllocations,
-								 BOOLEAN isRoot, uint32_t parentCategoryCode, OMRMemCategoryWalkState *state)
+omrtiGetMemoryCategoriesCallback(uint32_t categoryCode, const char *categoryName, uintptr_t liveBytes,
+        uintptr_t liveAllocations, BOOLEAN isRoot, uint32_t parentCategoryCode, OMRMemCategoryWalkState *state)
 {
 	struct omrtiGetMemoryCategoriesState *userData = (struct omrtiGetMemoryCategoriesState *)state->userData1;
 	uint32_t index = indexFromCategoryCode(userData->categories_mapping_size, categoryCode);
@@ -597,9 +634,11 @@ omrtiGetMemoryCategoriesCallback(uint32_t categoryCode, const char *categoryName
 		if (isRoot) {
 			omrtiCategory->parent = NULL;
 		} else {
-			uint32_t parentIndex = indexFromCategoryCode(userData->categories_mapping_size, parentCategoryCode);
+			uint32_t parentIndex =
+			        indexFromCategoryCode(userData->categories_mapping_size, parentCategoryCode);
 
-			/* Memory category walk is depth first - we will definitely have walked through and recorded our parent */
+			/* Memory category walk is depth first - we will definitely have walked through and recorded our
+			 * parent */
 			omrtiCategory->parent = userData->categories_mapping[parentIndex];
 		}
 
@@ -617,8 +656,8 @@ omrtiGetMemoryCategoriesCallback(uint32_t categoryCode, const char *categoryName
  * Callback used by omrtiGetMemoryCategories with omrmem_walk_categories
  */
 static uintptr_t
-omrtiCountMemoryCategoriesCallback(uint32_t categoryCode, const char *categoryName, uintptr_t liveBytes, uintptr_t liveAllocations,
-								   BOOLEAN isRoot, uint32_t parentCategoryCode, OMRMemCategoryWalkState *state)
+omrtiCountMemoryCategoriesCallback(uint32_t categoryCode, const char *categoryName, uintptr_t liveBytes,
+        uintptr_t liveAllocations, BOOLEAN isRoot, uint32_t parentCategoryCode, OMRMemCategoryWalkState *state)
 {
 	omrtiGetMemoryCategoriesState *userData = (struct omrtiGetMemoryCategoriesState *)state->userData1;
 	userData->total_categories++;
@@ -629,21 +668,23 @@ omrtiCountMemoryCategoriesCallback(uint32_t categoryCode, const char *categoryNa
  * Callback used by omrtiGetMemoryCategories with omrmem_walk_categories
  */
 static uintptr_t
-omrtiCalculateSlotsForCategoriesMappingCallback(uint32_t categoryCode, const char *categoryName, uintptr_t liveBytes, uintptr_t liveAllocations,
-		BOOLEAN isRoot, uint32_t parentCategoryCode, OMRMemCategoryWalkState *state)
+omrtiCalculateSlotsForCategoriesMappingCallback(uint32_t categoryCode, const char *categoryName, uintptr_t liveBytes,
+        uintptr_t liveAllocations, BOOLEAN isRoot, uint32_t parentCategoryCode, OMRMemCategoryWalkState *state)
 {
 
 	if (categoryCode < OMRMEM_LANGUAGE_CATEGORY_LIMIT) {
 		uintptr_t maxLanguageCategoryIndex = (uintptr_t)state->userData1;
 		uintptr_t categoryIndex = (uintptr_t)categoryCode;
 
-		state->userData1 = (void *)((maxLanguageCategoryIndex > categoryIndex) ? maxLanguageCategoryIndex : categoryIndex);
+		state->userData1 =
+		        (void *)((maxLanguageCategoryIndex > categoryIndex) ? maxLanguageCategoryIndex : categoryIndex);
 
 	} else if (categoryCode > OMRMEM_LANGUAGE_CATEGORY_LIMIT) {
 		uintptr_t maxOMRCategoryIndex = (uintptr_t)state->userData2;
 		uintptr_t categoryIndex = (uintptr_t)OMRMEM_OMR_CATEGORY_INDEX_FROM_CODE(categoryCode);
 
-		state->userData2 = (void *)((maxOMRCategoryIndex > categoryIndex) ? maxOMRCategoryIndex : categoryIndex);
+		state->userData2 =
+		        (void *)((maxOMRCategoryIndex > categoryIndex) ? maxOMRCategoryIndex : categoryIndex);
 	}
 	return J9MEM_CATEGORIES_KEEP_ITERATING;
 }
@@ -697,7 +738,7 @@ fillInCategoryDeepCounters(OMR_TI_MemoryCategory *category)
 
 omr_error_t
 omrtiGetMemoryCategories(OMR_VMThread *vmThread, int32_t max_categories, OMR_TI_MemoryCategory *categories_buffer,
-						 int32_t *written_count_ptr, int32_t *total_categories_ptr)
+        int32_t *written_count_ptr, int32_t *total_categories_ptr)
 {
 	OMR_TI_ENTER_FROM_VM_THREAD(vmThread)
 
@@ -709,8 +750,8 @@ omrtiGetMemoryCategories(OMR_VMThread *vmThread, int32_t max_categories, OMR_TI_
 		OMRMemCategoryWalkState walkState;
 		omrtiGetMemoryCategoriesState userData;
 
-		Trc_OMRTI_omrtiGetMemoryCategories_Entry(vmThread, max_categories, categories_buffer, written_count_ptr,
-				total_categories_ptr);
+		Trc_OMRTI_omrtiGetMemoryCategories_Entry(
+		        vmThread, max_categories, categories_buffer, written_count_ptr, total_categories_ptr);
 
 		memset(&userData, 0, sizeof(struct omrtiGetMemoryCategoriesState));
 
@@ -722,7 +763,8 @@ omrtiGetMemoryCategories(OMR_VMThread *vmThread, int32_t max_categories, OMR_TI_
 			max_categories = 0;
 		}
 
-		/* If we're asked to write to categories_buffer (max_categories > 0), make sure categories_buffer isn't NULL */
+		/* If we're asked to write to categories_buffer (max_categories > 0), make sure categories_buffer isn't
+		 * NULL */
 		if (max_categories > 0 && NULL == categories_buffer) {
 			Trc_OMRTI_omrtiGetMemoryCategories_NullOutput_Exit(vmThread, max_categories);
 			OMR_TI_RETURN(vmThread, OMR_ERROR_ILLEGAL_ARGUMENT);
@@ -730,7 +772,8 @@ omrtiGetMemoryCategories(OMR_VMThread *vmThread, int32_t max_categories, OMR_TI_
 
 		/* If the user has set max_categories and categories_buffer, but hasn't set written_count_ptr, fail. */
 		if (max_categories > 0 && categories_buffer && NULL == written_count_ptr) {
-			Trc_OMRTI_omrtiGetMemoryCategories_NullWrittenPtr_Exit(vmThread, max_categories, categories_buffer);
+			Trc_OMRTI_omrtiGetMemoryCategories_NullWrittenPtr_Exit(
+			        vmThread, max_categories, categories_buffer);
 			OMR_TI_RETURN(vmThread, OMR_ERROR_ILLEGAL_ARGUMENT);
 		}
 
@@ -759,24 +802,27 @@ omrtiGetMemoryCategories(OMR_VMThread *vmThread, int32_t max_categories, OMR_TI_
 			walkState.userData2 = 0;
 			omrmem_walk_categories(&walkState);
 			/* Both + 1 because we have the max indexes which start from 0 */
-			userData.categories_mapping_size = ((uintptr_t)walkState.userData1) + 1 + ((uintptr_t)walkState.userData2) + 1;
+			userData.categories_mapping_size = ((uintptr_t)walkState.userData1) + 1
+			        + ((uintptr_t)walkState.userData2) + 1;
 
 			walkState.walkFunction = omrtiGetMemoryCategoriesCallback;
 			walkState.userData1 = &userData;
 			walkState.userData2 = 0;
 
 			userData.categories_mapping = (OMR_TI_MemoryCategory **)omrmem_allocate_memory(
-											  userData.categories_mapping_size * sizeof(OMR_TI_MemoryCategory *), OMRMEM_CATEGORY_OMRTI);
+			        userData.categories_mapping_size * sizeof(OMR_TI_MemoryCategory *),
+			        OMRMEM_CATEGORY_OMRTI);
 			if (NULL == userData.categories_mapping) {
 				/* OMR_ERROR_OUT_OF_MEMORY is returned if the buffer the user gave
 				 * use wasn't big enough. That's not fatal. This is.
 				 */
-				Trc_OMRTI_omrtiGetMemoryCategories_J9MemAllocFail_Exit(vmThread,
-						userData.categories_mapping_size * sizeof(OMR_TI_MemoryCategory *));
+				Trc_OMRTI_omrtiGetMemoryCategories_J9MemAllocFail_Exit(
+				        vmThread, userData.categories_mapping_size * sizeof(OMR_TI_MemoryCategory *));
 				OMR_TI_RETURN(vmThread, OMR_ERROR_INTERNAL);
 			}
 
-			memset(userData.categories_mapping, 0, userData.categories_mapping_size * sizeof(OMR_TI_MemoryCategory *));
+			memset(userData.categories_mapping, 0,
+			        userData.categories_mapping_size * sizeof(OMR_TI_MemoryCategory *));
 			memset(categories_buffer, 0, max_categories * sizeof(OMR_TI_MemoryCategory));
 
 			/* Walk categories to get shallow values */
@@ -822,13 +868,12 @@ omrtiGetMemoryCategories(OMR_VMThread *vmThread, int32_t max_categories, OMR_TI_
 
 		OMR_TI_RETURN(vmThread, rc);
 	}
-
 }
 
 omr_error_t
 omrtiGetMethodDescriptions(OMR_VMThread *vmThread, void **methodArray, size_t methodArrayCount,
-	OMR_SampledMethodDescription *methodDescriptions, char *nameBuffer, size_t nameBytes,
-	size_t *firstRetryMethod, size_t *nameBytesRemaining)
+        OMR_SampledMethodDescription *methodDescriptions, char *nameBuffer, size_t nameBytes, size_t *firstRetryMethod,
+        size_t *nameBytesRemaining)
 {
 	omr_error_t rc = OMR_ERROR_NONE;
 
@@ -846,16 +891,19 @@ omrtiGetMethodDescriptions(OMR_VMThread *vmThread, void **methodArray, size_t me
 		rc = OMR_ERROR_ILLEGAL_ARGUMENT;
 	} else {
 		OMR_MethodDictionary *const dictionary = (OMR_MethodDictionary *)vmThread->_vm->_methodDictionary;
-		rc = dictionary->getEntries(vmThread, methodArray, methodArrayCount, methodDescriptions, nameBuffer, nameBytes, firstRetryMethod, nameBytesRemaining);
+		rc = dictionary->getEntries(vmThread, methodArray, methodArrayCount, methodDescriptions, nameBuffer,
+		        nameBytes, firstRetryMethod, nameBytesRemaining);
 	}
 	OMR_TI_RETURN(vmThread, rc);
 }
 
 /*
- * This function doesn't need to be synchronized because it accesses constant data, doesn't modify data, and doesn't use locks.
+ * This function doesn't need to be synchronized because it accesses constant data, doesn't modify data, and doesn't use
+ * locks.
  */
 omr_error_t
-omrtiGetMethodProperties(OMR_VMThread *vmThread, size_t *numProperties, const char *const **propertyNames, size_t *sizeofSampledMethodDesc)
+omrtiGetMethodProperties(OMR_VMThread *vmThread, size_t *numProperties, const char *const **propertyNames,
+        size_t *sizeofSampledMethodDesc)
 {
 	omr_error_t rc = OMR_ERROR_NONE;
 

@@ -20,48 +20,45 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
-#include "omrcfg.h"
-#include "omr.h"
-#include "modronopt.h"
-
 #include "ParallelTask.hpp"
 
 #include "AtomicOperations.hpp"
 #include "Dispatcher.hpp"
 #include "EnvironmentBase.hpp"
-
 #include "ModronAssertions.h"
+#include "modronopt.h"
+#include "omr.h"
+#include "omrcfg.h"
 
 bool
 MM_ParallelTask::handleNextWorkUnit(MM_EnvironmentBase *env)
 {
 	MM_GCExtensionsBase *extensions = env->getExtensions();
 
-	if(1 == _totalThreadCount) {
+	if (1 == _totalThreadCount) {
 		return true;
 	}
-	
 
 	/* If all threads are currently being held by synchronization except the master, then
 	 * only the master can make this call, and so should handle any and all work units.
 	 * We don't want to advance the index of the master and have it get out of sync with
 	 * all other threads.
 	 */
-	if(_synchronized) {
+	if (_synchronized) {
 		return true;
 	}
 
 	uintptr_t envWorkUnitToHandle = env->getWorkUnitToHandle();
 	uintptr_t envWorkUnitIndex = env->nextWorkUnitIndex();
 
-	if(envWorkUnitIndex > envWorkUnitToHandle) {
+	if (envWorkUnitIndex > envWorkUnitToHandle) {
 		envWorkUnitToHandle = MM_AtomicOperations::add(&_workUnitIndex, 1);
 		env->setWorkUnitToHandle(envWorkUnitToHandle);
 
 		if (extensions->_holdRandomThreadBeforeHandlingWorkUnit) {
 			if (0 == (rand() % extensions->_holdRandomThreadBeforeHandlingWorkUnitPeriod)) {
-				Trc_MM_ParallelTask_handleNextWorkUnit_holdingThread(env->getLanguageVMThread(), env->getWorkUnitIndex(), env->_lastSyncPointReached);
+				Trc_MM_ParallelTask_handleNextWorkUnit_holdingThread(env->getLanguageVMThread(),
+				        env->getWorkUnitIndex(), env->_lastSyncPointReached);
 				omrthread_sleep(10);
 			}
 		}
@@ -75,8 +72,8 @@ MM_ParallelTask::synchronizeGCThreads(MM_EnvironmentBase *env, const char *id)
 {
 	Trc_MM_SynchronizeGCThreads_Entry(env->getLanguageVMThread(), id);
 	env->_lastSyncPointReached = id;
-	
-	if(1 < _totalThreadCount) {
+
+	if (1 < _totalThreadCount) {
 		omrthread_monitor_enter(_synchronizeMutex);
 
 		/*check synchronization point*/
@@ -85,14 +82,17 @@ MM_ParallelTask::synchronizeGCThreads(MM_EnvironmentBase *env, const char *id)
 			_syncPointWorkUnitIndex = env->getWorkUnitIndex();
 		} else {
 			Assert_GC_true_with_message4(env, _syncPointUniqueId == id,
-				"%s at %p from synchronizeGCThreads: call from (%s), expected (%s)\n", getBaseVirtualTypeId(), this, id, _syncPointUniqueId);
+			        "%s at %p from synchronizeGCThreads: call from (%s), expected (%s)\n",
+			        getBaseVirtualTypeId(), this, id, _syncPointUniqueId);
 			Assert_GC_true_with_message4(env, _syncPointWorkUnitIndex == env->getWorkUnitIndex(),
-				"%s at %p from synchronizeGCThreads: call with syncPointWorkUnitIndex %zu, expected %zu\n", getBaseVirtualTypeId(), this, env->getWorkUnitIndex(), _syncPointWorkUnitIndex);
+			        "%s at %p from synchronizeGCThreads: call with "
+			        "syncPointWorkUnitIndex %zu, expected %zu\n",
+			        getBaseVirtualTypeId(), this, env->getWorkUnitIndex(), _syncPointWorkUnitIndex);
 		}
 
 		_synchronizeCount += 1;
 
-		if(_synchronizeCount == _threadCount) {
+		if (_synchronizeCount == _threadCount) {
 			_synchronizeCount = 0;
 			_synchronizeIndex += 1;
 			omrthread_monitor_notify_all(_synchronizeMutex);
@@ -101,10 +101,9 @@ MM_ParallelTask::synchronizeGCThreads(MM_EnvironmentBase *env, const char *id)
 
 			do {
 				omrthread_monitor_wait(_synchronizeMutex);
-			} while(index == _synchronizeIndex);
+			} while (index == _synchronizeIndex);
 		}
 		omrthread_monitor_exit(_synchronizeMutex);
-
 	}
 
 	Trc_MM_SynchronizeGCThreads_Exit(env->getLanguageVMThread());
@@ -118,7 +117,7 @@ MM_ParallelTask::synchronizeGCThreadsAndReleaseMaster(MM_EnvironmentBase *env, c
 	Trc_MM_SynchronizeGCThreadsAndReleaseMaster_Entry(env->getLanguageVMThread(), id);
 	env->_lastSyncPointReached = id;
 
-	if(1 < _totalThreadCount) {
+	if (1 < _totalThreadCount) {
 		volatile uintptr_t index = _synchronizeIndex;
 
 		omrthread_monitor_enter(_synchronizeMutex);
@@ -129,14 +128,17 @@ MM_ParallelTask::synchronizeGCThreadsAndReleaseMaster(MM_EnvironmentBase *env, c
 			_syncPointWorkUnitIndex = env->getWorkUnitIndex();
 		} else {
 			Assert_GC_true_with_message4(env, _syncPointUniqueId == id,
-				"%s at %p from synchronizeGCThreadsAndReleaseMaster: call from (%s), expected (%s)\n", getBaseVirtualTypeId(), this, id, _syncPointUniqueId);
+			        "%s at %p from synchronizeGCThreadsAndReleaseMaster: call from (%s), expected (%s)\n",
+			        getBaseVirtualTypeId(), this, id, _syncPointUniqueId);
 			Assert_GC_true_with_message4(env, _syncPointWorkUnitIndex == env->getWorkUnitIndex(),
-				"%s at %p from synchronizeGCThreadsAndReleaseMaster: call with syncPointWorkUnitIndex %zu, expected %zu\n", getBaseVirtualTypeId(), this, env->getWorkUnitIndex(), _syncPointWorkUnitIndex);
+			        "%s at %p from synchronizeGCThreadsAndReleaseMaster: call with "
+			        "syncPointWorkUnitIndex %zu, expected %zu\n",
+			        getBaseVirtualTypeId(), this, env->getWorkUnitIndex(), _syncPointWorkUnitIndex);
 		}
 
 		_synchronizeCount += 1;
-		if(_synchronizeCount == _threadCount) {
-			if(env->isMasterThread()) {
+		if (_synchronizeCount == _threadCount) {
+			if (env->isMasterThread()) {
 				omrthread_monitor_exit(_synchronizeMutex);
 				isMasterThread = true;
 				_synchronized = true;
@@ -145,8 +147,8 @@ MM_ParallelTask::synchronizeGCThreadsAndReleaseMaster(MM_EnvironmentBase *env, c
 			omrthread_monitor_notify_all(_synchronizeMutex);
 		}
 
-		while(index == _synchronizeIndex) {
-			if(env->isMasterThread() && (_synchronizeCount == _threadCount)) {
+		while (index == _synchronizeIndex) {
+			if (env->isMasterThread() && (_synchronizeCount == _threadCount)) {
 				omrthread_monitor_exit(_synchronizeMutex);
 				isMasterThread = true;
 				_synchronized = true;
@@ -162,7 +164,7 @@ MM_ParallelTask::synchronizeGCThreadsAndReleaseMaster(MM_EnvironmentBase *env, c
 
 done:
 	Trc_MM_SynchronizeGCThreadsAndReleaseMaster_Exit(env->getLanguageVMThread());
-	return isMasterThread;	
+	return isMasterThread;
 }
 
 bool
@@ -173,7 +175,7 @@ MM_ParallelTask::synchronizeGCThreadsAndReleaseSingleThread(MM_EnvironmentBase *
 	Trc_MM_SynchronizeGCThreadsAndReleaseSingleThread_Entry(env->getLanguageVMThread(), id);
 	env->_lastSyncPointReached = id;
 
-	if(1 < _totalThreadCount) {
+	if (1 < _totalThreadCount) {
 		volatile uintptr_t index = _synchronizeIndex;
 		uintptr_t workUnitIndex = env->getWorkUnitIndex();
 
@@ -185,13 +187,17 @@ MM_ParallelTask::synchronizeGCThreadsAndReleaseSingleThread(MM_EnvironmentBase *
 			_syncPointWorkUnitIndex = workUnitIndex;
 		} else {
 			Assert_GC_true_with_message4(env, _syncPointUniqueId == id,
-				"%s at %p from synchronizeGCThreadsAndReleaseSingleThread: call from (%s), expected (%s)\n", getBaseVirtualTypeId(), this, id, _syncPointUniqueId);
+			        "%s at %p from synchronizeGCThreadsAndReleaseSingleThread: call "
+			        "from (%s), expected (%s)\n",
+			        getBaseVirtualTypeId(), this, id, _syncPointUniqueId);
 			Assert_GC_true_with_message4(env, _syncPointWorkUnitIndex == env->getWorkUnitIndex(),
-				"%s at %p from synchronizeGCThreadsAndReleaseSingleThread: call with syncPointWorkUnitIndex %zu, expected %zu\n", getBaseVirtualTypeId(), this, env->getWorkUnitIndex(), _syncPointWorkUnitIndex);
+			        "%s at %p from synchronizeGCThreadsAndReleaseSingleThread: call "
+			        "with syncPointWorkUnitIndex %zu, expected %zu\n",
+			        getBaseVirtualTypeId(), this, env->getWorkUnitIndex(), _syncPointWorkUnitIndex);
 		}
 
 		_synchronizeCount += 1;
-		if(_synchronizeCount == _threadCount) {
+		if (_synchronizeCount == _threadCount) {
 			omrthread_monitor_exit(_synchronizeMutex);
 			isReleasedThread = true;
 			_synchronized = true;
@@ -200,7 +206,7 @@ MM_ParallelTask::synchronizeGCThreadsAndReleaseSingleThread(MM_EnvironmentBase *
 
 		do {
 			omrthread_monitor_wait(_synchronizeMutex);
-		} while(index == _synchronizeIndex);
+		} while (index == _synchronizeIndex);
 		omrthread_monitor_exit(_synchronizeMutex);
 	} else {
 		_synchronized = true;
@@ -219,8 +225,10 @@ MM_ParallelTask::releaseSynchronizedGCThreads(MM_EnvironmentBase *env)
 		_synchronized = false;
 		return;
 	}
-	
-	Assert_GC_true_with_message2(env, _synchronized, "%s at %p from releaseSynchronizedGCThreads: call for non-synchronized\n", getBaseVirtualTypeId(), this);
+
+	Assert_GC_true_with_message2(env, _synchronized,
+	        "%s at %p from releaseSynchronizedGCThreads: call for non-synchronized\n", getBaseVirtualTypeId(),
+	        this);
 	/* Could not have gotten here unless all other threads are sync'd - don't check, just release */
 	_synchronized = false;
 	omrthread_monitor_enter(_synchronizeMutex);
@@ -236,14 +244,14 @@ MM_ParallelTask::complete(MM_EnvironmentBase *env)
 	const char *id = UNIQUE_ID;
 
 	/* Update this slave thread's CPU time */
-	if(!env->isMasterThread()) {
+	if (!env->isMasterThread()) {
 		env->_slaveThreadCpuTimeNanos = omrthread_get_self_cpu_time(env->getOmrVMThread()->_os_thread);
 	}
 
-	if(1 == _totalThreadCount) {
+	if (1 == _totalThreadCount) {
 		_threadCount -= 1;
 		MM_Task::complete(env);
-		
+
 	} else {
 		omrthread_monitor_enter(_synchronizeMutex);
 
@@ -252,7 +260,8 @@ MM_ParallelTask::complete(MM_EnvironmentBase *env)
 			_syncPointWorkUnitIndex = env->getWorkUnitIndex();
 		} else {
 			Assert_GC_true_with_message3(env, _syncPointUniqueId == id,
-				"%s at %p from complete: reach end of the task however threads are waiting at (%s)\n", getBaseVirtualTypeId(), this, _syncPointUniqueId);
+			        "%s at %p from complete: reach end of the task however threads are waiting at (%s)\n",
+			        getBaseVirtualTypeId(), this, _syncPointUniqueId);
 			/*
 			 * MM_ParallelScrubCardTableTask is implemented to be aborted if it takes too much time
 			 * An abortion left work unit counters in unpredictable state so it would trigger this assertion
@@ -260,22 +269,23 @@ MM_ParallelTask::complete(MM_EnvironmentBase *env)
 			 */
 			/*
 			Assert_GC_true_with_message4(env, _syncPointWorkUnitIndex == env->getWorkUnitIndex(),
-				"%s at %p from complete: call with syncPointWorkUnitIndex %zu, expected %zu\n", getBaseVirtualTypeId(), this, env->getWorkUnitIndex(), _syncPointWorkUnitIndex);
+			        "%s at %p from complete: call with syncPointWorkUnitIndex %zu, expected %zu\n",
+			getBaseVirtualTypeId(), this, env->getWorkUnitIndex(), _syncPointWorkUnitIndex);
 			*/
 		}
 
 		_synchronizeCount += 1;
 		_threadCount -= 1;
-	
+
 		MM_Task::complete(env);
-	
-		if(env->isMasterThread()) {
+
+		if (env->isMasterThread()) {
 			/* Synchronization on exit - cannot delete the task object until all threads are done with it */
-			while(0 != _threadCount) {
+			while (0 != _threadCount) {
 				omrthread_monitor_wait(_synchronizeMutex);
 			}
 		} else {
-			if(0 == _threadCount) {
+			if (0 == _threadCount) {
 				omrthread_monitor_notify_all(_synchronizeMutex);
 			}
 		}
@@ -287,7 +297,7 @@ MM_ParallelTask::complete(MM_EnvironmentBase *env)
  * Return true if threads are currently syncronized, false otherwise
  * @return true if threads are currently syncronized, false otherwise
  */
-bool 
+bool
 MM_ParallelTask::isSynchronized()
 {
 	return _synchronized;
@@ -324,4 +334,3 @@ MM_ParallelTask::synchronizeGCThreads(MM_EnvironmentBase *env, const char *id, u
 
 	*stallTime += (endTime - startTime);
 }
-

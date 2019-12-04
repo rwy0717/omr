@@ -36,27 +36,22 @@ class MM_MemorySubSpace;
  * Delegate class provides implementations for methods required for gc policies using OMR global
  * collector.
  */
-class MM_GlobalCollectorDelegate
-{
+class MM_GlobalCollectorDelegate {
 	/*
 	 * Data members
 	 */
 private:
-
 protected:
 	MM_GCExtensionsBase *_extensions;
 	MM_MarkingScheme *_markingScheme;
 	MM_GlobalCollector *_globalCollector;
 
 public:
-
 	/*
 	 * Function members
 	 */
 private:
-
 protected:
-
 public:
 	/**
 	 * Initialize the delegate.
@@ -123,8 +118,7 @@ public:
 	 *
 	 * @param env environment for calling thread
 	 */
-	void postCollect(MM_EnvironmentBase* env, MM_MemorySubSpace* subSpace) {}
-
+	void postCollect(MM_EnvironmentBase *env, MM_MemorySubSpace *subSpace) {}
 
 	/**
 	 * Called on GC master thread prior to commencing a global collection. This is informational,
@@ -150,30 +144,26 @@ public:
 	 *
 	 * @return true if diagnostics are required to be supported
 	 */
-	bool
-	isAllowUserHeapWalk()
-	{
-		return true;
-	}
+	bool isAllowUserHeapWalk() { return true; }
 
 	/**
 	 * Informational, called when the heap expands.
 	 *
 	 * @return true to allow heap expansion.
 	 */
-	bool 
-	heapAddRange(MM_EnvironmentBase *env, MM_MemorySubSpace *subspace, UDATA size, void *lowAddress, void *highAddress)
+	bool heapAddRange(
+	        MM_EnvironmentBase *env, MM_MemorySubSpace *subspace, UDATA size, void *lowAddress, void *highAddress)
 	{
 		return true;
 	}
-	
+
 	/**
 	 * Informational, called when the heap contracts.
 	 *
 	 * @return true to allow heap contraction.
 	 */
-	bool
-	heapRemoveRange(MM_EnvironmentBase *env, MM_MemorySubSpace *subspace, UDATA size, void *lowAddress, void *highAddress, void *lowValidAddress, void *highValidAddress)
+	bool heapRemoveRange(MM_EnvironmentBase *env, MM_MemorySubSpace *subspace, UDATA size, void *lowAddress,
+	        void *highAddress, void *lowValidAddress, void *highValidAddress)
 	{
 		return true;
 	}
@@ -185,11 +175,7 @@ public:
 	 *
 	 * @return true if a global collection should occur instead of a generational collection.
 	 */
-	bool
-	isTimeForGlobalGCKickoff()
-	{
-		return false;
-	}
+	bool isTimeForGlobalGCKickoff() { return false; }
 
 #if defined(OMR_GC_MODRON_COMPACTION)
 	/**
@@ -198,17 +184,12 @@ public:
 	 *
 	 * @return true to suppress compaction for this cycle
 	 */
-	CompactPreventedReason
-	checkIfCompactionShouldBePrevented(MM_EnvironmentBase *env)
+	CompactPreventedReason checkIfCompactionShouldBePrevented(MM_EnvironmentBase *env)
 	{
 		return COMPACT_PREVENTED_NONE;
 	}
 #endif /* OMR_GC_MODRON_COMPACTION */
 
-	MM_GlobalCollectorDelegate()
-		: _extensions(NULL)
-		, _markingScheme(NULL)
-		, _globalCollector(NULL)
-	{}
+	MM_GlobalCollectorDelegate() : _extensions(NULL), _markingScheme(NULL), _globalCollector(NULL) {}
 };
 #endif /* GLOBALCOLLECTORDELEGATE_HPP_ */

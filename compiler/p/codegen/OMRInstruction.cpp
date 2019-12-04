@@ -36,220 +36,230 @@
 #include "il/Node.hpp"
 #include "runtime/CodeCacheManager.hpp"
 
-namespace TR { class PPCConditionalBranchInstruction; }
-namespace TR { class PPCDepImmInstruction;            }
-namespace TR { class PPCImmInstruction;               }
-namespace TR { class Register; }
+namespace TR {
+class PPCConditionalBranchInstruction;
+}
+namespace TR {
+class PPCDepImmInstruction;
+}
+namespace TR {
+class PPCImmInstruction;
+}
+namespace TR {
+class Register;
+}
 
-OMR::Power::Instruction::Instruction(TR::CodeGenerator *cg, TR::Instruction *precedingInstruction, TR::InstOpCode::Mnemonic op, TR::Node *node)
-   : OMR::Instruction(cg, precedingInstruction, op, node),
-                  _conditions(0),
-                  _asyncBranch(false)
-   {
-   self()->setBlockIndex(cg->getCurrentBlockIndex());
-   }
+OMR::Power::Instruction::Instruction(
+        TR::CodeGenerator *cg, TR::Instruction *precedingInstruction, TR::InstOpCode::Mnemonic op, TR::Node *node)
+        : OMR::Instruction(cg, precedingInstruction, op, node), _conditions(0), _asyncBranch(false)
+{
+	self()->setBlockIndex(cg->getCurrentBlockIndex());
+}
 
 OMR::Power::Instruction::Instruction(TR::CodeGenerator *cg, TR::InstOpCode::Mnemonic op, TR::Node *node)
-   : OMR::Instruction(cg, op, node),
-     _conditions(0),
-     _asyncBranch(false)
-   {
-   self()->setBlockIndex(cg->getCurrentBlockIndex());
-   }
+        : OMR::Instruction(cg, op, node), _conditions(0), _asyncBranch(false)
+{
+	self()->setBlockIndex(cg->getCurrentBlockIndex());
+}
 
 void
 OMR::Power::Instruction::remove()
-   {
-   self()->getPrev()->setNext(self()->getNext());
-   self()->getNext()->setPrev(self()->getPrev());
-   }
+{
+	self()->getPrev()->setNext(self()->getNext());
+	self()->getNext()->setPrev(self()->getPrev());
+}
 
-TR::Register*
+TR::Register *
 OMR::Power::Instruction::getTargetRegister(uint32_t i)
-   {
-   return (_conditions==NULL) ? NULL : _conditions->getTargetRegister(i, self()->cg());
-   }
+{
+	return (_conditions == NULL) ? NULL : _conditions->getTargetRegister(i, self()->cg());
+}
 
-TR::Register*
+TR::Register *
 OMR::Power::Instruction::getSourceRegister(uint32_t i)
-   {
-   return (_conditions==NULL) ? NULL : _conditions->getSourceRegister(i);
-   }
+{
+	return (_conditions == NULL) ? NULL : _conditions->getSourceRegister(i);
+}
 
 bool
 OMR::Power::Instruction::isCall()
-   {
-   return _opcode.isCall() || (self()->getMemoryReference() && self()->getMemoryReference()->getUnresolvedSnippet());
-   }
-
+{
+	return _opcode.isCall()
+	        || (self()->getMemoryReference() && self()->getMemoryReference()->getUnresolvedSnippet());
+}
 
 void
 OMR::Power::Instruction::PPCNeedsGCMap(uint32_t mask)
-   {
-   if (TR::comp()->useRegisterMaps())
-      self()->setNeedsGCMap(mask);
-   }
+{
+	if (TR::comp()->useRegisterMaps())
+		self()->setNeedsGCMap(mask);
+}
 
 TR::Register *
 OMR::Power::Instruction::getMemoryDataRegister()
-   {
-   return(NULL);
-   }
+{
+	return (NULL);
+}
 
 bool
-OMR::Power::Instruction::refsRegister(TR::Register * reg)
-   {
-   return OMR::Power::Instruction::getDependencyConditions() ? OMR::Power::Instruction::getDependencyConditions()->refsRegister(reg) : false;
-   }
+OMR::Power::Instruction::refsRegister(TR::Register *reg)
+{
+	return OMR::Power::Instruction::getDependencyConditions()
+	        ? OMR::Power::Instruction::getDependencyConditions()->refsRegister(reg)
+	        : false;
+}
 
 bool
-OMR::Power::Instruction::defsRegister(TR::Register * reg)
-   {
-   return OMR::Power::Instruction::getDependencyConditions() ? OMR::Power::Instruction::getDependencyConditions()->defsRegister(reg) : false;
-   }
+OMR::Power::Instruction::defsRegister(TR::Register *reg)
+{
+	return OMR::Power::Instruction::getDependencyConditions()
+	        ? OMR::Power::Instruction::getDependencyConditions()->defsRegister(reg)
+	        : false;
+}
 
 bool
-OMR::Power::Instruction::defsRealRegister(TR::Register * reg)
-   {
-   return OMR::Power::Instruction::getDependencyConditions() ? OMR::Power::Instruction::getDependencyConditions()->defsRealRegister(reg) : false;
-   }
+OMR::Power::Instruction::defsRealRegister(TR::Register *reg)
+{
+	return OMR::Power::Instruction::getDependencyConditions()
+	        ? OMR::Power::Instruction::getDependencyConditions()->defsRealRegister(reg)
+	        : false;
+}
 
 bool
-OMR::Power::Instruction::usesRegister(TR::Register * reg)
-   {
-   return OMR::Power::Instruction::getDependencyConditions() ? OMR::Power::Instruction::getDependencyConditions()->usesRegister(reg) : false;
-   }
+OMR::Power::Instruction::usesRegister(TR::Register *reg)
+{
+	return OMR::Power::Instruction::getDependencyConditions()
+	        ? OMR::Power::Instruction::getDependencyConditions()->usesRegister(reg)
+	        : false;
+}
 
 bool
-OMR::Power::Instruction::dependencyRefsRegister(TR::Register * reg)
-   {
-   return OMR::Power::Instruction::getDependencyConditions() ? OMR::Power::Instruction::getDependencyConditions()->refsRegister(reg) : false;
-   }
+OMR::Power::Instruction::dependencyRefsRegister(TR::Register *reg)
+{
+	return OMR::Power::Instruction::getDependencyConditions()
+	        ? OMR::Power::Instruction::getDependencyConditions()->refsRegister(reg)
+	        : false;
+}
 
 TR::PPCDepImmInstruction *
 OMR::Power::Instruction::getPPCDepImmInstruction()
-   {
-   return NULL;
-   }
+{
+	return NULL;
+}
 
 TR::PPCConditionalBranchInstruction *
 OMR::Power::Instruction::getPPCConditionalBranchInstruction()
-   {
-   return NULL;
-   }
+{
+	return NULL;
+}
 
 // The following safe virtual downcast method is only used in an assertion
 // check within "toPPCImmInstruction"
 #if defined(DEBUG) || defined(PROD_WITH_ASSUMES)
 TR::PPCImmInstruction *
 OMR::Power::Instruction::getPPCImmInstruction()
-   {
-   return NULL;
-   }
+{
+	return NULL;
+}
 #endif
-
 
 void
 OMR::Power::Instruction::assignRegisters(TR_RegisterKinds kindToBeAssigned)
-   {
-   if( OMR::Power::Instruction::getDependencyConditions() )
-      {
-      OMR::Power::Instruction::getDependencyConditions()->assignPostConditionRegisters(self(), kindToBeAssigned, self()->cg());
-      OMR::Power::Instruction::getDependencyConditions()->assignPreConditionRegisters(self()->getPrev(), kindToBeAssigned, self()->cg());
-      }
-   }
+{
+	if (OMR::Power::Instruction::getDependencyConditions()) {
+		OMR::Power::Instruction::getDependencyConditions()->assignPostConditionRegisters(
+		        self(), kindToBeAssigned, self()->cg());
+		OMR::Power::Instruction::getDependencyConditions()->assignPreConditionRegisters(
+		        self()->getPrev(), kindToBeAssigned, self()->cg());
+	}
+}
 
 bool
 OMR::Power::Instruction::isBeginBlock()
-   {
-   return self()->getPrev()->getOpCodeValue() == TR::InstOpCode::label;
-   }
+{
+	return self()->getPrev()->getOpCodeValue() == TR::InstOpCode::label;
+}
 
 bool
 OMR::Power::Instruction::setsCountRegister()
-   {
-   if (_opcode.getOpCodeValue() == TR::InstOpCode::beql)
-      return true;
-   return self()->isCall()|_opcode.setsCountRegister();
-   }
+{
+	if (_opcode.getOpCodeValue() == TR::InstOpCode::beql)
+		return true;
+	return self()->isCall() | _opcode.setsCountRegister();
+}
 
 bool
 OMR::Power::Instruction::is4ByteLoad()
-   {
-   return (self()->getOpCodeValue() == TR::InstOpCode::lwz);
-   }
+{
+	return (self()->getOpCodeValue() == TR::InstOpCode::lwz);
+}
 
 int32_t
 OMR::Power::Instruction::getMachineOpCode()
-   {
-   return self()->getOpCodeValue();
-   }
+{
+	return self()->getOpCodeValue();
+}
 
 uint8_t
 OMR::Power::Instruction::getBinaryLengthLowerBound()
-   {
-   return self()->getEstimatedBinaryLength();
-   }
+{
+	return self()->getEstimatedBinaryLength();
+}
 
-int32_t TR::PPCDepImmSymInstruction::estimateBinaryLength(int32_t currentEstimate)
-   {
-   int32_t length = PPC_INSTRUCTION_LENGTH;
-   setEstimatedBinaryLength(length);
-   return(currentEstimate + length);
-   }
+int32_t
+TR::PPCDepImmSymInstruction::estimateBinaryLength(int32_t currentEstimate)
+{
+	int32_t length = PPC_INSTRUCTION_LENGTH;
+	setEstimatedBinaryLength(length);
+	return (currentEstimate + length);
+}
 // This is overrriden by J9 but we haven't made this extensible completely yet,
 // and so for now we simply don't build this one.
 #ifndef J9_PROJECT_SPECIFIC
-uint8_t *TR::PPCDepImmSymInstruction::generateBinaryEncoding()
-   {
-   uint8_t   *instructionStart = cg()->getBinaryBufferCursor();
-   uint8_t   *cursor = getOpCode().copyBinaryToBuffer(instructionStart);
-   intptrj_t  distance;
+uint8_t *
+TR::PPCDepImmSymInstruction::generateBinaryEncoding()
+{
+	uint8_t *instructionStart = cg()->getBinaryBufferCursor();
+	uint8_t *cursor = getOpCode().copyBinaryToBuffer(instructionStart);
+	intptrj_t distance;
 
-   if (getOpCodeValue() == TR::InstOpCode::bl || getOpCodeValue() == TR::InstOpCode::b)
-      {
-      if (cg()->comp()->isRecursiveMethodTarget(getSymbolReference()->getSymbol()))
-         {
-         uint8_t *jitTojitStart = cg()->getCodeStart();
-         jitTojitStart += ((*(int32_t *)(jitTojitStart - 4)) >> 16) & 0x0000ffff;
-         distance = (intptrj_t)(jitTojitStart - cursor);
-         }
-      else
-         {
-         intptrj_t targetAddress = getAddrImmediate();
+	if (getOpCodeValue() == TR::InstOpCode::bl || getOpCodeValue() == TR::InstOpCode::b) {
+		if (cg()->comp()->isRecursiveMethodTarget(getSymbolReference()->getSymbol())) {
+			uint8_t *jitTojitStart = cg()->getCodeStart();
+			jitTojitStart += ((*(int32_t *)(jitTojitStart - 4)) >> 16) & 0x0000ffff;
+			distance = (intptrj_t)(jitTojitStart - cursor);
+		} else {
+			intptrj_t targetAddress = getAddrImmediate();
 
-         if (cg()->directCallRequiresTrampoline(targetAddress, (intptrj_t)cursor))
-            {
-            int32_t refNum = getSymbolReference()->getReferenceNumber();
-            if (refNum < TR_PPCnumRuntimeHelpers)
-               {
-               targetAddress = TR::CodeCacheManager::instance()->findHelperTrampoline(refNum, (void *)cursor);
-               }
-            else
-               {
-               targetAddress = cg()->fe()->methodTrampolineLookup(cg()->comp(), getSymbolReference(), (void *)cursor);
-               }
-            }
+			if (cg()->directCallRequiresTrampoline(targetAddress, (intptrj_t)cursor)) {
+				int32_t refNum = getSymbolReference()->getReferenceNumber();
+				if (refNum < TR_PPCnumRuntimeHelpers) {
+					targetAddress = TR::CodeCacheManager::instance()->findHelperTrampoline(
+					        refNum, (void *)cursor);
+				} else {
+					targetAddress = cg()->fe()->methodTrampolineLookup(
+					        cg()->comp(), getSymbolReference(), (void *)cursor);
+				}
+			}
 
-         TR_ASSERT_FATAL(TR::Compiler->target.cpu.isTargetWithinIFormBranchRange(targetAddress, (intptrj_t)cursor),
-                         "Target address is out of range");
+			TR_ASSERT_FATAL(TR::Compiler->target.cpu.isTargetWithinIFormBranchRange(
+			                        targetAddress, (intptrj_t)cursor),
+			        "Target address is out of range");
 
-         distance = targetAddress - (intptrj_t)cursor;
-         }
-      }
-   else
-      {
-      // Place holder only: non-TR::InstOpCode::b[l] usage of this instruction doesn't
-      // exist at this moment.
-      distance = getAddrImmediate() - (intptrj_t)cursor;
-      }
+			distance = targetAddress - (intptrj_t)cursor;
+		}
+	} else {
+		// Place holder only: non-TR::InstOpCode::b[l] usage of this instruction doesn't
+		// exist at this moment.
+		distance = getAddrImmediate() - (intptrj_t)cursor;
+	}
 
-   *(int32_t *)cursor |= distance & 0x03fffffc;
+	*(int32_t *)cursor |= distance & 0x03fffffc;
 
-   cursor += 4;
-   setBinaryLength(cursor - instructionStart);
-   setBinaryEncoding(instructionStart);
-   cg()->addAccumulatedInstructionLengthError(getEstimatedBinaryLength() - getBinaryLength());
-   return cursor;
-   }
+	cursor += 4;
+	setBinaryLength(cursor - instructionStart);
+	setBinaryEncoding(instructionStart);
+	cg()->addAccumulatedInstructionLengthError(getEstimatedBinaryLength() - getBinaryLength());
+	return cursor;
+}
 #endif

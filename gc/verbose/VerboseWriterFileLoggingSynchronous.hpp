@@ -22,16 +22,14 @@
 
 #if !defined(VERBOSEWRITERFILELOGGINGSYNCHRONOUS_HPP_)
 #define VERBOSEWRITERFILELOGGINGSYNCHRONOUS_HPP_
- 
-#include "omrcfg.h"
 
 #include "VerboseWriterFileLogging.hpp"
+#include "omrcfg.h"
 
 /**
  * Ouptut agent which directs verbosegc output to file.
  */
-class MM_VerboseWriterFileLoggingSynchronous : public MM_VerboseWriterFileLogging
-{
+class MM_VerboseWriterFileLoggingSynchronous : public MM_VerboseWriterFileLogging {
 	/*
 	 * Data members
 	 */
@@ -44,9 +42,10 @@ private:
 	 * Function members
 	 */
 public:
-	static MM_VerboseWriterFileLoggingSynchronous *newInstance(MM_EnvironmentBase *env, MM_VerboseManager *manager, char* filename, uintptr_t fileCount, uintptr_t iterations);
+	static MM_VerboseWriterFileLoggingSynchronous *newInstance(MM_EnvironmentBase *env, MM_VerboseManager *manager,
+	        char *filename, uintptr_t fileCount, uintptr_t iterations);
 
-	virtual void outputString(MM_EnvironmentBase *env, const char* string);
+	virtual void outputString(MM_EnvironmentBase *env, const char *string);
 
 protected:
 	MM_VerboseWriterFileLoggingSynchronous(MM_EnvironmentBase *env, MM_VerboseManager *manager);
@@ -57,7 +56,6 @@ private:
 
 	bool openFile(MM_EnvironmentBase *env);
 	void closeFile(MM_EnvironmentBase *env);
-
 };
 
 #endif /* VERBOSEWRITERFILELOGGINGSYNCHRONOUS_HPP_ */

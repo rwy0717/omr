@@ -25,6 +25,7 @@
  * @ingroup GC_Modron_Realtime
  */
 
+#include "RegionPoolSegregated.hpp"
 
 #include "EnvironmentBase.hpp"
 #include "FreeHeapRegionList.hpp"
@@ -35,11 +36,9 @@
 #include "LockingFreeHeapRegionList.hpp"
 #include "LockingHeapRegionQueue.hpp"
 #include "MemoryPoolAggregatedCellList.hpp"
-#include "OMR_VMThread.hpp"
 #include "OMRVMThreadListIterator.hpp"
+#include "OMR_VMThread.hpp"
 #include "SegregatedAllocationInterface.hpp"
-
-#include "RegionPoolSegregated.hpp"
 
 #if defined(OMR_GC_SEGREGATED_HEAP)
 
@@ -53,9 +52,10 @@ MM_RegionPoolSegregated::newInstance(MM_EnvironmentBase *env, MM_HeapRegionManag
 {
 	MM_RegionPoolSegregated *regionPool;
 
-	regionPool = (MM_RegionPoolSegregated *)env->getForge()->allocate(sizeof(MM_RegionPoolSegregated), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+	regionPool = (MM_RegionPoolSegregated *)env->getForge()->allocate(
+	        sizeof(MM_RegionPoolSegregated), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
 	if (NULL != regionPool) {
-		regionPool = new(regionPool) MM_RegionPoolSegregated(env, heapRegionManager);
+		regionPool = new (regionPool) MM_RegionPoolSegregated(env, heapRegionManager);
 		if (!regionPool->initialize(env)) {
 			regionPool->kill(env);
 			regionPool = NULL;
@@ -71,75 +71,92 @@ bool
 MM_RegionPoolSegregated::initialize(MM_EnvironmentBase *env)
 {
 	uint32_t szClass;
-	
-	for (szClass=0; szClass<=OMR_SIZECLASSES_MAX_SMALL; szClass++) {
-		for (uint32_t i=0; i<NUM_DEFRAG_BUCKETS; i++) {
+
+	for (szClass = 0; szClass <= OMR_SIZECLASSES_MAX_SMALL; szClass++) {
+		for (uint32_t i = 0; i < NUM_DEFRAG_BUCKETS; i++) {
 			_smallAvailableRegions[szClass][i] = NULL;
 		}
 		_smallFullRegions[szClass] = NULL;
 		_smallSweepRegions[szClass] = NULL;
 	}
 
-	_singleFreeList = MM_RegionPoolSegregated::allocateFreeHeapRegionList(env, MM_HeapRegionList::HRL_KIND_FREE, true);
-	_multiFreeList = MM_RegionPoolSegregated::allocateFreeHeapRegionList(env, MM_HeapRegionList::HRL_KIND_MULTI_FREE, false);
-	_coalesceFreeList = MM_RegionPoolSegregated::allocateFreeHeapRegionList(env, MM_HeapRegionList::HRL_KIND_COALESCE, false);
+	_singleFreeList =
+	        MM_RegionPoolSegregated::allocateFreeHeapRegionList(env, MM_HeapRegionList::HRL_KIND_FREE, true);
+	_multiFreeList =
+	        MM_RegionPoolSegregated::allocateFreeHeapRegionList(env, MM_HeapRegionList::HRL_KIND_MULTI_FREE, false);
+	_coalesceFreeList =
+	        MM_RegionPoolSegregated::allocateFreeHeapRegionList(env, MM_HeapRegionList::HRL_KIND_COALESCE, false);
 	if ((_singleFreeList == NULL) || (_multiFreeList == NULL) || (_coalesceFreeList == NULL)) {
 		return false;
 	}
 	_splitAvailableListSplitCount = env->getExtensions()->splitAvailableListSplitAmount;
 	Assert_MM_true(0 < _splitAvailableListSplitCount);
-	for (szClass=OMR_SIZECLASSES_MIN_SMALL; szClass<=OMR_SIZECLASSES_MAX_SMALL; szClass++) {
-		for (int32_t i=0; i<NUM_DEFRAG_BUCKETS; i++) {
-			uintptr_t splitAvailableListsSize = sizeof(MM_LockingHeapRegionQueue) * _splitAvailableListSplitCount;
-			_smallAvailableRegions[szClass][i] = (MM_LockingHeapRegionQueue *)env->getForge()->allocate(splitAvailableListsSize, OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+	for (szClass = OMR_SIZECLASSES_MIN_SMALL; szClass <= OMR_SIZECLASSES_MAX_SMALL; szClass++) {
+		for (int32_t i = 0; i < NUM_DEFRAG_BUCKETS; i++) {
+			uintptr_t splitAvailableListsSize = sizeof(MM_LockingHeapRegionQueue)
+			        * _splitAvailableListSplitCount;
+			_smallAvailableRegions[szClass][i] = (MM_LockingHeapRegionQueue *)env->getForge()->allocate(
+			        splitAvailableListsSize, OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
 			if (NULL == _smallAvailableRegions[szClass][i]) {
 				return false;
 			}
 			MM_LockingHeapRegionQueue *regionQueue = _smallAvailableRegions[szClass][i];
-			for (uintptr_t j=0; j<_splitAvailableListSplitCount; j++) {
-				/* The available lists should track the free bytes in their regions (4th param = true) */
-				new (&regionQueue[j]) MM_LockingHeapRegionQueue(MM_HeapRegionList::HRL_KIND_AVAILABLE, true, true, true);
+			for (uintptr_t j = 0; j < _splitAvailableListSplitCount; j++) {
+				/* The available lists should track the free bytes in their regions (4th param = true)
+				 */
+				new (&regionQueue[j]) MM_LockingHeapRegionQueue(
+				        MM_HeapRegionList::HRL_KIND_AVAILABLE, true, true, true);
 				if (!(&regionQueue[j])->initialize(env)) {
 					return false;
 				}
 			}
 		}
-		_smallFullRegions[szClass] = MM_RegionPoolSegregated::allocateHeapRegionQueue(env, MM_HeapRegionList::HRL_KIND_FULL, true, true, false);
-		_smallSweepRegions[szClass] = MM_RegionPoolSegregated::allocateHeapRegionQueue(env, MM_HeapRegionList::HRL_KIND_SWEEP, true, true, false);
+		_smallFullRegions[szClass] = MM_RegionPoolSegregated::allocateHeapRegionQueue(
+		        env, MM_HeapRegionList::HRL_KIND_FULL, true, true, false);
+		_smallSweepRegions[szClass] = MM_RegionPoolSegregated::allocateHeapRegionQueue(
+		        env, MM_HeapRegionList::HRL_KIND_SWEEP, true, true, false);
 		if (NULL == _smallFullRegions[szClass] || NULL == _smallSweepRegions[szClass]) {
 			return false;
 		}
-		_smallOccupancy[szClass] = 0.5;		
+		_smallOccupancy[szClass] = 0.5;
 	}
-	
+
 	/* The available lists should track the free bytes in their regions (4th param = true) */
-	_arrayletAvailableRegions = MM_RegionPoolSegregated::allocateHeapRegionQueue(env, MM_HeapRegionList::HRL_KIND_AVAILABLE, true, true, true);
-	_arrayletFullRegions = MM_RegionPoolSegregated::allocateHeapRegionQueue(env, MM_HeapRegionList::HRL_KIND_FULL, true, true, false);
-	_arrayletSweepRegions = MM_RegionPoolSegregated::allocateHeapRegionQueue(env, MM_HeapRegionList::HRL_KIND_SWEEP, true, true, false);
+	_arrayletAvailableRegions = MM_RegionPoolSegregated::allocateHeapRegionQueue(
+	        env, MM_HeapRegionList::HRL_KIND_AVAILABLE, true, true, true);
+	_arrayletFullRegions = MM_RegionPoolSegregated::allocateHeapRegionQueue(
+	        env, MM_HeapRegionList::HRL_KIND_FULL, true, true, false);
+	_arrayletSweepRegions = MM_RegionPoolSegregated::allocateHeapRegionQueue(
+	        env, MM_HeapRegionList::HRL_KIND_SWEEP, true, true, false);
 	if ((NULL == _arrayletAvailableRegions) || (NULL == _arrayletFullRegions) || (NULL == _arrayletSweepRegions)) {
 		return false;
 	}
-	
-	_largeFullRegions = MM_RegionPoolSegregated::allocateHeapRegionQueue(env, MM_HeapRegionList::HRL_KIND_FULL, false, true, false);
-	_largeSweepRegions = MM_RegionPoolSegregated::allocateHeapRegionQueue(env, MM_HeapRegionList::HRL_KIND_SWEEP, false, true, false);
+
+	_largeFullRegions = MM_RegionPoolSegregated::allocateHeapRegionQueue(
+	        env, MM_HeapRegionList::HRL_KIND_FULL, false, true, false);
+	_largeSweepRegions = MM_RegionPoolSegregated::allocateHeapRegionQueue(
+	        env, MM_HeapRegionList::HRL_KIND_SWEEP, false, true, false);
 	if ((NULL == _largeFullRegions) || (NULL == _largeSweepRegions)) {
 		return false;
-	}	
+	}
 
 	resetSkipAvailableRegionForAllocation();
 
 	return true;
 }
 
-
-MM_HeapRegionQueue*
-MM_RegionPoolSegregated::allocateHeapRegionQueue(MM_EnvironmentBase *env, MM_HeapRegionList::RegionListKind regionListKind, bool singleRegionsOnly, bool concurrentAccess, bool trackFreeBytes)
+MM_HeapRegionQueue *
+MM_RegionPoolSegregated::allocateHeapRegionQueue(MM_EnvironmentBase *env,
+        MM_HeapRegionList::RegionListKind regionListKind, bool singleRegionsOnly, bool concurrentAccess,
+        bool trackFreeBytes)
 {
-	return MM_LockingHeapRegionQueue::newInstance(env, regionListKind, singleRegionsOnly, concurrentAccess, trackFreeBytes);
+	return MM_LockingHeapRegionQueue::newInstance(
+	        env, regionListKind, singleRegionsOnly, concurrentAccess, trackFreeBytes);
 }
 
-MM_FreeHeapRegionList*
-MM_RegionPoolSegregated::allocateFreeHeapRegionList(MM_EnvironmentBase *env, MM_HeapRegionList::RegionListKind regionListKind, bool singleRegionsOnly)
+MM_FreeHeapRegionList *
+MM_RegionPoolSegregated::allocateFreeHeapRegionList(
+        MM_EnvironmentBase *env, MM_HeapRegionList::RegionListKind regionListKind, bool singleRegionsOnly)
 {
 	return MM_LockingFreeHeapRegionList::newInstance(env, regionListKind, singleRegionsOnly);
 }
@@ -151,17 +168,17 @@ MM_RegionPoolSegregated::tearDown(MM_EnvironmentBase *env)
 		_singleFreeList->kill(env);
 		_singleFreeList = NULL;
 	}
-	
+
 	if (_multiFreeList) {
 		_multiFreeList->kill(env);
 		_multiFreeList = NULL;
 	}
-	
+
 	if (_coalesceFreeList) {
 		_coalesceFreeList->kill(env);
 		_coalesceFreeList = NULL;
 	}
-	
+
 	if (_largeFullRegions) {
 		_largeFullRegions->kill(env);
 		_largeFullRegions = NULL;
@@ -170,7 +187,7 @@ MM_RegionPoolSegregated::tearDown(MM_EnvironmentBase *env)
 		_largeSweepRegions->kill(env);
 		_largeSweepRegions = NULL;
 	}
-	
+
 	if (_arrayletAvailableRegions) {
 		_arrayletAvailableRegions->kill(env);
 		_arrayletAvailableRegions = NULL;
@@ -183,12 +200,12 @@ MM_RegionPoolSegregated::tearDown(MM_EnvironmentBase *env)
 		_arrayletSweepRegions->kill(env);
 		_arrayletSweepRegions = NULL;
 	}
-	
-	for (int32_t szClass=OMR_SIZECLASSES_MIN_SMALL; szClass <= OMR_SIZECLASSES_MAX_SMALL; szClass++) {
-		for (uintptr_t i=0; i<NUM_DEFRAG_BUCKETS; i++) {
+
+	for (int32_t szClass = OMR_SIZECLASSES_MIN_SMALL; szClass <= OMR_SIZECLASSES_MAX_SMALL; szClass++) {
+		for (uintptr_t i = 0; i < NUM_DEFRAG_BUCKETS; i++) {
 			MM_LockingHeapRegionQueue *regionQueueArray = _smallAvailableRegions[szClass][i];
 			if (NULL != regionQueueArray) {
-				for (uintptr_t j=0; j<_splitAvailableListSplitCount; j++) {
+				for (uintptr_t j = 0; j < _splitAvailableListSplitCount; j++) {
 					(&regionQueueArray[j])->tearDown(env);
 				}
 				env->getForge()->free(regionQueueArray);
@@ -207,7 +224,7 @@ MM_RegionPoolSegregated::tearDown(MM_EnvironmentBase *env)
 
 void
 MM_RegionPoolSegregated::addSingleFree(MM_EnvironmentBase *env, MM_HeapRegionQueue *regionQueue)
-{ 
+{
 	uintptr_t returnedRegions = regionQueue->length();
 	decrementRegionsInUse(returnedRegions);
 	_singleFreeList->push(regionQueue);
@@ -220,14 +237,16 @@ MM_RegionPoolSegregated::moveInUseToSweep(MM_EnvironmentBase *env)
 	for (int32_t sizeClass = OMR_SIZECLASSES_MIN_SMALL; sizeClass <= OMR_SIZECLASSES_MAX_SMALL; sizeClass++) {
 		_darkMatterCellCount[sizeClass] = 0;
 		_smallSweepRegions[sizeClass]->enqueue(_smallFullRegions[sizeClass]);
-		for (int32_t i=0; i<NUM_DEFRAG_BUCKETS; i++) {
+		for (int32_t i = 0; i < NUM_DEFRAG_BUCKETS; i++) {
 			MM_LockingHeapRegionQueue *regionQueue = _smallAvailableRegions[sizeClass][i];
-			for (uintptr_t j=0; j<_splitAvailableListSplitCount; j++) {
+			for (uintptr_t j = 0; j < _splitAvailableListSplitCount; j++) {
 				_smallSweepRegions[sizeClass]->enqueue(&regionQueue[j]);
 			}
 		}
-		_initialCountOfSweepRegions[sizeClass] = _currentCountOfSweepRegions[sizeClass] = _smallSweepRegions[sizeClass]->getTotalRegions();
-		_initialTotalCountOfSweepRegions = _currentTotalCountOfSweepRegions += _initialCountOfSweepRegions[sizeClass];
+		_initialCountOfSweepRegions[sizeClass] = _currentCountOfSweepRegions[sizeClass] =
+		        _smallSweepRegions[sizeClass]->getTotalRegions();
+		_initialTotalCountOfSweepRegions = _currentTotalCountOfSweepRegions +=
+		        _initialCountOfSweepRegions[sizeClass];
 	}
 
 	_largeSweepRegions->enqueue(_largeFullRegions);
@@ -246,7 +265,8 @@ MM_RegionPoolSegregated::countFreeRegions(uintptr_t *singleFree, uintptr_t *mult
 
 /* enqueue the region using the split region list indexed by splitListIndex for size class sizeClass */
 void
-MM_RegionPoolSegregated::enqueueAvailable(MM_HeapRegionDescriptorSegregated *region, uintptr_t sizeClass, uintptr_t occupancy, uintptr_t splitListIndex)
+MM_RegionPoolSegregated::enqueueAvailable(
+        MM_HeapRegionDescriptorSegregated *region, uintptr_t sizeClass, uintptr_t occupancy, uintptr_t splitListIndex)
 {
 	for (int32_t i = 0; i < NUM_DEFRAG_BUCKETS; i++) {
 		if (occupancy >= defragBucketThresholds[i]) {
@@ -259,7 +279,8 @@ MM_RegionPoolSegregated::enqueueAvailable(MM_HeapRegionDescriptorSegregated *reg
 void
 MM_RegionPoolSegregated::addFreeRange(void *lowAddress, void *highAddress)
 {
-	MM_HeapRegionDescriptorSegregated *firstInRange = (MM_HeapRegionDescriptorSegregated *)_heapRegionManager->tableDescriptorForAddress(lowAddress);
+	MM_HeapRegionDescriptorSegregated *firstInRange =
+	        (MM_HeapRegionDescriptorSegregated *)_heapRegionManager->tableDescriptorForAddress(lowAddress);
 	uintptr_t range = ((uintptr_t)highAddress - (uintptr_t)lowAddress) / firstInRange->getSize();
 
 	if (1 < range) {
@@ -271,11 +292,13 @@ MM_RegionPoolSegregated::addFreeRange(void *lowAddress, void *highAddress)
 		/* empty range */
 	}
 
-	Assert_MM_true(0 == range || (lowAddress == firstInRange->getLowAddress() && highAddress == firstInRange->getHighAddress()));
+	Assert_MM_true(0 == range
+	        || (lowAddress == firstInRange->getLowAddress() && highAddress == firstInRange->getHighAddress()));
 }
 
 void
-MM_RegionPoolSegregated::addFreeRegion(MM_EnvironmentBase *env, MM_HeapRegionDescriptorSegregated *region, bool alreadyFree)
+MM_RegionPoolSegregated::addFreeRegion(
+        MM_EnvironmentBase *env, MM_HeapRegionDescriptorSegregated *region, bool alreadyFree)
 {
 	uintptr_t size = region->getRange();
 	if (!alreadyFree) {
@@ -291,33 +314,33 @@ MM_RegionPoolSegregated::addFreeRegion(MM_EnvironmentBase *env, MM_HeapRegionDes
 }
 
 MM_HeapRegionDescriptorSegregated *
-MM_RegionPoolSegregated::allocateFromRegionPool(MM_EnvironmentBase *env, uintptr_t numRegions, uintptr_t szClass, uintptr_t maxExcess)
+MM_RegionPoolSegregated::allocateFromRegionPool(
+        MM_EnvironmentBase *env, uintptr_t numRegions, uintptr_t szClass, uintptr_t maxExcess)
 {
 	MM_HeapRegionDescriptorSegregated *region = NULL;
 
 	if (numRegions == 1) {
 		region = _singleFreeList->allocate(env, szClass);
 	}
-	
+
 	if (region == NULL) {
 		region = _multiFreeList->allocate(env, szClass, numRegions, maxExcess);
-		
+
 		if (region == NULL) {
 			region = _coalesceFreeList->allocate(env, szClass, numRegions, maxExcess);
 		}
 	}
-	
-	
+
 	if (region != NULL) {
 		incrementRegionsInUse(region->getRange()); /* we must add here because we will return remainder later */
-		
+
 		/* We must notify the allocation tracker that a fresh region has been allocated, it will know how to
 		 * account for bytes lost to internal fragmentation and will account for all the memory allocated
 		 * in the case of large region allocation.
 		 */
 		region->emptyRegionAllocated(env);
 	}
-	
+
 	return region;
 }
 
@@ -327,8 +350,9 @@ MM_RegionPoolSegregated::joinBucketListsForSplitIndex(MM_EnvironmentBase *env)
 {
 	uintptr_t splitIndex = env->getSlaveID() % _splitAvailableListSplitCount;
 	for (int32_t sizeClass = OMR_SIZECLASSES_MIN_SMALL; sizeClass <= OMR_SIZECLASSES_MAX_SMALL; sizeClass++) {
-		MM_LockingHeapRegionQueue *primaryQueue = &(_smallAvailableRegions[sizeClass][PRIMARY_BUCKET])[splitIndex];
-		for (int32_t i=1; i<NUM_DEFRAG_BUCKETS; i++) {
+		MM_LockingHeapRegionQueue *primaryQueue =
+		        &(_smallAvailableRegions[sizeClass][PRIMARY_BUCKET])[splitIndex];
+		for (int32_t i = 1; i < NUM_DEFRAG_BUCKETS; i++) {
 			primaryQueue->enqueue(&(_smallAvailableRegions[sizeClass][i])[splitIndex]);
 		}
 	}
@@ -357,8 +381,8 @@ MM_RegionPoolSegregated::allocateRegionFromSmallSizeClass(MM_EnvironmentBase *en
 	}
 
 	/* if primary bucket fails, try the other split queues, starting from the current thread's split index */
-	for (uintptr_t j=startList+1; j<startList+_splitAvailableListSplitCount; j++) {
-		allocationQueue = &primaryQueueArray[j%_splitAvailableListSplitCount];
+	for (uintptr_t j = startList + 1; j < startList + _splitAvailableListSplitCount; j++) {
+		allocationQueue = &primaryQueueArray[j % _splitAvailableListSplitCount];
 		region = allocationQueue->dequeueIfNonEmpty();
 		if (region != NULL) {
 			return region;
@@ -367,10 +391,10 @@ MM_RegionPoolSegregated::allocateRegionFromSmallSizeClass(MM_EnvironmentBase *en
 
 	/* if all split lists in the primary bucket fail, try the remaining buckets */
 	if (_isSweepingSmall) {
-		for (int32_t i=1; i<NUM_DEFRAG_BUCKETS; i++) {
+		for (int32_t i = 1; i < NUM_DEFRAG_BUCKETS; i++) {
 			MM_LockingHeapRegionQueue *queueArray = _smallAvailableRegions[sizeClass][i];
-			for (uintptr_t j=startList; j<startList+_splitAvailableListSplitCount; j++) {
-				allocationQueue = &queueArray[j%_splitAvailableListSplitCount];
+			for (uintptr_t j = startList; j < startList + _splitAvailableListSplitCount; j++) {
+				allocationQueue = &queueArray[j % _splitAvailableListSplitCount];
 				region = allocationQueue->dequeueIfNonEmpty();
 				if (region != NULL) {
 					return region;
@@ -409,7 +433,8 @@ MM_RegionPoolSegregated::sweepAndAllocateRegionFromSmallSizeClass(MM_Environment
 	if (region != NULL) {
 		_sweepScheme->sweepRegion(env, region);
 		/* Keep maintaining the occupancy info even while doing nondeterministic sweeps */
-		_smallOccupancy[sizeClass] = (_smallOccupancy[sizeClass] * 0.9f) + (region->getMemoryPoolACL()->getMarkCount() / region->getNumCells() * 0.1f );
+		_smallOccupancy[sizeClass] = (_smallOccupancy[sizeClass] * 0.9f)
+		        + (region->getMemoryPoolACL()->getMarkCount() / region->getNumCells() * 0.1f);
 		decrementCurrentCountOfSweepRegions(sizeClass, 1);
 		decrementCurrentTotalCountOfSweepRegions(1);
 		_smallFullRegions[sizeClass]->enqueue(region);
@@ -418,7 +443,7 @@ MM_RegionPoolSegregated::sweepAndAllocateRegionFromSmallSizeClass(MM_Environment
 }
 
 void
-MM_RegionPoolSegregated::updateOccupancy (uintptr_t sizeClass, uintptr_t occupancy)
+MM_RegionPoolSegregated::updateOccupancy(uintptr_t sizeClass, uintptr_t occupancy)
 {
 	assume(occupancy <= 100 && occupancy >= 0, "invalid occupancy estimate");
 	_smallOccupancy[sizeClass] = _smallOccupancy[sizeClass] * 0.9f + occupancy * 0.001f;

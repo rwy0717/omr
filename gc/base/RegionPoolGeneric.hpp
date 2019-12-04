@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 /**
  * @file
  * @ingroup GC_Base_Core
@@ -29,35 +28,28 @@
 #if !defined(REGIONPOOLGENERIC_HPP_)
 #define REGIONPOOLGENERIC_HPP_
 
-#include "omr.h"
-
 #include "RegionPool.hpp"
+#include "omr.h"
 
 /**
  * A simple region pool which manages a single region.
- * 
+ *
  * @ingroup GC_Base_Core
  */
-class MM_RegionPoolGeneric : public MM_RegionPool
-{
+class MM_RegionPoolGeneric : public MM_RegionPool {
 private:
 protected:
-public:	
-	
-private:	
+public:
+private:
 protected:
 public:
 	virtual bool initialize(MM_EnvironmentBase *env);
 	virtual void tearDown(MM_EnvironmentBase *env);
-	
+
 	/**
 	 * Create a RegionPoolGeneric object.
 	 */
-	MM_RegionPoolGeneric(MM_EnvironmentBase *env) :
-		MM_RegionPool(env)
-	{
-		_typeId = __FUNCTION__;
-	};
+	MM_RegionPoolGeneric(MM_EnvironmentBase *env) : MM_RegionPool(env) { _typeId = __FUNCTION__; };
 };
 
 #endif /* REGIONPOOLGENERIC_HPP_ */

@@ -43,16 +43,13 @@ typedef struct TracePointIterator {
 	void *userData;
 } TracePointIterator;
 
-typedef enum TracePointIteratorState {
-	CONTINUE,
-	STOP,
-	STOP_WITH_ERROR
-} TracePointIteratorState;
+typedef enum TracePointIteratorState { CONTINUE, STOP, STOP_WITH_ERROR } TracePointIteratorState;
 
-static TracePointIteratorState nextTracePoint(PerThreadWrapBuffer *wrapBuffer, const UtTraceRecord *record, TracePointIterator *iter);
-static TracePointIteratorState parseTracePoint(const UtTraceRecord *record, uint32_t offset, uint32_t tpLength, TracePointIterator *iter);
+static TracePointIteratorState nextTracePoint(
+        PerThreadWrapBuffer *wrapBuffer, const UtTraceRecord *record, TracePointIterator *iter);
+static TracePointIteratorState parseTracePoint(
+        const UtTraceRecord *record, uint32_t offset, uint32_t tpLength, TracePointIterator *iter);
 static uint32_t getTraceIdFromBuffer(const UtTraceRecord *record, uint32_t offset);
-
 
 void
 initWrapBuffer(PerThreadWrapBuffer *wrapBuffer)
@@ -71,7 +68,8 @@ freeWrapBuffer(PerThreadWrapBuffer *wrapBuffer)
 }
 
 omr_error_t
-processTraceRecord(PerThreadWrapBuffer *wrapBuffer, UtSubscription *subscriptionID, TracePointCallback userCallback, void *userData)
+processTraceRecord(PerThreadWrapBuffer *wrapBuffer, UtSubscription *subscriptionID, TracePointCallback userCallback,
+        void *userData)
 {
 	omr_error_t rc = OMR_ERROR_NONE;
 	const UtTraceRecord *record = (const UtTraceRecord *)subscriptionID->data;
@@ -79,22 +77,26 @@ processTraceRecord(PerThreadWrapBuffer *wrapBuffer, UtSubscription *subscription
 
 	int32_t recordSize = record->nextEntry + 1;
 	if (recordSize > subscriptionID->dataLength) {
-		fprintf(stderr, "ERROR: trace buffer (%d bytes) doesn't contain last entry (%d bytes)\n", subscriptionID->dataLength, recordSize);
+		fprintf(stderr, "ERROR: trace buffer (%d bytes) doesn't contain last entry (%d bytes)\n",
+		        subscriptionID->dataLength, recordSize);
 		abort();
 	}
 
 	if (-1 == record->nextEntry) {
 		/*
-		 * If (record->nextEntry == -1), then this entire buffer is spanned by a tracepoint. Add it to the lastRecord cache.
+		 * If (record->nextEntry == -1), then this entire buffer is spanned by a tracepoint. Add it to the
+		 * lastRecord cache.
 		 * TODO test this
 		 */
 
 		size_t bytesNeeded = subscriptionID->dataLength - record->firstEntry;
 		if ((wrapBuffer->lastRecordPos + bytesNeeded) < wrapBuffer->lastRecordBytes) {
 			wrapBuffer->lastRecordBytes += bytesNeeded;
-			wrapBuffer->lastRecord = (uint8_t *)realloc(wrapBuffer->lastRecord, wrapBuffer->lastRecordBytes);
+			wrapBuffer->lastRecord =
+			        (uint8_t *)realloc(wrapBuffer->lastRecord, wrapBuffer->lastRecordBytes);
 		}
-		memcpy(wrapBuffer->lastRecord + wrapBuffer->lastRecordPos, (uint8_t *)record + record->firstEntry, bytesNeeded);
+		memcpy(wrapBuffer->lastRecord + wrapBuffer->lastRecordPos, (uint8_t *)record + record->firstEntry,
+		        bytesNeeded);
 		wrapBuffer->lastRecordPos += bytesNeeded;
 
 	} else {
@@ -108,12 +110,13 @@ processTraceRecord(PerThreadWrapBuffer *wrapBuffer, UtSubscription *subscription
 		}
 
 		/*
-		 * We iterate tracepoints backwards, starting from the last tracepoint (the newest tracepoint) in the buffer.
-		 * Each tracepoint's length is recorded at the end of its data.
+		 * We iterate tracepoints backwards, starting from the last tracepoint (the newest tracepoint) in the
+		 * buffer. Each tracepoint's length is recorded at the end of its data.
 		 */
 
 		/* Set up the iterator */
-		iter.currentPos = record->nextEntry; /* offset to the length byte of the last tracepoint in the buffer */
+		iter.currentPos = record->nextEntry; /* offset to the length byte of the last tracepoint in the buffer
+		                                      */
 #ifdef OMR_ENV_LITTLE_ENDIAN
 		iter.isBigEndian = FALSE;
 #else
@@ -127,20 +130,23 @@ processTraceRecord(PerThreadWrapBuffer *wrapBuffer, UtSubscription *subscription
 			/* continue */
 		}
 
-		/* We might have cached some data from the previous trace record even if there was no wrapped tracepoint.
-		 * Throw away the cached data.
+		/* We might have cached some data from the previous trace record even if there was no wrapped
+		 * tracepoint. Throw away the cached data.
 		 */
 		wrapBuffer->lastRecordPos = 0;
 
 		/*
-		 * Cache the data in the record after the last complete tracepoint, in case the last tracepoint wrapped to the next buffer.
+		 * Cache the data in the record after the last complete tracepoint, in case the last tracepoint wrapped
+		 * to the next buffer.
 		 *
-		 * record->nextEntry points to the last byte of the last complete tracepoint. Wrapped data starts at (record->nextEntry + 1).
+		 * record->nextEntry points to the last byte of the last complete tracepoint. Wrapped data starts at
+		 * (record->nextEntry + 1).
 		 */
 		size_t wrappedDataStart = record->nextEntry + 1;
 		size_t wrappedDataSize = subscriptionID->dataLength - wrappedDataStart;
 		if (wrappedDataSize > 0) {
-			/* bytesNeeded = (sizeof UtTraceRecord + thread name) + (data following the last complete trace record) */
+			/* bytesNeeded = (sizeof UtTraceRecord + thread name) + (data following the last complete trace
+			 * record) */
 			size_t bytesNeeded = record->firstEntry + wrappedDataSize;
 
 			if (wrapBuffer->lastRecordBytes < bytesNeeded) {
@@ -151,14 +157,14 @@ processTraceRecord(PerThreadWrapBuffer *wrapBuffer, UtSubscription *subscription
 				wrapBuffer->lastRecord = (uint8_t *)malloc(wrapBuffer->lastRecordBytes);
 			}
 			memcpy(wrapBuffer->lastRecord, record, record->firstEntry);
-			memcpy(wrapBuffer->lastRecord + record->firstEntry, (uint8_t *)record + wrappedDataStart, wrappedDataSize);
+			memcpy(wrapBuffer->lastRecord + record->firstEntry, (uint8_t *)record + wrappedDataStart,
+			        wrappedDataSize);
 			wrapBuffer->lastRecordPos = bytesNeeded;
 			((UtTraceRecord *)wrapBuffer->lastRecord)->nextEntry = -1;
 		}
 	}
 	return rc;
 }
-
 
 static TracePointIteratorState
 nextTracePoint(PerThreadWrapBuffer *wrapBuffer, const UtTraceRecord *record, TracePointIterator *iter)
@@ -199,8 +205,8 @@ nextTracePoint(PerThreadWrapBuffer *wrapBuffer, const UtTraceRecord *record, Tra
 	 *
 	 * 'offset' points to location of 'tpLength' for current tracepoint.
 	 * 'offset - tpLength' points to previous tracepoint's 'tpLength', if it exists.
-	 * 'offset + 1 - tpLength' points to start of current tracepoint's data, which must be at least 'record->firstEntry'
-	 * if the tracepoint fits in this buffer.
+	 * 'offset + 1 - tpLength' points to start of current tracepoint's data, which must be at least
+	 * 'record->firstEntry' if the tracepoint fits in this buffer.
 	 */
 	if ((tpLength > offset) || ((int32_t)(offset + 1 - tpLength) < record->firstEntry)) {
 		/* This tracepoint is wrapped from the previous buffer.
@@ -212,17 +218,20 @@ nextTracePoint(PerThreadWrapBuffer *wrapBuffer, const UtTraceRecord *record, Tra
 			abort();
 		}
 
-
 		size_t partialBytes = offset - record->firstEntry + 1;
 		if (wrapBuffer->lastRecordBytes < (wrapBuffer->lastRecordPos + partialBytes)) {
 			wrapBuffer->lastRecordBytes += partialBytes;
-			wrapBuffer->lastRecord = (uint8_t *)realloc(wrapBuffer->lastRecord, wrapBuffer->lastRecordBytes);
+			wrapBuffer->lastRecord =
+			        (uint8_t *)realloc(wrapBuffer->lastRecord, wrapBuffer->lastRecordBytes);
 		}
-		memcpy(wrapBuffer->lastRecord + wrapBuffer->lastRecordPos, (uint8_t *)record + record->firstEntry, partialBytes);
-//		printf("thread %p wrapped tpLength %u partialBytes %lu\n", omrthread_self(), tpLength, partialBytes);
+		memcpy(wrapBuffer->lastRecord + wrapBuffer->lastRecordPos, (uint8_t *)record + record->firstEntry,
+		        partialBytes);
+		//		printf("thread %p wrapped tpLength %u partialBytes %lu\n", omrthread_self(), tpLength,
+		// partialBytes);
 		wrapBuffer->lastRecordPos += partialBytes;
 
-		parseTracePoint((const UtTraceRecord *)wrapBuffer->lastRecord, (uint32_t)(wrapBuffer->lastRecordPos - tpLength - 1), tpLength, iter);
+		parseTracePoint((const UtTraceRecord *)wrapBuffer->lastRecord,
+		        (uint32_t)(wrapBuffer->lastRecordPos - tpLength - 1), tpLength, iter);
 
 		/* mark the temp buffer reusable */
 		wrapBuffer->lastRecordPos = 0;
@@ -235,7 +244,6 @@ nextTracePoint(PerThreadWrapBuffer *wrapBuffer, const UtTraceRecord *record, Tra
 	/* parse the relevant section into a tracepoint */
 	return parseTracePoint(record, offset - tpLength, tpLength, iter);
 }
-
 
 /**
  * OMRTODO Some cases may not be handled; cross-check with omrtraceformatter.c
@@ -251,7 +259,8 @@ parseTracePoint(const UtTraceRecord *record, uint32_t offset, uint32_t tpLength,
 
 	/* check for all the control/internal tracepoints */
 	if (traceId == 0x0010) { /* 0x0010nnnn8 == lost record tracepoint */
-		fprintf(stderr, "ERROR: *** lost records found in trace buffer - use external formatting tools for details.\n");
+		fprintf(stderr,
+		        "ERROR: *** lost records found in trace buffer - use external formatting tools for details.\n");
 		return STOP;
 
 	} else if ((traceId == 0x0000) && (tpLength == UT_TRC_SEQ_WRAP_LENGTH)) {
@@ -270,23 +279,28 @@ parseTracePoint(const UtTraceRecord *record, uint32_t offset, uint32_t tpLength,
 
 	} else {
 		/* otherwise all is well and we have a normal tracepoint */
-		uint32_t modNameLength = getU32FromTraceRecord(record, offset + TRACEPOINT_RAW_DATA_MODULE_NAME_LENGTH_OFFSET, iter->isBigEndian);
+		uint32_t modNameLength = getU32FromTraceRecord(
+		        record, offset + TRACEPOINT_RAW_DATA_MODULE_NAME_LENGTH_OFFSET, iter->isBigEndian);
 
 		/* Module name must not be longer than (the tracepoint length - start of module name string) */
-		/* modNameLength == 0 -- no modname - most likely partially overwritten - it's unformattable as a result! */
-		if ((0 != modNameLength) && (tpLength >= TRACEPOINT_RAW_DATA_MODULE_NAME_DATA_OFFSET) && (modNameLength <= (uint32_t)(tpLength - TRACEPOINT_RAW_DATA_MODULE_NAME_DATA_OFFSET))) {
+		/* modNameLength == 0 -- no modname - most likely partially overwritten - it's unformattable as a
+		 * result! */
+		if ((0 != modNameLength) && (tpLength >= TRACEPOINT_RAW_DATA_MODULE_NAME_DATA_OFFSET)
+		        && (modNameLength <= (uint32_t)(tpLength - TRACEPOINT_RAW_DATA_MODULE_NAME_DATA_OFFSET))) {
 			if (traceId > 257) {
 				traceId -= 257;
 
 				/* the modName was written straight to buf as (char *) */
 				const char *recordAsCharBuf = (const char *)record;
-				const char *modName = &recordAsCharBuf[offset + TRACEPOINT_RAW_DATA_MODULE_NAME_DATA_OFFSET];
-				uint32_t parameterOffset = offset + TRACEPOINT_RAW_DATA_MODULE_NAME_DATA_OFFSET + modNameLength;
-				uint32_t parameterDataLength = tpLength - (TRACEPOINT_RAW_DATA_MODULE_NAME_DATA_OFFSET + modNameLength);
-				if (OMR_ERROR_NONE !=
-					iter->userCallback(iter->userData, modName, modNameLength, traceId, record,
-									   parameterOffset, parameterDataLength, iter->isBigEndian)
-				) {
+				const char *modName =
+				        &recordAsCharBuf[offset + TRACEPOINT_RAW_DATA_MODULE_NAME_DATA_OFFSET];
+				uint32_t parameterOffset = offset + TRACEPOINT_RAW_DATA_MODULE_NAME_DATA_OFFSET
+				        + modNameLength;
+				uint32_t parameterDataLength = tpLength
+				        - (TRACEPOINT_RAW_DATA_MODULE_NAME_DATA_OFFSET + modNameLength);
+				if (OMR_ERROR_NONE
+				        != iter->userCallback(iter->userData, modName, modNameLength, traceId, record,
+				                parameterOffset, parameterDataLength, iter->isBigEndian)) {
 					return STOP_WITH_ERROR;
 				}
 			}
@@ -357,11 +371,13 @@ getU64FromTraceRecord(const UtTraceRecord *record, uint32_t offset, int32_t isBi
 
 	/* integer values are written out in platform endianess */
 	if (isBigEndian) {
-		ret = ((uint64_t)data[0] << 56) | ((uint64_t)data[1] << 48) | ((uint64_t)data[2] << 40) | ((uint64_t)data[3] << 32)
-				| ((uint64_t)data[4] << 24) | ((uint64_t)data[5] << 16) | ((uint64_t)data[6] << 8) | ((uint64_t)data[7]);
+		ret = ((uint64_t)data[0] << 56) | ((uint64_t)data[1] << 48) | ((uint64_t)data[2] << 40)
+		        | ((uint64_t)data[3] << 32) | ((uint64_t)data[4] << 24) | ((uint64_t)data[5] << 16)
+		        | ((uint64_t)data[6] << 8) | ((uint64_t)data[7]);
 	} else {
-		ret = ((uint64_t)data[7] << 56) | ((uint64_t)data[6] << 48) | ((uint64_t)data[5] << 40) | ((uint64_t)data[4] << 32)
-				| ((uint64_t)data[3] << 24) | ((uint64_t)data[2] << 16) | ((uint64_t)data[1] << 8) | ((uint64_t)data[0]);
+		ret = ((uint64_t)data[7] << 56) | ((uint64_t)data[6] << 48) | ((uint64_t)data[5] << 40)
+		        | ((uint64_t)data[4] << 32) | ((uint64_t)data[3] << 24) | ((uint64_t)data[2] << 16)
+		        | ((uint64_t)data[1] << 8) | ((uint64_t)data[0]);
 	}
 	return ret;
 }

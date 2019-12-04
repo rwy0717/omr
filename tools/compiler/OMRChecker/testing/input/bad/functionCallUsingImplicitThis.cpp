@@ -23,34 +23,33 @@
 /*
  * Description: Calls an extensible class member function using the
  *    implicit `this` pointer, which is not allowed.
-*/
+ */
 
 #define OMR_EXTENSIBLE __attribute__((annotate("OMR_Extensible")))
 
-namespace OMR
-{
+namespace OMR {
 
-class OMR_EXTENSIBLE ExtClass
-   {
-   public:
-   void functionCalled();   // function to be called
-   void callingFunction();  // function that will make call
-                            //    with implicit `this 
-   };
+class OMR_EXTENSIBLE ExtClass {
+public:
+	void functionCalled(); // function to be called
+	void callingFunction(); // function that will make call
+	                        //    with implicit `this
+};
 
 } // namespace OMR
 
-namespace TR
-{ 
-   
-class OMR_EXTENSIBLE ExtClass : public OMR::ExtClass
-   {
+namespace TR {
 
+class OMR_EXTENSIBLE ExtClass : public OMR::ExtClass {};
 
-   };
+} // namespace TR
 
+void
+OMR::ExtClass::functionCalled()
+{}
+
+void
+OMR::ExtClass::callingFunction()
+{
+	functionCalled();
 }
-
-void OMR::ExtClass::functionCalled() {}
-
-void OMR::ExtClass::callingFunction() { functionCalled(); }

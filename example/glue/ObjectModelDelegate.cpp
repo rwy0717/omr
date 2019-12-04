@@ -26,9 +26,11 @@
 #include "ObjectModel.hpp"
 
 omrobjectptr_t
-GC_ObjectModelDelegate::initializeAllocation(MM_EnvironmentBase *env, void *allocatedBytes, MM_AllocateInitialization *allocateInitialization)
+GC_ObjectModelDelegate::initializeAllocation(
+        MM_EnvironmentBase *env, void *allocatedBytes, MM_AllocateInitialization *allocateInitialization)
 {
-	Assert_MM_true(MM_ObjectAllocationModel::allocation_category_example == allocateInitialization->getAllocationCategory());
+	Assert_MM_true(MM_ObjectAllocationModel::allocation_category_example
+	        == allocateInitialization->getAllocationCategory());
 
 	omrobjectptr_t objectPtr = NULL;
 	if (NULL != allocatedBytes) {
@@ -40,7 +42,8 @@ GC_ObjectModelDelegate::initializeAllocation(MM_EnvironmentBase *env, void *allo
 
 #if defined(OMR_GC_MODRON_SCAVENGER)
 void
-GC_ObjectModelDelegate::calculateObjectDetailsForCopy(MM_EnvironmentBase *env, MM_ForwardedHeader *forwardedHeader, uintptr_t *objectCopySizeInBytes, uintptr_t *reservedObjectSizeInBytes, uintptr_t *hotFieldAlignmentDescriptor)
+GC_ObjectModelDelegate::calculateObjectDetailsForCopy(MM_EnvironmentBase *env, MM_ForwardedHeader *forwardedHeader,
+        uintptr_t *objectCopySizeInBytes, uintptr_t *reservedObjectSizeInBytes, uintptr_t *hotFieldAlignmentDescriptor)
 {
 	*objectCopySizeInBytes = getForwardedObjectSizeInBytes(forwardedHeader);
 	*reservedObjectSizeInBytes = env->getExtensions()->objectModel.adjustSizeInBytes(*objectCopySizeInBytes);

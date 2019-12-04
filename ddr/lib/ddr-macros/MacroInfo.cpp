@@ -21,10 +21,7 @@
 
 #include "ddr/macros/MacroInfo.hpp"
 
-MacroInfo::MacroInfo(const string &typeName)
-	: _typeName(typeName)
-{
-}
+MacroInfo::MacroInfo(const string &typeName) : _typeName(typeName) {}
 
 const string &
 MacroInfo::getTypeName() const

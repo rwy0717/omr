@@ -188,5 +188,4 @@ omr_vmthread_redetach(OMR_VMThread *currentThread)
 	Assert_OMRVM_true(0 < currentThread->_attachCount);
 	currentThread->_attachCount -= 1;
 }
-
 }

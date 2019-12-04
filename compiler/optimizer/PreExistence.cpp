@@ -31,36 +31,33 @@
 
 PrexKnowledgeLevel
 TR_PrexArgument::knowledgeLevel(TR_PrexArgument *pa)
-   {
-   if (!pa)
-      return NONE;
-   else if (pa->hasKnownObjectIndex())
-      return KNOWN_OBJECT;
-   else if (pa->classIsFixed())
-      return FIXED_CLASS;
-   else if (pa->classIsPreexistent())
-      return PREEXISTENT;
-   else
-      return NONE;
-   }
+{
+	if (!pa)
+		return NONE;
+	else if (pa->hasKnownObjectIndex())
+		return KNOWN_OBJECT;
+	else if (pa->classIsFixed())
+		return FIXED_CLASS;
+	else if (pa->classIsPreexistent())
+		return PREEXISTENT;
+	else
+		return NONE;
+}
 
-TR_PrexArgument::TR_PrexArgument(
-      TR::KnownObjectTable::Index knownObjectIndex,
-      TR::Compilation *comp) :
-   _classKind(ClassIsUnknown),
-   _class(0),
-   _profiledClazz(0),
-   _isTypeInfoForInlinedBody(false),
-   _knownObjectIndex(knownObjectIndex)
-   {
+TR_PrexArgument::TR_PrexArgument(TR::KnownObjectTable::Index knownObjectIndex, TR::Compilation *comp)
+        : _classKind(ClassIsUnknown)
+        , _class(0)
+        , _profiledClazz(0)
+        , _isTypeInfoForInlinedBody(false)
+        , _knownObjectIndex(knownObjectIndex)
+{
 #ifdef J9_PROJECT_SPECIFIC
-   TR::VMAccessCriticalSection prexArgumentCriticalSection(comp,
-                                                            TR::VMAccessCriticalSection::tryToAcquireVMAccess);
+	TR::VMAccessCriticalSection prexArgumentCriticalSection(
+	        comp, TR::VMAccessCriticalSection::tryToAcquireVMAccess);
 
-   if (prexArgumentCriticalSection.hasVMAccess())
-      {
-      _class = TR::Compiler->cls.objectClass(comp, comp->getKnownObjectTable()->getPointer(knownObjectIndex));
-      _classKind = ClassIsFixed;
-      }
+	if (prexArgumentCriticalSection.hasVMAccess()) {
+		_class = TR::Compiler->cls.objectClass(comp, comp->getKnownObjectTable()->getPointer(knownObjectIndex));
+		_classKind = ClassIsFixed;
+	}
 #endif
-   }
+}

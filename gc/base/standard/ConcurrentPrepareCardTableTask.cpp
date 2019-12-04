@@ -27,7 +27,6 @@
 #if defined(OMR_GC_MODRON_CONCURRENT_MARK)
 
 #include "ConcurrentCardTableForWC.hpp"
-
 #include "ConcurrentPrepareCardTableTask.hpp"
 
 void
@@ -37,5 +36,5 @@ MM_ConcurrentPrepareCardTableTask::run(MM_EnvironmentBase *envBase)
 	_cardTable->prepareCardTableChunk(env, _firstCard, _lastCard, _action);
 }
 
-#endif /* OMR_GC_MODRON_CONCURRENT_MARK */ 
+#endif /* OMR_GC_MODRON_CONCURRENT_MARK */
 #endif /* AIXPPC || LINUXPPC */

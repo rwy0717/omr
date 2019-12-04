@@ -26,7 +26,6 @@
  * @brief Timer utilities
  */
 
-
 #include <time.h>
 #include <sys/types.h>
 #include <sys/time.h>
@@ -94,8 +93,8 @@ omrtime_current_time_nanos(struct OMRPortLibrary *portLibrary, uintptr_t *succes
 	const int64_t subnanosec = MAXPREC();
 
 	// calculate nanosec = subnanosec * NUMERATOR / DENOMINATOR via integer arithmetics
-	const int64_t nanosec = muldiv64(subnanosec,
-			OMRPORT_TIME_HIRES_NANOTIME_NUMERATOR, OMRPORT_TIME_HIRES_NANOTIME_DENOMINATOR);
+	const int64_t nanosec =
+	        muldiv64(subnanosec, OMRPORT_TIME_HIRES_NANOTIME_NUMERATOR, OMRPORT_TIME_HIRES_NANOTIME_DENOMINATOR);
 
 	return nanosec;
 }
@@ -122,8 +121,8 @@ omrtime_nano_time(struct OMRPortLibrary *portLibrary)
 	const int64_t subnanosec = MAXPREC();
 
 	// calculate nanosec = subnanosec * NUMERATOR / DENOMINATOR via integer arithmetics
-	const int64_t nanosec = muldiv64(subnanosec,
-			OMRPORT_TIME_HIRES_NANOTIME_NUMERATOR, OMRPORT_TIME_HIRES_NANOTIME_DENOMINATOR);
+	const int64_t nanosec =
+	        muldiv64(subnanosec, OMRPORT_TIME_HIRES_NANOTIME_NUMERATOR, OMRPORT_TIME_HIRES_NANOTIME_DENOMINATOR);
 
 	return nanosec;
 }
@@ -178,7 +177,8 @@ omrtime_hires_frequency(struct OMRPortLibrary *portLibrary)
  *  \arg OMRPORT_TIME_DELTA_IN_NANOSECONDS return timer value in nanoseconds.
  */
 uint64_t
-omrtime_hires_delta(struct OMRPortLibrary *portLibrary, uint64_t startTime, uint64_t endTime, uint64_t requiredResolution)
+omrtime_hires_delta(
+        struct OMRPortLibrary *portLibrary, uint64_t startTime, uint64_t endTime, uint64_t requiredResolution)
 {
 	uint64_t ticks;
 
@@ -208,13 +208,10 @@ omrtime_hires_delta(struct OMRPortLibrary *portLibrary, uint64_t startTime, uint
  */
 void
 omrtime_shutdown(struct OMRPortLibrary *portLibrary)
-{
-}
+{}
 
 int32_t
 omrtime_startup(struct OMRPortLibrary *portLibrary)
 {
 	return 0;
 }
-
-

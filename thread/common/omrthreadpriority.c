@@ -37,16 +37,16 @@ omrthread_map_native_priority(int nativePriority)
 	int mapPriority;
 	int normal = omrthread_get_mapped_priority(J9THREAD_PRIORITY_NORMAL);
 	int ascending = omrthread_get_mapped_priority(J9THREAD_PRIORITY_MIN)
-					<= omrthread_get_mapped_priority(J9THREAD_PRIORITY_MAX);
+	        <= omrthread_get_mapped_priority(J9THREAD_PRIORITY_MAX);
 
 	for (i = J9THREAD_PRIORITY_MIN; i <= J9THREAD_PRIORITY_MAX; i++) {
 		/* find the closest priority that has higher priority than the given priority */
 		mapPriority = omrthread_get_mapped_priority(i);
-		if (ascending? (nativePriority <= mapPriority) : (nativePriority >= mapPriority)) {
+		if (ascending ? (nativePriority <= mapPriority) : (nativePriority >= mapPriority)) {
 			if (mapPriority == normal) {
-				/* if the native priority of i is the same as the native priority of J9THREAD_PRIORITY_NORMAL
-				* then we default to J9THREAD_PRIORITY_NORMAL
-				*/
+				/* if the native priority of i is the same as the native priority of
+				 * J9THREAD_PRIORITY_NORMAL then we default to J9THREAD_PRIORITY_NORMAL
+				 */
 				return J9THREAD_PRIORITY_NORMAL;
 			}
 			return i;
@@ -57,7 +57,6 @@ omrthread_map_native_priority(int nativePriority)
 	 */
 	return J9THREAD_PRIORITY_MAX;
 }
-
 
 int
 omrthread_get_mapped_priority(omrthread_prio_t omrthreadPriority)

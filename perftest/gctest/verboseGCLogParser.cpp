@@ -33,17 +33,18 @@
 #include "omrport.h"
 #include "omrthread.h"
 
-const char* XPATH_GET_ALL_MARK_TIME = "/verbosegc/gc-op[@type='mark']";
-const char* XPATH_GET_ALL_SWEEP_TIME = "/verbosegc/gc-op[@type='sweep']";
-const char* XPATH_GET_ALL_EXPAND_TIME = "/verbosegc/heap-resize[@type='expand']";
-const char* XPATH_GET_TOTAL_GC_TIME = "/verbosegc/gc-end[@type='global']";
-const char* SRC_DIR = "./";
-const char* VERBOSE_GC_FILE_PREFIX = "VerboseGC";
+const char *XPATH_GET_ALL_MARK_TIME = "/verbosegc/gc-op[@type='mark']";
+const char *XPATH_GET_ALL_SWEEP_TIME = "/verbosegc/gc-op[@type='sweep']";
+const char *XPATH_GET_ALL_EXPAND_TIME = "/verbosegc/heap-resize[@type='expand']";
+const char *XPATH_GET_TOTAL_GC_TIME = "/verbosegc/gc-end[@type='global']";
+const char *SRC_DIR = "./";
+const char *VERBOSE_GC_FILE_PREFIX = "VerboseGC";
 
 double getAvg(std::vector<double> v);
-void analyze(char* fileName, OMRPortLibrary portLibrary);
+void analyze(char *fileName, OMRPortLibrary portLibrary);
 
-int main(void)
+int
+main(void)
 {
 	int32_t totalFiles = 0;
 	intptr_t rc = 0;
@@ -68,7 +69,7 @@ int main(void)
 
 	rcFile = handle = omrfile_findfirst(SRC_DIR, resultBuffer);
 
-	if(rcFile == (uintptr_t)-1) {
+	if (rcFile == (uintptr_t)-1) {
 		fprintf(stderr, "omrfile_findfirst(SRC_DIR, resultBuffer), return code=%d\n", (int)rcFile);
 		return -1;
 	}
@@ -86,7 +87,7 @@ int main(void)
 		omrfile_findclose(handle);
 	}
 
-	if(totalFiles < 1) {
+	if (totalFiles < 1) {
 		omrtty_printf("Failed to find any verbose GC file to process!\n\n");
 	}
 
@@ -103,7 +104,7 @@ getAvg(std::vector<double> v)
 }
 
 void
-analyze(char* fileName, OMRPortLibrary portLibrary)
+analyze(char *fileName, OMRPortLibrary portLibrary)
 {
 	std::vector<double> mark_values;
 	std::vector<double> sweep_values;
@@ -135,39 +136,39 @@ analyze(char* fileName, OMRPortLibrary portLibrary)
 	pugi::xml_parse_result result = doc.load_file(fileName);
 
 	OMRPORT_ACCESS_FROM_OMRPORT(&portLibrary);
-	if(!result) {
+	if (!result) {
 		omrtty_printf("Error loading file : %s\n", fileName);
 		return;
 	} else {
-		omrtty_printf("\nResults for : %s\n",fileName);
+		omrtty_printf("\nResults for : %s\n", fileName);
 	}
 
 	markTimes = doc.select_nodes(XPATH_GET_ALL_MARK_TIME);
 	for (pugi::xpath_node_set::const_iterator it = markTimes.begin(); it != markTimes.end(); ++it) {
-	    pugi::xpath_node node = *it;
-	    double value = node.node().attribute("timems").as_double();
-	    mark_values.push_back(value);
+		pugi::xpath_node node = *it;
+		double value = node.node().attribute("timems").as_double();
+		mark_values.push_back(value);
 	}
 
 	sweepTimes = doc.select_nodes(XPATH_GET_ALL_SWEEP_TIME);
 	for (pugi::xpath_node_set::const_iterator it = sweepTimes.begin(); it != sweepTimes.end(); ++it) {
-	    pugi::xpath_node node = *it;
-	    double value = node.node().attribute("timems").as_double();
-	    sweep_values.push_back(value);
+		pugi::xpath_node node = *it;
+		double value = node.node().attribute("timems").as_double();
+		sweep_values.push_back(value);
 	}
 
 	expandTimes = doc.select_nodes(XPATH_GET_ALL_EXPAND_TIME);
 	for (pugi::xpath_node_set::const_iterator it = expandTimes.begin(); it != expandTimes.end(); ++it) {
-	    pugi::xpath_node node = *it;
-	    double value = node.node().attribute("timems").as_double();
-	    expand_values.push_back(value);
+		pugi::xpath_node node = *it;
+		double value = node.node().attribute("timems").as_double();
+		expand_values.push_back(value);
 	}
 
 	gcTimes = doc.select_nodes(XPATH_GET_TOTAL_GC_TIME);
 	for (pugi::xpath_node_set::const_iterator it = gcTimes.begin(); it != gcTimes.end(); ++it) {
-	    pugi::xpath_node node = *it;
-	    double value = node.node().attribute("durationms").as_double();
-	    gcduration_values.push_back(value);
+		pugi::xpath_node node = *it;
+		double value = node.node().attribute("durationms").as_double();
+		gcduration_values.push_back(value);
 	}
 
 	if (!mark_values.empty()) {
@@ -196,12 +197,9 @@ analyze(char* fileName, OMRPortLibrary portLibrary)
 
 	omrtty_printf("            Mark           Sweep          Expand        GCDuration\n");
 	omrtty_printf("-------------------------------------------------------------------\n");
-	omrtty_printf("Max     : %f        %f        %f        %f\n",
-						maxMark, maxSweep, maxExpand, maxGCDuration);
+	omrtty_printf("Max     : %f        %f        %f        %f\n", maxMark, maxSweep, maxExpand, maxGCDuration);
 
-	omrtty_printf("Min     : %f        %f        %f        %f\n",
-								minMark, minSweep, minExpand, minGCDuration);
+	omrtty_printf("Min     : %f        %f        %f        %f\n", minMark, minSweep, minExpand, minGCDuration);
 
-	omrtty_printf("Average : %f        %f        %f        %f\n\n",
-								avgMark, avgSweep, avgExpand, avgGCDuration);
+	omrtty_printf("Average : %f        %f        %f        %f\n\n", avgMark, avgSweep, avgExpand, avgGCDuration);
 }

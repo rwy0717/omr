@@ -20,9 +20,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-#include "omrcomp.h"
-#include "sizeclasses.h"
-#include "ModronAssertions.h"
+#include "SweepSchemeSegregated.hpp"
 
 #include "EnvironmentBase.hpp"
 #include "FreeHeapRegionList.hpp"
@@ -30,14 +28,15 @@
 #include "Heap.hpp"
 #include "HeapRegionDescriptorSegregated.hpp"
 #include "HeapRegionManager.hpp"
+#include "HeapRegionQueue.hpp"
 #include "MarkMap.hpp"
 #include "MemoryPoolAggregatedCellList.hpp"
 #include "MemoryPoolSegregated.hpp"
+#include "ModronAssertions.h"
 #include "RegionPoolSegregated.hpp"
 #include "Task.hpp"
-
-#include "SweepSchemeSegregated.hpp"
-#include "HeapRegionQueue.hpp"
+#include "omrcomp.h"
+#include "sizeclasses.h"
 
 #if defined(OMR_GC_SEGREGATED_HEAP)
 
@@ -49,10 +48,11 @@ MM_SweepSchemeSegregated *
 MM_SweepSchemeSegregated::newInstance(MM_EnvironmentBase *env, MM_MarkMap *markMap)
 {
 	MM_SweepSchemeSegregated *instance;
-	
-	instance = (MM_SweepSchemeSegregated *)env->getForge()->allocate(sizeof(MM_SweepSchemeSegregated), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+
+	instance = (MM_SweepSchemeSegregated *)env->getForge()->allocate(
+	        sizeof(MM_SweepSchemeSegregated), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
 	if (NULL != instance) {
-		new(instance) MM_SweepSchemeSegregated(env, markMap);
+		new (instance) MM_SweepSchemeSegregated(env, markMap);
 		if (!instance->initialize(env)) {
 			instance->kill(env);
 			instance = NULL;
@@ -68,13 +68,13 @@ MM_SweepSchemeSegregated::newInstance(MM_EnvironmentBase *env, MM_MarkMap *markM
 void
 MM_SweepSchemeSegregated::kill(MM_EnvironmentBase *env)
 {
-	tearDown(env); 
+	tearDown(env);
 	env->getForge()->free(this);
 }
 
 /**
  * Intialize the SweepSchemeSegregated instance.
- * 
+ *
  */
 bool
 MM_SweepSchemeSegregated::initialize(MM_EnvironmentBase *env)
@@ -84,17 +84,15 @@ MM_SweepSchemeSegregated::initialize(MM_EnvironmentBase *env)
 
 /**
  * Teardown the SweepSchemeSegregated instance.
- * 
+ *
  */
 void
 MM_SweepSchemeSegregated::tearDown(MM_EnvironmentBase *env)
-{
-}
+{}
 
 void
 MM_SweepSchemeSegregated::yieldFromSweep(MM_EnvironmentBase *env, uintptr_t yieldSlackTime)
-{
-}
+{}
 
 void
 MM_SweepSchemeSegregated::sweep(MM_EnvironmentBase *env, MM_MemoryPoolSegregated *memoryPool, bool isFixHeapForWalk)
@@ -106,11 +104,11 @@ MM_SweepSchemeSegregated::sweep(MM_EnvironmentBase *env, MM_MemoryPoolSegregated
 		preSweep(env);
 		env->_currentTask->releaseSynchronizedGCThreads(env);
 	}
-	
+
 	incrementalSweepArraylet(env);
 	env->_currentTask->synchronizeGCThreads(env, UNIQUE_ID);
 	incrementalSweepLarge(env);
-	
+
 	MM_RegionPoolSegregated *regionPool = _memoryPool->getRegionPool();
 	if (env->_currentTask->synchronizeGCThreadsAndReleaseMaster(env, UNIQUE_ID)) {
 		regionPool->setSweepSmallPages(true);
@@ -160,12 +158,9 @@ MM_SweepSchemeSegregated::sweepRegion(MM_EnvironmentBase *env, MM_HeapRegionDesc
 		addBytesFreedAfterSweep(env, region);
 		break;
 
-	case MM_HeapRegionDescriptor::SEGREGATED_LARGE:
-		sweepLargeRegion(env, region);
-		break;
+	case MM_HeapRegionDescriptor::SEGREGATED_LARGE: sweepLargeRegion(env, region); break;
 
-	default:
-		Assert_MM_unreachable();
+	default: Assert_MM_unreachable();
 	}
 }
 
@@ -181,22 +176,24 @@ MM_SweepSchemeSegregated::unmarkRegion(MM_EnvironmentBase *env, MM_HeapRegionDes
 
 	uintptr_t regionLowAddress = (uintptr_t)region->getLowAddress();
 	uintptr_t regionHighAddress = (uintptr_t)region->getHighAddress();
-	uintptr_t lastCellStart = regionLowAddress + (numCells - 1) * cellSize ;
+	uintptr_t lastCellStart = regionLowAddress + (numCells - 1) * cellSize;
 	uintptr_t scanBitOffset = 1 << OMR_SIZECLASSES_LOG_SMALLEST;
 
-	_markMap->getSlotIndexAndMask((omrobjectptr_t) regionLowAddress, &slotIndexLow, &bitMask);
+	_markMap->getSlotIndexAndMask((omrobjectptr_t)regionLowAddress, &slotIndexLow, &bitMask);
 
 	/*
-	 * CMVC 149635 : We need to ensure we do not miss to clear any scan bit, which is set for the ref array copy optimization.
-	 * To not miss the scan bit of an object that's in the last cell of a region, we pretend the last object starts
-	 * at 16 bytes past its header, which is where we would set the scan bit on the mark map.
-	 * Note we need to ensure that cell size is at least >16 bytes, otherwise 16 bytes past J9Object* would go off the end of page, hence the if check below.
-	 * And since there is no scan bit for object that's 16 bytes, this should be safe.
+	 * CMVC 149635 : We need to ensure we do not miss to clear any scan bit, which is set for the ref array copy
+	 * optimization. To not miss the scan bit of an object that's in the last cell of a region, we pretend the last
+	 * object starts at 16 bytes past its header, which is where we would set the scan bit on the mark map. Note we
+	 * need to ensure that cell size is at least >16 bytes, otherwise 16 bytes past J9Object* would go off the end
+	 * of page, hence the if check below. And since there is no scan bit for object that's 16 bytes, this should be
+	 * safe.
 	 */
 	if (lastCellStart + scanBitOffset >= regionHighAddress) {
-		_markMap->getSlotIndexAndMask((omrobjectptr_t) lastCellStart, &slotIndexHigh, &bitMask);
+		_markMap->getSlotIndexAndMask((omrobjectptr_t)lastCellStart, &slotIndexHigh, &bitMask);
 	} else {
-		_markMap->getSlotIndexAndMask((omrobjectptr_t) (lastCellStart + scanBitOffset), &slotIndexHigh, &bitMask);
+		_markMap->getSlotIndexAndMask(
+		        (omrobjectptr_t)(lastCellStart + scanBitOffset), &slotIndexHigh, &bitMask);
 	}
 	_markMap->setMarkBlock(slotIndexLow, slotIndexHigh, 0);
 }
@@ -226,10 +223,11 @@ MM_SweepSchemeSegregated::sweepSmallRegion(MM_EnvironmentBase *env, MM_HeapRegio
 
 	_markMap->getSlotIndexAndMask((omrobjectptr_t)lastCellAddress, &lastCellSlotIndex, &lastCellBitMask);
 
-	for (uintptr_t currentCellAddress = (uintptr_t)lowAddress; currentCellAddress <= lastCellAddress; currentCellAddress += blockSizeInBytes) {
+	for (uintptr_t currentCellAddress = (uintptr_t)lowAddress; currentCellAddress <= lastCellAddress;
+	        currentCellAddress += blockSizeInBytes) {
 		uintptr_t initialSlotIndex, slotIndex, bitMask;
 
-		_markMap->getSlotIndexAndMask((omrobjectptr_t) currentCellAddress, &initialSlotIndex, &bitMask);
+		_markMap->getSlotIndexAndMask((omrobjectptr_t)currentCellAddress, &initialSlotIndex, &bitMask);
 
 		if (0 != (_markMap->getSlot(initialSlotIndex) & bitMask)) {
 
@@ -237,7 +235,8 @@ MM_SweepSchemeSegregated::sweepSmallRegion(MM_EnvironmentBase *env, MM_HeapRegio
 			blockSizeInBytes = cellSize;
 
 			if (freeChunk) {
-				if (addFreeChunk(memoryPoolACL, (uintptr_t *) freeChunk, freeChunkSize, minimumFreeEntrySize, freeChunkCellCount)) {
+				if (addFreeChunk(memoryPoolACL, (uintptr_t *)freeChunk, freeChunkSize,
+				            minimumFreeEntrySize, freeChunkCellCount)) {
 					sweepCostCounter += 3;
 				}
 				freeChunk = 0;
@@ -253,7 +252,7 @@ MM_SweepSchemeSegregated::sweepSmallRegion(MM_EnvironmentBase *env, MM_HeapRegio
 				yieldFromSweep(env);
 			}
 		} else {
-	 		/* attempt block sweeping slots with all 0s */
+			/* attempt block sweeping slots with all 0s */
 			if ((0 == _markMap->getSlot(initialSlotIndex)) && (initialSlotIndex < lastCellSlotIndex)) {
 				slotIndex = initialSlotIndex;
 				do {
@@ -266,8 +265,7 @@ MM_SweepSchemeSegregated::sweepSmallRegion(MM_EnvironmentBase *env, MM_HeapRegio
 				numCellsInBlock = (nextCell - 1 - currentCellAddress) / cellSize + 1;
 				blockSizeInBytes = numCellsInBlock * cellSize;
 				/* end of block sweeping */
-			}
-			else {
+			} else {
 				numCellsInBlock = 1;
 				blockSizeInBytes = cellSize;
 			}
@@ -283,7 +281,8 @@ MM_SweepSchemeSegregated::sweepSmallRegion(MM_EnvironmentBase *env, MM_HeapRegio
 	}
 
 	if (freeChunk) {
-		if (addFreeChunk(memoryPoolACL, (uintptr_t *) freeChunk, freeChunkSize, minimumFreeEntrySize, freeChunkCellCount)) {
+		if (addFreeChunk(memoryPoolACL, (uintptr_t *)freeChunk, freeChunkSize, minimumFreeEntrySize,
+		            freeChunkCellCount)) {
 			sweepCostCounter += 3;
 		}
 	}
@@ -295,7 +294,8 @@ MM_SweepSchemeSegregated::sweepSmallRegion(MM_EnvironmentBase *env, MM_HeapRegio
 	/* Reset the free cells of the memory pool */
 	memoryPoolACL->resetCurrentEntry();
 
-	_memoryPool->getRegionPool()->addDarkMatterCellsAfterSweepForSizeClass(region->getSizeClass(), numCells - memoryPoolACL->getMarkCount() - memoryPoolACL->getFreeCount());
+	_memoryPool->getRegionPool()->addDarkMatterCellsAfterSweepForSizeClass(
+	        region->getSizeClass(), numCells - memoryPoolACL->getMarkCount() - memoryPoolACL->getFreeCount());
 }
 
 void
@@ -308,7 +308,7 @@ MM_SweepSchemeSegregated::sweepArrayletRegion(MM_EnvironmentBase *env, MM_HeapRe
 	uintptr_t firstUnused = UDATA_MAX;
 	for (uintptr_t i = 0; i < arrayletsPerRegion; i++) {
 		if (region->isArrayletUsed(i)) {
-			if (!_markMap->isBitSet((omrobjectptr_t) region->getArrayletParent(i))) {
+			if (!_markMap->isBitSet((omrobjectptr_t)region->getArrayletParent(i))) {
 				if (i < firstUnused) {
 					firstUnused = i;
 					region->setNextArrayletIndex(firstUnused);
@@ -330,7 +330,7 @@ void
 MM_SweepSchemeSegregated::sweepLargeRegion(MM_EnvironmentBase *env, MM_HeapRegionDescriptorSegregated *region)
 {
 	MM_MemoryPoolAggregatedCellList *memoryPoolACL = region->getMemoryPoolACL();
-	omrobjectptr_t object = (omrobjectptr_t) region->getLowAddress();
+	omrobjectptr_t object = (omrobjectptr_t)region->getLowAddress();
 
 	if (_markMap->isBitSet(object)) {
 		if (isClearMarkMapAfterSweep()) {
@@ -383,28 +383,29 @@ MM_SweepSchemeSegregated::incrementalCoalesceFreeRegions(MM_EnvironmentBase *env
 	uintptr_t regionCount = regionManager->getTableRegionCount();
 	MM_RegionPoolSegregated *regionPool = _memoryPool->getRegionPool();
 	MM_FreeHeapRegionList *coalesceFreeList = regionPool->getCoalesceFreeList();
-	
+
 	uintptr_t yieldSlackTime = resetCoalesceFreeRegionCount(env);
 	yieldFromSweep(env, yieldSlackTime);
 
 	coalesceFreeList->push(regionPool->getSingleFreeList());
 	coalesceFreeList->push(regionPool->getMultiFreeList());
-	
+
 	MM_HeapRegionDescriptorSegregated *coalescing = NULL;
 	MM_HeapRegionDescriptorSegregated *currentRegion = NULL;
-	
-	for (uintptr_t i=0; i< regionCount; ) {
-		
+
+	for (uintptr_t i = 0; i < regionCount;) {
+
 		currentRegion = (MM_HeapRegionDescriptorSegregated *)regionManager->mapRegionTableIndexToDescriptor(i);
 		uintptr_t range = currentRegion->getRange();
 		i += range;
-		
+
 		bool shouldYield = updateCoalesceFreeRegionCount(range);
 		bool shouldClose = shouldYield || (i >= regionCount);
-		
+
 		if (currentRegion->isFree()) {
 			coalesceFreeList->detach(currentRegion);
-			bool joined = (range < MAX_REGION_COALESCE) && (coalescing != NULL && coalescing->joinFreeRangeInit(currentRegion));
+			bool joined = (range < MAX_REGION_COALESCE)
+			        && (coalescing != NULL && coalescing->joinFreeRangeInit(currentRegion));
 			if (joined) {
 				currentRegion = NULL;
 			} else {
@@ -431,7 +432,7 @@ MM_SweepSchemeSegregated::incrementalCoalesceFreeRegions(MM_EnvironmentBase *env
 		}
 	}
 	if (currentRegion != NULL) {
-		regionPool->addFreeRegion(env, currentRegion, true);		
+		regionPool->addFreeRegion(env, currentRegion, true);
 		currentRegion = NULL;
 	}
 
@@ -448,7 +449,7 @@ MM_SweepSchemeSegregated::incrementalSweepLarge(MM_EnvironmentBase *env)
 	MM_HeapRegionDescriptorSegregated *currentRegion;
 	while ((currentRegion = largeSweepRegions->dequeue()) != NULL) {
 		sweepRegion(env, currentRegion);
-		
+
 		if (currentRegion->getMemoryPoolACL()->getFreeCount() == 0) {
 			largeFullRegions->enqueue(currentRegion);
 		} else {
@@ -468,17 +469,17 @@ MM_SweepSchemeSegregated::incrementalSweepArraylet(MM_EnvironmentBase *env)
 	MM_HeapRegionQueue *arrayletSweepRegions = regionPool->getArrayletSweepRegions();
 	MM_HeapRegionQueue *arrayletAvailableRegions = regionPool->getArrayletAvailableRegions();
 	MM_HeapRegionDescriptorSegregated *currentRegion;
-	
+
 	while ((currentRegion = arrayletSweepRegions->dequeue()) != NULL) {
 		sweepRegion(env, currentRegion);
-		
+
 		if (currentRegion->getMemoryPoolACL()->getFreeCount() != arrayletsPerRegion) {
 			arrayletAvailableRegions->enqueue(currentRegion);
 		} else {
 			currentRegion->emptyRegionReturned(env);
 			regionPool->addFreeRegion(env, currentRegion);
 		}
-		
+
 		yieldFromSweep(env);
 	}
 }
@@ -503,33 +504,39 @@ MM_SweepSchemeSegregated::incrementalSweepSmall(MM_EnvironmentBase *env)
 	MM_RegionPoolSegregated *regionPool = _memoryPool->getRegionPool();
 	uintptr_t splitIndex = env->getSlaveID() % (regionPool->getSplitAvailableListSplitCount());
 
-	/* 
+	/*
 	 * Iterate through the regions so that each region is processed exactly once.
 	 * Interleaved sweeping: free up some number of regions of all sizeClasses right away
 	 * so that application have somewhere to allocate from and minimize the usage of
-	 * non deterministic sweeps. 
+	 * non deterministic sweeps.
 	 * Any marked objects are unmarked.
-	 * If a region holds a marked object, then the region is kept active; 
+	 * If a region holds a marked object, then the region is kept active;
 	 * if a region contains no marked objects, then it can be returned to a free list.
 	 */
 	MM_SizeClasses *sizeClasses = ext->defaultSizeClasses;
 	while (regionPool->getCurrentTotalCountOfSweepRegions()) {
-		for (uintptr_t sizeClass = OMR_SIZECLASSES_MIN_SMALL; sizeClass <= OMR_SIZECLASSES_MAX_SMALL; sizeClass++) {
+		for (uintptr_t sizeClass = OMR_SIZECLASSES_MIN_SMALL; sizeClass <= OMR_SIZECLASSES_MAX_SMALL;
+		        sizeClass++) {
 			while (regionPool->getCurrentCountOfSweepRegions(sizeClass)) {
-				float yetToComplete = (float)regionPool->getCurrentCountOfSweepRegions(sizeClass) / regionPool->getInitialCountOfSweepRegions(sizeClass);
-				float totalYetToComplete = (float)regionPool->getCurrentTotalCountOfSweepRegions() / regionPool->getInitialTotalCountOfSweepRegions();
-				
+				float yetToComplete = (float)regionPool->getCurrentCountOfSweepRegions(sizeClass)
+				        / regionPool->getInitialCountOfSweepRegions(sizeClass);
+				float totalYetToComplete = (float)regionPool->getCurrentTotalCountOfSweepRegions()
+				        / regionPool->getInitialTotalCountOfSweepRegions();
+
 				if (yetToComplete < totalYetToComplete) {
 					break;
 				}
-				
+
 				MM_HeapRegionQueue *sweepList = regionPool->getSmallSweepRegions(sizeClass);
 				MM_HeapRegionDescriptorSegregated *currentRegion;
 				uintptr_t numCells = sizeClasses->getNumCells(sizeClass);
 				uintptr_t sweepSmallRegionsPerIteration = calcSweepSmallRegionsPerIteration(numCells);
-				uintptr_t yieldSlackTime = resetSweepSmallRegionCount(env, sweepSmallRegionsPerIteration);
+				uintptr_t yieldSlackTime =
+				        resetSweepSmallRegionCount(env, sweepSmallRegionsPerIteration);
 				uintptr_t actualSweepRegions;
-				if ((actualSweepRegions = sweepList->dequeue(env->getRegionWorkList(), sweepSmallRegionsPerIteration)) > 0) {
+				if ((actualSweepRegions = sweepList->dequeue(
+				             env->getRegionWorkList(), sweepSmallRegionsPerIteration))
+				        > 0) {
 					regionPool->decrementCurrentCountOfSweepRegions(sizeClass, actualSweepRegions);
 					regionPool->decrementCurrentTotalCountOfSweepRegions(actualSweepRegions);
 					uintptr_t freedRegions = 0, processedRegions = 0;
@@ -537,16 +544,22 @@ MM_SweepSchemeSegregated::incrementalSweepSmall(MM_EnvironmentBase *env)
 					while ((currentRegion = env->getRegionWorkList()->dequeue()) != NULL) {
 						sweepRegion(env, currentRegion);
 						if (currentRegion->getMemoryPoolACL()->getFreeCount() < numCells) {
-							uintptr_t occupancy = (currentRegion->getMemoryPoolACL()->getMarkCount() * 100) / numCells;
-							/* Maintain average occupancy needed for nondeterministic sweep heuristic */
+							uintptr_t occupancy =
+							        (currentRegion->getMemoryPoolACL()->getMarkCount()
+							                * 100)
+							        / numCells;
+							/* Maintain average occupancy needed for nondeterministic sweep
+							 * heuristic */
 							if (shouldUpdateOccupancy) {
 								regionPool->updateOccupancy(sizeClass, occupancy);
 							}
-							if (currentRegion->getMemoryPoolACL()->getMarkCount() == numCells) {
+							if (currentRegion->getMemoryPoolACL()->getMarkCount()
+							        == numCells) {
 								/* Return full regions to full list */
 								fullList->enqueue(currentRegion);
 							} else {
-								regionPool->enqueueAvailable(currentRegion, sizeClass, occupancy, splitIndex);
+								regionPool->enqueueAvailable(currentRegion, sizeClass,
+								        occupancy, splitIndex);
 							}
 						} else {
 							currentRegion->emptyRegionReturned(env);
@@ -555,12 +568,12 @@ MM_SweepSchemeSegregated::incrementalSweepSmall(MM_EnvironmentBase *env)
 							freedRegions++;
 						}
 						processedRegions++;
-						
+
 						if (updateSweepSmallRegionCount()) {
 							yieldFromSweep(env, yieldSlackTime);
 						}
 					}
-					regionPool->addSingleFree(env, env->getRegionLocalFree());				
+					regionPool->addSingleFree(env, env->getRegionLocalFree());
 					regionPool->getSmallFullRegions(sizeClass)->enqueue(fullList);
 					yieldFromSweep(env, yieldSlackTime);
 				}

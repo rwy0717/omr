@@ -23,22 +23,20 @@
 #if !defined(HEAPSTATS_HPP_)
 #define HEAPSTATS_HPP_
 
-#include "omrcomp.h"
-
 #include "Base.hpp"
+#include "omrcomp.h"
 
 /**
  * A collection of interesting statistics for the Heap.
  * @ingroup GC_Stats
  */
-class MM_HeapStats : public MM_Base 
-{
+class MM_HeapStats : public MM_Base {
 public:
 	uintptr_t _allocCount;
 	uintptr_t _allocBytes;
 	uintptr_t _allocDiscardedBytes;
 	uintptr_t _allocSearchCount;
-	
+
 	/* Number of bytes free at end of last GC */
 	uintptr_t _lastFreeBytes;
 
@@ -47,17 +45,16 @@ public:
 
 	/**
 	 * Create a HeapStats object.
-	 */   
-	MM_HeapStats() :
-		MM_Base(),
-		_allocCount(0),
-		_allocBytes(0),
-		_allocDiscardedBytes(0),
-		_allocSearchCount(0),
-		_lastFreeBytes(0),
-		_activeFreeEntryCount(0),
-		_inactiveFreeEntryCount(0)
-	{};
+	 */
+	MM_HeapStats()
+	        : MM_Base()
+	        , _allocCount(0)
+	        , _allocBytes(0)
+	        , _allocDiscardedBytes(0)
+	        , _allocSearchCount(0)
+	        , _lastFreeBytes(0)
+	        , _activeFreeEntryCount(0)
+	        , _inactiveFreeEntryCount(0){};
 };
 
 #endif /* HEAPSTATS_HPP_ */

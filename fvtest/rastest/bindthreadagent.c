@@ -33,10 +33,12 @@ typedef struct TestChildThreadData {
 } TestChildThreadData;
 
 static int J9THREAD_PROC childThreadMain(void *entryArg);
-static omr_error_t startTestChildThread(OMR_TI const *ti, OMR_VM *testVM, OMR_VMThread *curVMThread, omrthread_t *childThread, TestChildThreadData **childData);
+static omr_error_t startTestChildThread(OMR_TI const *ti, OMR_VM *testVM, OMR_VMThread *curVMThread,
+        omrthread_t *childThread, TestChildThreadData **childData);
 static omr_error_t testBindUnbind(OMR_TI const *ti, OMR_VM *vm, const char *threadName);
 static omr_error_t testBindUnbindNegativeCases(OMR_TI const *ti, OMR_VM *vm);
-static omr_error_t waitForTestChildThread(OMR_TI const *ti, OMR_VM *testVM, omrthread_t childThead, TestChildThreadData *childData);
+static omr_error_t waitForTestChildThread(
+        OMR_TI const *ti, OMR_VM *testVM, omrthread_t childThead, TestChildThreadData *childData);
 
 static const char *agentName = "bindthreadagent";
 
@@ -71,13 +73,14 @@ OMRAgent_OnUnload(OMR_TI const *ti, OMR_VM *vm)
 	return OMR_ERROR_NONE;
 }
 
-
 static omr_error_t
-startTestChildThread(OMR_TI const *ti, OMR_VM *testVM, OMR_VMThread *curVMThread, omrthread_t *childThread, TestChildThreadData **childData)
+startTestChildThread(OMR_TI const *ti, OMR_VM *testVM, OMR_VMThread *curVMThread, omrthread_t *childThread,
+        TestChildThreadData **childData)
 {
 	omr_error_t rc = OMR_ERROR_NONE;
 	OMRPORT_ACCESS_FROM_OMRVM(testVM);
-	TestChildThreadData *newChildData = (TestChildThreadData *)omrmem_allocate_memory(sizeof(*newChildData), OMRMEM_CATEGORY_VM);
+	TestChildThreadData *newChildData =
+	        (TestChildThreadData *)omrmem_allocate_memory(sizeof(*newChildData), OMRMEM_CATEGORY_VM);
 	OMR_ThreadAPI *threadAPI = (OMR_ThreadAPI *)ti->internalData;
 
 	if (NULL == newChildData) {
@@ -86,7 +89,9 @@ startTestChildThread(OMR_TI const *ti, OMR_VM *testVM, OMR_VMThread *curVMThread
 	}
 
 	if (OMR_ERROR_NONE == rc) {
-		if (0 != threadAPI->omrthread_monitor_init_with_name(&newChildData->shutdownCond, 0, "traceTestChildShutdown")) {
+		if (0
+		        != threadAPI->omrthread_monitor_init_with_name(
+		                &newChildData->shutdownCond, 0, "traceTestChildShutdown")) {
 			rc = OMR_ERROR_FAILED_TO_ALLOCATE_MONITOR;
 			omrtty_printf("%s:%d ERROR: Failed to init shutdownCond monitor\n", __FILE__, __LINE__);
 			omrmem_free_memory(newChildData);
@@ -99,12 +104,12 @@ startTestChildThread(OMR_TI const *ti, OMR_VM *testVM, OMR_VMThread *curVMThread
 	}
 
 	if (OMR_ERROR_NONE == rc) {
-		if (0 != threadAPI->omrthread_create_ex(
-			NULL, /* handle */
-			J9THREAD_ATTR_DEFAULT, /* attr */
-			FALSE, /* suspend */
-			childThreadMain, /* entrypoint */
-			newChildData) /* entryarg */
+		if (0
+		        != threadAPI->omrthread_create_ex(NULL, /* handle */
+		                J9THREAD_ATTR_DEFAULT, /* attr */
+		                FALSE, /* suspend */
+		                childThreadMain, /* entrypoint */
+		                newChildData) /* entryarg */
 		) {
 			rc = OMR_ERROR_OUT_OF_NATIVE_MEMORY;
 			omrtty_printf("%s:%d ERROR: Failed to init shutdownCond monitor\n", __FILE__, __LINE__);
@@ -199,7 +204,8 @@ testBindUnbind(OMR_TI const *ti, OMR_VM *vm, const char *threadName)
 			printf("%s: recursive BindCurrentThread failed, NULL vmThread2 was returned\n", agentName);
 			rc = OMR_ERROR_INTERNAL;
 		} else if (vmThread != vmThread2) {
-			printf("%s: recursive BindCurrentThread failed, vmThread (%p) != vmThread2 (%p)\n", agentName, vmThread, vmThread2);
+			printf("%s: recursive BindCurrentThread failed, vmThread (%p) != vmThread2 (%p)\n", agentName,
+			        vmThread, vmThread2);
 			rc = OMR_ERROR_INTERNAL;
 		} else {
 			printf("%s: recursive BindCurrentThread passed, vmThread2=%p\n", agentName, vmThread2);
@@ -254,7 +260,8 @@ testBindUnbindNegativeCases(OMR_TI const *ti, OMR_VM *vm)
 	if (OMR_ERROR_NONE == testRc) {
 		rc = ti->BindCurrentThread(NULL, "test thread", &vmThread);
 		if (OMR_ERROR_ILLEGAL_ARGUMENT != rc) {
-			printf("  Did not get expected rc (%d OMR_ERROR_ILLEGAL_ARGUMENT)\n", OMR_ERROR_ILLEGAL_ARGUMENT);
+			printf("  Did not get expected rc (%d OMR_ERROR_ILLEGAL_ARGUMENT)\n",
+			        OMR_ERROR_ILLEGAL_ARGUMENT);
 			testRc = OMR_ERROR_INTERNAL;
 		}
 	}
@@ -262,7 +269,8 @@ testBindUnbindNegativeCases(OMR_TI const *ti, OMR_VM *vm)
 	if (OMR_ERROR_NONE == testRc) {
 		rc = ti->BindCurrentThread(vm, "test thread", NULL);
 		if (OMR_ERROR_ILLEGAL_ARGUMENT != rc) {
-			printf("  Did not get expected rc (%d OMR_ERROR_ILLEGAL_ARGUMENT)\n", OMR_ERROR_ILLEGAL_ARGUMENT);
+			printf("  Did not get expected rc (%d OMR_ERROR_ILLEGAL_ARGUMENT)\n",
+			        OMR_ERROR_ILLEGAL_ARGUMENT);
 			testRc = OMR_ERROR_INTERNAL;
 		}
 	}

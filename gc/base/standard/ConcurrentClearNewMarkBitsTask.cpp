@@ -24,9 +24,8 @@
 
 #if defined(OMR_GC_MODRON_CONCURRENT_MARK)
 
-#include "ConcurrentGC.hpp"
-
 #include "ConcurrentClearNewMarkBitsTask.hpp"
+#include "ConcurrentGC.hpp"
 
 void
 MM_ConcurrentClearNewMarkBitsTask::run(MM_EnvironmentBase *envBase)
@@ -36,4 +35,3 @@ MM_ConcurrentClearNewMarkBitsTask::run(MM_EnvironmentBase *envBase)
 }
 
 #endif /* OMR_GC_MODRON_CONCURRENT_MARK */
- 

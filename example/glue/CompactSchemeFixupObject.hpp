@@ -18,7 +18,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
- 
+
 #ifndef COMPACTSCHEMEOBJECTFIXUP_HPP_
 #define COMPACTSCHEMEOBJECTFIXUP_HPP_
 
@@ -40,7 +40,6 @@ private:
 	MM_CompactScheme *_compactScheme;
 	*/
 public:
-
 	/**
 	 * Perform fixup for a single object
 	 * @param env[in] the current thread
@@ -50,11 +49,11 @@ public:
 
 	static void verifyForwardingPtr(omrobjectptr_t objectPtr, omrobjectptr_t forwardingPtr);
 
-	MM_CompactSchemeFixupObject(MM_EnvironmentBase* env, MM_CompactScheme *compactScheme)
-/*	:
-		_omrVM(env->getOmrVM()),
-		_extensions(env->getExtensions()),
-		_compactScheme(compactScheme)*/
+	MM_CompactSchemeFixupObject(MM_EnvironmentBase *env, MM_CompactScheme *compactScheme)
+	/*	:
+	                _omrVM(env->getOmrVM()),
+	                _extensions(env->getExtensions()),
+	                _compactScheme(compactScheme)*/
 	{}
 
 protected:

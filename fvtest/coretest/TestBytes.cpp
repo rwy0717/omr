@@ -22,8 +22,7 @@
 #include <OMR/Bytes.hpp>
 #include <gtest/gtest.h>
 
-namespace OMR
-{
+namespace OMR {
 
 TEST(TestBytes, CompareZeroToZero)
 {
@@ -54,7 +53,7 @@ TEST(TestBytes, IsPow2)
 	EXPECT_TRUE(isPow2(2));
 	EXPECT_TRUE(isPow2(4));
 	EXPECT_TRUE(isPow2(8));
-	EXPECT_TRUE(isPow2(size_t(1) << ((sizeof(size_t)*8) - 1)));
+	EXPECT_TRUE(isPow2(size_t(1) << ((sizeof(size_t) * 8) - 1)));
 
 	EXPECT_FALSE(isPow2(0));
 	EXPECT_FALSE(isPow2(3));
@@ -184,4 +183,4 @@ TEST(TestBytes, AlignMaximumSizeFor16byteAlignment)
 	EXPECT_EQ(std::numeric_limits<size_t>::max(), align(std::numeric_limits<size_t>::max(), 1));
 }
 
-}  // namespace OMR
+} // namespace OMR

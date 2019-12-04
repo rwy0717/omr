@@ -38,8 +38,7 @@ MM_GlobalAllocationManager::initialize(MM_EnvironmentBase *env)
  */
 void
 MM_GlobalAllocationManager::tearDown(MM_EnvironmentBase *env)
-{
-}
+{}
 
 /**
  * Flush all allocation contexts such that the cells allocated to them becomes safe for traversal.
@@ -53,7 +52,7 @@ MM_GlobalAllocationManager::flushAllocationContexts(MM_EnvironmentBase *env)
 	}
 }
 
-void 
+void
 MM_GlobalAllocationManager::flushAllocationContextsForShutdown(MM_EnvironmentBase *env)
 {
 	Assert_MM_true(_managedAllocationContextCount > 0);

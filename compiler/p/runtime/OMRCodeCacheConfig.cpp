@@ -23,6 +23,6 @@
 #include "runtime/CodeCacheConfig.hpp"
 
 OMR::Power::CodeCacheConfig::CodeCacheConfig() : OMR::CodeCacheConfig()
-   {
-   self()->setCodeCacheHelperAlignment(8);
-   }
+{
+	self()->setCodeCacheHelperAlignment(8);
+}

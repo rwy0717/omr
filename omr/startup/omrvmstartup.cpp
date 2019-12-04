@@ -68,9 +68,9 @@ OMR_Initialize(void *languageVM, OMR_VM **vmSlot)
 		goto done;
 	}
 
-	/* Recursive omrthread_attach_ex() (i.e. re-attaching a thread that is already attached) is cheaper and less fragile
-	 * than non-recursive. If performing a sequence of function calls that are likely to attach & detach internally,
-	 * it is more efficient to call omrthread_attach_ex() before the entire block.
+	/* Recursive omrthread_attach_ex() (i.e. re-attaching a thread that is already attached) is cheaper and less
+	 * fragile than non-recursive. If performing a sequence of function calls that are likely to attach & detach
+	 * internally, it is more efficient to call omrthread_attach_ex() before the entire block.
 	 */
 	if (0 != omrthread_attach_ex(&j9self, J9THREAD_ATTR_DEFAULT)) {
 		fprintf(stderr, "Failed to attach main thread.\n");
@@ -87,7 +87,9 @@ OMR_Initialize(void *languageVM, OMR_VM **vmSlot)
 	/* Disable port library signal handling. This mechanism disables everything except SIGXFSZ.
 	 * Handling other signals in the port library will interfere with language-specific signal handlers.
 	 */
-	if (0 != omrsig_set_options(OMRPORT_SIG_OPTIONS_REDUCED_SIGNALS_SYNCHRONOUS | OMRPORT_SIG_OPTIONS_REDUCED_SIGNALS_ASYNCHRONOUS)) {
+	if (0
+	        != omrsig_set_options(OMRPORT_SIG_OPTIONS_REDUCED_SIGNALS_SYNCHRONOUS
+	                | OMRPORT_SIG_OPTIONS_REDUCED_SIGNALS_ASYNCHRONOUS)) {
 		omrtty_printf("Failed to disable OMR signal handling.\n");
 		rc = OMR_ERROR_INTERNAL;
 		goto done;
@@ -193,7 +195,8 @@ OMR_Thread_Init(OMR_VM *omrVM, void *language_vm_thread, OMR_VMThread **threadSl
 }
 
 omr_error_t
-OMR_Thread_FirstInit(OMR_VM *omrVM, omrthread_t self, void *language_vm_thread, OMR_VMThread **threadSlot, const char *threadName)
+OMR_Thread_FirstInit(
+        OMR_VM *omrVM, omrthread_t self, void *language_vm_thread, OMR_VMThread **threadSlot, const char *threadName)
 {
 	omr_error_t rc = OMR_ERROR_NONE;
 	OMR_VMThread *currentThread = NULL;
@@ -226,7 +229,7 @@ OMR_Thread_FirstInit(OMR_VM *omrVM, omrthread_t self, void *language_vm_thread, 
 #endif /* defined(OMR_GC) */
 
 		*threadSlot = currentThread;
-done:
+	done:
 		if (OMR_ERROR_NONE != rc) {
 			/* Error cleanup */
 			omr_vmthread_lastDetach(currentThread);
@@ -263,7 +266,8 @@ OMR_Thread_Free(OMR_VMThread *omrVMThread)
 					/* balance the omrthread_attach_ex() from OMR_Thread_Init() */
 					omrthread_detach(self);
 				}
-				/* if (!selfIsCurrent), the runtime must have omrthread_detach()ed when the pthread exited. */
+				/* if (!selfIsCurrent), the runtime must have omrthread_detach()ed when the pthread
+				 * exited. */
 			}
 
 			/* balance the omrthread_attach_ex() in this function */
@@ -333,9 +337,9 @@ OMR_Initialize_VM(OMR_VM **omrVMSlot, OMR_VMThread **omrVMThreadSlot, void *lang
 		goto failed;
 	}
 
-	/* Recursive omrthread_attach_ex() (i.e. re-attaching a thread that is already attached) is cheaper and less fragile
-	 * than non-recursive. If performing a sequence of function calls that are likely to attach & detach internally,
-	 * it is more efficient to call omrthread_attach_ex() before the entire block.
+	/* Recursive omrthread_attach_ex() (i.e. re-attaching a thread that is already attached) is cheaper and less
+	 * fragile than non-recursive. If performing a sequence of function calls that are likely to attach & detach
+	 * internally, it is more efficient to call omrthread_attach_ex() before the entire block.
 	 */
 	if (0 != omrthread_attach_ex(&j9self, J9THREAD_ATTR_DEFAULT)) {
 		fprintf(stderr, "Failed to attach main thread.\n");
@@ -354,7 +358,9 @@ OMR_Initialize_VM(OMR_VM **omrVMSlot, OMR_VMThread **omrVMThreadSlot, void *lang
 	/* Disable port library signal handling. This mechanism disables everything except SIGXFSZ.
 	 * Handling other signals in the port library will interfere with language-specific signal handlers.
 	 */
-	if (0 != omrsig_set_options(OMRPORT_SIG_OPTIONS_REDUCED_SIGNALS_SYNCHRONOUS | OMRPORT_SIG_OPTIONS_REDUCED_SIGNALS_ASYNCHRONOUS)) {
+	if (0
+	        != omrsig_set_options(OMRPORT_SIG_OPTIONS_REDUCED_SIGNALS_SYNCHRONOUS
+	                | OMRPORT_SIG_OPTIONS_REDUCED_SIGNALS_ASYNCHRONOUS)) {
 		omrtty_printf("Failed to disable OMR signal handling.\n");
 		rc = OMR_ERROR_INTERNAL;
 		goto failed;
@@ -454,7 +460,8 @@ OMR_Initialize_VM(OMR_VM **omrVMSlot, OMR_VMThread **omrVMThreadSlot, void *lang
 			omrtty_printf("Failed to init health center, rc=%d.\n", rc);
 			goto failed;
 		}
-		rc = omr_ras_initMethodDictionary(omrVM, OMR_Glue_GetMethodDictionaryPropertyNum(), OMR_Glue_GetMethodDictionaryPropertyNames());
+		rc = omr_ras_initMethodDictionary(
+		        omrVM, OMR_Glue_GetMethodDictionaryPropertyNum(), OMR_Glue_GetMethodDictionaryPropertyNames());
 		if (OMR_ERROR_NONE != rc) {
 			omrtty_printf("Failed to init method dictionary, rc=%d.\n", rc);
 			goto failed;
@@ -501,7 +508,8 @@ OMR_Shutdown_VM(OMR_VM *omrVM, OMR_VMThread *omrVMThread)
 			omrtty_printf("Failed to free OMR VMThread for main thread, rc=%d.\n", rc);
 		}
 	} else {
-		fprintf(stderr, "No OMR VMThread so skipping shutdown phases that required an attached thread, rc=%d.\n", rc);
+		fprintf(stderr,
+		        "No OMR VMThread so skipping shutdown phases that required an attached thread, rc=%d.\n", rc);
 		fflush(stderr);
 	}
 

@@ -23,25 +23,24 @@
 #if !defined(CARDCLEANERFORMARKING_HPP_)
 #define CARDCLEANERFORMARKING_HPP_
 
-#include "omrcfg.h"
-
 #include "CardCleaner.hpp"
 #include "CollectorLanguageInterface.hpp"
 #include "EnvironmentStandard.hpp"
 #include "HeapMapIterator.hpp"
 #include "MarkingScheme.hpp"
+#include "omrcfg.h"
 
 /**
  * @todo Provide typedef documentation
  * @ingroup GC_Modron_Standard
  */
 
-class MM_CardCleanerForMarking : public MM_CardCleaner
-{
+class MM_CardCleanerForMarking : public MM_CardCleaner {
 public:
 protected:
 private:
 	MM_MarkingScheme *_markingScheme;
+
 public:
 protected:
 	/**
@@ -59,10 +58,12 @@ protected:
 
 		/* card may be marked dirty in WP overflow, so it is important to mark it clean before any scan */
 		*cardToClean = CARD_CLEAN;
-		/* previous line value MUST be physically written to memory (relevant for concurrent cleaning) - force such write if necessary */
+		/* previous line value MUST be physically written to memory (relevant for concurrent cleaning) - force
+		 * such write if necessary */
 		MM_AtomicOperations::sync();
 
-		MM_HeapMapIterator markedObjectIterator(extensions, _markingScheme->getMarkMap(), (uintptr_t *)lowAddress, (uintptr_t *)highAddress);
+		MM_HeapMapIterator markedObjectIterator(
+		        extensions, _markingScheme->getMarkMap(), (uintptr_t *)lowAddress, (uintptr_t *)highAddress);
 		omrobjectptr_t object = NULL;
 		while (NULL != (object = markedObjectIterator.nextObject())) {
 			_markingScheme->scanObject(env, object, SCAN_REASON_OVERFLOWED_OBJECT);
@@ -73,15 +74,12 @@ protected:
 	 * @see MM_CardCleaner::getVMStateID()
 	 */
 	virtual uintptr_t getVMStateID() { return OMRVMSTATE_GC_CARD_CLEANER_FOR_MARKING; }
-	
-public:
 
+public:
 	/**
 	 * Create a CardCleaner object specific for Incremental-Update style of marking
 	 */
-	MM_CardCleanerForMarking(MM_MarkingScheme *markingScheme)
-		: MM_CardCleaner()
-		, _markingScheme(markingScheme)
+	MM_CardCleanerForMarking(MM_MarkingScheme *markingScheme) : MM_CardCleaner(), _markingScheme(markingScheme)
 	{
 		_typeId = __FUNCTION__;
 	}

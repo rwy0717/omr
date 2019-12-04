@@ -30,8 +30,6 @@
 #include "omr.h"
 #include "OMR_BaseNonVirtual.hpp"
 
-extern "C" {
-
-}
+extern "C" {}
 
 #endif /* OMR_VMTHREAD_HPP_ */

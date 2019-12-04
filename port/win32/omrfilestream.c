@@ -32,12 +32,11 @@
 #include "portnls.h"
 #include "ut_omrport.h"
 
-
 static int
 translateBufferingMode(int32_t mode)
 {
 	/* On most systems the modes are already mapped correctly */
-	return (int) mode;
+	return (int)mode;
 }
 
 static int
@@ -47,20 +46,13 @@ EsTranslateOpenFlagsToSystemFlags(int32_t flags)
 	flags &= (EsOpenWrite | EsOpenRead | EsOpenAppend);
 
 	switch (flags) {
-	case (EsOpenWrite):
-		return _O_WRONLY;
-	case (EsOpenRead):
-		return _O_RDONLY;
-	case (EsOpenWrite | EsOpenRead):
-		return _O_RDWR;
-	case (EsOpenAppend | EsOpenWrite):
-		return _O_WRONLY | _O_APPEND;
-	case (EsOpenAppend | EsOpenRead):
-		return _O_RDONLY;
-	case (EsOpenAppend | EsOpenWrite | EsOpenRead):
-		return _O_RDWR | _O_APPEND;
-	default:
-		return _O_RDONLY;
+	case (EsOpenWrite): return _O_WRONLY;
+	case (EsOpenRead): return _O_RDONLY;
+	case (EsOpenWrite | EsOpenRead): return _O_RDWR;
+	case (EsOpenAppend | EsOpenWrite): return _O_WRONLY | _O_APPEND;
+	case (EsOpenAppend | EsOpenRead): return _O_RDONLY;
+	case (EsOpenAppend | EsOpenWrite | EsOpenRead): return _O_RDWR | _O_APPEND;
+	default: return _O_RDONLY;
 	}
 }
 
@@ -71,23 +63,15 @@ EsTranslateOpenFlagsToStandardFlags(int32_t flags)
 	flags &= (EsOpenWrite | EsOpenRead | EsOpenAppend);
 
 	switch (flags) {
-	case (EsOpenWrite):
-		return "w";
-	case (EsOpenRead):
-		return "r";
-	case (EsOpenWrite | EsOpenRead):
-		return "w+";
-	case (EsOpenAppend | EsOpenWrite):
-		return "a";
-	case (EsOpenAppend | EsOpenRead):
-		return "r";
-	case (EsOpenAppend | EsOpenWrite | EsOpenRead):
-		return "a+";
-	default:
-		return NULL;
+	case (EsOpenWrite): return "w";
+	case (EsOpenRead): return "r";
+	case (EsOpenWrite | EsOpenRead): return "w+";
+	case (EsOpenAppend | EsOpenWrite): return "a";
+	case (EsOpenAppend | EsOpenRead): return "r";
+	case (EsOpenAppend | EsOpenWrite | EsOpenRead): return "a+";
+	default: return NULL;
 	}
 }
-
 
 /**
  * @internal
@@ -98,48 +82,30 @@ EsTranslateOpenFlagsToStandardFlags(int32_t flags)
  * @return the (negative) portable error code
  */
 static int32_t
-findErrorFromErrno (int32_t errorCode)
+findErrorFromErrno(int32_t errorCode)
 {
-	switch (errorCode)
-	{
+	switch (errorCode) {
 	case EACCES:
 		/* FALLTHROUGH */
-	case EPERM:
-		return OMRPORT_ERROR_FILE_NOPERMISSION;
-	case ENAMETOOLONG:
-		return OMRPORT_ERROR_FILE_NAMETOOLONG;
-	case ENOENT:
-		return OMRPORT_ERROR_FILE_NOENT;
-	case ENOTDIR:
-		return OMRPORT_ERROR_FILE_NOTDIR;
-	case ELOOP:
-		return OMRPORT_ERROR_FILE_LOOP;
-	case EBADF:
-		return OMRPORT_ERROR_FILE_BADF;
-	case EEXIST:
-		return OMRPORT_ERROR_FILE_EXIST;
+	case EPERM: return OMRPORT_ERROR_FILE_NOPERMISSION;
+	case ENAMETOOLONG: return OMRPORT_ERROR_FILE_NAMETOOLONG;
+	case ENOENT: return OMRPORT_ERROR_FILE_NOENT;
+	case ENOTDIR: return OMRPORT_ERROR_FILE_NOTDIR;
+	case ELOOP: return OMRPORT_ERROR_FILE_LOOP;
+	case EBADF: return OMRPORT_ERROR_FILE_BADF;
+	case EEXIST: return OMRPORT_ERROR_FILE_EXIST;
 	case ENOSPC:
 		/* FALLTHROUGH */
-	case EFBIG:
-		return OMRPORT_ERROR_FILE_DISKFULL;
-	case EINVAL:
-		return OMRPORT_ERROR_FILE_INVAL;
-	case EISDIR:
-		return OMRPORT_ERROR_FILE_ISDIR;
-	case EAGAIN:
-		return OMRPORT_ERROR_FILE_EAGAIN;
-	case EFAULT:
-		return OMRPORT_ERROR_FILE_EFAULT;
-	case EINTR:
-		return OMRPORT_ERROR_FILE_EINTR;
-	case EIO:
-		return OMRPORT_ERROR_FILE_IO;
-	case EOVERFLOW:
-		return OMRPORT_ERROR_FILE_OVERFLOW;
-	case ESPIPE:
-		return OMRPORT_ERROR_FILE_SPIPE;
-	default:
-		return OMRPORT_ERROR_FILE_OPFAILED;
+	case EFBIG: return OMRPORT_ERROR_FILE_DISKFULL;
+	case EINVAL: return OMRPORT_ERROR_FILE_INVAL;
+	case EISDIR: return OMRPORT_ERROR_FILE_ISDIR;
+	case EAGAIN: return OMRPORT_ERROR_FILE_EAGAIN;
+	case EFAULT: return OMRPORT_ERROR_FILE_EFAULT;
+	case EINTR: return OMRPORT_ERROR_FILE_EINTR;
+	case EIO: return OMRPORT_ERROR_FILE_IO;
+	case EOVERFLOW: return OMRPORT_ERROR_FILE_OVERFLOW;
+	case ESPIPE: return OMRPORT_ERROR_FILE_SPIPE;
+	default: return OMRPORT_ERROR_FILE_OPFAILED;
 	}
 }
 
@@ -161,7 +127,7 @@ omrfilestream_open(struct OMRPortLibrary *portLibrary, const char *path, int32_t
 	OMRFileStream *fileStream = NULL;
 	const char *standardFlags = NULL;
 	int systemFlags = 0;
-	HANDLE handle = (HANDLE) -1;
+	HANDLE handle = (HANDLE)-1;
 	intptr_t file = -1;
 	int fileDescriptor = -1;
 
@@ -169,7 +135,8 @@ omrfilestream_open(struct OMRPortLibrary *portLibrary, const char *path, int32_t
 
 	if (NULL == path) {
 		Trc_PRT_filestream_open_invalidPath(path, flags, mode);
-		portLibrary->error_set_last_error(portLibrary, ERROR_INVALID_PARAMETER, findError(ERROR_INVALID_PARAMETER));
+		portLibrary->error_set_last_error(
+		        portLibrary, ERROR_INVALID_PARAMETER, findError(ERROR_INVALID_PARAMETER));
 		Trc_PRT_filestream_open_Exit(NULL);
 		return NULL;
 	}
@@ -177,7 +144,8 @@ omrfilestream_open(struct OMRPortLibrary *portLibrary, const char *path, int32_t
 	standardFlags = EsTranslateOpenFlagsToStandardFlags(flags);
 	if ((NULL == standardFlags) || (EsOpenRead == (flags & EsOpenRead))) {
 		Trc_PRT_filestream_open_invalidOpenFlags(path, flags, mode);
-		portLibrary->error_set_last_error(portLibrary, ERROR_INVALID_PARAMETER, findError(ERROR_INVALID_PARAMETER));
+		portLibrary->error_set_last_error(
+		        portLibrary, ERROR_INVALID_PARAMETER, findError(ERROR_INVALID_PARAMETER));
 		Trc_PRT_filestream_open_Exit(NULL);
 		return NULL;
 	}
@@ -195,16 +163,17 @@ omrfilestream_open(struct OMRPortLibrary *portLibrary, const char *path, int32_t
 	}
 
 	/* Get the native file descriptor, on windows this is actually a handle */
-	handle = (HANDLE) portLibrary->file_convert_omrfile_fd_to_native_fd(portLibrary, file);
+	handle = (HANDLE)portLibrary->file_convert_omrfile_fd_to_native_fd(portLibrary, file);
 	if (INVALID_HANDLE_VALUE == handle) {
-		int32_t error = portLibrary->error_set_last_error(portLibrary, ERROR_INVALID_HANDLE, findError(ERROR_INVALID_HANDLE));
+		int32_t error = portLibrary->error_set_last_error(
+		        portLibrary, ERROR_INVALID_HANDLE, findError(ERROR_INVALID_HANDLE));
 		Trc_PRT_filestream_open_failedToOpen(path, flags, mode, error);
 		Trc_PRT_filestream_open_Exit(NULL);
 		return NULL;
 	}
 
 	/* Turn the handle into a C file descriptor */
-	fileDescriptor = _open_osfhandle((intptr_t) handle, systemFlags);
+	fileDescriptor = _open_osfhandle((intptr_t)handle, systemFlags);
 	if (-1 == fileDescriptor) {
 		/* Does this change GetLastError() or errno ? */
 		int savedErrno = errno;
@@ -284,10 +253,10 @@ omrfilestream_write(struct OMRPortLibrary *portLibrary, OMRFileStream *fileStrea
 		rc = OMRPORT_ERROR_FILE_INVAL;
 	} else {
 		/* nbytes may be truncated during this cast, resulting in smaller writes than intended */
-		rc = (intptr_t) fwrite(buf, 1, (size_t) nbytes, fileStream);
+		rc = (intptr_t)fwrite(buf, 1, (size_t)nbytes, fileStream);
 		if (0 != ferror(fileStream)) {
 			rc = portLibrary->error_set_last_error(portLibrary, errno, findErrorFromErrno(errno));
-			Trc_PRT_filestream_write_failedToWrite(fileStream, buf, nbytes, (int32_t) rc);
+			Trc_PRT_filestream_write_failedToWrite(fileStream, buf, nbytes, (int32_t)rc);
 		}
 	}
 
@@ -296,7 +265,8 @@ omrfilestream_write(struct OMRPortLibrary *portLibrary, OMRFileStream *fileStrea
 }
 
 int32_t
-omrfilestream_setbuffer(OMRPortLibrary *portLibrary, OMRFileStream *fileStream, char *buffer, int32_t mode, uintptr_t size)
+omrfilestream_setbuffer(
+        OMRPortLibrary *portLibrary, OMRFileStream *fileStream, char *buffer, int32_t mode, uintptr_t size)
 {
 	int localMode = 0;
 	int32_t rc = 0;
@@ -315,7 +285,7 @@ omrfilestream_setbuffer(OMRPortLibrary *portLibrary, OMRFileStream *fileStream, 
 	if ((NULL == fileStream) || (-1 == localMode)) {
 		Trc_PRT_filestream_setbuffer_invalidArgs(fileStream, buffer, mode, size);
 		rc = OMRPORT_ERROR_FILE_INVAL;
-	} else if (0 != setvbuf(fileStream, (char *) buffer, mode, size)) {
+	} else if (0 != setvbuf(fileStream, (char *)buffer, mode, size)) {
 		Trc_PRT_filestream_setbuffer_failed(fileStream, buffer, mode, size);
 		rc = OMRPORT_ERROR_FILE_OPFAILED;
 	}
@@ -350,19 +320,20 @@ omrfilestream_fdopen(OMRPortLibrary *portLibrary, intptr_t fd, int32_t flags)
 	case OMRPORT_TTY_OUT:
 	case OMRPORT_TTY_ERR:
 		/* These 3 files are already C library file descriptor. */
-		fileDescriptor = (int) fd;
+		fileDescriptor = (int)fd;
 		break;
 	default:
 		/* Turn the OMRFile into a Windows HANDLE */
-		handle = (HANDLE) portLibrary->file_convert_omrfile_fd_to_native_fd(portLibrary, fd);
+		handle = (HANDLE)portLibrary->file_convert_omrfile_fd_to_native_fd(portLibrary, fd);
 
 		/* Turn the HANDLE into C library file descriptor */
-		fileDescriptor = _open_osfhandle((intptr_t) handle, systemFlags);
+		fileDescriptor = _open_osfhandle((intptr_t)handle, systemFlags);
 		if (-1 == fileDescriptor) {
 			/* Does this change GetLastError() or errno ? */
 			int savedErrno = errno;
 			int32_t error = 0;
-			error = portLibrary->error_set_last_error(portLibrary, savedErrno, findErrorFromErrno(savedErrno));
+			error = portLibrary->error_set_last_error(
+			        portLibrary, savedErrno, findErrorFromErrno(savedErrno));
 			Trc_PRT_filestream_fdopen_failed(fd, flags, error);
 			Trc_PRT_filestream_fdopen_Exit(NULL);
 			return NULL;
@@ -383,7 +354,6 @@ omrfilestream_fdopen(OMRPortLibrary *portLibrary, intptr_t fd, int32_t flags)
 	return fileStream;
 }
 
-
 intptr_t
 omrfilestream_fileno(OMRPortLibrary *portLibrary, OMRFileStream *fileStream)
 {
@@ -392,7 +362,8 @@ omrfilestream_fileno(OMRPortLibrary *portLibrary, OMRFileStream *fileStream)
 	Trc_PRT_filestream_fileno_Entry(fileStream);
 
 	if (NULL == fileStream) {
-		portLibrary->error_set_last_error(portLibrary, ERROR_INVALID_PARAMETER, findError(ERROR_INVALID_PARAMETER));
+		portLibrary->error_set_last_error(
+		        portLibrary, ERROR_INVALID_PARAMETER, findError(ERROR_INVALID_PARAMETER));
 		Trc_PRT_filestream_fileno_invalidArgs(fileStream);
 	} else {
 		intptr_t fileDescriptor = _fileno(fileStream);
@@ -411,13 +382,15 @@ omrfilestream_fileno(OMRPortLibrary *portLibrary, OMRFileStream *fileStream)
 				break;
 			default:
 				/* turn the FD into a HANDLE */
-				fileHandle = _get_osfhandle((int) fileDescriptor);
-				if (((intptr_t) INVALID_HANDLE_VALUE) == fileHandle) {
-					int32_t rc = portLibrary->error_set_last_error(portLibrary, errno, findErrorFromErrno(errno));
+				fileHandle = _get_osfhandle((int)fileDescriptor);
+				if (((intptr_t)INVALID_HANDLE_VALUE) == fileHandle) {
+					int32_t rc = portLibrary->error_set_last_error(
+					        portLibrary, errno, findErrorFromErrno(errno));
 					Trc_PRT_filestream_fileno_failed(fileStream, rc);
 				} else {
 					/* Turn the HANDLE into a OMRFileStream */
-					omrFile = portLibrary->file_convert_native_fd_to_omrfile_fd(portLibrary, fileHandle);
+					omrFile = portLibrary->file_convert_native_fd_to_omrfile_fd(
+					        portLibrary, fileHandle);
 				}
 				break;
 			}

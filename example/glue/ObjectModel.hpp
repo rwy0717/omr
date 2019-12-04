@@ -37,18 +37,16 @@ class MM_GCExtensionsBase;
  * Provides an example of an object model, sufficient to support basic GC test code (GCConfigTest)
  * and to illustrate some of the required facets of an OMR object model.
  */
-class GC_ObjectModel : public GC_ObjectModelBase
-{
-/*
- * Member data and types
- */
+class GC_ObjectModel : public GC_ObjectModelBase {
+	/*
+	 * Member data and types
+	 */
 private:
 protected:
 public:
-
-/*
- * Member functions
- */
+	/*
+	 * Member functions
+	 */
 private:
 protected:
 public:
@@ -70,8 +68,6 @@ public:
 	/**
 	 * Constructor.
 	 */
-	GC_ObjectModel()
-		: GC_ObjectModelBase()
-	{}
+	GC_ObjectModel() : GC_ObjectModelBase() {}
 };
 #endif /* OBJECTMODEL_HPP_ */

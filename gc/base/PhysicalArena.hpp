@@ -20,14 +20,12 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #if !defined(PHYSICALARENA_HPP_)
 #define PHYSICALARENA_HPP_
 
-#include "omrcomp.h"
-#include "modronbase.h"
-
 #include "BaseVirtual.hpp"
+#include "modronbase.h"
+#include "omrcomp.h"
 
 class MM_EnvironmentBase;
 class MM_Heap;
@@ -38,8 +36,7 @@ class MM_PhysicalSubArena;
  * @todo Provide class documentation
  * @ingroup GC_Base_Core
  */
-class MM_PhysicalArena : public MM_BaseVirtual
-{
+class MM_PhysicalArena : public MM_BaseVirtual {
 	/*
 	 * Data members
 	 */
@@ -48,14 +45,13 @@ private:
 	MM_PhysicalArena *_previousArena; /**< In multi-PA environments, points to the previous arena in the Heap */
 	void *_lowAddress; /**< The base address of this Physical Arena */
 	void *_highAddress; /**< The byte after the highest address byte addressable within this Physical Arena */
-	
+
 protected:
 	MM_MemorySpace *_memorySpace;
 	MM_Heap *_heap;
 	bool _attached;
 
 public:
-
 	/*
 	 * Function members
 	 */
@@ -68,7 +64,8 @@ public:
 	virtual void kill(MM_EnvironmentBase *env);
 
 	virtual bool inflate(MM_EnvironmentBase *env) = 0;
-	virtual bool attachSubArena(MM_EnvironmentBase *env, MM_PhysicalSubArena *subArena, uintptr_t size, uintptr_t attachPolicy) = 0;
+	virtual bool attachSubArena(
+	        MM_EnvironmentBase *env, MM_PhysicalSubArena *subArena, uintptr_t size, uintptr_t attachPolicy) = 0;
 	virtual void detachSubArena(MM_EnvironmentBase *env, MM_PhysicalSubArena *subArena) = 0;
 
 	virtual bool canExpand(MM_EnvironmentBase *env, MM_PhysicalSubArena *expandArena);
@@ -78,26 +75,26 @@ public:
 
 	MMINLINE void setAttached(bool attached) { _attached = attached; }
 
-	MM_PhysicalArena(MM_EnvironmentBase *env, MM_Heap *heap) :
-		_nextArena(NULL),
-		_previousArena(NULL),
-		_lowAddress(NULL),
-		_highAddress(NULL),
-		_memorySpace(NULL),
-		_heap(heap),
-		_attached(false)
+	MM_PhysicalArena(MM_EnvironmentBase *env, MM_Heap *heap)
+	        : _nextArena(NULL)
+	        , _previousArena(NULL)
+	        , _lowAddress(NULL)
+	        , _highAddress(NULL)
+	        , _memorySpace(NULL)
+	        , _heap(heap)
+	        , _attached(false)
 	{
 		_typeId = __FUNCTION__;
 	}
 
-	MM_PhysicalArena(MM_EnvironmentBase *env, MM_MemorySpace *memorySpace) :
-		_nextArena(NULL),
-		_previousArena(NULL),
-		_lowAddress(NULL),
-		_highAddress(NULL),
-		_memorySpace(memorySpace),
-		_heap(NULL),
-		_attached(false)
+	MM_PhysicalArena(MM_EnvironmentBase *env, MM_MemorySpace *memorySpace)
+	        : _nextArena(NULL)
+	        , _previousArena(NULL)
+	        , _lowAddress(NULL)
+	        , _highAddress(NULL)
+	        , _memorySpace(memorySpace)
+	        , _heap(NULL)
+	        , _attached(false)
 	{
 		_typeId = __FUNCTION__;
 	}

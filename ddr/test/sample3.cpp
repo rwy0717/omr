@@ -23,40 +23,38 @@
 #include <iostream>
 
 struct S3 {
-	//volatile field
+	// volatile field
 	volatile uint8_t q;
-	//const field
+	// const field
 	const uint8_t r;
 };
 
-struct S3 instanceOfS3 = { 1, 4 };
+struct S3 instanceOfS3 = {1, 4};
 
 // typedef of pointer type
 typedef S3 *pS3;
 
 // multiple inheritance
-class Vehicle
-{
+class Vehicle {
 public:
 	double speed;
 	Vehicle(double speedIn) : speed(speedIn) {}
 };
 
-class Toy
-{
+class Toy {
 public:
 	int durability;
 	Toy(int durabilityIn) : durability(durabilityIn) {}
 };
 
-class MatchboxCar : public Vehicle, public Toy
-{
+class MatchboxCar
+        : public Vehicle
+        , public Toy {
 public:
 	int hasWheels;
 	MatchboxCar(int hasWheelsIn, double speedIn, int durabilityIn)
-		: Vehicle(speedIn), Toy(durabilityIn), hasWheels(hasWheelsIn)
-	{
-	}
+	        : Vehicle(speedIn), Toy(durabilityIn), hasWheels(hasWheelsIn)
+	{}
 };
 
 /* Function pointer */
@@ -74,7 +72,7 @@ struct StructWithFunctionPointer {
 
 struct StructWithFunctionPointer structFunctionPointer;
 
-//struct with base types
+// struct with base types
 struct S4 {
 	int i;
 	long l;
@@ -82,7 +80,7 @@ struct S4 {
 	char c;
 	bool b;
 };
-struct S4 instanceOfS4 = { 0, 1L, 3.8, 'c', true };
+struct S4 instanceOfS4 = {0, 1L, 3.8, 'c', true};
 
 // Multiple untagged struct definitions inside a scope.
 struct Outer {
@@ -100,44 +98,42 @@ struct Outer {
 	} innerField3;
 };
 
-struct Outer instanceOfOuter = { { 2 }, { 4 }, { { 6 } } };
+struct Outer instanceOfOuter = {{2}, {4}, {{6}}};
 
 // Two different classes with inner classes of the same name.
-class OuterClassWithDifferentName1
-{
+class OuterClassWithDifferentName1 {
 private:
-	class InnerClassWithSameName
-	{
+	class InnerClassWithSameName {
 	public:
 		double g;
 		virtual void nop();
 	};
 	InnerClassWithSameName instanceOfInnerClassWithSameName;
+
 public:
 	virtual void nop();
 };
 
 OuterClassWithDifferentName1 instanceOfOuterClassWithDifferentName1;
 
-class OuterClassWithDifferentName2
-{
+class OuterClassWithDifferentName2 {
 private:
-	class InnerClassWithSameName
-	{
+	class InnerClassWithSameName {
 	public:
 		double h;
 	};
 	InnerClassWithSameName instanceOfInnerClassWithSameName;
+
 public:
 };
 
 OuterClassWithDifferentName2 instanceOfOuterClassWithDifferentName2;
 
-//Template class
+// Template class
 template <class T>
-class Complex
-{
+class Complex {
 	T real, imaginary;
+
 public:
 	Complex(T realIn, T imaginaryIn)
 	{
@@ -157,7 +153,7 @@ struct SArrayWithTypedefType {
 	UDATA2 arrayWithTypedefType[12];
 };
 
-struct SArrayWithTypedefType instanceOfSArrayWithTypedefType = { { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 } };
+struct SArrayWithTypedefType instanceOfSArrayWithTypedefType = {{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}};
 
 void
 sample3()
@@ -181,5 +177,9 @@ sample3()
 	std::cout << "functionPointer: " << structFunctionPointer.functionPointer << std::endl;
 }
 
-void OuterClassWithDifferentName1::nop() {}
-void OuterClassWithDifferentName1::InnerClassWithSameName::nop() {}
+void
+OuterClassWithDifferentName1::nop()
+{}
+void
+OuterClassWithDifferentName1::InnerClassWithSameName::nop()
+{}

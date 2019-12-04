@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -29,25 +28,25 @@
 
 #include "TableSwitch.hpp"
 
-static void printString(int64_t ptr)
-   {
-   #define PRINTSTRING_LINE LINETOSTR(__LINE__)
-   char *str = (char *) ptr;
-   printf("%s", str);
-   }
+static void
+printString(int64_t ptr)
+{
+#define PRINTSTRING_LINE LINETOSTR(__LINE__)
+	char *str = (char *)ptr;
+	printf("%s", str);
+}
 
-TableSwitchMethod::TableSwitchMethod(OMR::JitBuilder::TypeDictionary *d)
-   : OMR::JitBuilder::MethodBuilder(d)
-   {
-   DefineLine(LINETOSTR(__LINE__));
-   DefineFile(__FILE__);
+TableSwitchMethod::TableSwitchMethod(OMR::JitBuilder::TypeDictionary *d) : OMR::JitBuilder::MethodBuilder(d)
+{
+	DefineLine(LINETOSTR(__LINE__));
+	DefineFile(__FILE__);
 
-   DefineName("testTableSwitch");
+	DefineName("testTableSwitch");
 
-   DefineParameter("selector", Int32);
+	DefineParameter("selector", Int32);
 
-   DefineReturnType(NoType);
-   }
+	DefineReturnType(NoType);
+}
 
 /**
  * Example to show how RequestFunction can be used to define functions
@@ -60,89 +59,92 @@ TableSwitchMethod::TableSwitchMethod(OMR::JitBuilder::TypeDictionary *d)
  */
 bool
 TableSwitchMethod::RequestFunction(const char *name)
-   {
-   if (strncmp(name, "printString", 12) != 0)
-      return false;
+{
+	if (strncmp(name, "printString", 12) != 0)
+		return false;
 
-   DefineFunction((char *)"printString", 
-                  (char *)__FILE__,
-                  (char *)PRINTSTRING_LINE,
-                  (void *)&printString,
-                  NoType,
-                  1,
-                  Int64);
+	DefineFunction((char *)"printString", (char *)__FILE__, (char *)PRINTSTRING_LINE, (void *)&printString, NoType,
+	        1, Int64);
 
-   return true;
-   }
+	return true;
+}
 
 void
 TableSwitchMethod::PrintString(OMR::JitBuilder::IlBuilder *bldr, const char *s)
-   {
-   bldr->Call("printString", 1,
-   bldr->   ConstInt64((int64_t)(char *)s));
-   }
+{
+	bldr->Call("printString", 1, bldr->ConstInt64((int64_t)(char *)s));
+}
 
 bool
 TableSwitchMethod::buildIL()
-   {
-   OMR::JitBuilder::IlBuilder *defaultBldr=NULL;
-   OMR::JitBuilder::IlBuilder *case1Bldr=NULL, *case2Bldr=NULL, *case3Bldr=NULL;
-   TableSwitch("selector", &defaultBldr, true, 3,
-          MakeCase(1, &case1Bldr, false),
-          MakeCase(2, &case2Bldr, false),
-          MakeCase(3, &case3Bldr, false));
+{
+	OMR::JitBuilder::IlBuilder *defaultBldr = NULL;
+	OMR::JitBuilder::IlBuilder *case1Bldr = NULL, *case2Bldr = NULL, *case3Bldr = NULL;
+	TableSwitch("selector", &defaultBldr, true, 3, MakeCase(1, &case1Bldr, false), MakeCase(2, &case2Bldr, false),
+	        MakeCase(3, &case3Bldr, false));
 
-   PrintString(case1Bldr, "\tcase 1 reached\n");
+	PrintString(case1Bldr, "\tcase 1 reached\n");
 
-   PrintString(case2Bldr, "\tcase 2 reached\n");
+	PrintString(case2Bldr, "\tcase 2 reached\n");
 
-   PrintString(case3Bldr, "\tcase 3 reached\n");
+	PrintString(case3Bldr, "\tcase 3 reached\n");
 
-   PrintString(defaultBldr, "\tdefault case reached\n");
+	PrintString(defaultBldr, "\tdefault case reached\n");
 
-   Return();
+	Return();
 
-   return true;
-   }
-
+	return true;
+}
 
 int
 main(int argc, char *argv[])
-   {
-   printf("Step 1: initialize JIT\n");
-   bool initialized = initializeJit();
-   if (!initialized)
-      {
-      fprintf(stderr, "FAIL: could not initialize JIT\n");
-      exit(-1);
-      }
+{
+	printf("Step 1: initialize JIT\n");
+	bool initialized = initializeJit();
+	if (!initialized) {
+		fprintf(stderr, "FAIL: could not initialize JIT\n");
+		exit(-1);
+	}
 
-   printf("Step 2: define type dictionary\n");
-   OMR::JitBuilder::TypeDictionary types;
+	printf("Step 2: define type dictionary\n");
+	OMR::JitBuilder::TypeDictionary types;
 
-   printf("Step 3: compile method builder\n");
-   TableSwitchMethod method(&types);
-   void *entry=0;
-   int32_t rc = compileMethodBuilder(&method, &entry);
-   if (rc != 0)
-      {
-      fprintf(stderr,"FAIL: compilation error %d\n", rc);
-      exit(-2);
-      }
+	printf("Step 3: compile method builder\n");
+	TableSwitchMethod method(&types);
+	void *entry = 0;
+	int32_t rc = compileMethodBuilder(&method, &entry);
+	if (rc != 0) {
+		fprintf(stderr, "FAIL: compilation error %d\n", rc);
+		exit(-2);
+	}
 
-   printf("Step 4: invoke compiled code and verify results\n");
-   TableSwitchFunctionType *test = (TableSwitchFunctionType *)entry;
-   int s;
-   s=0;      printf("Test varargs table switch (%d):", s); test(s);   // default
-   s=1;      printf("Test varargs table switch (%d):", s); test(s);   // case1
-   s=2;      printf("Test varargs table switch (%d):", s); test(s);   // case2
-   s=3;      printf("Test varargs table switch (%d):", s); test(s);   // case3
-   s=4;      printf("Test varargs table switch (%d):", s); test(s);   // default
-   s=-9;     printf("Test varargs table switch (%d):", s); test(s);   // default
-   s=512288; printf("Test varargs table switch (%d):", s); test(s);   // default
+	printf("Step 4: invoke compiled code and verify results\n");
+	TableSwitchFunctionType *test = (TableSwitchFunctionType *)entry;
+	int s;
+	s = 0;
+	printf("Test varargs table switch (%d):", s);
+	test(s); // default
+	s = 1;
+	printf("Test varargs table switch (%d):", s);
+	test(s); // case1
+	s = 2;
+	printf("Test varargs table switch (%d):", s);
+	test(s); // case2
+	s = 3;
+	printf("Test varargs table switch (%d):", s);
+	test(s); // case3
+	s = 4;
+	printf("Test varargs table switch (%d):", s);
+	test(s); // default
+	s = -9;
+	printf("Test varargs table switch (%d):", s);
+	test(s); // default
+	s = 512288;
+	printf("Test varargs table switch (%d):", s);
+	test(s); // default
 
-   printf ("Step 5: shutdown JIT\n");
-   shutdownJit();
+	printf("Step 5: shutdown JIT\n");
+	shutdownJit();
 
-   printf("PASS\n");
-   }
+	printf("PASS\n");
+}

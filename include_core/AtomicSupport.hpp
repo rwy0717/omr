@@ -57,64 +57,120 @@
 #if !defined(ATOMIC_SUPPORT_STUB)
 #if defined(AIXPPC)
 /* The default hardware priorities on AIX is MEDIUM(4).
- * For AIX, dropSMT should drop to LOW(2) and 
+ * For AIX, dropSMT should drop to LOW(2) and
  * restoreSMT should raise back to MEDIUM(4)
  */
-		inline void __dropSMT() { __asm__ __volatile__ ("or 1,1,1"); }
-		inline void __restoreSMT() { __asm__ __volatile__ ("or 2,2,2"); }
+inline void
+__dropSMT()
+{
+	__asm__ __volatile__("or 1,1,1");
+}
+inline void
+__restoreSMT()
+{
+	__asm__ __volatile__("or 2,2,2");
+}
 #elif defined(LINUXPPC) /* defined(AIXPPC) */
 /* The default hardware priorities on LINUXPPC is MEDIUM-LOW(3).
- * For LINUXPPC, dropSMT should drop to VERY-LOW(1) and 
+ * For LINUXPPC, dropSMT should drop to VERY-LOW(1) and
  * restoreSMT should raise back to MEDIUM-LOW(3)
  */
-		inline void __dropSMT() {  __asm__ __volatile__ ("or 31,31,31"); }
-		inline void __restoreSMT() {  __asm__ __volatile__ ("or 6,6,6"); }
+inline void
+__dropSMT()
+{
+	__asm__ __volatile__("or 31,31,31");
+}
+inline void
+__restoreSMT()
+{
+	__asm__ __volatile__("or 6,6,6");
+}
 
 #elif defined(_MSC_VER) /* defined (LINUXPPC) */
-		inline void __yield() { _mm_pause(); }
+inline void
+__yield()
+{
+	_mm_pause();
+}
 #elif defined(__GNUC__) && (defined(J9X86) || defined(J9HAMMER))
-		inline void __yield() { __asm volatile ("pause"); }
+inline void
+__yield()
+{
+	__asm volatile("pause");
+}
 #else
-		inline void __yield() { __asm volatile ("# AtomicOperations::__yield"); }
+inline void
+__yield()
+{
+	__asm volatile("# AtomicOperations::__yield");
+}
 #endif /* __GNUC__ && (J9X86 || J9HAMMER) */
 
 #if defined(_MSC_VER)
-		/* use compiler intrinsic */
+/* use compiler intrinsic */
 #elif defined(LINUXPPC) || defined(AIXPPC)
-		inline void __nop() { __asm__ __volatile__ ("nop"); }
-		inline void __yield() { __asm__ __volatile__ ("or 27,27,27"); }
+inline void
+__nop()
+{
+	__asm__ __volatile__("nop");
+}
+inline void
+__yield()
+{
+	__asm__ __volatile__("or 27,27,27");
+}
 #elif defined(LINUX) && (defined(S390) || defined(S39064))
-		/*
-		 * nop instruction requires operand https://bugzilla.redhat.com/show_bug.cgi?id=506417
-		 */
-		inline void __nop() { __asm__ volatile ("nop 0"); }
+/*
+ * nop instruction requires operand https://bugzilla.redhat.com/show_bug.cgi?id=506417
+ */
+inline void
+__nop()
+{
+	__asm__ volatile("nop 0");
+}
 #else /* GCC && XL */
-		inline void __nop() { __asm__ volatile ("nop"); }
+inline void
+__nop()
+{
+	__asm__ volatile("nop");
+}
 #endif
 
 #if defined(AIXPPC) || defined(LINUXPPC)
 #if defined(__GNUC__) && !defined(__clang__)
-	/* GCC compiler does not provide the same intrinsics. */
+/* GCC compiler does not provide the same intrinsics. */
 
-	/**
-	 * Synchronize
-	 * Ensures that all instructions preceding the function the call to __sync complete before any instructions following
-	 * the function call can execute.
-	 */
-	inline void __sync() { asm volatile ("sync"); }
-	/**
-	 * Instruction Synchronize
-	 * Waits for all previous instructions to complete and then discards any prefetched instructions, causing subsequent
-	 * instructions to be fetched (or refetched) and executed in the context established by previous instructions.
-	 */
-	inline void __isync() {	asm volatile ("isync");	}
-	/**
-	 * Load Word Synchronize
-	 * Ensures that all store instructions preceding the call to __lwsync complete before any new instructions can be executed
-	 * on the processor that executed the function. This allows you to synchronize between multiple processors with minimal
-	 * performance impact, as __lwsync does not wait for confirmation from each processor.
-	 */
-	inline void __lwsync() { asm volatile ("lwsync"); }
+/**
+ * Synchronize
+ * Ensures that all instructions preceding the function the call to __sync complete before any instructions following
+ * the function call can execute.
+ */
+inline void
+__sync()
+{
+	asm volatile("sync");
+}
+/**
+ * Instruction Synchronize
+ * Waits for all previous instructions to complete and then discards any prefetched instructions, causing subsequent
+ * instructions to be fetched (or refetched) and executed in the context established by previous instructions.
+ */
+inline void
+__isync()
+{
+	asm volatile("isync");
+}
+/**
+ * Load Word Synchronize
+ * Ensures that all store instructions preceding the call to __lwsync complete before any new instructions can be
+ * executed on the processor that executed the function. This allows you to synchronize between multiple processors with
+ * minimal performance impact, as __lwsync does not wait for confirmation from each processor.
+ */
+inline void
+__lwsync()
+{
+	asm volatile("lwsync");
+}
 #endif /* defined(__GNUC__) && !defined(__clang__) */
 #endif /* AIXPPC || LINUXPPC */
 #endif /* !defined(ATOMIC_SUPPORT_STUB) */
@@ -130,15 +186,12 @@
 /**
  * Provide atomic access to data store.
  */
-class VM_AtomicSupport
-{
+class VM_AtomicSupport {
 public:
-
 	/**
 	 * If the CPU supports it, emit an instruction to yield the CPU to another thread.
 	 */
-	VMINLINE static void
-	yieldCPU()
+	VMINLINE static void yieldCPU()
 	{
 #if !defined(ATOMIC_SUPPORT_STUB)
 		__yield();
@@ -148,8 +201,7 @@ public:
 	/**
 	 * Generates platform-specific machine code that performs no operation.
 	 */
-	VMINLINE static void
-	nop()
+	VMINLINE static void nop()
 	{
 #if !defined(ATOMIC_SUPPORT_STUB)
 		__nop();
@@ -160,12 +212,11 @@ public:
 	 * Prevents compiler reordering of reads and writes across the barrier.
 	 * This does not prevent processor reordering.
 	 */
-	VMINLINE static void
-	compilerReorderingBarrier()
+	VMINLINE static void compilerReorderingBarrier()
 	{
 #if !defined(ATOMIC_SUPPORT_STUB)
 #if defined(__GNUC__)
-		asm volatile("":::"memory");
+		asm volatile("" ::: "memory");
 #elif defined(_MSC_VER) /* __GNUC__ */
 		_ReadWriteBarrier();
 #elif defined(J9ZOS390) /* _MSC_VER */
@@ -184,8 +235,7 @@ public:
 	 * of the sync instruction in the program sequence must complete their accesses to memory
 	 * first, and then any load or store instructions after sync can begin.
 	 */
-	VMINLINE static void
-	readWriteBarrier()
+	VMINLINE static void readWriteBarrier()
 	{
 #if !defined(ATOMIC_SUPPORT_STUB)
 #if defined(AIXPPC) || defined(LINUXPPC)
@@ -206,11 +256,11 @@ public:
 #elif defined(ARM) /* defined(J9HAMMER) */
 		__sync_synchronize();
 #elif defined(AARCH64) /* defined(ARM) */
-		__asm __volatile ("dmb ish":::"memory");
+		__asm __volatile("dmb ish" ::: "memory");
 #elif defined(S390) /* defined(AARCH64) */
-		asm volatile("bcr 15,0":::"memory");
+		asm volatile("bcr 15,0" ::: "memory");
 #else /* defined(S390) */
-		asm volatile("":::"memory");
+		asm volatile("" ::: "memory");
 #endif /* defined(J9X86) */
 #elif defined(J9ZOS390)
 		/* Replace this with an inline "bcr 15,0" whenever possible */
@@ -228,10 +278,9 @@ public:
 	 * an instruction that precedes the storeSync, and the ordering does not apply to accesses
 	 * to I/O memory (memory-mapped I/O).
 	 */
-	VMINLINE static void
-	writeBarrier()
+	VMINLINE static void writeBarrier()
 	{
-	/* Neither x86 nor S390 require a write barrier - the compiler fence is sufficient */
+		/* Neither x86 nor S390 require a write barrier - the compiler fence is sufficient */
 #if !defined(ATOMIC_SUPPORT_STUB)
 #if defined(AIXPPC) || defined(LINUXPPC)
 		__lwsync();
@@ -241,9 +290,9 @@ public:
 #if defined(ARM)
 		__sync_synchronize();
 #elif defined(AARCH64) /* defined(ARM) */
-		__asm __volatile ("dmb ishst":::"memory");
+		__asm __volatile("dmb ishst" ::: "memory");
 #else /* defined(AARCH64) */
-		asm volatile("":::"memory");
+		asm volatile("" ::: "memory");
 #endif /* defined(ARM) */
 #elif defined(J9ZOS390)
 		__fence();
@@ -258,10 +307,9 @@ public:
 	 * no loads following entry into a critical section can access data (because of aggressive
 	 * out-of-order and speculative execution in the processor) before the lock is acquired.
 	 */
-	VMINLINE static void
-	readBarrier()
+	VMINLINE static void readBarrier()
 	{
-	/* Neither x86 nor S390 require a read barrier - the compiler fence is sufficient */
+		/* Neither x86 nor S390 require a read barrier - the compiler fence is sufficient */
 #if !defined(ATOMIC_SUPPORT_STUB)
 #if defined(AIXPPC) || defined(LINUXPPC)
 		__isync();
@@ -271,9 +319,9 @@ public:
 #if defined(ARM)
 		__sync_synchronize();
 #elif defined(AARCH64) /* defined(ARM) */
-		__asm __volatile ("dmb ishld":::"memory");
+		__asm __volatile("dmb ishld" ::: "memory");
 #else /* defined(AARCH64) */
-		asm volatile("":::"memory");
+		asm volatile("" ::: "memory");
 #endif /* defined(ARM) */
 #elif defined(J9ZOS390)
 		__fence();
@@ -292,8 +340,7 @@ public:
 	 * This differs from readBarrier() in that it will break any memory transaction which is being
 	 * used to avoid locking a monitor.
 	 */
-	VMINLINE static void
-	monitorEnterBarrier()
+	VMINLINE static void monitorEnterBarrier()
 	{
 #if defined(AIXPPC) || defined(LINUXPPC)
 		readWriteBarrier();
@@ -315,8 +362,8 @@ public:
 	 *
 	 * @return the value at memory location <b>address</b> BEFORE the store was attempted
 	 */
-	VMINLINE static uint32_t
-	lockCompareExchangeU32(volatile uint32_t *address, uint32_t oldValue, uint32_t newValue, bool readBeforeCAS = false)
+	VMINLINE static uint32_t lockCompareExchangeU32(
+	        volatile uint32_t *address, uint32_t oldValue, uint32_t newValue, bool readBeforeCAS = false)
 	{
 #if defined(ATOMIC_SUPPORT_STUB)
 		return 0;
@@ -333,9 +380,9 @@ public:
 		cs((cs_t *)&oldValue, (cs_t *)address, (cs_t)newValue);
 		return oldValue;
 #elif defined(__xlC__) /* defined(OMRZTPF) */
-		__compare_and_swap((volatile int*)address, (int*)&oldValue, (int)newValue);
+		__compare_and_swap((volatile int *)address, (int *)&oldValue, (int)newValue);
 		return oldValue;
-#elif defined(__GNUC__)  /* defined(__xlC__) */
+#elif defined(__GNUC__) /* defined(__xlC__) */
 		/* Assume GCC >= 4.2 */
 		return __sync_val_compare_and_swap(address, oldValue, newValue);
 #elif defined(_MSC_VER) /* defined(__GNUC__) */
@@ -343,7 +390,8 @@ public:
 #elif defined(J9ZOS390) /* defined(_MSC_VER) */
 		/* V1.R13 has a compiler bug and if you pass a constant as oldValue it will cause c-stack corruption */
 		volatile uint32_t old = oldValue;
-		/* 390 cs() function defined in <stdlib.h>, doesn't expand properly to __cs1() which correctly deals with aliasing */
+		/* 390 cs() function defined in <stdlib.h>, doesn't expand properly to __cs1() which correctly deals
+		 * with aliasing */
 		__cs1((uint32_t *)&old, (uint32_t *)address, (uint32_t *)&newValue);
 		return old;
 #else /* defined(J9ZOS390) */
@@ -365,8 +413,8 @@ public:
 	 *
 	 * @return the value at memory location <b>address</b> BEFORE the store was attempted
 	 */
-	VMINLINE static uint64_t
-	lockCompareExchangeU64(volatile uint64_t *address, uint64_t oldValue, uint64_t newValue, bool readBeforeCAS = false)
+	VMINLINE static uint64_t lockCompareExchangeU64(
+	        volatile uint64_t *address, uint64_t oldValue, uint64_t newValue, bool readBeforeCAS = false)
 	{
 #if defined(ATOMIC_SUPPORT_STUB)
 		return 0;
@@ -385,28 +433,30 @@ public:
 		}
 #endif /* defined(ATOMIC_ALLOW_PRE_READ) */
 #if defined(OMR_ARCH_POWER) && !defined(OMR_ENV_DATA64) /* defined(ATOMIC_SUPPORT_STUB) */
-		return J9CAS8Helper(address, ((uint32_t*)&oldValue)[1], ((uint32_t*)&oldValue)[0], ((uint32_t*)&newValue)[1], ((uint32_t*)&newValue)[0]);
+		return J9CAS8Helper(address, ((uint32_t *)&oldValue)[1], ((uint32_t *)&oldValue)[0],
+		        ((uint32_t *)&newValue)[1], ((uint32_t *)&newValue)[0]);
 #elif defined(OMRZTPF) /* defined(OMR_ARCH_POWER) && !defined(OMR_ENV_DATA64) */
 		csg((csg_t *)&oldValue, (csg_t *)address, (csg_t)newValue);
 		return oldValue;
 #elif defined(__xlC__) /* defined(OMRZTPF) */
-		__compare_and_swaplp((volatile long*)address, (long*)&oldValue, (long)newValue);
+		__compare_and_swaplp((volatile long *)address, (long *)&oldValue, (long)newValue);
 		return oldValue;
 #elif defined(__GNUC__) /* defined(__xlC__) */
 		/* Assume GCC >= 4.2 */
 		return __sync_val_compare_and_swap(address, oldValue, newValue);
 #elif defined(_MSC_VER) /* defined(__GNUC__) */
-		return (uint64_t)_InterlockedCompareExchange64((volatile __int64 *)address, (__int64)newValue, (__int64)oldValue);
+		return (uint64_t)_InterlockedCompareExchange64(
+		        (volatile __int64 *)address, (__int64)newValue, (__int64)oldValue);
 #elif defined(J9ZOS390) /* defined(_MSC_VER) */
-		 /* V1.R13 has a compiler bug and if you pass a constant as oldValue it will cause c-stack corruption */
-		 volatile uint64_t old = oldValue;
+		/* V1.R13 has a compiler bug and if you pass a constant as oldValue it will cause c-stack corruption */
+		volatile uint64_t old = oldValue;
 #if defined(OMR_ENV_DATA64)
-		 /* Call __csg directly as csg() does not exist */
-		__csg((void*)&old, (void*)address, (void*)&newValue);
+		/* Call __csg directly as csg() does not exist */
+		__csg((void *)&old, (void *)address, (void *)&newValue);
 		return old;
 #else /* defined(OMR_ENV_DATA64) */
 		/* __cds1 does not write the swap value correctly, cds does the correct thing */
-		cds((cds_t*)&old, (cds_t*)address, *(cds_t*)&newValue);
+		cds((cds_t *)&old, (cds_t *)address, *(cds_t *)&newValue);
 		return old;
 #endif /* defined(OMR_ENV_DATA64) */
 #else /* defined(J9ZOS390) */
@@ -428,13 +478,15 @@ public:
 	 *
 	 * @return the value at memory location <b>address</b> BEFORE the store was attempted
 	 */
-	VMINLINE static uintptr_t
-	lockCompareExchange(volatile uintptr_t * address, uintptr_t oldValue, uintptr_t newValue, bool readBeforeCAS = false)
+	VMINLINE static uintptr_t lockCompareExchange(
+	        volatile uintptr_t *address, uintptr_t oldValue, uintptr_t newValue, bool readBeforeCAS = false)
 	{
 #if defined(OMR_ENV_DATA64)
-		return (uintptr_t)lockCompareExchangeU64((volatile uint64_t *)address, (uint64_t)oldValue, (uint64_t)newValue, readBeforeCAS);
+		return (uintptr_t)lockCompareExchangeU64(
+		        (volatile uint64_t *)address, (uint64_t)oldValue, (uint64_t)newValue, readBeforeCAS);
 #else /* defined(OMR_ENV_DATA64) */
-		return (uintptr_t)lockCompareExchangeU32((volatile uint32_t *)address, (uint32_t)oldValue, (uint32_t)newValue, readBeforeCAS);
+		return (uintptr_t)lockCompareExchangeU32(
+		        (volatile uint32_t *)address, (uint32_t)oldValue, (uint32_t)newValue, readBeforeCAS);
 #endif /* defined(OMR_ENV_DATA64) */
 	}
 
@@ -448,8 +500,7 @@ public:
 	 *
 	 * @return the value at memory location <b>address</b> BEFORE the store was attempted
 	 */
-	VMINLINE static uint64_t
-	lockExchangeU64(volatile uint64_t *address, uint64_t newValue)
+	VMINLINE static uint64_t lockExchangeU64(volatile uint64_t *address, uint64_t newValue)
 	{
 #if defined(ATOMIC_SUPPORT_STUB)
 		return 0;
@@ -488,8 +539,7 @@ public:
 	 *
 	 * @return the value at memory location <b>address</b> BEFORE the store was attempted
 	 */
-	VMINLINE static uint32_t
-	lockExchangeU32(volatile uint32_t *address, uint32_t newValue)
+	VMINLINE static uint32_t lockExchangeU32(volatile uint32_t *address, uint32_t newValue)
 	{
 #if defined(ATOMIC_SUPPORT_STUB)
 		return 0;
@@ -529,8 +579,7 @@ public:
 	 *
 	 * @return the value at memory location <b>address</b> BEFORE the store was attempted
 	 */
-	VMINLINE static uintptr_t
-	lockExchange(volatile uintptr_t * address, uintptr_t newValue)
+	VMINLINE static uintptr_t lockExchange(volatile uintptr_t *address, uintptr_t newValue)
 	{
 #if defined(OMR_ENV_DATA64)
 		return (uintptr_t)lockExchangeU64((volatile uint64_t *)address, (uint64_t)newValue);
@@ -549,8 +598,7 @@ public:
 	 *
 	 * @return The value at memory location <b>address</b> AFTER the add is completed
 	 */
-	VMINLINE static uintptr_t
-	add(volatile uintptr_t *address, uintptr_t addend)
+	VMINLINE static uintptr_t add(volatile uintptr_t *address, uintptr_t addend)
 	{
 		/* Stop compiler optimizing away load of oldValue */
 		volatile uintptr_t *localAddr = address;
@@ -573,8 +621,7 @@ public:
 	 *
 	 * @return The value at memory location <b>address</b> BEFORE the AND is completed
 	 */
-	VMINLINE static uintptr_t
-	bitAnd(volatile uintptr_t *address, uintptr_t mask)
+	VMINLINE static uintptr_t bitAnd(volatile uintptr_t *address, uintptr_t mask)
 	{
 		/* Stop compiler optimizing away load of oldValue */
 		volatile uintptr_t *localAddr = address;
@@ -597,8 +644,7 @@ public:
 	 *
 	 * @return The value at memory location <b>address</b> BEFORE the AND is completed
 	 */
-	VMINLINE static uint32_t
-	bitAndU32(volatile uint32_t *address, uint32_t mask)
+	VMINLINE static uint32_t bitAndU32(volatile uint32_t *address, uint32_t mask)
 	{
 		/* Stop compiler optimizing away load of oldValue */
 		volatile uint32_t *localAddr = address;
@@ -621,8 +667,7 @@ public:
 	 *
 	 * @return The value at memory location <b>address</b> BEFORE the OR is completed
 	 */
-	VMINLINE static uintptr_t
-	bitOr(volatile uintptr_t *address, uintptr_t mask)
+	VMINLINE static uintptr_t bitOr(volatile uintptr_t *address, uintptr_t mask)
 	{
 		/* Stop compiler optimizing away load of oldValue */
 		volatile uintptr_t *localAddr = address;
@@ -645,8 +690,7 @@ public:
 	 *
 	 * @return The value at memory location <b>address</b> BEFORE the OR is completed
 	 */
-	VMINLINE static uint32_t
-	bitOrU32(volatile uint32_t *address, uint32_t mask)
+	VMINLINE static uint32_t bitOrU32(volatile uint32_t *address, uint32_t mask)
 	{
 		/* Stop compiler optimizing away load of oldValue */
 		volatile uint32_t *localAddr = address;
@@ -669,8 +713,7 @@ public:
 	 *
 	 * @return The value at memory location <b>address</b>
 	 */
-	VMINLINE static uintptr_t
-	addU32(volatile uint32_t *address, uint32_t addend)
+	VMINLINE static uintptr_t addU32(volatile uint32_t *address, uint32_t addend)
 	{
 		/* Stop compiler optimizing away load of oldValue */
 		volatile uint32_t *localAddr = address;
@@ -693,8 +736,7 @@ public:
 	 *
 	 * @return The value at memory location <b>address</b>
 	 */
-	VMINLINE static uint64_t
-	addU64(volatile uint64_t *address, uint64_t addend)
+	VMINLINE static uint64_t addU64(volatile uint64_t *address, uint64_t addend)
 	{
 		/* Stop compiler optimizing away load of oldValue */
 		volatile uint64_t *localAddr = address;
@@ -722,15 +764,14 @@ public:
 	 *
 	 * @return The value at memory location <b>address</b>
 	 */
-	VMINLINE static double
-	addDouble(volatile double *address, double addend)
+	VMINLINE static double addDouble(volatile double *address, double addend)
 	{
 		/* while casting address to a DoubleConversionData* will silence GCC's strict aliasing warnings, the
 		 * code below is still dereferencing a type-punned pointer, and is thus undefined behaviour.
 		 */
 
 		/* Stop compiler optimizing away load of oldValue. data is a type-punned pointer. */
-		volatile DoubleConversionData* data = (volatile DoubleConversionData*)address;
+		volatile DoubleConversionData *data = (volatile DoubleConversionData *)address;
 
 		DoubleConversionData oldData;
 		DoubleConversionData newData;
@@ -755,8 +796,7 @@ public:
 	 *
 	 * @return The value at memory location <b>address</b>
 	 */
-	VMINLINE static uintptr_t
-	subtract(volatile uintptr_t *address, uintptr_t value)
+	VMINLINE static uintptr_t subtract(volatile uintptr_t *address, uintptr_t value)
 	{
 		/* Stop compiler optimizing away load of oldValue */
 		volatile uintptr_t *localAddr = address;
@@ -779,8 +819,7 @@ public:
 	 *
 	 * @return The value at memory location <b>address</b>
 	 */
-	VMINLINE static uint64_t
-	subtractU64(volatile uint64_t *address, uint64_t value)
+	VMINLINE static uint64_t subtractU64(volatile uint64_t *address, uint64_t value)
 	{
 		/* Stop compiler optimizing away load of oldValue */
 		volatile uint64_t *localAddr = address;
@@ -803,8 +842,7 @@ public:
 	 *
 	 * @return The value at memory location <b>address</b>
 	 */
-	VMINLINE static uintptr_t
-	subtractU32(volatile uint32_t *address, uint32_t value)
+	VMINLINE static uintptr_t subtractU32(volatile uint32_t *address, uint32_t value)
 	{
 		/* Stop compiler optimizing away load of oldValue */
 		volatile uint32_t *localAddr = address;
@@ -828,8 +866,7 @@ public:
 	 *
 	 * @note This method can spin indefinitely while attempting to write the new value.
 	 */
-	VMINLINE static uintptr_t
-	set(volatile uintptr_t *address, uintptr_t value)
+	VMINLINE static uintptr_t set(volatile uintptr_t *address, uintptr_t value)
 	{
 		/* Stop compiler optimizing away load of oldValue */
 		volatile uintptr_t *localAddr = address;
@@ -853,8 +890,7 @@ public:
 	 *
 	 * @note This method can spin indefinitely while attempting to write the new value.
 	 */
-	VMINLINE static uint64_t
-	setU64(volatile uint64_t *address, uint64_t value)
+	VMINLINE static uint64_t setU64(volatile uint64_t *address, uint64_t value)
 	{
 		/* Stop compiler optimizing away load of oldValue */
 		volatile uint64_t *localAddr = address;
@@ -869,14 +905,14 @@ public:
 
 	/**
 	 * Load a 64-bit value from memory location.
-	 * On a 32-bit platform, atomically read a 64-bit value using LCE. Just read and return value on 64-bit platforms.
+	 * On a 32-bit platform, atomically read a 64-bit value using LCE. Just read and return value on 64-bit
+	 * platforms.
 	 *
 	 * @param address The memory location to be read
 	 *
 	 * @return the value stored at the address.
 	 */
-	VMINLINE static uint64_t
-	getU64(volatile uint64_t *address)
+	VMINLINE static uint64_t getU64(volatile uint64_t *address)
 	{
 		uint64_t value = *address;
 
@@ -891,8 +927,7 @@ public:
 	/**
 	 * On PPC processors, lower the SMT thread priority.
 	 */
-	VMINLINE static void
-	dropSMTThreadPriority()
+	VMINLINE static void dropSMTThreadPriority()
 	{
 #if !defined(ATOMIC_SUPPORT_STUB)
 #if defined(AIXPPC) || defined(LINUXPPC)
@@ -904,8 +939,7 @@ public:
 	/**
 	 * On PPC processors, restore the SMT thread priority.
 	 */
-	VMINLINE static void
-	restoreSMTThreadPriority()
+	VMINLINE static void restoreSMTThreadPriority()
 	{
 #if !defined(ATOMIC_SUPPORT_STUB)
 #if defined(AIXPPC) || defined(LINUXPPC)
@@ -922,13 +956,11 @@ public:
 	 *
 	 * @return see above
 	 */
-	VMINLINE static bool
-	sampleTimestamp(uintptr_t frequency)
+	VMINLINE static bool sampleTimestamp(uintptr_t frequency)
 	{
 		/* TODO: JAZZ103 51150 */
 		return true;
 	}
-
 };
 
 #endif /* ATOMIC_SUPPORT_HPP_ */

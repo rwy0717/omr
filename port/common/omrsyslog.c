@@ -93,4 +93,3 @@ omrsyslog_set(struct OMRPortLibrary *portLibrary, uintptr_t options)
 {
 	/* noop */
 }
-

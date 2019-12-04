@@ -29,15 +29,11 @@
 
 #include "ilgen/OMRTypeDictionary.hpp"
 
-namespace TR
-{
-class TypeDictionary : public OMR::TypeDictionary
-   {
-   public:
-      TypeDictionary()
-         : OMR::TypeDictionary()
-         { }
-   };
+namespace TR {
+class TypeDictionary : public OMR::TypeDictionary {
+public:
+	TypeDictionary() : OMR::TypeDictionary() {}
+};
 } // namespace TR
 
 #endif // !defined(TR_TYPEDICTIONARY_INCL)

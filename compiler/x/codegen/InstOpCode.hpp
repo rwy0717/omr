@@ -22,34 +22,25 @@
 #ifndef TR_X86_INSTOPCODE_INCL
 #define TR_X86_INSTOPCODE_INCL
 
-namespace TR
-{
+namespace TR {
 
 /*
  * TODO: this is temporary so that X86 instruction can be re-shaped first.
  * Once X86 instruction is done, then this needs to be done properly.
  */
-class InstOpCode
-   {
-   public:
+class InstOpCode {
+public:
+	enum Mnemonic { BAD };
 
-   enum Mnemonic
-      {
-      BAD
-      };
+	InstOpCode(); // TODO: this needs to be private later
+	InstOpCode(Mnemonic m) : _mnemonic(m) {}
 
-   InstOpCode(); // TODO: this needs to be private later
-   InstOpCode(Mnemonic m): _mnemonic(m)  {}
+	Mnemonic getMnemonic() { return _mnemonic; }
+	void setMnemonic(Mnemonic op) { _mnemonic = op; }
 
-   Mnemonic getMnemonic() {return _mnemonic;}
-   void setMnemonic(Mnemonic op) {_mnemonic = op;}
-
-
-   private:
-
-   Mnemonic _mnemonic;
-
-   };
-}
+private:
+	Mnemonic _mnemonic;
+};
+} // namespace TR
 
 #endif

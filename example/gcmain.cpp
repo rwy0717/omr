@@ -43,7 +43,7 @@
 extern "C" {
 
 int
-omr_main_entry(int argc, char ** argv, char **envp)
+omr_main_entry(int argc, char **argv, char **envp)
 {
 	/* Start up */
 	OMR_VM_Example exampleVM;
@@ -63,14 +63,12 @@ omr_main_entry(int argc, char ** argv, char **envp)
 	Assert_MM_true(J9THREAD_RWMUTEX_OK == rw_rc);
 
 	/* Initialize root table */
-	exampleVM.rootTable = hashTableNew(
-			exampleVM._omrVM->_runtime->_portLibrary, OMR_GET_CALLSITE(), 0, sizeof(RootEntry), 0, 0, OMRMEM_CATEGORY_MM,
-			rootTableHashFn, rootTableHashEqualFn, NULL, NULL);
+	exampleVM.rootTable = hashTableNew(exampleVM._omrVM->_runtime->_portLibrary, OMR_GET_CALLSITE(), 0,
+	        sizeof(RootEntry), 0, 0, OMRMEM_CATEGORY_MM, rootTableHashFn, rootTableHashEqualFn, NULL, NULL);
 
 	/* Initialize root table */
-	exampleVM.objectTable = hashTableNew(
-			exampleVM._omrVM->_runtime->_portLibrary, OMR_GET_CALLSITE(), 0, sizeof(ObjectEntry), 0, 0, OMRMEM_CATEGORY_MM,
-			objectTableHashFn, objectTableHashEqualFn, NULL, NULL);
+	exampleVM.objectTable = hashTableNew(exampleVM._omrVM->_runtime->_portLibrary, OMR_GET_CALLSITE(), 0,
+	        sizeof(ObjectEntry), 0, 0, OMRMEM_CATEGORY_MM, objectTableHashFn, objectTableHashEqualFn, NULL, NULL);
 
 	OMRPORT_ACCESS_FROM_OMRVM(exampleVM._omrVM);
 	omrtty_printf("VM/GC INITIALIZED\n");
@@ -82,7 +80,8 @@ omr_main_entry(int argc, char ** argv, char **envp)
 	MM_GCExtensionsBase *extensions = env->getExtensions();
 
 	omrtty_printf("configuration is %s\n", extensions->configuration->getBaseVirtualTypeId());
-	omrtty_printf("collector interface is %s\n", env->getExtensions()->collectorLanguageInterface->getBaseVirtualTypeId());
+	omrtty_printf("collector interface is %s\n",
+	        env->getExtensions()->collectorLanguageInterface->getBaseVirtualTypeId());
 	omrtty_printf("garbage collector is %s\n", env->getExtensions()->getGlobalCollector()->getBaseVirtualTypeId());
 	omrtty_printf("allocation interface is %s\n", allocationInterface->getBaseVirtualTypeId());
 
@@ -110,7 +109,7 @@ omr_main_entry(int argc, char ** argv, char **envp)
 	/* Print/verify thread allocation stats before GC */
 	MM_AllocationStats *allocationStats = allocationInterface->getAllocationStats();
 	omrtty_printf("thread allocated %d tlh bytes, %d non-tlh bytes, from %d allocations before NULL\n",
-		allocationStats->tlhBytesAllocated(), allocationStats->nontlhBytesAllocated(), allocatedCount);
+	        allocationStats->tlhBytesAllocated(), allocationStats->nontlhBytesAllocated(), allocatedCount);
 
 	/* Force GC to print verbose system allocation stats -- should match thread allocation stats from before GC */
 	MM_ObjectAllocationModel allocationModel(env, allocSize, 0);
@@ -147,5 +146,4 @@ omr_main_entry(int argc, char ** argv, char **envp)
 
 	return rc;
 }
-
 }

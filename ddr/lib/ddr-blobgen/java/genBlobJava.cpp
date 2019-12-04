@@ -30,7 +30,8 @@
 #include <stdio.h>
 
 DDR_RC
-genBlob(struct OMRPortLibrary *portLibrary, Symbol_IR *ir, const char *supersetFile, const char *blobFile, bool printEmptyTypes)
+genBlob(struct OMRPortLibrary *portLibrary, Symbol_IR *ir, const char *supersetFile, const char *blobFile,
+        bool printEmptyTypes)
 {
 	DDR_RC rc = DDR_RC_OK;
 

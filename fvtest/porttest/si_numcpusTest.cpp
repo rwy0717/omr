@@ -44,7 +44,8 @@ TEST(PortSysinfoTest, sysinfo_numcpus_test0)
 	portTestEnv->changeIndent(-1);
 
 	if (0 == numberPhysicalCPUs) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "\tomrsysinfo_get_number_CPUs_by_type(OMRPORT_CPU_PHYSICAL) returned invalid value 0.\n");
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "\tomrsysinfo_get_number_CPUs_by_type(OMRPORT_CPU_PHYSICAL) returned invalid value 0.\n");
 	}
 
 	portTestEnv->changeIndent(-1);
@@ -70,7 +71,8 @@ TEST(PortSysinfoTest, sysinfo_numcpus_test1)
 			boundTestArg = &portTestEnv->_argv[i][strlen(BOUNDCPUS)];
 			boundCPUs = atoi(boundTestArg);
 			if (-1 == boundCPUs) {
-				portTestEnv->log(LEVEL_ERROR, "Invalid (non-numeric) format for %s value (%s).\n", BOUNDCPUS, boundTestArg);
+				portTestEnv->log(LEVEL_ERROR, "Invalid (non-numeric) format for %s value (%s).\n",
+				        BOUNDCPUS, boundTestArg);
 				boundCPUs = 0;
 			}
 		}
@@ -80,8 +82,11 @@ TEST(PortSysinfoTest, sysinfo_numcpus_test1)
 		uintptr_t numberPhysicalCPUs = omrsysinfo_get_number_CPUs_by_type(OMRPORT_CPU_ONLINE);
 		uintptr_t numberBoundCPUs = omrsysinfo_get_number_CPUs_by_type(OMRPORT_CPU_BOUND);
 		if (numberBoundCPUs < numberPhysicalCPUs) {
-			portTestEnv->log(LEVEL_ERROR, "The test was configured to run without CPU restrictions (e.g. taskset), but CPU restrictions were detected.\n");
-			portTestEnv->log(LEVEL_ERROR, "The test will continue with CPU restrictions configuration.\n\n");
+			portTestEnv->log(LEVEL_ERROR,
+			        "The test was configured to run without CPU restrictions (e.g. taskset), but CPU "
+			        "restrictions were detected.\n");
+			portTestEnv->log(
+			        LEVEL_ERROR, "The test will continue with CPU restrictions configuration.\n\n");
 			boundCPUs = numberBoundCPUs;
 		}
 	}
@@ -104,7 +109,8 @@ TEST(PortSysinfoTest, sysinfo_numcpus_test1)
 	} else if ((0 != boundTest) && (numberBoundCPUs == boundTest)) {
 		/* Bound. Confirm that binding is correct */
 	} else {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "\nomrsysinfo_get_number_CPUs_by_type(OMRPORT_CPU_BOUND) returned unexpected value.\n");
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "\nomrsysinfo_get_number_CPUs_by_type(OMRPORT_CPU_BOUND) returned unexpected value.\n");
 	}
 
 	portTestEnv->changeIndent(-1);
@@ -129,7 +135,8 @@ TEST(PortSysinfoTest, sysinfo_numcpus_test2)
 	portTestEnv->changeIndent(-1);
 
 	if (0 == numberOnlineCPUs) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "\tomrsysinfo_get_number_CPUs_by_type(OMRPORT_CPU_ONLINE) returned invalid value 0.\n");
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "\tomrsysinfo_get_number_CPUs_by_type(OMRPORT_CPU_ONLINE) returned invalid value 0.\n");
 	}
 
 	portTestEnv->changeIndent(-1);
@@ -149,7 +156,9 @@ TEST(PortSysinfoTest, sysinfo_numcpus_test3)
 	portTestEnv->log("\nGet number of online and physical CPUs. Validate online <= physical.\n");
 
 	if (numberOnlineCPUs > numberPhysicalCPUs) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "\tomrsysinfo_get_number_CPUs_by_type(OMRPORT_CPU_ONLINE) returned value greater than omrsysinfo_get_number_CPUs_by_type(OMRPORT_CPU_PHYSICAL).\n");
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "\tomrsysinfo_get_number_CPUs_by_type(OMRPORT_CPU_ONLINE) returned value greater than "
+		        "omrsysinfo_get_number_CPUs_by_type(OMRPORT_CPU_PHYSICAL).\n");
 	}
 
 	reportTestExit(OMRPORTLIB, testName);
@@ -173,7 +182,8 @@ TEST(PortSysinfoTest, sysinfo_numcpus_test4)
 	portTestEnv->changeIndent(-1);
 
 	if (result > 0) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "\tomrsysinfo_get_number_CPUs_by_type returned non-zero value when given invalid type.\n");
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "\tomrsysinfo_get_number_CPUs_by_type returned non-zero value when given invalid type.\n");
 	}
 
 	portTestEnv->changeIndent(-1);
@@ -188,7 +198,8 @@ TEST(PortSysinfoTest, sysinfo_numcpus_test4)
  *
  * @return TEST_PASSED on success, TEST_FAILED on failure
  */
-int omrsysinfo_numcpus_runTime(OMRPortLibrary *portLibrary, uintptr_t type)
+int
+omrsysinfo_numcpus_runTime(OMRPortLibrary *portLibrary, uintptr_t type)
 {
 #define J9SYSINFO_NUMCPUS_RUNTIME_LOOPS 1000
 	OMRPORT_ACCESS_FROM_OMRPORT(portLibrary);
@@ -207,27 +218,15 @@ int omrsysinfo_numcpus_runTime(OMRPortLibrary *portLibrary, uintptr_t type)
 	difference = after - before;
 
 	switch (type) {
-	case OMRPORT_CPU_PHYSICAL:
-		testType = "physical";
-		break;
-	case OMRPORT_CPU_ONLINE:
-		testType = "online";
-		break;
-	case OMRPORT_CPU_BOUND:
-		testType = "bound";
-		break;
-	case OMRPORT_CPU_TARGET:
-		testType = "target";
-		break;
-	default:
-		testType = "";
-		break;
+	case OMRPORT_CPU_PHYSICAL: testType = "physical"; break;
+	case OMRPORT_CPU_ONLINE: testType = "online"; break;
+	case OMRPORT_CPU_BOUND: testType = "bound"; break;
+	case OMRPORT_CPU_TARGET: testType = "target"; break;
+	default: testType = ""; break;
 	}
 	portTestEnv->log("\n");
-	portTestEnv->log("Get number of %s CPUs %d times: %d ns\n",
-				  testType,
-				  J9SYSINFO_NUMCPUS_RUNTIME_LOOPS,
-				  difference);
+	portTestEnv->log(
+	        "Get number of %s CPUs %d times: %d ns\n", testType, J9SYSINFO_NUMCPUS_RUNTIME_LOOPS, difference);
 
 	return reportTestExit(OMRPORTLIB, testName);
 }
@@ -301,13 +300,13 @@ TEST(PortSysinfoTest, sysinfo_testOnlineProcessorCount1)
 		 */
 		uintptr_t n_cpus_online = omrsysinfo_get_number_CPUs_by_type(OMRPORT_CPU_ONLINE);
 		if (0 == n_cpus_online) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_get_number_CPUs_by_type(OMRPORT_CPU_ONLINE) failed.\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "omrsysinfo_get_number_CPUs_by_type(OMRPORT_CPU_ONLINE) failed.\n");
 			goto _cleanup;
 		}
 
-		if ((n_cpus_online > 0) &&
-			(onlineProcessorCount(&procInfo) == n_cpus_online)) {
-			portTestEnv->log("Number of online processors: %d\n",  n_cpus_online);
+		if ((n_cpus_online > 0) && (onlineProcessorCount(&procInfo) == n_cpus_online)) {
+			portTestEnv->log("Number of online processors: %d\n", n_cpus_online);
 		} else {
 			outputErrorMessage(PORTTEST_ERROR_ARGS, "Invalid online processor count found.\n");
 		}
@@ -353,13 +352,14 @@ TEST(PortSysinfoTest, sysinfo_testtotalProcessorCount)
 		 */
 		uintptr_t n_cpus_physical = omrsysinfo_get_number_CPUs_by_type(OMRPORT_CPU_PHYSICAL);
 		if (0 == n_cpus_physical) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_get_number_CPUs_by_type(OMRPORT_CPU_PHYSICAL) failed.\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "omrsysinfo_get_number_CPUs_by_type(OMRPORT_CPU_PHYSICAL) failed.\n");
 			goto _cleanup;
 		}
 
-		if ((procInfo.totalProcessorCount > 0) &&
-			((uintptr_t)procInfo.totalProcessorCount == n_cpus_physical)) {
-			portTestEnv->log("Total number of processors: %d\n",  n_cpus_physical);
+		if ((procInfo.totalProcessorCount > 0)
+		        && ((uintptr_t)procInfo.totalProcessorCount == n_cpus_physical)) {
+			portTestEnv->log("Total number of processors: %d\n", n_cpus_physical);
 		} else {
 			outputErrorMessage(PORTTEST_ERROR_ARGS, "Invalid processor count retrieved.\n");
 		}

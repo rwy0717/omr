@@ -24,28 +24,22 @@
 
 #include "threadTestLib.hpp"
 
-class CWaitNotifyLooper: public CThread
-{
+class CWaitNotifyLooper : public CThread {
 public:
-	CWaitNotifyLooper(CMonitor& monitor, unsigned int* notifyCount, unsigned int* doneRunningCount) :
-			m_monitor(monitor),
-			m_keepRunning(true),
-			m_notifyCount(notifyCount),
-			m_doneRunningCount(doneRunningCount)
+	CWaitNotifyLooper(CMonitor &monitor, unsigned int *notifyCount, unsigned int *doneRunningCount)
+	        : m_monitor(monitor)
+	        , m_keepRunning(true)
+	        , m_notifyCount(notifyCount)
+	        , m_doneRunningCount(doneRunningCount)
 	{
 		assert(m_notifyCount);
 		assert(m_doneRunningCount);
 	}
 
-	void
-	StopRunning(void)
-	{
-		m_keepRunning = false;
-	}
+	void StopRunning(void) { m_keepRunning = false; }
 
 protected:
-	virtual intptr_t
-	Run(void)
+	virtual intptr_t Run(void)
 	{
 
 		omrTestEnv->log(LEVEL_VERBOSE, "thread %p (%p) running\n", m_self, this);
@@ -69,7 +63,7 @@ protected:
 		return 0;
 	}
 
-	CMonitor& m_monitor;
+	CMonitor &m_monitor;
 	volatile bool m_keepRunning;
 	unsigned int *m_notifyCount;
 	unsigned int *m_doneRunningCount;

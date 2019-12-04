@@ -50,7 +50,8 @@
  * If the initialization fails, we revert to the default.
  */
 clockid_t timeoutClock = CLOCK_REALTIME; /**< the clock used to derive absolute time from relative wait time */
-pthread_condattr_t *defaultCondAttr = NULL; /**< attribute passed to pthread_cond_init(). NULL means the system default. */
+pthread_condattr_t *defaultCondAttr = NULL; /**< attribute passed to pthread_cond_init(). NULL means the system default.
+                                             */
 static pthread_condattr_t defaultCondAttr_s; /* do not use directly */
 static intptr_t initCondAttr(void);
 #endif /* J9THREAD_USE_MONOTONIC_COND_CLOCK */
@@ -73,8 +74,8 @@ intptr_t sem_wait_zos(j9sem_t s);
 intptr_t sem_trywait_zos(j9sem_t s);
 intptr_t sem_post_zos(j9sem_t s);
 
-#if defined (OMRZTPF)
-void  ztpf_init_proc(void);
+#if defined(OMRZTPF)
+void ztpf_init_proc(void);
 #endif /* defined (OMRZTPF) */
 
 struct J9ThreadLibrary default_library;
@@ -96,7 +97,7 @@ call_omrthread_init(void)
 	zos_init_yielding();
 #endif
 
-#if  defined(OMRZTPF)
+#if defined(OMRZTPF)
 	ztpf_init_proc();
 #endif /* defined(OMRZTPF) */
 
@@ -187,7 +188,7 @@ intptr_t
 sem_init_zos(j9sem_t s, int pShared, int initValue)
 {
 	intptr_t rval;
-	zos_sem_t *zs = (zos_sem_t *) s;
+	zos_sem_t *zs = (zos_sem_t *)s;
 
 	zs->count = initValue;
 	rval = omrthread_monitor_init_with_name(&zs->monitor, 0, "&zs->monitor");
@@ -198,7 +199,7 @@ intptr_t
 sem_destroy_zos(j9sem_t s)
 {
 	intptr_t rval = 0;
-	zos_sem_t *zs = (zos_sem_t *) s;
+	zos_sem_t *zs = (zos_sem_t *)s;
 	if (zs->monitor) {
 		rval = omrthread_monitor_destroy(zs->monitor);
 	}
@@ -208,7 +209,7 @@ sem_destroy_zos(j9sem_t s)
 intptr_t
 sem_wait_zos(j9sem_t s)
 {
-	zos_sem_t *zs = (zos_sem_t *) s;
+	zos_sem_t *zs = (zos_sem_t *)s;
 
 	omrthread_monitor_enter(zs->monitor);
 	while (zs->count == 0) {
@@ -223,7 +224,7 @@ sem_wait_zos(j9sem_t s)
 intptr_t
 sem_post_zos(j9sem_t s)
 {
-	zos_sem_t *zs = (zos_sem_t *) s;
+	zos_sem_t *zs = (zos_sem_t *)s;
 
 	omrthread_monitor_enter(zs->monitor);
 	zs->count++;
@@ -233,13 +234,12 @@ sem_post_zos(j9sem_t s)
 	return 0;
 }
 
-
 intptr_t
 sem_getvalue_zos(j9sem_t s)
 {
 	uintptr_t rval;
-	zos_sem_t *zs = (zos_sem_t *) s;
-	rval =  zs->count;
+	zos_sem_t *zs = (zos_sem_t *)s;
+	rval = zs->count;
 	return rval;
 }
 
@@ -247,18 +247,17 @@ intptr_t
 sem_trywait_zos(j9sem_t s)
 {
 	uintptr_t rval = -1;
-	zos_sem_t *zs = (zos_sem_t *) s;
+	zos_sem_t *zs = (zos_sem_t *)s;
 
 	omrthread_monitor_enter(zs->monitor);
 	if (zs->count > 0) {
-		-- zs->count;
-		rval =  zs->count;
+		--zs->count;
+		rval = zs->count;
 	}
 	omrthread_monitor_exit(zs->monitor);
 
 	return rval;
 }
-
 
 #endif
 
@@ -298,7 +297,7 @@ initCondAttr(void)
 }
 #endif /* J9THREAD_USE_MONOTONIC_COND_CLOCK */
 
-#if  defined(OMRZTPF)
+#if defined(OMRZTPF)
 /**
  * process scoped settings for the z/TPF operating system.
  *
@@ -306,15 +305,15 @@ initCondAttr(void)
 void
 ztpf_init_proc()
 {
-        /*
-         * Disable heap check mode for the jvm process. See tpf rtc 15110.
-         */
-        tpf_eheap_heapcheck(TPF_EHEAP_HEAPCHECK_DISABLE);
-        /*
-         *  Set ECB attributes, ensure that these attributes are set in child ECBs too.
-         */
-        tpf_easetc(TPF_EASETC_SWITCHABLE, TPF_EASETC_SET_ON+TPF_EASETC_INHERIT_YES);
-        tpf_easetc(TPF_EASETC_NOSTACKVAL, TPF_EASETC_SET_ON+TPF_EASETC_INHERIT_YES);
+	/*
+	 * Disable heap check mode for the jvm process. See tpf rtc 15110.
+	 */
+	tpf_eheap_heapcheck(TPF_EHEAP_HEAPCHECK_DISABLE);
+	/*
+	 *  Set ECB attributes, ensure that these attributes are set in child ECBs too.
+	 */
+	tpf_easetc(TPF_EASETC_SWITCHABLE, TPF_EASETC_SET_ON + TPF_EASETC_INHERIT_YES);
+	tpf_easetc(TPF_EASETC_NOSTACKVAL, TPF_EASETC_SET_ON + TPF_EASETC_INHERIT_YES);
 }
 #endif /* defined(OMRZTPF) */
 

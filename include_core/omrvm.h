@@ -38,7 +38,8 @@ omr_error_t OMR_Initialize(void *languageVM, OMR_VM **vmSlot);
  */
 omr_error_t OMR_Shutdown(OMR_VM *omrVM);
 
-omr_error_t OMR_Initialize_VM(OMR_VM **omrVMSlot, OMR_VMThread **omrVMThreadSlot, void *languageVM, void *languageVMThread);
+omr_error_t OMR_Initialize_VM(
+        OMR_VM **omrVMSlot, OMR_VMThread **omrVMThreadSlot, void *languageVM, void *languageVMThread);
 
 omr_error_t OMR_Shutdown_VM(OMR_VM *omrVM, OMR_VMThread *omrVMThread);
 
@@ -65,8 +66,8 @@ omr_error_t OMR_Thread_Init(OMR_VM *omrVM, void *language_vm_thread, OMR_VMThrea
  *
  * Cleans up a thread that was initialized using OMR_Thread_Init().
  *
- * The thread need not be the current thread. It is recommended to invoke OMR_Thread_Free() from the terminating thread itself.
- * However, if the thread is _already dead_, OMR_Thread_Free() may be invoked by another thread to clean it up.
+ * The thread need not be the current thread. It is recommended to invoke OMR_Thread_Free() from the terminating thread
+ * itself. However, if the thread is _already dead_, OMR_Thread_Free() may be invoked by another thread to clean it up.
  *
  * A thread may be OMR_Thread_Free()ed multiple times, if it was OMR_Thread_Init()ed a corresponding number of times.
  *
@@ -79,15 +80,17 @@ omr_error_t OMR_Thread_Init(OMR_VM *omrVM, void *language_vm_thread, OMR_VMThrea
 omr_error_t OMR_Thread_Free(OMR_VMThread *omrVMThread);
 
 /**
- * @brief Helper for OMR_Thread_Init(). Use instead of OMR_Thread_Init() when certain that the current thread is not attached to OMR.
+ * @brief Helper for OMR_Thread_Init(). Use instead of OMR_Thread_Init() when certain that the current thread is not
+ * attached to OMR.
  */
-omr_error_t OMR_Thread_FirstInit(OMR_VM *omrVM, omrthread_t self, void *language_vm_thread, OMR_VMThread **threadSlot, const char *threadName);
+omr_error_t OMR_Thread_FirstInit(
+        OMR_VM *omrVM, omrthread_t self, void *language_vm_thread, OMR_VMThread **threadSlot, const char *threadName);
 
 /**
- * @brief Helper for OMR_Thread_Free(). Use instead of OMR_Thread_Free() when certain that omrVMThread is only attached to OMR once.
+ * @brief Helper for OMR_Thread_Free(). Use instead of OMR_Thread_Free() when certain that omrVMThread is only attached
+ * to OMR once.
  */
 omr_error_t OMR_Thread_LastFree(OMR_VMThread *omrVMThread);
-
 
 #ifdef __cplusplus
 } /* extern "C" { */

@@ -24,9 +24,8 @@
 
 #if defined(OMR_GC_MODRON_CONCURRENT_MARK)
 
-#include "EnvironmentStandard.hpp"
 #include "ConcurrentOverflow.hpp"
-
+#include "EnvironmentStandard.hpp"
 #include "WorkPacketsConcurrent.hpp"
 
 /**
@@ -37,9 +36,10 @@
 MM_WorkPacketsConcurrent *
 MM_WorkPacketsConcurrent::newInstance(MM_EnvironmentBase *env)
 {
-	MM_WorkPacketsConcurrent *workPackets = (MM_WorkPacketsConcurrent *)env->getForge()->allocate(sizeof(MM_WorkPacketsConcurrent), OMR::GC::AllocationCategory::WORK_PACKETS, OMR_GET_CALLSITE());
+	MM_WorkPacketsConcurrent *workPackets = (MM_WorkPacketsConcurrent *)env->getForge()->allocate(
+	        sizeof(MM_WorkPacketsConcurrent), OMR::GC::AllocationCategory::WORK_PACKETS, OMR_GET_CALLSITE());
 	if (NULL != workPackets) {
-		new(workPackets) MM_WorkPacketsConcurrent(env);
+		new (workPackets) MM_WorkPacketsConcurrent(env);
 		if (!workPackets->initialize(env)) {
 			workPackets->kill(env);
 			workPackets = NULL;
@@ -65,4 +65,3 @@ MM_WorkPacketsConcurrent::createOverflowHandler(MM_EnvironmentBase *env, MM_Work
 }
 
 #endif /* OMR_GC_MODRON_CONCURRENT_MARK */
-

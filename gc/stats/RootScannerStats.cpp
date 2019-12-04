@@ -25,10 +25,10 @@
  * @ingroup GC_Stats
  */
 
+#include "RootScannerStats.hpp"
+
 #include "omrcfg.h"
 #include "omrcomp.h"
-
-#include "RootScannerStats.hpp"
 
 void
 MM_RootScannerStats::clear()

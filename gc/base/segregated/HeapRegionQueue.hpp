@@ -23,34 +23,30 @@
 #if !defined(HEAPREGIONQUEUE_HPP_)
 #define HEAPREGIONQUEUE_HPP_
 
-#include "omrcfg.h"
-#include "modronopt.h"
-
 #include "AtomicOperations.hpp"
 #include "Debug.hpp"
 #include "EnvironmentBase.hpp"
 #include "HeapRegionDescriptorSegregated.hpp"
 #include "HeapRegionList.hpp"
+#include "modronopt.h"
+#include "omrcfg.h"
 
 #if defined(OMR_GC_SEGREGATED_HEAP)
 
 /**
  * A RegionList on which every Region stands only for itself.
  * SingleRegionList support a queue (FIFO) abstraction where Region objects
- * can be enqueued at the tail of the list and dequeued from the head. 
+ * can be enqueued at the tail of the list and dequeued from the head.
  */
-class MM_HeapRegionQueue : public MM_HeapRegionList
-{
-/* Data members & types */		
-public:		
-protected:
-private:	
-	
-/* Methods */	
+class MM_HeapRegionQueue : public MM_HeapRegionList {
+	/* Data members & types */
 public:
-
+protected:
+private:
+	/* Methods */
+public:
 	virtual void kill(MM_EnvironmentBase *env) = 0;
-	
+
 	virtual bool initialize(MM_EnvironmentBase *env) = 0;
 	virtual void tearDown(MM_EnvironmentBase *env) = 0;
 
@@ -60,12 +56,12 @@ public:
 	 * region push and pop operations are used and updateCounts doesn't get called on a region that lives
 	 * on the list.
 	 */
-	MM_HeapRegionQueue(RegionListKind regionListKind, bool singleRegionsOnly, bool trackFreeBytes) : 
-		MM_HeapRegionList(regionListKind, singleRegionsOnly)
+	MM_HeapRegionQueue(RegionListKind regionListKind, bool singleRegionsOnly, bool trackFreeBytes)
+	        : MM_HeapRegionList(regionListKind, singleRegionsOnly)
 	{
 		_typeId = __FUNCTION__;
 	}
-	
+
 	virtual void enqueue(MM_HeapRegionDescriptorSegregated *region) = 0;
 
 	virtual void enqueue(MM_HeapRegionQueue *target) = 0;

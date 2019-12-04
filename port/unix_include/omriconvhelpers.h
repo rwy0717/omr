@@ -79,7 +79,8 @@ typedef enum {
 
 int32_t iconv_global_init(struct OMRPortLibrary *portLibrary);
 void iconv_global_destroy(struct OMRPortLibrary *portLibrary);
-iconv_t iconv_get(struct OMRPortLibrary *portLibrary, J9IconvName converterName, const char *toCode, const char *fromCode);
+iconv_t iconv_get(
+        struct OMRPortLibrary *portLibrary, J9IconvName converterName, const char *toCode, const char *fromCode);
 
 void iconv_free(struct OMRPortLibrary *portLibrary, J9IconvName converterName, iconv_t converter);
 

@@ -24,19 +24,16 @@
 #define OBJECTHEAPITERATORSEGREGATED_HPP_
 
 #include "HeapRegionDescriptor.hpp"
-#include "ObjectModel.hpp"
-
 #include "ObjectHeapIterator.hpp"
+#include "ObjectModel.hpp"
 
 #if defined(OMR_GC_SEGREGATED_HEAP)
 
 /**
  * Object heap iterator for regions which use a segregated free list implementation.
  */
-class GC_ObjectHeapIteratorSegregated : public GC_ObjectHeapIterator
-{
+class GC_ObjectHeapIteratorSegregated : public GC_ObjectHeapIterator {
 public:
-
 protected:
 	omrobjectptr_t _scanPtr;
 	omrobjectptr_t _scanPtrTop;
@@ -55,21 +52,22 @@ public:
 	virtual void advance(uintptr_t size);
 	virtual void reset(uintptr_t *base, uintptr_t *top);
 
-	GC_ObjectHeapIteratorSegregated(MM_GCExtensionsBase *extensions, omrobjectptr_t base, omrobjectptr_t top, MM_HeapRegionDescriptor::RegionType type, uintptr_t cellSize, bool includeDeadObjects, bool skipFirstObject) :
-		_scanPtr(base)
-		,_scanPtrTop(top)
-		,_type(type)
-		,_cellSize(cellSize)
-		,_includeDeadObjects(includeDeadObjects)
-		,_pastFirstObject(skipFirstObject)
-		,_smallPtrTop(NULL)
-		,_extensions(extensions)
+	GC_ObjectHeapIteratorSegregated(MM_GCExtensionsBase *extensions, omrobjectptr_t base, omrobjectptr_t top,
+	        MM_HeapRegionDescriptor::RegionType type, uintptr_t cellSize, bool includeDeadObjects,
+	        bool skipFirstObject)
+	        : _scanPtr(base)
+	        , _scanPtrTop(top)
+	        , _type(type)
+	        , _cellSize(cellSize)
+	        , _includeDeadObjects(includeDeadObjects)
+	        , _pastFirstObject(skipFirstObject)
+	        , _smallPtrTop(NULL)
+	        , _extensions(extensions)
 	{
 		calculateActualScanPtrTop();
 	}
 
 protected:
-
 private:
 	void calculateActualScanPtrTop();
 };
@@ -77,4 +75,3 @@ private:
 #endif /* OMR_GC_SEGREGATED_HEAP */
 
 #endif /* OBJECTHEAPITERATORSEGREGATED_HPP_ */
-

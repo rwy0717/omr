@@ -29,132 +29,138 @@
 #include "il/Node.hpp"
 #include "il/Node_inlines.hpp"
 
-void OMR::ARM64::Linkage::mapStack(TR::ResolvedMethodSymbol *method)
-   {
-   /* do nothing */
-   }
+void
+OMR::ARM64::Linkage::mapStack(TR::ResolvedMethodSymbol *method)
+{
+	/* do nothing */
+}
 
-void OMR::ARM64::Linkage::mapSingleAutomatic(TR::AutomaticSymbol *p, uint32_t &stackIndex)
-   {
-   /* do nothing */
-   }
+void
+OMR::ARM64::Linkage::mapSingleAutomatic(TR::AutomaticSymbol *p, uint32_t &stackIndex)
+{
+	/* do nothing */
+}
 
-void OMR::ARM64::Linkage::initARM64RealRegisterLinkage()
-   {
-   /* do nothing */
-   }
+void
+OMR::ARM64::Linkage::initARM64RealRegisterLinkage()
+{
+	/* do nothing */
+}
 
-void OMR::ARM64::Linkage::setParameterLinkageRegisterIndex(TR::ResolvedMethodSymbol *method)
-   {
-   /* do nothing */
-   }
+void
+OMR::ARM64::Linkage::setParameterLinkageRegisterIndex(TR::ResolvedMethodSymbol *method)
+{
+	/* do nothing */
+}
 
-bool OMR::ARM64::Linkage::hasToBeOnStack(TR::ParameterSymbol *parm)
-   {
-   return(false);
-   }
+bool
+OMR::ARM64::Linkage::hasToBeOnStack(TR::ParameterSymbol *parm)
+{
+	return (false);
+}
 
-TR::MemoryReference *OMR::ARM64::Linkage::getOutgoingArgumentMemRef(TR::Register *argMemReg, TR::Register *argReg, TR::InstOpCode::Mnemonic opCode, TR::ARM64MemoryArgument &memArg)
-   {
-   const TR::ARM64LinkageProperties& properties = self()->getProperties();
+TR::MemoryReference *
+OMR::ARM64::Linkage::getOutgoingArgumentMemRef(
+        TR::Register *argMemReg, TR::Register *argReg, TR::InstOpCode::Mnemonic opCode, TR::ARM64MemoryArgument &memArg)
+{
+	const TR::ARM64LinkageProperties &properties = self()->getProperties();
 
-   TR::MemoryReference *result = new (self()->trHeapMemory()) TR::MemoryReference(argMemReg, 8, cg()); // post-increment
-   memArg.argRegister = argReg;
-   memArg.argMemory = result;
-   memArg.opCode = opCode; // opCode must be post-index form
+	TR::MemoryReference *result = new (self()->trHeapMemory())
+	        TR::MemoryReference(argMemReg, 8, cg()); // post-increment
+	memArg.argRegister = argReg;
+	memArg.argMemory = result;
+	memArg.opCode = opCode; // opCode must be post-index form
 
-   return result;
-   }
+	return result;
+}
 
-TR::Instruction *OMR::ARM64::Linkage::saveArguments(TR::Instruction *cursor)
-   {
-   TR_UNIMPLEMENTED();
-   return cursor;
-   }
+TR::Instruction *
+OMR::ARM64::Linkage::saveArguments(TR::Instruction *cursor)
+{
+	TR_UNIMPLEMENTED();
+	return cursor;
+}
 
-TR::Instruction *OMR::ARM64::Linkage::loadUpArguments(TR::Instruction *cursor)
-   {
-   TR_UNIMPLEMENTED();
-   return cursor;
-   }
+TR::Instruction *
+OMR::ARM64::Linkage::loadUpArguments(TR::Instruction *cursor)
+{
+	TR_UNIMPLEMENTED();
+	return cursor;
+}
 
-TR::Instruction *OMR::ARM64::Linkage::flushArguments(TR::Instruction *cursor)
-   {
-   TR_UNIMPLEMENTED();
-   return cursor;
-   }
+TR::Instruction *
+OMR::ARM64::Linkage::flushArguments(TR::Instruction *cursor)
+{
+	TR_UNIMPLEMENTED();
+	return cursor;
+}
 
-TR::Register *OMR::ARM64::Linkage::pushIntegerWordArg(TR::Node *child)
-   {
-   TR::CodeGenerator *cg = self()->cg();
-   TR::Register *pushRegister = NULL;
-   if (child->getRegister() == NULL && child->getOpCode().isLoadConst())
-      {
-      pushRegister = cg->allocateRegister();
-      loadConstant32(cg, child, child->getInt(), pushRegister);
-      child->setRegister(pushRegister);
-      }
-   else
-      {
-      pushRegister = cg->evaluate(child);
-      }
-   cg->decReferenceCount(child);
-   return pushRegister;
-   }
+TR::Register *
+OMR::ARM64::Linkage::pushIntegerWordArg(TR::Node *child)
+{
+	TR::CodeGenerator *cg = self()->cg();
+	TR::Register *pushRegister = NULL;
+	if (child->getRegister() == NULL && child->getOpCode().isLoadConst()) {
+		pushRegister = cg->allocateRegister();
+		loadConstant32(cg, child, child->getInt(), pushRegister);
+		child->setRegister(pushRegister);
+	} else {
+		pushRegister = cg->evaluate(child);
+	}
+	cg->decReferenceCount(child);
+	return pushRegister;
+}
 
-TR::Register *OMR::ARM64::Linkage::pushAddressArg(TR::Node *child)
-   {
-   TR_ASSERT(child->getDataType() == TR::Address, "assumption violated");
-   TR::CodeGenerator *cg = self()->cg();
-   TR::Register *pushRegister = cg->evaluate(child);
-   cg->decReferenceCount(child);
-   return pushRegister;
-   }
+TR::Register *
+OMR::ARM64::Linkage::pushAddressArg(TR::Node *child)
+{
+	TR_ASSERT(child->getDataType() == TR::Address, "assumption violated");
+	TR::CodeGenerator *cg = self()->cg();
+	TR::Register *pushRegister = cg->evaluate(child);
+	cg->decReferenceCount(child);
+	return pushRegister;
+}
 
-TR::Register *OMR::ARM64::Linkage::pushLongArg(TR::Node *child)
-   {
-   TR::CodeGenerator *cg = self()->cg();
-   TR::Register *pushRegister = NULL;
-   if (child->getRegister() == NULL && child->getOpCode().isLoadConst())
-      {
-      pushRegister = cg->allocateRegister();
-      loadConstant64(cg, child, child->getLongInt(), pushRegister);
-      child->setRegister(pushRegister);
-      }
-   else
-      {
-      pushRegister = cg->evaluate(child);
-      }
-   cg->decReferenceCount(child);
-   return pushRegister;
-   }
+TR::Register *
+OMR::ARM64::Linkage::pushLongArg(TR::Node *child)
+{
+	TR::CodeGenerator *cg = self()->cg();
+	TR::Register *pushRegister = NULL;
+	if (child->getRegister() == NULL && child->getOpCode().isLoadConst()) {
+		pushRegister = cg->allocateRegister();
+		loadConstant64(cg, child, child->getLongInt(), pushRegister);
+		child->setRegister(pushRegister);
+	} else {
+		pushRegister = cg->evaluate(child);
+	}
+	cg->decReferenceCount(child);
+	return pushRegister;
+}
 
-TR::Register *OMR::ARM64::Linkage::pushFloatArg(TR::Node *child)
-   {
-   TR::CodeGenerator *cg = self()->cg();
-   TR::Register *pushRegister = cg->evaluate(child);
-   cg->decReferenceCount(child);
-   return pushRegister;
-   }
+TR::Register *
+OMR::ARM64::Linkage::pushFloatArg(TR::Node *child)
+{
+	TR::CodeGenerator *cg = self()->cg();
+	TR::Register *pushRegister = cg->evaluate(child);
+	cg->decReferenceCount(child);
+	return pushRegister;
+}
 
-TR::Register *OMR::ARM64::Linkage::pushDoubleArg(TR::Node *child)
-   {
-   TR::CodeGenerator *cg = self()->cg();
-   TR::Register *pushRegister = cg->evaluate(child);
-   cg->decReferenceCount(child);
-   return pushRegister;
-   }
+TR::Register *
+OMR::ARM64::Linkage::pushDoubleArg(TR::Node *child)
+{
+	TR::CodeGenerator *cg = self()->cg();
+	TR::Register *pushRegister = cg->evaluate(child);
+	cg->decReferenceCount(child);
+	return pushRegister;
+}
 
 int32_t
 OMR::ARM64::Linkage::numArgumentRegisters(TR_RegisterKinds kind)
-   {
-   switch (kind)
-      {
-      case TR_GPR:
-         return self()->getProperties().getNumIntArgRegs();
-      case TR_FPR:
-         return self()->getProperties().getNumFloatArgRegs();
-      default:
-         return 0;
-      }
-   }
+{
+	switch (kind) {
+	case TR_GPR: return self()->getProperties().getNumIntArgRegs();
+	case TR_FPR: return self()->getProperties().getNumFloatArgRegs();
+	default: return 0;
+	}
+}

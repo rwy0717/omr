@@ -33,7 +33,7 @@
 /* Used to add space for the null terminator. Adding a wchar in case the platform
  * locale uses wchar
  */
-#define NULL_TERM_SZ       sizeof(wchar_t)
+#define NULL_TERM_SZ sizeof(wchar_t)
 
 static uintptr_t get_conv_txt_num_bytes(struct OMRPortLibrary *portLibrary, const char *message);
 static void syslog_write(struct OMRPortLibrary *portLibrary, const char *buf, int priority);
@@ -45,16 +45,10 @@ omrsyslog_write(struct OMRPortLibrary *portLibrary, uintptr_t flags, const char 
 		int priority;
 
 		switch (flags) {
-		case J9NLS_ERROR:
-			priority = LOG_ERR;
-			break;
-		case J9NLS_WARNING:
-			priority = LOG_WARNING;
-			break;
+		case J9NLS_ERROR: priority = LOG_ERR; break;
+		case J9NLS_WARNING: priority = LOG_WARNING; break;
 		case J9NLS_INFO:
-		default:
-			priority = LOG_INFO;
-			break;
+		default: priority = LOG_INFO; break;
 		}
 
 		syslog_write(portLibrary, message, priority);
@@ -130,13 +124,11 @@ get_conv_txt_num_bytes(struct OMRPortLibrary *portLibrary, const char *message)
 {
 	uintptr_t retval = 0U;
 
-	const int32_t convRes =
-		portLibrary->str_convert(portLibrary, J9STR_CODE_MUTF8,
-								 J9STR_CODE_PLATFORM_RAW, message, strlen(message),
-								 NULL, 0U);
+	const int32_t convRes = portLibrary->str_convert(
+	        portLibrary, J9STR_CODE_MUTF8, J9STR_CODE_PLATFORM_RAW, message, strlen(message), NULL, 0U);
 
 	if (0 < convRes) {
-		retval = (uintptr_t) convRes + NULL_TERM_SZ;
+		retval = (uintptr_t)convRes + NULL_TERM_SZ;
 	} else {
 		Trc_PRT_omrsyslog_failed_str_convert(convRes);
 	}
@@ -167,9 +159,8 @@ syslog_write(struct OMRPortLibrary *portLibrary, const char *buf, int priority)
 	BOOLEAN lclConvSuccess = FALSE;
 
 	if (NULL_TERM_SZ < lclMsgLen) {
-		lclMsg = portLibrary->mem_allocate_memory(portLibrary,
-				 lclMsgLen, OMR_GET_CALLSITE(),
-				 OMRMEM_CATEGORY_PORT_LIBRARY);
+		lclMsg = portLibrary->mem_allocate_memory(
+		        portLibrary, lclMsgLen, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 
 		if (NULL != lclMsg) {
 			/* If we got here, we are guaranteed to have enough
@@ -178,14 +169,12 @@ syslog_write(struct OMRPortLibrary *portLibrary, const char *buf, int priority)
 			 * str_convert routine guarantees that the resulting
 			 * string will be null terminated.
 			 */
-			const int32_t convRes =
-				portLibrary->str_convert(portLibrary,
-										 J9STR_CODE_MUTF8, J9STR_CODE_PLATFORM_RAW,
-										 buf, strlen(buf), lclMsg, lclMsgLen);
+			const int32_t convRes = portLibrary->str_convert(portLibrary, J9STR_CODE_MUTF8,
+			        J9STR_CODE_PLATFORM_RAW, buf, strlen(buf), lclMsg, lclMsgLen);
 
 			lclConvSuccess = (BOOLEAN)(convRes >= 0);
 
-			if (! lclConvSuccess) {
+			if (!lclConvSuccess) {
 				Trc_PRT_omrsyslog_failed_str_convert(convRes);
 			}
 		}

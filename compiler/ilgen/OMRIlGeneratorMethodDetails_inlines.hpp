@@ -29,20 +29,20 @@ class TR_ResolvedMethod;
 
 TR::IlGeneratorMethodDetails *
 OMR::IlGeneratorMethodDetails::self()
-   {
-   return static_cast<TR::IlGeneratorMethodDetails *>( this );
-   }
+{
+	return static_cast<TR::IlGeneratorMethodDetails *>(this);
+}
 
 const TR::IlGeneratorMethodDetails *
 OMR::IlGeneratorMethodDetails::self() const
-   {
-   return static_cast<const TR::IlGeneratorMethodDetails *>( this );
-   }
+{
+	return static_cast<const TR::IlGeneratorMethodDetails *>(this);
+}
 
 TR::IlGeneratorMethodDetails &
-OMR::IlGeneratorMethodDetails::create(TR::IlGeneratorMethodDetails & target, TR_ResolvedMethod *method)
-   {
-   return * new (&target) TR::IlGeneratorMethodDetails(method);
-   }
+OMR::IlGeneratorMethodDetails::create(TR::IlGeneratorMethodDetails &target, TR_ResolvedMethod *method)
+{
+	return *new (&target) TR::IlGeneratorMethodDetails(method);
+}
 
 #endif

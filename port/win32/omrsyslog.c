@@ -46,12 +46,15 @@ omrsyslog_write_utf8(struct OMRPortLibrary *portLibrary, uintptr_t flags, const 
 	if (NULL != portLibrary->portGlobals && NULL != PPG_syslog_handle) {
 		switch (flags) {
 		case J9NLS_ERROR:
-			return ReportEvent(PPG_syslog_handle, EVENTLOG_ERROR_TYPE, 0, MSG_ERROR, NULL, 1, 0, (LPCTSTR *)&message, NULL);
+			return ReportEvent(PPG_syslog_handle, EVENTLOG_ERROR_TYPE, 0, MSG_ERROR, NULL, 1, 0,
+			        (LPCTSTR *)&message, NULL);
 		case J9NLS_WARNING:
-			return ReportEvent(PPG_syslog_handle, EVENTLOG_WARNING_TYPE, 0, MSG_WARNING, NULL, 1, 0, (LPCTSTR *)&message, NULL);
+			return ReportEvent(PPG_syslog_handle, EVENTLOG_WARNING_TYPE, 0, MSG_WARNING, NULL, 1, 0,
+			        (LPCTSTR *)&message, NULL);
 		case J9NLS_INFO:
 		default:
-			return ReportEvent(PPG_syslog_handle, EVENTLOG_INFORMATION_TYPE, 0, MSG_INFO, NULL, 1, 0, (LPCTSTR *)&message, NULL);
+			return ReportEvent(PPG_syslog_handle, EVENTLOG_INFORMATION_TYPE, 0, MSG_INFO, NULL, 1, 0,
+			        (LPCTSTR *)&message, NULL);
 		}
 	}
 	return FALSE;
@@ -72,12 +75,15 @@ omrsyslog_write_unicode(struct OMRPortLibrary *portLibrary, uintptr_t flags, con
 	if (NULL != portLibrary->portGlobals && NULL != PPG_syslog_handle) {
 		switch (flags) {
 		case J9NLS_ERROR:
-			return ReportEventW(PPG_syslog_handle, EVENTLOG_ERROR_TYPE, 0, MSG_ERROR, NULL, 1, 0, (LPCWSTR *)&message, NULL);
+			return ReportEventW(PPG_syslog_handle, EVENTLOG_ERROR_TYPE, 0, MSG_ERROR, NULL, 1, 0,
+			        (LPCWSTR *)&message, NULL);
 		case J9NLS_WARNING:
-			return ReportEventW(PPG_syslog_handle, EVENTLOG_WARNING_TYPE, 0, MSG_WARNING, NULL, 1, 0, (LPCWSTR *)&message, NULL);
+			return ReportEventW(PPG_syslog_handle, EVENTLOG_WARNING_TYPE, 0, MSG_WARNING, NULL, 1, 0,
+			        (LPCWSTR *)&message, NULL);
 		case J9NLS_INFO:
 		default:
-			return ReportEventW(PPG_syslog_handle, EVENTLOG_INFORMATION_TYPE, 0, MSG_INFO, NULL, 1, 0, (LPCWSTR *)&message, NULL);
+			return ReportEventW(PPG_syslog_handle, EVENTLOG_INFORMATION_TYPE, 0, MSG_INFO, NULL, 1, 0,
+			        (LPCWSTR *)&message, NULL);
 		}
 	}
 	return FALSE;
@@ -101,22 +107,20 @@ omrsyslog_write(struct OMRPortLibrary *portLibrary, uintptr_t flags, const char 
 	BOOLEAN unicodeSuccess = FALSE;
 	uintptr_t retval = FALSE;
 
-	wchar_t *const unicodeMsg =
-		portLibrary->mem_allocate_memory(portLibrary, unicodeMsgLen, OMR_GET_CALLSITE(),
-										 OMRMEM_CATEGORY_PORT_LIBRARY);
+	wchar_t *const unicodeMsg = portLibrary->mem_allocate_memory(
+	        portLibrary, unicodeMsgLen, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 
 	if (NULL != unicodeMsg) {
 		/* If we got here, we are guaranteed to have enough space for the converted
 		 * string and the null termination char. Under these circumstances, str_convert
 		 * routine guarantees that the resulting string will be null terminated.
 		 */
-		const int32_t convRes =
-			portLibrary->str_convert(portLibrary, J9STR_CODE_MUTF8, J9STR_CODE_WIDE, message,
-									 messageLen, (char *) unicodeMsg, unicodeMsgLen);
+		const int32_t convRes = portLibrary->str_convert(portLibrary, J9STR_CODE_MUTF8, J9STR_CODE_WIDE,
+		        message, messageLen, (char *)unicodeMsg, unicodeMsgLen);
 
 		unicodeSuccess = (BOOLEAN)(convRes >= 0);
 
-		if (! unicodeSuccess) {
+		if (!unicodeSuccess) {
 			Trc_PRT_omrsyslog_failed_str_convert(convRes);
 		}
 	}
@@ -146,7 +150,8 @@ uintptr_t
 syslogOpen(struct OMRPortLibrary *portLibrary, uintptr_t flags)
 {
 	/* now register against that source name */
-	/* note that a registry entry for that event source name needs to be found for the messages to get logged correctly */
+	/* note that a registry entry for that event source name needs to be found for the messages to get logged
+	 * correctly */
 	/* registry key: HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\EventLog\Application\IBM Java */
 	char defaultEventSource[] = "IBM Java";
 	char *syslogEventSource;
@@ -228,4 +233,3 @@ omrsyslog_set(struct OMRPortLibrary *portLibrary, uintptr_t options)
 	/* set the logging options here */
 	PPG_syslog_flags = options;
 }
-

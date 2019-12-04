@@ -38,14 +38,14 @@ extern const char *UT_NO_THREAD_NAME;
  * 1 - fillInUTInterfaces - Setup function pointers in interfaces via fillInUTInterfaces
  * 2 - initializeTrace 	- Tell trace to intialise via initializeTrace supplying default options.
  * 							(Usually just the location of the .dat file is standard)
- * 3 - threadStart 		- Notify trace about the current thread since it started before trace was available via threadStart
- * 						- Trace should be notified about about threads beginning and ending via calls to threadStart and
- * 						  threadStop when they start and end.
- * [6] - setOptions 	- set any additional default options or process any options specified on the command line.
- * 8 - Initialize port, thread and any other modules that may have loaded before trace was ready.
- * 9 - The real work happens here, hopefully for a long time.
- * 10 - utTerminateTrace - Tell the trace engine to shutdown.
- * 11 - freeTrace - Tell the trace engine to free its internal data structures.
+ * 3 - threadStart 		- Notify trace about the current thread since it started before trace was available via
+ * threadStart
+ * 						- Trace should be notified about about threads beginning and ending via
+ * calls to threadStart and threadStop when they start and end. [6] - setOptions 	- set any additional default
+ * options or process any options specified on the command line. 8 - Initialize port, thread and any other modules that
+ * may have loaded before trace was ready. 9 - The real work happens here, hopefully for a long time. 10 -
+ * utTerminateTrace - Tell the trace engine to shutdown. 11 - freeTrace - Tell the trace engine to free its internal
+ * data structures.
  *
  */
 
@@ -138,10 +138,9 @@ omr_trc_startThreadTrace(OMR_VMThread *currentThread, const char *threadName)
 			rc = OMR_ERROR_NOT_AVAILABLE;
 		} else {
 			rc = threadStart(&OMR_TRACE_THREAD_FROM_VMTHREAD_NONNULL(currentThread),
-							 ((NULL == currentThread->_language_vmthread)? currentThread : currentThread->_language_vmthread),
-							 threadName,
-							 currentThread->_os_thread,
-							 currentThread);
+			        ((NULL == currentThread->_language_vmthread) ? currentThread
+			                                                     : currentThread->_language_vmthread),
+			        threadName, currentThread->_os_thread, currentThread);
 		}
 	}
 	return rc;
@@ -293,7 +292,8 @@ postForkCleanupThreads(OMR_TraceThread *thr)
 	OMRPORT_ACCESS_FROM_OMRPORT(OMR_TRACEGLOBAL(portLibrary));
 
 	/* Cleanup and free the name and OMR_TraceThread for all threads which do not exist after fork. */
-	OMR_TraceThread *iteratingThread = (OMR_TraceThread *)pool_startDo(OMR_TRACEGLOBAL(threadPool), &threadPoolState);
+	OMR_TraceThread *iteratingThread =
+	        (OMR_TraceThread *)pool_startDo(OMR_TRACEGLOBAL(threadPool), &threadPoolState);
 	while (NULL != iteratingThread) {
 		if (thr != iteratingThread) {
 			if ((NULL != iteratingThread->name) && (UT_NO_THREAD_NAME != iteratingThread->name)) {

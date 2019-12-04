@@ -40,7 +40,7 @@ void
 fillInLEJumpInfo(struct OMRPortLibrary *portLibrary, omr_31bit_mch *regs, void *jumpInfo)
 {
 	int i = 0;
-	struct __jumpinfo *farJumpInfo  = (struct __jumpinfo *)jumpInfo;
+	struct __jumpinfo *farJumpInfo = (struct __jumpinfo *)jumpInfo;
 
 	/* zero out the jump buffer*/
 	{
@@ -69,9 +69,9 @@ fillInLEJumpInfo(struct OMRPortLibrary *portLibrary, omr_31bit_mch *regs, void *
 #if !defined(OMR_ENV_DATA64)
 	if (0 != (regs->mch_flags & OMRPORT_MCH_FLAGS_HGPRS_VALID)) {
 		/* The OMRPORT_MCH_FLAGS_HGPRS_VALID bit was set */
-		farJumpInfo->__ji_fl_hr	= 1;
+		farJumpInfo->__ji_fl_hr = 1;
 	} else {
-		farJumpInfo->__ji_fl_hr	= 0;
+		farJumpInfo->__ji_fl_hr = 0;
 	}
 
 	for (i = 0; i < 16; i++) {
@@ -113,36 +113,18 @@ fillInLEJumpInfo(struct OMRPortLibrary *portLibrary, omr_31bit_mch *regs, void *
 		}
 	}
 
-	farJumpInfo->__ji_fpc = regs->fpc ;
+	farJumpInfo->__ji_fpc = regs->fpc;
 }
-
-
 
 /* infoForFPR_ceehdlr() follows the same convention as infoForFPR() in port/zos390/omrsignal_context.c */
 uint32_t
-infoForFPR_ceehdlr(struct OMRPortLibrary *portLibrary, OMRLEConditionInfo *info, int32_t index, const char **name, void **value)
+infoForFPR_ceehdlr(
+        struct OMRPortLibrary *portLibrary, OMRLEConditionInfo *info, int32_t index, const char **name, void **value)
 {
-	const char *n_fpr[NUM_REGS] = {
-		"fpr0",
-		"fpr1",
-		"fpr2",
-		"fpr3",
-		"fpr4",
-		"fpr5",
-		"fpr6",
-		"fpr7",
-		"fpr8",
-		"fpr9",
-		"fpr10",
-		"fpr11",
-		"fpr12",
-		"fpr13",
-		"fpr14",
-		"fpr15"
-	};
+	const char *n_fpr[NUM_REGS] = {"fpr0", "fpr1", "fpr2", "fpr3", "fpr4", "fpr5", "fpr6", "fpr7", "fpr8", "fpr9",
+	        "fpr10", "fpr11", "fpr12", "fpr13", "fpr14", "fpr15"};
 	omr_31bit_mch *mchRegs = (omr_31bit_mch *)info->cib->cib_machine;
 	*name = "";
-
 
 	if (index > 15) {
 		return OMRPORT_SIG_VALUE_UNDEFINED;
@@ -166,12 +148,12 @@ infoForFPR_ceehdlr(struct OMRPortLibrary *portLibrary, OMRLEConditionInfo *info,
 	}
 
 	return OMRPORT_SIG_VALUE_64;
-
 }
 
 /* infoForGPR_ceehdlr() follows the same convention as infoForGPR() in port/zos390/omrsignal_context.c */
 uint32_t
-infoForGPR_ceehdlr(struct OMRPortLibrary *portLibrary, OMRLEConditionInfo *info, int32_t index, const char **name, void **value)
+infoForGPR_ceehdlr(
+        struct OMRPortLibrary *portLibrary, OMRLEConditionInfo *info, int32_t index, const char **name, void **value)
 {
 
 	const char *n_gpr[NUM_REGS * 2] = {
@@ -229,47 +211,16 @@ infoForGPR_ceehdlr(struct OMRPortLibrary *portLibrary, OMRLEConditionInfo *info,
 #endif
 
 	return OMRPORT_SIG_VALUE_UNDEFINED;
-
 }
 
 /* infoForVR_ceehdlr() follows the same convention as infoForGPR() in port/zos390/omrsignal_context.c */
 uint32_t
-infoForVR_ceehdlr(struct OMRPortLibrary *portLibrary, OMRLEConditionInfo *info, int32_t index, const char **name, void **value)
+infoForVR_ceehdlr(
+        struct OMRPortLibrary *portLibrary, OMRLEConditionInfo *info, int32_t index, const char **name, void **value)
 {
-	const char *const n_vr[NUM_VECTOR_REGS] = {
-		"vr0",
-		"vr1",
-		"vr2",
-		"vr3",
-		"vr4",
-		"vr5",
-		"vr6",
-		"vr7",
-		"vr8",
-		"vr9",
-		"vr10",
-		"vr11",
-		"vr12",
-		"vr13",
-		"vr14",
-		"vr15",
-		"vr16",
-		"vr17",
-		"vr18",
-		"vr19",
-		"vr20",
-		"vr21",
-		"vr22",
-		"vr23",
-		"vr24",
-		"vr25",
-		"vr26",
-		"vr27",
-		"vr28",
-		"vr29",
-		"vr30",
-		"vr31"
-	};
+	const char *const n_vr[NUM_VECTOR_REGS] = {"vr0", "vr1", "vr2", "vr3", "vr4", "vr5", "vr6", "vr7", "vr8", "vr9",
+	        "vr10", "vr11", "vr12", "vr13", "vr14", "vr15", "vr16", "vr17", "vr18", "vr19", "vr20", "vr21", "vr22",
+	        "vr23", "vr24", "vr25", "vr26", "vr27", "vr28", "vr29", "vr30", "vr31"};
 
 	omr_31bit_mch *mchRegs = (omr_31bit_mch *)info->cib->cib_machine;
 
@@ -288,12 +239,13 @@ infoForVR_ceehdlr(struct OMRPortLibrary *portLibrary, OMRLEConditionInfo *info, 
 }
 
 /* infoForControl_ceehdlr() follows the same convention as infoForControl() in port/zos390/omrsignal_context.c
- * Some case statements for an immediate value are preceded by a fall-through case statement on a constant. This is done so that
- * it can be used both as an iterator (see documentation for omrsig_info() in port/common/omrsignal.c and so that values
- * for a specific register/attribute can requested.
+ * Some case statements for an immediate value are preceded by a fall-through case statement on a constant. This is done
+ * so that it can be used both as an iterator (see documentation for omrsig_info() in port/common/omrsignal.c and so
+ * that values for a specific register/attribute can requested.
  */
 uint32_t
-infoForControl_ceehdlr(struct OMRPortLibrary *portLibrary, OMRLEConditionInfo *info, int32_t index, const char **name, void **value)
+infoForControl_ceehdlr(
+        struct OMRPortLibrary *portLibrary, OMRLEConditionInfo *info, int32_t index, const char **name, void **value)
 {
 	omr_31bit_mch *mchRegs = (omr_31bit_mch *)info->cib->cib_machine;
 	*name = "";
@@ -335,23 +287,23 @@ infoForControl_ceehdlr(struct OMRPortLibrary *portLibrary, OMRLEConditionInfo *i
 		*name = "gpr7";
 		*value = &(mchRegs->gprs[7]);
 		return OMRPORT_SIG_VALUE_ADDRESS;
-	default:
-		return OMRPORT_SIG_VALUE_UNDEFINED;
+	default: return OMRPORT_SIG_VALUE_UNDEFINED;
 	}
 }
 
 /*
  * infoForModule_ceehdlr()  follows the same convention as infoForModule() in port/zos390/omrsignal_context.c
- * Some case statements for an immediate value are preceded by a fall-through case statement on a constant. This is done so that
- * it can be used both as an iterator (see documentation for omrsig_info() in port/common/omrsignal.c and so that values
- * for a specific register/attribute can requested.
+ * Some case statements for an immediate value are preceded by a fall-through case statement on a constant. This is done
+ * so that it can be used both as an iterator (see documentation for omrsig_info() in port/common/omrsignal.c and so
+ * that values for a specific register/attribute can requested.
  *
  * NOTE: because we use _gtca() to get the CAA (common anchor area, all the thread info dangles
  * 	off the caa), this routine must run on the thread that triggered the condition corresponding to @ref info
  *
  */
 uint32_t
-infoForModule_ceehdlr(struct OMRPortLibrary *portLibrary, OMRLEConditionInfo *info, int32_t index, const char **name, void **value)
+infoForModule_ceehdlr(
+        struct OMRPortLibrary *portLibrary, OMRLEConditionInfo *info, int32_t index, const char **name, void **value)
 {
 
 #if defined(J9ZOS39064)
@@ -385,27 +337,10 @@ infoForModule_ceehdlr(struct OMRPortLibrary *portLibrary, OMRLEConditionInfo *in
 	struct _FEEDBACK fc;
 
 	/* call CEETBCK */
-	ceetbck(
-		&dsaptr,
-		&dsa_format,
-		&caaptr,
-		&member_id,
-		info->program_unit_name,
-		&program_unit_name_length,
-		&info->program_unit_address,
-		&call_instruction_address,
-		info->entry_name,
-		&entry_name_length,
-		&info->entry_address,
-		&callers_call_instruction_address,
-		&callers_dsaptr,
-		&callers_dsa_format,
-		statement_id,
-		&statement_id_length,
-		&cibptr,
-		&main_program,
-		&fc
-	);
+	ceetbck(&dsaptr, &dsa_format, &caaptr, &member_id, info->program_unit_name, &program_unit_name_length,
+	        &info->program_unit_address, &call_instruction_address, info->entry_name, &entry_name_length,
+	        &info->entry_address, &callers_call_instruction_address, &callers_dsaptr, &callers_dsa_format,
+	        statement_id, &statement_id_length, &cibptr, &main_program, &fc);
 
 	if (fc.tok_sev != 0) {
 		return OMRPORT_SIG_VALUE_UNDEFINED;
@@ -446,20 +381,20 @@ infoForModule_ceehdlr(struct OMRPortLibrary *portLibrary, OMRLEConditionInfo *in
 		*name = "Entry_Address";
 		*value = (void *)&info->entry_address;
 		return OMRPORT_SIG_VALUE_ADDRESS;
-	default:
-		return OMRPORT_SIG_VALUE_UNDEFINED;
+	default: return OMRPORT_SIG_VALUE_UNDEFINED;
 	}
 
 #endif
 }
 
 /* infoForSignal_ceehdlr()  follows the same convention as infoForSignal() in port/zos390/omrsignal_context.c
- * Some case statements for an immediate value are preceded by a fall-through case statement on a constant. This is done so that
- * it can be used both as an iterator (see documentation for omrsig_info() in port/common/omrsignal.c and so that values
- * for a specific register/attribute can requested.
+ * Some case statements for an immediate value are preceded by a fall-through case statement on a constant. This is done
+ * so that it can be used both as an iterator (see documentation for omrsig_info() in port/common/omrsignal.c and so
+ * that values for a specific register/attribute can requested.
  */
 uint32_t
-infoForSignal_ceehdlr(struct OMRPortLibrary *portLibrary, OMRLEConditionInfo *info, int32_t index, const char **name, void **value)
+infoForSignal_ceehdlr(
+        struct OMRPortLibrary *portLibrary, OMRLEConditionInfo *info, int32_t index, const char **name, void **value)
 {
 	omr_31bit_mch *mchRegs = (omr_31bit_mch *)info->cib->cib_machine;
 	*name = "";
@@ -511,7 +446,6 @@ infoForSignal_ceehdlr(struct OMRPortLibrary *portLibrary, OMRLEConditionInfo *in
 		*name = "_FEEDBACK";
 		*value = &(info->fc);
 		return OMRPORT_SIG_VALUE_ADDRESS;
-	default:
-		return OMRPORT_SIG_VALUE_UNDEFINED;
+	default: return OMRPORT_SIG_VALUE_UNDEFINED;
 	}
 }

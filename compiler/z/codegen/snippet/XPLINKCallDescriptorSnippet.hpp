@@ -25,9 +25,15 @@
 #include <stdint.h>
 #include "codegen/ConstantDataSnippet.hpp"
 
-namespace TR { class CodeGenerator; }
-namespace TR { class Node; }
-namespace TR { class S390zOSSystemLinkage; }
+namespace TR {
+class CodeGenerator;
+}
+namespace TR {
+class Node;
+}
+namespace TR {
+class S390zOSSystemLinkage;
+}
 
 namespace TR {
 
@@ -47,35 +53,33 @@ namespace TR {
  *
  *  \verbatim
  *                                         0x01                               0x02                               0x03
- *  0x00 +----------------------------------+----------------------------------+----------------------------------+----------------------------------+
- *       | Signed offset, in bytes, to Entry Point Marker                                                                                            |
- *  0x04 +----------------------------------+----------------------------------+----------------------------------+----------------------------------+
- *       | Linkage and Return Value Adjust  | Parameter Adjust                                                                                       |
+ *  0x00
+ * +----------------------------------+----------------------------------+----------------------------------+----------------------------------+
+ *       | Signed offset, in bytes, to Entry Point Marker | 0x04
+ * +----------------------------------+----------------------------------+----------------------------------+----------------------------------+
+ *       | Linkage and Return Value Adjust  | Parameter Adjust |
  *       +----------------------------------+----------------------------------+----------------------------------+----------------------------------+
  *  \endverbatim
  */
-class XPLINKCallDescriptorSnippet : public TR::S390ConstantDataSnippet
-   {
-   public:
+class XPLINKCallDescriptorSnippet : public TR::S390ConstantDataSnippet {
+public:
+	/** \brief
+	 *     Size (in bytes) of the call descriptor data structure.
+	 */
+	static const size_t SIZE = 8;
 
-   /** \brief
-    *     Size (in bytes) of the call descriptor data structure.
-    */
-   static const size_t SIZE = 8;
+	static uint32_t generateCallDescriptorValue(TR::S390zOSSystemLinkage *linkage, TR::Node *callNode);
 
-   static uint32_t generateCallDescriptorValue(TR::S390zOSSystemLinkage* linkage, TR::Node* callNode);
+public:
+	XPLINKCallDescriptorSnippet(
+	        TR::CodeGenerator *cg, TR::S390zOSSystemLinkage *linkage, uint32_t callDescriptorValue);
 
-   public:
+	virtual uint8_t *emitSnippetBody();
 
-   XPLINKCallDescriptorSnippet(TR::CodeGenerator* cg, TR::S390zOSSystemLinkage* linkage, uint32_t callDescriptorValue);
-
-   virtual uint8_t* emitSnippetBody();
-
-   private:
-
-   TR::S390zOSSystemLinkage* _linkage;
-   uint32_t _callDescriptorValue;
-   };
-}
+private:
+	TR::S390zOSSystemLinkage *_linkage;
+	uint32_t _callDescriptorValue;
+};
+} // namespace TR
 
 #endif

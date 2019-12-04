@@ -31,7 +31,6 @@ typedef struct AgentData {
 	const char *trcFileName;
 } AgentData;
 
-
 static void alarmFunc(UtSubscription *subscriptionID);
 static omr_error_t subscribeFunc(UtSubscription *subscriptionID);
 static void recordErrorStatus(omr_error_t rc, const char *filename, int lineno);
@@ -70,7 +69,8 @@ OMRAgent_OnLoad(OMR_TI const *ti, OMR_VM *vm, char const *options, OMR_AgentCall
 		}
 	}
 	if (OMR_ERROR_NONE == rc) {
-		rc = ti->RegisterRecordSubscriber(vmThread, "sample", subscribeFunc, alarmFunc, (void *)&agentData, &agentData.subscriptionID);
+		rc = ti->RegisterRecordSubscriber(
+		        vmThread, "sample", subscribeFunc, alarmFunc, (void *)&agentData, &agentData.subscriptionID);
 		recordErrorStatus(rc, __FILE__, __LINE__);
 	}
 

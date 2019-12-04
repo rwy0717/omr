@@ -1,4 +1,4 @@
- /*******************************************************************************
+/*******************************************************************************
  * Copyright (c) 2017, 2017 IBM Corp. and others
  *
  * This program and the accompanying materials are made available under
@@ -23,14 +23,13 @@
 #ifndef STANDARDWRITEBARRIER_HPP_
 #define STANDARDWRITEBARRIER_HPP_
 
-#include "objectdescription.h"
-
 #include "CardTable.hpp"
 #include "EnvironmentStandard.hpp"
 #include "GCExtensionsBase.hpp"
 #include "ObjectModel.hpp"
 #include "Scavenger.hpp"
 #include "SlotObject.hpp"
+#include "objectdescription.h"
 
 struct OMR_VMThread;
 
@@ -55,8 +54,10 @@ standardWriteBarrier(OMR_VMThread *omrThread, omrobjectptr_t parentObject, omrob
 	if (extensions->scavengerEnabled) {
 		if (extensions->isOld(parentObject) && !extensions->isOld(childObject)) {
 			if (extensions->objectModel.atomicSetRememberedState(parentObject, STATE_REMEMBERED)) {
-				/* The object has been successfully marked as REMEMBERED - allocate an entry in the remembered set */
-				extensions->scavenger->addToRememberedSetFragment((MM_EnvironmentStandard *)env, parentObject);
+				/* The object has been successfully marked as REMEMBERED - allocate an entry in the
+				 * remembered set */
+				extensions->scavenger->addToRememberedSetFragment(
+				        (MM_EnvironmentStandard *)env, parentObject);
 			}
 		}
 	}
@@ -80,7 +81,8 @@ standardWriteBarrier(OMR_VMThread *omrThread, omrobjectptr_t parentObject, omrob
  * @see standardWriteBarrier(OMR_VMThread *, omrobjectptr_t, omrobjectptr_t)
  */
 MMINLINE void
-standardWriteBarrierStore(OMR_VMThread *omrThread, omrobjectptr_t parentObject, fomrobject_t *parentSlot, omrobjectptr_t childObject)
+standardWriteBarrierStore(
+        OMR_VMThread *omrThread, omrobjectptr_t parentObject, fomrobject_t *parentSlot, omrobjectptr_t childObject)
 {
 	GC_SlotObject slotObject(omrThread->_vm, parentSlot);
 	slotObject.writeReferenceToSlot(childObject);

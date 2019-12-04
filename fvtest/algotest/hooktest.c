@@ -24,16 +24,27 @@
 #include "hookable_api.h"
 #include "hooksample_internal.h"
 
-static int32_t testHookInterface(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount, J9HookInterface **hookInterface);
-static void testEnabled(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount, J9HookInterface **hookInterface, uintptr_t event, uintptr_t expectedResult);
-static void testDisable(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount, J9HookInterface **hookInterface, uintptr_t event, uintptr_t expectedResult);
-static void testReserve(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount, J9HookInterface **hookInterface, uintptr_t event, uintptr_t expectedResult);
-static void testRegister(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount, J9HookInterface **hookInterface, uintptr_t event, uintptr_t expectedResult);
-static void testRegisterWithAgent(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount, J9HookInterface **hookInterface, uintptr_t event, uintptr_t agentID, uintptr_t userData, uintptr_t expectedResult);
-static void testUnregister(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount, J9HookInterface **hookInterface, uintptr_t event);
-static void testUnregisterWithAgent(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount, J9HookInterface **hookInterface, uintptr_t event, uintptr_t userData);
-static void testDispatch(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount, uintptr_t event, uintptr_t expectedResult);
-static uintptr_t testAllocateAgentID(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount, J9HookInterface **hookInterface);
+static int32_t testHookInterface(
+        OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount, J9HookInterface **hookInterface);
+static void testEnabled(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount,
+        J9HookInterface **hookInterface, uintptr_t event, uintptr_t expectedResult);
+static void testDisable(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount,
+        J9HookInterface **hookInterface, uintptr_t event, uintptr_t expectedResult);
+static void testReserve(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount,
+        J9HookInterface **hookInterface, uintptr_t event, uintptr_t expectedResult);
+static void testRegister(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount,
+        J9HookInterface **hookInterface, uintptr_t event, uintptr_t expectedResult);
+static void testRegisterWithAgent(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount,
+        J9HookInterface **hookInterface, uintptr_t event, uintptr_t agentID, uintptr_t userData,
+        uintptr_t expectedResult);
+static void testUnregister(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount,
+        J9HookInterface **hookInterface, uintptr_t event);
+static void testUnregisterWithAgent(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount,
+        J9HookInterface **hookInterface, uintptr_t event, uintptr_t userData);
+static void testDispatch(
+        OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount, uintptr_t event, uintptr_t expectedResult);
+static uintptr_t testAllocateAgentID(
+        OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount, J9HookInterface **hookInterface);
 static void hookNormalEvent(J9HookInterface **hook, uintptr_t eventNum, void *voidEventData, void *userData);
 static void hookOrderedEvent(J9HookInterface **hook, uintptr_t eventNum, void *voidEventData, void *userData);
 
@@ -152,7 +163,8 @@ testHookInterface(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *fail
 	testDispatch(portLib, passCount, failCount, TESTHOOK_EVENT3, 3);
 
 	/* register a first chance istener */
-	testRegisterWithAgent(portLib, passCount, failCount, hookInterface, TESTHOOK_EVENT3, J9HOOK_AGENTID_FIRST, 0, 0);
+	testRegisterWithAgent(
+	        portLib, passCount, failCount, hookInterface, TESTHOOK_EVENT3, J9HOOK_AGENTID_FIRST, 0, 0);
 	testDispatch(portLib, passCount, failCount, TESTHOOK_EVENT3, 4);
 
 	/* and a last chance listener */
@@ -167,73 +179,92 @@ testHookInterface(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *fail
 }
 
 static void
-testEnabled(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount, J9HookInterface **hookInterface, uintptr_t event, uintptr_t expectedResult)
+testEnabled(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount, J9HookInterface **hookInterface,
+        uintptr_t event, uintptr_t expectedResult)
 {
 	OMRPORT_ACCESS_FROM_OMRPORT(portLib);
 
 	if (((*hookInterface)->J9HookIsEnabled(hookInterface, event) == 0) == (expectedResult == 0)) {
 		(*passCount)++;
 	} else {
-		omrtty_printf("Hook 0x%zx is %s. It should be %s.\n", event, (expectedResult ? "disabled" : "enabled"), (expectedResult ? "enabled" : "disabled"));
+		omrtty_printf("Hook 0x%zx is %s. It should be %s.\n", event, (expectedResult ? "disabled" : "enabled"),
+		        (expectedResult ? "enabled" : "disabled"));
 		(*failCount)++;
 	}
 }
 
 static void
-testDisable(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount, J9HookInterface **hookInterface, uintptr_t event, uintptr_t expectedResult)
+testDisable(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount, J9HookInterface **hookInterface,
+        uintptr_t event, uintptr_t expectedResult)
 {
 	OMRPORT_ACCESS_FROM_OMRPORT(portLib);
 
 	if (((*hookInterface)->J9HookDisable(hookInterface, event) == 0) == (expectedResult == 0)) {
 		(*passCount)++;
 	} else {
-		omrtty_printf("J9HookDisable for 0x%zx %s. It should have %s.\n", event, (expectedResult ? "succeeded" : "failed"), (expectedResult ? "failed" : "succeeded"));
+		omrtty_printf("J9HookDisable for 0x%zx %s. It should have %s.\n", event,
+		        (expectedResult ? "succeeded" : "failed"), (expectedResult ? "failed" : "succeeded"));
 		(*failCount)++;
 	}
 }
 
 static void
-testReserve(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount, J9HookInterface **hookInterface, uintptr_t event, uintptr_t expectedResult)
+testReserve(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount, J9HookInterface **hookInterface,
+        uintptr_t event, uintptr_t expectedResult)
 {
 	OMRPORT_ACCESS_FROM_OMRPORT(portLib);
 
 	if (((*hookInterface)->J9HookReserve(hookInterface, event) == 0) == (expectedResult == 0)) {
 		(*passCount)++;
 	} else {
-		omrtty_printf("J9HookReserve for 0x%zx %s. It should have %s.\n", event, (expectedResult ? "succeeded" : "failed"), (expectedResult ? "failed" : "succeeded"));
+		omrtty_printf("J9HookReserve for 0x%zx %s. It should have %s.\n", event,
+		        (expectedResult ? "succeeded" : "failed"), (expectedResult ? "failed" : "succeeded"));
 		(*failCount)++;
 	}
 }
 
 static void
-testRegister(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount, J9HookInterface **hookInterface, uintptr_t event, uintptr_t expectedResult)
+testRegister(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount, J9HookInterface **hookInterface,
+        uintptr_t event, uintptr_t expectedResult)
 {
 	OMRPORT_ACCESS_FROM_OMRPORT(portLib);
 
-	if (((*hookInterface)->J9HookRegisterWithCallSite(hookInterface, event, hookNormalEvent, OMR_GET_CALLSITE(), NULL) == 0) == (expectedResult == 0)) {
+	if (((*hookInterface)
+	                    ->J9HookRegisterWithCallSite(
+	                            hookInterface, event, hookNormalEvent, OMR_GET_CALLSITE(), NULL)
+	            == 0)
+	        == (expectedResult == 0)) {
 		(*passCount)++;
 	} else {
-		omrtty_printf("J9HookRegisterWithCallSite for 0x%zx %s. It should have %s.\n", event, (expectedResult ? "succeeded" : "failed"), (expectedResult ? "failed" : "succeeded"));
+		omrtty_printf("J9HookRegisterWithCallSite for 0x%zx %s. It should have %s.\n", event,
+		        (expectedResult ? "succeeded" : "failed"), (expectedResult ? "failed" : "succeeded"));
 		(*failCount)++;
 	}
 }
 
 static void
-testRegisterWithAgent(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount, J9HookInterface **hookInterface, uintptr_t event, uintptr_t agentID, uintptr_t userData, uintptr_t expectedResult)
+testRegisterWithAgent(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount,
+        J9HookInterface **hookInterface, uintptr_t event, uintptr_t agentID, uintptr_t userData,
+        uintptr_t expectedResult)
 {
 	OMRPORT_ACCESS_FROM_OMRPORT(portLib);
 
-	if (((*hookInterface)->J9HookRegisterWithCallSite(hookInterface, event | J9HOOK_TAG_AGENT_ID, hookOrderedEvent, OMR_GET_CALLSITE(), (void *)userData, agentID) == 0) == (expectedResult == 0)) {
+	if (((*hookInterface)
+	                    ->J9HookRegisterWithCallSite(hookInterface, event | J9HOOK_TAG_AGENT_ID, hookOrderedEvent,
+	                            OMR_GET_CALLSITE(), (void *)userData, agentID)
+	            == 0)
+	        == (expectedResult == 0)) {
 		(*passCount)++;
 	} else {
-		omrtty_printf("J9HookRegisterWithCallSite for 0x%zx %s. It should have %s.\n", event, (expectedResult ? "succeeded" : "failed"), (expectedResult ? "failed" : "succeeded"));
+		omrtty_printf("J9HookRegisterWithCallSite for 0x%zx %s. It should have %s.\n", event,
+		        (expectedResult ? "succeeded" : "failed"), (expectedResult ? "failed" : "succeeded"));
 		(*failCount)++;
 	}
 }
-
 
 static uintptr_t
-testAllocateAgentID(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount, J9HookInterface **hookInterface)
+testAllocateAgentID(
+        OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount, J9HookInterface **hookInterface)
 {
 	uintptr_t agentID = (*hookInterface)->J9HookAllocateAgentID(hookInterface);
 
@@ -250,42 +281,38 @@ testAllocateAgentID(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *fa
 }
 
 static void
-testUnregister(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount, J9HookInterface **hookInterface, uintptr_t event)
+testUnregister(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount, J9HookInterface **hookInterface,
+        uintptr_t event)
 {
 	(*hookInterface)->J9HookUnregister(hookInterface, event, hookNormalEvent, NULL);
 }
 
 static void
-testUnregisterWithAgent(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount, J9HookInterface **hookInterface, uintptr_t event, uintptr_t userData)
+testUnregisterWithAgent(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount,
+        J9HookInterface **hookInterface, uintptr_t event, uintptr_t userData)
 {
 	(*hookInterface)->J9HookUnregister(hookInterface, event, hookOrderedEvent, (void *)userData);
 }
 
 static void
-testDispatch(OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount, uintptr_t event, uintptr_t expectedResult)
+testDispatch(
+        OMRPortLibrary *portLib, uintptr_t *passCount, uintptr_t *failCount, uintptr_t event, uintptr_t expectedResult)
 {
 	OMRPORT_ACCESS_FROM_OMRPORT(portLib);
 	uintptr_t count = 0;
 
 	switch (event) {
-	case TESTHOOK_EVENT1:
-		TRIGGER_TESTHOOK_EVENT1(sampleHookInterface, count, -1);
-		break;
-	case TESTHOOK_EVENT2:
-		TRIGGER_TESTHOOK_EVENT2(sampleHookInterface, 1, count, -1);
-		break;
-	case TESTHOOK_EVENT3:
-		TRIGGER_TESTHOOK_EVENT3(sampleHookInterface, 2, 3, count, -1);
-		break;
-	case TESTHOOK_EVENT4:
-		TRIGGER_TESTHOOK_EVENT4(sampleHookInterface, 4, 5, 6, count, -1);
-		break;
+	case TESTHOOK_EVENT1: TRIGGER_TESTHOOK_EVENT1(sampleHookInterface, count, -1); break;
+	case TESTHOOK_EVENT2: TRIGGER_TESTHOOK_EVENT2(sampleHookInterface, 1, count, -1); break;
+	case TESTHOOK_EVENT3: TRIGGER_TESTHOOK_EVENT3(sampleHookInterface, 2, 3, count, -1); break;
+	case TESTHOOK_EVENT4: TRIGGER_TESTHOOK_EVENT4(sampleHookInterface, 4, 5, 6, count, -1); break;
 	}
 
 	if (count == expectedResult) {
 		(*passCount)++;
 	} else {
-		omrtty_printf("Incorrect number of listeners responded for 0x%zx. Got %d, expected %d\n", event, count, expectedResult);
+		omrtty_printf("Incorrect number of listeners responded for 0x%zx. Got %d, expected %d\n", event, count,
+		        expectedResult);
 		(*failCount)++;
 	}
 }
@@ -301,20 +328,11 @@ hookNormalEvent(J9HookInterface **hook, uintptr_t eventNum, void *voidEventData,
 	}
 
 	switch (eventNum) {
-	case TESTHOOK_EVENT1:
-		((TestHookEvent1 *)voidEventData)->count += increment;
-		break;
-	case TESTHOOK_EVENT2:
-		((TestHookEvent2 *)voidEventData)->count += increment;
-		break;
-	case TESTHOOK_EVENT3:
-		((TestHookEvent3 *)voidEventData)->count += increment;
-		break;
-	case TESTHOOK_EVENT4:
-		((TestHookEvent4 *)voidEventData)->count += increment;
-		break;
+	case TESTHOOK_EVENT1: ((TestHookEvent1 *)voidEventData)->count += increment; break;
+	case TESTHOOK_EVENT2: ((TestHookEvent2 *)voidEventData)->count += increment; break;
+	case TESTHOOK_EVENT3: ((TestHookEvent3 *)voidEventData)->count += increment; break;
+	case TESTHOOK_EVENT4: ((TestHookEvent4 *)voidEventData)->count += increment; break;
 	}
-
 }
 
 static void
@@ -354,18 +372,9 @@ hookOrderedEvent(J9HookInterface **hook, uintptr_t eventNum, void *voidEventData
 	}
 
 	switch (eventNum) {
-	case TESTHOOK_EVENT1:
-		((TestHookEvent1 *)voidEventData)->count += increment;
-		break;
-	case TESTHOOK_EVENT2:
-		((TestHookEvent2 *)voidEventData)->count += increment;
-		break;
-	case TESTHOOK_EVENT3:
-		((TestHookEvent3 *)voidEventData)->count += increment;
-		break;
-	case TESTHOOK_EVENT4:
-		((TestHookEvent4 *)voidEventData)->count += increment;
-		break;
+	case TESTHOOK_EVENT1: ((TestHookEvent1 *)voidEventData)->count += increment; break;
+	case TESTHOOK_EVENT2: ((TestHookEvent2 *)voidEventData)->count += increment; break;
+	case TESTHOOK_EVENT3: ((TestHookEvent3 *)voidEventData)->count += increment; break;
+	case TESTHOOK_EVENT4: ((TestHookEvent4 *)voidEventData)->count += increment; break;
 	}
-
 }

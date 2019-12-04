@@ -23,24 +23,21 @@
 #if !defined(OVERFLOWSEGREGATED_HPP_)
 #define OVERFLOWSEGREGATED_HPP_
 
-#include "omr.h"
-
-#include "WorkPacketOverflow.hpp"
-
 #include "EnvironmentBase.hpp"
 #include "GCExtensionsBase.hpp"
+#include "WorkPacketOverflow.hpp"
+#include "omr.h"
 
 #if defined(OMR_GC_SEGREGATED_HEAP)
 
-class MM_OverflowSegregated : public MM_WorkPacketOverflow
-{
-/* Data members */
+class MM_OverflowSegregated : public MM_WorkPacketOverflow {
+	/* Data members */
 public:
 protected:
 private:
 	MM_GCExtensionsBase *_extensions;
 
-/* Methods */
+	/* Methods */
 public:
 	static MM_OverflowSegregated *newInstance(MM_EnvironmentBase *env, MM_WorkPackets *workPackets);
 
@@ -89,9 +86,9 @@ public:
 	/**
 	 * Create a MM_OverflowSegregated object.
 	 */
-	MM_OverflowSegregated(MM_EnvironmentBase *env, MM_WorkPackets *workPackets) :
-		MM_WorkPacketOverflow(env, workPackets),
-		_extensions(MM_GCExtensionsBase::getExtensions(env->getOmrVM()))
+	MM_OverflowSegregated(MM_EnvironmentBase *env, MM_WorkPackets *workPackets)
+	        : MM_WorkPacketOverflow(env, workPackets)
+	        , _extensions(MM_GCExtensionsBase::getExtensions(env->getOmrVM()))
 	{
 		_typeId = __FUNCTION__;
 	};
@@ -120,7 +117,6 @@ protected:
 	void overflowItemInternal(MM_EnvironmentBase *env, void *item);
 
 private:
-
 };
 
 #endif /* OMR_GC_SEGREGATED_HEAP */

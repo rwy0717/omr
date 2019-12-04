@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #include <iostream>
 #include <stdlib.h>
 #include <stdint.h>
@@ -29,170 +28,144 @@
 #include "VMRegister.hpp"
 #include "JitBuilder.hpp"
 
-using std::cout;
 using std::cerr;
+using std::cout;
 
-#define TOSTR(x)     #x
+#define TOSTR(x) #x
 #define LINETOSTR(x) TOSTR(x)
-
 
 int
 main(int argc, char *argv[])
-   {
-   cout << "Step 1: initialize JIT\n";
-   bool initialized = initializeJit();
-   if (!initialized)
-      {
-      cerr << "FAIL: could not initialize JIT\n";
-      exit(-1);
-      }
+{
+	cout << "Step 1: initialize JIT\n";
+	bool initialized = initializeJit();
+	if (!initialized) {
+		cerr << "FAIL: could not initialize JIT\n";
+		exit(-1);
+	}
 
-   cout << "Step 2: define type dictionary\n";
-   OMR::JitBuilder::TypeDictionary types;
+	cout << "Step 2: define type dictionary\n";
+	OMR::JitBuilder::TypeDictionary types;
 
-   cout << "Step 3: compile vmregister method builder\n";
-   VMRegisterMethod method(&types);
-   void *entry = 0;
-   int32_t rc = compileMethodBuilder(&method, &entry);
-   if (rc != 0)
-      {
-      cerr << "FAIL: compilation error " << rc << "\n";
-      exit(-2);
-      }
+	cout << "Step 3: compile vmregister method builder\n";
+	VMRegisterMethod method(&types);
+	void *entry = 0;
+	int32_t rc = compileMethodBuilder(&method, &entry);
+	if (rc != 0) {
+		cerr << "FAIL: compilation error " << rc << "\n";
+		exit(-2);
+	}
 
-   cout << "Step 4: invoke compiled vmregister function and print results\n";
-   typedef int32_t (VMRegisterMethodFunction)(int8_t **values, int32_t count);
-   VMRegisterMethodFunction *vmregister = (VMRegisterMethodFunction *) entry;
+	cout << "Step 4: invoke compiled vmregister function and print results\n";
+	typedef int32_t(VMRegisterMethodFunction)(int8_t * *values, int32_t count);
+	VMRegisterMethodFunction *vmregister = (VMRegisterMethodFunction *)entry;
 
-   int8_t values[] = {7,2,9,5,3,1,6};
-   int8_t *vals = values;
-   int32_t retVal = vmregister(&vals, 7);
-   cout << "vmregister(values) returned " << retVal << "\n";
+	int8_t values[] = {7, 2, 9, 5, 3, 1, 6};
+	int8_t *vals = values;
+	int32_t retVal = vmregister(&vals, 7);
+	cout << "vmregister(values) returned " << retVal << "\n";
 
-   cout << "Step 5: compile vmregisterInStruct method builder\n";
-   VMRegisterInStructMethod method2(&types);
-   entry = 0;
-   rc = compileMethodBuilder(&method2, &entry);
-   if (rc != 0)
-      {
-      cerr << "FAIL: compilation error " << rc << "\n";
-      exit(-2);
-      }
+	cout << "Step 5: compile vmregisterInStruct method builder\n";
+	VMRegisterInStructMethod method2(&types);
+	entry = 0;
+	rc = compileMethodBuilder(&method2, &entry);
+	if (rc != 0) {
+		cerr << "FAIL: compilation error " << rc << "\n";
+		exit(-2);
+	}
 
-   cout << "Step 6: invoke compiled vmregisterInStruct function and print results\n";
-   typedef int32_t (VMRegisterInStructMethodFunction)(VMRegisterStruct *param);
-   VMRegisterInStructMethodFunction *vmregisterInStruct = (VMRegisterInStructMethodFunction *) entry;
+	cout << "Step 6: invoke compiled vmregisterInStruct function and print results\n";
+	typedef int32_t(VMRegisterInStructMethodFunction)(VMRegisterStruct * param);
+	VMRegisterInStructMethodFunction *vmregisterInStruct = (VMRegisterInStructMethodFunction *)entry;
 
-   VMRegisterStruct param;
-   param.count = 7;
-   param.values = values;
-   retVal = vmregisterInStruct(&param);
-   cout << "vmregisterInStruct(values) returned " << retVal << "\n";
+	VMRegisterStruct param;
+	param.count = 7;
+	param.values = values;
+	retVal = vmregisterInStruct(&param);
+	cout << "vmregisterInStruct(values) returned " << retVal << "\n";
 
-   cout << "Step 7: shutdown JIT\n";
-   shutdownJit();
-   }
-
-
+	cout << "Step 7: shutdown JIT\n";
+	shutdownJit();
+}
 
 VMRegisterMethod::VMRegisterMethod(OMR::JitBuilder::TypeDictionary *d)
-   : OMR::JitBuilder::MethodBuilder(d, (OMR::JitBuilder::VirtualMachineState *) NULL)
-   {
-   DefineLine(LINETOSTR(__LINE__));
-   DefineFile(__FILE__);
+        : OMR::JitBuilder::MethodBuilder(d, (OMR::JitBuilder::VirtualMachineState *)NULL)
+{
+	DefineLine(LINETOSTR(__LINE__));
+	DefineFile(__FILE__);
 
-   DefineName("vmregister");
-   DefineParameter("valuesPtr", d->PointerTo(d->PointerTo(Int8)));
-   DefineParameter("count", Int32);
-   DefineReturnType(Int32);
-   }
+	DefineName("vmregister");
+	DefineParameter("valuesPtr", d->PointerTo(d->PointerTo(Int8)));
+	DefineParameter("count", Int32);
+	DefineReturnType(Int32);
+}
 
 bool
 VMRegisterMethod::buildIL()
-   {
-   OMR::JitBuilder::TypeDictionary *dict = typeDictionary();
-   OMR::JitBuilder::IlType *pElementType = dict->PointerTo(Int8);
-   OMR::JitBuilder::IlType *ppElementType = dict->PointerTo(pElementType);
-   OMR::JitBuilder::VirtualMachineRegister *vmreg = new OMR::JitBuilder::VirtualMachineRegister(this, "MYBYTES", ppElementType, sizeof(int8_t), Load("valuesPtr"));
+{
+	OMR::JitBuilder::TypeDictionary *dict = typeDictionary();
+	OMR::JitBuilder::IlType *pElementType = dict->PointerTo(Int8);
+	OMR::JitBuilder::IlType *ppElementType = dict->PointerTo(pElementType);
+	OMR::JitBuilder::VirtualMachineRegister *vmreg = new OMR::JitBuilder::VirtualMachineRegister(
+	        this, "MYBYTES", ppElementType, sizeof(int8_t), Load("valuesPtr"));
 
-   Store("result", ConstInt32(0));
+	Store("result", ConstInt32(0));
 
-   OMR::JitBuilder::IlBuilder *loop = NULL;
-   ForLoopUp("i", &loop,
-           ConstInt32(0),
-           Load("count"),
-           ConstInt32(1));
+	OMR::JitBuilder::IlBuilder *loop = NULL;
+	ForLoopUp("i", &loop, ConstInt32(0), Load("count"), ConstInt32(1));
 
-   loop->Store("valAddress",
-               vmreg->Load(loop));
+	loop->Store("valAddress", vmreg->Load(loop));
 
-   loop->Store("val",
-   loop->      LoadAt(pElementType,
-   loop->             Load("valAddress")));
+	loop->Store("val", loop->LoadAt(pElementType, loop->Load("valAddress")));
 
-   loop->Store("result",
-   loop->      Add(
-   loop->          Load("result"),
-   loop->          ConvertTo(Int32,
-   loop->                    Load("val"))));
-   vmreg->Adjust(loop, 1);
+	loop->Store("result", loop->Add(loop->Load("result"), loop->ConvertTo(Int32, loop->Load("val"))));
+	vmreg->Adjust(loop, 1);
 
-   Return(Load("result"));
+	Return(Load("result"));
 
-   return true;
-   }
+	return true;
+}
 
 VMRegisterInStructMethod::VMRegisterInStructMethod(OMR::JitBuilder::TypeDictionary *d)
-   : OMR::JitBuilder::MethodBuilder(d, (OMR::JitBuilder::VirtualMachineState *) NULL)
-   {
-   DefineLine(LINETOSTR(__LINE__));
-   DefineFile(__FILE__);
+        : OMR::JitBuilder::MethodBuilder(d, (OMR::JitBuilder::VirtualMachineState *)NULL)
+{
+	DefineLine(LINETOSTR(__LINE__));
+	DefineFile(__FILE__);
 
-   d->DefineStruct("VMRegisterStruct");
-   d->DefineField("VMRegisterStruct", "values", d->PointerTo(Int8), offsetof(VMRegisterStruct, values));
-   d->DefineField("VMRegisterStruct", "count", Int32, offsetof(VMRegisterStruct, count));
-   d->CloseStruct("VMRegisterStruct");
+	d->DefineStruct("VMRegisterStruct");
+	d->DefineField("VMRegisterStruct", "values", d->PointerTo(Int8), offsetof(VMRegisterStruct, values));
+	d->DefineField("VMRegisterStruct", "count", Int32, offsetof(VMRegisterStruct, count));
+	d->CloseStruct("VMRegisterStruct");
 
-   DefineName("vmregisterInStruct");
-   DefineParameter("param", d->PointerTo("VMRegisterStruct"));
-   DefineReturnType(Int32);
-   }
+	DefineName("vmregisterInStruct");
+	DefineParameter("param", d->PointerTo("VMRegisterStruct"));
+	DefineReturnType(Int32);
+}
 
 bool
 VMRegisterInStructMethod::buildIL()
-   {
-   OMR::JitBuilder::TypeDictionary *dict = typeDictionary();
-   OMR::JitBuilder::IlType *pElementType = dict->PointerTo(Int8);
-   OMR::JitBuilder::IlType *ppElementType = dict->PointerTo(pElementType);
-   OMR::JitBuilder::VirtualMachineRegisterInStruct *vmreg = new OMR::JitBuilder::VirtualMachineRegisterInStruct(this, "VMRegisterStruct", "param", "values", "VALUES");
+{
+	OMR::JitBuilder::TypeDictionary *dict = typeDictionary();
+	OMR::JitBuilder::IlType *pElementType = dict->PointerTo(Int8);
+	OMR::JitBuilder::IlType *ppElementType = dict->PointerTo(pElementType);
+	OMR::JitBuilder::VirtualMachineRegisterInStruct *vmreg = new OMR::JitBuilder::VirtualMachineRegisterInStruct(
+	        this, "VMRegisterStruct", "param", "values", "VALUES");
 
-   Store("count",
-      LoadIndirect("VMRegisterStruct", "count",
-                  Load("param")));
+	Store("count", LoadIndirect("VMRegisterStruct", "count", Load("param")));
 
-   Store("result", ConstInt32(0));
+	Store("result", ConstInt32(0));
 
-   OMR::JitBuilder::IlBuilder *loop = NULL;
-   ForLoopUp("i", &loop,
-           ConstInt32(0),
-           Load("count"),
-           ConstInt32(1));
+	OMR::JitBuilder::IlBuilder *loop = NULL;
+	ForLoopUp("i", &loop, ConstInt32(0), Load("count"), ConstInt32(1));
 
-   loop->Store("valAddress",
-               vmreg->Load(loop));
+	loop->Store("valAddress", vmreg->Load(loop));
 
-   loop->Store("val",
-   loop->      LoadAt(pElementType,
-   loop->             Load("valAddress")));
+	loop->Store("val", loop->LoadAt(pElementType, loop->Load("valAddress")));
 
-   loop->Store("result",
-   loop->      Add(
-   loop->          Load("result"),
-   loop->          ConvertTo(Int32,
-   loop->                    Load("val"))));
-   vmreg->Adjust(loop, 1);
+	loop->Store("result", loop->Add(loop->Load("result"), loop->ConvertTo(Int32, loop->Load("val"))));
+	vmreg->Adjust(loop, 1);
 
-   Return(Load("result"));
+	Return(Load("result"));
 
-   return true;
-   }
+	return true;
+}

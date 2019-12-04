@@ -37,7 +37,7 @@
 #include <sys/time.h>
 #include <sys/utsname.h>
 
-#if !__GLIBC_PREREQ(2,4)
+#if !__GLIBC_PREREQ(2, 4)
 /* Compilation on RHEL 4 (for eventual 7.0 VM to Java 6.0 backport) */
 #include <asm/systemcfg.h>
 extern volatile struct systemcfg *systemcfgP_millis;
@@ -172,7 +172,8 @@ omrtime_hires_clock(struct OMRPortLibrary *portLibrary)
 	}
 
 	gettimeofday(&tp, NULL);
-	return ((int64_t)tp.tv_sec) * OMRTIME_HIRES_CLOCK_FREQUENCY + tp.tv_usec * (OMRTIME_HIRES_CLOCK_FREQUENCY / 1000000);
+	return ((int64_t)tp.tv_sec) * OMRTIME_HIRES_CLOCK_FREQUENCY
+	        + tp.tv_usec * (OMRTIME_HIRES_CLOCK_FREQUENCY / 1000000);
 }
 /**
  * Query OS for clock frequency
@@ -210,7 +211,8 @@ omrtime_hires_frequency(struct OMRPortLibrary *portLibrary)
  *  \arg OMRPORT_TIME_DELTA_IN_NANOSECONDS return timer value in nanoseconds.
  */
 uint64_t
-omrtime_hires_delta(struct OMRPortLibrary *portLibrary, uint64_t startTime, uint64_t endTime, uint64_t requiredResolution)
+omrtime_hires_delta(
+        struct OMRPortLibrary *portLibrary, uint64_t startTime, uint64_t endTime, uint64_t requiredResolution)
 {
 	uint64_t ticks;
 
@@ -220,9 +222,11 @@ omrtime_hires_delta(struct OMRPortLibrary *portLibrary, uint64_t startTime, uint
 	if (OMRTIME_HIRES_CLOCK_FREQUENCY == requiredResolution) {
 		/* no conversion necessary */
 	} else if (OMRTIME_HIRES_CLOCK_FREQUENCY < requiredResolution) {
-		ticks = (uint64_t)((double)ticks * ((double)requiredResolution / (double)OMRTIME_HIRES_CLOCK_FREQUENCY));
+		ticks = (uint64_t)(
+		        (double)ticks * ((double)requiredResolution / (double)OMRTIME_HIRES_CLOCK_FREQUENCY));
 	} else {
-		ticks = (uint64_t)((double)ticks / ((double)OMRTIME_HIRES_CLOCK_FREQUENCY / (double)requiredResolution));
+		ticks = (uint64_t)(
+		        (double)ticks / ((double)OMRTIME_HIRES_CLOCK_FREQUENCY / (double)requiredResolution));
 	}
 	return ticks;
 }
@@ -238,8 +242,7 @@ omrtime_hires_delta(struct OMRPortLibrary *portLibrary, uint64_t startTime, uint
  */
 void
 omrtime_shutdown(struct OMRPortLibrary *portLibrary)
-{
-}
+{}
 
 /**
  * PortLibrary startup.
@@ -261,7 +264,7 @@ omrtime_startup(struct OMRPortLibrary *portLibrary)
 	int32_t rc = 0;
 	struct timespec ts;
 
-#if !__GLIBC_PREREQ(2,4)
+#if !__GLIBC_PREREQ(2, 4)
 	systemcfgP_millis = systemcfg_init();
 #else
 	int procfd;
@@ -276,7 +279,8 @@ omrtime_startup(struct OMRPortLibrary *portLibrary)
 	}
 #endif
 
-	/* cmvc 89134 - on some linux kernel versions the struct exists but the time is not filled in, null the pointer to cause the slower fallback code to be used */
+	/* cmvc 89134 - on some linux kernel versions the struct exists but the time is not filled in, null the pointer
+	 * to cause the slower fallback code to be used */
 	if (systemcfgP_millis && omrtime_current_time_millis(portLibrary) == 0) {
 		systemcfgP_millis = NULL;
 	}
@@ -300,7 +304,8 @@ omrtime_startup(struct OMRPortLibrary *portLibrary)
 		struct OMROSKernelInfo kernelInfo = {0};
 
 		if (portLibrary->sysinfo_os_kernel_info(portLibrary, &kernelInfo)) {
-			if ((2 == kernelInfo.kernelVersion) && (6 == kernelInfo.majorRevision) && (18 >= kernelInfo.minorRevision)) {
+			if ((2 == kernelInfo.kernelVersion) && (6 == kernelInfo.majorRevision)
+			        && (18 >= kernelInfo.minorRevision)) {
 				systemcfgP_nanos = systemcfgP_millis;
 			}
 		}

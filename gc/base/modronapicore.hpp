@@ -20,18 +20,17 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #ifndef MODRONAPICORE_HPP_
 #define MODRONAPICORE_HPP_
 
-#include "omrcfg.h"
 #include "omr.h"
+#include "omrcfg.h"
 #include "pool_api.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-const char* omrgc_get_version(OMR_VM *omrVM);
+const char *omrgc_get_version(OMR_VM *omrVM);
 extern uintptr_t omrgc_condYieldFromGC(OMR_VMThread *omrVMThread, uintptr_t componentType);
 void *omrgc_walkLWNRLockTracePool(void *omrVM, pool_state *state);
 #ifdef __cplusplus

@@ -22,23 +22,21 @@
 #include "runtime/CodeCacheMemorySegment.hpp"
 #include "runtime/CodeCacheManager.hpp"
 
-TR::CodeCacheMemorySegment*
+TR::CodeCacheMemorySegment *
 OMR::CodeCacheMemorySegment::self()
-   {
-   return static_cast<TR::CodeCacheMemorySegment*>(this);
-   }
-
+{
+	return static_cast<TR::CodeCacheMemorySegment *>(this);
+}
 
 void
 OMR::CodeCacheMemorySegment::adjustAlloc(int64_t adjust)
-   {
-   self()->setSegmentAlloc(self()->segmentAlloc() + adjust);
-   }
-
+{
+	self()->setSegmentAlloc(self()->segmentAlloc() + adjust);
+}
 
 void
 OMR::CodeCacheMemorySegment::free(TR::CodeCacheManager *manager)
-   {
-   manager->freeMemory(_base);
-   new (static_cast<TR::CodeCacheMemorySegment *>(this)) TR::CodeCacheMemorySegment();
-   }
+{
+	manager->freeMemory(_base);
+	new (static_cast<TR::CodeCacheMemorySegment *>(this)) TR::CodeCacheMemorySegment();
+}

@@ -20,8 +20,8 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-#include "omrcfg.h"
 #include "modronopt.h"
+#include "omrcfg.h"
 
 #if defined(OMR_GC_MODRON_STANDARD) || defined(OMR_GC_REALTIME)
 
@@ -31,7 +31,7 @@ void
 MM_MarkStats::clear()
 {
 	_scanTime = 0;
-	
+
 	_objectsMarked = 0;
 	_objectsScanned = 0;
 	_bytesScanned = 0;

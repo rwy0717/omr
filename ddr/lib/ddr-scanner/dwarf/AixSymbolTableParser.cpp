@@ -41,8 +41,8 @@ static int _startNewFile = 0;
 static Dwarf_Off refNumber = 1;
 /* This is used to initialize declLine to a unique value for each unique DIE every time it is required. */
 static Dwarf_Off declarationLine = 1;
-Dwarf_CU_Context * Dwarf_CU_Context::_firstCU;
-Dwarf_CU_Context * Dwarf_CU_Context::_currentCU;
+Dwarf_CU_Context *Dwarf_CU_Context::_firstCU;
+Dwarf_CU_Context *Dwarf_CU_Context::_currentCU;
 
 static void checkBitFields(Dwarf_Error *error);
 static void deleteDie(Dwarf_Die die);
@@ -51,7 +51,8 @@ static int parseBaseType(const string data, Dwarf_Die currentDie, Dwarf_Error *e
 static int parseNamelessReference(const string data, Dwarf_Die currentDie, Dwarf_Error *error);
 static int parseStabstringDeclarationIntoDwarfDie(const string data, Dwarf_Error *error);
 static int parseSymbolTable(const char *line, Dwarf_Error *error);
-static Dwarf_Half parseDeclarationLine(string data, int *typeID, declFormat *format, string *declarationData, string *name);
+static Dwarf_Half parseDeclarationLine(
+        string data, int *typeID, declFormat *format, string *declarationData, string *name);
 static int parseEnum(const string data, string dieName, Dwarf_Die currentDie, Dwarf_Error *error);
 static int parseFields(const string data, Dwarf_Die currentDie, Dwarf_Error *error);
 static int parseCPPstruct(const string data, const string dieName, Dwarf_Die currentDie, Dwarf_Error *error);
@@ -94,12 +95,7 @@ dwarf_finish(Dwarf_Debug dbg, Dwarf_Error *error)
 }
 
 int
-dwarf_init(int fd,
-	Dwarf_Unsigned access,
-	Dwarf_Handler errhand,
-	Dwarf_Ptr errarg,
-	Dwarf_Debug *dbg,
-	Dwarf_Error *error)
+dwarf_init(int fd, Dwarf_Unsigned access, Dwarf_Handler errhand, Dwarf_Ptr errarg, Dwarf_Debug *dbg, Dwarf_Error *error)
 {
 	/* Initialize CU values */
 	int ret = DW_DLV_OK;
@@ -146,7 +142,8 @@ dwarf_init(int fd,
 	/* _currentCU must begin as NULL for dwarf_next_cu_header. */
 	Dwarf_CU_Context::_currentCU = NULL;
 
-	/* If the symbol table that we parsed contained no new files, create an empty placeholder generic CU and CU DIE. */
+	/* If the symbol table that we parsed contained no new files, create an empty placeholder generic CU and CU DIE.
+	 */
 	if (NULL == Dwarf_CU_Context::_firstCU) {
 		Dwarf_CU_Context *newCU = new Dwarf_CU_Context;
 		Dwarf_Die newDie = new Dwarf_Die_s;
@@ -171,7 +168,7 @@ dwarf_init(int fd,
 			newDie->_child = NULL;
 			newDie->_context = newCU;
 			newDie->_attribute = name;
-							
+
 			name->_type = DW_AT_name;
 			name->_nextAttr = NULL;
 			name->_form = DW_FORM_string;
@@ -202,7 +199,8 @@ static void
 checkBitFields(Dwarf_Error *error)
 {
 	for (size_t i = 0; i < bitFieldsToCheck.size(); ++i) {
-		/* Since this is a field, the type attribute is always the attribute after the first of the die passed in. */
+		/* Since this is a field, the type attribute is always the attribute after the first of the die passed
+		 * in. */
 		Dwarf_Attribute type = NULL;
 		Dwarf_Attribute bitSize = NULL;
 		Dwarf_Attribute tmpAttribute = bitFieldsToCheck[i]->_attribute;
@@ -243,9 +241,7 @@ checkBitFields(Dwarf_Error *error)
 					}
 					baseTypeHasBeenFound = true;
 					break;
-				default:
-					baseTypeHasBeenFound = true;
-					break;
+				default: baseTypeHasBeenFound = true; break;
 				}
 			}
 			if (!needsBitField) {
@@ -287,7 +283,6 @@ deleteDie(Dwarf_Die die)
 	}
 	delete die;
 }
-
 
 /**
  * Parses the string to file ID. Extracts the integer betwen the square brackets.
@@ -348,7 +343,8 @@ parseArray(const string data, Dwarf_Die currentDie, Dwarf_Error *error)
 			Dwarf_Die newDie = new Dwarf_Die_s;
 			Dwarf_Attribute subrangeType = new Dwarf_Attribute_s;
 			Dwarf_Attribute subrangeUpperBound = new Dwarf_Attribute_s;
-			if ((NULL == type) || (NULL == newDie) || (NULL == subrangeType) || (NULL == subrangeUpperBound)) {
+			if ((NULL == type) || (NULL == newDie) || (NULL == subrangeType)
+			        || (NULL == subrangeUpperBound)) {
 				ret = DW_DLV_ERROR;
 				setError(error, DW_DLE_MAF);
 			} else {
@@ -361,7 +357,8 @@ parseArray(const string data, Dwarf_Die currentDie, Dwarf_Error *error)
 				type->_ref = NULL;
 
 				/* Add the new attribute to the list of attributes to populate. */
-				refsToPopulate.push_back(make_pair<int, Dwarf_Attribute>((int)ID, (Dwarf_Attribute)type));
+				refsToPopulate.push_back(
+				        make_pair<int, Dwarf_Attribute>((int)ID, (Dwarf_Attribute)type));
 				currentDie->_attribute = type;
 				newDie->_tag = DW_TAG_subrange_type;
 				newDie->_parent = currentDie;
@@ -379,7 +376,8 @@ parseArray(const string data, Dwarf_Die currentDie, Dwarf_Error *error)
 				subrangeType->_ref = NULL;
 
 				/* Add subrangeType to the list of refs to populate in a second pass. */
-				refsToPopulate.push_back(make_pair<int, Dwarf_Attribute>((int)-37, (Dwarf_Attribute)subrangeType));
+				refsToPopulate.push_back(
+				        make_pair<int, Dwarf_Attribute>((int)-37, (Dwarf_Attribute)subrangeType));
 
 				subrangeUpperBound->_type = DW_AT_upper_bound;
 				subrangeUpperBound->_nextAttr = NULL;
@@ -446,46 +444,26 @@ parseBaseType(const string data, Dwarf_Die currentDie, Dwarf_Error *error)
 		string builtInType = "0";
 		switch (index) {
 		case 6:
-		case 27:
-			builtInType = "-2";
-			break;
-		case 9:
-			builtInType = "-8";
-			break;
+		case 27: builtInType = "-2"; break;
+		case 9: builtInType = "-8"; break;
 		case 15:
-		case 29:
-			builtInType = "-1";
-			break;
-		case 17:
-			builtInType = "-12";
-			break;
-		case 18:
-			builtInType = "-13";
-			break;
-		case 20:
-			builtInType = "-5";
-			break;
-		case 28:
-			builtInType = "-3";
-			break;
-		case 30:
-			builtInType = "-7";
-			break;
-		case 33:
-			builtInType = "-32";
-			break;
-		case 34:
-			builtInType = "-31";
-			break;
+		case 29: builtInType = "-1"; break;
+		case 17: builtInType = "-12"; break;
+		case 18: builtInType = "-13"; break;
+		case 20: builtInType = "-5"; break;
+		case 28: builtInType = "-3"; break;
+		case 30: builtInType = "-7"; break;
+		case 33: builtInType = "-32"; break;
+		case 34: builtInType = "-31"; break;
 		}
 		ret = parseTypeDef(builtInType, BUILT_IN_TYPES_THAT_ARE_TYPEDEFS[index], currentDie, error);
 	}
 	return ret;
 }
 /*
- * Parses the data passed in and populates a DIE as a constant/pointer/volatile/subroutine type (all of those types have the same structure)
- * param[in] data: the data to be parsed, it should be of the form (*|k|V)(TYPE)
- * param[out] currentDie: the DIE to populate with the parsed data.
+ * Parses the data passed in and populates a DIE as a constant/pointer/volatile/subroutine type (all of those types have
+ * the same structure) param[in] data: the data to be parsed, it should be of the form (*|k|V)(TYPE) param[out]
+ * currentDie: the DIE to populate with the parsed data.
  */
 static int
 parseNamelessReference(const string data, Dwarf_Die currentDie, Dwarf_Error *error)
@@ -517,7 +495,8 @@ parseNamelessReference(const string data, Dwarf_Die currentDie, Dwarf_Error *err
 /**
  * Parses a line of data and returns the declaration type of the data string.
  *
- * @param[in]  data: the string to be parsed. data should be the portion of the declaration line after "debug     0    decl" and whitespace.
+ * @param[in]  data: the string to be parsed. data should be the portion of the declaration line after "debug     0
+ * decl" and whitespace.
  * @param[out] tag: the type of the declaration of the data string
  * @param[out] typeID: the ID of the entity being declared
  * @param[out] format: the format of the declaration being parsed (used for structures, unions and classes)
@@ -525,16 +504,13 @@ parseNamelessReference(const string data, Dwarf_Die currentDie, Dwarf_Error *err
  * @param[out] name: the name of the entity being declared
  */
 static Dwarf_Half
-parseDeclarationLine(const string data,
-	int *typeID,
-	declFormat *format,
-	string *declarationData,
-	string *name)
+parseDeclarationLine(const string data, int *typeID, declFormat *format, string *declarationData, string *name)
 {
 	Dwarf_Half ret = DW_TAG_unknown;
 
-	/* 'data' is of the format: (DECLARATION_NAME):(c|t|T)(INTEGER_TYPE_ID)=(DECLARATION_TYPE_AND_SIZE)(FIELD_MEMBERS)
-	 * Split the declaration into the name and the information about the declaration.
+	/* 'data' is of the format:
+	 * (DECLARATION_NAME):(c|t|T)(INTEGER_TYPE_ID)=(DECLARATION_TYPE_AND_SIZE)(FIELD_MEMBERS) Split the declaration
+	 * into the name and the information about the declaration.
 	 */
 	size_t indexOfFirstColon = data.find_first_of(':');
 	if (string::npos != indexOfFirstColon) {
@@ -554,39 +530,21 @@ parseDeclarationLine(const string data,
 
 			/* Parse the data string to get the type of the expression. */
 			switch (type[0]) {
-			case '-': /* Built-in type */
-				ret = DW_TAG_base_type;
-				break;
-			case 'k': /* Constant */
-				ret = DW_TAG_const_type;
-				break;
-			case '*': /* Pointer */
-				ret = DW_TAG_pointer_type;
-				break;
-			case 'V': /* Volatile */
-				ret = DW_TAG_volatile_type;
-				break;
-			case 'a': /* Array */
-				ret = DW_TAG_array_type;
-				break;
-			case 'f': /* Subprogram */
-				ret = DW_TAG_subroutine_type;
-				break;
-			case '&': /* Reference */
-				ret = DW_TAG_reference_type;
-				break;
-			case 'm': /* Pointer to member type */
-				ret = DW_TAG_ptr_to_member_type;
-				break;
-			default:
-				ret = DW_TAG_unknown;
-				break;
+			case '-': /* Built-in type */ ret = DW_TAG_base_type; break;
+			case 'k': /* Constant */ ret = DW_TAG_const_type; break;
+			case '*': /* Pointer */ ret = DW_TAG_pointer_type; break;
+			case 'V': /* Volatile */ ret = DW_TAG_volatile_type; break;
+			case 'a': /* Array */ ret = DW_TAG_array_type; break;
+			case 'f': /* Subprogram */ ret = DW_TAG_subroutine_type; break;
+			case '&': /* Reference */ ret = DW_TAG_reference_type; break;
+			case 'm': /* Pointer to member type */ ret = DW_TAG_ptr_to_member_type; break;
+			default: ret = DW_TAG_unknown; break;
 			}
 		} else if ('T' == (*declarationData).at(0)) {
 			size_t indexOfFirstEqualsSign = (*declarationData).find('=');
-			/* After the "=", the declaration type and field members have two possible formats: C-style and C++-stype.
-			 * C-style formatting is: (e/s/u)(DECLARED_TYPE_SIZE)(FIELD_MEMBERS)
-			 * C++-style formatting is: Y(DECLARED_TYPE_SIZE)(c/e/s/u)((FIELD_MEMBERS))
+			/* After the "=", the declaration type and field members have two possible formats: C-style and
+			 * C++-stype. C-style formatting is: (e/s/u)(DECLARED_TYPE_SIZE)(FIELD_MEMBERS) C++-style
+			 * formatting is: Y(DECLARED_TYPE_SIZE)(c/e/s/u)((FIELD_MEMBERS))
 			 */
 			if (string::npos != indexOfFirstEqualsSign) {
 				*typeID = extractTypeID((*declarationData).substr(0, indexOfFirstEqualsSign));
@@ -594,24 +552,17 @@ parseDeclarationLine(const string data,
 				if (string::npos != (*declarationData).find('(')) {
 					/* C++ type class/struct/union declaration */
 					size_t indexOfFirstParenthesis = members.find('(');
-					string sizeAndType = stripLeading(members.substr(0, indexOfFirstParenthesis), 'Y');
+					string sizeAndType =
+					        stripLeading(members.substr(0, indexOfFirstParenthesis), 'Y');
 					size_t indexOfFirstNonInteger = sizeAndType.find_first_not_of("1234567890");
 					members = stripLeading(members.substr(indexOfFirstParenthesis), '(');
 					*format = CPP_FORMAT;
 					/* Check if the declaration is for a class, structure, or union. */
-					switch(sizeAndType[indexOfFirstNonInteger]) {
-					case 'c':
-						ret = DW_TAG_class_type;
-						break;
-					case 's':
-						ret = DW_TAG_structure_type;
-						break;
-					case 'u':
-						ret = DW_TAG_union_type;
-						break;
-					default:
-						ret = DW_TAG_unknown;
-						break;
+					switch (sizeAndType[indexOfFirstNonInteger]) {
+					case 'c': ret = DW_TAG_class_type; break;
+					case 's': ret = DW_TAG_structure_type; break;
+					case 'u': ret = DW_TAG_union_type; break;
+					default: ret = DW_TAG_unknown; break;
 					}
 				} else {
 					/* C type struct/union/enum declaration */
@@ -637,7 +588,8 @@ parseDeclarationLine(const string data,
 
 /**
  * Takes in a declaration for an entity and creates a Dwarf DIE for it
- * param[in] line: declaration for an entity. It should be the portion of a declaration line after "^\\[.*\\].*m.*debug.*decl\\s+"
+ * param[in] line: declaration for an entity. It should be the portion of a declaration line after
+ * "^\\[.*\\].*m.*debug.*decl\\s+"
  */
 static int
 parseStabstringDeclarationIntoDwarfDie(const string line, Dwarf_Error *error)
@@ -649,10 +601,12 @@ parseStabstringDeclarationIntoDwarfDie(const string line, Dwarf_Error *error)
 	string name;
 	string members;
 
-	/* We are parsing the section of debug info containing type declarations, comprised of lines beginning with "debug		0		decl".
-	 * Each declaration line is of the format: (DECLARATION_NAME):(c|t|T)(INTEGER_TYPE_ID)=(DECLARATION_TYPE)(FIELD_MEMBERS)
-	 * where DECLARATION_TYPE is one of: (*(INTEGER)|a|b|c|C|d|D|e|f|g|i|k|m|M|r|s|S|V|w|Z). See parseDeclarationLine() for more information.
-	 * The format differs for constants, typedefs, structures, etc. First, determine the type of declaration. Then parse that specific format.
+	/* We are parsing the section of debug info containing type declarations, comprised of lines beginning with
+	 * "debug		0		decl". Each declaration line is of the format:
+	 * (DECLARATION_NAME):(c|t|T)(INTEGER_TYPE_ID)=(DECLARATION_TYPE)(FIELD_MEMBERS) where DECLARATION_TYPE is one
+	 * of: (*(INTEGER)|a|b|c|C|d|D|e|f|g|i|k|m|M|r|s|S|V|w|Z). See parseDeclarationLine() for more information. The
+	 * format differs for constants, typedefs, structures, etc. First, determine the type of declaration. Then parse
+	 * that specific format.
 	 */
 
 	/* Get the type of the data of the parsed line. */
@@ -684,11 +638,13 @@ parseStabstringDeclarationIntoDwarfDie(const string line, Dwarf_Error *error)
 				newDie->_attribute = NULL;
 
 				/* Insert the new DIE into createdDies. */
-				createdDies[typeID] = make_pair<Dwarf_Off, Dwarf_Die>((Dwarf_Off)refNumber, (Dwarf_Die)newDie);
+				createdDies[typeID] =
+				        make_pair<Dwarf_Off, Dwarf_Die>((Dwarf_Off)refNumber, (Dwarf_Die)newDie);
 
 				refNumber = refNumber + 1;
 
-				/* If the current CU DIE doesn't have a child then make the first new new DIE the child. */
+				/* If the current CU DIE doesn't have a child then make the first new new DIE the child.
+				 */
 				if (NULL == Dwarf_CU_Context::_currentCU->_die->_child) {
 					Dwarf_CU_Context::_currentCU->_die->_child = newDie;
 				}
@@ -714,26 +670,16 @@ parseStabstringDeclarationIntoDwarfDie(const string line, Dwarf_Error *error)
 
 			/* Populate the dies. */
 			switch (tag) {
-			case DW_TAG_array_type:
-				ret = parseArray(members, newDie, error);
-				break;
-			case DW_TAG_base_type:
-				ret = parseBaseType(members, newDie, error);
-				break;
-			case DW_TAG_class_type:
-				ret = parseCPPstruct(members, name, newDie, error);
-				break;
+			case DW_TAG_array_type: ret = parseArray(members, newDie, error); break;
+			case DW_TAG_base_type: ret = parseBaseType(members, newDie, error); break;
+			case DW_TAG_class_type: ret = parseCPPstruct(members, name, newDie, error); break;
 			case DW_TAG_const_type:
 			case DW_TAG_pointer_type:
 			case DW_TAG_volatile_type:
 			case DW_TAG_subroutine_type:
 			case DW_TAG_reference_type:
-			case DW_TAG_ptr_to_member_type:
-				ret = parseNamelessReference(members, newDie, error);
-				break;
-			case DW_TAG_enumeration_type:
-				ret = parseEnum(members, name, newDie, error);
-				break;
+			case DW_TAG_ptr_to_member_type: ret = parseNamelessReference(members, newDie, error); break;
+			case DW_TAG_enumeration_type: ret = parseEnum(members, name, newDie, error); break;
 			case DW_TAG_typedef:
 				/* Note: AIX label is the same as DWARF typedef. */
 				ret = parseTypeDef(members, name, newDie, error);
@@ -769,36 +715,43 @@ parseSymbolTable(const char *line, Dwarf_Error *error)
 
 	/* This state machine processes each stage of the input:
 	 * 0: has not reached the start of a new file yet: skip junk data
-	 * 1: reached the start of a new file: parse to get info about the file and populate Dwarf_CU_Context::_currentCU
-	 * 2: inside of a file: skip the section listing the includes until the first type declaration is found
-	 * 3: parse declarations: parse to get the information to populate dwarf DIEs and check if end of file reached
- 	 */
+	 * 1: reached the start of a new file: parse to get info about the file and populate
+	 * Dwarf_CU_Context::_currentCU 2: inside of a file: skip the section listing the includes until the first type
+	 * declaration is found 3: parse declarations: parse to get the information to populate dwarf DIEs and check if
+	 * end of file reached
+	 */
 	if (0 == _startNewFile) {
 		/* Ignore the information before the start of the debug information for a file.
-		 * Search for the pattern "debug	3	FILE", indicating the start of a new file, to progress to step 2.
+		 * Search for the pattern "debug	3	FILE", indicating the start of a new file, to progress
+		 * to step 2.
 		 */
 		size_t indexOfDebug = data.find(START_OF_FILE[0]);
 		if (string::npos != indexOfDebug) {
 			string dataAfterDebug = data.substr(indexOfDebug + START_OF_FILE[0].length());
-			size_t indexOfNumber  = dataAfterDebug.find(START_OF_FILE[1]);
+			size_t indexOfNumber = dataAfterDebug.find(START_OF_FILE[1]);
 			if (string::npos != indexOfNumber) {
-				string dataAfterNumber = dataAfterDebug.substr(indexOfNumber + START_OF_FILE[1].length());
+				string dataAfterNumber =
+				        dataAfterDebug.substr(indexOfNumber + START_OF_FILE[1].length());
 				size_t indexOfFile = dataAfterNumber.find(START_OF_FILE[2]);
 				if (string::npos != indexOfFile) {
 					/* Verify that there are only whitespaces between the words. */
-					if ((indexOfNumber == dataAfterDebug.find_first_not_of(' ')) && (indexOfFile == dataAfterNumber.find_first_not_of(' '))) {
-						/* Populate the attribute references and nested classes from the previous file that we parsed. */
+					if ((indexOfNumber == dataAfterDebug.find_first_not_of(' '))
+					        && (indexOfFile == dataAfterNumber.find_first_not_of(' '))) {
+						/* Populate the attribute references and nested classes from the
+						 * previous file that we parsed. */
 						populateAttributeReferences();
 						populateNestedClasses();
 
-						/* Remove DIEs which have no children, no size, and are not referred to by any other DIE. */
+						/* Remove DIEs which have no children, no size, and are not referred to
+						 * by any other DIE. */
 						removeUselessStubs();
 
 						/* Clear the unordered_maps we maintained from the last file. */
 						createdDies.clear();
 						nestedClassesToPopulate.clear();
 						refsToPopulate.clear();
-						/* Change state to expect the start of a section of debug info for a file next. */
+						/* Change state to expect the start of a section of debug info for a
+						 * file next. */
 						_startNewFile = 1;
 					}
 				}
@@ -811,7 +764,7 @@ parseSymbolTable(const char *line, Dwarf_Error *error)
 			size_t fileNameIndex = data.find(FILE_NAME) + FILE_NAME.size();
 			size_t index = data.substr(fileNameIndex).find_first_not_of(' ');
 
-			fileName = strip(data.substr(index+fileNameIndex), '\n');
+			fileName = strip(data.substr(index + fileNameIndex), '\n');
 
 			/* Verify that the file has not been parsed through before. */
 			if (filesAdded.end() == filesAdded.find(fileName)) {
@@ -848,7 +801,7 @@ parseSymbolTable(const char *line, Dwarf_Error *error)
 					newDie->_child = NULL;
 					newDie->_context = newCU;
 					newDie->_attribute = name;
-						
+
 					name->_type = DW_AT_name;
 					name->_nextAttr = NULL;
 					name->_form = DW_FORM_string;
@@ -857,7 +810,6 @@ parseSymbolTable(const char *line, Dwarf_Error *error)
 					name->_stringdata = strdup(Dwarf_CU_Context::_fileList.back().c_str());
 					name->_refdata = 0;
 					name->_ref = NULL;
-
 
 					if (NULL == Dwarf_CU_Context::_firstCU) {
 						Dwarf_CU_Context::_firstCU = newCU;
@@ -876,8 +828,9 @@ parseSymbolTable(const char *line, Dwarf_Error *error)
 			}
 		}
 	} else if (2 == _startNewFile) {
-		/* Skip lines of the format "debug		0		(b|e)incl" until finding a line of the format "debug	0		decl".
-		 * These first lines in the file list includes before the section listing the type declarations.
+		/* Skip lines of the format "debug		0		(b|e)incl" until finding a line of the
+		 * format "debug	0		decl". These first lines in the file list includes before the
+		 * section listing the type declarations.
 		 */
 		size_t indexOfDebug = data.find(DECL_FILE[0]);
 		if (string::npos != indexOfDebug) {
@@ -888,9 +841,11 @@ parseSymbolTable(const char *line, Dwarf_Error *error)
 				size_t indexOfDecl = dataAfterNumber.find(DECL_FILE[2]);
 				if (string::npos != indexOfDecl) {
 					/* Verify that there are only whitespaces between the words. */
-					if ((indexOfNumber == dataAfterDebug.find_first_not_of(' ')) && (indexOfDecl == dataAfterNumber.find_first_not_of(' '))) {
+					if ((indexOfNumber == dataAfterDebug.find_first_not_of(' '))
+					        && (indexOfDecl == dataAfterNumber.find_first_not_of(' '))) {
 						/* Parse the data line to populate a DIE. */
-						string dataAfterDecl = dataAfterNumber.substr(indexOfDecl + DECL_FILE[2].length());
+						string dataAfterDecl =
+						        dataAfterNumber.substr(indexOfDecl + DECL_FILE[2].length());
 						size_t index = dataAfterDecl.find_first_not_of(' ');
 						validData.assign(strip(dataAfterDecl.substr(index), '\n'));
 						ret = parseStabstringDeclarationIntoDwarfDie(validData, error);
@@ -898,14 +853,17 @@ parseSymbolTable(const char *line, Dwarf_Error *error)
 					}
 				}
 			} else {
-				/* Check if it is the declaration for the start of another file as the previous file may have contained no symbols */
+				/* Check if it is the declaration for the start of another file as the previous file may
+				 * have contained no symbols */
 				indexOfNumber = dataAfterDebug.find(START_OF_FILE[1]);
 				if (string::npos != indexOfNumber) {
-					string dataAfterNumber = dataAfterDebug.substr(indexOfNumber+START_OF_FILE[1].length());
+					string dataAfterNumber =
+					        dataAfterDebug.substr(indexOfNumber + START_OF_FILE[1].length());
 					size_t indexOfFile = dataAfterNumber.find(START_OF_FILE[2]);
 					if (string::npos != indexOfFile) {
 						/* Verify that there are only whitespaces between the words */
-						if ((indexOfNumber == dataAfterDebug.find_first_not_of(' ')) && (indexOfFile == dataAfterNumber.find_first_not_of(' '))) {
+						if ((indexOfNumber == dataAfterDebug.find_first_not_of(' '))
+						        && (indexOfFile == dataAfterNumber.find_first_not_of(' '))) {
 							_startNewFile = 1;
 						}
 					}
@@ -917,7 +875,8 @@ parseSymbolTable(const char *line, Dwarf_Error *error)
 		 * declarations in a file are guaranteed to be in a continuous block.
 		 */
 		size_t indexOfDebug = data.find(DECL_FILE[0]);
-		/* Verify that the type declaration section has not ended by checking that the line begins with "debug		0		decl". */
+		/* Verify that the type declaration section has not ended by checking that the line begins with "debug
+		 * 0		decl". */
 		if (string::npos != indexOfDebug) {
 			string dataAfterDebug = data.substr(indexOfDebug + DECL_FILE[0].length());
 			size_t indexOfNumber = dataAfterDebug.find(DECL_FILE[1]);
@@ -926,9 +885,11 @@ parseSymbolTable(const char *line, Dwarf_Error *error)
 				size_t indexOfDecl = dataAfterNumber.find(DECL_FILE[2]);
 				if (string::npos != indexOfDecl) {
 					/* Verify that there are only whitespaces between the words/ */
-					if ((indexOfNumber == dataAfterDebug.find_first_not_of(' ')) && (indexOfDecl == dataAfterNumber.find_first_not_of(' '))) {
+					if ((indexOfNumber == dataAfterDebug.find_first_not_of(' '))
+					        && (indexOfDecl == dataAfterNumber.find_first_not_of(' '))) {
 						/* Parse the data line to populate a DIE. */
-						string dataAfterDecl = dataAfterNumber.substr(indexOfDecl + DECL_FILE[2].length());
+						string dataAfterDecl =
+						        dataAfterNumber.substr(indexOfDecl + DECL_FILE[2].length());
 						size_t index = dataAfterDecl.find_first_not_of(' ');
 						validData.assign(strip(dataAfterDecl.substr(index), '\n'));
 						ret = parseStabstringDeclarationIntoDwarfDie(validData, error);
@@ -959,10 +920,7 @@ parseSymbolTable(const char *line, Dwarf_Error *error)
  * param[out] currentDie: the DIE to populate with the parsed data.
  */
 static int
-parseEnum(const string data,
-	string dieName,
-	Dwarf_Die currentDie,
-	Dwarf_Error *error)
+parseEnum(const string data, string dieName, Dwarf_Die currentDie, Dwarf_Error *error)
 {
 	int ret = DW_DLV_OK;
 	/* Parse the declaration line for the required fields. */
@@ -973,7 +931,8 @@ parseEnum(const string data,
 		members = stripTrailing(members, ';');
 
 		/* Check if the enum was a generated name by AIX, and if so, delete the generated name. */
-		if ((0 == strcmp("__", dieName.substr(0, 2).c_str())) && (string::npos == dieName.substr(2).find_first_not_of("1234567890"))) {
+		if ((0 == strcmp("__", dieName.substr(0, 2).c_str()))
+		        && (string::npos == dieName.substr(2).find_first_not_of("1234567890"))) {
 			/* Generated names are of the form __(INTEGER). */
 			dieName.assign("");
 		}
@@ -1022,7 +981,8 @@ parseEnum(const string data,
 					/* Create name and value attributes and assign them to each DIE. */
 					str_vect tmp;
 					newDie = currentDie->_child;
-					for (str_vect::iterator it = enumerators.begin(); it != enumerators.end(); ++it) {
+					for (str_vect::iterator it = enumerators.begin(); it != enumerators.end();
+					        ++it) {
 						tmp = split(*it, ':');
 
 						Dwarf_Attribute enumeratorName = new Dwarf_Attribute_s;
@@ -1057,7 +1017,7 @@ parseEnum(const string data,
 				}
 			}
 		}
-	}	else {
+	} else {
 		ret = DW_DLV_ERROR;
 		setError(error, DW_DLE_IA);
 	}
@@ -1100,7 +1060,7 @@ parseFields(const string data, Dwarf_Die currentDie, Dwarf_Error *error)
 		type->_nextAttr = declFile;
 		type->_form = DW_FORM_ref1;
 
-		int ID = extractTypeID(fieldAttributes[0],0);
+		int ID = extractTypeID(fieldAttributes[0], 0);
 		type->_udata = 0;
 		type->_sdata = 0;
 		type->_refdata = 0;
@@ -1160,15 +1120,12 @@ parseFields(const string data, Dwarf_Die currentDie, Dwarf_Error *error)
 
 /**
  * Parses the data passed in as a C-style structure/union
- * param[in] data: data to be parsed, in the format (s|u)(INTEGER)(NAME):(TYPE),(BIT_OFFSET),(NUM_BITS);(NAME):(TYPE),(BIT_OFFSET),(NUM_BITS);(...);;
- * param[in] dieName: the name of the structure/union
- * param[out] currentDie: the DIE to populate with the parsed data.
+ * param[in] data: data to be parsed, in the format
+ * (s|u)(INTEGER)(NAME):(TYPE),(BIT_OFFSET),(NUM_BITS);(NAME):(TYPE),(BIT_OFFSET),(NUM_BITS);(...);; param[in] dieName:
+ * the name of the structure/union param[out] currentDie: the DIE to populate with the parsed data.
  */
 static int
-parseCstruct(const string data,
-	const string dieName,
-	Dwarf_Die currentDie,
-	Dwarf_Error *error)
+parseCstruct(const string data, const string dieName, Dwarf_Die currentDie, Dwarf_Error *error)
 {
 	int ret = DW_DLV_OK;
 	/* Get rid of the first index of data. It only specifies if the declaration is for a struct or union. */
@@ -1226,7 +1183,7 @@ parseCstruct(const string data,
 				}
 			}
 		}
-	}	else {
+	} else {
 		ret = DW_DLV_ERROR;
 		setError(error, DW_DLE_IA);
 	}
@@ -1240,10 +1197,7 @@ parseCstruct(const string data,
  * param[out] currentDie: the DIE to populate with the parsed data.
  */
 static int
-parseCPPstruct(const string data,
-	const string dieName,
-	Dwarf_Die currentDie,
-	Dwarf_Error *error)
+parseCPPstruct(const string data, const string dieName, Dwarf_Die currentDie, Dwarf_Error *error)
 {
 	int ret = DW_DLV_OK;
 	size_t indexOfFirstParenthesis = data.find('(');
@@ -1261,7 +1215,8 @@ parseCPPstruct(const string data,
 			size_t indexOfColon = sizeTypeAndInheritance.find(':');
 			if (string::npos != indexOfColon) {
 				/* A parent class exists. */
-				int parentClassID = toInt(stripLeading(sizeTypeAndInheritance.substr(indexOfColon), ':'));
+				int parentClassID =
+				        toInt(stripLeading(sizeTypeAndInheritance.substr(indexOfColon), ':'));
 
 				/* Create a DIE to record the inheritance. */
 				Dwarf_Die inheritanceDie = new Dwarf_Die_s;
@@ -1278,7 +1233,7 @@ parseCPPstruct(const string data,
 					inheritanceDie->_child = NULL;
 					inheritanceDie->_context = Dwarf_CU_Context::_currentCU;
 					inheritanceDie->_attribute = type;
-					
+
 					type->_type = DW_AT_type;
 					type->_nextAttr = NULL;
 					type->_form = DW_FORM_ref1;
@@ -1288,7 +1243,8 @@ parseCPPstruct(const string data,
 					type->_ref = NULL;
 
 					/* Push the type ref into a vector to populate in a second pass. */
-					refsToPopulate.push_back(make_pair<int, Dwarf_Attribute>((int)parentClassID, (Dwarf_Attribute)type));
+					refsToPopulate.push_back(make_pair<int, Dwarf_Attribute>(
+					        (int)parentClassID, (Dwarf_Attribute)type));
 
 					if (NULL == currentDie->_child) {
 						currentDie->_child = inheritanceDie;
@@ -1303,8 +1259,8 @@ parseCPPstruct(const string data,
 			}
 
 			if (DW_DLV_OK == ret) {
-			/* Set DIE attributes. */
-			ret = setDieAttributes(dieName, size, currentDie, error);
+				/* Set DIE attributes. */
+				ret = setDieAttributes(dieName, size, currentDie, error);
 			}
 
 			if (DW_DLV_OK == ret) {
@@ -1333,38 +1289,56 @@ parseCPPstruct(const string data,
 							newDie->_attribute = NULL;
 							if (2 <= members[i].size()) {
 								if (string::npos != members[i].find_first_of('[')) {
-									/* The member is a member function. We will delete the DIE as functions are not necessary. */
+									/* The member is a member function. We will
+									 * delete the DIE as functions are not
+									 * necessary. */
 									deleteDie(newDie);
-								} else if (string::npos != members[i].find_first_of(']')) {
-									/* The member is a friend function. We will delete the DIE as functions are not necessary. */
+								} else if (string::npos
+								        != members[i].find_first_of(']')) {
+									/* The member is a friend function. We will
+									 * delete the DIE as functions are not
+									 * necessary. */
 									deleteDie(newDie);
-								} else if (string::npos != members[i].find_first_of(':')) {
+								} else if (string::npos
+								        != members[i].find_first_of(':')) {
 									/* Check to see if the data member is valid. */
-									size_t indexOfFirstColon  = members[i].find_first_of(':');
+									size_t indexOfFirstColon =
+									        members[i].find_first_of(':');
 									if (string::npos != indexOfFirstColon) {
-										ret = parseFields(members[i].substr(indexOfFirstColon+1), newDie, error);
+										ret = parseFields(
+										        members[i].substr(
+										                indexOfFirstColon + 1),
+										        newDie, error);
 										if (DW_DLV_OK == ret) {
-											/* Set the member as a child of the parent die. */
+											/* Set the member as a child of
+											 * the parent die. */
 											if (NULL == lastChild) {
-												currentDie->_child = newDie;
+												currentDie->_child =
+												        newDie;
 											} else {
-												lastChild->_sibling = newDie;
-												newDie->_previous = lastChild;
+												lastChild->_sibling =
+												        newDie;
+												newDie->_previous =
+												        lastChild;
 											}
 											lastChild = newDie;
 										} else {
 											deleteDie(newDie);
 										}
 									} else {
-										/* Delete DIE's for invalid data members. */
+										/* Delete DIE's for invalid data
+										 * members. */
 										deleteDie(newDie);
 									}
 								} else if ('N' == members[i].at(1)) {
 									/* Verift that the nested class is valid. */
-									/* Get the ID of the nested class from tmp[1]. */
+									/* Get the ID of the nested class from tmp[1].
+									 */
 									str_vect tmp = split(members[i], 'N');
 									int ID = toInt(tmp[1]);
-									nestedClassesToPopulate.push_back(make_pair<int, Dwarf_Die>((int)ID, (Dwarf_Die)currentDie));
+									nestedClassesToPopulate.push_back(
+									        make_pair<int, Dwarf_Die>((int)ID,
+									                (Dwarf_Die)currentDie));
 
 									deleteDie(newDie);
 								} else {
@@ -1392,17 +1366,14 @@ parseCPPstruct(const string data,
  * param[out] currentDie: the DIE to populate with the parsed data.
  */
 static int
-parseTypeDef(const string data,
-	const string dieName,
-	Dwarf_Die currentDie,
-	Dwarf_Error *error)
+parseTypeDef(const string data, const string dieName, Dwarf_Die currentDie, Dwarf_Error *error)
 {
 	int ret = DW_DLV_OK;
 	int ID = 0;
 
 	/* Set attributes for name, type, and declaring file. */
 	Dwarf_Attribute type = new Dwarf_Attribute_s;
-	Dwarf_Attribute name  = new Dwarf_Attribute_s;
+	Dwarf_Attribute name = new Dwarf_Attribute_s;
 	Dwarf_Attribute declFile = new Dwarf_Attribute_s;
 	Dwarf_Attribute declLine = new Dwarf_Attribute_s;
 
@@ -1492,7 +1463,9 @@ populateAttributeReferences()
 
 				/* Set _refdata to the correct value and insert the reference into refMap. */
 				tmp->_refdata = existingDieEntry->second.first;
-				Dwarf_Die_s::refMap.insert(make_pair<Dwarf_Off, Dwarf_Die>((Dwarf_Off)existingDieEntry->second.first, (Dwarf_Die)existingDieEntry->second.second));
+				Dwarf_Die_s::refMap.insert(
+				        make_pair<Dwarf_Off, Dwarf_Die>((Dwarf_Off)existingDieEntry->second.first,
+				                (Dwarf_Die)existingDieEntry->second.second));
 			}
 		} else {
 			/* Search for the reference in the DIE map. */
@@ -1502,7 +1475,9 @@ populateAttributeReferences()
 
 				/* Set _refdata to the correct value and insert the reference into refMap. */
 				tmp->_refdata = existingDieEntry->second.first;
-				Dwarf_Die_s::refMap.insert(make_pair<Dwarf_Off, Dwarf_Die>((Dwarf_Off)existingDieEntry->second.first, (Dwarf_Die)existingDieEntry->second.second));
+				Dwarf_Die_s::refMap.insert(
+				        make_pair<Dwarf_Off, Dwarf_Die>((Dwarf_Off)existingDieEntry->second.first,
+				                (Dwarf_Die)existingDieEntry->second.second));
 			}
 		}
 	}
@@ -1571,7 +1546,7 @@ populateBuiltInTypeDies(Dwarf_Error *error)
 				Dwarf_Attribute name = new Dwarf_Attribute_s;
 				Dwarf_Attribute size = new Dwarf_Attribute_s;
 
-				if ((NULL == name)||(NULL == size)) {
+				if ((NULL == name) || (NULL == size)) {
 					ret = DW_DLV_ERROR;
 					setError(error, DW_DLE_MAF);
 				} else {
@@ -1604,8 +1579,10 @@ populateBuiltInTypeDies(Dwarf_Error *error)
 					}
 					previousDie = newDie;
 
-					/* Insert the newly created DIE into the unordered_map for lookup by offset later on. */
-					builtInDies[i * -1] = make_pair<Dwarf_Off, Dwarf_Die>((Dwarf_Off)refNumber, (Dwarf_Die)newDie);
+					/* Insert the newly created DIE into the unordered_map for lookup by offset
+					 * later on. */
+					builtInDies[i * -1] = make_pair<Dwarf_Off, Dwarf_Die>(
+					        (Dwarf_Off)refNumber, (Dwarf_Die)newDie);
 
 					/* Increment the refNumber. */
 					refNumber = refNumber + 1;
@@ -1632,50 +1609,31 @@ populateBuiltInTypeDies(Dwarf_Error *error)
 				string data = "0";
 				switch (i) {
 				case 6:
-				case 27:
-					data = "-2";
-					break;
-				case 9:
-					data = "-8";
-					break;
+				case 27: data = "-2"; break;
+				case 9: data = "-8"; break;
 				case 15:
-				case 29:
-					data = "-1";
-					break;
-				case 17:
-					data = "-12";
-					break;
-				case 18:
-					data = "-13";
-					break;
-				case 20:
-					data = "-5";
-					break;
-				case 28:
-					data = "-3";
-					break;
-				case 30:
-					data = "-7";
-					break;
-				case 33:
-					data = "-32";
-					break;
-				case 34:
-					data = "-31";
-					break;
+				case 29: data = "-1"; break;
+				case 17: data = "-12"; break;
+				case 18: data = "-13"; break;
+				case 20: data = "-5"; break;
+				case 28: data = "-3"; break;
+				case 30: data = "-7"; break;
+				case 33: data = "-32"; break;
+				case 34: data = "-31"; break;
 				}
 				ret = parseTypeDef(data, BUILT_IN_TYPES_THAT_ARE_TYPEDEFS[i], newDie, error);
 
 				if (DW_DLV_OK == ret) {
 					/* Add the new child to the linked list of DIEs. */
-					if (NULL !=  previousDie) {
+					if (NULL != previousDie) {
 						previousDie->_sibling = newDie;
 						newDie->_previous = previousDie;
 					}
 					previousDie = newDie;
 
 					/* Insert the typedef into the unordered_map for lookup by offset later on. */
-					builtInDies[i * -1] = make_pair<Dwarf_Off, Dwarf_Die>((Dwarf_Off)refNumber, (Dwarf_Die)newDie);
+					builtInDies[i * -1] = make_pair<Dwarf_Off, Dwarf_Die>(
+					        (Dwarf_Off)refNumber, (Dwarf_Die)newDie);
 
 					/* Increment the refNumber to assign associate a unique number with each DIE. */
 					refNumber = refNumber + 1;
@@ -1711,7 +1669,8 @@ populateNestedClasses()
 						}
 					}
 
-					/* In case the current parent of nestedClass has nestedClass as the child, set it to be the sibling of nestedClass. */
+					/* In case the current parent of nestedClass has nestedClass as the child, set
+					 * it to be the sibling of nestedClass. */
 					if (nestedClass == nestedClass->_parent->_child) {
 						nestedClass->_parent->_child = nestedClass->_sibling;
 					}
@@ -1749,9 +1708,12 @@ removeUselessStubs()
 		Dwarf_Off refNumberToCheck = it->second.first;
 		if (Dwarf_Die_s::refMap.end() == Dwarf_Die_s::refMap.find(refNumberToCheck)) {
 			/* Get rid of empty struct/union/class DIEs. */
-			if ((DW_TAG_class_type == dieToCheck->_tag) || (DW_TAG_union_type == dieToCheck->_tag) || (DW_TAG_structure_type == dieToCheck->_tag)) {
-				if ((Dwarf_CU_Context::_currentCU->_die == dieToCheck->_parent) && (NULL == dieToCheck->_child)) {
-					/* If the DIE has a size of zero, has no children, and is not being referred to by any other DIE then it's useless. */
+			if ((DW_TAG_class_type == dieToCheck->_tag) || (DW_TAG_union_type == dieToCheck->_tag)
+			        || (DW_TAG_structure_type == dieToCheck->_tag)) {
+				if ((Dwarf_CU_Context::_currentCU->_die == dieToCheck->_parent)
+				        && (NULL == dieToCheck->_child)) {
+					/* If the DIE has a size of zero, has no children, and is not being referred to
+					 * by any other DIE then it's useless. */
 					bool zeroSize = true;
 					Dwarf_Attribute attributeToCheck = dieToCheck->_attribute;
 					while (NULL != attributeToCheck) {
@@ -1790,10 +1752,7 @@ removeUselessStubs()
  * param[out] currentDie: the DIE to populate with the attributes.
  */
 static int
-setDieAttributes(const string dieName,
-	const unsigned int dieSize,
-	Dwarf_Die currentDie,
-	Dwarf_Error *error)
+setDieAttributes(const string dieName, const unsigned int dieSize, Dwarf_Die currentDie, Dwarf_Error *error)
 {
 	int ret = DW_DLV_OK;
 	/* If the die already had attributes then update them. */
@@ -1801,9 +1760,7 @@ setDieAttributes(const string dieName,
 		Dwarf_Attribute tmp = currentDie->_attribute;
 		while (NULL != tmp) {
 			switch (tmp->_type) {
-			case DW_AT_byte_size:
-				tmp->_udata = dieSize;
-				break;
+			case DW_AT_byte_size: tmp->_udata = dieSize; break;
 			case DW_AT_decl_file:
 				/* The declaration file number starts at 1. */
 				tmp->_udata = Dwarf_CU_Context::_fileList.size();
@@ -1813,7 +1770,7 @@ setDieAttributes(const string dieName,
 		}
 	} else {
 		/* Create attributes for name, size, and declaring file. */
-		Dwarf_Attribute name  = new Dwarf_Attribute_s;
+		Dwarf_Attribute name = new Dwarf_Attribute_s;
 		Dwarf_Attribute size = new Dwarf_Attribute_s;
 		Dwarf_Attribute declFile = new Dwarf_Attribute_s;
 		Dwarf_Attribute declLine = new Dwarf_Attribute_s;
@@ -1974,7 +1931,7 @@ shiftDecimal(const double value)
 {
 	double ret = value;
 	if (ret >= 1) {
-		ret = shiftDecimal(value/100);
+		ret = shiftDecimal(value / 100);
 	}
 	return ret;
 }

@@ -30,8 +30,7 @@
 struct OMRPortLibrary;
 class Symbol_IR;
 
-class MacroTool
-{
+class MacroTool {
 private:
 	std::vector<MacroInfo> macroList;
 

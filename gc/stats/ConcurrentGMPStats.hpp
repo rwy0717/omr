@@ -28,37 +28,36 @@
 #if !defined(CONCURRENTGMPSTATS_HPP_)
 #define CONCURRENTGMPSTATS_HPP_
 
+#include "Base.hpp"
 #include "omrcfg.h"
 #include "omrcomp.h"
-
-#include "Base.hpp"
 
 /**
  * Stats structure intended to be used by the Concurrent GMP triggers (firstly, for verbose) in VLHGC.
  * @ingroup GC_Stats
  */
-class MM_ConcurrentGMPStats : public MM_Base
-{
+class MM_ConcurrentGMPStats : public MM_Base {
 	/* Data Members */
 private:
 protected:
 public:
-	uintptr_t _gmpCycleID;	/**< The "_id" of the corresponding GMP cycle (since concurrent operations are always logically part of a GMP cycle) */
-	uintptr_t _scanTargetInBytes;	/**< The number of bytes a given concurrent task was expected to scan before terminating */
-	uintptr_t _bytesScanned;	/**< The number of bytes a given concurrent task did scan before it terminated (can be lower than _scanTargetInBytes if the termination was asynchronously requested) */
-	bool _terminationWasRequested;	/**< True if a given concurrent task's termination was asynchronously requested (although it might have terminated due to meeting its target, anyway - there is a timing window which allows both of these reasons to be true) */
+	uintptr_t _gmpCycleID; /**< The "_id" of the corresponding GMP cycle (since concurrent operations are always
+	                          logically part of a GMP cycle) */
+	uintptr_t _scanTargetInBytes; /**< The number of bytes a given concurrent task was expected to scan before
+	                                 terminating */
+	uintptr_t _bytesScanned; /**< The number of bytes a given concurrent task did scan before it terminated (can be
+	                            lower than _scanTargetInBytes if the termination was asynchronously requested) */
+	bool _terminationWasRequested; /**< True if a given concurrent task's termination was asynchronously requested
+	                                  (although it might have terminated due to meeting its target, anyway - there
+	                                  is a timing window which allows both of these reasons to be true) */
 
 	/* Member Functions */
 private:
 protected:
 public:
 	MM_ConcurrentGMPStats()
-		: MM_Base()
-		, _gmpCycleID(0)
-		, _scanTargetInBytes(0)
-		, _bytesScanned(0)
-		, _terminationWasRequested(false)
+	        : MM_Base(), _gmpCycleID(0), _scanTargetInBytes(0), _bytesScanned(0), _terminationWasRequested(false)
 	{}
-}; 
+};
 
 #endif /* CONCURRENTGMPSTATS_HPP_ */

@@ -24,22 +24,21 @@
 
 #include "EnvironmentBase.hpp"
 
-bool 
+bool
 MM_SweepPoolState::initialize(MM_EnvironmentBase *env)
 {
 	return true;
 }
 
-
-void 
+void
 MM_SweepPoolState::create(MM_EnvironmentBase *env, void *memPtr, MM_MemoryPool *memoryPool)
 {
-	MM_SweepPoolState *poolState = (MM_SweepPoolState *) memPtr;
-	new(poolState) MM_SweepPoolState(memoryPool);
+	MM_SweepPoolState *poolState = (MM_SweepPoolState *)memPtr;
+	new (poolState) MM_SweepPoolState(memoryPool);
 	poolState->initialize(env);
 }
 
-void 
+void
 MM_SweepPoolState::kill(MM_EnvironmentBase *env, J9Pool *pool, omrthread_monitor_t mutex)
 {
 	tearDown(env);
@@ -50,41 +49,42 @@ MM_SweepPoolState::kill(MM_EnvironmentBase *env, J9Pool *pool, omrthread_monitor
 }
 
 MM_SweepPoolState *
-MM_SweepPoolState::newInstance(MM_EnvironmentBase *env, J9Pool *pool, omrthread_monitor_t mutex, MM_MemoryPool *memoryPool)
+MM_SweepPoolState::newInstance(
+        MM_EnvironmentBase *env, J9Pool *pool, omrthread_monitor_t mutex, MM_MemoryPool *memoryPool)
 {
 	MM_SweepPoolState *sweepPoolState;
-	
+
 	omrthread_monitor_enter(mutex);
 	sweepPoolState = (MM_SweepPoolState *)pool_newElement(pool);
 	omrthread_monitor_exit(mutex);
 
 	if (sweepPoolState) {
-		new(sweepPoolState) MM_SweepPoolState(memoryPool);
-		if (!sweepPoolState->initialize(env)) { 
-			sweepPoolState->kill(env, pool, mutex);        
-			sweepPoolState = NULL;            
-		}                                       
+		new (sweepPoolState) MM_SweepPoolState(memoryPool);
+		if (!sweepPoolState->initialize(env)) {
+			sweepPoolState->kill(env, pool, mutex);
+			sweepPoolState = NULL;
+		}
 	}
 
 	return sweepPoolState;
 }
 
-void 
+void
 MM_SweepPoolState::tearDown(MM_EnvironmentBase *env)
 {
 	return;
 }
 
-MM_SweepPoolState::MM_SweepPoolState(MM_MemoryPool *memoryPool) :
-	_memoryPool(memoryPool),
-	_connectPreviousFreeEntry(NULL),
-	_connectPreviousFreeEntrySize(0),
-	_connectPreviousPreviousFreeEntry(NULL),
-	_connectPreviousChunk(NULL),
-	_sweepFreeBytes(0),
-	_sweepFreeHoles(0),
-	_largestFreeEntry(0),
-	_previousLargestFreeEntry(NULL)
+MM_SweepPoolState::MM_SweepPoolState(MM_MemoryPool *memoryPool)
+        : _memoryPool(memoryPool)
+        , _connectPreviousFreeEntry(NULL)
+        , _connectPreviousFreeEntrySize(0)
+        , _connectPreviousPreviousFreeEntry(NULL)
+        , _connectPreviousChunk(NULL)
+        , _sweepFreeBytes(0)
+        , _sweepFreeHoles(0)
+        , _largestFreeEntry(0)
+        , _previousLargestFreeEntry(NULL)
 {
 	_typeId = __FUNCTION__;
 }

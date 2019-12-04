@@ -31,7 +31,8 @@ MM_StartupManagerTestExample::parseLanguageOptions(MM_GCExtensionsBase *extensio
 	pugi::xml_document doc;
 	pugi::xml_parse_result parseResult = doc.load_file(_configFile);
 	if (!parseResult) {
-		gcTestEnv->log(LEVEL_ERROR, "Failed to load test configuration file (%s) with error description: %s.\n", _configFile, parseResult.description());
+		gcTestEnv->log(LEVEL_ERROR, "Failed to load test configuration file (%s) with error description: %s.\n",
+		        _configFile, parseResult.description());
 		result = false;
 	} else {
 		/* parse options */
@@ -55,7 +56,8 @@ MM_StartupManagerTestExample::parseLanguageOptions(MM_GCExtensionsBase *extensio
 		}
 
 		if (result) {
-			for (pugi::xml_attribute attr = option.node().first_attribute(); attr; attr = attr.next_attribute()) {
+			for (pugi::xml_attribute attr = option.node().first_attribute(); attr;
+			        attr = attr.next_attribute()) {
 				if (0 == strcmp(attr.name(), "memoryMax")) {
 					extensions->memoryMax = atoi(attr.value()) * unitSize;
 				} else if (0 == strcmp(attr.name(), "initialMemorySize")) {
@@ -89,25 +91,37 @@ MM_StartupManagerTestExample::parseLanguageOptions(MM_GCExtensionsBase *extensio
 #if defined(OMR_GC_MODRON_SCAVENGER)
 						extensions->scavengerEnabled = true;
 #else
-						gcTestEnv->log(LEVEL_ERROR, "WARNING: GCPolicy=gencon ignored, requires OMR_GC_MODRON_SCAVENGER (see configure_common.mk)\n");
+						gcTestEnv->log(LEVEL_ERROR,
+						        "WARNING: GCPolicy=gencon ignored, requires "
+						        "OMR_GC_MODRON_SCAVENGER (see configure_common.mk)\n");
 #endif /* defined(OMR_GC_MODRON_SCAVENGER) */
-					} else  if (0 != j9_cmdla_stricmp(attr.value(), "optavgpause")) {
-						gcTestEnv->log(LEVEL_ERROR, "Failed: Unrecognized GC policy (expected gencon or optavgpause): %s\n", attr.value());
+					} else if (0 != j9_cmdla_stricmp(attr.value(), "optavgpause")) {
+						gcTestEnv->log(LEVEL_ERROR,
+						        "Failed: Unrecognized GC policy (expected gencon or "
+						        "optavgpause): %s\n",
+						        attr.value());
 						result = false;
 					}
 				} else if (0 == strcmp(attr.name(), "concurrentMark")) {
 #if defined(OMR_GC_MODRON_CONCURRENT_MARK)
 					extensions->concurrentMark = (0 == j9_cmdla_stricmp(attr.value(), "true"));
 #else
-					gcTestEnv->log(LEVEL_ERROR, "WARNING: concurrentMark=true ignored, requires OMR_GC_MODRON_CONCURRENT_MARK (see configure_common.mk)\n");
+					gcTestEnv->log(LEVEL_ERROR,
+					        "WARNING: concurrentMark=true ignored, requires "
+					        "OMR_GC_MODRON_CONCURRENT_MARK (see configure_common.mk)\n");
 #endif /* defined(OMR_GC_MODRON_CONCURRENT_MARK)*/
 #if defined(OMR_GC_MODRON_SCAVENGER)
 				} else if (0 == strcmp(attr.name(), "forceBackOut")) {
-					extensions->fvtest_forceScavengerBackout = (0 == j9_cmdla_stricmp(attr.value(), "true"));
+					extensions->fvtest_forceScavengerBackout =
+					        (0 == j9_cmdla_stricmp(attr.value(), "true"));
 				} else if (0 == strcmp(attr.name(), "forcePoisonEvacuate")) {
-					extensions->fvtest_forcePoisonEvacuate = (0 == j9_cmdla_stricmp(attr.value(), "true"));
+					extensions->fvtest_forcePoisonEvacuate =
+					        (0 == j9_cmdla_stricmp(attr.value(), "true"));
 #endif /* defined(OMR_GC_MODRON_SCAVENGER) */
-				} else if ((0 == strcmp(attr.name(), "verboseLog")) || (0 == strcmp(attr.name(), "numOfFiles")) || (0 == strcmp(attr.name(), "numOfCycles")) || (0 == strcmp(attr.name(), "sizeUnit"))) {
+				} else if ((0 == strcmp(attr.name(), "verboseLog"))
+				        || (0 == strcmp(attr.name(), "numOfFiles"))
+				        || (0 == strcmp(attr.name(), "numOfCycles"))
+				        || (0 == strcmp(attr.name(), "sizeUnit"))) {
 				} else {
 					gcTestEnv->log(LEVEL_ERROR, "Failed: Unrecognized option: %s\n", attr.name());
 					result = false;

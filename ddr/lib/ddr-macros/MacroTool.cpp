@@ -85,7 +85,7 @@ MacroTool::getMacros(OMRPortLibrary *portLibrary, const char *filename)
 			MacroInfo info(typeName);
 			macroList.push_back(info);
 		} else if (startsWith(line, MacroEyeCatcher, LITERAL_STRLEN(MacroEyeCatcher))) {
-			const char * const whitespace = "\t ";
+			const char *const whitespace = "\t ";
 			const size_t pos = line.find_first_of(whitespace);
 			if ((string::npos == pos) || (pos <= LITERAL_STRLEN(MacroEyeCatcher))) {
 				// input malformed: no space
@@ -97,7 +97,8 @@ MacroTool::getMacros(OMRPortLibrary *portLibrary, const char *filename)
 					/* omit trailing whitespace */
 					size_t end = line.find_last_not_of(whitespace);
 
-					const string name = line.substr(LITERAL_STRLEN(MacroEyeCatcher), pos - LITERAL_STRLEN(MacroEyeCatcher) );
+					const string name = line.substr(
+					        LITERAL_STRLEN(MacroEyeCatcher), pos - LITERAL_STRLEN(MacroEyeCatcher));
 					const string value = line.substr(start, end - start + 1);
 
 					macroList.back().addMacro(name, value);
@@ -163,7 +164,8 @@ MacroTool::addMacrosToIR(Symbol_IR *ir) const
 				rc = DDR_RC_ERROR;
 				break;
 			} else {
-				for (set<pair<string, string> >::const_iterator it = macroInfo.getMacroStart(); it != macroInfo.getMacroEnd(); ++it) {
+				for (set<pair<string, string> >::const_iterator it = macroInfo.getMacroStart();
+				        it != macroInfo.getMacroEnd(); ++it) {
 					outerType->addMacro(new Macro(it->first, it->second));
 				}
 			}

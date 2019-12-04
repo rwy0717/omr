@@ -37,7 +37,7 @@
  */
 #include <stdarg.h>
 #include <stdio.h>
-#include <stdlib.h>   /* for malloc() via e2a_string()/a2e_string() */
+#include <stdlib.h> /* for malloc() via e2a_string()/a2e_string() */
 #include <string.h>
 
 /*
@@ -55,7 +55,11 @@
 
 #define ERROR_RETVAL -1
 #define SUCCESS 0
-#define CheckRet(x) { if ((x) == ERROR_RETVAL) return ERROR_RETVAL; }
+#define CheckRet(x) \
+	{ \
+		if ((x) == ERROR_RETVAL) \
+			return ERROR_RETVAL; \
+	}
 
 typedef struct InstanceData {
 	char *buffer;
@@ -119,8 +123,7 @@ pchar(InstanceData *this, int c)
  * returns     - int return code, 0 for success
  *************************************************************************/
 static int
-fstring(InstanceData *this, char *str, int left_justify, int min_width,
-		int precision)
+fstring(InstanceData *this, char *str, int left_justify, int min_width, int precision)
 {
 	int pad_length;
 	int width = 0;
@@ -164,10 +167,7 @@ fstring(InstanceData *this, char *str, int left_justify, int min_width,
 }
 
 #define MAX_DIGITS 32
-typedef enum {
-	FALSE = 0,
-	TRUE = 1
-} bool_t;
+typedef enum { FALSE = 0, TRUE = 1 } bool_t;
 
 /**************************************************************************
  * name        - fnumber
@@ -183,8 +183,8 @@ typedef enum {
  * returns     - int return code, 0 for success
  *************************************************************************/
 static int
-fnumber(InstanceData *this, long value, int format_type, int left_justify,
-		int min_width, int precision, bool_t zero_pad)
+fnumber(InstanceData *this, long value, int format_type, int left_justify, int min_width, int precision,
+        bool_t zero_pad)
 {
 	int sign_value = 0;
 	unsigned long uvalue;
@@ -198,25 +198,17 @@ fnumber(InstanceData *this, long value, int format_type, int left_justify,
 
 	switch (format_type) {
 	case 'o':
-	case 'O':
-		base = 8;
-		break;
+	case 'O': base = 8; break;
 	case 'd':
 	case 'D':
-	case 'i':                                                 /*ibm@9929*/
-	case 'I':                                                 /*ibm@9929*/
-		add_sign = TRUE; /*FALLTHROUGH*/
+	case 'i': /*ibm@9929*/
+	case 'I': /*ibm@9929*/ add_sign = TRUE; /*FALLTHROUGH*/
 	case 'u':
-	case 'U':
-		base = 10;
-		break;
-	case 'X':
-		caps = TRUE; /*FALLTHROUGH*/
-	case 'x':
-		base = 16;
-		break;
+	case 'U': base = 10; break;
+	case 'X': caps = TRUE; /*FALLTHROUGH*/
+	case 'x': base = 16; break;
 	case 'p':
-		caps = TRUE;  /*FALLTHROUGH*/
+		caps = TRUE; /*FALLTHROUGH*/
 		base = 16;
 		break;
 	}
@@ -297,8 +289,8 @@ fnumber(InstanceData *this, long value, int format_type, int left_justify,
  *=======================================================================
  */
 static int
-flongnumber(InstanceData *this, signed long long value, int format_type, int left_justify,
-			int min_width, int precision, bool_t zero_pad)
+flongnumber(InstanceData *this, signed long long value, int format_type, int left_justify, int min_width, int precision,
+        bool_t zero_pad)
 {
 	int sign_value = 0;
 	unsigned long long uvalue;
@@ -312,25 +304,17 @@ flongnumber(InstanceData *this, signed long long value, int format_type, int lef
 
 	switch (format_type) {
 	case 'o':
-	case 'O':
-		base = 8;
-		break;
+	case 'O': base = 8; break;
 	case 'd':
 	case 'D':
-	case 'i':                                                 /*ibm@9929*/
-	case 'I':                                                 /*ibm@9929*/
-		add_sign = TRUE; /*FALLTHROUGH*/
+	case 'i': /*ibm@9929*/
+	case 'I': /*ibm@9929*/ add_sign = TRUE; /*FALLTHROUGH*/
 	case 'u':
-	case 'U':
-		base = 10;
-		break;
-	case 'X':
-		caps = TRUE; /*FALLTHROUGH*/
-	case 'x':
-		base = 16;
-		break;
+	case 'U': base = 10; break;
+	case 'X': caps = TRUE; /*FALLTHROUGH*/
+	case 'x': base = 16; break;
 	case 'p':
-		caps = TRUE;  /*FALLTHROUGH*/
+		caps = TRUE; /*FALLTHROUGH*/
 		base = 16;
 		break;
 	}
@@ -410,18 +394,18 @@ int
 atoe_vsnprintf(char *str, size_t count, const char *fmt, va_list args)
 {
 	char *strvalue;
-	const char *pattern;                                       /*ibm@8665*/
+	const char *pattern; /*ibm@8665*/
 	long value;
 	InstanceData this;
 	bool_t left_justify, zero_pad;
-	bool_t long_flag, long_long_flag;                         /*ibm@9094*/
+	bool_t long_flag, long_long_flag; /*ibm@9094*/
 	bool_t fPrecision;
 	int min_width, precision, ch;
-	static char NULLCHARSTRING[] = "[null]";                /*ibm@029013*/
+	static char NULLCHARSTRING[] = "[null]"; /*ibm@029013*/
 	/*ibm@029013*/
-	if (fmt == NULL) {                                      /*ibm@029013*/
-		fmt = NULLCHARSTRING;                               /*ibm@029013*/
-	}                                                       /*ibm@029013*/
+	if (fmt == NULL) { /*ibm@029013*/
+		fmt = NULLCHARSTRING; /*ibm@029013*/
+	} /*ibm@029013*/
 	if (str == NULL) {
 		return ERROR_RETVAL;
 	}
@@ -429,31 +413,28 @@ atoe_vsnprintf(char *str, size_t count, const char *fmt, va_list args)
 
 	this.buffer = str;
 	this.end = str + count - 1;
-	*this.end = '\0';          /* ensure null-termination in case of failure */
+	*this.end = '\0'; /* ensure null-termination in case of failure */
 
 	while ((ch = *fmt++) != 0) {
 		if (ch == '%') {
 			zero_pad = FALSE;
 			long_flag = FALSE;
-			long_long_flag = FALSE;                            /*ibm@9094*/
+			long_long_flag = FALSE; /*ibm@9094*/
 			fPrecision = FALSE;
-			pattern = fmt - 1;                                 /*ibm@8665*/
+			pattern = fmt - 1; /*ibm@8665*/
 			left_justify = TRUE;
 			min_width = 0;
 			precision = this.end - this.buffer;
 
-next_char:
+		next_char:
 			ch = *fmt++;
 			switch (ch) {
-			case 0:
-				return ERROR_RETVAL;
-			case '-':
-				left_justify = FALSE;
-				goto next_char;
-			case '+':                                                                                       /*ibm@8665*/
-				left_justify = TRUE;                             /*ibm@8665*/
-				goto next_char;                                  /*ibm@8665*/
-			case '0':            /* set zero padding if min_width not set */
+			case 0: return ERROR_RETVAL;
+			case '-': left_justify = FALSE; goto next_char;
+			case '+': /*ibm@8665*/
+				left_justify = TRUE; /*ibm@8665*/
+				goto next_char; /*ibm@8665*/
+			case '0': /* set zero padding if min_width not set */
 				if (min_width == 0) {
 					zero_pad = TRUE;
 				}
@@ -496,73 +477,70 @@ next_char:
 				goto next_char;
 			case 's':
 				strvalue = va_arg(args, char *);
-				CheckRet(fstring(&this, strvalue, left_justify,
-								 min_width, precision));
+				CheckRet(fstring(&this, strvalue, left_justify, min_width, precision));
 				break;
 			case 'c':
 				ch = va_arg(args, int);
 				CheckRet(pchar(&this, ch));
 				break;
-			case '%':
-				CheckRet(pchar(&this, '%'));
+			case '%': CheckRet(pchar(&this, '%'));
 #if 0 /* J9 CMVC defect 74726 */
 				CheckRet(pchar(&this, '%'));    /*ibm@5203 */
 #endif
 				break;
 			case 'd':
 			case 'D':
-			case 'i':                                                 /*ibm@9929*/
-			case 'I':                                                 /*ibm@9929*/
+			case 'i': /*ibm@9929*/
+			case 'I': /*ibm@9929*/
 			case 'u':
 			case 'U':
 			case 'o':
 			case 'O':
 			case 'x':
 			case 'X':
-				if (long_long_flag) {                                      /*ibm@9094*/
-					signed long long value64 = va_arg(args, signed long long);               /*ibm@9094*/ /* j9@72429 */
+				if (long_long_flag) { /*ibm@9094*/
+					signed long long value64 = va_arg(args, signed long long);
+					/*ibm@9094*/ /* j9@72429
+					              */
 
 					CheckRet(flongnumber(&this, value64, ch, left_justify, /*ibm@9094*/
-										 min_width, precision, zero_pad));     /*ibm@9094*/
+					        min_width, precision, zero_pad)); /*ibm@9094*/
 				} else {
 					value = long_flag ? va_arg(args, long) : va_arg(args, int);
-					CheckRet(fnumber(&this, value, ch, left_justify,
-									 min_width, precision, zero_pad));
+					CheckRet(fnumber(
+					        &this, value, ch, left_justify, min_width, precision, zero_pad));
 				}
 				break;
 			case 'p':
-				value = (long) va_arg(args, char *);
-				CheckRet(fnumber(&this, value, ch, left_justify,
-								 min_width, precision, zero_pad));
+				value = (long)va_arg(args, char *);
+				CheckRet(fnumber(&this, value, ch, left_justify, min_width, precision, zero_pad));
 				break;
 			case 'e':
 			case 'E':
 			case 'f':
 			case 'F':
 			case 'g':
-			case 'G':
-				{
-					/* ibm@8665
-					 * Add floating point support for dbl2str & flt2str
-					 */
-					char *b;
-					int len;
+			case 'G': {
+				/* ibm@8665
+				 * Add floating point support for dbl2str & flt2str
+				 */
+				char *b;
+				int len;
 
-					b = a2e((char *)pattern, fmt - pattern);
+				b = a2e((char *)pattern, fmt - pattern);
 
-					/* Extract a double from args, this works for both doubles
-					 * and floats,
-					 * NB if we use float for a single precision floating
-					 * point number the result is wrong.
-					 */
-					len = sprintf(this.buffer, b, va_arg(args, double));
-					free(b);
-					b = e2a_string(this.buffer);
-					strcpy(this.buffer, b);
-					free(b);
-					this.buffer += len;
-				}
-				break;
+				/* Extract a double from args, this works for both doubles
+				 * and floats,
+				 * NB if we use float for a single precision floating
+				 * point number the result is wrong.
+				 */
+				len = sprintf(this.buffer, b, va_arg(args, double));
+				free(b);
+				b = e2a_string(this.buffer);
+				strcpy(this.buffer, b);
+				free(b);
+				this.buffer += len;
+			} break;
 			default:
 				/* ibm@9094
 				 * If all we got was "%ll" assume
@@ -571,8 +549,8 @@ next_char:
 				if (long_long_flag) {
 					signed long long value64 = va_arg(args, signed long long);
 
-					CheckRet(flongnumber(&this, value64, 'd', left_justify,
-										 min_width, precision, zero_pad));
+					CheckRet(flongnumber(
+					        &this, value64, 'd', left_justify, min_width, precision, zero_pad));
 
 					fmt--; /*backup so we don't lose the current char */
 					break;

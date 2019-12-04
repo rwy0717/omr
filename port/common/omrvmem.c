@@ -45,8 +45,7 @@
  */
 void
 omrvmem_shutdown(struct OMRPortLibrary *portLibrary)
-{
-}
+{}
 /**
  * PortLibrary startup.
  *
@@ -77,7 +76,8 @@ omrvmem_startup(struct OMRPortLibrary *portLibrary)
  * @return pointer to the allocated memory on success, NULL on failure.
  */
 void *
-omrvmem_commit_memory(struct OMRPortLibrary *portLibrary, void *address, uintptr_t byteAmount, struct J9PortVmemIdentifier *identifier)
+omrvmem_commit_memory(struct OMRPortLibrary *portLibrary, void *address, uintptr_t byteAmount,
+        struct J9PortVmemIdentifier *identifier)
 {
 	return NULL;
 }
@@ -85,9 +85,9 @@ omrvmem_commit_memory(struct OMRPortLibrary *portLibrary, void *address, uintptr
 /**
  * Decommit memory in virtual address space.
  *
- * Decommits physical storage of the size specified starting at the address specified, checking first if port library global
- * vmemAdviseOSonFree is set, based on -XX:+DisclaimVirtualMemory and -XX:-DisclaimVirtualMemory command line options.
- * If vmemAdviseOSonFree is not set, then no memory will be disclaimed.
+ * Decommits physical storage of the size specified starting at the address specified, checking first if port library
+ * global vmemAdviseOSonFree is set, based on -XX:+DisclaimVirtualMemory and -XX:-DisclaimVirtualMemory command line
+ * options. If vmemAdviseOSonFree is not set, then no memory will be disclaimed.
  *
  * @param[in] portLibrary The port library.
  * @param[in] address The starting address of the memory to be decommitted. Must be page aligned.
@@ -97,7 +97,8 @@ omrvmem_commit_memory(struct OMRPortLibrary *portLibrary, void *address, uintptr
  * @return 0 on success, non zero on failure.
  */
 intptr_t
-omrvmem_decommit_memory(struct OMRPortLibrary *portLibrary, void *address, uintptr_t byteAmount, struct J9PortVmemIdentifier *identifier)
+omrvmem_decommit_memory(struct OMRPortLibrary *portLibrary, void *address, uintptr_t byteAmount,
+        struct J9PortVmemIdentifier *identifier)
 {
 	return OMRPORT_ERROR_VMEM_OPFAILED;
 }
@@ -115,7 +116,8 @@ omrvmem_decommit_memory(struct OMRPortLibrary *portLibrary, void *address, uintp
  * @return 0 on success, non zero on failure.
  */
 int32_t
-omrvmem_free_memory(struct OMRPortLibrary *portLibrary, void *address, uintptr_t byteAmount, struct J9PortVmemIdentifier *identifier)
+omrvmem_free_memory(struct OMRPortLibrary *portLibrary, void *address, uintptr_t byteAmount,
+        struct J9PortVmemIdentifier *identifier)
 {
 	return OMRPORT_ERROR_VMEM_OPFAILED;
 }
@@ -154,7 +156,9 @@ omrvmem_vmem_params_init(struct OMRPortLibrary *portLibrary, struct J9PortVmemPa
  * The memory may not be used by other memory allocation routines until it is explicitly released.
  *
  * @param[in] portLibrary The port library.
- * @param[in] address The starting address of the memory to be reserved. Requesting memory at a specific address is only supported if the build flag OMR_PORT_CAPABILITY_CAN_RESERVE_SPECIFIC_ADDRESS is set. Address is ignored if this capability is not supported.
+ * @param[in] address The starting address of the memory to be reserved. Requesting memory at a specific address is only
+ * supported if the build flag OMR_PORT_CAPABILITY_CAN_RESERVE_SPECIFIC_ADDRESS is set. Address is ignored if this
+ * capability is not supported.
  * @param[in] byteAmount The number of bytes to be reserved.
  * @param[in] identifier Descriptor for virtual memory block.
  * @param[in] mode Bitmap indicating how memory is to be reserved.  Expected values combination of:
@@ -172,11 +176,11 @@ omrvmem_vmem_params_init(struct OMRPortLibrary *portLibrary, struct J9PortVmemPa
  * can not be allocated the result would be an infinite loop.
  */
 void *
-omrvmem_reserve_memory(struct OMRPortLibrary *portLibrary, void *address, uintptr_t byteAmount, struct J9PortVmemIdentifier *identifier, uintptr_t mode, uintptr_t pageSize, uint32_t category)
+omrvmem_reserve_memory(struct OMRPortLibrary *portLibrary, void *address, uintptr_t byteAmount,
+        struct J9PortVmemIdentifier *identifier, uintptr_t mode, uintptr_t pageSize, uint32_t category)
 {
 	return NULL;
 }
-
 
 /**
  * Reserve memory
@@ -195,7 +199,8 @@ omrvmem_reserve_memory(struct OMRPortLibrary *portLibrary, void *address, uintpt
  * @return pointer to the reserved memory on success, NULL on failure.
  */
 void *
-omrvmem_reserve_memory_ex(struct OMRPortLibrary *portLibrary, struct J9PortVmemIdentifier *identifier, struct J9PortVmemParams *params)
+omrvmem_reserve_memory_ex(
+        struct OMRPortLibrary *portLibrary, struct J9PortVmemIdentifier *identifier, struct J9PortVmemParams *params)
 {
 	return NULL;
 }
@@ -207,14 +212,17 @@ omrvmem_reserve_memory_ex(struct OMRPortLibrary *portLibrary, struct J9PortVmemI
  * @param void*                addressesOffeset[]      [in] Addresses to be double mapped
  * @param uintptr_t            byteAmount              [in] Total size to allocate for contiguous block of memory
  * @param struct J9PortVmemIdentifier *oldIdentifier   [in]  old Identifier containing file descriptor
- * @param struct J9PortVmemIdentifier *newIdentifier   [out] new Identifier for new block of memory. The structure to be updated
+ * @param struct J9PortVmemIdentifier *newIdentifier   [out] new Identifier for new block of memory. The structure to be
+ * updated
  * @param uintptr_t            mode,           [in] Access Mode
  * @paramuintptr_t             pageSize,       [in] onstant describing pageSize
  * @param OMRMemCategory       *category       [in] Memory allocation category
  */
 
 void *
-omrvmem_get_contiguous_region_memory(struct OMRPortLibrary *portLibrary, void* addresses[], uintptr_t addressesCount, uintptr_t addressSize, uintptr_t byteAmount, struct J9PortVmemIdentifier *oldIdentifier, struct J9PortVmemIdentifier *newIdentifier, uintptr_t mode, uintptr_t pageSize, OMRMemCategory *category)
+omrvmem_get_contiguous_region_memory(struct OMRPortLibrary *portLibrary, void *addresses[], uintptr_t addressesCount,
+        uintptr_t addressSize, uintptr_t byteAmount, struct J9PortVmemIdentifier *oldIdentifier,
+        struct J9PortVmemIdentifier *newIdentifier, uintptr_t mode, uintptr_t pageSize, OMRMemCategory *category)
 {
 	return NULL;
 }
@@ -253,8 +261,8 @@ omrvmem_get_page_flags(struct OMRPortLibrary *portLibrary, struct J9PortVmemIden
  *
  * @param[in] portLibrary The port library.
  *
- * @return A 0 terminated array of supported page sizes in bytes.  The first entry is the default page size, other entries
- * are the large page sizes supported.
+ * @return A 0 terminated array of supported page sizes in bytes.  The first entry is the default page size, other
+ * entries are the large page sizes supported.
  */
 uintptr_t *
 omrvmem_supported_page_sizes(struct OMRPortLibrary *portLibrary)
@@ -276,17 +284,20 @@ omrvmem_supported_page_flags(struct OMRPortLibrary *portLibrary)
 }
 
 /**
- * The default large page size and corresponding page flags used when large pages are enabled but no specific page size is requested
+ * The default large page size and corresponding page flags used when large pages are enabled but no specific page size
+ * is requested
  *
  * @param[in] portLibrary The port library.
- * @param[in] mode Used only on 64-bit z/OS, ignored on other platforms. Valid value is OMRPORT_VMEM_MEMORY_MODE_EXECUTE or 0.
+ * @param[in] mode Used only on 64-bit z/OS, ignored on other platforms. Valid value is OMRPORT_VMEM_MEMORY_MODE_EXECUTE
+ * or 0.
  * @param[out] pageSize  Pointer to store default large page size.
  * @param[out] pageFlags  Pointer to store flags for default large page.
  *
  * @return void
  */
 void
-omrvmem_default_large_page_size_ex(struct OMRPortLibrary *portLibrary, uintptr_t mode, uintptr_t *pageSize, uintptr_t *pageFlags)
+omrvmem_default_large_page_size_ex(
+        struct OMRPortLibrary *portLibrary, uintptr_t mode, uintptr_t *pageSize, uintptr_t *pageFlags)
 {
 	return;
 }
@@ -309,40 +320,44 @@ omrvmem_default_large_page_size_ex(struct OMRPortLibrary *portLibrary, uintptr_t
  * @param[in] portLibrary The port library.
  * @param[in] mode Used only z/OS, ignored on other platforms. Valid value is OMRPORT_VMEM_MEMORY_MODE_EXECUTE or 0.
  * @param[in/out] pageSize  As input, stores hint provided by caller to decide initial page size.
- * 							On return, stores the page size to be used by the caller for making allocation requests.
+ * 							On return, stores the page size to be used by the caller for
+ making allocation requests.
  * @param[in/out] pageFlags As input, stores page flags corresponding to the pageSize hint provided by the caller.
- *  						On return, stores page flags corresponding to value returned in pageSize.
+ *  						On return, stores page flags corresponding to value returned in
+ pageSize.
  * @param[out] isSizeSupported Set to true if the requested page size/flags is supported, false otherwise
  *
  * @return 0 on success, does not fail.
  */
 intptr_t
-omrvmem_find_valid_page_size(struct OMRPortLibrary *portLibrary, uintptr_t mode, uintptr_t *pageSize, uintptr_t *pageFlags, BOOLEAN *isSizeSupported)
+omrvmem_find_valid_page_size(struct OMRPortLibrary *portLibrary, uintptr_t mode, uintptr_t *pageSize,
+        uintptr_t *pageFlags, BOOLEAN *isSizeSupported)
 {
 	return 0;
 }
 
 /**
-* Associate memory in the virtual address space with the specified NUMA node.
-*
-* The memory must have already been reserved (using omrvmem_reserve_memory or omrvmem_reserve_memory_ex),
-* but must not have been committed. This function does not commit the memory.
-*
-* When memory in the range is committed, the OS will make a best-effort to associate it with the desired
-* node. The association is permanent if the memory is decommitted and subsequently recommitted. Calling
-* omrvmem_numa_set_affinity() twice on the same range (or on overlapping ranges) will result in undefined
-* affinity.
-*
-* @param portLibrary The port library.
-* @param numaNode The identifier of the NUMA node to associate the memory with (indexed from 1)
-* @param address The page aligned starting address of the memory to associate with the NUMA node.
-* @param byteAmount The number of bytes to associate with the NUMA node (must be a multiple of page size)
-* @param identifier Descriptor for virtual memory block.
-*
-* @return	0, if no errors occurred, otherwise the (negative) error code.
-*/
+ * Associate memory in the virtual address space with the specified NUMA node.
+ *
+ * The memory must have already been reserved (using omrvmem_reserve_memory or omrvmem_reserve_memory_ex),
+ * but must not have been committed. This function does not commit the memory.
+ *
+ * When memory in the range is committed, the OS will make a best-effort to associate it with the desired
+ * node. The association is permanent if the memory is decommitted and subsequently recommitted. Calling
+ * omrvmem_numa_set_affinity() twice on the same range (or on overlapping ranges) will result in undefined
+ * affinity.
+ *
+ * @param portLibrary The port library.
+ * @param numaNode The identifier of the NUMA node to associate the memory with (indexed from 1)
+ * @param address The page aligned starting address of the memory to associate with the NUMA node.
+ * @param byteAmount The number of bytes to associate with the NUMA node (must be a multiple of page size)
+ * @param identifier Descriptor for virtual memory block.
+ *
+ * @return	0, if no errors occurred, otherwise the (negative) error code.
+ */
 intptr_t
-omrvmem_numa_set_affinity(struct OMRPortLibrary *portLibrary, uintptr_t numaNode, void *address, uintptr_t byteAmount, struct J9PortVmemIdentifier *identifier)
+omrvmem_numa_set_affinity(struct OMRPortLibrary *portLibrary, uintptr_t numaNode, void *address, uintptr_t byteAmount,
+        struct J9PortVmemIdentifier *identifier)
 {
 	return OMRPORT_ERROR_VMEM_OPFAILED;
 }
@@ -355,8 +370,11 @@ omrvmem_numa_set_affinity(struct OMRPortLibrary *portLibrary, uintptr_t numaNode
  * haven't been somehow restricted via numactl as preferred).
  *
  * @param portLibrary[in] The Port Library instance
- * @param numaNodes[out] The buffer containing a description of the NUMA nodes on the system subject to the restrictions of the current NUMA policy
- * @param nodeCount[in/out] On enter, the size of the numaNodes buffer, in J9MemoryNodeDetail structs.  On exit, the number of NUMA nodes known to the implementation (the number of entries in numaNodes populated is the minimum of these two values)
+ * @param numaNodes[out] The buffer containing a description of the NUMA nodes on the system subject to the restrictions
+ * of the current NUMA policy
+ * @param nodeCount[in/out] On enter, the size of the numaNodes buffer, in J9MemoryNodeDetail structs.  On exit, the
+ * number of NUMA nodes known to the implementation (the number of entries in numaNodes populated is the minimum of
+ * these two values)
  *
  * @return 0 on success or an error code if an error occurred
  */
@@ -368,11 +386,11 @@ omrvmem_numa_get_node_details(struct OMRPortLibrary *portLibrary, J9MemoryNodeDe
 }
 
 /**
-* Get the  number of currently available bytes of physical memory.  This is not supported on z/OS.
-* @param [in] portLibrary port library
-* @param [out] freePhysicalMemorySize pointer to variable to receive result
-* @return 0 on success, OMRPORT_ERROR_VMEM_OPFAILED if an error occurred, or OMRPORT_ERROR_VMEM_NOT_SUPPORTED.
-*/
+ * Get the  number of currently available bytes of physical memory.  This is not supported on z/OS.
+ * @param [in] portLibrary port library
+ * @param [out] freePhysicalMemorySize pointer to variable to receive result
+ * @return 0 on success, OMRPORT_ERROR_VMEM_OPFAILED if an error occurred, or OMRPORT_ERROR_VMEM_NOT_SUPPORTED.
+ */
 int32_t
 omrvmem_get_available_physical_memory(struct OMRPortLibrary *portLibrary, uint64_t *freePhysicalMemorySize)
 {
@@ -380,12 +398,13 @@ omrvmem_get_available_physical_memory(struct OMRPortLibrary *portLibrary, uint64
 }
 
 /**
-* Get the size of a process's memory in bytes.  This is not supported on z/OS.
-* @param [in] portLibrary port library
-* @param [in] J9VmemMemoryQuery queryType indicates which memory aspect to measure
-* @param [out] freePhysicalMemorySize pointer to variable to receive result
-* @return 0 on success, OMRPORT_ERROR_VMEM_OPFAILED or OMRPORT_ERROR_VMEM_INSUFFICENT_RESOURCES if an error occurred, or OMRPORT_ERROR_VMEM_NOT_SUPPORTED.
-*/
+ * Get the size of a process's memory in bytes.  This is not supported on z/OS.
+ * @param [in] portLibrary port library
+ * @param [in] J9VmemMemoryQuery queryType indicates which memory aspect to measure
+ * @param [out] freePhysicalMemorySize pointer to variable to receive result
+ * @return 0 on success, OMRPORT_ERROR_VMEM_OPFAILED or OMRPORT_ERROR_VMEM_INSUFFICENT_RESOURCES if an error occurred,
+ * or OMRPORT_ERROR_VMEM_NOT_SUPPORTED.
+ */
 int32_t
 omrvmem_get_process_memory_size(struct OMRPortLibrary *portLibrary, J9VMemMemoryQuery queryType, uint64_t *memorySize)
 {

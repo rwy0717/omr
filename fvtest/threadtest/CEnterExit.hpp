@@ -27,14 +27,13 @@
 /*
  * Thread that acquires and holds a monitor for a time.
  */
-class CEnterExit: public CThread
-{
+class CEnterExit : public CThread {
 public:
-	CEnterExit(CMonitor& monitor, int sleep);
+	CEnterExit(CMonitor &monitor, int sleep);
 
 protected:
 	virtual intptr_t Run(void);
-	CMonitor& m_monitor;
+	CMonitor &m_monitor;
 	int m_sleep;
 };
 

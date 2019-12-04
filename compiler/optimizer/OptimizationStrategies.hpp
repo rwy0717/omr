@@ -25,12 +25,11 @@
 #include <stdint.h>
 #include "optimizer/Optimizations.hpp"
 
-struct OptimizationStrategy
-   {
-   OMR::Optimizations _num;
-   uint16_t      _options;
-   };
-//optimization groups
+struct OptimizationStrategy {
+	OMR::Optimizations _num;
+	uint16_t _options;
+};
+// optimization groups
 
 extern const OptimizationStrategy loopAliasRefinerOpts[];
 extern const OptimizationStrategy arrayPrivatizationOpts[];
@@ -58,8 +57,8 @@ extern const OptimizationStrategy stripMiningOpts[];
 extern const OptimizationStrategy prefetchInsertionOpts[];
 extern const OptimizationStrategy methodHandleInvokeInliningOpts[];
 
-//arrays of optimizations
+// arrays of optimizations
 
-extern const OptimizationStrategy * omrCompilationStrategies[];
+extern const OptimizationStrategy *omrCompilationStrategies[];
 
 #endif

@@ -23,8 +23,8 @@
 #if !defined(METRONOMESTATS_HPP_)
 #define METRONOMESTATS_HPP_
 
-#include "Base.hpp"
 #include "AtomicOperations.hpp"
+#include "Base.hpp"
 
 /**
  * @todo Provide class documentation
@@ -46,7 +46,8 @@ public:
 	uintptr_t nonDeterministicSweepConsecutive;
 	uint64_t nonDeterministicSweepDelay;
 
-	uint64_t _microsToStopMutators; /**< The number of microseconds the master thread had to wait for the mutator threads to stop, at the beginning of this increment */
+	uint64_t _microsToStopMutators; /**< The number of microseconds the master thread had to wait for the mutator
+	                                   threads to stop, at the beginning of this increment */
 protected:
 private:
 public:
@@ -74,45 +75,32 @@ public:
 		_microsToStopMutators = 0;
 	}
 
-	MMINLINE void incrementWorkPacketOverflowCount()
-	{
-		MM_AtomicOperations::add(&_workPacketOverflowCount, 1);
-	}
+	MMINLINE void incrementWorkPacketOverflowCount() { MM_AtomicOperations::add(&_workPacketOverflowCount, 1); }
 
-	MMINLINE void incrementObjectOverflowCount()
-	{
-		MM_AtomicOperations::add(&_objectOverflowCount, 1);
-	}
+	MMINLINE void incrementObjectOverflowCount() { MM_AtomicOperations::add(&_objectOverflowCount, 1); }
 
-	MMINLINE uintptr_t getWorkPacketOverflowCount()
-	{
-		return _workPacketOverflowCount;
-	}
+	MMINLINE uintptr_t getWorkPacketOverflowCount() { return _workPacketOverflowCount; }
 
-	MMINLINE uintptr_t getObjectOverflowCount()
-	{
-		return _objectOverflowCount;
-	}
+	MMINLINE uintptr_t getObjectOverflowCount() { return _objectOverflowCount; }
 
-	void merge(MM_MetronomeStats* statsToMerge);
+	void merge(MM_MetronomeStats *statsToMerge);
 
 	/**
 	 * Create a MetronomeStats object.
 	 */
 	MM_MetronomeStats()
-		: MM_Base()
-		, classLoaderUnloadedCount(0)
-		, classesUnloadedCount(0)
-		, anonymousClassesUnloadedCount(0)
-		, finalizableCount(0)
-		, _workPacketOverflowCount(0)
-		, _objectOverflowCount(0)
-		, nonDeterministicSweepCount(0)
-		, nonDeterministicSweepConsecutive(0)
-		, nonDeterministicSweepDelay(0)
-		, _microsToStopMutators(0)
-	{
-	}
+	        : MM_Base()
+	        , classLoaderUnloadedCount(0)
+	        , classesUnloadedCount(0)
+	        , anonymousClassesUnloadedCount(0)
+	        , finalizableCount(0)
+	        , _workPacketOverflowCount(0)
+	        , _objectOverflowCount(0)
+	        , nonDeterministicSweepCount(0)
+	        , nonDeterministicSweepConsecutive(0)
+	        , nonDeterministicSweepDelay(0)
+	        , _microsToStopMutators(0)
+	{}
 
 protected:
 private:

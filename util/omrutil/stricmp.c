@@ -26,7 +26,6 @@
 #define tolower(c) (((c) >= 'A' && (c) <= 'Z') ? ((c) - 'A' + 'a') : (c))
 #define toupper(c) (((c) >= 'a' && (c) <= 'z') ? ((c) - 'a' + 'A') : (c))
 
-
 int
 j9_cmdla_tolower(int c)
 {
@@ -86,4 +85,3 @@ j9_cmdla_strnicmp(const char *s1, const char *s2, size_t length)
 	}
 	return 0;
 }
-

@@ -21,24 +21,24 @@
  *******************************************************************************/
 
 #include "gcspinlock.h"
-#include "omrthread.h"
 
 #include "AtomicOperations.hpp"
+#include "omrthread.h"
 
-#define UPDATE_JLM_MON_ENTER(tracing)\
-	do {\
-		tracing->enter_count++;\
+#define UPDATE_JLM_MON_ENTER(tracing) \
+	do { \
+		tracing->enter_count++; \
 		/* handle the roll-over case */ \
-		if (tracing->enter_count == 0){\
-			tracing->enter_count++;\
-			tracing->recursive_count = 0;\
-			tracing->slow_count = 0;\
-			tracing->holdtime_count = 0;\
-			tracing->holdtime_sum = 0;\
-			tracing->holdtime_avg = 0;\
-			tracing->spin2_count = 0;\
-			tracing->yield_count = 0;\
-		}\
+		if (tracing->enter_count == 0) { \
+			tracing->enter_count++; \
+			tracing->recursive_count = 0; \
+			tracing->slow_count = 0; \
+			tracing->holdtime_count = 0; \
+			tracing->holdtime_sum = 0; \
+			tracing->holdtime_avg = 0; \
+			tracing->spin2_count = 0; \
+			tracing->yield_count = 0; \
+		} \
 	} while (0)
 
 /**
@@ -48,14 +48,14 @@
  * @return  0 on success or negative value on failure
  */
 intptr_t
-omrgc_spinlock_acquire(J9GCSpinlock *spinlock, J9ThreadMonitorTracing*  lockTracing)
+omrgc_spinlock_acquire(J9GCSpinlock *spinlock, J9ThreadMonitorTracing *lockTracing)
 {
-	volatile intptr_t *target = (volatile intptr_t*) &spinlock->target;
+	volatile intptr_t *target = (volatile intptr_t *)&spinlock->target;
 	intptr_t result;
 	intptr_t oldValue = -1;
 	intptr_t newValue = 0;
 #if defined(OMR_THR_JLM)
-	J9ThreadMonitorTracing* tracing = lockTracing;
+	J9ThreadMonitorTracing *tracing = lockTracing;
 #endif
 	uintptr_t spinCount2 = 0;
 	uintptr_t spinCount3 = spinlock->spinCount3;
@@ -64,7 +64,9 @@ omrgc_spinlock_acquire(J9GCSpinlock *spinlock, J9ThreadMonitorTracing*  lockTrac
 		for (spinCount2 = spinlock->spinCount2; spinCount2 > 0; spinCount2--) {
 			if (oldValue == *target) {
 				/* Try to put 0 into the target field (-1 indicates free)'. */
-				if (oldValue == (intptr_t) MM_AtomicOperations::lockCompareExchange((volatile uintptr_t*) target, oldValue, newValue))	{
+				if (oldValue
+				        == (intptr_t)MM_AtomicOperations::lockCompareExchange(
+				                (volatile uintptr_t *)target, oldValue, newValue)) {
 					result = 0;
 					goto done;
 				}
@@ -73,7 +75,7 @@ omrgc_spinlock_acquire(J9GCSpinlock *spinlock, J9ThreadMonitorTracing*  lockTrac
 			MM_AtomicOperations::yieldCPU();
 
 			/* begin tight loop */
-			for (uintptr_t spinCount1 = spinlock->spinCount1; spinCount1 > 0; spinCount1--)	{
+			for (uintptr_t spinCount1 = spinlock->spinCount1; spinCount1 > 0; spinCount1--) {
 				MM_AtomicOperations::nop();
 			} /* end tight loop */
 		}
@@ -90,7 +92,8 @@ omrgc_spinlock_acquire(J9GCSpinlock *spinlock, J9ThreadMonitorTracing*  lockTrac
 		oldValue = result;
 		newValue = result + 1;
 
-		result = (intptr_t) MM_AtomicOperations::lockCompareExchange((volatile uintptr_t*) target, oldValue, newValue);
+		result = (intptr_t)MM_AtomicOperations::lockCompareExchange(
+		        (volatile uintptr_t *)target, oldValue, newValue);
 		if (oldValue == result) {
 			break;
 		}
@@ -98,7 +101,7 @@ omrgc_spinlock_acquire(J9GCSpinlock *spinlock, J9ThreadMonitorTracing*  lockTrac
 
 	if (0 == newValue) {
 		/* Acquired it through atomic, afterall. */
-    	result = 0;
+		result = 0;
 	} else {
 		/* Wait on OS semaphore */
 		result = j9sem_wait(spinlock->osSemaphore);
@@ -112,15 +115,18 @@ omrgc_spinlock_acquire(J9GCSpinlock *spinlock, J9ThreadMonitorTracing*  lockTrac
 done:
 #if defined(OMR_THR_JLM)
 	if (tracing != NULL) {
-		/* if tracing counts are ever shared among multiple spinlocks, the two spin count updates should be atomic */
+		/* if tracing counts are ever shared among multiple spinlocks, the two spin count updates should be
+		 * atomic */
 		uintptr_t yield_count_update = spinlock->spinCount3 - spinCount3;
 		tracing->yield_count += yield_count_update;
-		uintptr_t spin2_count_update = yield_count_update * spinlock->spinCount2 + (spinlock->spinCount2 - spinCount2);
+		uintptr_t spin2_count_update = yield_count_update * spinlock->spinCount2
+		        + (spinlock->spinCount2 - spinCount2);
 		tracing->spin2_count += spin2_count_update;
 		UPDATE_JLM_MON_ENTER(tracing);
 	}
 #endif /* OMR_THR_JLM */
-	/* On out-of-order memory models (e.g. Power4), ensure that all reads and writes have been completed at this point */
+	/* On out-of-order memory models (e.g. Power4), ensure that all reads and writes have been completed at this
+	 * point */
 	MM_AtomicOperations::readWriteBarrier();
 	return result;
 }
@@ -166,7 +172,7 @@ omrgc_spinlock_release(J9GCSpinlock *spinlock)
 {
 	intptr_t result;
 	MM_AtomicOperations::writeBarrier();
-	volatile intptr_t *target = (volatile intptr_t*) &spinlock->target;
+	volatile intptr_t *target = (volatile intptr_t *)&spinlock->target;
 
 	/*
 	 * Atomic decrement of target field
@@ -179,7 +185,8 @@ omrgc_spinlock_release(J9GCSpinlock *spinlock)
 		oldValue = result;
 		newValue = result - 1;
 
-		result = (intptr_t) MM_AtomicOperations::lockCompareExchange((volatile uintptr_t*) target, oldValue, newValue);
+		result = (intptr_t)MM_AtomicOperations::lockCompareExchange(
+		        (volatile uintptr_t *)target, oldValue, newValue);
 		if (oldValue == result) {
 			break;
 		}

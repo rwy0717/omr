@@ -23,23 +23,22 @@
 #include "env/FrontEnd.hpp"
 #include "tests/injectors/Qux2IlInjector.hpp"
 
-namespace TestCompiler
-{
+namespace TestCompiler {
 
 bool
 Qux2IlInjector::injectIL()
-   {
-   createBlocks(1);
-   // Block 2: blocks(0)
-   // int32_t i = parameter;
-   // i = i * 2;
-   // return i;
-   TR::SymbolReference *newIndexSymRef = newTemp(Int32);
-   storeToTemp(newIndexSymRef, intParameter());
-   storeToTemp(newIndexSymRef, createWithoutSymRef(TR::imul, 2, loadTemp(newIndexSymRef), iconst(2)));
-   returnValue(loadTemp(newIndexSymRef));
+{
+	createBlocks(1);
+	// Block 2: blocks(0)
+	// int32_t i = parameter;
+	// i = i * 2;
+	// return i;
+	TR::SymbolReference *newIndexSymRef = newTemp(Int32);
+	storeToTemp(newIndexSymRef, intParameter());
+	storeToTemp(newIndexSymRef, createWithoutSymRef(TR::imul, 2, loadTemp(newIndexSymRef), iconst(2)));
+	returnValue(loadTemp(newIndexSymRef));
 
-   return true;
-   }
+	return true;
+}
 
 } // namespace TestCompiler

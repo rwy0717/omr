@@ -27,8 +27,14 @@
  */
 #ifndef OMR_INSTRUCTIONDELEGATE_CONNECTOR
 #define OMR_INSTRUCTIONDELEGATE_CONNECTOR
-namespace OMR { namespace ARM64 { class InstructionDelegate; } }
-namespace OMR { typedef OMR::ARM64::InstructionDelegate InstructionDelegateConnector; }
+namespace OMR {
+namespace ARM64 {
+class InstructionDelegate;
+}
+} // namespace OMR
+namespace OMR {
+typedef OMR::ARM64::InstructionDelegate InstructionDelegateConnector;
+}
 #else
 #error OMR::ARM64::InstructionDelegate expected to be a primary connector, but an OMR connector is already defined
 #endif
@@ -37,35 +43,29 @@ namespace OMR { typedef OMR::ARM64::InstructionDelegate InstructionDelegateConne
 #include "compiler/codegen/OMRInstructionDelegate.hpp"
 #include "infra/Annotations.hpp"
 
-namespace OMR
-{
+namespace OMR {
 
-namespace ARM64
-{
+namespace ARM64 {
 
-class OMR_EXTENSIBLE InstructionDelegate : public OMR::InstructionDelegate
-   {
+class OMR_EXTENSIBLE InstructionDelegate : public OMR::InstructionDelegate {
 protected:
-
-   InstructionDelegate() {}
+	InstructionDelegate() {}
 
 public:
+	/**
+	 * @brief Sets the return address to CallSnippet for Label target
+	 * @param[in] cg : CodeGenerator
+	 * @param[in] ins : instruction associated with CallSnippet
+	 * @param[in] cursor : instruction cursor
+	 */
+	static void encodeBranchToLabel(TR::CodeGenerator *cg, TR::ARM64ImmSymInstruction *ins, uint8_t *cursor)
+	{
+		// Do nothing in OMR
+	}
+};
 
-   /**
-    * @brief Sets the return address to CallSnippet for Label target
-    * @param[in] cg : CodeGenerator
-    * @param[in] ins : instruction associated with CallSnippet
-    * @param[in] cursor : instruction cursor
-    */
-   static void encodeBranchToLabel(TR::CodeGenerator *cg, TR::ARM64ImmSymInstruction *ins, uint8_t *cursor)
-      {
-      // Do nothing in OMR
-      }
+} // namespace ARM64
 
-   };
-
-}
-
-}
+} // namespace OMR
 
 #endif

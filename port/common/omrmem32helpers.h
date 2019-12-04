@@ -33,5 +33,3 @@ void free_memory32(struct OMRPortLibrary *portLibrary, void *memoryPointer);
 uintptr_t ensure_capacity32(struct OMRPortLibrary *portLibrary, uintptr_t byteAmount);
 
 #endif /* omrmemhelpers_h */
-
-

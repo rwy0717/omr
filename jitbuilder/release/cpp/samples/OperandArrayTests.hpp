@@ -20,44 +20,41 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #ifndef OPERANDARRAYTESTS_INCL
 #define OPERANDARRAYTESTS_INCL
 
 #include "JitBuilder.hpp"
 
 #define ARRAYVALUEILTYPE Int32
-#define ARRAYVALUETYPE   int32_t
+#define ARRAYVALUETYPE int32_t
 
-class OperandArrayTestMethod : public OMR::JitBuilder::MethodBuilder
-   {
-   public:
-   OperandArrayTestMethod(OMR::JitBuilder::TypeDictionary *);
-   virtual bool buildIL();
+class OperandArrayTestMethod : public OMR::JitBuilder::MethodBuilder {
+public:
+	OperandArrayTestMethod(OMR::JitBuilder::TypeDictionary *);
+	virtual bool buildIL();
 
-   static void verify(const char *step, int32_t max, int32_t num, ...);
-   static bool verifyUntouched(int32_t maxTouched);
+	static void verify(const char *step, int32_t max, int32_t num, ...);
+	static bool verifyUntouched(int32_t maxTouched);
 
-   ARRAYVALUETYPE **getArrayPtr() { return &_realArray; }
+	ARRAYVALUETYPE **getArrayPtr() { return &_realArray; }
 
-   protected:
-   bool testArray(OMR::JitBuilder::BytecodeBuilder *b, bool useEqual);
+protected:
+	bool testArray(OMR::JitBuilder::BytecodeBuilder *b, bool useEqual);
 
-   OMR::JitBuilder::IlType         *_valueType;
+	OMR::JitBuilder::IlType *_valueType;
 
-   static ARRAYVALUETYPE           *_realArray;
-   static int32_t                   _realArrayLength;
-   
-   static void createArray();
-   static ARRAYVALUETYPE *moveArray();
-   static void freeArray();
-   };
-   
-class OperandArrayTestUsingFalseMethod : public OperandArrayTestMethod
-   {
-   public:
-   OperandArrayTestUsingFalseMethod(OMR::JitBuilder::TypeDictionary *);
-   virtual bool buildIL();
-   };
+	static ARRAYVALUETYPE *_realArray;
+	static int32_t _realArrayLength;
+
+	static void createArray();
+	static ARRAYVALUETYPE *moveArray();
+	static void freeArray();
+};
+
+class OperandArrayTestUsingFalseMethod : public OperandArrayTestMethod {
+public:
+	OperandArrayTestUsingFalseMethod(OMR::JitBuilder::TypeDictionary *);
+	virtual bool buildIL();
+};
 
 #endif // !defined(OPERANDARRAYTESTS_INCL)

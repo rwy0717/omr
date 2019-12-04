@@ -76,7 +76,8 @@ typedef struct UtTracePointIterator UtTracePointIterator;
  * @param[in] portLib An initialized OMRPortLibraryStructure.
  * @param[in] fileName The name of the trace file to open.
  * @param[in,out] iteratorPtr A pointer to a location where the initialized UtTraceFileIterator pointer can be stored.
- * @param[in] getFormatString A callback the formatter can use to obtain a format string for a trace point id in a named module.
+ * @param[in] getFormatString A callback the formatter can use to obtain a format string for a trace point id in a named
+ * module.
  *
  * @return OMR_ERROR_NONE on success
  * @return OMR_ERROR_NOT_AVAILABLE if the specified file cannot be opened
@@ -84,7 +85,8 @@ typedef struct UtTracePointIterator UtTracePointIterator;
  * @return OMR_ERROR_OUT_OF_NATIVE_MEMORY if memory for the iterator structure cannot be allocated.
  * @return OMR_ERROR_NOT_AVAILABLE if the specified file cannot be opened.
  */
-omr_error_t omr_trc_getTraceFileIterator(OMRPortLibrary *portLib, char *fileName, UtTraceFileIterator **iteratorPtr, FormatStringCallback getFormatString);
+omr_error_t omr_trc_getTraceFileIterator(OMRPortLibrary *portLib, char *fileName, UtTraceFileIterator **iteratorPtr,
+        FormatStringCallback getFormatString);
 
 /**
  * @deprecated
@@ -104,12 +106,14 @@ omr_error_t omr_trc_freeTraceFileIterator(UtTraceFileIterator *iter);
  * If there are no more trace buffers in the file *bufferIteratorPtr will point to NULL.
  *
  * @param[in] fileIter A pointer to the UtTraceFileIterator that will return an iterator over it's next buffer.
- * @param[in,out] bufferIteratorPtr A pointer to a location where the initialized UtTracePointIterator pointer can be stored.
+ * @param[in,out] bufferIteratorPtr A pointer to a location where the initialized UtTracePointIterator pointer can be
+ * stored.
  * @return OMR_ERROR_NONE on success, including if there are no more buffers in the file at EOF.
  * @return OMR_ERROR_OUT_OF_NATIVE_MEMORY if memory for the iterator structure cannot be allocated.
  * @return OMR_ERROR_INTERNAL if the file ends unexpectedly.
  */
-omr_error_t omr_trc_getTracePointIteratorForNextBuffer(UtTraceFileIterator *fileIter, UtTracePointIterator **bufferIteratorPtr);
+omr_error_t omr_trc_getTracePointIteratorForNextBuffer(
+        UtTraceFileIterator *fileIter, UtTracePointIterator **bufferIteratorPtr);
 
 /**
  * @deprecated

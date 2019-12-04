@@ -26,23 +26,22 @@
 
 bool
 OMR::Power::CPU::getPPCis64bit()
-   {
-   TR_Processor p = id();
-   TR_ASSERT(p >= TR_FirstPPCProcessor && p <= TR_LastPPCProcessor, "Not a valid PPC Processor Type");
+{
+	TR_Processor p = id();
+	TR_ASSERT(p >= TR_FirstPPCProcessor && p <= TR_LastPPCProcessor, "Not a valid PPC Processor Type");
 
-   return (p >= TR_FirstPPC64BitProcessor)? true : false;
-   }
+	return (p >= TR_FirstPPC64BitProcessor) ? true : false;
+}
 
 bool
 OMR::Power::CPU::supportsTransactionalMemoryInstructions()
-   {
-   return self()->getPPCSupportsTM();
-   }
+{
+	return self()->getPPCSupportsTM();
+}
 
 bool
 OMR::Power::CPU::isTargetWithinIFormBranchRange(intptrj_t targetAddress, intptrj_t sourceAddress)
-   {
-   intptrj_t range = targetAddress - sourceAddress;
-   return range <= self()->maxIFormBranchForwardOffset() &&
-          range >= self()->maxIFormBranchBackwardOffset();
-   }
+{
+	intptrj_t range = targetAddress - sourceAddress;
+	return range <= self()->maxIFormBranchForwardOffset() && range >= self()->maxIFormBranchBackwardOffset();
+}

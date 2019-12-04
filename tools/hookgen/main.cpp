@@ -73,7 +73,7 @@ wmain(int argc, wchar_t **argv, wchar_t **envp)
 	char **translated_envp = NULL;
 	char *cursor = NULL;
 	int i = 0;
-	int length = argc;	/* 1 null terminator per string */
+	int length = argc; /* 1 null terminator per string */
 	int envc = 0;
 	int rc = -1;
 
@@ -94,7 +94,7 @@ wmain(int argc, wchar_t **argv, wchar_t **envp)
 		*cursor++ = '\0';
 		length -= utf8Length;
 	}
-	translated_argv[argc] = NULL;	/* NULL terminated the new argv */
+	translated_argv[argc] = NULL; /* NULL terminated the new argv */
 
 	/* Translate argv to UTF-8 */
 	if (NULL != envp) {
@@ -102,7 +102,7 @@ wmain(int argc, wchar_t **argv, wchar_t **envp)
 		while (NULL != envp[envc]) {
 			envc++;
 		}
-		length = envc;	/* 1 null terminator per string */
+		length = envc; /* 1 null terminator per string */
 		for (i = 0; i < envc; i++) {
 			length += (int)(wcslen(envp[i]) * 3);
 		}
@@ -111,14 +111,16 @@ wmain(int argc, wchar_t **argv, wchar_t **envp)
 		for (i = 0; i < envc; i++) {
 			int utf8Length;
 			translated_envp[i] = cursor;
-			if (0 == (utf8Length = WideCharToMultiByte(CP_UTF8, 0, envp[i], -1, cursor, length, NULL, NULL))) {
+			if (0
+			        == (utf8Length = WideCharToMultiByte(
+			                    CP_UTF8, 0, envp[i], -1, cursor, length, NULL, NULL))) {
 				return -1;
 			}
 			cursor += utf8Length;
 			*cursor++ = '\0';
 			length -= utf8Length;
 		}
-		translated_envp[envc] = NULL;	/* NULL terminated the new envp */
+		translated_envp[envc] = NULL; /* NULL terminated the new envp */
 	}
 
 	rc = translated_main(argc, translated_argv, translated_envp);

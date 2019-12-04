@@ -32,374 +32,332 @@
 #include "ilgen/TypeDictionary.hpp"
 #include "ilgen/MethodBuilder.hpp"
 
-class MinimalTest : public TRTest::JitTest
-   {
-   public:
-   MinimalTest();
-   };
+class MinimalTest : public TRTest::JitTest {
+public:
+	MinimalTest();
+};
 
-MinimalTest::MinimalTest()
-   : TRTest::JitTest::JitTest()
-   {}
+MinimalTest::MinimalTest() : TRTest::JitTest::JitTest() {}
 
 template <typename S>
-class StaticSignatureMethodBuilder : public TR::MethodBuilder
-   {
-   public:
-   typedef S* FunctionPtr;
+class StaticSignatureMethodBuilder : public TR::MethodBuilder {
+public:
+	typedef S *FunctionPtr;
 
-   StaticSignatureMethodBuilder(TR::TypeDictionary* types)
-   	  : TR::MethodBuilder(types)
-   	  {}
+	StaticSignatureMethodBuilder(TR::TypeDictionary *types) : TR::MethodBuilder(types) {}
 
-   FunctionPtr Compile()
-      {
-      TR::ResolvedMethod resolvedMethod(this);
-      TR::IlGeneratorMethodDetails details(&resolvedMethod);
-      int32_t rc = 0;
-      FunctionPtr entry = (FunctionPtr)compileMethodFromDetails(NULL, details, warm, rc);
-      return entry;
-      }
-   };
+	FunctionPtr Compile()
+	{
+		TR::ResolvedMethod resolvedMethod(this);
+		TR::IlGeneratorMethodDetails details(&resolvedMethod);
+		int32_t rc = 0;
+		FunctionPtr entry = (FunctionPtr)compileMethodFromDetails(NULL, details, warm, rc);
+		return entry;
+	}
+};
 
-class MeaningOfLifeMethod : public StaticSignatureMethodBuilder<int32_t()>
-   {
-   public:
-   MeaningOfLifeMethod(TR::TypeDictionary *types);
-   virtual bool buildIL();
-   };
+class MeaningOfLifeMethod : public StaticSignatureMethodBuilder<int32_t()> {
+public:
+	MeaningOfLifeMethod(TR::TypeDictionary *types);
+	virtual bool buildIL();
+};
 
-MeaningOfLifeMethod::MeaningOfLifeMethod(TR::TypeDictionary *types)
-   : StaticSignatureMethodBuilder<int32_t()>(types)
-   {
-   DefineLine(LINETOSTR(__LINE__));
-   DefineFile(__FILE__);
+MeaningOfLifeMethod::MeaningOfLifeMethod(TR::TypeDictionary *types) : StaticSignatureMethodBuilder<int32_t()>(types)
+{
+	DefineLine(LINETOSTR(__LINE__));
+	DefineFile(__FILE__);
 
-   DefineName("MeaningOfLife");
-   DefineReturnType(Int32);
-   }
+	DefineName("MeaningOfLife");
+	DefineReturnType(Int32);
+}
 
 bool
 MeaningOfLifeMethod::buildIL()
-   {
-   Return(
-      ConstInt32(42));
-   return true;
-   }
+{
+	Return(ConstInt32(42));
+	return true;
+}
 
-class ReturnArgI32Method : public StaticSignatureMethodBuilder<int32_t(int32_t)>
-   {
-   public:
-   ReturnArgI32Method(TR::TypeDictionary *types);
-   virtual bool buildIL();
-   };
+class ReturnArgI32Method : public StaticSignatureMethodBuilder<int32_t(int32_t)> {
+public:
+	ReturnArgI32Method(TR::TypeDictionary *types);
+	virtual bool buildIL();
+};
 
 ReturnArgI32Method::ReturnArgI32Method(TR::TypeDictionary *types)
-   : StaticSignatureMethodBuilder<int32_t(int32_t)>(types)
-   {
-   DefineLine(LINETOSTR(__LINE__));
-   DefineFile(__FILE__);
+        : StaticSignatureMethodBuilder<int32_t(int32_t)>(types)
+{
+	DefineLine(LINETOSTR(__LINE__));
+	DefineFile(__FILE__);
 
-   DefineName("ReturnArgI32");
-   DefineParameter("arg", Int32);
-   DefineReturnType(Int32);
-   }
+	DefineName("ReturnArgI32");
+	DefineParameter("arg", Int32);
+	DefineReturnType(Int32);
+}
 
 bool
 ReturnArgI32Method::buildIL()
-   {
-   DefineLocal("result", Int32);
-   Store("result",
-         Load("arg"));
-   Return(
-      Load("result"));
-   return true;
-   }
+{
+	DefineLocal("result", Int32);
+	Store("result", Load("arg"));
+	Return(Load("result"));
+	return true;
+}
 
-class MaxIfThenMethod : public StaticSignatureMethodBuilder<int32_t(int32_t, int32_t)>
-   {
-   public:
-   MaxIfThenMethod(TR::TypeDictionary *types);
-   virtual bool buildIL();
-   };
+class MaxIfThenMethod : public StaticSignatureMethodBuilder<int32_t(int32_t, int32_t)> {
+public:
+	MaxIfThenMethod(TR::TypeDictionary *types);
+	virtual bool buildIL();
+};
 
 MaxIfThenMethod::MaxIfThenMethod(TR::TypeDictionary *types)
-   : StaticSignatureMethodBuilder<int32_t(int32_t, int32_t)>(types)
-   {
-   DefineLine(LINETOSTR(__LINE__));
-   DefineFile(__FILE__);
+        : StaticSignatureMethodBuilder<int32_t(int32_t, int32_t)>(types)
+{
+	DefineLine(LINETOSTR(__LINE__));
+	DefineFile(__FILE__);
 
-   DefineName("MaxIfThenMethod");
-   DefineParameter("leftV", Int32);
-   DefineParameter("rightV", Int32);
-   DefineReturnType(Int32);
-   }
+	DefineName("MaxIfThenMethod");
+	DefineParameter("leftV", Int32);
+	DefineParameter("rightV", Int32);
+	DefineReturnType(Int32);
+}
 
 bool
 MaxIfThenMethod::buildIL()
-   {
-   TR::IlBuilder *thenPath = NULL;
-   IfThen(&thenPath,
-      GreaterThan(
-         Load("leftV"),
-         Load("rightV")));
+{
+	TR::IlBuilder *thenPath = NULL;
+	IfThen(&thenPath, GreaterThan(Load("leftV"), Load("rightV")));
 
-   thenPath->Return(
-   thenPath->   Load("leftV"));
+	thenPath->Return(thenPath->Load("leftV"));
 
-   Return(
-      Load("rightV"));
+	Return(Load("rightV"));
 
-   return true;
-   }
+	return true;
+}
 
-class AddArgConstMethod : public StaticSignatureMethodBuilder<int32_t(int32_t)>
-   {
-   public:
-   AddArgConstMethod(TR::TypeDictionary *types);
-   virtual bool buildIL();
-   };
+class AddArgConstMethod : public StaticSignatureMethodBuilder<int32_t(int32_t)> {
+public:
+	AddArgConstMethod(TR::TypeDictionary *types);
+	virtual bool buildIL();
+};
 
-AddArgConstMethod::AddArgConstMethod(TR::TypeDictionary *types)
-   : StaticSignatureMethodBuilder<int32_t(int32_t)>(types)
-   {
-   DefineLine(LINETOSTR(__LINE__));
-   DefineFile(__FILE__);
+AddArgConstMethod::AddArgConstMethod(TR::TypeDictionary *types) : StaticSignatureMethodBuilder<int32_t(int32_t)>(types)
+{
+	DefineLine(LINETOSTR(__LINE__));
+	DefineFile(__FILE__);
 
-   DefineName("AddArgConst");
-   DefineParameter("arg", Int32);
-   DefineReturnType(Int32);
-   }
+	DefineName("AddArgConst");
+	DefineParameter("arg", Int32);
+	DefineReturnType(Int32);
+}
 
 bool
 AddArgConstMethod::buildIL()
-   {
-   Return(
-      Add(
-         Load("arg"),
-         ConstInt32(42)));
-   return true;
-   }
+{
+	Return(Add(Load("arg"), ConstInt32(42)));
+	return true;
+}
 
-class SubArgArgMethod : public StaticSignatureMethodBuilder<int32_t(int32_t, int32_t)>
-   {
-   public:
-   SubArgArgMethod(TR::TypeDictionary *types);
-   virtual bool buildIL();
-   };
+class SubArgArgMethod : public StaticSignatureMethodBuilder<int32_t(int32_t, int32_t)> {
+public:
+	SubArgArgMethod(TR::TypeDictionary *types);
+	virtual bool buildIL();
+};
 
 SubArgArgMethod::SubArgArgMethod(TR::TypeDictionary *types)
-   : StaticSignatureMethodBuilder<int32_t(int32_t, int32_t)>(types)
-   {
-   DefineLine(LINETOSTR(__LINE__));
-   DefineFile(__FILE__);
+        : StaticSignatureMethodBuilder<int32_t(int32_t, int32_t)>(types)
+{
+	DefineLine(LINETOSTR(__LINE__));
+	DefineFile(__FILE__);
 
-   DefineName("SubArgArg");
-   DefineParameter("arg1", Int32);
-   DefineParameter("arg2", Int32);
-   DefineReturnType(Int32);
-   }
+	DefineName("SubArgArg");
+	DefineParameter("arg1", Int32);
+	DefineParameter("arg2", Int32);
+	DefineReturnType(Int32);
+}
 
 bool
 SubArgArgMethod::buildIL()
-   {
-   Return(
-      Sub(
-         Load("arg1"),
-         Load("arg2")));
-   return true;
-   }
+{
+	Return(Sub(Load("arg1"), Load("arg2")));
+	return true;
+}
 
-class FactorialMethod : public StaticSignatureMethodBuilder<int32_t(int32_t)>
-   {
-   public:
-   FactorialMethod(TR::TypeDictionary *types);
-   virtual bool buildIL();
-   };
+class FactorialMethod : public StaticSignatureMethodBuilder<int32_t(int32_t)> {
+public:
+	FactorialMethod(TR::TypeDictionary *types);
+	virtual bool buildIL();
+};
 
-FactorialMethod::FactorialMethod(TR::TypeDictionary *types)
-   : StaticSignatureMethodBuilder<int32_t(int32_t)>(types)
-   {
-   DefineLine(LINETOSTR(__LINE__));
-   DefineFile(__FILE__);
+FactorialMethod::FactorialMethod(TR::TypeDictionary *types) : StaticSignatureMethodBuilder<int32_t(int32_t)>(types)
+{
+	DefineLine(LINETOSTR(__LINE__));
+	DefineFile(__FILE__);
 
-   DefineName("Factorial");
-   DefineParameter("x", Int32);
-   DefineReturnType(Int32);
-   }
+	DefineName("Factorial");
+	DefineParameter("x", Int32);
+	DefineReturnType(Int32);
+}
 
 bool
 FactorialMethod::buildIL()
-   {
-   TR::IlBuilder *baseCase=NULL, *recursiveCase=NULL;
-   IfThenElse(&baseCase, &recursiveCase,
-      LessThan(
-         Load("x"),
-         ConstInt32(1)));
+{
+	TR::IlBuilder *baseCase = NULL, *recursiveCase = NULL;
+	IfThenElse(&baseCase, &recursiveCase, LessThan(Load("x"), ConstInt32(1)));
 
-   DefineLocal("result", Int32);
+	DefineLocal("result", Int32);
 
-   baseCase->Store("result",
-   baseCase->   ConstInt32(1));
-   recursiveCase->Store("result",
-   recursiveCase->   Mul(
-   recursiveCase->      Call("Factorial", 1,
-   recursiveCase->         Sub(
-   recursiveCase->            Load("x"),
-   recursiveCase->            ConstInt32(1))),
-   recursiveCase->      Load("x")));
+	baseCase->Store("result", baseCase->ConstInt32(1));
+	recursiveCase->Store("result",
+	        recursiveCase->Mul(recursiveCase->Call("Factorial", 1,
+	                                   recursiveCase->Sub(recursiveCase->Load("x"), recursiveCase->ConstInt32(1))),
+	                recursiveCase->Load("x")));
 
-   Return(
-      Load("result"));
-   return true;
-   }
+	Return(Load("result"));
+	return true;
+}
 
-class RecursiveFibonnaciMethod : public StaticSignatureMethodBuilder<int32_t(int32_t)>
-   {
-   public:
+class RecursiveFibonnaciMethod : public StaticSignatureMethodBuilder<int32_t(int32_t)> {
+public:
 	RecursiveFibonnaciMethod(TR::TypeDictionary *types);
-   virtual bool buildIL();
-   };
-
+	virtual bool buildIL();
+};
 
 RecursiveFibonnaciMethod::RecursiveFibonnaciMethod(TR::TypeDictionary *types)
-   : StaticSignatureMethodBuilder<int32_t(int32_t)>(types)
-   {
-   DefineLine(LINETOSTR(__LINE__));
-   DefineFile(__FILE__);
+        : StaticSignatureMethodBuilder<int32_t(int32_t)>(types)
+{
+	DefineLine(LINETOSTR(__LINE__));
+	DefineFile(__FILE__);
 
-   DefineName("fib_recur");
-   DefineParameter("n", Int32);
-   DefineReturnType(Int32);
-   }
+	DefineName("fib_recur");
+	DefineParameter("n", Int32);
+	DefineReturnType(Int32);
+}
 
 bool
 RecursiveFibonnaciMethod::buildIL()
-   {
-   TR::IlBuilder *baseCase=NULL, *recursiveCase=NULL;
-   IfThenElse(&baseCase, &recursiveCase,
-      LessThan(
-         Load("n"),
-         ConstInt32(2)));
+{
+	TR::IlBuilder *baseCase = NULL, *recursiveCase = NULL;
+	IfThenElse(&baseCase, &recursiveCase, LessThan(Load("n"), ConstInt32(2)));
 
-   DefineLocal("result", Int32);
+	DefineLocal("result", Int32);
 
-   baseCase->Store("result",
-   baseCase->   Load("n"));
-   recursiveCase->Store("result",
-   recursiveCase->   Add(
-   recursiveCase->      Call("fib_recur", 1,
-   recursiveCase->         Sub(
-   recursiveCase->            Load("n"),
-   recursiveCase->            ConstInt32(1))),
-   recursiveCase->      Call("fib_recur", 1,
-   recursiveCase->         Sub(
-   recursiveCase->            Load("n"),
-   recursiveCase->            ConstInt32(2)))));
+	baseCase->Store("result", baseCase->Load("n"));
+	recursiveCase->Store("result",
+	        recursiveCase->Add(recursiveCase->Call("fib_recur", 1,
+	                                   recursiveCase->Sub(recursiveCase->Load("n"), recursiveCase->ConstInt32(1))),
+	                recursiveCase->Call("fib_recur", 1,
+	                        recursiveCase->Sub(recursiveCase->Load("n"), recursiveCase->ConstInt32(2)))));
 
-   Return(
-      Load("result"));
-   return true;
-   }
-
+	Return(Load("result"));
+	return true;
+}
 
 template <typename M>
-typename M::FunctionPtr compile()
-   {
-   TR::TypeDictionary types;
-   M m(&types);
-   return m.Compile();
-   }
+typename M::FunctionPtr
+compile()
+{
+	TR::TypeDictionary types;
+	M m(&types);
+	return m.Compile();
+}
 
 TEST_F(MinimalTest, MeaningOfLife)
-   {
-   std::string arch = omrsysinfo_get_CPU_architecture();
-   SKIP_IF((OMRPORT_ARCH_PPC == arch || OMRPORT_ARCH_PPC64 == arch || OMRPORT_ARCH_PPC64LE == arch), MissingImplementation)
-          << "Test is skipped on POWER platform because calls are not currently supported (see issue #1645)";
+{
+	std::string arch = omrsysinfo_get_CPU_architecture();
+	SKIP_IF((OMRPORT_ARCH_PPC == arch || OMRPORT_ARCH_PPC64 == arch || OMRPORT_ARCH_PPC64LE == arch),
+	        MissingImplementation)
+	        << "Test is skipped on POWER platform because calls are not currently supported (see issue #1645)";
 
-   auto entry = compile<MeaningOfLifeMethod>();
+	auto entry = compile<MeaningOfLifeMethod>();
 
-   EXPECT_EQ(entry(), 42);
-   }
+	EXPECT_EQ(entry(), 42);
+}
 
 TEST_F(MinimalTest, ReturnArgI32)
-   {
-   std::string arch = omrsysinfo_get_CPU_architecture();
-   SKIP_IF((OMRPORT_ARCH_PPC == arch || OMRPORT_ARCH_PPC64 == arch || OMRPORT_ARCH_PPC64LE == arch), MissingImplementation)
-           << "Test is skipped on POWER platform because calls are not currently supported (see issue #1645)";
+{
+	std::string arch = omrsysinfo_get_CPU_architecture();
+	SKIP_IF((OMRPORT_ARCH_PPC == arch || OMRPORT_ARCH_PPC64 == arch || OMRPORT_ARCH_PPC64LE == arch),
+	        MissingImplementation)
+	        << "Test is skipped on POWER platform because calls are not currently supported (see issue #1645)";
 
-   auto entry = compile<ReturnArgI32Method>();
+	auto entry = compile<ReturnArgI32Method>();
 
-   EXPECT_EQ(entry(42), 42);
-   EXPECT_EQ(entry(-1), -1);
-   }
+	EXPECT_EQ(entry(42), 42);
+	EXPECT_EQ(entry(-1), -1);
+}
 
 TEST_F(MinimalTest, MaxIfThen)
-   {
-   std::string arch = omrsysinfo_get_CPU_architecture();
-   SKIP_IF((OMRPORT_ARCH_PPC == arch || OMRPORT_ARCH_PPC64 == arch || OMRPORT_ARCH_PPC64LE == arch), MissingImplementation)
-           << "Test is skipped on POWER platform because calls are not currently supported (see issue #1645)";
+{
+	std::string arch = omrsysinfo_get_CPU_architecture();
+	SKIP_IF((OMRPORT_ARCH_PPC == arch || OMRPORT_ARCH_PPC64 == arch || OMRPORT_ARCH_PPC64LE == arch),
+	        MissingImplementation)
+	        << "Test is skipped on POWER platform because calls are not currently supported (see issue #1645)";
 
-   auto entry = compile<MaxIfThenMethod>();
+	auto entry = compile<MaxIfThenMethod>();
 
-   EXPECT_EQ(entry(10, 20), 20);
-   EXPECT_EQ(entry(20, 10), 20);
-   EXPECT_EQ(entry(-20,10), 10);
-   EXPECT_EQ(entry(10,-20), 10);
-   }
+	EXPECT_EQ(entry(10, 20), 20);
+	EXPECT_EQ(entry(20, 10), 20);
+	EXPECT_EQ(entry(-20, 10), 10);
+	EXPECT_EQ(entry(10, -20), 10);
+}
 
 TEST_F(MinimalTest, AddArgConst)
-   {
-   std::string arch = omrsysinfo_get_CPU_architecture();
-   SKIP_IF((OMRPORT_ARCH_PPC == arch || OMRPORT_ARCH_PPC64 == arch || OMRPORT_ARCH_PPC64LE == arch), MissingImplementation)
-           << "Test is skipped on POWER platform because calls are not currently supported (see issue #1645)";
+{
+	std::string arch = omrsysinfo_get_CPU_architecture();
+	SKIP_IF((OMRPORT_ARCH_PPC == arch || OMRPORT_ARCH_PPC64 == arch || OMRPORT_ARCH_PPC64LE == arch),
+	        MissingImplementation)
+	        << "Test is skipped on POWER platform because calls are not currently supported (see issue #1645)";
 
-   auto entry = compile<AddArgConstMethod>();
+	auto entry = compile<AddArgConstMethod>();
 
-   EXPECT_EQ(entry(42), 42+42);
-   EXPECT_EQ(entry(-1), 42-1);
-   }
+	EXPECT_EQ(entry(42), 42 + 42);
+	EXPECT_EQ(entry(-1), 42 - 1);
+}
 
 TEST_F(MinimalTest, SubArgArg)
-   {
-   std::string arch = omrsysinfo_get_CPU_architecture();
-   SKIP_IF((OMRPORT_ARCH_PPC == arch || OMRPORT_ARCH_PPC64 == arch || OMRPORT_ARCH_PPC64LE == arch), MissingImplementation)
-           << "Test is skipped on POWER platform because calls are not currently supported (see issue #1645)";
+{
+	std::string arch = omrsysinfo_get_CPU_architecture();
+	SKIP_IF((OMRPORT_ARCH_PPC == arch || OMRPORT_ARCH_PPC64 == arch || OMRPORT_ARCH_PPC64LE == arch),
+	        MissingImplementation)
+	        << "Test is skipped on POWER platform because calls are not currently supported (see issue #1645)";
 
-   auto entry = compile<SubArgArgMethod>();
+	auto entry = compile<SubArgArgMethod>();
 
-   EXPECT_EQ(entry(10, 20), -10);
-   EXPECT_EQ(entry(20, 10), 10);
-   EXPECT_EQ(entry(-20,10), -30);
-   EXPECT_EQ(entry(10,-20), 30);
-   }
+	EXPECT_EQ(entry(10, 20), -10);
+	EXPECT_EQ(entry(20, 10), 10);
+	EXPECT_EQ(entry(-20, 10), -30);
+	EXPECT_EQ(entry(10, -20), 30);
+}
 
 TEST_F(MinimalTest, Factorial)
-   {
-   std::string arch = omrsysinfo_get_CPU_architecture();
-   SKIP_IF((OMRPORT_ARCH_PPC == arch || OMRPORT_ARCH_PPC64 == arch || OMRPORT_ARCH_PPC64LE == arch), MissingImplementation)
-           << "Test is skipped on POWER platform because calls are not currently supported (see issue #1645)";
+{
+	std::string arch = omrsysinfo_get_CPU_architecture();
+	SKIP_IF((OMRPORT_ARCH_PPC == arch || OMRPORT_ARCH_PPC64 == arch || OMRPORT_ARCH_PPC64LE == arch),
+	        MissingImplementation)
+	        << "Test is skipped on POWER platform because calls are not currently supported (see issue #1645)";
 
-   auto entry = compile<FactorialMethod>();
+	auto entry = compile<FactorialMethod>();
 
-   EXPECT_EQ(entry(5), 120);
-   }
+	EXPECT_EQ(entry(5), 120);
+}
 
 static int32_t
 RecursiveFibonnaci(int32_t n)
-   {
-   if (n < 2)
-      return n;
-   return RecursiveFibonnaci(n-1) + RecursiveFibonnaci(n-2);
-   }
+{
+	if (n < 2)
+		return n;
+	return RecursiveFibonnaci(n - 1) + RecursiveFibonnaci(n - 2);
+}
 
 TEST_F(MinimalTest, RecursiveFibonnaci)
-   {
-   std::string arch = omrsysinfo_get_CPU_architecture();
-   SKIP_IF((OMRPORT_ARCH_PPC == arch || OMRPORT_ARCH_PPC64 == arch || OMRPORT_ARCH_PPC64LE == arch), MissingImplementation)
-           << "Test is skipped on POWER platform because calls are not currently supported (see issue #1645)";
+{
+	std::string arch = omrsysinfo_get_CPU_architecture();
+	SKIP_IF((OMRPORT_ARCH_PPC == arch || OMRPORT_ARCH_PPC64 == arch || OMRPORT_ARCH_PPC64LE == arch),
+	        MissingImplementation)
+	        << "Test is skipped on POWER platform because calls are not currently supported (see issue #1645)";
 
-   auto entry = compile<RecursiveFibonnaciMethod>();
+	auto entry = compile<RecursiveFibonnaciMethod>();
 
-   EXPECT_EQ(entry(10), RecursiveFibonnaci(10));
-   }
+	EXPECT_EQ(entry(10), RecursiveFibonnaci(10));
+}

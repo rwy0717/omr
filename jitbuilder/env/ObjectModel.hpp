@@ -25,17 +25,13 @@
 
 #include "env/JBObjectModel.hpp"
 
+namespace TR {
 
-namespace TR
-{
+class ObjectModel : public JitBuilder::ObjectModelConnector {
+public:
+	ObjectModel() : JitBuilder::ObjectModelConnector() {}
+};
 
-class ObjectModel : public JitBuilder::ObjectModelConnector
-   {
-   public:
-
-   ObjectModel() : JitBuilder::ObjectModelConnector() {}
-   };
-
-}
+} // namespace TR
 
 #endif

@@ -53,13 +53,14 @@ char *read_from_catalog(struct OMRPortLibrary *portLibrary, intptr_t fd, char *b
 static void open_catalog(struct OMRPortLibrary *portLibrary);
 
 static const char *nlsh_lookup(struct OMRPortLibrary *portLibrary, uint32_t module_name, uint32_t message_num);
-static J9NLSHashEntry *nls_allocateHashEntry(struct OMRPortLibrary *portLibrary, uint32_t module_name, uint32_t message_num, const char *message, uint32_t sizeOfMessage);
-static const char *parse_catalog(struct OMRPortLibrary *portLibrary, uintptr_t flags, uint32_t module_name, uint32_t message_num, const char *default_string);
+static J9NLSHashEntry *nls_allocateHashEntry(struct OMRPortLibrary *portLibrary, uint32_t module_name,
+        uint32_t message_num, const char *message, uint32_t sizeOfMessage);
+static const char *parse_catalog(struct OMRPortLibrary *portLibrary, uintptr_t flags, uint32_t module_name,
+        uint32_t message_num, const char *default_string);
 static void nlsh_insert(struct OMRPortLibrary *portLibrary, J9NLSHashEntry *entry);
 static void writeSyslog(struct OMRPortLibrary *portLibrary, uintptr_t flags, const char *format, va_list args);
 static void convertModuleName(uint32_t module_name, uint8_t *module_str);
 static uint32_t nlsh_hash(uint32_t module_name, uint32_t message_num);
-
 
 /* a sample key */
 #define J9NLS_EXEMPLAR "XXXX000"
@@ -126,7 +127,6 @@ j9nls_get_language(struct OMRPortLibrary *portLibrary)
 	}
 	nls = &portLibrary->portGlobals->nls_data;
 
-
 	return nls->language;
 }
 
@@ -153,7 +153,6 @@ j9nls_get_region(struct OMRPortLibrary *portLibrary)
 	nls = &portLibrary->portGlobals->nls_data;
 
 	return nls->region;
-
 }
 /**
  * Return the string representing the currently set variant.
@@ -245,7 +244,8 @@ writeSyslog(struct OMRPortLibrary *portLibrary, uintptr_t flags, const char *for
 	if (sizeof(localBuffer) >= bufferSize) {
 		writeBuffer = localBuffer;
 	} else {
-		writeBuffer = portLibrary->mem_allocate_memory(portLibrary, bufferSize, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
+		writeBuffer = portLibrary->mem_allocate_memory(
+		        portLibrary, bufferSize, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 	}
 
 	/* format and write out the buffer (truncate into local buffer as last resort) */
@@ -308,7 +308,8 @@ j9nls_printf(struct OMRPortLibrary *portLibrary, uintptr_t flags, uint32_t modul
  * in the "Inside J9" Lotus Notes database.
  */
 void
-j9nls_vprintf(struct OMRPortLibrary *portLibrary, uintptr_t flags, uint32_t module_name, uint32_t message_num, va_list args)
+j9nls_vprintf(
+        struct OMRPortLibrary *portLibrary, uintptr_t flags, uint32_t module_name, uint32_t message_num, va_list args)
 {
 	const char *message;
 	va_list argsForSyslog;
@@ -331,12 +332,14 @@ j9nls_vprintf(struct OMRPortLibrary *portLibrary, uintptr_t flags, uint32_t modu
 		char buffer[1024];
 		va_list argsForTrace;
 
-		/* Format the message text for the tracepoint insert and issue tracepoint. Uses simple buffer for message
-		 * text, limit of 1024 characters. NLS messages are typically less than 80 characters.
+		/* Format the message text for the tracepoint insert and issue tracepoint. Uses simple buffer for
+		 * message text, limit of 1024 characters. NLS messages are typically less than 80 characters.
 		 */
 		COPY_VA_LIST(argsForTrace, args);
-		if (sizeof(buffer) == portLibrary->str_vprintf(portLibrary, buffer, sizeof(buffer), message, argsForTrace)) {
-			/* str_vprintf will fill buffer with no null terminator if message is longer than buffer length -- add null terminator */
+		if (sizeof(buffer)
+		        == portLibrary->str_vprintf(portLibrary, buffer, sizeof(buffer), message, argsForTrace)) {
+			/* str_vprintf will fill buffer with no null terminator if message is longer than buffer length
+			 * -- add null terminator */
 			buffer[sizeof(buffer) - 1] = '\0';
 		}
 		Trc_PRT_j9nls_vprintf(buffer);
@@ -369,7 +372,8 @@ j9nls_vprintf(struct OMRPortLibrary *portLibrary, uintptr_t flags, uint32_t modu
  * @deprecated NLS API is deprecated.
  */
 const char *
-j9nls_lookup_message(struct OMRPortLibrary *portLibrary, uintptr_t flags, uint32_t module_name, uint32_t message_num, const char *default_string)
+j9nls_lookup_message(struct OMRPortLibrary *portLibrary, uintptr_t flags, uint32_t module_name, uint32_t message_num,
+        const char *default_string)
 {
 	const char *message;
 	J9NLSDataCache *nls;
@@ -421,7 +425,8 @@ done:
  * @deprecated NLS API is deprecated.
  */
 void
-j9nls_set_catalog(struct OMRPortLibrary *portLibrary, const char **paths, const int nPaths, const char *baseName, const char *extension)
+j9nls_set_catalog(struct OMRPortLibrary *portLibrary, const char **paths, const int nPaths, const char *baseName,
+        const char *extension)
 {
 	int i;
 	char *p;
@@ -459,7 +464,8 @@ j9nls_set_catalog(struct OMRPortLibrary *portLibrary, const char **paths, const 
 	}
 
 	for (i = 0; i < nPaths; i++) {
-		nls->baseCatalogPaths[i] = portLibrary->mem_allocate_memory(portLibrary, strlen(paths[i]) + 1, OMR_GET_CALLSITE() , OMRMEM_CATEGORY_PORT_LIBRARY);
+		nls->baseCatalogPaths[i] = portLibrary->mem_allocate_memory(
+		        portLibrary, strlen(paths[i]) + 1, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 		if (nls->baseCatalogPaths[i]) {
 			strcpy(nls->baseCatalogPaths[i], paths[i]);
 			p = strrchr(nls->baseCatalogPaths[i], DIR_SEPARATOR);
@@ -470,12 +476,14 @@ j9nls_set_catalog(struct OMRPortLibrary *portLibrary, const char **paths, const 
 		}
 	}
 
-	nls->baseCatalogName = portLibrary->mem_allocate_memory(portLibrary, strlen(baseName) + 1, OMR_GET_CALLSITE() , OMRMEM_CATEGORY_PORT_LIBRARY);
+	nls->baseCatalogName = portLibrary->mem_allocate_memory(
+	        portLibrary, strlen(baseName) + 1, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 	if (nls->baseCatalogName) {
 		strcpy(nls->baseCatalogName, baseName);
 	}
 
-	nls->baseCatalogExtension = portLibrary->mem_allocate_memory(portLibrary, strlen(extension) + 1, OMR_GET_CALLSITE() , OMRMEM_CATEGORY_PORT_LIBRARY);
+	nls->baseCatalogExtension = portLibrary->mem_allocate_memory(
+	        portLibrary, strlen(extension) + 1, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 	if (nls->baseCatalogExtension) {
 		strcpy(nls->baseCatalogExtension, extension);
 	}
@@ -486,7 +494,6 @@ j9nls_set_catalog(struct OMRPortLibrary *portLibrary, const char **paths, const 
 
 clean_exit:
 	omrthread_monitor_exit(nls->monitor);
-
 }
 
 static char *
@@ -546,7 +553,7 @@ build_catalog_name(struct OMRPortLibrary *portLibrary, int32_t usePath, int32_t 
 	len += strlen(nls->variant) + 1;
 	len += 1; /* null terminator */
 
-	catalog = portLibrary->mem_allocate_memory(portLibrary, len, OMR_GET_CALLSITE() , OMRMEM_CATEGORY_PORT_LIBRARY);
+	catalog = portLibrary->mem_allocate_memory(portLibrary, len, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 	if (!catalog) {
 		goto _done;
 	}
@@ -590,11 +597,8 @@ open_catalog(struct OMRPortLibrary *portLibrary)
 	nls = &portLibrary->portGlobals->nls_data;
 
 	/* try the following way to look for the catalog:
-	 * The base name will typically be "<path>/java.properties". Append as many locale descriptors to the file name as possible to find a file.
-	 * e.g.
-	 *	java_en_US_Texas.properties
-	 *	java_en_US.properties
-	 *	java_en.properties
+	 * The base name will typically be "<path>/java.properties". Append as many locale descriptors to the file name
+	 *as possible to find a file. e.g. java_en_US_Texas.properties java_en_US.properties java_en.properties
 	 *	java.properties
 	 */
 
@@ -643,7 +647,8 @@ open_catalog(struct OMRPortLibrary *portLibrary)
 }
 
 static const char *
-parse_catalog(struct OMRPortLibrary *portLibrary, uintptr_t flags, uint32_t module_name, uint32_t message_num, const char *default_string)
+parse_catalog(struct OMRPortLibrary *portLibrary, uintptr_t flags, uint32_t module_name, uint32_t message_num,
+        const char *default_string)
 {
 #define MSG_NONE 0
 #define MSG_SLASH 1
@@ -665,13 +670,11 @@ parse_catalog(struct OMRPortLibrary *portLibrary, uintptr_t flags, uint32_t modu
 	intptr_t fd = -1;
 	J9NLSHashEntry *entry = NULL;
 	char convertedModuleEnum[5];
-	/* calculate a size which is larger than we could possibly need by putting together all of the prefixes and suffixes */
-	char prefix[
-		sizeof(J9NLS_ERROR_PREFIX "" J9NLS_INFO_PREFIX "" J9NLS_WARNING_PREFIX
-			   "" J9NLS_COMMON_PREFIX "" J9NLS_EXEMPLAR
-			   "" J9NLS_ERROR_SUFFIX "" J9NLS_INFO_SUFFIX "" J9NLS_WARNING_SUFFIX
-			   " \n")
-	];
+	/* calculate a size which is larger than we could possibly need by putting together all of the prefixes and
+	 * suffixes */
+	char prefix[sizeof(
+	        J9NLS_ERROR_PREFIX "" J9NLS_INFO_PREFIX "" J9NLS_WARNING_PREFIX "" J9NLS_COMMON_PREFIX "" J9NLS_EXEMPLAR
+	                           "" J9NLS_ERROR_SUFFIX "" J9NLS_INFO_SUFFIX "" J9NLS_WARNING_SUFFIX " \n")];
 	char *searchKey;
 	BOOLEAN newline = !(flags & J9NLS_DO_NOT_APPEND_NEWLINE);
 	const char *format;
@@ -705,7 +708,8 @@ parse_catalog(struct OMRPortLibrary *portLibrary, uintptr_t flags, uint32_t modu
 			format = "" J9NLS_INFO_PREFIX "" J9NLS_COMMON_PREFIX "%s%03u" J9NLS_INFO_SUFFIX " %s";
 		}
 	}
-	portLibrary->str_printf(portLibrary, prefix, sizeof(prefix), format, convertedModuleEnum, message_num, newline ? "\n" : "");
+	portLibrary->str_printf(
+	        portLibrary, prefix, sizeof(prefix), format, convertedModuleEnum, message_num, newline ? "\n" : "");
 
 	/* make sure the searchKey string starts at J9VM001 instead of (E)J9VM001 */
 	searchKey = prefix + (strchr(format, '%') - format);
@@ -725,7 +729,7 @@ parse_catalog(struct OMRPortLibrary *portLibrary, uintptr_t flags, uint32_t modu
 		if (default_string) {
 			tmpStr = (char *)default_string;
 		}
-		entry = nls_allocateHashEntry(portLibrary, module_name, message_num,  tmpStr, (uint32_t)strlen(tmpStr));
+		entry = nls_allocateHashEntry(portLibrary, module_name, message_num, tmpStr, (uint32_t)strlen(tmpStr));
 		if (!entry) {
 			return default_string;
 		}
@@ -733,8 +737,8 @@ parse_catalog(struct OMRPortLibrary *portLibrary, uintptr_t flags, uint32_t modu
 		return entry->message;
 	}
 
-
-	if (!(buf = portLibrary->mem_allocate_memory(portLibrary, bufSize, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY))) {
+	if (!(buf = portLibrary->mem_allocate_memory(
+	              portLibrary, bufSize, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY))) {
 		goto finished;
 	}
 
@@ -747,7 +751,8 @@ parse_catalog(struct OMRPortLibrary *portLibrary, uintptr_t flags, uint32_t modu
 
 			if (offset + 2 >= bufSize) {
 				bufSize <<= 1;
-				if (!(newBuf = portLibrary->mem_allocate_memory(portLibrary, bufSize, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY))) {
+				if (!(newBuf = portLibrary->mem_allocate_memory(portLibrary, bufSize,
+				              OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY))) {
 					goto finished;
 				}
 				memcpy(newBuf, buf, offset);
@@ -776,11 +781,11 @@ parse_catalog(struct OMRPortLibrary *portLibrary, uintptr_t flags, uint32_t modu
 					buf[offset++] = unicode;
 				} else if (unicode == 0 || (unicode >= 0x80 && unicode <= 0x7ff)) {
 					buf[offset++] = ((unicode >> 6) & 0x1f) | 0xc0;
-					buf[offset++] = (unicode        & 0x3f) | 0x80;
+					buf[offset++] = (unicode & 0x3f) | 0x80;
 				} else if (unicode >= 0x800 && unicode <= 0xffff) {
 					buf[offset++] = ((unicode >> 12) & 0x0f) | 0xe0;
-					buf[offset++] = ((unicode >> 6)  & 0x3f) | 0x80;
-					buf[offset++] = (unicode         & 0x3f) | 0x80;
+					buf[offset++] = ((unicode >> 6) & 0x3f) | 0x80;
+					buf[offset++] = (unicode & 0x3f) | 0x80;
 				}
 				if (nextChar != '\n') {
 					continue;
@@ -796,21 +801,11 @@ parse_catalog(struct OMRPortLibrary *portLibrary, uintptr_t flags, uint32_t modu
 				case '\n':
 					mode = MSG_IGNORE; /* Ignore whitespace on the next line */
 					continue;
-				case 'b':
-					nextChar = '\b';
-					break;
-				case 'f':
-					nextChar = '\f';
-					break;
-				case 'n':
-					nextChar = '\n';
-					break;
-				case 'r':
-					nextChar = '\r';
-					break;
-				case 't':
-					nextChar = '\t';
-					break;
+				case 'b': nextChar = '\b'; break;
+				case 'f': nextChar = '\f'; break;
+				case 'n': nextChar = '\n'; break;
+				case 'r': nextChar = '\r'; break;
+				case 't': nextChar = '\t'; break;
 				case 'u':
 					mode = MSG_UNICODE;
 					unicode = count = 0;
@@ -824,9 +819,12 @@ parse_catalog(struct OMRPortLibrary *portLibrary, uintptr_t flags, uint32_t modu
 
 						while (1) {
 							if (charPointer >= endPointer) {
-								if (read_from_catalog(portLibrary, fd, (char *)dataBuf, BUF_SIZE) != NULL) {
+								if (read_from_catalog(
+								            portLibrary, fd, (char *)dataBuf, BUF_SIZE)
+								        != NULL) {
 									charPointer = dataBuf;
-									endPointer = charPointer + strlen((char *)charPointer);
+									endPointer = charPointer
+									        + strlen((char *)charPointer);
 								}
 							}
 							if (charPointer >= endPointer) {
@@ -849,18 +847,23 @@ parse_catalog(struct OMRPortLibrary *portLibrary, uintptr_t flags, uint32_t modu
 				case '\r':
 					mode = MSG_NONE;
 					firstChar = TRUE;
-makeStrings:
+				makeStrings:
 					if (keyLength >= 0) {
 #if defined(NLS_DEBUG)
-						portLibrary->tty_printf(portLibrary, "NLS - parse_catalog - keyLength: %d -- buf: %20.20s\n", keyLength, buf);
+						portLibrary->tty_printf(portLibrary,
+						        "NLS - parse_catalog - keyLength: %d -- buf: %20.20s\n",
+						        keyLength, buf);
 #endif
 						if (strncmp(searchKey, buf, sizeof(J9NLS_EXEMPLAR) - 1) == 0) {
 #if defined(NLS_DEBUG)
-							portLibrary->tty_printf(portLibrary, "NLS - parse_catalog - key match\n");
+							portLibrary->tty_printf(
+							        portLibrary, "NLS - parse_catalog - key match\n");
 #endif
 							/* we have the exact message */
 							if (flags & J9NLS_DO_NOT_PRINT_MESSAGE_TAG) {
-								entry = nls_allocateHashEntry(portLibrary, module_name, message_num,  buf + keyLength, offset - keyLength + 1);
+								entry = nls_allocateHashEntry(portLibrary, module_name,
+								        message_num, buf + keyLength,
+								        offset - keyLength + 1);
 								if (entry) {
 									entry->message[offset - keyLength] = '\0';
 									if (newline) {
@@ -868,11 +871,15 @@ makeStrings:
 									}
 								}
 							} else {
-								entry = nls_allocateHashEntry(portLibrary, module_name, message_num,  prefix, offset - keyLength + (uint32_t)strlen(prefix));
+								entry = nls_allocateHashEntry(portLibrary, module_name,
+								        message_num, prefix,
+								        offset - keyLength + (uint32_t)strlen(prefix));
 								if (entry) {
 									/* null terminate and trim the \n if required */
-									entry->message[strlen(prefix) - (newline ? 1 : 0)] = '\0';
-									strncat(entry->message, buf + keyLength, offset - keyLength);
+									entry->message[strlen(prefix)
+									        - (newline ? 1 : 0)] = '\0';
+									strncat(entry->message, buf + keyLength,
+									        offset - keyLength);
 									if (newline) {
 										strcat(entry->message, "\n");
 									}
@@ -883,25 +890,28 @@ makeStrings:
 						keyLength = -1;
 					}
 					if (charPointer >= endPointer) {
-						if (read_from_catalog(portLibrary, fd, (char *)dataBuf, BUF_SIZE) != NULL) {
+						if (read_from_catalog(portLibrary, fd, (char *)dataBuf, BUF_SIZE)
+						        != NULL) {
 							charPointer = dataBuf;
 							endPointer = charPointer + strlen((char *)charPointer);
 						}
 					}
 					if (charPointer >= endPointer) {
-finished:
+					finished:
 						if (buf) {
 							portLibrary->mem_free_memory(portLibrary, buf);
 						}
 #if defined(NLS_DEBUG)
-						portLibrary->tty_printf(portLibrary, "NLS - parse_catalog - inserting message\n");
+						portLibrary->tty_printf(
+						        portLibrary, "NLS - parse_catalog - inserting message\n");
 #endif
 						if (!entry) {
 							char *tmpStr = prefix;
 							if (default_string) {
 								tmpStr = (char *)default_string;
 							}
-							entry = nls_allocateHashEntry(portLibrary, module_name, message_num,  tmpStr, (uint32_t)strlen(tmpStr));
+							entry = nls_allocateHashEntry(portLibrary, module_name,
+							        message_num, tmpStr, (uint32_t)strlen(tmpStr));
 							if (!entry) {
 								portLibrary->file_close(portLibrary, fd);
 								return default_string;
@@ -916,9 +926,7 @@ finished:
 					}
 					offset = 0;
 					continue;
-				case '\\':
-					mode = MSG_SLASH;
-					continue;
+				case '\\': mode = MSG_SLASH; continue;
 				case ':':
 				case '=':
 					if (keyLength == -1) { /* if parsing the key */
@@ -960,7 +968,6 @@ finished:
 #undef MSG_CONTINUE
 #undef MSG_DONE
 #undef MSG_IGNORE
-
 }
 
 static void
@@ -980,7 +987,7 @@ free_catalog(struct OMRPortLibrary *portLibrary)
 	nls = &portLibrary->portGlobals->nls_data;
 
 	for (i = 0; i < J9NLS_NUM_HASH_BUCKETS; i++) {
-		J9NLSHashEntry *entry  = nls->hash_buckets[i];
+		J9NLSHashEntry *entry = nls->hash_buckets[i];
 		if (entry) {
 			while (entry->next) {
 				entry = entry->next;
@@ -1070,17 +1077,17 @@ j9nls_startup(struct OMRPortLibrary *portLibrary)
 
 	if (NULL == portLibrary->portGlobals) {
 		/* CMVC 114135: failure to allocate portGlobals */
-		return (int32_t) OMRPORT_ERROR_STARTUP_NLS;
+		return (int32_t)OMRPORT_ERROR_STARTUP_NLS;
 	}
 	nls = &portLibrary->portGlobals->nls_data;
 
 	if (0 != omrthread_monitor_init_with_name(&nls->monitor, 0, "NLS hash table")) {
-		return (int32_t) OMRPORT_ERROR_STARTUP_NLS;
+		return (int32_t)OMRPORT_ERROR_STARTUP_NLS;
 	}
 
 	nls_determine_locale(portLibrary);
 
-	return (int32_t) 0;
+	return (int32_t)0;
 }
 /**
  * Free dynamically cached data (allocated and cached since @ref j9nls_startup was called).  This should be
@@ -1179,9 +1186,12 @@ j9nls_shutdown(struct OMRPortLibrary *portLibrary)
 	omrthread_monitor_destroy(nls->monitor);
 }
 static J9NLSHashEntry *
-nls_allocateHashEntry(struct OMRPortLibrary *portLibrary, uint32_t module_name, uint32_t message_num, const char *message, uint32_t sizeOfMessage)
+nls_allocateHashEntry(struct OMRPortLibrary *portLibrary, uint32_t module_name, uint32_t message_num,
+        const char *message, uint32_t sizeOfMessage)
 {
-	J9NLSHashEntry *entry = portLibrary->mem_allocate_memory(portLibrary, sizeof(J9NLSHashEntry) + sizeOfMessage + 1 - sizeof(entry->message), OMR_GET_CALLSITE() , OMRMEM_CATEGORY_PORT_LIBRARY);
+	J9NLSHashEntry *entry = portLibrary->mem_allocate_memory(portLibrary,
+	        sizeof(J9NLSHashEntry) + sizeOfMessage + 1 - sizeof(entry->message), OMR_GET_CALLSITE(),
+	        OMRMEM_CATEGORY_PORT_LIBRARY);
 #if defined(NLS_DEBUG_TRACE)
 	portLibrary->tty_printf(portLibrary, "NLS - nls_allocateHashEntry\n");
 #endif
@@ -1195,7 +1205,8 @@ nls_allocateHashEntry(struct OMRPortLibrary *portLibrary, uint32_t module_name, 
 	memcpy(entry->message, message, sizeOfMessage);
 	entry->message[sizeOfMessage] = '\0';
 #if defined(NLS_DEBUG)
-	portLibrary->tty_printf(portLibrary, "NLS - nls_allocateHashEntry - message: %s - sizeOfMessage: %d\n", entry->message, sizeOfMessage);
+	portLibrary->tty_printf(portLibrary, "NLS - nls_allocateHashEntry - message: %s - sizeOfMessage: %d\n",
+	        entry->message, sizeOfMessage);
 #endif
 	return entry;
 }
@@ -1205,7 +1216,7 @@ convertModuleName(uint32_t module_name, uint8_t *module_str)
 	module_str[0] = (uint8_t)((module_name >> 24) & 0xff);
 	module_str[1] = (uint8_t)((module_name >> 16) & 0xff);
 	module_str[2] = (uint8_t)((module_name >> 8) & 0xff);
-	module_str[3] = (uint8_t)((module_name) & 0xff);
+	module_str[3] = (uint8_t)((module_name)&0xff);
 	module_str[4] = 0;
 }
 
@@ -1228,7 +1239,6 @@ read_from_catalog(struct OMRPortLibrary *portLibrary, intptr_t fd, char *buf, in
 	/* discount 1 for the trailing NUL */
 	nbytes -= 1;
 
-
 #if defined(J9ZOS390) && !defined(OMR_EBCDIC)
 	/* iconv_get is not an a2e function, so we need to pass it honest-to-goodness EBCDIC strings */
 #pragma convlit(suspend)
@@ -1238,7 +1248,6 @@ read_from_catalog(struct OMRPortLibrary *portLibrary, intptr_t fd, char *buf, in
 		return NULL;
 	}
 #endif /* defined(J9ZOS390) && !defined(OMR_EBCDIC) */
-
 
 	while (nbytes) {
 		count = BUF_SIZE > nbytes ? nbytes : BUF_SIZE;
@@ -1260,7 +1269,8 @@ read_from_catalog(struct OMRPortLibrary *portLibrary, intptr_t fd, char *buf, in
 		inbytesleft = count;
 		outbuf = cursor;
 		outbytesleft = nbytes;
-		if ((size_t) - 1 == iconv(converter, &inbuf, &inbytesleft, &outbuf, &outbytesleft) || inbytesleft == count) {
+		if ((size_t)-1 == iconv(converter, &inbuf, &inbytesleft, &outbuf, &outbytesleft)
+		        || inbytesleft == count) {
 			/* conversion failed */
 			iconv_free(portLibrary, J9NLS_ICONV_DESCRIPTOR, converter);
 			portLibrary->file_seek(portLibrary, fd, -1 * count, EsSeekCur);

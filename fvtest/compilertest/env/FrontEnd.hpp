@@ -28,57 +28,59 @@
 #include "env/jittypes.h"
 #include "runtime/TestJitConfig.hpp"
 
-namespace TR { class GCStackAtlas; }
-namespace OMR { struct MethodMetaDataPOD; }
+namespace TR {
+class GCStackAtlas;
+}
+namespace OMR {
+struct MethodMetaDataPOD;
+}
 class TR_ResolvedMethod;
 
-namespace TR
-{
+namespace TR {
 
-template <> struct FETraits<TestCompiler::FrontEnd>
-   {
-   typedef TestCompiler::JitConfig      JitConfig;
-   static const size_t  DEFAULT_SEG_SIZE = (128 * 1024); // 128kb
-   };
+template <>
+struct FETraits<TestCompiler::FrontEnd> {
+	typedef TestCompiler::JitConfig JitConfig;
+	static const size_t DEFAULT_SEG_SIZE = (128 * 1024); // 128kb
+};
 
-}
+} // namespace TR
 
-namespace TestCompiler
-{
+namespace TestCompiler {
 
-class FrontEnd : public TR::FEBase<FrontEnd>
-   {
-   private:
-   static FrontEnd   *_instance; /* singleton */
+class FrontEnd : public TR::FEBase<FrontEnd> {
+private:
+	static FrontEnd *_instance; /* singleton */
 
-   public:
-   FrontEnd();
-   static FrontEnd *instance()  { TR_ASSERT(_instance, "bad singleton"); return _instance; }
+public:
+	FrontEnd();
+	static FrontEnd *instance()
+	{
+		TR_ASSERT(_instance, "bad singleton");
+		return _instance;
+	}
 
-   virtual void reserveTrampolineIfNecessary(TR::Compilation *comp, TR::SymbolReference *symRef, bool inBinaryEncoding);
+	virtual void reserveTrampolineIfNecessary(
+	        TR::Compilation *comp, TR::SymbolReference *symRef, bool inBinaryEncoding);
 
 #if defined(TR_TARGET_S390)
-   virtual void generateBinaryEncodingPrologue(TR_BinaryEncodingData *beData, TR::CodeGenerator *cg);
+	virtual void generateBinaryEncodingPrologue(TR_BinaryEncodingData *beData, TR::CodeGenerator *cg);
 #endif
 
-   virtual intptrj_t methodTrampolineLookup(TR::Compilation *comp, TR::SymbolReference *symRef,  void *currentCodeCache);
+	virtual intptrj_t methodTrampolineLookup(
+	        TR::Compilation *comp, TR::SymbolReference *symRef, void *currentCodeCache);
 
-  TR_ResolvedMethod * createResolvedMethod(TR_Memory * trMemory, TR_OpaqueMethodBlock * aMethod,
-                                            TR_ResolvedMethod * owningMethod, TR_OpaqueClassBlock *classForNewInstance);
-
-
-
-   };
+	TR_ResolvedMethod *createResolvedMethod(TR_Memory *trMemory, TR_OpaqueMethodBlock *aMethod,
+	        TR_ResolvedMethod *owningMethod, TR_OpaqueClassBlock *classForNewInstance);
+};
 
 } // namespace TestCompiler
 
-namespace TR
-{
-class FrontEnd : public TestCompiler::FrontEnd
-   {
-   public:
-   FrontEnd();
-   };
+namespace TR {
+class FrontEnd : public TestCompiler::FrontEnd {
+public:
+	FrontEnd();
+};
 
 } // namespace TR
 

@@ -26,8 +26,7 @@
 #include "ddr/error.hpp"
 
 /* This type represents both class and struct types */
-class ClassUDT : public ClassType
-{
+class ClassUDT : public ClassType {
 public:
 	ClassUDT *_superClass;
 	bool _isClass;
@@ -39,7 +38,7 @@ public:
 
 	virtual DDR_RC acceptVisitor(const TypeVisitor &visitor);
 
-	bool operator==(const Type & rhs) const;
+	bool operator==(const Type &rhs) const;
 	virtual bool compareToClass(const ClassUDT &) const;
 };
 

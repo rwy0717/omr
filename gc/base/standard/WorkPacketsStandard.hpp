@@ -23,7 +23,6 @@
 #if !defined(WORKPACKETSSTANDARD_HPP_)
 #define WORKPACKETSSTANDARD_HPP_
 
-
 #include "EnvironmentStandard.hpp"
 #include "WorkPackets.hpp"
 
@@ -32,37 +31,27 @@ class MM_CardTable;
 /**
  * @todo Provide class documentation
  */
-class MM_WorkPacketsStandard : public MM_WorkPackets
-{
-/*
- * Data members
- */
+class MM_WorkPacketsStandard : public MM_WorkPackets {
+	/*
+	 * Data members
+	 */
 private:
-
 protected:
-
 public:
-	
-/*
- * Function members
- */
+	/*
+	 * Function members
+	 */
 private:
-	
 protected:
 	virtual MM_WorkPacketOverflow *createOverflowHandler(MM_EnvironmentBase *env, MM_WorkPackets *workPackets);
 
 public:
-	static MM_WorkPacketsStandard  *newInstance(MM_EnvironmentBase *env);
+	static MM_WorkPacketsStandard *newInstance(MM_EnvironmentBase *env);
 
 	/**
 	 * Create a WorkPackets object.
 	 */
-	MM_WorkPacketsStandard(MM_EnvironmentBase *env) :
-		MM_WorkPackets(env)
-	{
-		_typeId = __FUNCTION__;
-	};
+	MM_WorkPacketsStandard(MM_EnvironmentBase *env) : MM_WorkPackets(env) { _typeId = __FUNCTION__; };
 };
 
 #endif /* WORKPACKETSSTANDARD_HPP_ */
-

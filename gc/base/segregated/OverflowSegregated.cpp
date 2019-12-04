@@ -19,23 +19,22 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
-#include "omr.h"
+#include "OverflowSegregated.hpp"
 
 #include "CollectorLanguageInterface.hpp"
 #include "EnvironmentBase.hpp"
 #include "GCExtensionsBase.hpp"
 #include "Heap.hpp"
 #include "HeapRegionIterator.hpp"
-#include "MarkingScheme.hpp"
 #include "MarkMap.hpp"
+#include "MarkingScheme.hpp"
 #include "ObjectHeapIteratorSegregated.hpp"
 #include "Packet.hpp"
 #include "SegregatedGC.hpp"
 #include "SegregatedMarkingScheme.hpp"
 #include "Task.hpp"
 #include "WorkPackets.hpp"
-
-#include "OverflowSegregated.hpp"
+#include "omr.h"
 
 #if defined(OMR_GC_SEGREGATED_HEAP)
 
@@ -46,9 +45,10 @@ MM_OverflowSegregated *
 MM_OverflowSegregated::newInstance(MM_EnvironmentBase *env, MM_WorkPackets *workPackets)
 {
 	Assert_MM_true(env->getExtensions()->isSegregatedHeap());
-	MM_OverflowSegregated *overflow = (MM_OverflowSegregated *)env->getForge()->allocate(sizeof(MM_OverflowSegregated), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+	MM_OverflowSegregated *overflow = (MM_OverflowSegregated *)env->getForge()->allocate(
+	        sizeof(MM_OverflowSegregated), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
 	if (NULL != overflow) {
-		new(overflow) MM_OverflowSegregated(env,workPackets);
+		new (overflow) MM_OverflowSegregated(env, workPackets);
 		if (!overflow->initialize(env)) {
 			overflow->kill(env);
 			overflow = NULL;
@@ -78,10 +78,11 @@ MM_OverflowSegregated::emptyToOverflow(MM_EnvironmentBase *env, MM_Packet *packe
 
 	_extensions->globalGCStats.workPacketStats.setSTWWorkStackOverflowOccured(true);
 	_extensions->globalGCStats.workPacketStats.incrementSTWWorkStackOverflowCount();
-	_extensions->globalGCStats.workPacketStats.setSTWWorkpacketCountAtOverflow(_workPackets->getActivePacketCount());
+	_extensions->globalGCStats.workPacketStats.setSTWWorkpacketCountAtOverflow(
+	        _workPackets->getActivePacketCount());
 
 	/* Empty the current packet by dirtying its cards now */
-	while(NULL != (objectPtr = packet->pop(env))) {
+	while (NULL != (objectPtr = packet->pop(env))) {
 		overflowItemInternal(env, objectPtr);
 	}
 
@@ -95,7 +96,8 @@ MM_OverflowSegregated::overflowItem(MM_EnvironmentBase *env, void *item, MM_Over
 
 	_extensions->globalGCStats.workPacketStats.setSTWWorkStackOverflowOccured(true);
 	_extensions->globalGCStats.workPacketStats.incrementSTWWorkStackOverflowCount();
-	_extensions->globalGCStats.workPacketStats.setSTWWorkpacketCountAtOverflow(_workPackets->getActivePacketCount());
+	_extensions->globalGCStats.workPacketStats.setSTWWorkpacketCountAtOverflow(
+	        _workPackets->getActivePacketCount());
 
 	overflowItemInternal(env, item);
 }
@@ -106,7 +108,8 @@ MM_OverflowSegregated::overflowItemInternal(MM_EnvironmentBase *env, void *item)
 	void *heapBase = _extensions->heap->getHeapBase();
 	void *heapTop = _extensions->heap->getHeapTop();
 
-	if ((PACKET_ARRAY_SPLIT_TAG != ((uintptr_t)item & PACKET_ARRAY_SPLIT_TAG)) &&  (item >= heapBase) && (item < heapTop)) {
+	if ((PACKET_ARRAY_SPLIT_TAG != ((uintptr_t)item & PACKET_ARRAY_SPLIT_TAG)) && (item >= heapBase)
+	        && (item < heapTop)) {
 		MM_SegregatedGC *globalCollector = (MM_SegregatedGC *)_extensions->getGlobalCollector();
 		MM_SegregatedMarkingScheme *markingScheme = globalCollector->getMarkingScheme();
 		MM_MarkMap *markMap = markingScheme->getMarkMap();
@@ -120,7 +123,7 @@ MM_OverflowSegregated::overflowItemInternal(MM_EnvironmentBase *env, void *item)
 		markMap->atomicSetBit((omrobjectptr_t)((uintptr_t)item + markMap->getObjectGrain()));
 
 		/* Perform language specific actions */
-		markingScheme->getMarkingDelegate()->handleWorkPacketOverflowItem(env,objectPtr);
+		markingScheme->getMarkingDelegate()->handleWorkPacketOverflowItem(env, objectPtr);
 	}
 }
 
@@ -144,19 +147,25 @@ MM_OverflowSegregated::handleOverflow(MM_EnvironmentBase *env)
 		MM_SegregatedMarkingScheme *markingScheme = globalCollector->getMarkingScheme();
 		MM_MarkMap *markMap = markingScheme->getMarkMap();
 
-		while((region = (MM_HeapRegionDescriptorSegregated *)regionIterator.nextRegion()) != NULL) {
-			GC_ObjectHeapIteratorSegregated objectIterator(_extensions, (omrobjectptr_t)region->getLowAddress(), (omrobjectptr_t)region->getHighAddress(), region->getRegionType(), region->getCellSize(), false, false);
+		while ((region = (MM_HeapRegionDescriptorSegregated *)regionIterator.nextRegion()) != NULL) {
+			GC_ObjectHeapIteratorSegregated objectIterator(_extensions,
+			        (omrobjectptr_t)region->getLowAddress(), (omrobjectptr_t)region->getHighAddress(),
+			        region->getRegionType(), region->getCellSize(), false, false);
 			omrobjectptr_t object;
 
-			while((object = objectIterator.nextObject()) != NULL) {
+			while ((object = objectIterator.nextObject()) != NULL) {
 				/* search for double marked (overflowed) objects */
-				if ((markMap->isBitSet(object)) && (markMap->isBitSet((omrobjectptr_t)((uintptr_t)object + markMap->getObjectGrain())))) {
+				if ((markMap->isBitSet(object))
+				        && (markMap->isBitSet(
+				                (omrobjectptr_t)((uintptr_t)object + markMap->getObjectGrain())))) {
 					/* clean overflow mark */
-					markMap->clearBit((omrobjectptr_t)((uintptr_t)object + markMap->getObjectGrain()));
+					markMap->clearBit(
+					        (omrobjectptr_t)((uintptr_t)object + markMap->getObjectGrain()));
 
 					/* scan overflowed object */
 					/* TODO Fix this as it is wrong for metronome GC policy */
-					/* The subclassing of markingscheme by segregatedmarking scheme needs a lot of work and means metronome is pretty broken */
+					/* The subclassing of markingscheme by segregatedmarking scheme needs a lot of
+					 * work and means metronome is pretty broken */
 					markingScheme->scanObject(env, object, SCAN_REASON_OVERFLOWED_OBJECT);
 				}
 			}
@@ -167,9 +176,7 @@ MM_OverflowSegregated::handleOverflow(MM_EnvironmentBase *env)
 
 void
 MM_OverflowSegregated::reset(MM_EnvironmentBase *env)
-{
-
-}
+{}
 
 bool
 MM_OverflowSegregated::isEmpty()

@@ -24,7 +24,6 @@
 #define CLASSUNLOADSTATS_HPP_
 
 #include "Base.hpp"
-
 #include "omrcomp.h"
 
 /**
@@ -55,20 +54,20 @@ public:
 	void clear();
 
 	MM_ClassUnloadStats()
-		: MM_Base()
-		, _classLoaderUnloadedCount(0)
-		, _classLoaderCandidates(0)
-		, _classesUnloadedCount(0)
-		, _anonymousClassesUnloadedCount(0)
-		, _startTime(0)
-		, _endTime(0)
-		, _startSetupTime(0)
-		, _endSetupTime(0)
-		, _startScanTime(0)
-		, _endScanTime(0)
-		, _startPostTime(0)
-		, _endPostTime(0)
-		, _classUnloadMutexQuiesceTime(0) {};
+	        : MM_Base()
+	        , _classLoaderUnloadedCount(0)
+	        , _classLoaderCandidates(0)
+	        , _classesUnloadedCount(0)
+	        , _anonymousClassesUnloadedCount(0)
+	        , _startTime(0)
+	        , _endTime(0)
+	        , _startSetupTime(0)
+	        , _endSetupTime(0)
+	        , _startScanTime(0)
+	        , _endScanTime(0)
+	        , _startPostTime(0)
+	        , _endPostTime(0)
+	        , _classUnloadMutexQuiesceTime(0){};
 };
 
 #endif /* CLASSUNLOADSTATS_HPP_ */

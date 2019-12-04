@@ -26,7 +26,6 @@
  * @brief Timer utilities
  */
 
-
 #include <time.h>
 #include <sys/types.h>
 #include <sys/time.h>
@@ -168,7 +167,8 @@ omrtime_hires_frequency(struct OMRPortLibrary *portLibrary)
  *  \arg OMRPORT_TIME_DELTA_IN_NANOSECONDS return timer value in nanoseconds.
  */
 uint64_t
-omrtime_hires_delta(struct OMRPortLibrary *portLibrary, uint64_t startTime, uint64_t endTime, uint64_t requiredResolution)
+omrtime_hires_delta(
+        struct OMRPortLibrary *portLibrary, uint64_t startTime, uint64_t endTime, uint64_t requiredResolution)
 {
 	uint64_t ticks;
 
@@ -178,9 +178,11 @@ omrtime_hires_delta(struct OMRPortLibrary *portLibrary, uint64_t startTime, uint
 	if (OMRTIME_HIRES_CLOCK_FREQUENCY == requiredResolution) {
 		/* no conversion necessary */
 	} else if (OMRTIME_HIRES_CLOCK_FREQUENCY < requiredResolution) {
-		ticks = (uint64_t)((double)ticks * ((double)requiredResolution / (double)OMRTIME_HIRES_CLOCK_FREQUENCY));
+		ticks = (uint64_t)(
+		        (double)ticks * ((double)requiredResolution / (double)OMRTIME_HIRES_CLOCK_FREQUENCY));
 	} else {
-		ticks = (uint64_t)((double)ticks / ((double)OMRTIME_HIRES_CLOCK_FREQUENCY / (double)requiredResolution));
+		ticks = (uint64_t)(
+		        (double)ticks / ((double)OMRTIME_HIRES_CLOCK_FREQUENCY / (double)requiredResolution));
 	}
 	return ticks;
 }
@@ -196,8 +198,7 @@ omrtime_hires_delta(struct OMRPortLibrary *portLibrary, uint64_t startTime, uint
  */
 void
 omrtime_shutdown(struct OMRPortLibrary *portLibrary)
-{
-}
+{}
 /**
  * PortLibrary startup.
  *
@@ -217,4 +218,3 @@ omrtime_startup(struct OMRPortLibrary *portLibrary)
 {
 	return 0;
 }
-

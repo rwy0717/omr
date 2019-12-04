@@ -23,19 +23,18 @@
 #include "env/FrontEnd.hpp"
 #include "tests/injectors/ChildlessUnaryOpIlInjector.hpp"
 
-namespace TestCompiler
-{
+namespace TestCompiler {
 
 bool
 ChildlessUnaryOpIlInjector::injectIL()
-   {
-   if (!isOpCodeSupported())
-      return false;
+{
+	if (!isOpCodeSupported())
+		return false;
 
-   createBlocks(1);
-   returnValue(parm(1));
+	createBlocks(1);
+	returnValue(parm(1));
 
-   return true;
-   }
+	return true;
+}
 
 } // namespace TestCompiler

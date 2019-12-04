@@ -73,7 +73,4 @@ typedef struct PortlibPTBuffers_struct *PortlibPTBuffers_t;
 
 void omrport_free_ptBuffer(struct OMRPortLibrary *portLibrary, PortlibPTBuffers_t ptBuffer);
 
-
-#endif     /* omrportptb_h */
-
-
+#endif /* omrportptb_h */

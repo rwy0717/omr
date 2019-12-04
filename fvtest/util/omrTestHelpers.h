@@ -36,28 +36,29 @@ extern "C" {
  * ================
  */
 #define OMRTEST_PRINT_ERROR(x) omrTestPrintError(#x, (x), OMRPORTLIB, __FILE__, __LINE__)
-omr_error_t omrTestPrintError(const char *funcCall, const omr_error_t rc, OMRPortLibrary *portLibrary, const char *callFile, intptr_t callLine);
+omr_error_t omrTestPrintError(const char *funcCall, const omr_error_t rc, OMRPortLibrary *portLibrary,
+        const char *callFile, intptr_t callLine);
 
-#define OMRTEST_PRINT_UNEXPECTED_INT_RC(x, exp) omrTestPrintUnexpectedIntRC(#x, (x), (exp), OMRPORTLIB, __FILE__, __LINE__)
+#define OMRTEST_PRINT_UNEXPECTED_INT_RC(x, exp) \
+	omrTestPrintUnexpectedIntRC(#x, (x), (exp), OMRPORTLIB, __FILE__, __LINE__)
 omr_error_t omrTestPrintUnexpectedIntRC(const char *funcCall, const intptr_t rc, const intptr_t expectedRC,
-										OMRPortLibrary *portLibrary, const char *callFile, intptr_t callLine);
+        OMRPortLibrary *portLibrary, const char *callFile, intptr_t callLine);
 
 #define OMRTEST_PRINT_UNEXPECTED_RC(x, exp) omrTestPrintUnexpectedRC(#x, (x), (exp), OMRPORTLIB, __FILE__, __LINE__)
 omr_error_t omrTestPrintUnexpectedRC(const char *funcCall, const omr_error_t rc, const omr_error_t expectedRC,
-									 OMRPortLibrary *portLibrary, const char *callFile, intptr_t callLine);
+        OMRPortLibrary *portLibrary, const char *callFile, intptr_t callLine);
 
 #define OMRTEST_ASSERT_ERROR_NONE(x) \
 	do { \
 		omr_error_t rc = (x); \
-		ASSERT_EQ(OMR_ERROR_NONE, rc)<<#x " failed, "<< omrErrorToString(rc); \
+		ASSERT_EQ(OMR_ERROR_NONE, rc) << #x " failed, " << omrErrorToString(rc); \
 	} while (0)
 
 #define OMRTEST_ASSERT_ERROR(e, x) \
 	do { \
 		omr_error_t rc = (x); \
-		ASSERT_EQ(e, rc)<<#x " failed, "<< omrErrorToString(rc); \
+		ASSERT_EQ(e, rc) << #x " failed, " << omrErrorToString(rc); \
 	} while (0)
-
 
 const char *omrErrorToString(omr_error_t rc);
 BOOLEAN strStartsWith(const char *s, const char *prefix);
@@ -87,7 +88,6 @@ omr_error_t omrTestVMInit(OMRTestVM *const testVM, OMRPortLibrary *portLibrary);
  * Shutdown a stub OMR VM.
  */
 omr_error_t omrTestVMFini(OMRTestVM *const testVM);
-
 
 #ifdef __cplusplus
 }

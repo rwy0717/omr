@@ -39,78 +39,76 @@
 
 #include <algorithm>
 
-int32_t Tril::SimpleCompiler::compile() {
-   return compileWithVerifier(NULL);
+int32_t
+Tril::SimpleCompiler::compile()
+{
+	return compileWithVerifier(NULL);
 }
 
-int32_t Tril::SimpleCompiler::compileWithVerifier(TR::IlVerifier* verifier) {
-    // construct an IL generator for the method
-    auto methodInfo = getMethodInfo();
-    TR::TypeDictionary types;
-    Tril::TRLangBuilder ilgenerator(methodInfo.getBodyAST(), &types);
+int32_t
+Tril::SimpleCompiler::compileWithVerifier(TR::IlVerifier *verifier)
+{
+	// construct an IL generator for the method
+	auto methodInfo = getMethodInfo();
+	TR::TypeDictionary types;
+	Tril::TRLangBuilder ilgenerator(methodInfo.getBodyAST(), &types);
 
-    // get a list of the method's argument types and transform it
-    // into a list of `TR::IlType`
-    auto argTypes = methodInfo.getArgTypes();
-    auto argIlTypes = std::vector<TR::IlType*>(argTypes.size());
-    auto it_argIlTypes = argIlTypes.begin();
-    for (auto it = argTypes.begin(); it != argTypes.end(); it++) {
-          *it_argIlTypes++ = types.PrimitiveType(*it);
-    }
-    // construct a `TR::ResolvedMethod` instance from the IL generator and use
-    // to compile the method
-    TR::ResolvedMethod resolvedMethod("file", "line", "name",
-                                      argIlTypes.size(),
-                                      &argIlTypes[0],
-                                      types.PrimitiveType(methodInfo.getReturnType()),
-                                      0,
-                                      &ilgenerator);
-    TR::IlGeneratorMethodDetails methodDetails(&resolvedMethod);
+	// get a list of the method's argument types and transform it
+	// into a list of `TR::IlType`
+	auto argTypes = methodInfo.getArgTypes();
+	auto argIlTypes = std::vector<TR::IlType *>(argTypes.size());
+	auto it_argIlTypes = argIlTypes.begin();
+	for (auto it = argTypes.begin(); it != argTypes.end(); it++) {
+		*it_argIlTypes++ = types.PrimitiveType(*it);
+	}
+	// construct a `TR::ResolvedMethod` instance from the IL generator and use
+	// to compile the method
+	TR::ResolvedMethod resolvedMethod("file", "line", "name", argIlTypes.size(), &argIlTypes[0],
+	        types.PrimitiveType(methodInfo.getReturnType()), 0, &ilgenerator);
+	TR::IlGeneratorMethodDetails methodDetails(&resolvedMethod);
 
-    // If a verifier is provided, set one up.
-    if (NULL != verifier)
-       {
-       methodDetails.setIlVerifier(verifier);
-       }
+	// If a verifier is provided, set one up.
+	if (NULL != verifier) {
+		methodDetails.setIlVerifier(verifier);
+	}
 
-    int32_t rc = 0;
-    auto entry_point = compileMethodFromDetails(NULL, methodDetails, warm, rc);
+	int32_t rc = 0;
+	auto entry_point = compileMethodFromDetails(NULL, methodDetails, warm, rc);
 
-    // if compilation was successful, set the entry point for the compiled body
-    if (rc == 0)
-       {
+	// if compilation was successful, set the entry point for the compiled body
+	if (rc == 0) {
 #if defined(J9ZOS390)
-       struct FunctionDescriptor
-       {
-          uint64_t environment;
-          void* func;
-       };
+		struct FunctionDescriptor {
+			uint64_t environment;
+			void *func;
+		};
 
-       FunctionDescriptor* fd = new FunctionDescriptor();
-       fd->environment = 0;
-       fd->func = entry_point;
+		FunctionDescriptor *fd = new FunctionDescriptor();
+		fd->environment = 0;
+		fd->func = entry_point;
 
-       entry_point = (uint8_t*) fd;
+		entry_point = (uint8_t *)fd;
 #elif defined(AIXPPC)
-       struct FunctionDescriptor
-          {
-          void* func;
-          void* toc;
-          void* environment;
-          };
+		struct FunctionDescriptor {
+			void *func;
+			void *toc;
+			void *environment;
+		};
 
-       FunctionDescriptor* fd = new FunctionDescriptor();
-       fd->func = entry_point;
-       // TODO: There should really be a better way to get this. Usually, we would use
-       // cg->getTOCBase(), but the code generator has already been destroyed by now...
-       fd->toc = toPPCTableOfConstants(TR_PersistentMemory::getNonThreadSafePersistentInfo()->getPersistentTOC())->getTOCBase();
-       fd->environment = NULL;
+		FunctionDescriptor *fd = new FunctionDescriptor();
+		fd->func = entry_point;
+		// TODO: There should really be a better way to get this. Usually, we would use
+		// cg->getTOCBase(), but the code generator has already been destroyed by now...
+		fd->toc =
+		        toPPCTableOfConstants(TR_PersistentMemory::getNonThreadSafePersistentInfo()->getPersistentTOC())
+		                ->getTOCBase();
+		fd->environment = NULL;
 
-       entry_point = (uint8_t*) fd;
+		entry_point = (uint8_t *)fd;
 #endif
-       setEntryPoint(entry_point);
-       }
+		setEntryPoint(entry_point);
+	}
 
-    // return the return code for the compilation
-    return rc;
+	// return the return code for the compilation
+	return rc;
 }

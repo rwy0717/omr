@@ -56,7 +56,7 @@ omrget_userid(char *userid, uintptr_t length)
 	if (NULL != tmp_userid) {
 		char *ascname = NULL;
 		memset(tmp_userid, '\0', J9_MAX_USERID);
-		_USERID(tmp_userid);  /* requires <31bit address */
+		_USERID(tmp_userid); /* requires <31bit address */
 #if !defined(OMR_EBCDIC)
 		ascname = e2a_func(tmp_userid, strlen(tmp_userid));
 #else /* !defined(OMR_EBCDIC) */

@@ -23,6 +23,5 @@
 
 class GCConfigObjectTable {
 private:
-
 public:
 };

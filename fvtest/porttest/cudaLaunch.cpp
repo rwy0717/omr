@@ -67,14 +67,14 @@ TEST_F(CudaDeviceTest, launching)
 		ASSERT_EQ(0, rc) << "omrcuda_deviceAlloc failed";
 		ASSERT_NOT_NULL(deviceBuf) << "allocated null device address";
 
-		expected.byteValue   = 85;
-		expected.charValue   = 33;
+		expected.byteValue = 85;
+		expected.charValue = 33;
 		expected.doubleValue = 3.14159265358979323846; /* pi */
-		expected.floatValue  = 2.71828182845904523536f; /* e */
-		expected.intValue    = 28;
-		expected.longValue   = 42;
-		expected.pointer     = (uintptr_t)deviceBuf;
-		expected.shortValue  = 85;
+		expected.floatValue = 2.71828182845904523536f; /* e */
+		expected.intValue = 28;
+		expected.longValue = 42;
+		expected.pointer = (uintptr_t)deviceBuf;
+		expected.shortValue = 85;
 
 		kernelParms[0] = &deviceBuf;
 		kernelParms[1] = &bufferSize;

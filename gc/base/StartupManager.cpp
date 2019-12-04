@@ -20,13 +20,12 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
+#include "StartupManager.hpp"
 
 #include <string.h>
-
-#include "StartupManager.hpp"
 #if defined(OMR_GC)
-#include "GCExtensionsBase.hpp"
 #include "ConfigurationFlat.hpp"
+#include "GCExtensionsBase.hpp"
 #endif /* OMR_GC */
 
 #define OMR_GC_BUFFER_SIZE 256
@@ -74,7 +73,7 @@ MM_StartupManager::getUDATAValue(char *option, uintptr_t *outputValue)
 	}
 	buffer[count] = '\0';
 
-	*outputValue = (uintptr_t) atoi(buffer);
+	*outputValue = (uintptr_t)atoi(buffer);
 
 	return count;
 }
@@ -116,8 +115,7 @@ MM_StartupManager::getUDATAMemoryValue(char *option, uintptr_t *convertedValue)
 	case 'B':
 		/* nothing */
 		break;
-	default:
-		return false;
+	default: return false;
 	}
 
 	*convertedValue = actualValue;
@@ -147,7 +145,8 @@ MM_StartupManager::parseGcOptions(MM_GCExtensionsBase *extensions)
 			} else {
 				end = (size_t)(nextSpace - options);
 				if (0 == end) {
-					/* starting with a space or multiple spaces in a row so skip to next character */
+					/* starting with a space or multiple spaces in a row so skip to next character
+					 */
 					options += 1;
 					continue;
 				}
@@ -159,7 +158,7 @@ MM_StartupManager::parseGcOptions(MM_GCExtensionsBase *extensions)
 			}
 			strncpy(option, options, end);
 			option[end] = '\0';
-			if(!handleOption(extensions, option)) {
+			if (!handleOption(extensions, option)) {
 				omrtty_printf("Error parsing OMR GC options: '%s'\n", gcOptions);
 				result = false;
 				break;
@@ -266,14 +265,14 @@ MM_StartupManager::handleOption(MM_GCExtensionsBase *extensions, char *option)
 	}
 #endif /* OMR_GC_MODRON_COMPACTION */
 	else if (0 == strncmp(option, OMR_XVERBOSEGCLOG, OMR_XVERBOSEGCLOG_LENGTH)) {
-		verboseFileName = (char *) omrmem_allocate_memory(strlen(option+OMR_XVERBOSEGCLOG_LENGTH)+1, OMRMEM_CATEGORY_MM);
+		verboseFileName = (char *)omrmem_allocate_memory(
+		        strlen(option + OMR_XVERBOSEGCLOG_LENGTH) + 1, OMRMEM_CATEGORY_MM);
 		if (NULL == verboseFileName) {
 			result = false;
 		} else {
 			strcpy(verboseFileName, option + OMR_XVERBOSEGCLOG_LENGTH);
 		}
-	}
-	else if (0 == strncmp(option, OMR_XGCBUFFERED_LOGGING, OMR_XGCBUFFERED_LOGGING_LENGTH)) {
+	} else if (0 == strncmp(option, OMR_XGCBUFFERED_LOGGING, OMR_XGCBUFFERED_LOGGING_LENGTH)) {
 		extensions->bufferedLogging = true;
 	}
 #if defined(OMR_GC_MORDON_SCAVENGER)

@@ -56,7 +56,7 @@ OMRPortLibrary portLibraryToTest;
  * version of a large buffer representing memory for a port library.
  * @{
  */
-#define bigBufferSize (2*sizeof(OMRPortLibrary))
+#define bigBufferSize (2 * sizeof(OMRPortLibrary))
 char bigBuffer[bigBufferSize];
 /** @} */
 
@@ -190,7 +190,8 @@ TEST(PortTest, port_test1)
 	/* Pass, exact match all fields */
 	actualSize = omrport_getSize();
 	if (actualSize != expectedSize) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrport_getSize() returned %zu expected %zu\n", actualSize, expectedSize);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrport_getSize() returned %zu expected %zu\n", actualSize, expectedSize);
 	}
 
 	reportTestExit(OMRPORTLIB, testName);
@@ -236,7 +237,6 @@ TEST(PortTest, port_test2)
 	rc = omrport_create_library(fakePtr, sizeof(OMRPortLibrary));
 	if (0 != rc) {
 		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrport_create_library() returned %d expected 0\n", rc);
-
 	}
 
 	/* Fail, buffer 1 byte too small */
@@ -244,11 +244,14 @@ TEST(PortTest, port_test2)
 	memset(fakePtr, eyeCatcher, bigBufferSize);
 	rc = omrport_create_library(fakePtr, sizeof(OMRPortLibrary) - 1);
 	if (OMRPORT_ERROR_INIT_OMR_WRONG_SIZE != rc) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrport_create_library() returned %d expected %d\n", rc, OMRPORT_ERROR_INIT_OMR_WRONG_SIZE);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrport_create_library() returned %d expected %d\n", rc,
+		        OMRPORT_ERROR_INIT_OMR_WRONG_SIZE);
 	}
 	/* Ensure we didn't write anything, being lazy only checking first byte */
 	if (eyeCatcher != bigBuffer[0]) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrport_create_library() trampled memory expected \"%c\" found \"%c\"\n", eyeCatcher, bigBuffer[0]);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "omrport_create_library() trampled memory expected \"%c\" found \"%c\"\n", eyeCatcher,
+		        bigBuffer[0]);
 	}
 
 	/* Fail, buffer size way too small */
@@ -256,11 +259,14 @@ TEST(PortTest, port_test2)
 	memset(fakePtr, eyeCatcher, bigBufferSize);
 	rc = omrport_create_library(fakePtr, 20);
 	if (OMRPORT_ERROR_INIT_OMR_WRONG_SIZE != rc) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrport_create_library() returned %d expected %d\n", rc, OMRPORT_ERROR_INIT_OMR_WRONG_SIZE);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrport_create_library() returned %d expected %d\n", rc,
+		        OMRPORT_ERROR_INIT_OMR_WRONG_SIZE);
 	}
 	/* Ensure we didn't write anything, being lazy only checking first byte */
 	if (eyeCatcher != bigBuffer[0]) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrport_create_library() trampled memory expected \"%c\" found \"%c\"\n", eyeCatcher, bigBuffer[0]);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "omrport_create_library() trampled memory expected \"%c\" found \"%c\"\n", eyeCatcher,
+		        bigBuffer[0]);
 	}
 
 	reportTestExit(OMRPORTLIB, testName);
@@ -334,7 +340,8 @@ TEST(PortTest, port_test3)
 	fakePtr->time_startup = fake_time_startup;
 	rc = omrport_startup_library(fakePtr);
 	if (failMemStartup != rc) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrport_startup_library() returned %d expected %d\n", rc, failMemStartup);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrport_startup_library() returned %d expected %d\n", rc, failMemStartup);
 	}
 
 exit:
@@ -443,7 +450,8 @@ TEST(PortTest, port_test5)
 	fakePortLibrary->mem_startup = fake_mem_startup;
 	rc = omrport_startup_library(fakePortLibrary);
 	if (failMemStartup != rc) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrport_startup_library() returned %d expected %d\n", rc, failMemStartup);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrport_startup_library() returned %d expected %d\n", rc, failMemStartup);
 	}
 
 	/* No way to tell if it freed the memory properly.  The pointer we have to the port library is

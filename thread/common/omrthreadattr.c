@@ -190,9 +190,7 @@ omrthread_attr_set_schedpolicy(omrthread_attr_t *attr, omrthread_schedpolicy_t p
 		(*attr)->schedpolicy = policy;
 		rc = J9THREAD_ERR_UNSUPPORTED_VALUE;
 		break;
-	default:
-		rc = J9THREAD_ERR_INVALID_VALUE;
-		break;
+	default: rc = J9THREAD_ERR_INVALID_VALUE; break;
 	}
 
 	return rc;
@@ -285,13 +283,9 @@ omrthread_attr_set_category(omrthread_attr_t *attr, uint32_t category)
 	case J9THREAD_USER_DEFINED_THREAD_CATEGORY_2:
 	case J9THREAD_USER_DEFINED_THREAD_CATEGORY_3:
 	case J9THREAD_USER_DEFINED_THREAD_CATEGORY_4:
-	case J9THREAD_USER_DEFINED_THREAD_CATEGORY_5:
-		(*attr)->category = category;
-		break;
+	case J9THREAD_USER_DEFINED_THREAD_CATEGORY_5: (*attr)->category = category; break;
 
-	default:
-		rc = J9THREAD_ERR_INVALID_VALUE;
-		break;
+	default: rc = J9THREAD_ERR_INVALID_VALUE; break;
 	}
 
 	return rc;

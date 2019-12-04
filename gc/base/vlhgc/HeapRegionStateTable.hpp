@@ -22,11 +22,9 @@
 #if !defined(HEAPREGIONSTATETABLE_HPP)
 #define HEAPREGIONSTATETABLE_HPP
 
-#include <omrcfg.h>
-
-#include "omrgcconsts.h"
 #include "BaseVirtual.hpp"
-
+#include "omrgcconsts.h"
+#include <omrcfg.h>
 #include <stdint.h>
 
 namespace OMR {
@@ -34,14 +32,13 @@ namespace GC {
 
 class Forge;
 
-class HeapRegionStateTable : public MM_BaseVirtual
-{
+class HeapRegionStateTable : public MM_BaseVirtual {
 	/*
 	 * Data members
 	 */
-  public:
-  protected:
-  private:
+public:
+protected:
+private:
 	uint8_t *_table;
 	uintptr_t _heapBase;
 	uintptr_t _regionShift;
@@ -49,9 +46,9 @@ class HeapRegionStateTable : public MM_BaseVirtual
 	/*
 	 * Function members
 	 */
-  public:
-
-	static HeapRegionStateTable *newInstance(Forge *forge, uintptr_t heapBase, uintptr_t regionShift, uintptr_t regionCount);
+public:
+	static HeapRegionStateTable *newInstance(
+	        Forge *forge, uintptr_t heapBase, uintptr_t regionShift, uintptr_t regionCount);
 
 	bool initialize(Forge *forge, uintptr_t heapBase, uintptr_t regionShift, uintptr_t regionCount);
 
@@ -59,43 +56,28 @@ class HeapRegionStateTable : public MM_BaseVirtual
 
 	void tearDown(Forge *forge);
 
-	HeapRegionStateTable()
-		: _table(NULL)
-		, _heapBase(0)
-		, _regionShift(0)
-	{
-		_typeId = __FUNCTION__;
-	}
+	HeapRegionStateTable() : _table(NULL), _heapBase(0), _regionShift(0) { _typeId = __FUNCTION__; }
 
 	MMINLINE uint8_t *getTable() { return _table; }
 
-	MMINLINE uintptr_t
-	getIndex(const void *heapAddress)
+	MMINLINE uintptr_t getIndex(const void *heapAddress)
 	{
 		uintptr_t heapDelta = ((uintptr_t)heapAddress) - _heapBase;
-		uintptr_t index = heapDelta >> _regionShift; 
+		uintptr_t index = heapDelta >> _regionShift;
 		return index;
 	}
 
-	MMINLINE uint8_t
-	getRegionState(const void *heapAddress)
-	{
-		return _table[getIndex(heapAddress)];
-	}
+	MMINLINE uint8_t getRegionState(const void *heapAddress) { return _table[getIndex(heapAddress)]; }
 
 	/**
 	 * Set the state of the region in the table.  Must use
 	 * constants defined by enum HeapRegionState,
 	 * 	HEAP_REGION_STATE_NONE, or HEAP_REGION_STATE_COPY_FORWARD
 	 */
-	MMINLINE void
-	setRegionState(const void *heapAddress, uint8_t state)
-	{
-		_table[getIndex(heapAddress)] = state;
-	}
+	MMINLINE void setRegionState(const void *heapAddress, uint8_t state) { _table[getIndex(heapAddress)] = state; }
 
-  protected:
-  private:
+protected:
+private:
 };
 
 } // namespace GC

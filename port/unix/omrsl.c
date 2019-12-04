@@ -59,7 +59,6 @@
 #include "omriconvhelpers.h"
 #endif /* defined(__STDC_ISO_10646__) || defined(LINUX) || defined(OSX) */
 
-
 #if defined(J9VM_USE_MBTOWC) || defined(J9VM_USE_ICONV)
 #include <nl_types.h>
 #include <langinfo.h>
@@ -86,17 +85,12 @@
 static void convertWithMBTOWC(struct OMRPortLibrary *portLibrary, const char *error, char *errBuf, uintptr_t bufLen);
 #endif /* J9VM_USE_MBTOWC (autogen) */
 
-
-
 #if (defined(J9VM_USE_ICONV)) /* priv. proto (autogen) */
 
 static void convertWithIConv(struct OMRPortLibrary *portLibrary, char *error, char *errBuf, uintptr_t bufLen);
 #endif /* J9VM_USE_ICONV (autogen) */
 
-
-
 static void getDLError(struct OMRPortLibrary *portLibrary, char *errBuf, uintptr_t bufLen);
-
 
 /**
  * Close a shared library.
@@ -118,7 +112,8 @@ omrsl_close_shared_library(struct OMRPortLibrary *portLibrary, uintptr_t descrip
 		if (0 != result) {
 			char errBuf[MAX_ERR_BUF_LENGTH];
 			getDLError(portLibrary, errBuf, sizeof(errBuf));
-			portLibrary->tty_printf(portLibrary, "dlclose() failed: return code: %d message: \"%s\" \n", result, errBuf);
+			portLibrary->tty_printf(
+			        portLibrary, "dlclose() failed: return code: %d message: \"%s\" \n", result, errBuf);
 		}
 	}
 
@@ -146,9 +141,11 @@ omrsl_open_shared_library(struct OMRPortLibrary *portLibrary, char *name, uintpt
 		char *p = strrchr(name, '/');
 		if (NULL != p) {
 			/* the names specifies a path */
-			pathLength = portLibrary->str_printf(portLibrary, mangledName, (MAX_STRING_LENGTH + 1), "%.*slib%s" PLATFORM_DLL_EXTENSION, (uintptr_t)p + 1 - (uintptr_t)name, name, p + 1);
+			pathLength = portLibrary->str_printf(portLibrary, mangledName, (MAX_STRING_LENGTH + 1),
+			        "%.*slib%s" PLATFORM_DLL_EXTENSION, (uintptr_t)p + 1 - (uintptr_t)name, name, p + 1);
 		} else {
-			pathLength = portLibrary->str_printf(portLibrary, mangledName, (MAX_STRING_LENGTH + 1), "lib%s" PLATFORM_DLL_EXTENSION, name);
+			pathLength = portLibrary->str_printf(portLibrary, mangledName, (MAX_STRING_LENGTH + 1),
+			        "lib%s" PLATFORM_DLL_EXTENSION, name);
 		}
 		if (pathLength >= MAX_STRING_LENGTH) {
 			Trc_PRT_sl_open_shared_library_Exit2(OMRPORT_SL_UNSUPPORTED);
@@ -179,13 +176,15 @@ omrsl_open_shared_library(struct OMRPortLibrary *portLibrary, char *name, uintpt
 				/* proceed only if buffer size can fit the new concatenated path (+1 for NUL) */
 				if (MAX_STRING_LENGTH < (pathLength + strlen(openName) + 1)) {
 					const char *error = portLibrary->nls_lookup_message(portLibrary,
-								  J9NLS_ERROR | J9NLS_DO_NOT_APPEND_NEWLINE,
-								  J9NLS_PORT_SL_BUFFER_EXCEEDED_ERROR,
-								  "Insufficient buffer memory while attempting to load a shared library");
+					        J9NLS_ERROR | J9NLS_DO_NOT_APPEND_NEWLINE,
+					        J9NLS_PORT_SL_BUFFER_EXCEEDED_ERROR,
+					        "Insufficient buffer memory while attempting to load a shared library");
 					strncpy(errBuf, error, MAX_ERR_BUF_LENGTH);
-					errBuf[MAX_ERR_BUF_LENGTH - 1] = '\0'; /* If NLS message size exceeds buffer length */
+					errBuf[MAX_ERR_BUF_LENGTH - 1] = '\0'; /* If NLS message size exceeds buffer
+					                                          length */
 					Trc_PRT_sl_open_shared_library_Exit2(OMRPORT_SL_INVALID);
-					return portLibrary->error_set_last_error_with_message(portLibrary, OMRPORT_SL_INVALID, errBuf);
+					return portLibrary->error_set_last_error_with_message(
+					        portLibrary, OMRPORT_SL_INVALID, errBuf);
 				}
 				memcpy(portLibDir, libraryInfo.dli_fname, pathLength);
 				strcpy(portLibDir + pathLength, openName);
@@ -207,11 +206,12 @@ omrsl_open_shared_library(struct OMRPortLibrary *portLibrary, char *name, uintpt
 			return portLibrary->error_set_last_error_with_message(portLibrary, OMRPORT_SL_INVALID, errBuf);
 		} else {
 			Trc_PRT_sl_open_shared_library_Exit2(OMRPORT_SL_NOT_FOUND);
-			return portLibrary->error_set_last_error_with_message(portLibrary, OMRPORT_SL_NOT_FOUND, errBuf);
+			return portLibrary->error_set_last_error_with_message(
+			        portLibrary, OMRPORT_SL_NOT_FOUND, errBuf);
 		}
 	}
 
-	*descriptor = (uintptr_t) handle;
+	*descriptor = (uintptr_t)handle;
 	Trc_PRT_sl_open_shared_library_Exit1(*descriptor);
 	return 0;
 }
@@ -249,7 +249,8 @@ omrsl_open_shared_library(struct OMRPortLibrary *portLibrary, char *name, uintpt
  * @note contents of func are undefined on failure.
  */
 uintptr_t
-omrsl_lookup_name(struct OMRPortLibrary *portLibrary, uintptr_t descriptor, char *name, uintptr_t *func, const char *argSignature)
+omrsl_lookup_name(
+        struct OMRPortLibrary *portLibrary, uintptr_t descriptor, char *name, uintptr_t *func, const char *argSignature)
 {
 	void *address;
 
@@ -259,7 +260,7 @@ omrsl_lookup_name(struct OMRPortLibrary *portLibrary, uintptr_t descriptor, char
 		Trc_PRT_sl_lookup_name_Exit2(name, argSignature, descriptor, 1);
 		return 1;
 	}
-	*func = (uintptr_t) address;
+	*func = (uintptr_t)address;
 
 	Trc_PRT_sl_lookup_name_Exit1(*func);
 	return 0;
@@ -277,10 +278,8 @@ getDLError(struct OMRPortLibrary *portLibrary, char *errBuf, uintptr_t bufLen)
 	error = dlerror();
 	if ((NULL == error) || ('\0' == error[0])) {
 		/* just in case another thread consumed our error message */
-		error = portLibrary->nls_lookup_message(portLibrary,
-				J9NLS_ERROR | J9NLS_DO_NOT_APPEND_NEWLINE,
-				J9NLS_PORT_SL_UNKOWN_ERROR,
-				"Unknown error");
+		error = portLibrary->nls_lookup_message(portLibrary, J9NLS_ERROR | J9NLS_DO_NOT_APPEND_NEWLINE,
+		        J9NLS_PORT_SL_UNKOWN_ERROR, "Unknown error");
 		strncpy(errBuf, error, bufLen);
 		errBuf[bufLen - 1] = '\0';
 		return;
@@ -338,7 +337,6 @@ convertWithIConv(struct OMRPortLibrary *portLibrary, char *error, char *errBuf, 
 	iconv_free(portLibrary, J9SL_ICONV_DESCRIPTOR, converter);
 }
 #endif /* J9VM_USE_ICONV (autogen) */
-
 
 #if (defined(J9VM_USE_MBTOWC)) /* priv. proto (autogen) */
 
@@ -407,8 +405,7 @@ convertWithMBTOWC(struct OMRPortLibrary *portLibrary, const char *error, char *e
  */
 void
 omrsl_shutdown(struct OMRPortLibrary *portLibrary)
-{
-}
+{}
 
 /**
  * PortLibrary startup.

@@ -23,37 +23,35 @@
 #if !defined(SEGREGATEDSWEEPTASK_HPP_)
 #define SEGREGATEDSWEEPTASK_HPP_
 
-#include "omrmodroncore.h"
-
 #include "ParallelTask.hpp"
+#include "omrmodroncore.h"
 
 #if defined(OMR_GC_SEGREGATED_HEAP)
 
-class MM_SegregatedSweepTask : public MM_ParallelTask
-{
-/* Data members / types */
+class MM_SegregatedSweepTask : public MM_ParallelTask {
+	/* Data members / types */
 public:
 protected:
 private:
 	MM_SweepSchemeSegregated *_sweepScheme;
 	MM_MemoryPoolSegregated *_memoryPool;
 
-/* Methods */
+	/* Methods */
 public:
 	/* OMRTODO come up with a better number here.. */
 	virtual uintptr_t getVMStateID() { return OMRVMSTATE_GC_SWEEP; };
-	
+
 	virtual void run(MM_EnvironmentBase *env);
 	virtual void setup(MM_EnvironmentBase *env);
 	virtual void cleanup(MM_EnvironmentBase *env);
-	
-	MM_SegregatedSweepTask(MM_EnvironmentBase *env, MM_Dispatcher *dispatcher, MM_SweepSchemeSegregated *sweepScheme, MM_MemoryPoolSegregated *memoryPool)
-		: MM_ParallelTask(env, dispatcher)
-		, _sweepScheme(sweepScheme)
-		, _memoryPool(memoryPool)
+
+	MM_SegregatedSweepTask(MM_EnvironmentBase *env, MM_Dispatcher *dispatcher,
+	        MM_SweepSchemeSegregated *sweepScheme, MM_MemoryPoolSegregated *memoryPool)
+	        : MM_ParallelTask(env, dispatcher), _sweepScheme(sweepScheme), _memoryPool(memoryPool)
 	{
 		_typeId = __FUNCTION__;
 	}
+
 protected:
 private:
 };

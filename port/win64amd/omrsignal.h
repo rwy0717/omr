@@ -39,6 +39,4 @@ typedef struct OMRWin32SignalInfo {
 	BOOLEAN tryExceptHandlerIgnore;
 } OMRWin32SignalInfo;
 
-#endif     /* omrsignal_h */
-
-
+#endif /* omrsignal_h */

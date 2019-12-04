@@ -23,47 +23,40 @@
 #if !defined(HEAPREGIONITERATORSTANDARD_HPP)
 #define HEAPREGIONITERATORSTANDARD_HPP
 
-#include "omrcfg.h"
-
 #include "HeapRegionDescriptorStandard.hpp"
 #include "HeapRegionIterator.hpp"
+#include "omrcfg.h"
 
 class GC_HeapRegionIteratorStandard : public GC_HeapRegionIterator {
 
 private:
 private:
 protected:
-	
 public:
-	
 	/**
 	 * Construct a HeapRegionIterator for the specified heap.
-	 * 
+	 *
 	 * @param manager The versions of the regions returned will come from this manager
 	 */
-	GC_HeapRegionIteratorStandard(MM_HeapRegionManager *manager) 
-		: GC_HeapRegionIterator(manager)
-		{ }
+	GC_HeapRegionIteratorStandard(MM_HeapRegionManager *manager) : GC_HeapRegionIterator(manager) {}
 
 	/**
 	 * Construct a HeapRegionIterator for the regions which belong to the specified memory space.
-	 * 
+	 *
 	 * @param manager The versions of the regions returned will come from this manager
 	 * @param space the memory space whose regions should be walked
 	 */
-	GC_HeapRegionIteratorStandard(MM_HeapRegionManager *manager, MM_MemorySpace* space)
-		: GC_HeapRegionIterator(manager, space)
-		{ }
-	
+	GC_HeapRegionIteratorStandard(MM_HeapRegionManager *manager, MM_MemorySpace *space)
+	        : GC_HeapRegionIterator(manager, space)
+	{}
+
 	/**
 	 * @return the next region in the heap, or NULL if there are no more regions
 	 */
-	MM_HeapRegionDescriptorStandard *nextRegion() 
+	MM_HeapRegionDescriptorStandard *nextRegion()
 	{
-		return (MM_HeapRegionDescriptorStandard*)GC_HeapRegionIterator::nextRegion();
+		return (MM_HeapRegionDescriptorStandard *)GC_HeapRegionIterator::nextRegion();
 	}
-
 };
-
 
 #endif /* HEAPREGIONITERATORSTANDARD_HPP */

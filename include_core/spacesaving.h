@@ -49,5 +49,4 @@ uintptr_t spaceSavingGetCurSize(OMRSpaceSaving *spaceSaving);
 }
 #endif
 
-
 #endif

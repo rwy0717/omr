@@ -21,5 +21,4 @@
 
 void
 sl_AixDLLMissingDependency_function(void)
-{
-}
+{}

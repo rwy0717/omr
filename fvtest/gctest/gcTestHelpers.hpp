@@ -34,8 +34,7 @@
 #include "testEnvironment.hpp"
 #include <vector>
 
-class GCTestEnvironment: public BaseEnvironment
-{
+class GCTestEnvironment : public BaseEnvironment {
 	/*
 	 * Data members
 	 */
@@ -59,10 +58,7 @@ public:
 	void GCTestTearDown();
 
 public:
-	GCTestEnvironment(int argc, char **argv)
-	: BaseEnvironment(argc, argv), keepLog(false)
-	{
-	}
+	GCTestEnvironment(int argc, char **argv) : BaseEnvironment(argc, argv), keepLog(false) {}
 };
 
 /**

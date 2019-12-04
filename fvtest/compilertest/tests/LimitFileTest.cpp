@@ -31,33 +31,32 @@
 #include "tests/OpCodesTest.hpp"
 
 TestCompiler::LimitFileTest::LimitFileTest()
-   {
-   // Don't use fork(), since that doesn't let us initialize the JIT
-   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-   }
+{
+	// Don't use fork(), since that doesn't let us initialize the JIT
+	::testing::FLAGS_gtest_death_test_style = "threadsafe";
+}
 
 TestCompiler::LimitFileTest::~LimitFileTest()
-   {
-   // Remove all generated vlog files.
-   for(auto it = _vlog.begin(); it != _vlog.end(); ++it)
-      {
-      unlink(*it);
-      }
-   }
+{
+	// Remove all generated vlog files.
+	for (auto it = _vlog.begin(); it != _vlog.end(); ++it) {
+		unlink(*it);
+	}
+}
 
 void
 TestCompiler::LimitFileTest::delayUnlink(const char *file)
-   {
-   _vlog.push_back(file);
-   }
+{
+	_vlog.push_back(file);
+}
 
 void
 TestCompiler::LimitFileTest::compileTests()
-   {
-   ::TestCompiler::OpCodesTest unaryTest;
-   unaryTest.compileUnaryTestMethods();
-   //unaryTest.invokeUnaryTests();
-   }
+{
+	::TestCompiler::OpCodesTest unaryTest;
+	unaryTest.compileUnaryTestMethods();
+	// unaryTest.invokeUnaryTests();
+}
 
 /**
  * Determine if a file exists.
@@ -66,12 +65,12 @@ TestCompiler::LimitFileTest::compileTests()
  */
 bool
 TestCompiler::LimitFileTest::fileExists(const char *name)
-   {
-   // TODO: use port library for file operations
-   struct stat buf;
-   int result = stat(name, &buf);
-   return result == 0;
-   }
+{
+	// TODO: use port library for file operations
+	struct stat buf;
+	int result = stat(name, &buf);
+	return result == 0;
+}
 
 /**
  * Startup the JIT, run tests, shut down the JIT, then exit with
@@ -84,20 +83,20 @@ TestCompiler::LimitFileTest::fileExists(const char *name)
  */
 void
 TestCompiler::LimitFileTest::generateVLog(const char *vlog, const char *limitFile)
-   {
-   std::string args = std::string("-Xjit:verbose,disableSuffixLogs,vlog=");
-   args = args + vlog;
+{
+	std::string args = std::string("-Xjit:verbose,disableSuffixLogs,vlog=");
+	args = args + vlog;
 
-   // Add the limit file, if provided.
-   if(limitFile)
-      args = args + ",limitFile=" + limitFile;
+	// Add the limit file, if provided.
+	if (limitFile)
+		args = args + ",limitFile=" + limitFile;
 
-   OMRTestEnv::initialize(const_cast<char *>(args.c_str()));
-   compileTests();
-   OMRTestEnv::shutdown();
+	OMRTestEnv::initialize(const_cast<char *>(args.c_str()));
+	compileTests();
+	OMRTestEnv::shutdown();
 
-   exit(0);
-   }
+	exit(0);
+}
 
 /**
  * Assert if a method was or was not compiled in a test, by searching
@@ -112,58 +111,54 @@ TestCompiler::LimitFileTest::generateVLog(const char *vlog, const char *limitFil
  *             parameter is only valid when compiled is true.
  */
 void
-TestCompiler::LimitFileTest::checkVLogForMethod(const char *vlog, const char *method, const char *level, int *foundOnLine)
-   {
-   std::ifstream vlogFile(vlog);
-   ASSERT_TRUE(vlogFile.is_open());
+TestCompiler::LimitFileTest::checkVLogForMethod(
+        const char *vlog, const char *method, const char *level, int *foundOnLine)
+{
+	std::ifstream vlogFile(vlog);
+	ASSERT_TRUE(vlogFile.is_open());
 
-   bool foundPlus = false;
-   bool foundSpace = false;
-   std::string line;
-   for(int i = 1; std::getline(vlogFile, line); ++i)
-      {
-      // If method hasn't been compiled, it shouldn't be anywhere in the vlog
-      if(level == NULL)
-         {
-         ASSERT_EQ(line.find(method), std::string::npos);
-         continue;
-         }
+	bool foundPlus = false;
+	bool foundSpace = false;
+	std::string line;
+	for (int i = 1; std::getline(vlogFile, line); ++i) {
+		// If method hasn't been compiled, it shouldn't be anywhere in the vlog
+		if (level == NULL) {
+			ASSERT_EQ(line.find(method), std::string::npos);
+			continue;
+		}
 
-      if(line.empty())
-         continue;
+		if (line.empty())
+			continue;
 
-      // Lines in a vlog file are dependent on their first character.
-      switch(line[0])
-         {
-         // Method successfully compiled
-         case '+':
-            if(line.find(method) != std::string::npos)
-               {
-               ASSERT_NE(line.find(level), std::string::npos);
-               foundPlus = true;
-               if(foundOnLine)
-                  *foundOnLine = i;
-               }
-            break;
-         // Method compilation began
-         case ' ':
-            if(line.find(method) != std::string::npos)
-               {
-               ASSERT_NE(line.find(" compiling"), std::string::npos);
-               foundSpace = true;
-               }
-            break;
-         }
-      }
+		// Lines in a vlog file are dependent on their first character.
+		switch (line[0]) {
+		// Method successfully compiled
+		case '+':
+			if (line.find(method) != std::string::npos) {
+				ASSERT_NE(line.find(level), std::string::npos);
+				foundPlus = true;
+				if (foundOnLine)
+					*foundOnLine = i;
+			}
+			break;
+		// Method compilation began
+		case ' ':
+			if (line.find(method) != std::string::npos) {
+				ASSERT_NE(line.find(" compiling"), std::string::npos);
+				foundSpace = true;
+			}
+			break;
+		}
+	}
 
-   if(level == NULL)
-      return;
+	if (level == NULL)
+		return;
 
-   // If asserting compilation, we should have found both a compilation
-   // beginning message, and a successful compilation message.
-   ASSERT_TRUE(foundPlus);
-   ASSERT_TRUE(foundSpace);
-   }
+	// If asserting compilation, we should have found both a compilation
+	// beginning message, and a successful compilation message.
+	ASSERT_TRUE(foundPlus);
+	ASSERT_TRUE(foundSpace);
+}
 
 /**
  * Create a vlog file by creating a new process and running a set of tests.
@@ -182,16 +177,16 @@ TestCompiler::LimitFileTest::checkVLogForMethod(const char *vlog, const char *me
  */
 void
 TestCompiler::LimitFileTest::createVLog(const char *vlog, const char *limitFile)
-   {
-   delayUnlink(vlog);
+{
+	delayUnlink(vlog);
 
-   /* This creates the new process, runs generateVLog, and asserts it exits
-    * with a status code of 0.
-    */
-   ASSERT_EXIT(generateVLog(vlog, limitFile), ::testing::ExitedWithCode(0), "");
+	/* This creates the new process, runs generateVLog, and asserts it exits
+	 * with a status code of 0.
+	 */
+	ASSERT_EXIT(generateVLog(vlog, limitFile), ::testing::ExitedWithCode(0), "");
 
-   ASSERT_TRUE(fileExists(vlog));
-   }
+	ASSERT_TRUE(fileExists(vlog));
+}
 
 /**
  * Create a vlog file by creating a new process and running a set of tests,
@@ -206,81 +201,81 @@ TestCompiler::LimitFileTest::createVLog(const char *vlog, const char *limitFile)
  */
 void
 TestCompiler::LimitFileTest::createAndCheckVLog(const char *vlog, const char *limitFile, int *methodLine)
-   {
-   createVLog(vlog, limitFile);
+{
+	createVLog(vlog, limitFile);
 
-   checkVLogForMethod(vlog, "iNeg", "warm", methodLine);
-   checkVLogForMethod(vlog, "iReturn", "warm");
-   }
+	checkVLogForMethod(vlog, "iNeg", "warm", methodLine);
+	checkVLogForMethod(vlog, "iReturn", "warm");
+}
 
 namespace TestCompiler {
 
 // Assert a vlog file was created.
 TEST_F(LimitFileTest, CreateVLogTest)
-   {
-   const char *vlog = "createVLog.log";
-   createVLog(vlog);
-   }
+{
+	const char *vlog = "createVLog.log";
+	createVLog(vlog);
+}
 
 // Assert that methods were compiled and logged.
 TEST_F(LimitFileTest, CheckVLogTest)
-   {
-   const char *vlog = "checkVLog.log";
-   createAndCheckVLog(vlog);
-   }
+{
+	const char *vlog = "checkVLog.log";
+	createAndCheckVLog(vlog);
+}
 
 // Use a limit file.
 TEST_F(LimitFileTest, UseLimitFileTest)
-   {
-   const char *vlog = "checkLimitFileSuccess.log";
-   const char *limitFile = "checkLimitFileSuccess.limit";
+{
+	const char *vlog = "checkLimitFileSuccess.log";
+	const char *limitFile = "checkLimitFileSuccess.limit";
 
-   // Create limit file.
-   createAndCheckVLog(limitFile, NULL);
+	// Create limit file.
+	createAndCheckVLog(limitFile, NULL);
 
-   createAndCheckVLog(vlog, limitFile);
-   }
+	createAndCheckVLog(vlog, limitFile);
+}
 
 // Use (limitfile,n,m) notation.
 TEST_F(LimitFileTest, UseLimitFileRangeTest)
-   {
-   const char *vlog = "checkLimitFileSuccess.log";
-   const char *limitFile = "checkLimitFileSuccess.limit";
+{
+	const char *vlog = "checkLimitFileSuccess.log";
+	const char *limitFile = "checkLimitFileSuccess.limit";
 
-   // Create limit file.
-   int iNegLine;
-   createAndCheckVLog(limitFile, NULL, &iNegLine);
+	// Create limit file.
+	int iNegLine;
+	createAndCheckVLog(limitFile, NULL, &iNegLine);
 
-   std::ostringstream ss;
-   ss << static_cast<long long>(iNegLine);
+	std::ostringstream ss;
+	ss << static_cast<long long>(iNegLine);
 
-   std::string iNegLineStr = ss.str();
-   std::string limitArg = std::string("(") + limitFile + "," + iNegLineStr + "," + iNegLineStr + ")";
-   createVLog(vlog, limitArg.c_str());
+	std::string iNegLineStr = ss.str();
+	std::string limitArg = std::string("(") + limitFile + "," + iNegLineStr + "," + iNegLineStr + ")";
+	createVLog(vlog, limitArg.c_str());
 
-   checkVLogForMethod(vlog, "iNeg", "warm");
-   checkVLogForMethod(vlog, "iReturn", NULL);
-   }
+	checkVLogForMethod(vlog, "iNeg", "warm");
+	checkVLogForMethod(vlog, "iReturn", NULL);
+}
 
 // Use (limitfile,n) notation.
 TEST_F(LimitFileTest, UseLimitFileBoundTest)
-   {
-   const char *vlog = "checkLimitFileSuccess.log";
-   const char *limitFile = "checkLimitFileSuccess.limit";
+{
+	const char *vlog = "checkLimitFileSuccess.log";
+	const char *limitFile = "checkLimitFileSuccess.limit";
 
-   // Create limit file.
-   int iNegLine;
-   createAndCheckVLog(limitFile, NULL, &iNegLine);
+	// Create limit file.
+	int iNegLine;
+	createAndCheckVLog(limitFile, NULL, &iNegLine);
 
-   iNegLine++; // Start at line after iNeg.
+	iNegLine++; // Start at line after iNeg.
 
-   std::ostringstream ss;
-   ss << static_cast<long long>(iNegLine);
+	std::ostringstream ss;
+	ss << static_cast<long long>(iNegLine);
 
-   std::string limitArg = std::string("(") + limitFile + "," + ss.str() + ")";
-   createVLog(vlog, limitArg.c_str());
-   checkVLogForMethod(vlog, "iNeg", NULL);
-   }
-
+	std::string limitArg = std::string("(") + limitFile + "," + ss.str() + ")";
+	createVLog(vlog, limitArg.c_str());
+	checkVLogForMethod(vlog, "iNeg", NULL);
 }
+
+} // namespace TestCompiler
 #endif /* defined(GTEST_HAS_DEATH_TEST) */

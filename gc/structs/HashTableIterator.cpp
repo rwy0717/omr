@@ -32,17 +32,17 @@
 /**
  * \brief       Get the next slot of a J9HashTable
  * \ingroup     GC_Structs
- *  
+ *
  * @return      A slot pointer (NULL when no more slots)
- * 
+ *
  *	Continues the interation of all nodes in a J9HashTable
- *      
+ *
  */
 void **
 GC_HashTableIterator::nextSlot()
 {
 	void **value;
-	
+
 	if (_firstIteration) {
 		_firstIteration = false;
 
@@ -57,11 +57,11 @@ GC_HashTableIterator::nextSlot()
 /**
  * \brief       Remove the current slot in a J9HashTable
  * \ingroup     GC_Structs
- *  
- *	Removes the current slot in a J9HashTable (not valid in Out Of Process) 
- *      
+ *
+ *	Removes the current slot in a J9HashTable (not valid in Out Of Process)
+ *
  */
-void 
+void
 GC_HashTableIterator::removeSlot()
 {
 	hashTableDoRemove(&_handle);

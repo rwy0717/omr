@@ -35,7 +35,7 @@ extern "C" {
  * of dynamic shared memory required to launch a related kernel function with
  * that block size.
  */
-typedef uintptr_t (* J9CudaBlockToDynamicSharedMemorySize)(uint32_t blockSize, uintptr_t userData);
+typedef uintptr_t (*J9CudaBlockToDynamicSharedMemorySize)(uint32_t blockSize, uintptr_t userData);
 
 /**
  * Fast local memory can be split between an L1 cache and shared memory.
@@ -358,7 +358,8 @@ typedef enum J9CudaDeviceLimit {
 	/** maximum number of outstanding device runtime launches that can be made from this context */
 	J9CUDA_DEVICE_LIMIT_DEV_RUNTIME_PENDING_LAUNCH_COUNT,
 
-	/** maximum grid depth at which a thread can issue the device runtime call omrcuda_deviceSynchronize() to wait on child grid launches to complete */
+	/** maximum grid depth at which a thread can issue the device runtime call omrcuda_deviceSynchronize() to wait
+	   on child grid launches to complete */
 	J9CUDA_DEVICE_LIMIT_DEV_RUNTIME_SYNC_DEPTH,
 
 	/** size in bytes of the heap used by the ::malloc() and ::free() device system calls */
@@ -836,13 +837,13 @@ typedef enum J9CudaError {
  * An opaque handle for an event.
  */
 struct J9CudaEventState;
-typedef struct J9CudaEventState * J9CudaEvent;
+typedef struct J9CudaEventState *J9CudaEvent;
 
 /**
  * An opaque handle for a function.
  */
 struct J9CudaFunctionState;
-typedef struct J9CudaFunctionState * J9CudaFunction;
+typedef struct J9CudaFunctionState *J9CudaFunction;
 
 /**
  * Kernel function attributes codes for use with omrcuda_funcGetAttribute.
@@ -1177,7 +1178,7 @@ typedef struct J9CudaStreamData *J9CudaStream;
  * A pointer to a function to be invoked after completing precediing
  * activities on a stream or the default stream of a device.
  */
-typedef void (* J9CudaStreamCallback)(J9CudaStream stream, int32_t error, uintptr_t userData);
+typedef void (*J9CudaStreamCallback)(J9CudaStream stream, int32_t error, uintptr_t userData);
 
 /**
  * A summary description of the CUDA runtime environment.
@@ -1197,8 +1198,9 @@ struct OMRPortLibrary; /* forward struct declaration */
  * Accessor functions to CUDA environment descriptions.
  */
 typedef struct J9CudaConfig {
-	int32_t (* getSummaryData)(struct OMRPortLibrary *portLibrary, J9CudaSummaryDescriptor *summaryData);
-	int32_t (* getDeviceData)(struct OMRPortLibrary *portLibrary, uint32_t deviceId, J9CudaDeviceDescriptor *deviceData);
+	int32_t (*getSummaryData)(struct OMRPortLibrary *portLibrary, J9CudaSummaryDescriptor *summaryData);
+	int32_t (*getDeviceData)(
+	        struct OMRPortLibrary *portLibrary, uint32_t deviceId, J9CudaDeviceDescriptor *deviceData);
 } J9CudaConfig;
 
 #if defined(__cplusplus)

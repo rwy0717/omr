@@ -52,7 +52,8 @@ TypePrinter::printLiterals(const std::vector<EnumMember *> &literals) const
 	if (0 != (_flags & LITERALS)) {
 		for (vector<EnumMember *>::const_iterator it = literals.begin(); it != literals.end(); ++it) {
 			printIndent();
-			_portLibrary->tty_printf(_portLibrary, "literal '%s' = %d\n", (*it)->_name.c_str(), (*it)->_value);
+			_portLibrary->tty_printf(
+			        _portLibrary, "literal '%s' = %d\n", (*it)->_name.c_str(), (*it)->_value);
 		}
 	}
 }
@@ -63,7 +64,8 @@ TypePrinter::printMacros(const std::vector<Macro> &macros) const
 	if (0 != (_flags & MACROS)) {
 		for (vector<Macro>::const_iterator it = macros.begin(); it != macros.end(); ++it) {
 			printIndent();
-			_portLibrary->tty_printf(_portLibrary, "macro '%s' = %s\n", it->_name.c_str(), it->getValue().c_str());
+			_portLibrary->tty_printf(
+			        _portLibrary, "macro '%s' = %s\n", it->_name.c_str(), it->getValue().c_str());
 		}
 	}
 }
@@ -80,10 +82,8 @@ DDR_RC
 TypePrinter::visitClass(ClassUDT *type) const
 {
 	printIndent();
-	_portLibrary->tty_printf(_portLibrary, "%s '%s' size(%zu)",
-			type->_isClass ? "class" : "struct",
-			type->_name.c_str(),
-			type->_sizeOf);
+	_portLibrary->tty_printf(_portLibrary, "%s '%s' size(%zu)", type->_isClass ? "class" : "struct",
+	        type->_name.c_str(), type->_sizeOf);
 	if (NULL != type->_superClass) {
 		_portLibrary->tty_printf(_portLibrary, ":  %s", type->_superClass->_name.c_str());
 	}

@@ -50,7 +50,7 @@ typedef struct J9Thread {
 	struct J9ThreadMonitor *destroyed_monitor_tail;
 #if defined(J9ZOS390)
 	omrthread_os_errno_t os_errno2;
-#endif   /* J9ZOS390 */
+#endif /* J9ZOS390 */
 #if !defined(OMR_OS_WINDOWS)
 	uintptr_t key_deletion_attempts;
 #endif /* !OMR_OS_WINDOWS */
@@ -66,7 +66,6 @@ typedef struct J9ThreadMonitor {
 	struct J9Thread *notifyAllWaiting;
 } J9ThreadMonitor;
 
-
 #define J9THREAD_MONITOR_POOL_SIZE 64
 
 /*
@@ -80,8 +79,7 @@ typedef struct J9ThreadMonitorPool {
 } J9ThreadMonitorPool;
 
 /* This constant required here for DDR */
-#define MONITOR_POOL_SIZE  J9THREAD_MONITOR_POOL_SIZE
-
+#define MONITOR_POOL_SIZE J9THREAD_MONITOR_POOL_SIZE
 
 typedef struct J9ThreadGlobal {
 	struct J9ThreadGlobal *next;
@@ -118,8 +116,8 @@ typedef struct J9ThreadLibrary {
 	uintptr_t defaultMonitorSpinCount2;
 	uintptr_t defaultMonitorSpinCount3;
 #if defined(OMR_THR_SPIN_WAKE_CONTROL)
- 	uintptr_t maxSpinThreads;
- 	uintptr_t maxWakeThreads;
+	uintptr_t maxSpinThreads;
+	uintptr_t maxWakeThreads;
 #endif /* defined(OMR_THR_SPIN_WAKE_CONTROL) */
 #endif /* OMR_THR_THREE_TIER_LOCKING */
 	TLSKEY attachedLibKey;

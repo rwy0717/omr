@@ -63,32 +63,33 @@ static void setCurrentSignal(struct OMRPortLibrary *portLibrary, uint32_t portLi
  * 	"V1R11.0 Language Environment Programming Guide", p. 243, http://publibz.boulder.ibm.com/epubs/pdf/ceea21a0.pdf
  *
  *	@param[in]	fc		A 12-byte condition token that identifies the current condition being processed.
- * 							Language Environment uses this parameter to tell your condition handler what condition has occurred.
- *	@param[in]	token 	An OMRZOSLEConditionHandlerRecord as specified when this handler was registered by @ref omrsig_protect_ceehdlr
- *	@param[in]	leResult	A 4-byte integer that contains instructions about responses the user-written condition
- * 							handler wants Language Environment to make when processing the condition.
- * 							The result_code is passed by reference.
- * 							Valid responses are shown in Table 38 of the Language Environment Programming Guide
- * 							For example, use 20 to percolate the condition.
+ * 							Language Environment uses this parameter to tell your condition
+ *handler what condition has occurred.
+ *	@param[in]	token 	An OMRZOSLEConditionHandlerRecord as specified when this handler was registered by @ref
+ *omrsig_protect_ceehdlr
+ *	@param[in]	leResult	A 4-byte integer that contains instructions about responses the user-written
+ *condition handler wants Language Environment to make when processing the condition. The result_code is passed by
+ *reference. Valid responses are shown in Table 38 of the Language Environment Programming Guide For example, use 20 to
+ *percolate the condition.
  *	@param[in]	newfc	new_condition (output) A 12-byte condition token that represents either
- *						 the promoted condition for a promote response (result_code values of 30, 31, and 32)
- *						 or the requested fix-up actions for a fix-up and resume response (result_code value of 60).
- *						 When a result_code of 60, denoting fix-up and resume, is set by the condition handler,
- *						 new_condition must be set to a condition token that indicates what fix-up action is requested.
- *						 Many conditions, including mathematical routines, use the condition tokens in
- *						 Table 39 to resume with corrective action (either resume with new input value
- *						 or resume with new output value).
- *						 For some conditions, there may be other condition tokens that can be provided by the condition
- *						 handler in new_condition to request specific fix-up actions.
+ *						 the promoted condition for a promote response (result_code values of 30,
+ *31, and 32) or the requested fix-up actions for a fix-up and resume response (result_code value of 60). When a
+ *result_code of 60, denoting fix-up and resume, is set by the condition handler, new_condition must be set to a
+ *condition token that indicates what fix-up action is requested. Many conditions, including mathematical routines, use
+ *the condition tokens in Table 39 to resume with corrective action (either resume with new input value or resume with
+ *new output value). For some conditions, there may be other condition tokens that can be provided by the condition
+ *handler in new_condition to request specific fix-up actions.
  *
  *
- * The Language environment documentation for all the condition messages are here http://publibz.boulder.ibm.com/epubs/pdf/ceea91a0.pdf,
- * 	but the POSIX signal mappings are not included for hardware raised signals.
+ * The Language environment documentation for all the condition messages are here
+ *http://publibz.boulder.ibm.com/epubs/pdf/ceea91a0.pdf, but the POSIX signal mappings are not included for hardware
+ *raised signals.
  *
- * The messages for hardware raised POSIX signals are in Table 74, pg. 421 here http://publibz.boulder.ibm.com/epubs/pdf/cbcpg1a0.pdf
- * The messages for software raised POSIX signals are in Table 76, pg. 423 here http://publibz.boulder.ibm.com/epubs/pdf/cbcpg1a0.pdf
+ * The messages for hardware raised POSIX signals are in Table 74, pg. 421 here
+ *http://publibz.boulder.ibm.com/epubs/pdf/cbcpg1a0.pdf The messages for software raised POSIX signals are in Table 76,
+ *pg. 423 here http://publibz.boulder.ibm.com/epubs/pdf/cbcpg1a0.pdf
  *
-*/
+ */
 void
 omrsig_le_condition_handler(_FEEDBACK *fc, _INT4 *token, _INT4 *leResult, _FEEDBACK *newfc)
 {
@@ -107,7 +108,8 @@ omrsig_le_condition_handler(_FEEDBACK *fc, _INT4 *token, _INT4 *leResult, _FEEDB
 #if defined(OMRSIGNAL_DEBUG)
 	static int count = 0;
 
-	printf("omrsig_le_condition_handler count: %i, %s%i, sev: %i\n", count, e2a_func(fc->tok_facid, 3), fc->tok_msgno, fc->tok_sev);
+	printf("omrsig_le_condition_handler count: %i, %s%i, sev: %i\n", count, e2a_func(fc->tok_facid, 3),
+	        fc->tok_msgno, fc->tok_sev);
 	fflush(NULL);
 	count++;
 #endif
@@ -143,7 +145,9 @@ omrsig_le_condition_handler(_FEEDBACK *fc, _INT4 *token, _INT4 *leResult, _FEEDB
 			if ((5201 <= fc->tok_msgno) && (fc->tok_msgno <= 5238)) {
 				OMRPortLibrary *portLibrary = thisRecord->portLibrary;
 				char *asciiFacilityID = e2a_func(fc->tok_facid, 3);
-				portLibrary->nls_printf(portLibrary, J9NLS_ERROR, J9NLS_PORT_ZOS_CONDITION_FOR_SOFTWARE_RAISED_SIGNAL_RECEIVED, (NULL == asciiFacilityID) ? "NULL" : asciiFacilityID, fc->tok_msgno);
+				portLibrary->nls_printf(portLibrary, J9NLS_ERROR,
+				        J9NLS_PORT_ZOS_CONDITION_FOR_SOFTWARE_RAISED_SIGNAL_RECEIVED,
+				        (NULL == asciiFacilityID) ? "NULL" : asciiFacilityID, fc->tok_msgno);
 				free(asciiFacilityID);
 			}
 		}
@@ -152,14 +156,14 @@ omrsig_le_condition_handler(_FEEDBACK *fc, _INT4 *token, _INT4 *leResult, _FEEDB
 	/*
 	 * Call the handlers that were registered with the port library.
 	 *
-	 * If portlibSignalNo is 0 at this point, we have received a condition that cannot be mapped to a hardware-raised POSIX signal.
-	 * In this case, only handlers that were registered against OMRPORT_SIG_FLAG_SIGALLSYNC should get called,
+	 * If portlibSignalNo is 0 at this point, we have received a condition that cannot be mapped to a
+	 * hardware-raised POSIX signal. In this case, only handlers that were registered against
+	 * OMRPORT_SIG_FLAG_SIGALLSYNC should get called,
 	 *
 	 * If portlibSignalNo is set, then call handlers registered explicitly for the specified signal type.
 	 */
 	if (OMR_ARE_ANY_BITS_SET(thisRecord->flags, portlibSignalNo)
-	 || ((0 == portlibSignalNo) && OMR_ARE_ANY_BITS_SET(thisRecord->flags, OMRPORT_SIG_FLAG_SIGALLSYNC))
-	) {
+	        || ((0 == portlibSignalNo) && OMR_ARE_ANY_BITS_SET(thisRecord->flags, OMRPORT_SIG_FLAG_SIGALLSYNC))) {
 		OMRLEConditionInfo signalInfo;
 		_CEECIB *cib_ptr = NULL;
 		_FEEDBACK cibfc;
@@ -182,7 +186,7 @@ omrsig_le_condition_handler(_FEEDBACK *fc, _INT4 *token, _INT4 *leResult, _FEEDB
 		signalInfo.handlerAddress = (void *)thisRecord->handler;
 		signalInfo.handlerAddress2 = (void *)omrsig_le_condition_handler;
 		signalInfo.messageNumber = (uint16_t)fc->tok_msgno;
-		signalInfo.facilityID = e2a_func(fc->tok_facid, 3);	/* e2a_func() uses malloc, free below */
+		signalInfo.facilityID = e2a_func(fc->tok_facid, 3); /* e2a_func() uses malloc, free below */
 
 		/* Save the previous signal, set the current, restore the previous
 		 * If thisRecord->handler crashes without registering its own protection (using omrsig_protect),
@@ -193,10 +197,12 @@ omrsig_le_condition_handler(_FEEDBACK *fc, _INT4 *token, _INT4 *leResult, _FEEDB
 		setCurrentSignal(thisRecord->portLibrary, portlibSignalNo);
 
 		thisRecord->recursiveCheck = 1;
-		handlerResult = thisRecord->handler(thisRecord->portLibrary, portlibSignalNo, &signalInfo, thisRecord->handler_arg);
+		handlerResult = thisRecord->handler(
+		        thisRecord->portLibrary, portlibSignalNo, &signalInfo, thisRecord->handler_arg);
 		thisRecord->recursiveCheck = 0;
 
-		/* control leaves omrsig_le_condition_handler in all cases following this point, so restore the previous signal */
+		/* control leaves omrsig_le_condition_handler in all cases following this point, so restore the previous
+		 * signal */
 		setCurrentSignal(thisRecord->portLibrary, prevPortlibSignalNo);
 
 		if (NULL != signalInfo.facilityID) {
@@ -206,8 +212,9 @@ omrsig_le_condition_handler(_FEEDBACK *fc, _INT4 *token, _INT4 *leResult, _FEEDB
 
 		switch (handlerResult) {
 		case OMRPORT_SIG_EXCEPTION_CONTINUE_SEARCH:
-			/* thisRecord->handler was not adequately able to address the signal, try the previously registered handler
-			 * To do this, percolate the signal such as to invoke the previously registered LE condition handler */
+			/* thisRecord->handler was not adequately able to address the signal, try the previously
+			 * registered handler To do this, percolate the signal such as to invoke the previously
+			 * registered LE condition handler */
 			*leResult = 20; /* percolate */
 			return;
 		case OMRPORT_SIG_EXCEPTION_CONTINUE_EXECUTION: {
@@ -221,7 +228,8 @@ omrsig_le_condition_handler(_FEEDBACK *fc, _INT4 *token, _INT4 *leResult, _FEEDB
 			break;
 		}
 		case OMRPORT_SIG_EXCEPTION_RETURN:
-			/* jump back to where this was registered in @ref omrsig_protect_ceehdlr, so that we can return back to it's caller  */
+			/* jump back to where this was registered in @ref omrsig_protect_ceehdlr, so that we can return
+			 * back to it's caller  */
 			longjmp(thisRecord->returnBuf, 0);
 			/* unreachable */
 			break;
@@ -235,7 +243,8 @@ omrsig_le_condition_handler(_FEEDBACK *fc, _INT4 *token, _INT4 *leResult, _FEEDB
 }
 
 int32_t
-omrsig_protect_ceehdlr(struct OMRPortLibrary *portLibrary,  omrsig_protected_fn fn, void *fn_arg, omrsig_handler_fn handler, void *handler_arg, uint32_t flags, uintptr_t *result)
+omrsig_protect_ceehdlr(struct OMRPortLibrary *portLibrary, omrsig_protected_fn fn, void *fn_arg,
+        omrsig_handler_fn handler, void *handler_arg, uint32_t flags, uintptr_t *result)
 {
 
 	struct OMRZOSLEConditionHandlerRecord thisRecord;
@@ -262,7 +271,7 @@ omrsig_protect_ceehdlr(struct OMRPortLibrary *portLibrary,  omrsig_protected_fn 
 
 		/* Register omrsig_le_condition_handler as an LE condition handler */
 		token = (_INT4)&thisRecord;
-		leConditionHandler.address = (_POINTER)&omrsig_le_condition_handler ;
+		leConditionHandler.address = (_POINTER)&omrsig_le_condition_handler;
 		leConditionHandler.nesting = NULL;
 
 		CEEHDLR(&leConditionHandler, &token, &fc);
@@ -291,29 +300,24 @@ omrsig_protect_ceehdlr(struct OMRPortLibrary *portLibrary,  omrsig_protected_fn 
 }
 
 uint32_t
-omrsig_info_ceehdlr(struct OMRPortLibrary *portLibrary, void *info, uint32_t category, int32_t index, const char **name, void **value)
+omrsig_info_ceehdlr(struct OMRPortLibrary *portLibrary, void *info, uint32_t category, int32_t index, const char **name,
+        void **value)
 {
 
 	*name = "";
 
 	switch (category) {
-	case OMRPORT_SIG_GPR:
-		return infoForGPR_ceehdlr(portLibrary, info, index, name, value);
-	case OMRPORT_SIG_CONTROL:
-		return infoForControl_ceehdlr(portLibrary, info, index, name, value);
-	case OMRPORT_SIG_FPR:
-		return infoForFPR_ceehdlr(portLibrary, info, index, name, value);
-	case OMRPORT_SIG_MODULE:
-		return infoForModule_ceehdlr(portLibrary, info, index, name, value);
-	case OMRPORT_SIG_SIGNAL:
-		return infoForSignal_ceehdlr(portLibrary, info, index, name, value);
+	case OMRPORT_SIG_GPR: return infoForGPR_ceehdlr(portLibrary, info, index, name, value);
+	case OMRPORT_SIG_CONTROL: return infoForControl_ceehdlr(portLibrary, info, index, name, value);
+	case OMRPORT_SIG_FPR: return infoForFPR_ceehdlr(portLibrary, info, index, name, value);
+	case OMRPORT_SIG_MODULE: return infoForModule_ceehdlr(portLibrary, info, index, name, value);
+	case OMRPORT_SIG_SIGNAL: return infoForSignal_ceehdlr(portLibrary, info, index, name, value);
 	case OMRPORT_SIG_VR:
 		if (portLibrary->portGlobals->vectorRegsSupportOn) {
 			return infoForVR_ceehdlr(portLibrary, info, index, name, value);
 		}
 	case OMRPORT_SIG_OTHER:
-	default:
-		return OMRPORT_SIG_VALUE_UNDEFINED;
+	default: return OMRPORT_SIG_VALUE_UNDEFINED;
 	}
 }
 
@@ -332,7 +336,8 @@ setCurrentSignal(struct OMRPortLibrary *portLibrary, uint32_t portLibSigType)
 int32_t
 ceehdlr_startup(struct OMRPortLibrary *portLibrary)
 {
-	/* use this to record the last signal that occured such that we can call omrsig_handler in omrexit_shutdown_and_exit */
+	/* use this to record the last signal that occured such that we can call omrsig_handler in
+	 * omrexit_shutdown_and_exit */
 	if (omrthread_tls_alloc(&tlsKeyCurrentSignal)) {
 		return -1;
 	}

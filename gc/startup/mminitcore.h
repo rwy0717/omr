@@ -28,16 +28,15 @@ extern "C" {
 #endif
 
 #include "omr.h"
-intptr_t initializeMutatorModel(OMR_VMThread* omrVMThread);
-void cleanupMutatorModel(OMR_VMThread* omrVMThread, uintptr_t flushCaches);
+intptr_t initializeMutatorModel(OMR_VMThread *omrVMThread);
+void cleanupMutatorModel(OMR_VMThread *omrVMThread, uintptr_t flushCaches);
 
-intptr_t gcOmrInitializeDefaults(OMR_VM* omrVM);
+intptr_t gcOmrInitializeDefaults(OMR_VM *omrVM);
 
 void gcOmrInitializeTrace(OMR_VMThread *omrVMThread);
 
 #ifdef __cplusplus
 } /* extern "C" { */
 #endif
-
 
 #endif /* MMINITCORE_H_ */

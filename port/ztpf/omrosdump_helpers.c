@@ -28,10 +28,10 @@
 
 #define ZTPF_NEEDS_GETCONTEXT
 
-#include <tpf/tpf_limits.h>                /* For PATH_MAX            */
-#include <tpf/i_ecb3.h>                    /* Page 3, ECB            */
-#include <tpf/c_deri.h>                    /* SERRC info record    */
-#include <sys/stat.h>                      /* For chmod().            */
+#include <tpf/tpf_limits.h> /* For PATH_MAX            */
+#include <tpf/i_ecb3.h> /* Page 3, ECB            */
+#include <tpf/c_deri.h> /* SERRC info record    */
+#include <sys/stat.h> /* For chmod().            */
 #include <elf.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -49,27 +49,26 @@
 #include "safe_storage.h"
 
 extern void translateInterruptContexts(args *argv) __attribute__((nonnull));
-extern void masterSynchSignalHandler(int nbr, siginfo_t *siginfo,
-		void *ucontext, uintptr_t bear);
+extern void masterSynchSignalHandler(int nbr, siginfo_t *siginfo, void *ucontext, uintptr_t bear);
 
-#define    KEY0(a)    do { cinfc(CINFC_WRITE, CINFC_CMMJDB); } while(0)
-#define    UNKEY(a) do { keyrc(); } while(0)
+#define KEY0(a) \
+	do { \
+		cinfc(CINFC_WRITE, CINFC_CMMJDB); \
+	} while (0)
+#define UNKEY(a) \
+	do { \
+		keyrc(); \
+	} while (0)
 
-char javaPgmsToDump[][5] =
-{
-		/* JVM 2.9 programs */
-		"DJHK", "DJNC", "DJVB", "DJCK", "DJHS", "DJPR", "DJVM",
-		"DJDD", "DJHT", "DJRD", "DJZL", "DJDP", "DJHV", "DJSG",
-		"D9VM", "DJHY", "DJSH", "DJ7B", "DJGC", "DJIT", "DJTH",
-		"DJAR", "DJGK", "DJMT", "DJTR", "DJFF", "DJXT", "DJOR",
+char javaPgmsToDump[][5] = {
+        /* JVM 2.9 programs */
+        "DJHK", "DJNC", "DJVB", "DJCK", "DJHS", "DJPR", "DJVM", "DJDD", "DJHT", "DJRD", "DJZL", "DJDP", "DJHV", "DJSG",
+        "D9VM", "DJHY", "DJSH", "DJ7B", "DJGC", "DJIT", "DJTH", "DJAR", "DJGK", "DJMT", "DJTR", "DJFF", "DJXT", "DJOR",
 
-		/* JCL programs */
-		"DJVA", "DJRM", "DJNM", "DJAT", "DJAW", "DJAH", "DJDB",
-		"DJDC", "DJDS", "DJFM", "DJHP", "DJIN", "DJAV", "DJCD",
-		"DJJW", "DJWP", "DJLI", "DJPG", "DJSD", "DJSN", "DJKC",
-		"DJLC", "DJMN", "DJML", "DJNT", "DJIO", "DJPT", "DJTK",
-		"DJUN", "DJVR", "DJWR", "DJZP"
-};
+        /* JCL programs */
+        "DJVA", "DJRM", "DJNM", "DJAT", "DJAW", "DJAH", "DJDB", "DJDC", "DJDS", "DJFM", "DJHP", "DJIN", "DJAV", "DJCD",
+        "DJJW", "DJWP", "DJLI", "DJPG", "DJSD", "DJSN", "DJKC", "DJLC", "DJMN", "DJML", "DJNT", "DJIO", "DJPT", "DJTK",
+        "DJUN", "DJVR", "DJWR", "DJZP"};
 
 /**
  * The ELF program header permission bits for read, write, and execute combined
@@ -84,12 +83,11 @@ char javaPgmsToDump[][5] =
 /*
  *      Non-exportable function prototypes
  */
-static uint8_t* splitPathName(char *finalname, char *pathname);
+static uint8_t *splitPathName(char *finalname, char *pathname);
 static void buildELFHeader(Elf64_Ehdr *buffer);
-static uint16_t buildELFPheaderBlk(Elf64_Phdr *buffer, DBFHDR *dbfHdr, uintptr_t phnum,
-		uint64_t * numBytes);
+static uint16_t buildELFPheaderBlk(Elf64_Phdr *buffer, DBFHDR *dbfHdr, uintptr_t phnum, uint64_t *numBytes);
 static uintptr_t buildELFNoteArea(Elf64_Nhdr *buffer, DIB *dibPtr);
-static void errMsg(args *argv, uint8_t *message, ...) __attribute__((nonnull(1,2)));
+static void errMsg(args *argv, uint8_t *message, ...) __attribute__((nonnull(1, 2)));
 static uint64_t writeDumpFile(int32_t fd, uint8_t *buffer, uint64_t bytes);
 
 /*
@@ -116,8 +114,8 @@ writeDumpFile(int32_t fd, uint8_t *buffer, uint64_t bytes)
 			return -1L;
 		}
 		next += bytesWrittenOnce;
-		bytesWrittenTotal += (uint64_t) bytesWrittenOnce;
-		bytesLeft -= (uint64_t) bytesWrittenOnce;
+		bytesWrittenTotal += (uint64_t)bytesWrittenOnce;
+		bytesLeft -= (uint64_t)bytesWrittenOnce;
 	}
 	return bytesWrittenTotal;
 }
@@ -163,7 +161,7 @@ calcGap(DBFITEM *curr, DBFITEM *next, uint64_t *gap)
 static uintptr_t
 adjustDBFTable(DBFHDR *dbfHdr)
 {
-	DBFITEM *dbfTbl = (DBFITEM *) dbfHdr + 1; /* DBTI[0] starts right after dbfHdr    */
+	DBFITEM *dbfTbl = (DBFITEM *)dbfHdr + 1; /* DBTI[0] starts right after dbfHdr    */
 	DBFITEM *pred = dbfTbl; /* Predecessor DBTI                        */
 	/*
 	 * For first pass only, set pred = curr. We never want to address zero.
@@ -181,7 +179,7 @@ adjustDBFTable(DBFHDR *dbfHdr)
 
 	KEY0(); /* JDB's in SPK=0, get auth to write it.*/
 	while (curr < limit) {
-		memset(DBTITYPE, 0, sizeof(char) + (sizeof(DBTIGAP)));/* Clear DBTI tail            */
+		memset(DBTITYPE, 0, sizeof(char) + (sizeof(DBTIGAP))); /* Clear DBTI tail            */
 		calcGap(curr, succ, &wGap); /* Get GAP size.                        */
 
 		if (0 == wGap) {
@@ -346,9 +344,9 @@ splitPathName(char *finalname, char *pathname)
 void *
 ztpfBuildCoreFile(void *argv_block)
 {
-#define  MOUNT_TFS    4  /* TPF Filesystem equate from imount.h */
+#define MOUNT_TFS 4 /* TPF Filesystem equate from imount.h */
 
-	args *arg = (args *) argv_block;
+	args *arg = (args *)argv_block;
 	uint8_t *buffer, *endBuffer;
 	DBFHDR *dbfptr; /* Ptr to JDB's index header                */
 	DIB *dibPtr = dibAddr(arg); /* Ptr to the Dump I'chg Block    */
@@ -374,12 +372,12 @@ ztpfBuildCoreFile(void *argv_block)
 	 */
 	if (!(dibPtr->dibjdb)) { /* No dump buffer? Not possible.*/
 		dumpFlags(arg) |= J9TPF_NO_JAVA_DUMPBUFFER;
-		returnCode (arg) = -1; /* Set error flags & bad RC ...    */
+		returnCode(arg) = -1; /* Set error flags & bad RC ...    */
 		return NULL; /* 'Bye.                        */
 	}
 	dbfptr = dibPtr->dibjdb; /* Pick up the dump buffer ptr    */
 	if (0L == dbfptr->ijavcnt) { /* Did CCCPSE write us one?        */
-		returnCode (arg) = -1; /* Nope. JDB is locked...        */
+		returnCode(arg) = -1; /* Nope. JDB is locked...        */
 		dumpFlags(arg) |= J9TPF_JDUMPBUFFER_LOCKED;
 		return NULL; /* See ya next time.            */
 	}
@@ -388,8 +386,8 @@ ztpfBuildCoreFile(void *argv_block)
 	 *     use for the ELF-dictated start of the file content. The start address
 	 *     should, as a matter of good practice, start on a paragraph boundary.
 	 */
-	buffer = (uint8_t *) (dbfptr->ijavbfp); /* Get buffer start as uint8_t ptr    */
-	buffer = (uint8_t *) NEXT_PARA(buffer); /* Start it on next paragraph    */
+	buffer = (uint8_t *)(dbfptr->ijavbfp); /* Get buffer start as uint8_t ptr    */
+	buffer = (uint8_t *)NEXT_PARA(buffer); /* Start it on next paragraph    */
 	/*    boundary.                    */
 	endBuffer = buffer + dbfptr->ijavbfl; /* Get bytes left in buffer        */
 	spcAvailable = endBuffer - buffer; /* Get corrected count of bytes    */
@@ -397,9 +395,7 @@ ztpfBuildCoreFile(void *argv_block)
 	phCount = dbfptr->ijavcnt;
 
 	int numJavaPgms = sizeof(javaPgmsToDump) / 5;
-	octetsToWrite = sizeof(Elf64_Ehdr)
-			+ ((phCount + 1 + numJavaPgms) * sizeof(Elf64_Phdr)) +
-			NOTE_TABLE_SIZE;
+	octetsToWrite = sizeof(Elf64_Ehdr) + ((phCount + 1 + numJavaPgms) * sizeof(Elf64_Phdr)) + NOTE_TABLE_SIZE;
 	/*
 	 *     Uh oh. Not enough free space remaining in the dump buffer. Now
 	 *     we've gotta go to the heap and see if there's enough there. Not
@@ -408,7 +404,7 @@ ztpfBuildCoreFile(void *argv_block)
 	if (octetsToWrite > spcAvailable) { /* Check for available memory,    */
 		buffer = malloc64(octetsToWrite); /*  anywhere. We're desperate.    */
 		if (!buffer) { /* If we can't buffer our I/Os,    */
-			returnCode (arg) = -1; /*  we are done. Indicate error */
+			returnCode(arg) = -1; /*  we are done. Indicate error */
 			errMsg(arg, (uint8_t *)"Cannot buffer dump file, out of memory");
 			dumpFlags(arg) |= J9TPF_OUT_OF_BUFFERSPACE;
 			KEY0();
@@ -432,19 +428,18 @@ ztpfBuildCoreFile(void *argv_block)
 	/*
 	 *    The "OS filename" will look like ${path}/core.${TOD_in_hex}.${pid}
 	 */
-	sprintf((char *)workSpace(arg), "core.%lX.%d", dibPtr->dstckf,
-			dumpSiginfo(arg)->si_pid);
+	sprintf((char *)workSpace(arg), "core.%lX.%d", dibPtr->dstckf, dumpSiginfo(arg)->si_pid);
 	{
 		int fsystype = pathconf(pathName, _TPF_PC_FS_TYPE);
 		if (fsystype == MOUNT_TFS) {
 			errMsg(arg, (uint8_t *)"Cannot use the tfs for java dumps: path used='%s'\n",
-					(uint8_t *)pathName);
-			returnCode (arg) = -1;
+			        (uint8_t *)pathName);
+			returnCode(arg) = -1;
 			KEY0();
 			dbfptr->ijavcnt = 0L; /* Unlock the JDB so CCCPSE can reuse it*/
 			UNKEY();
 			return NULL;
-			//dir_path_name is within the TFS
+			// dir_path_name is within the TFS
 		}
 	}
 	strcat(pathName, (const char *)workSpace(arg));
@@ -452,7 +447,7 @@ ztpfBuildCoreFile(void *argv_block)
 
 	if (-1 == ofd) {
 		errMsg(arg, (uint8_t *)"Cannot open() filename %s: %s\n", strerror(errno));
-		returnCode (arg) = -1;
+		returnCode(arg) = -1;
 		KEY0();
 		dbfptr->ijavcnt = 0L; /* Unlock the JDB so CCCPSE can reuse it*/
 		UNKEY();
@@ -465,10 +460,10 @@ ztpfBuildCoreFile(void *argv_block)
 	 *    the ELF-dictated start, and then follow that with the data in the
 	 *    ICB.
 	 */
-	wPtr = (uintptr_t) buffer; /*    Calc section addresses with single    */
-	                           /*     byte arithmetic                    */
-	ehdrp = (Elf64_Ehdr *) wPtr; /*    Elf64_Ehdr pointer                    */
-	phdrp = (Elf64_Phdr *) (ehdrp + 1); /*    Elf64_Phdr pointer                    */
+	wPtr = (uintptr_t)buffer; /*    Calc section addresses with single    */
+	/*     byte arithmetic                    */
+	ehdrp = (Elf64_Ehdr *)wPtr; /*    Elf64_Ehdr pointer                    */
+	phdrp = (Elf64_Phdr *)(ehdrp + 1); /*    Elf64_Phdr pointer                    */
 	buildELFHeader(ehdrp);
 	uint64_t numBytes = 0;
 	uint64_t pCount = buildELFPheaderBlk(phdrp, dbfptr, phCount, &numBytes);
@@ -476,9 +471,9 @@ ztpfBuildCoreFile(void *argv_block)
 	ehdrp->e_phnum = pCount; /*  absolutely final Phdr count and     */
 	ehdrp->e_phoff = 0x40; /*    offset of its table into place in    */
 	UNKEY(); /*  the Ehdr, then get back to SPK 1.    */
-	wPtr = (uintptr_t) phdrp; /* Calculate the end address        */
+	wPtr = (uintptr_t)phdrp; /* Calculate the end address        */
 	wPtr += ((phCount + 1 + numJavaPgms) * sizeof(Elf64_Phdr)); /*    of the Elf64_Phdr section        */
-	narea = (Elf64_Nhdr *) wPtr; /* Calculate the address of NOTE sec,    */
+	narea = (Elf64_Nhdr *)wPtr; /* Calculate the address of NOTE sec,    */
 	buildELFNoteArea(narea, dibPtr); /*    and go write it there.                */
 	/*
 	 *    Write the ELF-dictated portion of the file first.
@@ -495,7 +490,7 @@ ztpfBuildCoreFile(void *argv_block)
 	/*
 	 *    Finish the output with the ICB portion of the Java Dump Buffer
 	 */
-	imageBuffer = (uint8_t *) cinfc_fast(CINFC_CMMJDB);
+	imageBuffer = (uint8_t *)cinfc_fast(CINFC_CMMJDB);
 	octetsWritten = writeDumpFile(ofd, imageBuffer, numBytes);
 	if (-1 == octetsWritten) {
 		errMsg(arg, (uint8_t *)"Error writing dump file %s: %s", ofn, strerror(errno));
@@ -507,18 +502,16 @@ ztpfBuildCoreFile(void *argv_block)
 	}
 	int i = 0;
 	for (i = 0; i < numJavaPgms; i++) {
-		struct pat * pgmpat = progc(javaPgmsToDump[i], PROGC_PBI);
+		struct pat *pgmpat = progc(javaPgmsToDump[i], PROGC_PBI);
 		if (pgmpat != NULL) {
 			struct ifetch *pgmbase = pgmpat->patgca;
 			if (pgmbase != NULL) {
-				int offset = pgmbase->_iftch_txt_off + pgmbase->_iftch_txt_size
-					+ 0x1000;
-				char * text = ((char*) pgmbase) + offset;
+				int offset = pgmbase->_iftch_txt_off + pgmbase->_iftch_txt_size + 0x1000;
+				char *text = ((char *)pgmbase) + offset;
 				uint64_t size = pgmpat->patpsize - offset;
 				octetsWritten = writeDumpFile(ofd, (uint8_t *)text, size);
 				if (-1 == octetsWritten) {
-					errMsg(arg, (uint8_t *)"Error writing dump file %s: %s", ofn,
-						strerror(errno));
+					errMsg(arg, (uint8_t *)"Error writing dump file %s: %s", ofn, strerror(errno));
 					dumpFlags(arg) |= J9TPF_FILE_SYSTEM_ERROR;
 					KEY0();
 					dbfptr->ijavcnt = 0L; /* Unlock the JDB so CCCPSE can reuse it*/
@@ -534,8 +527,7 @@ ztpfBuildCoreFile(void *argv_block)
 	 */
 	rc = close(ofd); /* Only try to close() the file once    */
 	if (-1 == rc) {
-		errMsg(arg, (uint8_t *)"I/O error attempting to close %s:%s\n", ofn,
-				strerror(errno));
+		errMsg(arg, (uint8_t *)"I/O error attempting to close %s:%s\n", ofn, strerror(errno));
 		KEY0();
 		dbfptr->ijavcnt = 0L; /* Unlock the JDB so CCCPSE can reuse it*/
 		UNKEY();
@@ -555,14 +547,13 @@ ztpfBuildCoreFile(void *argv_block)
 	 * avoid a mem leak.
 	 */
 	strcpy((char *)dumpFilename(arg), ofn); /* Store it in the args block so the */
-	return (void *) ofn; /*  caller always has it, and goback.*/
+	return (void *)ofn; /*  caller always has it, and goback.*/
 }
 
-static char *elf64header_constant =
-		"\x7f\x45\x4c\x46\x02\x02\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00"
-				"\x00\x04\x00\x16\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00"
-				"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
-				"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
+static char *elf64header_constant = "\x7f\x45\x4c\x46\x02\x02\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+                                    "\x00\x04\x00\x16\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00"
+                                    "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+                                    "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
 
 /**
  * \internal Build the ELF64 header. This is really simple, just overlay the input buffer
@@ -643,16 +634,14 @@ buildELFHeader(Elf64_Ehdr *buffer)
  *      Count of program headers written.
  */
 static uint16_t
-buildELFPheaderBlk(Elf64_Phdr *buffer, DBFHDR *dbfHdr,
-		uint64_t phnum, uint64_t * numBytes)
+buildELFPheaderBlk(Elf64_Phdr *buffer, DBFHDR *dbfHdr, uint64_t phnum, uint64_t *numBytes)
 {
 	Elf64_Phdr *phdrPtr = buffer;
-	DBFITEM *curr = (DBFITEM *) (dbfHdr + 1);
+	DBFITEM *curr = (DBFITEM *)(dbfHdr + 1);
 	uint64_t dbfiCount = dbfHdr->ijavcnt;
 	uint16_t newPhdrCount = 0;
 	int numJavaPgms = sizeof(javaPgmsToDump) / 5;
-	uint64_t netOffset = sizeof(Elf64_Ehdr)
-			+ ((phnum + 1 + numJavaPgms) * sizeof(Elf64_Phdr));
+	uint64_t netOffset = sizeof(Elf64_Ehdr) + ((phnum + 1 + numJavaPgms) * sizeof(Elf64_Phdr));
 
 	/*
 	 * First we set up one constant Phdr ... a PT_NOTE. The rest come from DBF
@@ -674,7 +663,7 @@ buildELFPheaderBlk(Elf64_Phdr *buffer, DBFHDR *dbfHdr,
 		phdrPtr->p_type = PT_LOAD; /* Normal virtual memory content, loadable*/
 		phdrPtr->p_flags = PT_RWX; /* Flags = rwx                            */
 		phdrPtr->p_offset = netOffset; /* Fill in offset into file ...            */
-		phdrPtr->p_vaddr = (uintptr_t) DBTIVADDR; /*  ... the virtual memory address        */
+		phdrPtr->p_vaddr = (uintptr_t)DBTIVADDR; /*  ... the virtual memory address        */
 		phdrPtr->p_filesz = phdrPtr->p_memsz = DBTISIZ; /*  ... and memory sizes.        */
 		phdrPtr->p_align = 1; /* Align all images to 1                */
 		/*
@@ -691,24 +680,21 @@ buildELFPheaderBlk(Elf64_Phdr *buffer, DBFHDR *dbfHdr,
 	}
 	// return number of bytes to write from the dump buffer
 	*numBytes = netOffset
-			- (sizeof(Elf64_Ehdr)
-					+ ((phnum + 1 + numJavaPgms) * sizeof(Elf64_Phdr))
-					+ NOTE_TABLE_SIZE);
+	        - (sizeof(Elf64_Ehdr) + ((phnum + 1 + numJavaPgms) * sizeof(Elf64_Phdr)) + NOTE_TABLE_SIZE);
 	int i = 0;
 	for (i = 0; i < numJavaPgms; i++) {
-		struct pat * pgmpat = progc(javaPgmsToDump[i], PROGC_PBI);
+		struct pat *pgmpat = progc(javaPgmsToDump[i], PROGC_PBI);
 		if (pgmpat != NULL) {
 			struct ifetch *pgmbase = pgmpat->patgca;
 			if (pgmbase != NULL) {
-				int offset = pgmbase->_iftch_txt_off + pgmbase->_iftch_txt_size
-						+ 0x1000;
-				char * text = ((char*) pgmbase) + offset;
+				int offset = pgmbase->_iftch_txt_off + pgmbase->_iftch_txt_size + 0x1000;
+				char *text = ((char *)pgmbase) + offset;
 				uint64_t size = pgmpat->patpsize - offset;
 				memset(phdrPtr, 0, sizeof(Elf64_Phdr)); /* Zeroize all 56 bytes.        */
 				phdrPtr->p_type = PT_LOAD; /* Normal virtual memory content, loadable*/
 				phdrPtr->p_flags = PT_RWX; /* Flags = rwx                            */
 				phdrPtr->p_offset = netOffset; /* Fill in offset into file ...            */
-				phdrPtr->p_vaddr = (uintptr_t) text;
+				phdrPtr->p_vaddr = (uintptr_t)text;
 				phdrPtr->p_filesz = phdrPtr->p_memsz = size;
 				phdrPtr->p_align = 1; /* Align all images to 1                */
 				netOffset += size; /* Set next offset and                    */
@@ -721,7 +707,7 @@ buildELFPheaderBlk(Elf64_Phdr *buffer, DBFHDR *dbfHdr,
 	return newPhdrCount; /* We're done                              */
 }
 
-#define    NOTE_DATA_OFFSET(p)    ((uintptr_t)p+0x14)
+#define NOTE_DATA_OFFSET(p) ((uintptr_t)p + 0x14)
 
 /**
  * \internal
@@ -786,8 +772,8 @@ buildELFNoteArea(Elf64_Nhdr *buffer, DIB *dibPtr)
 	 *    past the DBFHDR, which just so happens to be the same length as a DBFITEM
 	 *    itself.
 	 */
-	DBFITEM *eriRef = (DBFITEM *) dbfPtr + 1;
-	struct cderi *eriPtr = (struct cderi *) (eriRef->ijavsbuf);
+	DBFITEM *eriRef = (DBFITEM *)dbfPtr + 1;
+	struct cderi *eriPtr = (struct cderi *)(eriRef->ijavsbuf);
 	/*
 	 * z/TPF keeps its process information in a unique IPROC block, address it.
 	 */
@@ -811,7 +797,7 @@ buildELFNoteArea(Elf64_Nhdr *buffer, DIB *dibPtr)
 	KEY0();
 	memset(buffer, 0, tableSize); /* Clear the entire buffer        */
 	nsh_prstat = buffer; /* Start the data sec hdr ptr.    */
-	prstat = (prstatus_t *) NOTE_DATA_OFFSET(nsh_prstat); /* Point at its data*/
+	prstat = (prstatus_t *)NOTE_DATA_OFFSET(nsh_prstat); /* Point at its data*/
 	nsh_prstat->n_namesz = 5; /* Size of "CORE" = 5            */
 	nsh_prstat->n_descsz = sizeof(prstatus_t);
 	nsh_prstat->n_type = NT_PRSTATUS; /* Type = 1                        */
@@ -861,22 +847,22 @@ buildELFNoteArea(Elf64_Nhdr *buffer, DIB *dibPtr)
 	 * fractional. Does it really matter? Nah. But if you're gonna do it, you might
 	 * as well do it right ....
 	 */
-	prstat->stime.tv_usec = *((unsigned long long *)(tpf_get_ecb_field(CE1ISTIM_FIELD)))/4098;
-	wDest = (uint8_t *) &(prstat->reg); /* Point at offset +0 of reg fld    */
+	prstat->stime.tv_usec = *((unsigned long long *)(tpf_get_ecb_field(CE1ISTIM_FIELD))) / 4098;
+	wDest = (uint8_t *)&(prstat->reg); /* Point at offset +0 of reg fld    */
 	/*
 	 *     The PGM/O PSW is followed by a 16-wide array of ULONGs which
 	 *     represent the values of all 16 general registers, 0 through 15,
 	 *     as they were at the time the PGM/N PSW fired. Prepare to copy
 	 *     them into the NT_PRSTATUS section, lth=128+16 (144).
 	 */
-	wSrc = (unsigned char *) (dibPtr->dispw); /* Point @ PSW & general regs        */
+	wSrc = (unsigned char *)(dibPtr->dispw); /* Point @ PSW & general regs        */
 	memcpy(wDest, wSrc, 144); /* Preserve all that data.            */
 	prstat->fpvalid = TRUE; /* Yes, we have floating point        */
 	/*
 	 * NT_PRPSINFO is next
 	 */
-	nsh_prpsin = (Elf64_Nhdr *) (prstat + 1); /* Point to next NOTE hdr    */
-	prinfo = (prpsinfo_t *) NOTE_DATA_OFFSET(nsh_prpsin);
+	nsh_prpsin = (Elf64_Nhdr *)(prstat + 1); /* Point to next NOTE hdr    */
+	prinfo = (prpsinfo_t *)NOTE_DATA_OFFSET(nsh_prpsin);
 	nsh_prpsin->n_namesz = 5; /* Size of "CORE" = 5        */
 	nsh_prpsin->n_descsz = sizeof(prpsinfo_t);
 	nsh_prpsin->n_type = NT_PRPSINFO; /* Type = 3                    */
@@ -896,8 +882,8 @@ buildELFNoteArea(Elf64_Nhdr *buffer, DIB *dibPtr)
 	 * NT_AUXV after that ... we fake it (we have no ELF protocols involved
 	 * in task switching and thus have no AUXV structure or meaning).
 	 */
-	nsh_auxvxx = (Elf64_Nhdr *) (prinfo + 1); /* Next NOTE header            */
-	auxv = (AUXV *) NOTE_DATA_OFFSET(nsh_auxvxx); /* and data region ptr.    */
+	nsh_auxvxx = (Elf64_Nhdr *)(prinfo + 1); /* Next NOTE header            */
+	auxv = (AUXV *)NOTE_DATA_OFFSET(nsh_auxvxx); /* and data region ptr.    */
 	nsh_auxvxx->n_namesz = 5; /* Size of "CORE" = 5        */
 	nsh_auxvxx->n_descsz = sizeof(AUXV);
 	nsh_auxvxx->n_type = NT_AUXV; /* Type = 6                    */
@@ -906,8 +892,8 @@ buildELFNoteArea(Elf64_Nhdr *buffer, DIB *dibPtr)
 	/*
 	 * ... then NT_FPREGSET
 	 */
-	nsh_fpregs = (Elf64_Nhdr *) (auxv + 1); /* Next NOTE header            */
-	fpregs = (fpregset_t *) NOTE_DATA_OFFSET(nsh_fpregs); /* and data ptr    */
+	nsh_fpregs = (Elf64_Nhdr *)(auxv + 1); /* Next NOTE header            */
+	fpregs = (fpregset_t *)NOTE_DATA_OFFSET(nsh_fpregs); /* and data ptr    */
 	nsh_fpregs->n_namesz = 5; /* Size of "CORE" = 5        */
 	nsh_fpregs->n_descsz = sizeof(fpregset_t);
 	nsh_fpregs->n_type = NT_FPREGSET; /* Type = 2                    */
@@ -918,19 +904,19 @@ buildELFNoteArea(Elf64_Nhdr *buffer, DIB *dibPtr)
 	 * anyway.
 	 */
 	fpregs->fpc = 0x00800000;
-	wSrc = (uint8_t *) &(dibPtr->dfreg); /* Get the adrs of the fp    */
-	wDest = (U_8 *)&(fpregs->fprs);                /*  regs, then copy them     */
-	memcpy( wDest, wSrc, sizeof(fpregs->fprs) );   /*  into the note area.      */
+	wSrc = (uint8_t *)&(dibPtr->dfreg); /* Get the adrs of the fp    */
+	wDest = (U_8 *)&(fpregs->fprs); /*  regs, then copy them     */
+	memcpy(wDest, wSrc, sizeof(fpregs->fprs)); /*  into the note area.      */
 	/*
 	 * ... then NT_S390_LAST_BREAK
 	 */
-	nsh_lastbr = (Elf64_Nhdr *) (fpregs + 1);
+	nsh_lastbr = (Elf64_Nhdr *)(fpregs + 1);
 	nsh_lastbr->n_namesz = 6; /* Size of "LINUX" = 6        */
 	nsh_lastbr->n_descsz = 8; /* Always 0x008 bytes.        */
 	nsh_lastbr->n_type = 0x306; /* Type = NT_S390_LAST_BR    */
-	wDest = (uint8_t *) NOTE_DATA_OFFSET(nsh_lastbr);
+	wDest = (uint8_t *)NOTE_DATA_OFFSET(nsh_lastbr);
 	memcpy(nsh_lastbr + 1, "LINUX", 6); /* Set "LINUX" name            */
-	wSrc = (unsigned char *) (dibPtr->dbrevn); /* Get NOTE data source ptr */
+	wSrc = (unsigned char *)(dibPtr->dbrevn); /* Get NOTE data source ptr */
 	memcpy(wDest, wSrc, 8); /*  and move it in.            */
 	UNKEY();
 	return tableSize; /* We're done.                */
@@ -939,14 +925,14 @@ buildELFNoteArea(Elf64_Nhdr *buffer, DIB *dibPtr)
 	 * class code to display this)
 	 */
 	wPtr += 8;
-	nsh_lastbr = (Elf64_Nhdr *) (wDest + 8);
+	nsh_lastbr = (Elf64_Nhdr *)(wDest + 8);
 	nsh_lastbr->n_namesz = 5; /* Size of "ZTPF" = 5        */
 	nsh_lastbr->n_descsz = 68; /* Always 0x044 bytes.        */
 	nsh_lastbr->n_type = 0x500; /* Type = 500                */
 	memcpy(nsh_lastbr + 1, "ZTPF", 5); /* Set "ZTPF" name ...        */
 	wDest += 0x14; /*  and point at data        */
-	sprintf((char *)wDest, "SE-%4.4d OPR-%c%6.6X PGM-%4.4s %5.5c %8.8s", eriPtr->eriseq,
-			eriPtr->eridpfx, eriPtr->eridnum, eriPtr->eridate, eriPtr->eritime);
+	sprintf((char *)wDest, "SE-%4.4d OPR-%c%6.6X PGM-%4.4s %5.5c %8.8s", eriPtr->eriseq, eriPtr->eridpfx,
+	        eriPtr->eridnum, eriPtr->eridate, eriPtr->eritime);
 	UNKEY();
 	return tableSize; /* We're done.                */
 }
@@ -960,8 +946,7 @@ ztpf_preemptible_helper(void)
 	s->argv.flags = J9TPF_NO_PORT_LIBRARY;
 	s->pDIB = ecbp2()->ce2dib;
 	s->argv.dibPtr = s->pDIB;
-	masterSynchSignalHandler(s->siginfo.si_signo, &(s->siginfo), &(s->ucontext),
-			s->pDIB->dbrevn);
+	masterSynchSignalHandler(s->siginfo.si_signo, &(s->siginfo), &(s->ucontext), s->pDIB->dbrevn);
 	/*
 	 * Like its "harder" cousin, below, if the signal handler returns here, it is
 	 * acknowledging that it wants to exit. Otherwise, don't expect a return. In
@@ -986,7 +971,7 @@ ztpf_nonpreemptible_helper(void)
 	 *    handler for the JVM's structured signal handling architecture. This
 	 *    storage comes from a static storage segment in DJPR.
 	 */
-	s->pDIB = (DIB *) (ecbp2()->ce2dib);
+	s->pDIB = (DIB *)(ecbp2()->ce2dib);
 	s->argv.dibPtr = s->pDIB;
 	translateInterruptContexts(&(s->argv));
 
@@ -1012,7 +997,7 @@ ztpf_nonpreemptible_helper(void)
 	 *    on our little subsection of the PROC block is also still in effect.
 	 *    But first, stash the DIB pointer in the IPROC block, then unlock it.
 	 */
-	s->pPROC->iproc_tdibptr = (uint64_t) s->pDIB; /*    Stash the faulting DIB pointer            */
+	s->pPROC->iproc_tdibptr = (uint64_t)s->pDIB; /*    Stash the faulting DIB pointer            */
 	PROC_UNLOCK(&(s->pPROC->iproc_JVMLock), holdkey);
 	/*
 	 * Call the master structured signal handler for synchronous signals.
@@ -1020,8 +1005,7 @@ ztpf_nonpreemptible_helper(void)
 	 * either hand off execution to the JIT, or will run the dump agents. Do not
 	 * expect a return; else the normal SIG_DFL (bye, bye) rule applies.
 	 */
-	masterSynchSignalHandler(s->siginfo.si_signo, &(s->siginfo), &(s->ucontext),
-			s->pDIB->dbrevn);
+	masterSynchSignalHandler(s->siginfo.si_signo, &(s->siginfo), &(s->ucontext), s->pDIB->dbrevn);
 	/*
 	 * If execution returns to this point, the signal handler returned
 	 * here. This means that the thread accepts the consequences of a

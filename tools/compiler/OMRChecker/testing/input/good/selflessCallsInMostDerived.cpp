@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 /**
  * Description: Calls an extensible class member function using
  *    the `self()` function for down casting.
@@ -28,35 +27,41 @@
 
 #define OMR_EXTENSIBLE __attribute__((annotate("OMR_Extensible")))
 
-namespace TR  { class ExtClass; }         // forward declaration required to declared `self()`
+namespace TR {
+class ExtClass;
+} // namespace TR
 
-namespace OMR
-{
+namespace OMR {
 
-class OMR_EXTENSIBLE ExtClass
-   {
-   public:
-   TR::ExtClass * self();   // declaration of down cast function
-   void functionCalled();   // function to be called
-   };
+class OMR_EXTENSIBLE ExtClass {
+public:
+	TR::ExtClass *self(); // declaration of down cast function
+	void functionCalled(); // function to be called
+};
 
 } // namespace OMR
 
-namespace TR
-{
-   class OMR_EXTENSIBLE ExtClass : public OMR::ExtClass {
-      public:
-      ExtClass(int x) { 
-         functionCalled(); // Inside of TR::ExtClass, needn't call self, as this is already of the correct type. 
-      }
+namespace TR {
+class OMR_EXTENSIBLE ExtClass : public OMR::ExtClass {
+public:
+	ExtClass(int x)
+	{
+		functionCalled(); // Inside of TR::ExtClass, needn't call self, as this is already of the correct type.
+	}
 
-      void frobnicate() { 
-         functionCalled();  // Inside of TR::ExtClass, needn't call self. 
-      }
-   };
+	void frobnicate()
+	{
+		functionCalled(); // Inside of TR::ExtClass, needn't call self.
+	}
+};
+} // namespace TR
+
+TR::ExtClass *
+OMR::ExtClass::self()
+{
+	return static_cast<TR::ExtClass *>(this);
 }
 
-TR::ExtClass * OMR::ExtClass::self() { return static_cast<TR::ExtClass *>(this); }
-
-void OMR::ExtClass::functionCalled() {}
-
+void
+OMR::ExtClass::functionCalled()
+{}

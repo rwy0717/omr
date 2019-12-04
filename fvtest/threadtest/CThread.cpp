@@ -21,14 +21,12 @@
 
 #include "threadTestLib.hpp"
 
-CThread::CThread(omrthread_t self) :
-	m_self(self), m__terminated(false)
+CThread::CThread(omrthread_t self) : m_self(self), m__terminated(false)
 {
 	m__exitlock = new CMonitor("exitlock");
 }
 
-CThread::CThread(void) :
-	m_self(0), m__terminated(false)
+CThread::CThread(void) : m_self(0), m__terminated(false)
 {
 	m__exitlock = new CMonitor("exitlock");
 
@@ -138,7 +136,7 @@ CThread::Run(void)
 int
 CThread::StartFunction(void *data)
 {
-	CThread *pObj = (CThread *) data;
+	CThread *pObj = (CThread *)data;
 	intptr_t rv = pObj->Run();
 	pObj->m__terminated = true;
 	return (int)rv;

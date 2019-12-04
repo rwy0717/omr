@@ -45,17 +45,14 @@ public:
 	 * @note This method is NOT thread safe.
 	 *
 	 */
-	void merge(MM_ReferenceStats* stats)
+	void merge(MM_ReferenceStats *stats)
 	{
 		_candidates += stats->_candidates;
 		_cleared += stats->_cleared;
 		_enqueued += stats->_enqueued;
 	}
 
-	MM_ReferenceStats()
-		: _candidates(0)
-		, _cleared(0)
-		, _enqueued(0) {};
+	MM_ReferenceStats() : _candidates(0), _cleared(0), _enqueued(0){};
 };
 
 #endif /* REFERENCESTATS_HPP_ */

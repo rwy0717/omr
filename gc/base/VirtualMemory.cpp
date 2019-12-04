@@ -20,11 +20,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-#include <string.h>
-
-#include "omrcomp.h"
-#include "omrport.h"
-#include "omr.h"
+#include "VirtualMemory.hpp"
 
 #include "EnvironmentBase.hpp"
 #include "Forge.hpp"
@@ -32,7 +28,10 @@
 #include "Math.hpp"
 #include "ModronAssertions.h"
 #include "NUMAManager.hpp"
-#include "VirtualMemory.hpp"
+#include "omr.h"
+#include "omrcomp.h"
+#include "omrport.h"
+#include <string.h>
 
 #define HIGH_ADDRESS UDATA_MAX
 
@@ -41,10 +40,13 @@
  ****************************************
  */
 
-MM_VirtualMemory*
-MM_VirtualMemory::newInstance(MM_EnvironmentBase* env, uintptr_t heapAlignment, uintptr_t size, uintptr_t pageSize, uintptr_t pageFlags, uintptr_t tailPadding, void* preferredAddress, void* ceiling, uintptr_t mode, uintptr_t options, uint32_t memoryCategory)
+MM_VirtualMemory *
+MM_VirtualMemory::newInstance(MM_EnvironmentBase *env, uintptr_t heapAlignment, uintptr_t size, uintptr_t pageSize,
+        uintptr_t pageFlags, uintptr_t tailPadding, void *preferredAddress, void *ceiling, uintptr_t mode,
+        uintptr_t options, uint32_t memoryCategory)
 {
-	MM_VirtualMemory* vmem = (MM_VirtualMemory*)env->getForge()->allocate(sizeof(MM_VirtualMemory), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+	MM_VirtualMemory *vmem = (MM_VirtualMemory *)env->getForge()->allocate(
+	        sizeof(MM_VirtualMemory), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
 
 	if (vmem) {
 		new (vmem) MM_VirtualMemory(env, heapAlignment, pageSize, pageFlags, tailPadding, mode);
@@ -58,14 +60,15 @@ MM_VirtualMemory::newInstance(MM_EnvironmentBase* env, uintptr_t heapAlignment, 
 }
 
 void
-MM_VirtualMemory::kill(MM_EnvironmentBase* env)
+MM_VirtualMemory::kill(MM_EnvironmentBase *env)
 {
 	tearDown(env);
 	env->getForge()->free(this);
 }
 
 bool
-MM_VirtualMemory::initialize(MM_EnvironmentBase* env, uintptr_t size, void* preferredAddress, void* ceiling, uintptr_t options, uint32_t memoryCategory)
+MM_VirtualMemory::initialize(MM_EnvironmentBase *env, uintptr_t size, void *preferredAddress, void *ceiling,
+        uintptr_t options, uint32_t memoryCategory)
 {
 	OMRPORT_ACCESS_FROM_OMRPORT(env->getPortLibrary());
 
@@ -89,16 +92,16 @@ MM_VirtualMemory::initialize(MM_EnvironmentBase* env, uintptr_t size, void* pref
 	}
 
 	if ((NULL != ceiling) && (params.byteAmount <= (uintptr_t)ceiling)) {
-		void* maxEndAddress = (void*)((uintptr_t)ceiling - params.byteAmount);
+		void *maxEndAddress = (void *)((uintptr_t)ceiling - params.byteAmount);
 
 		/*
 		 * Temporary fix to cover problem in Port Library:
-		 * if direction is top down an allocation would be attempted from endAddress first regardless it page aligned or not
-		 * For unaligned case an allocation will succeed but not in requested pages
-		 * As far as this is only place in GC used endAddress add rounding here
-		 * (another case is handling of preferredAddress - we do not care)
+		 * if direction is top down an allocation would be attempted from endAddress first regardless it page
+		 * aligned or not For unaligned case an allocation will succeed but not in requested pages As far as
+		 * this is only place in GC used endAddress add rounding here (another case is handling of
+		 * preferredAddress - we do not care)
 		 */
-		maxEndAddress = (void*)MM_Math::roundToFloor(_pageSize, (uintptr_t)maxEndAddress);
+		maxEndAddress = (void *)MM_Math::roundToFloor(_pageSize, (uintptr_t)maxEndAddress);
 
 		if (params.endAddress > maxEndAddress) {
 			params.endAddress = maxEndAddress;
@@ -114,13 +117,17 @@ MM_VirtualMemory::initialize(MM_EnvironmentBase* env, uintptr_t size, void* pref
 
 		/* If heap touches top of address range */
 		if (lastByte == HIGH_ADDRESS) {
-			_heapTop = (void*)MM_Math::roundToFloor(_heapAlignment, ((uintptr_t)_baseAddress) + (allocateSize - _tailPadding - _heapAlignment));
+			_heapTop = (void *)MM_Math::roundToFloor(_heapAlignment,
+			        ((uintptr_t)_baseAddress) + (allocateSize - _tailPadding - _heapAlignment));
 		} else {
-			_heapTop = (void*)MM_Math::roundToFloor(_heapAlignment, ((uintptr_t)_baseAddress) + (allocateSize - _tailPadding));
+			_heapTop = (void *)MM_Math::roundToFloor(
+			        _heapAlignment, ((uintptr_t)_baseAddress) + (allocateSize - _tailPadding));
 		}
 
-		if ((_heapBase >= _heapTop) /* CMVC 45178: Need to catch the case where we aligned heapTop and heapBase to the same address and consider it an error. */
-		|| ((NULL != ceiling) && (_heapTop > ceiling)) /* Check that memory we got is located below ceiling */
+		if ((_heapBase >= _heapTop) /* CMVC 45178: Need to catch the case where we aligned heapTop and heapBase
+		                               to the same address and consider it an error. */
+		        || ((NULL != ceiling) && (_heapTop > ceiling)) /* Check that memory we got is located below
+		                                                          ceiling */
 		) {
 			freeMemory();
 			_heapBase = NULL;
@@ -133,11 +140,11 @@ MM_VirtualMemory::initialize(MM_EnvironmentBase* env, uintptr_t size, void* pref
 void
 MM_VirtualMemory::roundDownTop(uintptr_t rounding)
 {
-	_heapTop = (void*)MM_Math::roundToFloor(_heapAlignment, ((uintptr_t)_heapBase) + (_reserveSize - rounding));
+	_heapTop = (void *)MM_Math::roundToFloor(_heapAlignment, ((uintptr_t)_heapBase) + (_reserveSize - rounding));
 }
 
-void*
-MM_VirtualMemory::reserveMemory(J9PortVmemParams* params)
+void *
+MM_VirtualMemory::reserveMemory(J9PortVmemParams *params)
 {
 	OMRPORT_ACCESS_FROM_OMRVM(_extensions->getOmrVM());
 
@@ -145,7 +152,7 @@ MM_VirtualMemory::reserveMemory(J9PortVmemParams* params)
 	Assert_MM_true(NULL == _baseAddress);
 	Assert_MM_true(0 != _pageSize);
 
-	void* addressToReturn = NULL;
+	void *addressToReturn = NULL;
 	_reserveSize = MM_Math::roundToCeiling(_pageSize, params->byteAmount);
 	params->byteAmount = _reserveSize;
 
@@ -156,24 +163,28 @@ MM_VirtualMemory::reserveMemory(J9PortVmemParams* params)
 		_pageSize = omrvmem_get_page_size(&_identifier);
 		_pageFlags = omrvmem_get_page_flags(&_identifier);
 		Assert_MM_true(0 != _pageSize);
-		addressToReturn = (void*)MM_Math::roundToCeiling(_heapAlignment, (uintptr_t)_baseAddress);
+		addressToReturn = (void *)MM_Math::roundToCeiling(_heapAlignment, (uintptr_t)_baseAddress);
 	}
 	return addressToReturn;
 }
 
 #if defined(OMR_GC_DOUBLE_MAP_ARRAYLETS)
-void*
-MM_VirtualMemory::doubleMapArraylet(MM_EnvironmentBase *env, void* arrayletLeaves[], UDATA arrayletLeafCount, UDATA arrayletLeafSize, UDATA byteAmount, struct J9PortVmemIdentifier *newIdentifier, UDATA pageSize)
+void *
+MM_VirtualMemory::doubleMapArraylet(MM_EnvironmentBase *env, void *arrayletLeaves[], UDATA arrayletLeafCount,
+        UDATA arrayletLeafSize, UDATA byteAmount, struct J9PortVmemIdentifier *newIdentifier, UDATA pageSize)
 {
 	OMRPORT_ACCESS_FROM_OMRVM(_extensions->getOmrVM());
 	struct J9PortVmemIdentifier *oldIdentifier = &_identifier;
-	uintptr_t mode = OMRPORT_VMEM_MEMORY_MODE_READ | OMRPORT_VMEM_MEMORY_MODE_WRITE | OMRPORT_VMEM_MEMORY_MODE_COMMIT;
+	uintptr_t mode = OMRPORT_VMEM_MEMORY_MODE_READ | OMRPORT_VMEM_MEMORY_MODE_WRITE
+	        | OMRPORT_VMEM_MEMORY_MODE_COMMIT;
 
-	return omrvmem_get_contiguous_region_memory(arrayletLeaves, arrayletLeafCount, arrayletLeafSize, byteAmount, oldIdentifier, newIdentifier, mode, pageSize, omrmem_get_category(OMRMEM_CATEGORY_MM));
+	return omrvmem_get_contiguous_region_memory(arrayletLeaves, arrayletLeafCount, arrayletLeafSize, byteAmount,
+	        oldIdentifier, newIdentifier, mode, pageSize, omrmem_get_category(OMRMEM_CATEGORY_MM));
 }
 #endif /* defined(OMR_GC_DOUBLE_MAP_ARRAYLETS) */
 
-bool MM_VirtualMemory::freeMemory()
+bool
+MM_VirtualMemory::freeMemory()
 {
 	OMRPORT_ACCESS_FROM_OMRVM(_extensions->getOmrVM());
 	bool success = (0 == omrvmem_free_memory(_baseAddress, _reserveSize, &_identifier));
@@ -189,7 +200,7 @@ bool MM_VirtualMemory::freeMemory()
  * @return true if successful, false otherwise.
  */
 bool
-MM_VirtualMemory::commitMemory(void* address, uintptr_t size)
+MM_VirtualMemory::commitMemory(void *address, uintptr_t size)
 {
 	OMRPORT_ACCESS_FROM_OMRVM(_extensions->getOmrVM());
 	Assert_MM_true(0 != _pageSize);
@@ -197,8 +208,8 @@ MM_VirtualMemory::commitMemory(void* address, uintptr_t size)
 	bool success = true;
 
 	/* port library takes page aligned addresses and sizes only */
-	void* commitBase = (void*)MM_Math::roundToFloor(_pageSize, (uintptr_t)address);
-	void* commitTop = (void*)MM_Math::roundToCeiling(_pageSize, (uintptr_t)address + size + _tailPadding);
+	void *commitBase = (void *)MM_Math::roundToFloor(_pageSize, (uintptr_t)address);
+	void *commitTop = (void *)MM_Math::roundToCeiling(_pageSize, (uintptr_t)address + size + _tailPadding);
 	uintptr_t commitSize;
 
 	if (commitBase <= commitTop) {
@@ -225,16 +236,18 @@ MM_VirtualMemory::commitMemory(void* address, uintptr_t size)
  * Decommit the address range from physical memory.
  * @param address the start of the block to be decommitted
  * @param size the size of the block to be decommitted
- * @param lowValidAddress the end of the previous committed block below address, or NULL if address is the first committed block
- * @param highValidAddress the start of the next committed block above address, or NULL if address is the last committed block
+ * @param lowValidAddress the end of the previous committed block below address, or NULL if address is the first
+ * committed block
+ * @param highValidAddress the start of the next committed block above address, or NULL if address is the last committed
+ * block
  * @return true if successful, false otherwise.
  */
 bool
-MM_VirtualMemory::decommitMemory(void* address, uintptr_t size, void* lowValidAddress, void* highValidAddress)
+MM_VirtualMemory::decommitMemory(void *address, uintptr_t size, void *lowValidAddress, void *highValidAddress)
 {
 	bool result = true;
-	void* decommitBase = address;
-	void* decommitTop = (void*)((uintptr_t)decommitBase + size + _tailPadding);
+	void *decommitBase = address;
+	void *decommitTop = (void *)((uintptr_t)decommitBase + size + _tailPadding);
 	Assert_MM_true(0 != _pageSize);
 
 	OMRPORT_ACCESS_FROM_OMRVM(_extensions->getOmrVM());
@@ -242,7 +255,7 @@ MM_VirtualMemory::decommitMemory(void* address, uintptr_t size, void* lowValidAd
 	if (NULL != lowValidAddress) {
 		/* Ensure that we do not decommit a valid page prior to address */
 		/* What about tail padding? Are we deleting someone's pad? */
-		lowValidAddress = (void*)((uintptr_t)lowValidAddress + _tailPadding);
+		lowValidAddress = (void *)((uintptr_t)lowValidAddress + _tailPadding);
 		if (lowValidAddress > decommitBase) {
 			decommitBase = lowValidAddress;
 		}
@@ -256,8 +269,8 @@ MM_VirtualMemory::decommitMemory(void* address, uintptr_t size, void* lowValidAd
 	}
 
 	/* port library takes page aligned addresses and sizes only */
-	decommitBase = (void*)MM_Math::roundToCeiling(_pageSize, (uintptr_t)decommitBase);
-	decommitTop = (void*)MM_Math::roundToFloor(_pageSize, (uintptr_t)decommitTop);
+	decommitBase = (void *)MM_Math::roundToCeiling(_pageSize, (uintptr_t)decommitBase);
+	decommitTop = (void *)MM_Math::roundToFloor(_pageSize, (uintptr_t)decommitTop);
 
 	if (decommitBase < decommitTop) {
 		/* There is still memory to decommit, calculate size */
@@ -269,7 +282,7 @@ MM_VirtualMemory::decommitMemory(void* address, uintptr_t size, void* lowValidAd
 }
 
 void
-MM_VirtualMemory::tearDown(MM_EnvironmentBase* env)
+MM_VirtualMemory::tearDown(MM_EnvironmentBase *env)
 {
 	if (NULL != _heapBase) {
 		freeMemory();
@@ -278,7 +291,7 @@ MM_VirtualMemory::tearDown(MM_EnvironmentBase* env)
 }
 
 bool
-MM_VirtualMemory::setNumaAffinity(uintptr_t numaNode, void* address, uintptr_t byteAmount)
+MM_VirtualMemory::setNumaAffinity(uintptr_t numaNode, void *address, uintptr_t byteAmount)
 {
 	Assert_MM_true(0 != _pageSize);
 
@@ -290,7 +303,7 @@ MM_VirtualMemory::setNumaAffinity(uintptr_t numaNode, void* address, uintptr_t b
 	/* start address must be aligned to physical page size */
 	Assert_MM_true(0 == ((uintptr_t)address % _pageSize));
 
-	void* topAddress = (void*)((uintptr_t)address + byteAmount);
+	void *topAddress = (void *)((uintptr_t)address + byteAmount);
 
 	/* top address must be above heap start address */
 	Assert_MM_true(topAddress >= _heapBase);
@@ -302,12 +315,13 @@ MM_VirtualMemory::setNumaAffinity(uintptr_t numaNode, void* address, uintptr_t b
 		OMRPORT_ACCESS_FROM_OMRVM(_extensions->getOmrVM());
 
 		uintptr_t byteAmountPageAligned = MM_Math::roundToCeiling(_pageSize, byteAmount);
-		/* aligned high address might be higher then heapTop but 
+		/* aligned high address might be higher then heapTop but
 		 * must be in the heap reserved memory range
 		 */
 		Assert_MM_true(((uintptr_t)address + byteAmountPageAligned) <= ((uintptr_t)_heapBase + _reserveSize));
 
-		didSetAffinity = (0 == omrvmem_numa_set_affinity(numaNode, address, byteAmountPageAligned, &_identifier));
+		didSetAffinity =
+		        (0 == omrvmem_numa_set_affinity(numaNode, address, byteAmountPageAligned, &_identifier));
 	}
 	return didSetAffinity;
 }

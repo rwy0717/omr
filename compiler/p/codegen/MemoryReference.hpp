@@ -26,42 +26,45 @@
 
 #include <stdint.h>
 
-namespace TR { class SymbolReference; }
-namespace TR { class CodeGenerator; }
-namespace TR { class Node; }
-namespace TR { class Register; }
-
-namespace TR
-{
-
-class OMR_EXTENSIBLE MemoryReference : public OMR::MemoryReferenceConnector
-   {
-   public:
-
-   MemoryReference(TR::CodeGenerator *cg) :
-      OMR::MemoryReferenceConnector(cg) {}
-
-   MemoryReference(TR::Register *br,
-      TR::Register *ir,
-      uint8_t len,
-      TR::CodeGenerator *cg) :
-         OMR::MemoryReferenceConnector(br, ir, len, cg) {}
-
-   MemoryReference(TR::Register *br,
-      int32_t disp,
-      uint8_t len,
-      TR::CodeGenerator *cg) :
-         OMR::MemoryReferenceConnector(br, disp, len, cg) {}
-
-   MemoryReference(TR::Node *rootLoadOrStore, uint32_t len, TR::CodeGenerator *cg):
-      OMR::MemoryReferenceConnector(rootLoadOrStore, len, cg) {}
-
-   MemoryReference(TR::Node *node, TR::SymbolReference *symRef, uint32_t len, TR::CodeGenerator *cg):
-      OMR::MemoryReferenceConnector(node, symRef, len, cg) {}
-
-   MemoryReference(TR::Node *node, MemoryReference& mr, int32_t n, uint32_t len, TR::CodeGenerator *cg):
-      OMR::MemoryReferenceConnector(node, mr, n, len, cg) {}
-   };
+namespace TR {
+class SymbolReference;
 }
+namespace TR {
+class CodeGenerator;
+}
+namespace TR {
+class Node;
+}
+namespace TR {
+class Register;
+}
+
+namespace TR {
+
+class OMR_EXTENSIBLE MemoryReference : public OMR::MemoryReferenceConnector {
+public:
+	MemoryReference(TR::CodeGenerator *cg) : OMR::MemoryReferenceConnector(cg) {}
+
+	MemoryReference(TR::Register *br, TR::Register *ir, uint8_t len, TR::CodeGenerator *cg)
+	        : OMR::MemoryReferenceConnector(br, ir, len, cg)
+	{}
+
+	MemoryReference(TR::Register *br, int32_t disp, uint8_t len, TR::CodeGenerator *cg)
+	        : OMR::MemoryReferenceConnector(br, disp, len, cg)
+	{}
+
+	MemoryReference(TR::Node *rootLoadOrStore, uint32_t len, TR::CodeGenerator *cg)
+	        : OMR::MemoryReferenceConnector(rootLoadOrStore, len, cg)
+	{}
+
+	MemoryReference(TR::Node *node, TR::SymbolReference *symRef, uint32_t len, TR::CodeGenerator *cg)
+	        : OMR::MemoryReferenceConnector(node, symRef, len, cg)
+	{}
+
+	MemoryReference(TR::Node *node, MemoryReference &mr, int32_t n, uint32_t len, TR::CodeGenerator *cg)
+	        : OMR::MemoryReferenceConnector(node, mr, n, len, cg)
+	{}
+};
+} // namespace TR
 
 #endif

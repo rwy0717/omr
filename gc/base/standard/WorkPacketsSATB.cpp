@@ -24,11 +24,10 @@
 
 #if defined(OMR_GC_REALTIME)
 
-#include "WorkPacketsSATB.hpp"
-
 #include "Debug.hpp"
 #include "GCExtensionsBase.hpp"
 #include "OverflowStandard.hpp"
+#include "WorkPacketsSATB.hpp"
 
 /**
  * Instantiate a MM_WorkPacketsSATB
@@ -39,16 +38,17 @@ MM_WorkPacketsSATB *
 MM_WorkPacketsSATB::newInstance(MM_EnvironmentBase *env)
 {
 	MM_WorkPacketsSATB *workPackets;
-	
-	workPackets = (MM_WorkPacketsSATB *)env->getForge()->allocate(sizeof(MM_WorkPacketsSATB), MM_AllocationCategory::WORK_PACKETS, J9_GET_CALLSITE());
+
+	workPackets = (MM_WorkPacketsSATB *)env->getForge()->allocate(
+	        sizeof(MM_WorkPacketsSATB), MM_AllocationCategory::WORK_PACKETS, J9_GET_CALLSITE());
 	if (workPackets) {
-		new(workPackets) MM_WorkPacketsSATB(env);
+		new (workPackets) MM_WorkPacketsSATB(env);
 		if (!workPackets->initialize(env)) {
 			workPackets->kill(env);
-			workPackets = NULL;	
+			workPackets = NULL;
 		}
 	}
-	
+
 	return workPackets;
 }
 
@@ -101,7 +101,7 @@ MM_WorkPacketsSATB::getBarrierPacket(MM_EnvironmentBase *env)
 
 	/* Check the free list */
 	barrierPacket = getPacket(env, &_emptyPacketList);
-	if(NULL != barrierPacket) {
+	if (NULL != barrierPacket) {
 		return barrierPacket;
 	}
 
@@ -133,7 +133,7 @@ MM_WorkPacketsSATB::getPacketByOverflowing(MM_EnvironmentBase *env)
 		omrthread_monitor_enter(_inputListMonitor);
 
 		/* Overflow was created - alert other threads that are waiting */
-		if(_inputListWaitCount > 0) {
+		if (_inputListWaitCount > 0) {
 			omrthread_monitor_notify(_inputListMonitor);
 		}
 		omrthread_monitor_exit(_inputListMonitor);
@@ -215,13 +215,14 @@ MM_WorkPacketsSATB::getInputPacketFromOverflow(MM_EnvironmentBase *env)
 	 * would turn into an infinite busy loop.
 	 * while(!_overflowHandler->isEmpty()) {
 	 */
-	if(!_overflowHandler->isEmpty()) {
-		if(NULL != (overflowPacket = getPacket(env, &_emptyPacketList))) {
+	if (!_overflowHandler->isEmpty()) {
+		if (NULL != (overflowPacket = getPacket(env, &_emptyPacketList))) {
 
 			_overflowHandler->fillFromOverflow(env, overflowPacket);
 
-			if(overflowPacket->isEmpty()) {
-				/* If we didn't end up filling the packet with anything, don't return it and try again */
+			if (overflowPacket->isEmpty()) {
+				/* If we didn't end up filling the packet with anything, don't return it and try again
+				 */
 				putPacket(env, overflowPacket);
 			} else {
 				return overflowPacket;

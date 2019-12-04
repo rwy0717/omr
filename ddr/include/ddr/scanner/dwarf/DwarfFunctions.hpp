@@ -77,8 +77,7 @@ typedef unsigned short Dwarf_Half;
 typedef signed long long Dwarf_Signed;
 typedef unsigned long long Dwarf_Addr;
 
-struct Dwarf_Block
-{
+struct Dwarf_Block {
 	Dwarf_Small *bl_data;
 	Dwarf_Unsigned bl_len;
 };
@@ -88,16 +87,16 @@ typedef void (*Dwarf_Handler)(Dwarf_Error error, Dwarf_Ptr errarg);
 
 typedef vector<string> str_vect;
 
-#define DW_DLE_NE             0x00 /* No error */
-#define DW_DLE_ATTR_FORM_BAD  0x01 /* Wrong form for attribute */
-#define DW_DLE_BADOFF         0x02 /* Invalid offset */
-#define DW_DLE_DIE_NULL       0x03 /* Die NULL */
-#define DW_DLE_FNO            0x04 /* File not open */
-#define DW_DLE_IA             0x05 /* Invalid argument */
-#define DW_DLE_IOF            0x06 /* I/O failure */
-#define DW_DLE_MAF            0x07 /* Memory allocation failure */
-#define DW_DLE_NOB            0x08 /* Not an object file */
-#define DW_DLE_VMM            0x09 /* Dwarf format/library version mismatch */
+#define DW_DLE_NE 0x00 /* No error */
+#define DW_DLE_ATTR_FORM_BAD 0x01 /* Wrong form for attribute */
+#define DW_DLE_BADOFF 0x02 /* Invalid offset */
+#define DW_DLE_DIE_NULL 0x03 /* Die NULL */
+#define DW_DLE_FNO 0x04 /* File not open */
+#define DW_DLE_IA 0x05 /* Invalid argument */
+#define DW_DLE_IOF 0x06 /* I/O failure */
+#define DW_DLE_MAF 0x07 /* Memory allocation failure */
+#define DW_DLE_NOB 0x08 /* Not an object file */
+#define DW_DLE_VMM 0x09 /* Dwarf format/library version mismatch */
 
 #define DW_DLC_READ 0x01
 
@@ -199,13 +198,11 @@ typedef vector<string> str_vect;
 #define DW_TAG_volatile_type 0x16
 #define DW_TAG_unspecified_type 0x17
 
-struct Dwarf_Error_s
-{
+struct Dwarf_Error_s {
 	Dwarf_Half _errno;
 };
 
-struct Dwarf_CU_Context
-{
+struct Dwarf_CU_Context {
 	Dwarf_Die_s *_die;
 	Dwarf_Unsigned _CUheaderLength;
 	Dwarf_Half _versionStamp;
@@ -219,8 +216,7 @@ struct Dwarf_CU_Context
 	static Dwarf_CU_Context *_currentCU;
 };
 
-struct Dwarf_Die_s
-{
+struct Dwarf_Die_s {
 	Dwarf_Half _tag;
 	Dwarf_Die_s *_parent;
 	Dwarf_Die_s *_sibling;
@@ -234,8 +230,7 @@ struct Dwarf_Die_s
 	static unordered_map<Dwarf_Off, Dwarf_Die> refMap;
 };
 
-struct Dwarf_Attribute_s
-{
+struct Dwarf_Attribute_s {
 	Dwarf_Half _type;
 	Dwarf_Attribute_s *_nextAttr;
 	Dwarf_Half _form;
@@ -247,28 +242,23 @@ struct Dwarf_Attribute_s
 	Dwarf_Die_s *_ref;
 
 	Dwarf_Attribute_s()
-		: _type(DW_AT_unknown)
-		, _nextAttr(NULL)
-		, _form(DW_FORM_unknown)
-		, _flag(false)
-		, _sdata(0)
-		, _udata(0)
-		, _stringdata(NULL)
-		, _refdata(0)
-		, _ref(NULL)
-	{
-	}
+	        : _type(DW_AT_unknown)
+	        , _nextAttr(NULL)
+	        , _form(DW_FORM_unknown)
+	        , _flag(false)
+	        , _sdata(0)
+	        , _udata(0)
+	        , _stringdata(NULL)
+	        , _refdata(0)
+	        , _ref(NULL)
+	{}
 };
 
 int dwarf_srcfiles(Dwarf_Die die, char ***srcfiles, Dwarf_Signed *filecount, Dwarf_Error *error);
 
-int dwarf_attr(
-	Dwarf_Die die,
-	Dwarf_Half attr,
-	Dwarf_Attribute *return_attr,
-	Dwarf_Error *error);
+int dwarf_attr(Dwarf_Die die, Dwarf_Half attr, Dwarf_Attribute *return_attr, Dwarf_Error *error);
 
-char* dwarf_errmsg(Dwarf_Error error);
+char *dwarf_errmsg(Dwarf_Error error);
 
 int dwarf_formstring(Dwarf_Attribute attr, char **returned_string, Dwarf_Error *error);
 
@@ -286,11 +276,7 @@ int dwarf_diename(Dwarf_Die die, char **diename, Dwarf_Error *error);
 
 int dwarf_global_formref(Dwarf_Attribute attr, Dwarf_Off *return_offset, Dwarf_Error *error);
 
-int dwarf_offdie_b(Dwarf_Debug dbg,
-	Dwarf_Off offset,
-	Dwarf_Bool is_info,
-	Dwarf_Die *return_die,
-	Dwarf_Error *error);
+int dwarf_offdie_b(Dwarf_Debug dbg, Dwarf_Off offset, Dwarf_Bool is_info, Dwarf_Die *return_die, Dwarf_Error *error);
 
 int dwarf_child(Dwarf_Die die, Dwarf_Die *return_childdie, Dwarf_Error *error);
 
@@ -300,24 +286,15 @@ int dwarf_tag(Dwarf_Die die, Dwarf_Half *return_tag, Dwarf_Error *error);
 
 int dwarf_formsdata(Dwarf_Attribute attr, Dwarf_Signed *returned_val, Dwarf_Error *error);
 
-int dwarf_next_cu_header(Dwarf_Debug dbg,
-	Dwarf_Unsigned *cu_header_length,
-	Dwarf_Half *version_stamp,
-	Dwarf_Off *abbrev_offset,
-	Dwarf_Half *address_size,
-	Dwarf_Unsigned *next_cu_header_offset,
-	Dwarf_Error *error);
+int dwarf_next_cu_header(Dwarf_Debug dbg, Dwarf_Unsigned *cu_header_length, Dwarf_Half *version_stamp,
+        Dwarf_Off *abbrev_offset, Dwarf_Half *address_size, Dwarf_Unsigned *next_cu_header_offset, Dwarf_Error *error);
 
 int dwarf_siblingof(Dwarf_Debug dbg, Dwarf_Die die, Dwarf_Die *dieOut, Dwarf_Error *error);
 
 int dwarf_finish(Dwarf_Debug dbg, Dwarf_Error *error);
 
-int dwarf_init(int fd,
-	Dwarf_Unsigned access,
-	Dwarf_Handler errhand,
-	Dwarf_Ptr errarg,
-	Dwarf_Debug *dbg,
-	Dwarf_Error *error);
+int dwarf_init(
+        int fd, Dwarf_Unsigned access, Dwarf_Handler errhand, Dwarf_Ptr errarg, Dwarf_Debug *dbg, Dwarf_Error *error);
 
 int dwarf_dieoffset(Dwarf_Die die, Dwarf_Off *dieOffset, Dwarf_Error *error);
 

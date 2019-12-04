@@ -36,19 +36,18 @@ class Type;
 class TypedefUDT;
 class UnionUDT;
 
-DDR_RC genBlob(OMRPortLibrary *portLibrary, Symbol_IR *ir, const char *supersetFile, const char *blobFile, bool printEmptyTypes);
+DDR_RC genBlob(OMRPortLibrary *portLibrary, Symbol_IR *ir, const char *supersetFile, const char *blobFile,
+        bool printEmptyTypes);
 
-class BlobGenerator
-{
+class BlobGenerator {
 protected:
-	 bool _printEmptyTypes;
+	bool _printEmptyTypes;
 
 public:
 	virtual DDR_RC genBinaryBlob(OMRPortLibrary *portLibrary, Symbol_IR *ir, const char *blobFile) = 0;
 };
 
-class SupersetGenerator
-{
+class SupersetGenerator {
 protected:
 	bool _printEmptyTypes;
 

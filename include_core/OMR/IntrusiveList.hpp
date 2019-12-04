@@ -26,8 +26,7 @@
 #include <omrcfg.h>
 #include <stddef.h>
 
-namespace OMR
-{
+namespace OMR {
 
 template <typename T>
 class IntrusiveListNode;
@@ -44,15 +43,14 @@ class IntrusiveListConstIterator;
 /// Stores the next and previous pointers for elements in an IntrusiveList. Each element in an intrusive list must
 /// contain an IntrusiveListNode<T>. The Node is obtained via an accessor class. See
 template <typename T>
-class IntrusiveListNode
-{
+class IntrusiveListNode {
 public:
 	IntrusiveListNode() : prev(NULL), next(NULL) {}
 
-	IntrusiveListNode(T* p, T* n) : prev(p), next(n) {}
+	IntrusiveListNode(T *p, T *n) : prev(p), next(n) {}
 
 	/// assign previous, next to node.
-	void assign(T* p, T* n)
+	void assign(T *p, T *n)
 	{
 		prev = p;
 		next = n;
@@ -65,42 +63,38 @@ public:
 		next = NULL;
 	}
 
-	T* prev;
-	T* next;
+	T *prev;
+	T *next;
 };
 
 /// The IntrusiveListNodeAccessor is the default accessor used to obtain an InstrusiveListNode from a list element. This
 /// template can be specialized to set the default accessor for a type.
 template <typename T>
-struct IntrusiveListNodeAccessor
-{
+struct IntrusiveListNodeAccessor {
 	typedef IntrusiveListNode<T> Node;
 
 	/// Obtain the IntrusiveListNode from an element. By default, calls element.node().
-	static Node& node(T& element) { return element.node(); }
+	static Node &node(T &element) { return element.node(); }
 
 	/// Obtain a constant node from an element.
-	static const Node& node(const T& element) { return element.node(); }
+	static const Node &node(const T &element) { return element.node(); }
 };
 
 /// Simple bidirectional iterator for the elements in an intrusive list.
 template <typename T, typename Accessor = IntrusiveListNodeAccessor<T> >
-class IntrusiveListIterator
-{
+class IntrusiveListIterator {
 public:
 	IntrusiveListIterator() : _current(NULL) {}
 
-	explicit IntrusiveListIterator(T* root) : _current(root) {}
+	explicit IntrusiveListIterator(T *root) : _current(root) {}
 
-	IntrusiveListIterator(const IntrusiveListIterator<T, Accessor>& rhs)
-	        : _current(rhs.current())
-	{}
+	IntrusiveListIterator(const IntrusiveListIterator<T, Accessor> &rhs) : _current(rhs.current()) {}
 
-	T& operator*() const { return *_current; }
+	T &operator*() const { return *_current; }
 
-	T* operator->() const { return _current; }
+	T *operator->() const { return _current; }
 
-	IntrusiveListIterator<T, Accessor>& operator++()
+	IntrusiveListIterator<T, Accessor> &operator++()
 	{
 		_current = Accessor::node(*_current).next;
 		return *this;
@@ -113,7 +107,7 @@ public:
 		return copy;
 	}
 
-	IntrusiveListIterator<T, Accessor>& operator--()
+	IntrusiveListIterator<T, Accessor> &operator--()
 	{
 		_current = Accessor::node(*_current).prev;
 		return *this;
@@ -126,50 +120,39 @@ public:
 		return copy;
 	}
 
-	bool operator==(const IntrusiveListIterator<T, Accessor>& rhs) const
-	{
-		return _current == rhs._current;
-	}
+	bool operator==(const IntrusiveListIterator<T, Accessor> &rhs) const { return _current == rhs._current; }
 
-	bool operator!=(const IntrusiveListIterator<T, Accessor>& rhs) const
-	{
-		return _current != rhs._current;
-	}
+	bool operator!=(const IntrusiveListIterator<T, Accessor> &rhs) const { return _current != rhs._current; }
 
-	IntrusiveListIterator<T, Accessor>& operator=(const IntrusiveListIterator<T, Accessor>& rhs)
+	IntrusiveListIterator<T, Accessor> &operator=(const IntrusiveListIterator<T, Accessor> &rhs)
 	{
 		_current = rhs._current;
 		return *this;
 	}
 
-	T* current() const { return _current; }
+	T *current() const { return _current; }
 
 private:
-	T* _current;
+	T *_current;
 };
 
 /// Simple bidirectional iterator for the elements in a constant intrusive list.
 template <typename T, typename Accessor = IntrusiveListNodeAccessor<T> >
-class IntrusiveListConstIterator
-{
+class IntrusiveListConstIterator {
 public:
 	IntrusiveListConstIterator() : _current(NULL) {}
 
-	explicit IntrusiveListConstIterator(T* root) : _current(root) {}
+	explicit IntrusiveListConstIterator(T *root) : _current(root) {}
 
-	IntrusiveListConstIterator(const IntrusiveListConstIterator<T, Accessor>& rhs)
-	        : _current(rhs.current())
-	{}
+	IntrusiveListConstIterator(const IntrusiveListConstIterator<T, Accessor> &rhs) : _current(rhs.current()) {}
 
-	IntrusiveListConstIterator(const IntrusiveListIterator<T, Accessor>& rhs)
-	        : _current(rhs.current())
-	{}
+	IntrusiveListConstIterator(const IntrusiveListIterator<T, Accessor> &rhs) : _current(rhs.current()) {}
 
-	const T& operator*() const { return *_current; }
+	const T &operator*() const { return *_current; }
 
-	const T* operator->() const { return _current; }
+	const T *operator->() const { return _current; }
 
-	IntrusiveListConstIterator<T, Accessor>& operator++()
+	IntrusiveListConstIterator<T, Accessor> &operator++()
 	{
 		_current = Accessor::node(*_current).next;
 		return *this;
@@ -182,7 +165,7 @@ public:
 		return copy;
 	}
 
-	IntrusiveListConstIterator<T, Accessor>& operator--()
+	IntrusiveListConstIterator<T, Accessor> &operator--()
 	{
 		_current = Accessor::node(*_current).prev;
 		return *this;
@@ -195,49 +178,36 @@ public:
 		return copy;
 	}
 
-	bool operator==(const IntrusiveListIterator<T, Accessor>& rhs) const
-	{
-		return _current == rhs.current();
-	}
+	bool operator==(const IntrusiveListIterator<T, Accessor> &rhs) const { return _current == rhs.current(); }
 
-	bool operator!=(const IntrusiveListIterator<T, Accessor>& rhs) const
-	{
-		return _current != rhs.current();
-	}
+	bool operator!=(const IntrusiveListIterator<T, Accessor> &rhs) const { return _current != rhs.current(); }
 
-	bool operator==(const IntrusiveListConstIterator<T, Accessor>& rhs) const
-	{
-		return _current == rhs._current;
-	}
+	bool operator==(const IntrusiveListConstIterator<T, Accessor> &rhs) const { return _current == rhs._current; }
 
-	bool operator!=(const IntrusiveListConstIterator<T, Accessor>& rhs) const
-	{
-		return _current != rhs._current;
-	}
+	bool operator!=(const IntrusiveListConstIterator<T, Accessor> &rhs) const { return _current != rhs._current; }
 
-	IntrusiveListConstIterator<T, Accessor>&
-	operator=(const IntrusiveListConstIterator<T, Accessor>& rhs)
+	IntrusiveListConstIterator<T, Accessor> &operator=(const IntrusiveListConstIterator<T, Accessor> &rhs)
 	{
 		_current = rhs._current;
 		return *this;
 	}
 
-	const T* current() const { return _current; }
+	const T *current() const { return _current; }
 
 private:
-	const T* _current;
+	const T *_current;
 };
 
 template <typename T, typename A>
 bool
-operator==(const IntrusiveListIterator<T, A>& lhs, const IntrusiveListConstIterator<T, A>& rhs)
+operator==(const IntrusiveListIterator<T, A> &lhs, const IntrusiveListConstIterator<T, A> &rhs)
 {
 	return rhs.current() == lhs.current();
 }
 
 template <typename T, typename A>
 bool
-operator!=(const IntrusiveListIterator<T, A>& lhs, const IntrusiveListConstIterator<T, A>& rhs)
+operator!=(const IntrusiveListIterator<T, A> &lhs, const IntrusiveListConstIterator<T, A> &rhs)
 {
 	return rhs.current() != lhs.current();
 }
@@ -252,8 +222,7 @@ operator!=(const IntrusiveListIterator<T, A>& lhs, const IntrusiveListConstItera
 ///  2. Override the Accessor template parameter in the list.
 ///
 template <typename T, typename Accessor = IntrusiveListNodeAccessor<T> >
-class IntrusiveList
-{
+class IntrusiveList {
 public:
 	typedef IntrusiveListNode<T> Node;
 
@@ -264,7 +233,7 @@ public:
 	IntrusiveList() : _root(NULL) {}
 
 	/// Add element to the head of the list. Constant time.
-	void add(T* element)
+	void add(T *element)
 	{
 		Accessor::node(*element).assign(NULL, _root);
 		if (_root) {
@@ -274,9 +243,9 @@ public:
 	}
 
 	/// Remove element from the list. Removing an element invalidates any iterators. Constant time.
-	void remove(T* element)
+	void remove(T *element)
 	{
-		Node& node = Accessor::node(*element);
+		Node &node = Accessor::node(*element);
 		if (element == _root) {
 			if (node.next != NULL) {
 				Accessor::node(*node.next).prev = NULL;
@@ -304,7 +273,7 @@ public:
 	bool empty() const { return _root == NULL; }
 
 private:
-	T* _root;
+	T *_root;
 };
 
 } // namespace OMR

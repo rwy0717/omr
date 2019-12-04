@@ -27,8 +27,7 @@
 
 class Type;
 
-class Field : public Members
-{
+class Field : public Members {
 public:
 	Type *_fieldType;
 	size_t _offset;

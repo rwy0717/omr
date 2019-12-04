@@ -23,10 +23,10 @@
 #include "omrcfg.h"
 
 /** This header is included from outside the thread library directory and does not have
-	access to vpath information encoded in the makefile.  Do a compile-time test of a
-	J9THREAD_LIB constant defined in j9cfg.h.
+        access to vpath information encoded in the makefile.  Do a compile-time test of a
+        J9THREAD_LIB constant defined in j9cfg.h.
 
-	Please keep the tests in alphabetic order.
+        Please keep the tests in alphabetic order.
  */
 
 #if OMRTHREAD_LIB_AIX
@@ -57,9 +57,8 @@ extern "C" {
  * @retval J9THREAD_ERR_xxx failure
  * @retval J9THREAD_ERR_OS_ERRNO_SET bit flag indicating that an os_errno is available.
  */
-intptr_t
-osthread_create(struct J9Thread *self, OSTHREAD *handle, const omrthread_attr_t attr, 
-		WRAPPER_FUNC entrypoint, WRAPPER_ARG entryarg);
+intptr_t osthread_create(struct J9Thread *self, OSTHREAD *handle, const omrthread_attr_t attr, WRAPPER_FUNC entrypoint,
+        WRAPPER_ARG entryarg);
 
 /**
  * Platform-specific thread join.
@@ -72,8 +71,7 @@ osthread_create(struct J9Thread *self, OSTHREAD *handle, const omrthread_attr_t 
  * @retval J9THREAD_ERR|J9THREAD_ERR_OS_ERRNO_SET The O/S join function returned an error code,
  *         and an os_errno is also available.
  */
-intptr_t
-osthread_join(omrthread_t self, omrthread_t threadToJoin);
+intptr_t osthread_join(omrthread_t self, omrthread_t threadToJoin);
 
 #ifdef __cplusplus
 }

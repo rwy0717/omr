@@ -28,9 +28,8 @@
 #if !defined(CONFIGURATIONSEGREGATED_HPP_)
 #define CONFIGURATIONSEGREGATED_HPP_
 
-#include "omrcfg.h"
-
 #include "Configuration.hpp"
+#include "omrcfg.h"
 
 #if defined(OMR_GC_SEGREGATED_HEAP)
 
@@ -40,8 +39,7 @@ class MM_GlobalCollector;
 class MM_Heap;
 class MM_SegregatedAllocationTracker;
 
-class MM_ConfigurationSegregated : public MM_Configuration
-{
+class MM_ConfigurationSegregated : public MM_Configuration {
 	/*
 	 * Data members
 	 */
@@ -58,16 +56,21 @@ public:
 	static MM_Configuration *newInstance(MM_EnvironmentBase *env);
 
 	virtual MM_GlobalCollector *createGlobalCollector(MM_EnvironmentBase *env);
-	virtual MM_Heap *createHeapWithManager(MM_EnvironmentBase *env, uintptr_t heapBytesRequested, MM_HeapRegionManager *regionManager);
+	virtual MM_Heap *createHeapWithManager(
+	        MM_EnvironmentBase *env, uintptr_t heapBytesRequested, MM_HeapRegionManager *regionManager);
 	virtual MM_HeapRegionManager *createHeapRegionManager(MM_EnvironmentBase *env);
-	virtual MM_MemorySpace *createDefaultMemorySpace(MM_EnvironmentBase *env, MM_Heap *heap, MM_InitializationParameters *parameters);
+	virtual MM_MemorySpace *createDefaultMemorySpace(
+	        MM_EnvironmentBase *env, MM_Heap *heap, MM_InitializationParameters *parameters);
 	virtual J9Pool *createEnvironmentPool(MM_EnvironmentBase *env);
-	virtual MM_Dispatcher *createDispatcher(MM_EnvironmentBase *env, omrsig_handler_fn handler, void* handler_arg, uintptr_t defaultOSStackSize);
-	
-	virtual void defaultMemorySpaceAllocated(MM_GCExtensionsBase *extensions, void* defaultMemorySpace);
-	
+	virtual MM_Dispatcher *createDispatcher(
+	        MM_EnvironmentBase *env, omrsig_handler_fn handler, void *handler_arg, uintptr_t defaultOSStackSize);
+
+	virtual void defaultMemorySpaceAllocated(MM_GCExtensionsBase *extensions, void *defaultMemorySpace);
+
 	MM_ConfigurationSegregated(MM_EnvironmentBase *env)
-		: MM_Configuration(env, gc_policy_metronome, mm_regionAlignment, SEGREGATED_REGION_SIZE_BYTES, SEGREGATED_ARRAYLET_LEAF_SIZE_BYTES, gc_modron_wrtbar_none, gc_modron_allocation_type_segregated)
+	        : MM_Configuration(env, gc_policy_metronome, mm_regionAlignment, SEGREGATED_REGION_SIZE_BYTES,
+	                SEGREGATED_ARRAYLET_LEAF_SIZE_BYTES, gc_modron_wrtbar_none,
+	                gc_modron_allocation_type_segregated)
 	{
 		_typeId = __FUNCTION__;
 	};

@@ -43,8 +43,7 @@ class UDT;
 class UnionUDT;
 struct FieldOverride;
 
-class Type
-{
+class Type {
 public:
 	static bool isStandardType(const char *type, size_t typeLen, bool *isSigned, size_t *bitWidth);
 
@@ -80,7 +79,7 @@ public:
 	virtual Type *getBaseType();
 	Type *getOpaqueType();
 
-	bool operator==(const Type & rhs) const;
+	bool operator==(const Type &rhs) const;
 	virtual bool compareToClass(const ClassUDT &) const;
 	virtual bool compareToClasstype(const ClassType &) const;
 	virtual bool compareToEnum(const EnumUDT &) const;

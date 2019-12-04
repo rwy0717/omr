@@ -19,13 +19,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
- 
+
 #include <signal.h>
 #if defined(OMR_OS_WINDOWS)
 /* windows.h defined UDATA.  Ignore its definition */
 #define UDATA UDATA_win32_
 #include <windows.h>
-#undef UDATA	/* this is safe because our UDATA is a typedef, not a macro */
+#undef UDATA /* this is safe because our UDATA is a typedef, not a macro */
 #else /* defined(OMR_OS_WINDOWS) */
 #include <pthread.h>
 #endif /* defined(OMR_OS_WINDOWS) */
@@ -75,14 +75,11 @@ struct OMR_SigData {
 #define NSIG MNSIG
 #endif /* defined(J9ZOS390) */
 
-
 #if defined(OMR_OS_WINDOWS)
 
 #define LockMask
-#define SIGLOCK(sigMutex) \
-	sigMutex.lock();
-#define SIGUNLOCK(sigMutex) \
-	sigMutex.unlock();
+#define SIGLOCK(sigMutex) sigMutex.lock();
+#define SIGUNLOCK(sigMutex) sigMutex.unlock();
 
 #if !defined(MSVC_RUNTIME_DLL)
 #if (_MSC_VER == 1200) /* Visual Studio (VS) 6 */
@@ -116,21 +113,16 @@ struct OMR_SigData {
 #define SIGLOCK(sigMutex) \
 	sigset_t previousMask; \
 	sigMutex.lock(&previousMask);
-#define SIGUNLOCK(sigMutex) \
-	sigMutex.unlock(&previousMask);
+#define SIGUNLOCK(sigMutex) sigMutex.unlock(&previousMask);
 
 #endif /* defined(OMR_OS_WINDOWS) */
 
-class SigMutex
-{
+class SigMutex {
 private:
 	volatile uintptr_t locked;
 
 public:
-	SigMutex()
-	{
-		locked = 0;
-	}
+	SigMutex() { locked = 0; }
 
 	void lock(LockMask)
 	{

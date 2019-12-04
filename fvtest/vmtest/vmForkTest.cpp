@@ -55,7 +55,7 @@ omrVmResetStart()
 
 	/* Pre-fork */
 	int pipeRC = pipe(pipedata);
-	EXPECT_TRUE(0 == pipeRC)  << "Failure occurred calling pipe";
+	EXPECT_TRUE(0 == pipeRC) << "Failure occurred calling pipe";
 
 	omr_vm_preFork(&testVM.omrVM);
 	if (0 == fork()) {

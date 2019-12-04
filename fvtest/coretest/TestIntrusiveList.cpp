@@ -23,32 +23,26 @@
 #include <OMR/IntrusiveList.hpp>
 #include <gtest/gtest.h>
 
-namespace OMR
-{
+namespace OMR {
 
 struct LinkedInt;
 
 typedef IntrusiveListNode<LinkedInt> LinkedIntListNode;
 
 /// Forms a linked list of integers.
-struct LinkedInt
-{
+struct LinkedInt {
 	int value;
 	LinkedIntListNode node;
 };
 
 template <>
-struct IntrusiveListNodeAccessor<LinkedInt>
-{
-	static LinkedIntListNode& node(LinkedInt &i) { return i.node; }
+struct IntrusiveListNodeAccessor<LinkedInt> {
+	static LinkedIntListNode &node(LinkedInt &i) { return i.node; }
 
-	static const LinkedIntListNode& node(const LinkedInt &i)
-	{
-		return i.node;
-	}
+	static const LinkedIntListNode &node(const LinkedInt &i) { return i.node; }
 };
 
-typedef IntrusiveList<LinkedInt>  LinkedIntList;
+typedef IntrusiveList<LinkedInt> LinkedIntList;
 
 typedef LinkedIntList::Iterator LinkedIntListIterator;
 

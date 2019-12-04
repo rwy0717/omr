@@ -58,9 +58,10 @@ typedef struct MM_CommonGCStartData {
 	MM_CommonGCData commonData; /**&lt; common data to GC start and GC end */
 
 	uint64_t exclusiveAccessTime; /**&lt; time taken to get exclusive access (in ticks) */
-	uint64_t meanExclusiveAccessIdleTime; /**&lt; the average time each thread (including the requester) spent idle until the last thread checked in (in ticks) */
+	uint64_t meanExclusiveAccessIdleTime; /**&lt; the average time each thread (including the requester) spent idle
+	                                         until the last thread checked in (in ticks) */
 	uintptr_t haltedThreads; /**&lt; the number of threads which had to be halted to acquire exclusive access */
-	struct OMR_VMThread* lastResponder; /**&lt; the last thread to respond the the exclusive request */
+	struct OMR_VMThread *lastResponder; /**&lt; the last thread to respond the the exclusive request */
 	uintptr_t beatenByOtherThread; /**&lt; flag to indicate if another thread beat us to exclusive access */
 
 	uintptr_t tlhAllocCount; /**&lt; number of TLHs allocated since the last GC */
@@ -78,7 +79,5 @@ typedef struct MM_CommonGCStartData {
 typedef struct MM_CommonGCEndData {
 	MM_CommonGCData commonData; /**&lt; common data to GC start and GC end */
 } MM_CommonGCEndData;
-
-
 
 #endif /* MMHOOK_H_ */

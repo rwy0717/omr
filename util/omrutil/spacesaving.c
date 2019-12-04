@@ -22,7 +22,6 @@
 
 #include "spacesaving.h"
 
-
 OMRSpaceSaving *
 spaceSavingNew(OMRPortLibrary *portLibrary, uint32_t size)
 {
@@ -53,7 +52,8 @@ spaceSavingUpdate(OMRSpaceSaving *spaceSaving, void *data, uintptr_t count)
 {
 	if (rankingIncrementEntry(spaceSaving->ranking, data, count) != TRUE) { /* doesn't exist in ranking*/
 		if (spaceSaving->ranking->curSize == spaceSaving->ranking->size) {
-			rankingUpdateLowest(spaceSaving->ranking, data, rankingGetLowestCount(spaceSaving->ranking) + count);
+			rankingUpdateLowest(
+			        spaceSaving->ranking, data, rankingGetLowestCount(spaceSaving->ranking) + count);
 		} else {
 			rankingUpdateLowest(spaceSaving->ranking, data, count);
 		}

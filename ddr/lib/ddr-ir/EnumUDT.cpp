@@ -23,11 +23,7 @@
 
 #include "ddr/ir/EnumMember.hpp"
 
-EnumUDT::EnumUDT(unsigned int lineNumber)
-	: UDT(4, lineNumber)
-	, _enumMembers()
-{
-}
+EnumUDT::EnumUDT(unsigned int lineNumber) : UDT(4, lineNumber), _enumMembers() {}
 
 EnumUDT::~EnumUDT()
 {
@@ -52,7 +48,7 @@ EnumUDT::acceptVisitor(const TypeVisitor &visitor)
 }
 
 bool
-EnumUDT::operator==(const Type & rhs) const
+EnumUDT::operator==(const Type &rhs) const
 {
 	return rhs.compareToEnum(*this);
 }
@@ -63,10 +59,8 @@ EnumUDT::compareToEnum(const EnumUDT &other) const
 	bool enumMembersEqual = _enumMembers.size() == other._enumMembers.size();
 	vector<EnumMember *>::const_iterator it2 = other._enumMembers.begin();
 	for (vector<EnumMember *>::const_iterator it = _enumMembers.begin();
-		it != _enumMembers.end() && it2 != other._enumMembers.end() && enumMembersEqual;
-		++it, ++it2) {
+	        it != _enumMembers.end() && it2 != other._enumMembers.end() && enumMembersEqual; ++it, ++it2) {
 		enumMembersEqual = ((*it)->_name == (*it2)->_name) && ((*it)->_value == (*it2)->_value);
 	}
-	return compareToUDT(other)
-		&& enumMembersEqual;
+	return compareToUDT(other) && enumMembersEqual;
 }

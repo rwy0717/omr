@@ -27,42 +27,17 @@
 #include "omrport.h"
 #include "omragent_internal.h"
 
-static OMR_ThreadAPI const theOmrThreadAPI = {
-	omrthread_create,
-	omrthread_monitor_init_with_name,
-	omrthread_monitor_destroy,
-	omrthread_monitor_enter,
-	omrthread_monitor_exit,
-	omrthread_monitor_wait,
-	omrthread_monitor_notify_all,
-	omrthread_attr_init,
-	omrthread_attr_destroy,
-	omrthread_attr_set_detachstate,
-	omrthread_attr_set_category,
-	omrthread_create_ex,
-	omrthread_join
-};
+static OMR_ThreadAPI const theOmrThreadAPI = {omrthread_create, omrthread_monitor_init_with_name,
+        omrthread_monitor_destroy, omrthread_monitor_enter, omrthread_monitor_exit, omrthread_monitor_wait,
+        omrthread_monitor_notify_all, omrthread_attr_init, omrthread_attr_destroy, omrthread_attr_set_detachstate,
+        omrthread_attr_set_category, omrthread_create_ex, omrthread_join};
 
-OMR_TI const OMR_Agent::theOmrTI = {
-	OMR_TI_VERSION_0,
-	(void *)&theOmrThreadAPI,
-	omrtiBindCurrentThread,
-	omrtiUnbindCurrentThread,
-	omrtiRegisterRecordSubscriber,
-	omrtiDeregisterRecordSubscriber,
-	omrtiGetTraceMetadata,
-	omrtiSetTraceOptions,
-	omrtiGetSystemCpuLoad,
-	omrtiGetProcessCpuLoad,
-	omrtiGetMemoryCategories,
-	omrtiFlushTraceData,
-	omrtiGetFreePhysicalMemorySize,
-	omrtiGetProcessVirtualMemorySize,
-	omrtiGetProcessPrivateMemorySize,
-	omrtiGetProcessPhysicalMemorySize,
-	omrtiGetMethodDescriptions,
-	omrtiGetMethodProperties
-};
+OMR_TI const OMR_Agent::theOmrTI = {OMR_TI_VERSION_0, (void *)&theOmrThreadAPI, omrtiBindCurrentThread,
+        omrtiUnbindCurrentThread, omrtiRegisterRecordSubscriber, omrtiDeregisterRecordSubscriber, omrtiGetTraceMetadata,
+        omrtiSetTraceOptions, omrtiGetSystemCpuLoad, omrtiGetProcessCpuLoad, omrtiGetMemoryCategories,
+        omrtiFlushTraceData, omrtiGetFreePhysicalMemorySize, omrtiGetProcessVirtualMemorySize,
+        omrtiGetProcessPrivateMemorySize, omrtiGetProcessPhysicalMemorySize, omrtiGetMethodDescriptions,
+        omrtiGetMethodProperties};
 
 extern "C" OMR_Agent *
 omr_agent_create(OMR_VM *vm, char const *arg)
@@ -100,14 +75,8 @@ omr_agent_getTI(void)
 	return &OMR_Agent::theOmrTI;
 }
 
-OMR_Agent::OMR_Agent(OMR_VM *vm, char const *arg) :
-	_handle(0),
-	_vm(vm),
-	_onload(NULL),
-	_onunload(NULL),
-	_dllpath(NULL),
-	_options(NULL),
-	_state(UNINITIALIZED)
+OMR_Agent::OMR_Agent(OMR_VM *vm, char const *arg)
+        : _handle(0), _vm(vm), _onload(NULL), _onunload(NULL), _dllpath(NULL), _options(NULL), _state(UNINITIALIZED)
 {
 	OMRPORT_ACCESS_FROM_OMRVM(_vm);
 
@@ -139,10 +108,9 @@ OMR_Agent::createAgent(OMR_VM *vm, char const *arg)
 
 	if (NULL != arg) {
 		OMRPORT_ACCESS_FROM_OMRVM(vm);
-		newAgent = static_cast<OMR_Agent *>(omrmem_allocate_memory(sizeof(*newAgent),
-				OMRMEM_CATEGORY_VM));
+		newAgent = static_cast<OMR_Agent *>(omrmem_allocate_memory(sizeof(*newAgent), OMRMEM_CATEGORY_VM));
 		if (NULL != newAgent) {
-			new(newAgent) OMR_Agent(vm, arg);
+			new (newAgent) OMR_Agent(vm, arg);
 			if (INITIALIZED != newAgent->_state) {
 				destroyAgent(newAgent);
 				newAgent = NULL;
@@ -176,14 +144,16 @@ OMR_Agent::openLibrary(void)
 		uintptr_t portRc = 0;
 		OMRPORT_ACCESS_FROM_OMRVM(_vm);
 
-		portRc = omrsl_open_shared_library((char *)_dllpath, &_handle, OMRPORT_SLOPEN_DECORATE | OMRPORT_SLOPEN_LAZY);
+		portRc = omrsl_open_shared_library(
+		        (char *)_dllpath, &_handle, OMRPORT_SLOPEN_DECORATE | OMRPORT_SLOPEN_LAZY);
 		if (0 != portRc) {
 			_state = OPEN_LIBRARY_ERROR;
 			rc = OMR_ERROR_ILLEGAL_ARGUMENT;
 		}
 
 		if (OMR_ERROR_NONE == rc) {
-			portRc = omrsl_lookup_name(_handle, (char *)"OMRAgent_OnLoad", (uintptr_t *)&_onload, (char *)"IPPPP");
+			portRc = omrsl_lookup_name(
+			        _handle, (char *)"OMRAgent_OnLoad", (uintptr_t *)&_onload, (char *)"IPPPP");
 			if (0 != portRc) {
 				_state = LOOKUP_ONLOAD_ERROR;
 				rc = OMR_ERROR_ILLEGAL_ARGUMENT;
@@ -191,7 +161,8 @@ OMR_Agent::openLibrary(void)
 		}
 
 		if (OMR_ERROR_NONE == rc) {
-			portRc = omrsl_lookup_name(_handle, (char *)"OMRAgent_OnUnload", (uintptr_t *)&_onunload, (char *)"IPP");
+			portRc = omrsl_lookup_name(
+			        _handle, (char *)"OMRAgent_OnUnload", (uintptr_t *)&_onunload, (char *)"IPP");
 			if (0 != portRc) {
 				_state = LOOKUP_ONUNLOAD_ERROR;
 				rc = OMR_ERROR_ILLEGAL_ARGUMENT;

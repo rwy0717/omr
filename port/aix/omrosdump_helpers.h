@@ -38,5 +38,3 @@ void findOSPreferredCoreDir(struct OMRPortLibrary *portLibrary, char *buffer);
 uintptr_t getPEnvValue(struct OMRPortLibrary *portLibrary, char *envVar, char *infoString);
 intptr_t genSystemCoreUsingGencore(struct OMRPortLibrary *portLibrary, char *filename);
 void appendCoreName(OMRPortLibrary *portLibrary, char *corepath, intptr_t pid);
-
-

@@ -30,102 +30,101 @@
 #include "env/jittypes.h"
 #include "infra/Assert.hpp"
 
-namespace TR { class Node; }
+namespace TR {
+class Node;
+}
 
-OMR::ObjectModel::ObjectModel()
-   {
-   }
+OMR::ObjectModel::ObjectModel() {}
 
 int32_t
 OMR::ObjectModel::sizeofReferenceField()
-   {
-   TR_UNIMPLEMENTED();
-   return 0;
-   }
+{
+	TR_UNIMPLEMENTED();
+	return 0;
+}
 
 intptrj_t
 OMR::ObjectModel::sizeofReferenceAddress()
-   {
-   return TR::Compiler->target.is64Bit() ? 8 : 4;
-   }
+{
+	return TR::Compiler->target.is64Bit() ? 8 : 4;
+}
 
 uintptrj_t
 OMR::ObjectModel::elementSizeOfBooleanArray()
-   {
-   TR_UNIMPLEMENTED();
-   return 0;
-   }
-
+{
+	TR_UNIMPLEMENTED();
+	return 0;
+}
 
 uint32_t
-OMR::ObjectModel::getSizeOfArrayElement(TR::Node * node)
-   {
-   TR_UNIMPLEMENTED();
-   return 0;
-   }
+OMR::ObjectModel::getSizeOfArrayElement(TR::Node *node)
+{
+	TR_UNIMPLEMENTED();
+	return 0;
+}
 
 int64_t
 OMR::ObjectModel::maxArraySizeInElementsForAllocation(TR::Node *newArray, TR::Compilation *comp)
-   {
-   return LONG_MAX;
-   }
+{
+	return LONG_MAX;
+}
 
 int64_t
 OMR::ObjectModel::maxArraySizeInElements(int32_t knownMinElementSize, TR::Compilation *comp)
-   {
-   return LONG_MAX;
-   }
+{
+	return LONG_MAX;
+}
 
 bool
-OMR::ObjectModel::isDiscontiguousArray(TR::Compilation* comp, uintptrj_t objectPointer)
-   {
-   TR_UNIMPLEMENTED();
-   return false;
-   }
+OMR::ObjectModel::isDiscontiguousArray(TR::Compilation *comp, uintptrj_t objectPointer)
+{
+	TR_UNIMPLEMENTED();
+	return false;
+}
 
 intptrj_t
-OMR::ObjectModel::getArrayLengthInElements(TR::Compilation* comp, uintptrj_t objectPointer)
-   {
-   TR_UNIMPLEMENTED();
-   return 0;
-   }
+OMR::ObjectModel::getArrayLengthInElements(TR::Compilation *comp, uintptrj_t objectPointer)
+{
+	TR_UNIMPLEMENTED();
+	return 0;
+}
 
 uintptrj_t
-OMR::ObjectModel::getArrayLengthInBytes(TR::Compilation* comp, uintptrj_t objectPointer)
-   {
-   TR_UNIMPLEMENTED();
-   return 0;
-   }
+OMR::ObjectModel::getArrayLengthInBytes(TR::Compilation *comp, uintptrj_t objectPointer)
+{
+	TR_UNIMPLEMENTED();
+	return 0;
+}
 
 uintptrj_t
 OMR::ObjectModel::getArrayElementWidthInBytes(TR::DataType type)
-   {
-   TR_UNIMPLEMENTED();
-   return 0;
-   }
+{
+	TR_UNIMPLEMENTED();
+	return 0;
+}
 
 uintptrj_t
-OMR::ObjectModel::getArrayElementWidthInBytes(TR::Compilation* comp, uintptrj_t objectPointer)
-   {
-   TR_UNIMPLEMENTED();
-   return 0;
-   }
+OMR::ObjectModel::getArrayElementWidthInBytes(TR::Compilation *comp, uintptrj_t objectPointer)
+{
+	TR_UNIMPLEMENTED();
+	return 0;
+}
 
 uintptrj_t
-OMR::ObjectModel::decompressReference(TR::Compilation* comp, uintptrj_t compressedReference)
-   {
-   TR_UNIMPLEMENTED();
-   return 0;
-   }
+OMR::ObjectModel::decompressReference(TR::Compilation *comp, uintptrj_t compressedReference)
+{
+	TR_UNIMPLEMENTED();
+	return 0;
+}
 
 int32_t
 OMR::ObjectModel::compressedReferenceShiftOffset()
-   {
-   return 0;
-   }
+{
+	return 0;
+}
 
 int32_t
 OMR::ObjectModel::compressedReferenceShift()
-   {
-   return 0;
-   }
+{
+	return 0;
+}

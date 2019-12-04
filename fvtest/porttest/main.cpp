@@ -24,8 +24,12 @@
 #include "portTestHelpers.hpp"
 #include "testHelpers.hpp"
 
-extern int omrfile_runTests(struct OMRPortLibrary *portLibrary, char *argv0, char *omrfile_child, BOOLEAN asynch); /** @see omrfileTest.c::omrfile_runTests */
-extern int omrsig_runTests(struct OMRPortLibrary *portLibrary, char *exeName, char *argument); /** @see omrsignalTest.c::omrsig_runTests */
+extern int omrfile_runTests(struct OMRPortLibrary *portLibrary, char *argv0, char *omrfile_child,
+        BOOLEAN asynch); /** @see omrfileTest.c::omrfile_runTests */
+extern int omrsig_runTests(
+        struct OMRPortLibrary *portLibrary, char *exeName, char *argument); /** @see
+                                                                               omrsignalTest.c::omrsig_runTests
+                                                                             */
 extern int omrmmap_runTests(struct OMRPortLibrary *portLibrary, char *argv0, char *omrmmap_child);
 
 PortTestEnvironment *portTestEnv;

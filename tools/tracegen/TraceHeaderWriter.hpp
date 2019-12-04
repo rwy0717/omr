@@ -26,15 +26,13 @@
 #include "Port.hpp"
 #include "TDFTypes.hpp"
 
-class TraceHeaderWriter
-{
+class TraceHeaderWriter {
 	/*
 	 * Data members
 	 */
 private:
 protected:
 public:
-
 	/*
 	 * Function members
 	 */
@@ -44,14 +42,17 @@ private:
 	 * @param fd Output stream
 	 * @return RC_OK on success, RC_FAILED on failure
 	 */
-	RCType tpTemplate(FILE *fd, unsigned int overhead, unsigned int test, const char *name, const char *module, unsigned int id, unsigned int envparam, const char *format, unsigned int formatParamCount, unsigned int auxiliary);
+	RCType tpTemplate(FILE *fd, unsigned int overhead, unsigned int test, const char *name, const char *module,
+	        unsigned int id, unsigned int envparam, const char *format, unsigned int formatParamCount,
+	        unsigned int auxiliary);
 
 	/**
 	 *  Output assertion
 	 *  @param fd Output stream
 	 *  @return RC_OK on success, RC_FAILED on failure
 	 */
-	RCType tpAssert(FILE *fd, unsigned int overhead, unsigned int test, const char *name, const char *module, unsigned int id, unsigned int envparam, const char *format, unsigned int formatParamCount);
+	RCType tpAssert(FILE *fd, unsigned int overhead, unsigned int test, const char *name, const char *module,
+	        unsigned int id, unsigned int envparam, const char *format, unsigned int formatParamCount);
 
 	/**
 	 * Output file header
@@ -68,6 +69,7 @@ private:
 	 * @return RC_OK on success, RC_FAILED on failure
 	 */
 	RCType footerTemplate(FILE *fd, const char *moduleName);
+
 protected:
 public:
 	/**

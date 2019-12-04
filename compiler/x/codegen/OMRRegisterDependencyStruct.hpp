@@ -27,8 +27,14 @@
  */
 #ifndef OMR_REGISTER_DEPENDENCY_STRUCT_CONNECTOR
 #define OMR_REGISTER_DEPENDENCY_STRUCT_CONNECTOR
-namespace OMR { namespace X86 { struct RegisterDependencyExt; } }
-namespace OMR { typedef OMR::X86::RegisterDependencyExt RegisterDependency; }
+namespace OMR {
+namespace X86 {
+struct RegisterDependencyExt;
+}
+} // namespace OMR
+namespace OMR {
+typedef OMR::X86::RegisterDependencyExt RegisterDependency;
+}
 #else
 #error OMR::X86::RegisterDependencyExt expected to be a primary connector, but a OMR connector is already defined
 #endif
@@ -38,41 +44,52 @@ namespace OMR { typedef OMR::X86::RegisterDependencyExt RegisterDependency; }
 #include <stdint.h>
 #include "codegen/RealRegister.hpp"
 
-#define GlobalRegisterFPDependency    0x04
+#define GlobalRegisterFPDependency 0x04
 
-class TR_X86RegisterDependencyIndex
-   {
-   int32_t _index;
+class TR_X86RegisterDependencyIndex {
+	int32_t _index;
 
-   public:
+public:
+	TR_X86RegisterDependencyIndex(int32_t index) : _index(index) {}
 
-   TR_X86RegisterDependencyIndex(int32_t index):_index(index){}
+	operator int32_t() const { return _index; }
+	TR_X86RegisterDependencyIndex operator++()
+	{
+		++_index;
+		return *this;
+	}
+	TR_X86RegisterDependencyIndex operator--()
+	{
+		--_index;
+		return *this;
+	}
+	TR_X86RegisterDependencyIndex operator++(int)
+	{
+		int32_t oldIndex = _index;
+		_index++;
+		return oldIndex;
+	}
+	TR_X86RegisterDependencyIndex operator--(int)
+	{
+		int32_t oldIndex = _index;
+		_index--;
+		return oldIndex;
+	}
+};
 
-   operator int32_t() const { return _index; }
-   TR_X86RegisterDependencyIndex operator++()    { ++_index; return *this; }
-   TR_X86RegisterDependencyIndex operator--()    { --_index; return *this; }
-   TR_X86RegisterDependencyIndex operator++(int) { int32_t oldIndex = _index; _index++; return oldIndex; }
-   TR_X86RegisterDependencyIndex operator--(int) { int32_t oldIndex = _index; _index--; return oldIndex; }
+namespace OMR {
+namespace X86 {
 
-   };
+struct RegisterDependencyExt : OMR::RegisterDependencyExt {
+	TR::RealRegister::RegNum _realRegister;
 
-namespace OMR
-{
-namespace X86
-{
+	TR::RealRegister::RegNum getRealRegister() { return _realRegister; }
+	TR::RealRegister::RegNum setRealRegister(TR::RealRegister::RegNum r) { return (_realRegister = r); }
 
-struct RegisterDependencyExt : OMR::RegisterDependencyExt
-   {
-   TR::RealRegister::RegNum _realRegister;
-
-   TR::RealRegister::RegNum getRealRegister() {return _realRegister;}
-   TR::RealRegister::RegNum setRealRegister(TR::RealRegister::RegNum r) { return (_realRegister = r); }
-
-   uint32_t getGlobalFPRegister()   {return _flags & GlobalRegisterFPDependency;}
-   uint32_t setGlobalFPRegister()   {return (_flags |= GlobalRegisterFPDependency);}
-
-   };
-}
-}
+	uint32_t getGlobalFPRegister() { return _flags & GlobalRegisterFPDependency; }
+	uint32_t setGlobalFPRegister() { return (_flags |= GlobalRegisterFPDependency); }
+};
+} // namespace X86
+} // namespace OMR
 
 #endif

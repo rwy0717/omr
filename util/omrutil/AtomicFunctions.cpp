@@ -52,7 +52,7 @@ issueWriteBarrier(void)
 {
 	VM_AtomicSupport::writeBarrier();
 }
- 
+
 uintptr_t
 addAtomic(volatile uintptr_t *address, uintptr_t addend)
 {

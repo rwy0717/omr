@@ -35,7 +35,8 @@ TEST_F(CudaDeviceTest, linking)
 		J9CudaLinker linker = NULL;
 		int32_t rc = 0;
 
-		rc = omrcuda_deviceGetAttribute(deviceId, J9CUDA_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY, &computeCapability);
+		rc = omrcuda_deviceGetAttribute(
+		        deviceId, J9CUDA_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY, &computeCapability);
 
 		ASSERT_EQ(0, rc) << "omrcuda_deviceGetAttribute(compute_capability) failed";
 
@@ -49,13 +50,13 @@ TEST_F(CudaDeviceTest, linking)
 		ASSERT_EQ(0, rc) << "omrcuda_linkerCreate failed";
 		ASSERT_NOT_NULL(linker) << "created null linker";
 
-		rc = omrcuda_linkerAddData(deviceId, linker, J9CUDA_JIT_INPUT_TYPE_PTX,
-		        ptxFragment1.data, ptxFragment1.length, "fragment1", NULL);
+		rc = omrcuda_linkerAddData(deviceId, linker, J9CUDA_JIT_INPUT_TYPE_PTX, ptxFragment1.data,
+		        ptxFragment1.length, "fragment1", NULL);
 
 		ASSERT_EQ(0, rc) << "omrcuda_linkerAddData failed";
 
-		rc = omrcuda_linkerAddData(deviceId, linker, J9CUDA_JIT_INPUT_TYPE_PTX,
-				ptxFragment2.data, ptxFragment2.length, "fragment2", NULL);
+		rc = omrcuda_linkerAddData(deviceId, linker, J9CUDA_JIT_INPUT_TYPE_PTX, ptxFragment2.data,
+		        ptxFragment2.length, "fragment2", NULL);
 
 		ASSERT_EQ(0, rc) << "omrcuda_linkerAddData failed";
 

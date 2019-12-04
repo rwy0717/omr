@@ -19,22 +19,21 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
- 
-#include <math.h>
-#include <stdlib.h>
 
-#include "omrport.h"
+#include "FreeEntrySizeClassStats.hpp"
 
 #include "EnvironmentBase.hpp"
 #include "Forge.hpp"
-#include "FreeEntrySizeClassStats.hpp"
 #include "GCExtensionsBase.hpp"
 #include "LargeObjectAllocateStats.hpp"
 #include "ModronAssertions.h"
-
+#include "omrport.h"
+#include <math.h>
+#include <stdlib.h>
 
 bool
-MM_FreeEntrySizeClassStats::initialize(MM_EnvironmentBase *env, uintptr_t maxAllocateSizes, uintptr_t maxSizeClasses, uintptr_t veryLargeObjectThreshold, uintptr_t factorVeryLargeEntryPool, bool simulation)
+MM_FreeEntrySizeClassStats::initialize(MM_EnvironmentBase *env, uintptr_t maxAllocateSizes, uintptr_t maxSizeClasses,
+        uintptr_t veryLargeObjectThreshold, uintptr_t factorVeryLargeEntryPool, bool simulation)
 {
 	_maxSizeClasses = maxSizeClasses;
 	_maxFrequentAllocateSizes = maxAllocateSizes;
@@ -42,28 +41,36 @@ MM_FreeEntrySizeClassStats::initialize(MM_EnvironmentBase *env, uintptr_t maxAll
 	_maxVeryLargeEntrySizes = 0;
 
 	if (0 != _maxSizeClasses) {
-		_count = (uintptr_t *)env->getForge()->allocate(sizeof(uintptr_t) * _maxSizeClasses, OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+		_count = (uintptr_t *)env->getForge()->allocate(
+		        sizeof(uintptr_t) * _maxSizeClasses, OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
 
 		if (NULL == _count) {
 			return false;
 		}
 
-		/* _maxFrequentAllocateSizes is set to 0 when we use this structure to gather TLH allocation profile, which has no need for frequent allocations */
+		/* _maxFrequentAllocateSizes is set to 0 when we use this structure to gather TLH allocation profile,
+		 * which has no need for frequent allocations */
 		if (0 != _maxFrequentAllocateSizes) {
-			_frequentAllocationHead = (FrequentAllocation **)env->getForge()->allocate(sizeof(FrequentAllocation *) * _maxSizeClasses, OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+			_frequentAllocationHead = (FrequentAllocation **)env->getForge()->allocate(
+			        sizeof(FrequentAllocation *) * _maxSizeClasses, OMR::GC::AllocationCategory::FIXED,
+			        OMR_GET_CALLSITE());
 
 			if (NULL == _frequentAllocationHead) {
 				return false;
 			}
 
-			_frequentAllocation = (FrequentAllocation *)env->getForge()->allocate(sizeof(FrequentAllocation) * MAX_FREE_ENTRY_COUNTERS_PER_FREQ_ALLOC_SIZE * _maxFrequentAllocateSizes, OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+			_frequentAllocation = (FrequentAllocation *)env->getForge()->allocate(sizeof(FrequentAllocation)
+			                * MAX_FREE_ENTRY_COUNTERS_PER_FREQ_ALLOC_SIZE * _maxFrequentAllocateSizes,
+			        OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
 
 			if (NULL == _frequentAllocation) {
 				return false;
 			}
 
 			if (simulation) {
-				_fractionFrequentAllocation = (float *)env->getForge()->allocate(sizeof(float)*_maxFrequentAllocateSizes, OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+				_fractionFrequentAllocation =
+				        (float *)env->getForge()->allocate(sizeof(float) * _maxFrequentAllocateSizes,
+				                OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
 				if (NULL == _fractionFrequentAllocation) {
 					return false;
 				}
@@ -72,16 +79,20 @@ MM_FreeEntrySizeClassStats::initialize(MM_EnvironmentBase *env, uintptr_t maxAll
 			if (veryLargeObjectThreshold > env->getExtensions()->memoryMax) {
 				_veryLargeEntryPool = NULL;
 			} else {
-				/* if veryLargeObjectThreshold == 0, set veryLargePool size = VERY_LARGE_ENTRY_POOL_SIZE_FOR_THREAD for thread base FreeEntrySizeClassStats */
+				/* if veryLargeObjectThreshold == 0, set veryLargePool size =
+				 * VERY_LARGE_ENTRY_POOL_SIZE_FOR_THREAD for thread base FreeEntrySizeClassStats */
 				uintptr_t count = VERY_LARGE_ENTRY_POOL_SIZE_FOR_THREAD;
 				if (0 != veryLargeObjectThreshold) {
-					count = env->getExtensions()->memoryMax / veryLargeObjectThreshold * factorVeryLargeEntryPool;
+					count = env->getExtensions()->memoryMax / veryLargeObjectThreshold
+					        * factorVeryLargeEntryPool;
 					guarantyEnoughPoolSizeForVeryLargeEntry = true;
 				} else {
 					guarantyEnoughPoolSizeForVeryLargeEntry = false;
 				}
 
-				_veryLargeEntryPool = (FrequentAllocation *)env->getForge()->allocate(sizeof(FrequentAllocation) * count, OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+				_veryLargeEntryPool = (FrequentAllocation *)env->getForge()->allocate(
+				        sizeof(FrequentAllocation) * count, OMR::GC::AllocationCategory::FIXED,
+				        OMR_GET_CALLSITE());
 
 				if (NULL == _veryLargeEntryPool) {
 					return false;
@@ -97,7 +108,6 @@ MM_FreeEntrySizeClassStats::initialize(MM_EnvironmentBase *env, uintptr_t maxAll
 		if (!_lock.initialize(env, &env->getExtensions()->lnrlOptions, "MM_FreeEntrySizeClassStats:_lock")) {
 			return false;
 		}
-
 	}
 
 	return true;
@@ -121,7 +131,7 @@ MM_FreeEntrySizeClassStats::tearDown(MM_EnvironmentBase *env)
 		_frequentAllocation = NULL;
 	}
 
-	if(NULL != _fractionFrequentAllocation) {
+	if (NULL != _fractionFrequentAllocation) {
 		env->getForge()->free(_fractionFrequentAllocation);
 		_fractionFrequentAllocation = NULL;
 	}
@@ -137,11 +147,12 @@ void
 MM_FreeEntrySizeClassStats::mergeCountForVeryLargeEntries()
 {
 	if (NULL != _frequentAllocationHead) {
-		for (uintptr_t sizeClassIndex = _veryLargeEntrySizeClass; sizeClassIndex < _maxSizeClasses; sizeClassIndex++) {
+		for (uintptr_t sizeClassIndex = _veryLargeEntrySizeClass; sizeClassIndex < _maxSizeClasses;
+		        sizeClassIndex++) {
 			if (NULL != _frequentAllocationHead[sizeClassIndex]) {
-				FrequentAllocation* curr = _frequentAllocationHead[sizeClassIndex];
-				FrequentAllocation* prev = NULL;
-				FrequentAllocation* next = NULL;
+				FrequentAllocation *curr = _frequentAllocationHead[sizeClassIndex];
+				FrequentAllocation *prev = NULL;
+				FrequentAllocation *next = NULL;
 
 				while (NULL != curr) {
 					if (0 > ((intptr_t)curr->_count)) {
@@ -178,10 +189,10 @@ MM_FreeEntrySizeClassStats::merge(MM_FreeEntrySizeClassStats *stats)
 		if (NULL != _frequentAllocationHead) {
 			if (sizeClassIndex >= _veryLargeEntrySizeClass) {
 				if (NULL != stats->_frequentAllocationHead[sizeClassIndex]) {
-					FrequentAllocation* dest = _frequentAllocationHead[sizeClassIndex];
-					FrequentAllocation* predest = NULL;
-					FrequentAllocation* src = stats->_frequentAllocationHead[sizeClassIndex];
-					FrequentAllocation* newEntry = NULL;
+					FrequentAllocation *dest = _frequentAllocationHead[sizeClassIndex];
+					FrequentAllocation *predest = NULL;
+					FrequentAllocation *src = stats->_frequentAllocationHead[sizeClassIndex];
+					FrequentAllocation *newEntry = NULL;
 					while (NULL != src) {
 						if (0 == src->_count) {
 							src = src->_nextInSizeClass;
@@ -196,11 +207,12 @@ MM_FreeEntrySizeClassStats::merge(MM_FreeEntrySizeClassStats *stats)
 							predest = newEntry;
 							src = src->_nextInSizeClass;
 						} else if (dest->_size == src->_size) {
-							FrequentAllocation* nextdest = dest->_nextInSizeClass;
+							FrequentAllocation *nextdest = dest->_nextInSizeClass;
 							dest->_count += src->_count;
 							if (0 == dest->_count) {
 								if (NULL == predest) {
-									_frequentAllocationHead[sizeClassIndex] = nextdest;
+									_frequentAllocationHead[sizeClassIndex] =
+									        nextdest;
 								} else {
 									predest->_nextInSizeClass = nextdest;
 								}
@@ -261,36 +273,39 @@ MM_FreeEntrySizeClassStats::getFreeMemory(const uintptr_t sizeClassSizes[])
 	return totalFreeMemory;
 }
 
-uintptr_t 
-MM_FreeEntrySizeClassStats::getPageAlignedFreeMemory(const uintptr_t sizeClassSizes[], uintptr_t pageSize) {
+uintptr_t
+MM_FreeEntrySizeClassStats::getPageAlignedFreeMemory(const uintptr_t sizeClassSizes[], uintptr_t pageSize)
+{
 
 	uintptr_t resusableFreeMemory = 0;
 
 	for (uintptr_t sizeClassIndex = 0; sizeClassIndex < _maxSizeClasses; sizeClassIndex++) {
-		
+
 		/* Check if the current size class is larger than the page size */
 		if (pageSize < sizeClassSizes[sizeClassIndex]) {
 
 			/* regular sizes */
 			resusableFreeMemory += _count[sizeClassIndex] * (sizeClassSizes[sizeClassIndex] - pageSize);
-			
-			/* 
-			 * We need to find how many pages of specified size, would fit into free entries. 
-			 * Since we don't have exact info about the start and end of each free entry (we only have low bound size and count of each entry)
-			 * we use a simple heuristic that freeEntrySize - pageSize of bytes, in average will fit. For example if free entry is 6K and page 
-			 * is 4K, in average 2K will be reusable (50% chances it will be 1 full page, and 50% no page will fit).
+
+			/*
+			 * We need to find how many pages of specified size, would fit into free entries.
+			 * Since we don't have exact info about the start and end of each free entry (we only have low
+			 * bound size and count of each entry) we use a simple heuristic that freeEntrySize - pageSize
+			 * of bytes, in average will fit. For example if free entry is 6K and page is 4K, in average 2K
+			 * will be reusable (50% chances it will be 1 full page, and 50% no page will fit).
 			 */
 
 			/* for each size class, find frequent allocation sizes */
 			if (NULL != _frequentAllocationHead) {
-				MM_FreeEntrySizeClassStats::FrequentAllocation *curr = _frequentAllocationHead[sizeClassIndex];
+				MM_FreeEntrySizeClassStats::FrequentAllocation *curr =
+				        _frequentAllocationHead[sizeClassIndex];
 				while (NULL != curr) {
 					resusableFreeMemory += curr->_count * (curr->_size - pageSize);
 					curr = curr->_nextInSizeClass;
 				}
 			}
 		}
-	}	
+	}
 
 	return resusableFreeMemory;
 }
@@ -299,7 +314,8 @@ uintptr_t
 MM_FreeEntrySizeClassStats::copyTo(MM_FreeEntrySizeClassStats *stats, const uintptr_t sizeClassSizes[])
 {
 	uintptr_t totalFreeMemory = 0;
-	const uintptr_t maxFrequentAllocateSizeCounters = MAX_FREE_ENTRY_COUNTERS_PER_FREQ_ALLOC_SIZE * _maxFrequentAllocateSizes;
+	const uintptr_t maxFrequentAllocateSizeCounters = MAX_FREE_ENTRY_COUNTERS_PER_FREQ_ALLOC_SIZE
+	        * _maxFrequentAllocateSizes;
 
 	Assert_MM_true(stats->_maxSizeClasses == _maxSizeClasses);
 	stats->_frequentAllocateSizeCounters = 0;
@@ -321,7 +337,7 @@ MM_FreeEntrySizeClassStats::copyTo(MM_FreeEntrySizeClassStats *stats, const uint
 
 			while (NULL != curr) {
 				totalFreeMemory += curr->_count * curr->_size;
-				FrequentAllocation* statsCurr = NULL;
+				FrequentAllocation *statsCurr = NULL;
 
 				if (sizeClassIndex >= _veryLargeEntrySizeClass) {
 					Assert_MM_true(NULL != stats->_freeHeadVeryLargeEntry);
@@ -329,7 +345,8 @@ MM_FreeEntrySizeClassStats::copyTo(MM_FreeEntrySizeClassStats *stats, const uint
 					stats->_freeHeadVeryLargeEntry = statsCurr->_nextInSizeClass;
 				} else {
 					/* get a new FrequentAllocation from the pool */
-					Assert_MM_true(stats->_frequentAllocateSizeCounters < maxFrequentAllocateSizeCounters);
+					Assert_MM_true(
+					        stats->_frequentAllocateSizeCounters < maxFrequentAllocateSizeCounters);
 					statsCurr = &stats->_frequentAllocation[stats->_frequentAllocateSizeCounters];
 					stats->_frequentAllocateSizeCounters += 1;
 				}
@@ -364,10 +381,10 @@ MM_FreeEntrySizeClassStats::copyTo(MM_FreeEntrySizeClassStats *stats, const uint
 }
 
 MM_FreeEntrySizeClassStats::FrequentAllocation *
-MM_FreeEntrySizeClassStats::copyVeryLargeEntry(FrequentAllocation* entry)
+MM_FreeEntrySizeClassStats::copyVeryLargeEntry(FrequentAllocation *entry)
 {
 	Assert_MM_true(NULL != _freeHeadVeryLargeEntry);
-	FrequentAllocation* newEntry = _freeHeadVeryLargeEntry;
+	FrequentAllocation *newEntry = _freeHeadVeryLargeEntry;
 	_freeHeadVeryLargeEntry = newEntry->_nextInSizeClass;
 	newEntry->_size = entry->_size;
 	newEntry->_count = entry->_count;
@@ -376,13 +393,14 @@ MM_FreeEntrySizeClassStats::copyVeryLargeEntry(FrequentAllocation* entry)
 }
 
 void
-MM_FreeEntrySizeClassStats::resetCounts() {
+MM_FreeEntrySizeClassStats::resetCounts()
+{
 	for (uintptr_t sizeClassIndex = 0; sizeClassIndex < _maxSizeClasses; sizeClassIndex++) {
 		_count[sizeClassIndex] = 0;
 		if (0 != _maxFrequentAllocateSizes) {
 			FrequentAllocation *curr = _frequentAllocationHead[sizeClassIndex];
 			if (sizeClassIndex >= _veryLargeEntrySizeClass) {
-				FrequentAllocation* prev = NULL;
+				FrequentAllocation *prev = NULL;
 				if (NULL != curr) {
 					while (NULL != curr) {
 						prev = curr;
@@ -422,10 +440,11 @@ void
 MM_FreeEntrySizeClassStats::initializeVeryLargeEntryPool()
 {
 	if (0 != _maxFrequentAllocateSizes) {
-		for (uintptr_t sizeClassIndex = _veryLargeEntrySizeClass; sizeClassIndex < _maxSizeClasses; sizeClassIndex++) {
+		for (uintptr_t sizeClassIndex = _veryLargeEntrySizeClass; sizeClassIndex < _maxSizeClasses;
+		        sizeClassIndex++) {
 			_frequentAllocationHead[sizeClassIndex] = NULL;
 		}
-	
+
 		_freeHeadVeryLargeEntry = NULL;
 		if ((NULL != _veryLargeEntryPool) && (0 != _maxVeryLargeEntrySizes)) {
 			for (uintptr_t index = 0; index < _maxVeryLargeEntrySizes; index++) {
@@ -443,18 +462,23 @@ MM_FreeEntrySizeClassStats::initializeFrequentAllocation(MM_LargeObjectAllocateS
 {
 	clearFrequentAllocation();
 
-	const uintptr_t maxFrequentAllocateSizeCounters = MAX_FREE_ENTRY_COUNTERS_PER_FREQ_ALLOC_SIZE * _maxFrequentAllocateSizes;
-	uintptr_t maxFrequentAllocateSizes = OMR_MIN(_maxFrequentAllocateSizes, spaceSavingGetCurSize(largeObjectAllocateStats->getSpaceSavingSizesAveragePercent()));
+	const uintptr_t maxFrequentAllocateSizeCounters = MAX_FREE_ENTRY_COUNTERS_PER_FREQ_ALLOC_SIZE
+	        * _maxFrequentAllocateSizes;
+	uintptr_t maxFrequentAllocateSizes = OMR_MIN(_maxFrequentAllocateSizes,
+	        spaceSavingGetCurSize(largeObjectAllocateStats->getSpaceSavingSizesAveragePercent()));
 	const uintptr_t maxHeapSize = largeObjectAllocateStats->getMaxHeapSize();
 
-	for(uintptr_t i = 0; i < maxFrequentAllocateSizes; i++ ) {
-		uintptr_t frequentAllocSize = (uintptr_t)spaceSavingGetKthMostFreq(largeObjectAllocateStats->getSpaceSavingSizesAveragePercent(), i + 1);
-		uintptr_t maxFactor = OMR_MIN(MAX_FREE_ENTRY_COUNTERS_PER_FREQ_ALLOC_SIZE, (maxHeapSize / frequentAllocSize));
+	for (uintptr_t i = 0; i < maxFrequentAllocateSizes; i++) {
+		uintptr_t frequentAllocSize = (uintptr_t)spaceSavingGetKthMostFreq(
+		        largeObjectAllocateStats->getSpaceSavingSizesAveragePercent(), i + 1);
+		uintptr_t maxFactor =
+		        OMR_MIN(MAX_FREE_ENTRY_COUNTERS_PER_FREQ_ALLOC_SIZE, (maxHeapSize / frequentAllocSize));
 
 		/* insert this size and a next few multiples (set as maxFactor) of this size */
 		uintptr_t size = frequentAllocSize;
 		for (uintptr_t factor = 1; factor <= maxFactor; factor++, size += frequentAllocSize) {
-			/* follow the chain of frequent allocation sizes for this sizeClassIndex insert this size at appropriate place (the list is in increasing order) */
+			/* follow the chain of frequent allocation sizes for this sizeClassIndex insert this size at
+			 * appropriate place (the list is in increasing order) */
 
 			uintptr_t sizeClassIndex = largeObjectAllocateStats->getSizeClassIndex(size);
 			if (sizeClassIndex >= _veryLargeEntrySizeClass) {
@@ -477,10 +501,12 @@ MM_FreeEntrySizeClassStats::initializeFrequentAllocation(MM_LargeObjectAllocateS
 
 				if (NULL == prev) {
 					/* first one to add to the list */
-					_frequentAllocationHead[sizeClassIndex] = &_frequentAllocation[_frequentAllocateSizeCounters];
+					_frequentAllocationHead[sizeClassIndex] =
+					        &_frequentAllocation[_frequentAllocateSizeCounters];
 				} else {
 					/* somewhere in a middle (or last), set prev-to-this pointer */
-					Assert_MM_true(_frequentAllocation[_frequentAllocateSizeCounters]._size > prev->_size);
+					Assert_MM_true(
+					        _frequentAllocation[_frequentAllocateSizeCounters]._size > prev->_size);
 					prev->_nextInSizeClass = &_frequentAllocation[_frequentAllocateSizeCounters];
 				}
 
@@ -489,7 +515,8 @@ MM_FreeEntrySizeClassStats::initializeFrequentAllocation(MM_LargeObjectAllocateS
 					_frequentAllocation[_frequentAllocateSizeCounters]._nextInSizeClass = NULL;
 				} else {
 					/* somewhere in a middle (or first), set this-to-next pointer */
-					Assert_MM_true(_frequentAllocation[_frequentAllocateSizeCounters]._size < curr->_size);
+					Assert_MM_true(
+					        _frequentAllocation[_frequentAllocateSizeCounters]._size < curr->_size);
 					_frequentAllocation[_frequentAllocateSizeCounters]._nextInSizeClass = curr;
 				}
 

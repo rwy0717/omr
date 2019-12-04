@@ -28,16 +28,16 @@
 #if !defined(GCUTILS_H_)
 #define GCUTILS_H_
 
-#include "omrcfg.h"
-#include "modronbase.h"
 #include "j9nongenerated.h"
+#include "modronbase.h"
+#include "omrcfg.h"
 
 /**
  * @}
  */
 #ifdef __cplusplus
 extern "C" {
-#endif  /* __cplusplus */
+#endif /* __cplusplus */
 
 void qualifiedSize(uintptr_t *byteSize, const char **qualifier);
 
@@ -62,7 +62,6 @@ const char *getSystemGCReasonAsString(uint32_t gcCode);
 
 #ifdef __cplusplus
 } /* extern "C" { */
-#endif  /* __cplusplus */
+#endif /* __cplusplus */
 
 #endif /* GCUTILS_H_ */
-

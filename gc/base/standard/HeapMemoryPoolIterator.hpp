@@ -28,10 +28,9 @@
 #if !defined(HEAPMEMORYPOOLITERATOR_HPP_)
 #define HEAPMEMORYPOOLITERATOR_HPP_
 
-#include "omrcfg.h"
-#include "omr.h"
-
 #include "HeapMemorySubSpaceIterator.hpp"
+#include "omr.h"
+#include "omrcfg.h"
 
 class MM_Heap;
 class MM_MemoryPool;
@@ -41,27 +40,25 @@ class MM_EnvironmentBase;
 /**
  * Iterate through all visible memory pools in the system.
  * Provides a preordered walk of all memory subspaces to find all memory pools for a MM_Heap.
- * 
+ *
  * @ingroup GC_Modron_Base
- */	
-class MM_HeapMemoryPoolIterator
-{
+ */
+class MM_HeapMemoryPoolIterator {
 private:
-	MM_HeapMemorySubSpaceIterator _mssIterator;  /**< Memory subspace iterator for the heap */
-	
+	MM_HeapMemorySubSpaceIterator _mssIterator; /**< Memory subspace iterator for the heap */
+
 	MM_MemorySubSpace *_memorySubSpace;
 	MM_MemoryPool *_memoryPool;
-	
+
 	uintptr_t _state;
-	
+
 	void reset();
 
 	/**
 	 * Iterator states to maintain preorder traversal.
 	 */
-	enum {
-		mm_heapmp_iterator_next_subspace,  	 /**< Get to next subspace	   */
-		mm_heapmp_iterator_next_memory_pool  /**< Get to next pool		   */
+	enum { mm_heapmp_iterator_next_subspace, /**< Get to next subspace	   */
+		mm_heapmp_iterator_next_memory_pool /**< Get to next pool		   */
 	};
 
 protected:
@@ -69,23 +66,18 @@ public:
 	MM_MemoryPool *nextPool();
 	MM_MemoryPool *nextPoolInSubSpace();
 
-	MM_HeapMemoryPoolIterator(MM_EnvironmentBase *env, MM_Heap *heap) :
-		_mssIterator(heap),
-		_memorySubSpace(NULL),
-		_memoryPool(NULL),
-		_state(0)
+	MM_HeapMemoryPoolIterator(MM_EnvironmentBase *env, MM_Heap *heap)
+	        : _mssIterator(heap), _memorySubSpace(NULL), _memoryPool(NULL), _state(0)
 	{
 		reset();
 	}
 
-	MM_HeapMemoryPoolIterator(MM_EnvironmentBase *env, MM_Heap *heap, MM_MemorySubSpace *memorySubSpace) :
-		_mssIterator(heap),
-		_memorySubSpace(memorySubSpace),
-		_memoryPool(NULL),
-		_state(mm_heapmp_iterator_next_subspace)
-	{
-	}
-		
+	MM_HeapMemoryPoolIterator(MM_EnvironmentBase *env, MM_Heap *heap, MM_MemorySubSpace *memorySubSpace)
+	        : _mssIterator(heap)
+	        , _memorySubSpace(memorySubSpace)
+	        , _memoryPool(NULL)
+	        , _state(mm_heapmp_iterator_next_subspace)
+	{}
 };
 
 #endif /* HEAPMEMORYPOOLITERATOR_HPP_ */

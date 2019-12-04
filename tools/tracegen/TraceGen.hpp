@@ -30,16 +30,15 @@
 
 RCType startTraceGen(int argc, char *argv[]);
 
-class TraceGen
-{
+class TraceGen {
 	/*
 	 * Data members
 	 */
 private:
 	Path *_visitedFile;
+
 protected:
 public:
-
 private:
 	/**
 	 * Allocate new group and assign groupName.
@@ -93,12 +92,10 @@ private:
 	 * @return On success trace groups. On failure NULL.
 	 */
 	J9TDFGroup *calculateGroups(J9TDFOptions *options, J9TDFFile *tdf, unsigned int *groupCount);
+
 protected:
 public:
-	TraceGen()
-		: _visitedFile(NULL)
-	{
-	}
+	TraceGen() : _visitedFile(NULL) {}
 	/**
 	 * Parse TDF file and generate .h .c and .pdat files
 	 * @param options Command line options

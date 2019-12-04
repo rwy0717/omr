@@ -25,18 +25,17 @@
 
 #include "ObjectHeapBufferedIteratorPopulator.hpp"
 
-class MM_MarkedObjectPopulator : public MM_ObjectHeapBufferedIteratorPopulator 
-{
+class MM_MarkedObjectPopulator : public MM_ObjectHeapBufferedIteratorPopulator {
 public:
-	MM_MarkedObjectPopulator() : MM_ObjectHeapBufferedIteratorPopulator()
-	{
-		_typeId = __FUNCTION__;
-	}
-	
-	virtual void initializeObjectHeapBufferedIteratorState(MM_HeapRegionDescriptor* region, GC_ObjectHeapBufferedIteratorState* state) const;
-	virtual uintptr_t populateObjectHeapBufferedIteratorCache(omrobjectptr_t* cache, uintptr_t count, GC_ObjectHeapBufferedIteratorState* state) const;
-	virtual void advance(uintptr_t size, GC_ObjectHeapBufferedIteratorState* state) const;
-	virtual void reset(MM_HeapRegionDescriptor* region, GC_ObjectHeapBufferedIteratorState* state, void* base, void* top) const;
+	MM_MarkedObjectPopulator() : MM_ObjectHeapBufferedIteratorPopulator() { _typeId = __FUNCTION__; }
+
+	virtual void initializeObjectHeapBufferedIteratorState(
+	        MM_HeapRegionDescriptor *region, GC_ObjectHeapBufferedIteratorState *state) const;
+	virtual uintptr_t populateObjectHeapBufferedIteratorCache(
+	        omrobjectptr_t *cache, uintptr_t count, GC_ObjectHeapBufferedIteratorState *state) const;
+	virtual void advance(uintptr_t size, GC_ObjectHeapBufferedIteratorState *state) const;
+	virtual void reset(MM_HeapRegionDescriptor *region, GC_ObjectHeapBufferedIteratorState *state, void *base,
+	        void *top) const;
 };
 
 #endif /*MARKEDOBJECTPOPULATOR_HPP_*/

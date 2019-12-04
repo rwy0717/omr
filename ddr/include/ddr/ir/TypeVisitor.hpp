@@ -31,8 +31,7 @@ class Type;
 class TypedefUDT;
 class UnionUDT;
 
-class TypeVisitor
-{
+class TypeVisitor {
 public:
 	virtual DDR_RC visitType(Type *type) const = 0;
 	virtual DDR_RC visitClass(ClassUDT *type) const = 0;

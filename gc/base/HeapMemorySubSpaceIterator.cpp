@@ -29,12 +29,12 @@
 /**
  * Iterator states to maintain preorder traversal.
  */
-enum {
-	mm_heapmss_iterator_current_space,  /**< Process the subspace associated to the current space */
-	mm_heapmss_iterator_current_subspace,  /**< Process the current subspace */
-	mm_heapmss_iterator_children_subspace,  /**< Process the children of the current subspace */
-	mm_heapmss_iterator_next_subspace,  /**< Move to the next sibling (or parent if unavailable) of the current subspace */
-	mm_heapmss_iterator_next_space  /**< Move to the next space */
+enum { mm_heapmss_iterator_current_space, /**< Process the subspace associated to the current space */
+	mm_heapmss_iterator_current_subspace, /**< Process the current subspace */
+	mm_heapmss_iterator_children_subspace, /**< Process the children of the current subspace */
+	mm_heapmss_iterator_next_subspace, /**< Move to the next sibling (or parent if unavailable) of the current
+	                                      subspace */
+	mm_heapmss_iterator_next_space /**< Move to the next space */
 };
 
 /**
@@ -51,15 +51,15 @@ MM_HeapMemorySubSpaceIterator::reset(MM_Heap *heap)
 /**
  * Walk all memory subspaces for the given heap.
  * The list traversal is preorder, in that all parent nodes are visited before any of their children.
- * 
+ *
  * @todo Should integrate use of MM_MemorySubSpaceChildIterator.
  * @return Next memory subspace in the list, or NULL if all spaces have been processed.
  */
 MM_MemorySubSpace *
 MM_HeapMemorySubSpaceIterator::nextSubSpace()
 {
-	while(NULL != _memorySpace) {
-		switch(_state) {
+	while (NULL != _memorySpace) {
+		switch (_state) {
 		case mm_heapmss_iterator_current_space:
 			/* Process the subspace associated to the current space */
 			_memorySubSpace = _memorySpace->getMemorySubSpaceList();
@@ -67,7 +67,7 @@ MM_HeapMemorySubSpaceIterator::nextSubSpace()
 			break;
 		case mm_heapmss_iterator_current_subspace:
 			/* Process the current subspace */
-			if(NULL == _memorySubSpace) {
+			if (NULL == _memorySubSpace) {
 				_state = mm_heapmss_iterator_next_space;
 				break;
 			}
@@ -76,7 +76,7 @@ MM_HeapMemorySubSpaceIterator::nextSubSpace()
 			break;
 		case mm_heapmss_iterator_children_subspace:
 			/* Process the children of the current subspace */
-			if(NULL == _memorySubSpace->getChildren()) {
+			if (NULL == _memorySubSpace->getChildren()) {
 				_state = mm_heapmss_iterator_next_subspace;
 				break;
 			}
@@ -85,11 +85,11 @@ MM_HeapMemorySubSpaceIterator::nextSubSpace()
 			break;
 		case mm_heapmss_iterator_next_subspace:
 			/* Move to the next sibling (or parent if unavailable) of the current subspace */
-			if(NULL == _memorySubSpace) {
+			if (NULL == _memorySubSpace) {
 				_state = mm_heapmss_iterator_next_space;
 				break;
 			}
-			if(NULL == _memorySubSpace->getNext()) {
+			if (NULL == _memorySubSpace->getNext()) {
 				/* Moving to the parent means we will just find its next sibling in the list */
 				_memorySubSpace = _memorySubSpace->getParent();
 				break;
@@ -102,9 +102,8 @@ MM_HeapMemorySubSpaceIterator::nextSubSpace()
 			_memorySpace = _memorySpace->getNext();
 			_state = mm_heapmss_iterator_current_space;
 			break;
-		}			
+		}
 	}
 
 	return NULL;
 }
-

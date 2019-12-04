@@ -44,7 +44,7 @@
 #include "ut_j9thr.h"
 
 /* for syscall getrusage() used in omrthread_get_process_times */
-#if defined(LINUX) || defined (J9ZOS390) || defined(AIXPPC) || defined(OSX)
+#if defined(LINUX) || defined(J9ZOS390) || defined(AIXPPC) || defined(OSX)
 #include <errno.h> /* Examine errno codes. */
 #include <sys/time.h> /* Portability */
 #include <sys/resource.h>
@@ -53,7 +53,7 @@
 #if defined(J9ZOS390)
 #include "omrgetthent.h"
 
-#define I32MAXVAL	0x7FFFFFFF
+#define I32MAXVAL 0x7FFFFFFF
 #endif
 
 #if defined(LINUX)
@@ -62,7 +62,6 @@ extern int pthread_getcpuclockid(pthread_t thread_id, clockid_t *clock_id);
 #endif /* defined(LINUX) */
 
 #define STACK_PATTERN 0xBAADF00D
-
 
 /**
  * Return the amount of CPU time used by an arbitrary thread, in nanoseconds.
@@ -86,7 +85,6 @@ omrthread_get_cpu_time(omrthread_t thread)
 	return cpuTime;
 }
 
-
 /**
  * Return the amount of CPU time used by an arbitrary thread, in nanoseconds.
  * Returns extended error code information.
@@ -99,8 +97,8 @@ omrthread_get_cpu_time(omrthread_t thread)
  * @retval J9THREAD_SUCCESS success
  * @retval J9THREAD_ERR_NO_SUCH_THREAD if the thread handle is invalid, or J9THREAD_ERR if not supported
  *		   on this platform or some other platform specific error occurred.
- * @retval J9THREAD_ERR_OS_ERRNO_SET Bit flag optionally or'd into the return code. Indicates that an os_errno is available.
- *         See traces for the actual error code.
+ * @retval J9THREAD_ERR_OS_ERRNO_SET Bit flag optionally or'd into the return code. Indicates that an os_errno is
+ *available. See traces for the actual error code.
  * @see omrthread_get_self_cpu_time, omrthread_get_user_time, omrthread_get_cpu_time
  */
 intptr_t
@@ -123,7 +121,7 @@ omrthread_get_cpu_time_ex(omrthread_t thread, int64_t *cpuTime)
 
 		if (GetThreadTimes(thread->handle, &creationTime, &exitTime, &kernelTime, &userTime)) {
 			totalTime = ((int64_t)kernelTime.dwLowDateTime | ((int64_t)kernelTime.dwHighDateTime << 32))
-						+ ((int64_t)userTime.dwLowDateTime | ((int64_t)userTime.dwHighDateTime << 32));
+			        + ((int64_t)userTime.dwLowDateTime | ((int64_t)userTime.dwHighDateTime << 32));
 
 			/* totalTime is in 100's of nanos.  Convert to nanos */
 			*cpuTime = totalTime * 100;
@@ -131,7 +129,7 @@ omrthread_get_cpu_time_ex(omrthread_t thread, int64_t *cpuTime)
 		} else {
 			DWORD result = GetLastError();
 			Trc_THR_omrthread_get_cpu_time_ex_GetThreadTimes_failed(result, thread);
-			thread->os_errno = (omrthread_os_errno_t) result;
+			thread->os_errno = (omrthread_os_errno_t)result;
 			ret = J9THREAD_ERR_OS_ERRNO_SET;
 			if (ERROR_INVALID_HANDLE == result) {
 				/* Such a thread was not found. */
@@ -144,7 +142,7 @@ omrthread_get_cpu_time_ex(omrthread_t thread, int64_t *cpuTime)
 		ret |= J9THREAD_ERR;
 		return ret;
 	}
-#endif	/* defined(OMR_OS_WINDOWS) && !defined(BREW) */
+#endif /* defined(OMR_OS_WINDOWS) && !defined(BREW) */
 
 #ifdef AIXPPC
 	{
@@ -154,14 +152,15 @@ omrthread_get_cpu_time_ex(omrthread_t thread, int64_t *cpuTime)
 		memset(&usageInfo, 0, sizeof(usageInfo));
 		result = pthread_getrusage_np(thread->handle, &usageInfo, PTHRDSINFO_RUSAGE_COLLECT);
 		if (0 == result) {
-			int64_t totalTime = ((int64_t)usageInfo.ru_stime.tv_sec + usageInfo.ru_utime.tv_sec) * 1000 * 1000; /* microseconds */
+			int64_t totalTime = ((int64_t)usageInfo.ru_stime.tv_sec + usageInfo.ru_utime.tv_sec) * 1000
+			        * 1000; /* microseconds */
 			totalTime += (int64_t)usageInfo.ru_stime.tv_usec + usageInfo.ru_utime.tv_usec;
-			*cpuTime = totalTime * 1000; 	/* convert to nanoseconds */
+			*cpuTime = totalTime * 1000; /* convert to nanoseconds */
 			return J9THREAD_SUCCESS;
 		} else {
 			/* Handle error conditions. */
 			Trc_THR_omrthread_get_cpu_time_ex_pthread_getrusage_np_failed((int32_t)result, thread);
-			thread->os_errno = (omrthread_os_errno_t) result;
+			thread->os_errno = (omrthread_os_errno_t)result;
 			ret = J9THREAD_ERR_OS_ERRNO_SET;
 			if (ESRCH == result) {
 				/* Such a thread was not found. */
@@ -189,13 +188,14 @@ omrthread_get_cpu_time_ex(omrthread_t thread, int64_t *cpuTime)
 				return J9THREAD_SUCCESS;
 			} else {
 				int last_errno = errno;
-				Trc_THR_omrthread_get_cpu_time_ex_clock_gettime_failed((int32_t)clock_id, (intptr_t)last_errno, thread);
-				thread->os_errno = (omrthread_os_errno_t) last_errno;
+				Trc_THR_omrthread_get_cpu_time_ex_clock_gettime_failed(
+				        (int32_t)clock_id, (intptr_t)last_errno, thread);
+				thread->os_errno = (omrthread_os_errno_t)last_errno;
 				ret = J9THREAD_ERR_OS_ERRNO_SET;
 			}
 		} else {
 			Trc_THR_omrthread_get_cpu_time_ex_pthread_getcpuclockid_failed((int32_t)result, thread);
-			thread->os_errno = (omrthread_os_errno_t) result;
+			thread->os_errno = (omrthread_os_errno_t)result;
 			ret = J9THREAD_ERR_OS_ERRNO_SET;
 			/* Handle error conditions. */
 			if (ESRCH == result) {
@@ -214,7 +214,7 @@ omrthread_get_cpu_time_ex(omrthread_t thread, int64_t *cpuTime)
 	{
 		intptr_t ret = 0;
 		struct j9pg_thread_data threadData;
-		unsigned char *output_buffer = (unsigned char *) &threadData;
+		unsigned char *output_buffer = (unsigned char *)&threadData;
 		uint32_t output_size = sizeof(struct j9pg_thread_data);
 		uint32_t input_size = sizeof(struct pgtha);
 		int32_t ret_val = 0;
@@ -222,7 +222,7 @@ omrthread_get_cpu_time_ex(omrthread_t thread, int64_t *cpuTime)
 		uint32_t reason_code = 0;
 		uint32_t data_offset = 0;
 		struct pgtha pgthaInst;
-		unsigned char *cursor = (unsigned char *) &pgthaInst;
+		unsigned char *cursor = (unsigned char *)&pgthaInst;
 		struct pgthj *pgthj = NULL;
 
 		memset(cursor, 0, sizeof(pgthaInst));
@@ -237,23 +237,15 @@ omrthread_get_cpu_time_ex(omrthread_t thread, int64_t *cpuTime)
 		pgthaInst.flag1 = PGTHA_FLAG_PROCESS_DATA | PGTHA_FLAG_THREAD_DATA;
 
 #if defined(_LP64)
-		BPX4GTH(
-			&input_size,		/* Size of pgtha structure */
-			&cursor,			/* Pointer to address of pgtha */
-			&output_size,		/* output size with padding */
-			&output_buffer,		/* Output buffer */
-			&ret_val,			/* return should be 0 on success */
-			&ret_code,			/* On failure, this will have the reason */
-			&reason_code);		/* more info on error */
+		BPX4GTH(&input_size, /* Size of pgtha structure */
+		        &cursor, /* Pointer to address of pgtha */
+		        &output_size, /* output size with padding */
+		        &output_buffer, /* Output buffer */
+		        &ret_val, /* return should be 0 on success */
+		        &ret_code, /* On failure, this will have the reason */
+		        &reason_code); /* more info on error */
 #else
-		BPX1GTH(
-			&input_size,
-			&cursor,
-			&output_size,
-			&output_buffer,
-			&ret_val,
-			&ret_code,
-			&reason_code);
+		BPX1GTH(&input_size, &cursor, &output_size, &output_buffer, &ret_val, &ret_code, &reason_code);
 #endif
 
 		/**
@@ -262,8 +254,8 @@ omrthread_get_cpu_time_ex(omrthread_t thread, int64_t *cpuTime)
 		if (-1 == ret_val) {
 			/* Return a negative value on error */
 			Trc_THR_ThreadGetCpuTime_Bpxgth(thread, ret_val, ret_code, reason_code);
-			thread->os_errno = (omrthread_os_errno_t) ret_code;
-			thread->os_errno2 = (omrthread_os_errno_t) reason_code;
+			thread->os_errno = (omrthread_os_errno_t)ret_code;
+			thread->os_errno2 = (omrthread_os_errno_t)reason_code;
 			ret = J9THREAD_ERR_OS_ERRNO_SET;
 			if (ESRCH == ret_code) {
 				/* Such a thread was not found. */
@@ -285,10 +277,10 @@ omrthread_get_cpu_time_ex(omrthread_t thread, int64_t *cpuTime)
 		data_offset = (data_offset & I32MAXVAL) >> 8;
 
 		/* Check if the thread's data is past the end of the populated buffer */
-		if (data_offset > ((struct pgthb *)output_buffer)->lenused ||
-			data_offset > output_size - sizeof(struct pgthj)
-		   ) {
-			Trc_THR_ThreadGetCpuTime_BpxgthBuffer(thread, ret_val, data_offset, ((struct pgthb *)output_buffer)->lenused, output_size);
+		if (data_offset > ((struct pgthb *)output_buffer)->lenused
+		        || data_offset > output_size - sizeof(struct pgthj)) {
+			Trc_THR_ThreadGetCpuTime_BpxgthBuffer(
+			        thread, ret_val, data_offset, ((struct pgthb *)output_buffer)->lenused, output_size);
 			return J9THREAD_ERR;
 		}
 
@@ -325,7 +317,7 @@ omrthread_get_cpu_time_ex(omrthread_t thread, int64_t *cpuTime)
 			return J9THREAD_ERR;
 		}
 		*cpuTime = ((int64_t)tbi->user_time.seconds + tbi->system_time.seconds) * 1000 * 1000 * 1000
-			+ ((int64_t)tbi->user_time.microseconds + tbi->system_time.microseconds) * 1000;
+		        + ((int64_t)tbi->user_time.microseconds + tbi->system_time.microseconds) * 1000;
 
 		return J9THREAD_SUCCESS;
 	}
@@ -415,7 +407,7 @@ omrthread_get_user_time(omrthread_t thread)
 		return totalTime * 100;
 	}
 
-#endif	/* defined(OMR_OS_WINDOWS) && !defined(BREW) */
+#endif /* defined(OMR_OS_WINDOWS) && !defined(BREW) */
 
 #if defined(AIXPPC)
 
@@ -430,9 +422,9 @@ omrthread_get_user_time(omrthread_t thread)
 	if (0 == pthread_getrusage_np(thread->handle, &usageInfo, PTHRDSINFO_RUSAGE_COLLECT)) {
 		int64_t userTime = (int64_t)usageInfo.ru_utime.tv_sec * 1000 * 1000; /* microseconds */
 		userTime += (int64_t)usageInfo.ru_utime.tv_usec;
-		return userTime * 1000; 	/* convert to nanoseconds */
+		return userTime * 1000; /* convert to nanoseconds */
 	}
-#endif	/* AIX */
+#endif /* AIX */
 
 	/* If none of the above platforms, then return -1 (not supported). */
 
@@ -452,7 +444,6 @@ omrthread_get_self_user_time(omrthread_t self)
 	return omrthread_get_user_time(self);
 }
 
-
 /**
  * Return the OS handle for a thread.
  *
@@ -464,10 +455,10 @@ omrthread_get_handle(omrthread_t thread)
 {
 #if defined(J9ZOS390)
 	/* Hack!! - If we do the simple cast (in the #else case) we get the following
-		compiler error in z/OS:
-			"ERROR CBC3117 ./thrprof.c:79    Operand must be a scalar type."
-		In order to work around the compiler error, we have to reach inside
-		the structure do the dirty work. The handle may not even be correct! */
+	        compiler error in z/OS:
+	                "ERROR CBC3117 ./thrprof.c:79    Operand must be a scalar type."
+	        In order to work around the compiler error, we have to reach inside
+	        the structure do the dirty work. The handle may not even be correct! */
 	uintptr_t *tempHandle;
 	tempHandle = (uintptr_t *)&(thread->handle.__[0]);
 	return *tempHandle;
@@ -475,7 +466,6 @@ omrthread_get_handle(omrthread_t thread)
 	return (uintptr_t)thread->handle;
 #endif
 }
-
 
 /**
  * Enable or disable monitoring of stack usage.
@@ -493,7 +483,6 @@ omrthread_enable_stack_usage(uintptr_t enable)
 #endif /* defined(OMR_OS_WINDOWS) */
 }
 
-
 /**
  * Return the approximate stack usage by a thread
  *
@@ -506,7 +495,7 @@ omrthread_enable_stack_usage(uintptr_t enable)
 uintptr_t
 omrthread_get_stack_usage(omrthread_t thread)
 {
-#if defined(LINUX) || defined (J9ZOS390) || defined(AIXPPC) || defined(OSX)
+#if defined(LINUX) || defined(J9ZOS390) || defined(AIXPPC) || defined(OSX)
 	return 0;
 #else /* defined(LINUX) || defined (J9ZOS390) || defined(AIXPPC) || defined(OSX) */
 	uintptr_t *tos = thread->tos;
@@ -527,7 +516,6 @@ omrthread_get_stack_usage(omrthread_t thread)
 	return count;
 #endif /* defined(LINUX) || defined (J9ZOS390) || defined(AIXPPC) || defined(OSX) */
 }
-
 
 /*
  * Paint a thread's stack.
@@ -566,10 +554,10 @@ paint_stack(omrthread_t thread)
 
 	/* Round up to the system page size. */
 	GetSystemInfo(&sysInfo);
-	thread->stacksize = ((uintptr_t)stack - (uintptr_t)thread->tos + sysInfo.dwPageSize) & ~((uintptr_t)sysInfo.dwPageSize - 1);
+	thread->stacksize = ((uintptr_t)stack - (uintptr_t)thread->tos + sysInfo.dwPageSize)
+	        & ~((uintptr_t)sysInfo.dwPageSize - 1);
 #endif /* defined(OMR_OS_WINDOWS) */
 }
-
 
 /**
  * Returns a thread's stack size.
@@ -584,7 +572,6 @@ omrthread_get_stack_size(omrthread_t thread)
 {
 	return thread->stacksize;
 }
-
 
 /**
  * Return the OS's scheduling policy and priority for a thread.
@@ -655,7 +642,6 @@ omrthread_get_os_priority(omrthread_t thread, intptr_t *policy, intptr_t *priori
 	return 0;
 }
 
-
 /**
  * Return the amount of CPU time used by the entire process in nanoseconds.
  * @param void
@@ -672,15 +658,14 @@ omrthread_get_process_cpu_time(void)
 
 	if (GetProcessTimes(GetCurrentProcess(), &creationTime, &exitTime, &kernelTime, &userTime)) {
 		totalTime = ((int64_t)kernelTime.dwLowDateTime | ((int64_t)kernelTime.dwHighDateTime << 32))
-					+ ((int64_t)userTime.dwLowDateTime | ((int64_t)userTime.dwHighDateTime << 32));
+		        + ((int64_t)userTime.dwLowDateTime | ((int64_t)userTime.dwHighDateTime << 32));
 
 		/* totalTime is in 100's of nanos.  Convert to nanos */
 		return totalTime * GET_PROCESS_TIMES_IN_NANO;
 	}
-#endif	/* defined(OMR_OS_WINDOWS) && !defined(BREW) */
+#endif /* defined(OMR_OS_WINDOWS) && !defined(BREW) */
 
 	return -1;
-
 }
 
 /**
@@ -709,17 +694,17 @@ omrthread_get_process_times(omrthread_process_time_t *processTime)
 		 * WARNING: GetProcessTimes does not exist on pre-Win 98
 		 */
 		if (GetProcessTimes(GetCurrentProcess(), &creationTime, &exitTime, &systemTime, &userTime)) {
-			processTime->_userTime = GET_PROCESS_TIMES_IN_NANO *
-									 ((int64_t)userTime.dwLowDateTime | ((int64_t)userTime.dwHighDateTime << 32));
-			processTime->_systemTime = GET_PROCESS_TIMES_IN_NANO *
-									   ((int64_t)systemTime.dwLowDateTime | ((int64_t)systemTime.dwHighDateTime << 32));
+			processTime->_userTime = GET_PROCESS_TIMES_IN_NANO
+			        * ((int64_t)userTime.dwLowDateTime | ((int64_t)userTime.dwHighDateTime << 32));
+			processTime->_systemTime = GET_PROCESS_TIMES_IN_NANO
+			        * ((int64_t)systemTime.dwLowDateTime | ((int64_t)systemTime.dwHighDateTime << 32));
 			return 0;
 		} else {
 			/* GetLastError() indicates reason for failure in GetProcessTimes(). */
 			Trc_THR_ThreadGetProcessTimes_GetProcessTimesFailed(GetLastError());
 			return -2;
 		}
-#endif	/* defined(OMR_OS_WINDOWS) */
+#endif /* defined(OMR_OS_WINDOWS) */
 
 #if defined(LINUX) || defined(AIXPPC) || defined(OSX)
 		struct rusage rUsage;
@@ -727,10 +712,10 @@ omrthread_get_process_times(omrthread_process_time_t *processTime)
 
 		/* if getrusage() returns successfully, store the time values in processTime.*/
 		if (0 == getrusage(RUSAGE_SELF, &rUsage)) {
-			processTime->_userTime   = (SEC_TO_NANO_CONVERSION_CONSTANT   * (int64_t)rUsage.ru_utime.tv_sec) +
-									   (MICRO_TO_NANO_CONVERSION_CONSTANT * (int64_t)rUsage.ru_utime.tv_usec);
-			processTime->_systemTime = (SEC_TO_NANO_CONVERSION_CONSTANT   * (int64_t)rUsage.ru_stime.tv_sec) +
-									   (MICRO_TO_NANO_CONVERSION_CONSTANT * (int64_t)rUsage.ru_stime.tv_usec);
+			processTime->_userTime = (SEC_TO_NANO_CONVERSION_CONSTANT * (int64_t)rUsage.ru_utime.tv_sec)
+			        + (MICRO_TO_NANO_CONVERSION_CONSTANT * (int64_t)rUsage.ru_utime.tv_usec);
+			processTime->_systemTime = (SEC_TO_NANO_CONVERSION_CONSTANT * (int64_t)rUsage.ru_stime.tv_sec)
+			        + (MICRO_TO_NANO_CONVERSION_CONSTANT * (int64_t)rUsage.ru_stime.tv_usec);
 			return 0;
 		} else {
 			/* Error in getrusage */
@@ -739,14 +724,14 @@ omrthread_get_process_times(omrthread_process_time_t *processTime)
 		}
 #endif /* defined(LINUX) || defined(AIXPPC) || defined(OSX) */
 
-#if defined (J9ZOS390)
+#if defined(J9ZOS390)
 		/* Input buffer, pointer to buffer, and size of the buffer area. */
 		struct pgtha pgthaInst;
-		unsigned char *cursor = (unsigned char *) &pgthaInst;
+		unsigned char *cursor = (unsigned char *)&pgthaInst;
 		uint32_t input_size = sizeof(struct pgtha);
 		/* Output buffer, pointer to buffer, and size of the buffer area. */
 		struct j9pg_thread_data threadData;
-		unsigned char *output_buffer = (unsigned char *) &threadData;
+		unsigned char *output_buffer = (unsigned char *)&threadData;
 		uint32_t output_size = sizeof(struct j9pg_thread_data);
 		struct pgthc *pgthc = NULL;
 		int32_t ret_val = 0;
@@ -766,23 +751,15 @@ omrthread_get_process_times(omrthread_process_time_t *processTime)
 		/* We don't need thread data. */
 		pgthaInst.flag1 = PGTHA_FLAG_PROCESS_DATA;
 #if defined(_LP64)
-		BPX4GTH(
-			&input_size,            /* Size of pgtha structure */
-			&cursor,                /* Pointer to address of pgtha */
-			&output_size,           /* output size with padding */
-			&output_buffer,         /* Output buffer */
-			&ret_val,               /* return should be 0 on success */
-			&ret_code,              /* On failure, this will have the reason */
-			&reason_code);          /* more info on error */
+		BPX4GTH(&input_size, /* Size of pgtha structure */
+		        &cursor, /* Pointer to address of pgtha */
+		        &output_size, /* output size with padding */
+		        &output_buffer, /* Output buffer */
+		        &ret_val, /* return should be 0 on success */
+		        &ret_code, /* On failure, this will have the reason */
+		        &reason_code); /* more info on error */
 #else
-		BPX1GTH(
-			&input_size,
-			&cursor,
-			&output_size,
-			&output_buffer,
-			&ret_val,
-			&ret_code,
-			&reason_code);
+		BPX1GTH(&input_size, &cursor, &output_size, &output_buffer, &ret_val, &ret_code, &reason_code);
 #endif
 		if (-1 == ret_val) {
 			/* Error in BPXNGTH() invocation. For information on error codes, refer:
@@ -793,13 +770,13 @@ omrthread_get_process_times(omrthread_process_time_t *processTime)
 		}
 
 		/* Obtain an integer from the 3 bytes filled in. */
-		data_offset = *((unsigned int *) threadData.pgthb.offc);
+		data_offset = *((unsigned int *)threadData.pgthb.offc);
 
 		/* Discard the least significant byte and use only the most significant 3. */
 		data_offset = (data_offset & I32MAXVAL) >> 8;
 
 		/* Offset to the structure containing process times (among other things). */
-		pgthc = (struct pgthc *)(((char *) &threadData) + data_offset);
+		pgthc = (struct pgthc *)(((char *)&threadData) + data_offset);
 
 		/* These times are in 100's of seconds. Convert to nanoseconds. */
 		processTime->_userTime = (int64_t)pgthc->usertime * 10000000;
@@ -824,7 +801,7 @@ uint64_t
 omrthread_get_hires_clock(void)
 {
 #if defined(LINUX) && (defined(J9HAMMER) || defined(J9X86))
-#define J9TIME_NANOSECONDS_PER_SECOND	J9CONST_U64(1000000000)
+#define J9TIME_NANOSECONDS_PER_SECOND J9CONST_U64(1000000000)
 	struct timespec ts;
 	uint64_t hiresTime = 0;
 
@@ -842,7 +819,7 @@ omrthread_get_hires_clock(void)
 		return (uint64_t)GetTickCount();
 	}
 #elif defined(OSX) /* defined(OMR_OS_WINDOWS) */
-#define J9TIME_NANOSECONDS_PER_SECOND	J9CONST_U64(1000000000)
+#define J9TIME_NANOSECONDS_PER_SECOND J9CONST_U64(1000000000)
 	omrthread_library_t lib = GLOBAL_DATA(default_library);
 	mach_timespec_t mt;
 	uint64_t hiresTime = 0;
@@ -859,8 +836,8 @@ omrthread_get_hires_clock(void)
 #endif /* defined(OSX) */
 }
 
-#define THREAD_WALK_RESOURCE_USAGE_MUTEX_HELD	0x1
-#define THREAD_WALK_MONITOR_MUTEX_HELD			0x2
+#define THREAD_WALK_RESOURCE_USAGE_MUTEX_HELD 0x1
+#define THREAD_WALK_MONITOR_MUTEX_HELD 0x2
 
 /**
  * Calculate the cpu usage information for the thread categories of System, application
@@ -882,7 +859,7 @@ omrthread_get_jvm_cpu_usage_info(J9ThreadsCpuUsage *cpuUsage)
 	int64_t systemJvmCpuTime = 0;
 	int64_t resourceMonitorCpuTime = 0;
 	int64_t applicationCpuTime = 0;
-	int64_t userCpuTime[J9THREAD_MAX_USER_DEFINED_THREAD_CATEGORIES] = { 0 };
+	int64_t userCpuTime[J9THREAD_MAX_USER_DEFINED_THREAD_CATEGORIES] = {0};
 	omrthread_t walkThread = NULL;
 	pool_state state;
 	intptr_t ret = J9THREAD_SUCCESS;
@@ -926,9 +903,9 @@ omrthread_get_jvm_cpu_usage_info(J9ThreadsCpuUsage *cpuUsage)
 		result = omrthread_get_cpu_time_ex(walkThread, &threadCpuTime);
 		THREAD_UNLOCK(walkThread);
 
-		/* Obtaining CPU time fails with error code J9THREAD_ERR_NO_SUCH_THREAD, implying the thread isn't available to
-		 * the OS; skip accounting for such threads, as storeExitCpuUsage() must have already done this for it. Return
-		 * error for other (internal) errors.
+		/* Obtaining CPU time fails with error code J9THREAD_ERR_NO_SUCH_THREAD, implying the thread isn't
+		 * available to the OS; skip accounting for such threads, as storeExitCpuUsage() must have already done
+		 * this for it. Return error for other (internal) errors.
 		 */
 		if (J9THREAD_SUCCESS != result) {
 			result &= ~J9THREAD_ERR_OS_ERRNO_SET;
@@ -948,7 +925,8 @@ omrthread_get_jvm_cpu_usage_info(J9ThreadsCpuUsage *cpuUsage)
 			systemJvmCpuTime += threadCpuTime;
 			if (OMR_ARE_ALL_BITS_SET(walkThread->effective_category, J9THREAD_CATEGORY_SYSTEM_GC_THREAD)) {
 				gcCpuTime += threadCpuTime;
-			} else if (OMR_ARE_ALL_BITS_SET(walkThread->effective_category, J9THREAD_CATEGORY_SYSTEM_JIT_THREAD)) {
+			} else if (OMR_ARE_ALL_BITS_SET(
+			                   walkThread->effective_category, J9THREAD_CATEGORY_SYSTEM_JIT_THREAD)) {
 				jitCpuTime += threadCpuTime;
 			}
 		} else if (OMR_ARE_ALL_BITS_SET(walkThread->effective_category, J9THREAD_CATEGORY_APPLICATION_THREAD)) {
@@ -956,7 +934,8 @@ omrthread_get_jvm_cpu_usage_info(J9ThreadsCpuUsage *cpuUsage)
 
 			/* If the thread has been set to a user defined category, count it in the right category */
 			if ((walkThread->effective_category & J9THREAD_USER_DEFINED_THREAD_CATEGORY_MASK) > 0) {
-				int userCat = (walkThread->effective_category - J9THREAD_USER_DEFINED_THREAD_CATEGORY_1) & J9THREAD_USER_DEFINED_THREAD_CATEGORY_MASK;
+				int userCat = (walkThread->effective_category - J9THREAD_USER_DEFINED_THREAD_CATEGORY_1)
+				        & J9THREAD_USER_DEFINED_THREAD_CATEGORY_MASK;
 				userCat >>= J9THREAD_USER_DEFINED_THREAD_CATEGORY_BIT_SHIFT;
 				ASSERT(userCat >= J9THREAD_MAX_USER_DEFINED_THREAD_CATEGORIES);
 				userCpuTime[userCat] += threadCpuTime;
@@ -986,7 +965,8 @@ omrthread_get_jvm_cpu_usage_info(J9ThreadsCpuUsage *cpuUsage)
 		 * some unknown reason. The if check introduces variability in the loop causing gcc not to use xmm.
 		 */
 		if ((cumulativeUsage->applicationUserCpuTime[i] > 0) || (userCpuTime[i] > 0)) {
-			cpuUsage->applicationUserCpuTime[i] = cumulativeUsage->applicationUserCpuTime[i] + userCpuTime[i];
+			cpuUsage->applicationUserCpuTime[i] = cumulativeUsage->applicationUserCpuTime[i]
+			        + userCpuTime[i];
 		}
 	}
 

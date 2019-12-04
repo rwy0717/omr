@@ -29,7 +29,7 @@
  * @return the difference between minuend and subtrahend, or zero if minuend is not larger than subtrahend
  */
 uintptr_t
-MM_Math::saturatingSubtract(uintptr_t minuend, uintptr_t subtrahend) 
+MM_Math::saturatingSubtract(uintptr_t minuend, uintptr_t subtrahend)
 {
 	uintptr_t result = 0;
 	if (minuend > subtrahend) {
@@ -43,7 +43,7 @@ MM_Math::saturatingSubtract(uintptr_t minuend, uintptr_t subtrahend)
  * @return the weighted average of the combined parameters.
  */
 float
-MM_Math::weightedAverage(float currentAverage, float newValue, float weight) 
+MM_Math::weightedAverage(float currentAverage, float newValue, float weight)
 {
-	return ((currentAverage) * weight) + ((newValue) * ((float)1.0 - weight));
+	return ((currentAverage)*weight) + ((newValue) * ((float)1.0 - weight));
 }

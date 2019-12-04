@@ -26,15 +26,13 @@
 #include "Port.hpp"
 #include "TDFTypes.hpp"
 
-class ArgParser
-{
+class ArgParser {
 	/*
 	 * Data members
 	 */
 private:
 protected:
 public:
-
 	/*
 	 * Function members
 	 */

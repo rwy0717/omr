@@ -23,9 +23,7 @@
 
 #include "ddr/ir/Symbol_IR.hpp"
 
-ClassType::ClassType(size_t size, unsigned int lineNumber)
-	: NamespaceUDT(lineNumber)
-	, _fieldMembers()
+ClassType::ClassType(size_t size, unsigned int lineNumber) : NamespaceUDT(lineNumber), _fieldMembers()
 {
 	_sizeOf = size;
 }
@@ -66,7 +64,7 @@ ClassType::renameFieldsAndMacros(const FieldOverride &fieldOverride, Type *repla
 }
 
 bool
-ClassType::operator==(const Type & rhs) const
+ClassType::operator==(const Type &rhs) const
 {
 	return rhs.compareToClasstype(*this);
 }
@@ -77,20 +75,17 @@ ClassType::compareToClasstype(const ClassType &other) const
 	bool enumMembersEqual = _enumMembers.size() == other._enumMembers.size();
 	vector<EnumMember *>::const_iterator it2 = other._enumMembers.begin();
 	for (vector<EnumMember *>::const_iterator it = _enumMembers.begin();
-		it != _enumMembers.end() && it2 != other._enumMembers.end() && enumMembersEqual;
-		++ it, ++ it2) {
+	        it != _enumMembers.end() && it2 != other._enumMembers.end() && enumMembersEqual; ++it, ++it2) {
 		enumMembersEqual = ((*it)->_name == (*it2)->_name) && ((*it)->_value == (*it2)->_value);
 	}
 
 	bool fieldMembersEqual = _fieldMembers.size() == other._fieldMembers.size();
 	vector<Field *>::const_iterator it3 = other._fieldMembers.begin();
 	for (vector<Field *>::const_iterator it = _fieldMembers.begin();
-		it != _fieldMembers.end() && it3 != other._fieldMembers.end() && fieldMembersEqual;
-		++ it, ++ it3) {
+	        it != _fieldMembers.end() && it3 != other._fieldMembers.end() && fieldMembersEqual; ++it, ++it3) {
 		fieldMembersEqual = ((*it)->_name == (*it3)->_name)
-			&& (NULL == (*it)->_fieldType || NULL == (*it3)->_fieldType || (*it)->_fieldType->_name == (*it3)->_fieldType->_name);
+		        && (NULL == (*it)->_fieldType || NULL == (*it3)->_fieldType
+		                || (*it)->_fieldType->_name == (*it3)->_fieldType->_name);
 	}
-	return compareToNamespace(other)
-		&& enumMembersEqual
-		&& fieldMembersEqual;
+	return compareToNamespace(other) && enumMembersEqual && fieldMembersEqual;
 }

@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #if !defined(PACKETLIST_HPP_)
 #define PACKETLIST_HPP_
 
@@ -28,58 +27,52 @@
 #define __TPF_DO_NOT_MAP_ATOE_REMOVE
 #endif
 
-#include "omrcfg.h"
-#include "omr.h"
-#include "ModronAssertions.h"
-
 #include "AtomicOperations.hpp"
 #include "BaseNonVirtual.hpp"
 #include "EnvironmentBase.hpp"
 #include "LightweightNonReentrantLock.hpp"
+#include "ModronAssertions.h"
 #include "Packet.hpp"
+#include "omr.h"
+#include "omrcfg.h"
 
 class MM_GCExtensionsBase;
 
-class MM_PacketList: public MM_BaseNonVirtual
-{
+class MM_PacketList : public MM_BaseNonVirtual {
 
-/* Data Section */
+	/* Data Section */
 public:
 	struct PacketSublist {
-		MM_Packet * _head;  /**< Head of the list */
-		MM_Packet * _tail;  /**< Tail of the list */
-		MM_LightweightNonReentrantLock _lock;  /**< Lock for getting/putting packets */
+		MM_Packet *_head; /**< Head of the list */
+		MM_Packet *_tail; /**< Tail of the list */
+		MM_LightweightNonReentrantLock _lock; /**< Lock for getting/putting packets */
 
-		bool
-		initialize(MM_EnvironmentBase *env)
+		bool initialize(MM_EnvironmentBase *env)
 		{
-			if (!_lock.initialize(env, &env->getExtensions()->lnrlOptions, "MM_PacketList:_sublists[]._lock")) {
+			if (!_lock.initialize(
+			            env, &env->getExtensions()->lnrlOptions, "MM_PacketList:_sublists[]._lock")) {
 				return false;
 			}
 			return true;
 		}
 
-		PacketSublist()
-			: _head(NULL)
-			, _tail(NULL)
-		{
-		}
+		PacketSublist() : _head(NULL), _tail(NULL) {}
 	};
-	
+
 protected:
-	
 private:
-	struct PacketSublist *_sublists;	/**< An array of PacketSublist structures which is _sublistCount elements long */
-	
+	struct PacketSublist *_sublists; /**< An array of PacketSublist structures which is _sublistCount elements long
+	                                  */
+
 	uintptr_t _sublistCount; /**< the number of lists (split for parallelism). Must be at least 1 */
-	volatile uintptr_t _count;  /**< Number of items in the list */
-	
-/* Functionality Section */
+	volatile uintptr_t _count; /**< Number of items in the list */
+
+	/* Functionality Section */
 private:
 	/**
 	 * Increment the shared counter by the specified amount.
 	 * Must be called inside of a locked region
-	 * 
+	 *
 	 * @param value the positive value to increment
 	 */
 	void incrementCount(uintptr_t value)
@@ -91,7 +84,7 @@ private:
 			MM_AtomicOperations::add(&_count, value);
 		}
 	}
-	
+
 	/**
 	 * Decrement the shared counter by the specified amount.
 	 * Must be called inside of a locked region
@@ -111,48 +104,42 @@ private:
 	/**
 	 * Hash the specified environment to determine what sublist index
 	 * it should use
-	 * 
+	 *
 	 * @param env the current environment
-	 * 
+	 *
 	 * @return an index into the _sublists array
 	 */
-	MMINLINE uintptr_t
-	getSublistIndex(MM_EnvironmentBase *env)
-	{
-		return env->getEnvironmentId() % _sublistCount;
-	}
-		
+	MMINLINE uintptr_t getSublistIndex(MM_EnvironmentBase *env) { return env->getEnvironmentId() % _sublistCount; }
+
 protected:
-	
 public:
-	
 	bool initialize(MM_EnvironmentBase *env);
-	void tearDown(MM_EnvironmentBase *env) ;
-	
+	void tearDown(MM_EnvironmentBase *env);
+
 	/**
 	 * Push a list of packets onto this packet list.
-	 * 
+	 *
 	 * @param head The first entry in the list
 	 * @param tail The last entry in the list
 	 * @param count The number of entries in the list
 	 */
 	void pushList(MM_Packet *head, MM_Packet *tail, uintptr_t count);
-	
+
 	/**
 	 * Pop all of the entries from this packetlist into the references
 	 * passed as parameters.
-	 * 
+	 *
 	 * @note this function will destroy the values passes in as parameters.
-	 * 
+	 *
 	 * @param head The first entry in the list
 	 * @param end The last entry in the list
 	 * @param count The number of entries in the list
-	 * 
+	 *
 	 * @return true is there were entries, false otherwise
 	 */
 	bool popList(MM_Packet **head, MM_Packet **tail, uintptr_t *count);
 	void remove(MM_Packet *packetToRemove);
-	
+
 	/**
 	 * Push a packet on the packetList.
 	 *
@@ -162,7 +149,7 @@ public:
 	{
 		uintptr_t index = getSublistIndex(env);
 		PacketSublist *list = &_sublists[index];
-	
+
 		list->_lock.acquire();
 
 		packet->_next = list->_head;
@@ -175,10 +162,10 @@ public:
 		}
 		list->_head = packet;
 		incrementCount(1);
-		
+
 		list->_lock.release();
 	}
-	
+
 	/**
 	 * Pop a packet off of the packetList.
 	 *
@@ -202,7 +189,7 @@ public:
 						list->_tail = NULL;
 					} else {
 						list->_head->_previous = NULL;
-					}		
+					}
 				}
 				list->_lock.release();
 
@@ -210,33 +197,27 @@ public:
 					break;
 				}
 			}
-			
-			index = (index + 1) %  _sublistCount;
+
+			index = (index + 1) % _sublistCount;
 		}
 
 		return packet;
 	}
-	
+
 	/**
 	 * Check to see if the list is empty
 	 *
 	 * @return true if the list is empty, false otherwise
 	 */
-	MMINLINE bool isEmpty() 
-	{
-		return 0 == _count;
-	}
-	
+	MMINLINE bool isEmpty() { return 0 == _count; }
+
 	/**
 	 * Return the count of how many entries there are in the list
 	 *
 	 * @return count The number of entries in the list
 	 */
-	MMINLINE uintptr_t getCount()
-	{
-		return _count;
-	}
-	
+	MMINLINE uintptr_t getCount() { return _count; }
+
 	/**
 	 * Return the first element in the list.
 	 * This should be avoided as it combines all sublists in to one
@@ -245,22 +226,17 @@ public:
 	 * @return head The first entry in the list
 	 */
 	MM_Packet *getHead();
-	
+
 	/**
 	 * Create a PacketList object.
 	 */
-	MM_PacketList(MM_EnvironmentBase *env) :
-		MM_BaseNonVirtual()
-		,_sublists(NULL)
-		,_sublistCount(0)
-		,_count(0)
+	MM_PacketList(MM_EnvironmentBase *env) : MM_BaseNonVirtual(), _sublists(NULL), _sublistCount(0), _count(0)
 	{
 		_typeId = __FUNCTION__;
 	}
-	
+
 protected:
 private:
-	
 	friend class MM_PacketSublistIterator;
 };
 #endif /* PACKETLIST_HPP_ */

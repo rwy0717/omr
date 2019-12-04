@@ -28,19 +28,24 @@
 #include "omragent.h"
 
 #define MATRIX_ORDER 1000
-#define NUM_ITERATIONS_SYSTEM_CPU_BURN	3000
+#define NUM_ITERATIONS_SYSTEM_CPU_BURN 3000
 
-static intptr_t dummy_omrsysinfo_get_CPU_utilization(struct OMRPortLibrary *portLibrary, struct J9SysinfoCPUTime *cpuTimeStats);
+static intptr_t dummy_omrsysinfo_get_CPU_utilization(
+        struct OMRPortLibrary *portLibrary, struct J9SysinfoCPUTime *cpuTimeStats);
 static void matrixSquare(OMR_VMThread *vmThread);
 static void systemTimeCPUBurn(void);
-static omr_error_t testProcessCpuLoad(OMR_VMThread *vmThread, OMR_TI const *ti, omr_error_t expectedRc, BOOLEAN dummyPort, BOOLEAN checkRc);
-static omr_error_t testSystemCpuLoad(OMR_VMThread *vmThread, OMR_TI const *ti, omr_error_t expectedRc, BOOLEAN dummyPort, BOOLEAN checkRc);
+static omr_error_t testProcessCpuLoad(
+        OMR_VMThread *vmThread, OMR_TI const *ti, omr_error_t expectedRc, BOOLEAN dummyPort, BOOLEAN checkRc);
+static omr_error_t testSystemCpuLoad(
+        OMR_VMThread *vmThread, OMR_TI const *ti, omr_error_t expectedRc, BOOLEAN dummyPort, BOOLEAN checkRc);
 static omr_error_t testTICpuLoad(OMR_VMThread *vmThread, OMR_TI const *ti);
 
 static const char *agentName = "cpuLoadAgent";
 
-typedef intptr_t (*real_sysinfo_get_CPU_utilization)(struct OMRPortLibrary *portLibrary, struct J9SysinfoCPUTime *cpuTime);
-/* real_omrsysinfo_get_CPU_utilization and callIndex are global because dummy_omrsysinfo_get_CPU_utilization() needs to access them */
+typedef intptr_t (*real_sysinfo_get_CPU_utilization)(
+        struct OMRPortLibrary *portLibrary, struct J9SysinfoCPUTime *cpuTime);
+/* real_omrsysinfo_get_CPU_utilization and callIndex are global because dummy_omrsysinfo_get_CPU_utilization() needs to
+ * access them */
 static real_sysinfo_get_CPU_utilization real_omrsysinfo_get_CPU_utilization = NULL;
 static int32_t callIndex = 0;
 
@@ -72,7 +77,8 @@ OMRAgent_OnLoad(OMR_TI const *ti, OMR_VM *vm, char const *options, OMR_AgentCall
 #if !defined(J9ZOS390)
 	/**
 	 * Exclude z/OS when testing GetProcessCpuLoad() and GetSystemCpuLoad(). Existing implementation of
-	 * omrsysinfo_get_CPU_utilization(), which the two APIs rely on, is problematic on z/OS. (details see JAZZ103 53507)
+	 * omrsysinfo_get_CPU_utilization(), which the two APIs rely on, is problematic on z/OS. (details see JAZZ103
+	 * 53507)
 	 */
 	if (OMR_ERROR_NONE == rc) {
 		rc = OMRTEST_PRINT_ERROR(testTICpuLoad(vmThread, ti));
@@ -140,23 +146,23 @@ testProcessCpuLoad(OMR_VMThread *vmThread, OMR_TI const *ti, omr_error_t expecte
 	}
 	rc = ti->GetProcessCpuLoad(vmThread, &processCpuLoad);
 	if ((processCpuLoad < 0.0) || (processCpuLoad > 1.0)) {
-		omrtty_printf(
-			"%s:%d callIndex: %d: GetProcessCpuLoad() returned an invalid value, processCpuLoad = %lf ! ProcessCpuLoad should be in [0, 1].\n",
-			__FILE__, __LINE__, callIndex, processCpuLoad);
+		omrtty_printf("%s:%d callIndex: %d: GetProcessCpuLoad() returned an invalid value, processCpuLoad = "
+		              "%lf ! ProcessCpuLoad should be in [0, 1].\n",
+		        __FILE__, __LINE__, callIndex, processCpuLoad);
 		testRc = OMR_ERROR_INTERNAL;
 	} else if (checkRc) {
 		rc = OMRTEST_PRINT_UNEXPECTED_RC(rc, expectedRc);
 		if (expectedRc != rc) {
-			omrtty_printf(
-				"%s:%d callIndex: %d: GetProcessCpuLoad() returned a wrong error code !\n",
-				__FILE__, __LINE__, callIndex);
+			omrtty_printf("%s:%d callIndex: %d: GetProcessCpuLoad() returned a wrong error code !\n",
+			        __FILE__, __LINE__, callIndex);
 			testRc = OMR_ERROR_INTERNAL;
 		} else if (OMR_ERROR_NONE == rc) {
-			omrtty_printf(
-				"callIndex: %d: rc = %d (%s), the function call is successful ! Process CPU load: %lf\n",
-				callIndex, rc, omrErrorToString(rc), processCpuLoad);
+			omrtty_printf("callIndex: %d: rc = %d (%s), the function call is successful ! Process CPU "
+			              "load: %lf\n",
+			        callIndex, rc, omrErrorToString(rc), processCpuLoad);
 		} else {
-			omrtty_printf("callIndex: %d: rc = %d (%s), the function call is successful !\n", callIndex, rc, omrErrorToString(rc));
+			omrtty_printf("callIndex: %d: rc = %d (%s), the function call is successful !\n", callIndex, rc,
+			        omrErrorToString(rc));
 		}
 	}
 	if (TRUE == dummyPort) {
@@ -183,23 +189,23 @@ testSystemCpuLoad(OMR_VMThread *vmThread, OMR_TI const *ti, omr_error_t expected
 	}
 	rc = ti->GetSystemCpuLoad(vmThread, &systemCpuLoad);
 	if ((systemCpuLoad < 0.0) || (systemCpuLoad > 1.0)) {
-		omrtty_printf(
-			"%s:%d callIndex: %d: GetSystemCpuLoad() returned an invalid value, systemCpuLoad = %lf ! systemCpuLoad should be in [0, 1].\n",
-			__FILE__, __LINE__, callIndex, systemCpuLoad);
+		omrtty_printf("%s:%d callIndex: %d: GetSystemCpuLoad() returned an invalid value, systemCpuLoad = %lf "
+		              "! systemCpuLoad should be in [0, 1].\n",
+		        __FILE__, __LINE__, callIndex, systemCpuLoad);
 		testRc = OMR_ERROR_INTERNAL;
 	} else if (checkRc) {
 		rc = OMRTEST_PRINT_UNEXPECTED_RC(rc, expectedRc);
 		if (expectedRc != rc) {
-			omrtty_printf(
-				"%s:%d callIndex: %d: GetSystemCpuLoad() returned a wrong error code ! \n",
-				__FILE__, __LINE__, callIndex);
+			omrtty_printf("%s:%d callIndex: %d: GetSystemCpuLoad() returned a wrong error code ! \n",
+			        __FILE__, __LINE__, callIndex);
 			testRc = OMR_ERROR_INTERNAL;
 		} else if (OMR_ERROR_NONE == rc) {
-			omrtty_printf(
-				"callIndex: %d: rc = %d (%s), the function call is successful ! system CPU load: %lf\n",
-				callIndex, rc, omrErrorToString(rc), systemCpuLoad);
+			omrtty_printf("callIndex: %d: rc = %d (%s), the function call is successful ! system CPU load: "
+			              "%lf\n",
+			        callIndex, rc, omrErrorToString(rc), systemCpuLoad);
 		} else {
-			omrtty_printf("callIndex: %d: rc = %d (%s), the function call is successful !\n", callIndex, rc, omrErrorToString(rc));
+			omrtty_printf("callIndex: %d: rc = %d (%s), the function call is successful !\n", callIndex, rc,
+			        omrErrorToString(rc));
 		}
 	}
 	if (TRUE == dummyPort) {
@@ -213,48 +219,54 @@ testSystemCpuLoad(OMR_VMThread *vmThread, OMR_TI const *ti, omr_error_t expected
  * Copied from JAZZ103 68519 CTD model for OMR TI APIs related to MXBeans CPU data.
  * Test cases covered by the code:
  *
- * CaseID 	CPUs		userPrivilege 	isSupported		ThreadID 	Sample1 	Sample2 	CurrentSample 	Expected Return Value
- *	1 		multiple 	sufficient 		True 			valid 		valid 		invalid 	valid 			OMR_ERROR_NONE
- *	2 		multiple 	sufficient 		True 			valid 		valid 		valid 		valid 			OMR_ERROR_NONE
- *	3 		multiple 	sufficient 		True 			valid 		valid 		valid 		doNotExist 		OMR_ERROR_NONE
- *	4 		multiple 	sufficient 		True 			valid 		valid 		invalid 	doNotExist 		OMR_ERROR_RETRY
- *	5 		multiple 	sufficient 		True 			valid 		valid 		doNotExist 	doNotExist 		OMR_ERROR_RETRY
- *	6 		multiple 	sufficient 		True 			valid 		valid 		invalid 	invalid 		OMR_ERROR_RETRY
- *	7 		multiple 	sufficient 		True 			valid 		invalid 	valid 		valid 			OMR_ERROR_NONE
- *	8 		single 		sufficient 		True 			valid 		valid 		valid 		valid 			OMR_ERROR_NONE
- *	9 		multiple 	insufficient 	True 			valid 		/ 				/ 		doNotExist 		OMR_ERROR_NOT_AVAILABLE
- *	10 		multiple 	sufficient 		false 			valid 		/ 				/ 		doNotExist 		OMR_ERROR_NOT_AVAILABLE
- *	11		/				/			/				NULL		/				/		doNotExist		OMR_THREAD_NOT_ATTACHED
- *
- *	We could call the API 13 times in the following sequence to cover the above 11 cases:
- *	call 1 ---> call 2 ---> call 3 ---> call 4 ---> call 5 ---> call 6 --->call 7 --->
- *	(valid)		(invalid)	(valid)		(valid)		(valid) 	(invalid) 	(invalid)
- *	---> call 8 --->call 9 --->call 10 ----->call 11 -----> call 12 ----> call 13
- *	(call 8 to 10 valid, single CPU)   (no privilege) (unsupported) (NULL thread)
- *
- *	In this way,
- *	case 1 is covered by call 1 to 3,	case 2 is covered by call 3 to 5, 	case 3 is covered by call 3 to 4,
- *	case 4 is covered by call 1 to 2,	case 5 is covered by call 1, 		case 6 is covered by call 5 to 7,
- *	case 7 is covered by call 2 to 4,	case 8 is covered by call 8 to 10,	case 9 is covered by call 11,
- *	case 10 is covered by call 12, 		case 11 is covered by call 13
- *
- *	Therefore, we should check the return value of the API in the following sequence:
- *	callIndex		expected return value			covered caseID
- *	1				OMR_ERROR_RETRY					5
- *	2				OMR_ERROR_RETRY					4
- *	3				OMR_ERROR_NONE					1
- *	4				OMR_ERROR_NONE					3, 7
- *	5				OMR_ERROR_NONE					2
- *	7				OMR_ERROR_RETRY					6
- *	10				OMR_ERROR_NONE					8
- *	11				OMR_ERROR_NOT_AVAILABLE			9
- *	12 				OMR_ERROR_NOT_AVAILABLE			10
- *	13				OMR_THREAD_NOT_ATTACHED			11
- *
- */
+ * CaseID 	CPUs		userPrivilege 	isSupported		ThreadID 	Sample1 	Sample2
+ *CurrentSample 	Expected Return Value
+ *	1 		multiple 	sufficient 		True 			valid 		valid
+ *invalid 	valid 			OMR_ERROR_NONE
+ *	2 		multiple 	sufficient 		True 			valid 		valid
+ *valid 		valid 			OMR_ERROR_NONE
+ *	3 		multiple 	sufficient 		True 			valid 		valid
+ *valid 		doNotExist 		OMR_ERROR_NONE
+ *	4 		multiple 	sufficient 		True 			valid 		valid
+ *invalid 	doNotExist 		OMR_ERROR_RETRY 5 		multiple 	sufficient True
+ *valid 		valid 		doNotExist 	doNotExist 		OMR_ERROR_RETRY 6 multiple
+ *sufficient 		True 			valid 		valid 		invalid 	invalid
+ *OMR_ERROR_RETRY 7 		multiple 	sufficient 		True 			valid 		invalid
+ *valid 		valid 			OMR_ERROR_NONE
+ *	8 		single 		sufficient 		True 			valid 		valid
+ *valid 		valid 			OMR_ERROR_NONE
+ *	9 		multiple 	insufficient 	True 			valid 		/
+ *	/ 		doNotExist 		OMR_ERROR_NOT_AVAILABLE 10 		multiple 	sufficient
+ *false 			valid 		/ 				/ 		doNotExist
+ *OMR_ERROR_NOT_AVAILABLE
+ *	11		/				/			/				NULL
+ *	/
+ */ doNotExist OMR_THREAD_NOT_ATTACHED **We could call the API 13 times in the following sequence to cover the
+                                above 11 cases
+        : *call 1 --->call 2 --->call 3 --->call 4 --->call 5 --->call 6 --->call 7 -- ->*(valid)(invalid)(valid)(valid)(valid)(invalid)(invalid)
+                * --->call 8 --->call 9 --->call 10 ----->call 11 ----->call 12 ---- > call 13
+                * (call 8 to 10 valid, single CPU)(no privilege)(unsupported)(NULL thread) * *In this way
+        , *case 1 is covered by call 1 to 3
+        , case 2 is covered by call 3 to 5
+        , case 3 is covered by call 3 to * 4
+        , case 4 is covered by call 1 to 2
+        , case 5 is covered by call 1
+        , case 6 is covered by call 5 to 7
+        , case 7 * is covered by call 2 to 4
+        , case 8 is covered by call 8 to 10
+        , case 9 is covered by call 11
+        , case 10 is covered *by call 12
+        , case 11 is covered by call 13 * *Therefore
+        , we should check the return value of the API in the following sequence
+        : *callIndex expected return value covered caseID
+          * 1 OMR_ERROR_RETRY 5
+          * 2 OMR_ERROR_RETRY 4
+          * 3 OMR_ERROR_NONE 1
+          * 4 OMR_ERROR_NONE 3
+        , 7 * 5 OMR_ERROR_NONE 2 * 7 OMR_ERROR_RETRY 6 * 10 OMR_ERROR_NONE 8 * 11 OMR_ERROR_NOT_AVAILABLE 9
+        * 12 OMR_ERROR_NOT_AVAILABLE 10 * 13 OMR_THREAD_NOT_ATTACHED 11 * * /
 
-static omr_error_t
-testTICpuLoad(OMR_VMThread *vmThread, OMR_TI const *ti)
+        static omr_error_t testTICpuLoad(OMR_VMThread *vmThread, OMR_TI const *ti)
 {
 	OMRPORT_ACCESS_FROM_OMRVMTHREAD(vmThread);
 	omr_error_t testRc = OMR_ERROR_NONE;
@@ -312,12 +324,12 @@ testTICpuLoad(OMR_VMThread *vmThread, OMR_TI const *ti)
 	}
 	if (OMR_ERROR_NONE == testRc) {
 		double cpuLoad = 0.0;
-		omr_error_t rc = OMRTEST_PRINT_UNEXPECTED_RC(ti->GetProcessCpuLoad(NULL, &cpuLoad), OMR_THREAD_NOT_ATTACHED);
+		omr_error_t rc =
+		        OMRTEST_PRINT_UNEXPECTED_RC(ti->GetProcessCpuLoad(NULL, &cpuLoad), OMR_THREAD_NOT_ATTACHED);
 
 		if (OMR_THREAD_NOT_ATTACHED == rc) {
-			omrtty_printf(
-				"callIndex: %d: rc = %d (%s), the function call is successful !\n",
-				callIndex, OMR_THREAD_NOT_ATTACHED, omrErrorToString(OMR_THREAD_NOT_ATTACHED));
+			omrtty_printf("callIndex: %d: rc = %d (%s), the function call is successful !\n", callIndex,
+			        OMR_THREAD_NOT_ATTACHED, omrErrorToString(OMR_THREAD_NOT_ATTACHED));
 		}
 		callIndex += 1;
 	}
@@ -376,12 +388,12 @@ testTICpuLoad(OMR_VMThread *vmThread, OMR_TI const *ti)
 	}
 	if (OMR_ERROR_NONE == testRc) {
 		double cpuLoad = 0.0;
-		omr_error_t rc = OMRTEST_PRINT_UNEXPECTED_RC(ti->GetSystemCpuLoad(NULL, &cpuLoad), OMR_THREAD_NOT_ATTACHED);
+		omr_error_t rc =
+		        OMRTEST_PRINT_UNEXPECTED_RC(ti->GetSystemCpuLoad(NULL, &cpuLoad), OMR_THREAD_NOT_ATTACHED);
 
 		if (OMR_THREAD_NOT_ATTACHED == rc) {
-			omrtty_printf(
-				"callIndex: %d: rc = %d (%s), the function call is successful !\n",
-				callIndex, OMR_THREAD_NOT_ATTACHED, omrErrorToString(OMR_THREAD_NOT_ATTACHED));
+			omrtty_printf("callIndex: %d: rc = %d (%s), the function call is successful !\n", callIndex,
+			        OMR_THREAD_NOT_ATTACHED, omrErrorToString(OMR_THREAD_NOT_ATTACHED));
 		}
 		callIndex += 1;
 	}
@@ -410,18 +422,16 @@ matrixSquare(OMR_VMThread *vmThread)
 	/* Declare and initialize the matrix. memset works here since this is a true 2D
 	 * array defined in the same scope as the memset. */
 	matrix_size = MATRIX_ORDER * MATRIX_ORDER * sizeof(uintptr_t);
-	matrix = (uintptr_t*) omrmem_allocate_memory(matrix_size,
-			OMRMEM_CATEGORY_UNKNOWN);
+	matrix = (uintptr_t *)omrmem_allocate_memory(matrix_size, OMRMEM_CATEGORY_UNKNOWN);
 	if (NULL == matrix) {
-		omrtty_err_printf("Unable to allocate %d bytes in the matrixSquare(vmThread) function.\n",
-				matrix_size);
+		omrtty_err_printf("Unable to allocate %d bytes in the matrixSquare(vmThread) function.\n", matrix_size);
 		return;
 	}
 
 	memset(matrix, 0, matrix_size);
 
 	for (j = 0; j < MATRIX_ORDER; j++) {
-		*(matrix + i * MATRIX_ORDER + j) = (uintptr_t) pow((double)100, 2.0);
+		*(matrix + i * MATRIX_ORDER + j) = (uintptr_t)pow((double)100, 2.0);
 	}
 
 	omrmem_free_memory(matrix);

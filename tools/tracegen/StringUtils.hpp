@@ -25,15 +25,13 @@
 
 #include "Port.hpp"
 
-class StringUtils
-{
+class StringUtils {
 	/*
 	 * Data members
 	 */
 private:
 protected:
 public:
-
 	/*
 	 * Function members
 	 */

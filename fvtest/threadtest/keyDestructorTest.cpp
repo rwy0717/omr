@@ -31,7 +31,7 @@
 
 extern ThreadTestEnvironment *omrTestEnv;
 
-class KeyDestructorTest: public ::testing::Test {
+class KeyDestructorTest : public ::testing::Test {
 public:
 	static bool completed;
 #if !defined(OMR_OS_WINDOWS) && !defined(J9ZOS390)
@@ -41,11 +41,7 @@ public:
 	static void *threadproc(void *p);
 #endif /* !defined(OMR_OS_WINDOWS) && !defined(J9ZOS390) */
 protected:
-
-	static void
-	SetUpTestCase(void)
-	{
-	}
+	static void SetUpTestCase(void) {}
 };
 
 bool KeyDestructorTest::completed = false;

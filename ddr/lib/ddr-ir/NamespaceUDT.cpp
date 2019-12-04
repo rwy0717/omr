@@ -23,13 +23,7 @@
 
 #include "ddr/ir/Symbol_IR.hpp"
 
-NamespaceUDT::NamespaceUDT(unsigned int lineNumber)
-	: UDT(0, lineNumber)
-	, _subUDTs()
-	, _macros()
-	, _enumMembers()
-{
-}
+NamespaceUDT::NamespaceUDT(unsigned int lineNumber) : UDT(0, lineNumber), _subUDTs(), _macros(), _enumMembers() {}
 
 NamespaceUDT::~NamespaceUDT()
 {
@@ -111,7 +105,7 @@ NamespaceUDT::renameFieldsAndMacros(const FieldOverride &fieldOverride, Type *re
 }
 
 bool
-NamespaceUDT::operator==(const Type & rhs) const
+NamespaceUDT::operator==(const Type &rhs) const
 {
 	return rhs.compareToNamespace(*this);
 }
@@ -122,10 +116,8 @@ NamespaceUDT::compareToNamespace(const NamespaceUDT &other) const
 	bool subUDTsEqual = _subUDTs.size() == other._subUDTs.size();
 	vector<UDT *>::const_iterator it2 = other._subUDTs.begin();
 	for (vector<UDT *>::const_iterator it = _subUDTs.begin();
-		it != _subUDTs.end() && it2 != other._subUDTs.end() && subUDTsEqual;
-		++ it, ++ it2) {
+	        it != _subUDTs.end() && it2 != other._subUDTs.end() && subUDTsEqual; ++it, ++it2) {
 		subUDTsEqual = (**it == **it2);
 	}
-	return compareToUDT(other)
-		&& subUDTsEqual;
+	return compareToUDT(other) && subUDTsEqual;
 }

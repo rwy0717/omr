@@ -32,35 +32,31 @@
  * some of the intervals.
  */
 
-static bool isRetvalOk(CWaiter& waiter, intptr_t expected);
-static bool isRetvalOk(CWaiter& waiter, intptr_t expected1, intptr_t expected2);
+static bool isRetvalOk(CWaiter &waiter, intptr_t expected);
+static bool isRetvalOk(CWaiter &waiter, intptr_t expected1, intptr_t expected2);
 
 static bool
-isRetvalOk(CWaiter& waiter, intptr_t expected)
+isRetvalOk(CWaiter &waiter, intptr_t expected)
 {
 	bool ok = true;
 	if (waiter.GetWaitReturnValue() != expected) {
 		ok = false;
-		omrTestEnv->log(LEVEL_ERROR," Failed:\n\twait returned %s (%d), expected %s\n\n",
-						waiter.GetWaitReturnValueAsString(),
-						waiter.GetWaitReturnValue(),
-						waiter.MapReturnValueToString(expected));
+		omrTestEnv->log(LEVEL_ERROR, " Failed:\n\twait returned %s (%d), expected %s\n\n",
+		        waiter.GetWaitReturnValueAsString(), waiter.GetWaitReturnValue(),
+		        waiter.MapReturnValueToString(expected));
 	}
 	return ok;
 }
 
 static bool
-isRetvalOk(CWaiter& waiter, intptr_t expected1, intptr_t expected2)
+isRetvalOk(CWaiter &waiter, intptr_t expected1, intptr_t expected2)
 {
 	bool ok = true;
-	if ((waiter.GetWaitReturnValue() != expected1)
-		&& (waiter.GetWaitReturnValue() != expected2)) {
+	if ((waiter.GetWaitReturnValue() != expected1) && (waiter.GetWaitReturnValue() != expected2)) {
 		ok = false;
 		omrTestEnv->log(LEVEL_ERROR, "Failed:\n\twait returned %s (%d), expected %s or %s\n\n",
-						waiter.GetWaitReturnValueAsString(),
-						waiter.GetWaitReturnValue(),
-						waiter.MapReturnValueToString(expected1),
-						waiter.MapReturnValueToString(expected2));
+		        waiter.GetWaitReturnValueAsString(), waiter.GetWaitReturnValue(),
+		        waiter.MapReturnValueToString(expected1), waiter.MapReturnValueToString(expected2));
 	}
 	return ok;
 }
@@ -255,8 +251,7 @@ TEST(PriorityInterrupt, testIntrAndPrioInterrupted)
 		pSelf->Sleep(10);
 	}
 
-	EXPECT_TRUE(
-		isRetvalOk(waiter, J9THREAD_INTERRUPTED, J9THREAD_PRIORITY_INTERRUPTED));
+	EXPECT_TRUE(isRetvalOk(waiter, J9THREAD_INTERRUPTED, J9THREAD_PRIORITY_INTERRUPTED));
 
 	while (!waiter.Terminated()) {
 		pSelf->Sleep(10);

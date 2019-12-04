@@ -29,10 +29,9 @@ class Field;
 
 #include <vector>
 
-class TypePrinter : public TypeVisitor
-{
+class TypePrinter : public TypeVisitor {
 private:
-	OMRPortLibrary * const _portLibrary;
+	OMRPortLibrary *const _portLibrary;
 	const int32_t _flags;
 	const int32_t _indent;
 
@@ -42,27 +41,18 @@ private:
 	void printMacros(const std::vector<Macro> &macros) const;
 
 	explicit TypePrinter(const TypePrinter *outer)
-		: TypeVisitor()
-		, _portLibrary(outer->_portLibrary)
-		, _flags(outer->_flags)
-		, _indent(outer->_indent + 1)
-	{
-	}
+	        : TypeVisitor(), _portLibrary(outer->_portLibrary), _flags(outer->_flags), _indent(outer->_indent + 1)
+	{}
 
 public:
 	enum { FIELDS = 1, LITERALS = 2, MACROS = 4 };
 
-	TypePrinter(OMRPortLibrary * portLibrary, int32_t flags)
-		: TypeVisitor()
-		, _portLibrary(portLibrary)
-		, _flags(flags)
-		, _indent(0)
-	{
-	}
+	TypePrinter(OMRPortLibrary *portLibrary, int32_t flags)
+	        : TypeVisitor(), _portLibrary(portLibrary), _flags(flags), _indent(0)
+	{}
 
-	template<typename TypeVector>
-	void
-	printUDTs(const TypeVector &types) const
+	template <typename TypeVector>
+	void printUDTs(const TypeVector &types) const
 	{
 		for (typename TypeVector::const_iterator it = types.begin(); it != types.end(); ++it) {
 			(*it)->acceptVisitor(*this);

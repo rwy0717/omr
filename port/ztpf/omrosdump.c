@@ -68,8 +68,7 @@ typedef struct iproc IPROC;
  * null-pointer reference).
  *
  */
-static void __attribute__((used))
-ztpf_preemptible_err_ep(void)
+static void __attribute__((used)) ztpf_preemptible_err_ep(void)
 {
 	// let the port library do the work.
 	ztpf_preemptible_helper();
@@ -83,9 +82,7 @@ ztpf_preemptible_err_ep(void)
  * (i.e. is a 'hard' interrupt) caused by any number of programming errors
  * considered serious enough to question the state of the JVM.
  */
-static void
-__attribute__((used))
-ztpf_nonpreemptible_err_ep(void)
+static void __attribute__((used)) ztpf_nonpreemptible_err_ep(void)
 {
 	// let the port library do the work.
 	ztpf_nonpreemptible_helper();
@@ -133,7 +130,7 @@ omrdump_create(struct OMRPortLibrary *portLibrary, char *filename, char *dumpTyp
 	void *oldPath;
 
 	s = allocateDurableStorage();
-	if (s == NULL)  {
+	if (s == NULL) {
 		portLibrary->tty_err_printf(portLibrary, "Unable to to allocateDurableStorage().\n");
 		return 1; /* Return Failure. */
 	}
@@ -185,7 +182,7 @@ omrdump_create(struct OMRPortLibrary *portLibrary, char *filename, char *dumpTyp
 	 *        aren't working a synchronous signal.
 	 */
 	if (s->pPROC->iproc_tdibptr) { /* If there's a DIB ptr stashed,  */
-		pDIB = (DIB *) (s->pPROC->iproc_tdibptr); /* use it, then free the stash    */
+		pDIB = (DIB *)(s->pPROC->iproc_tdibptr); /* use it, then free the stash    */
 		PROC_LOCK(&(s->pPROC->iproc_JVMLock), holdkey);
 		s->pPROC->iproc_tdibptr = 0L; /* location ...                   */
 		PROC_UNLOCK(&(s->pPROC->iproc_JVMLock), holdkey);
@@ -223,9 +220,7 @@ omrdump_create(struct OMRPortLibrary *portLibrary, char *filename, char *dumpTyp
 		} else { /* How do we come up with a message?            */
 			switch (s->argv.flags & J9TPF_FLAGS_ERR_MASK) {
 			case (J9TPF_JDUMPBUFFER_LOCKED + J9TPF_NO_JAVA_DUMPBUFFER):
-			case J9TPF_JDUMPBUFFER_LOCKED:
-				errMsg = "Java dump buffer is locked";
-				break;
+			case J9TPF_JDUMPBUFFER_LOCKED: errMsg = "Java dump buffer is locked"; break;
 			case J9TPF_NO_JAVA_DUMPBUFFER:
 				errMsg = "Java dump buffer is likely not for this process";
 				break;
@@ -234,54 +229,49 @@ omrdump_create(struct OMRPortLibrary *portLibrary, char *filename, char *dumpTyp
 					errMsg = strerror(s->argv.rc); /*see if we can get a decent   */
 				} /* reason out of strerror().    */
 				else if (strlen((char *)s->argv.wkSpace)) { /* Otherwise, see if there's     */
-					errMsg = (char *)s->argv.wkSpace; /*	 a message left by the dump writer	*/
+					errMsg = (char *)s->argv.wkSpace; /*	 a message left by the dump writer
+					                                   */
 				} /* If there is, use it.                 */
 				break;
 			case J9TPF_OUT_OF_BUFFERSPACE:
-				errMsg =
-						"insufficient free buffer space to write the core file";
+				errMsg = "insufficient free buffer space to write the core file";
 				break;
 			default:
-				sprintf((const char *)workspace,
-						"unantipated err flag value (0x%X). errno=%x.",
-						s->argv.flags, s->argv.rc);
+				sprintf((const char *)workspace, "unantipated err flag value (0x%X). errno=%x.",
+				        s->argv.flags, s->argv.rc);
 				errMsg = (char *)workspace;
 				strcat(errMsg, "\nThere is no system dump to work with.");
 				break;
 			}
 		}
-		portLibrary->tty_err_printf(portLibrary,
-				"unable to write ELF core dump: %s\n", errMsg);
+		portLibrary->tty_err_printf(portLibrary, "unable to write ELF core dump: %s\n", errMsg);
 		return 1; /* Report failure, get outta here.      */
 	} else {
-		s->argv.rc = rename((const char *)s->argv.wkSpace, (const char *)JVMfn); /* Success. Return.                     */
+		s->argv.rc = rename((const char *)s->argv.wkSpace, (const char *)JVMfn); /* Success. Return. */
 		if ((s->argv.rc < 0) && (errno == ENOENT)) {
-			//Current working directory may be different from target Dump Directory.
-			//In this scenario the dump is already in the target directory.
-			//Therefore re-issue the command using an absolute path name for old
-			//name.
+			// Current working directory may be different from target Dump Directory.
+			// In this scenario the dump is already in the target directory.
+			// Therefore re-issue the command using an absolute path name for old
+			// name.
 			targetDirectory = dirname((char *)JVMfn);
 			if (targetDirectory == NULL) {
-				portLibrary->tty_err_printf(portLibrary,
-						"Problem determining directory for %s\n", JVMfn);
+				portLibrary->tty_err_printf(
+				        portLibrary, "Problem determining directory for %s\n", JVMfn);
 			}
 			// +2 for terminating Null and joining path seperator
-			oldPath = alloca(
-					strlen(targetDirectory) + strlen((const char *)s->argv.wkSpace) + 2);
+			oldPath = alloca(strlen(targetDirectory) + strlen((const char *)s->argv.wkSpace) + 2);
 			strcpy(oldPath, targetDirectory);
 			strcat(oldPath, "/");
 			strcat(oldPath, (const char *)s->argv.wkSpace);
 			s->argv.rc = rename(oldPath, (const char *)JVMfn); /* Success. Return. */
 			if (s->argv.rc < 0) {
-				portLibrary->tty_err_printf(portLibrary,
-						"Failed to rename: %s\n", oldPath);
+				portLibrary->tty_err_printf(portLibrary, "Failed to rename: %s\n", oldPath);
 			}
-			//free response from dirname (using atoe wrapper library) because
-			//untranslated dirname is static storage and atoe_dirname needs
-			//to use malloc for response.
+			// free response from dirname (using atoe wrapper library) because
+			// untranslated dirname is static storage and atoe_dirname needs
+			// to use malloc for response.
 			free(targetDirectory);
 		}
-
 	}
 	return 0;
 }
@@ -294,15 +284,13 @@ omrdump_startup(struct OMRPortLibrary *portLibrary)
 {
 
 	char prevSPK;
-	IPROC *pPROC = (IPROC *) iproc_process;
+	IPROC *pPROC = (IPROC *)iproc_process;
 	struct ifetch *fblk;
 	int rc;
 	PROC_LOCK(&(pPROC->iprocloc), prevSPK);
 	memset(pPROC->iproc_nppsw, 0,
-			(sizeof(pPROC->iproc_nppsw) + sizeof(pPROC->iproc_pepsw)
-					+ sizeof(pPROC->iproc_byteinterp)
-					+ sizeof(pPROC->iproc_tdibptr)
-					+ sizeof(pPROC->iproc_JVMLock)));
+	        (sizeof(pPROC->iproc_nppsw) + sizeof(pPROC->iproc_pepsw) + sizeof(pPROC->iproc_byteinterp)
+	                + sizeof(pPROC->iproc_tdibptr) + sizeof(pPROC->iproc_JVMLock)));
 	pPROC->iproc_flags |= IPROC_JVMPROCESS;
 	PROC_UNLOCK(&(pPROC->iprocloc), prevSPK);
 
@@ -322,8 +310,7 @@ omrdump_startup(struct OMRPortLibrary *portLibrary)
 	 *      First, get the address range of the byte interpreter module.
 	 *      The kernel needs this to detect what's faulting: native or Java code
 	 */
-	rc = getpc( OMRZTPF_BYTE_INTERP, GETPC_LOCK, NO_LVL, &fblk, GETPC_NODUMP,
-			GETPC_PBI, NULL);
+	rc = getpc(OMRZTPF_BYTE_INTERP, GETPC_LOCK, NO_LVL, &fblk, GETPC_NODUMP, GETPC_PBI, NULL);
 	/*
 	 *      Next, get a lock on the JVM's sub-area of the process block
 	 *      with the PROC_LOCK() macro, which also puts us in KEY 0 so
@@ -334,15 +321,14 @@ omrdump_startup(struct OMRPortLibrary *portLibrary)
 	 * Calculate & store the address range of the byte interpreter module
 	 */
 	pPROC->iproc_byteinterp[0] = fblk->_iftch_entry + fblk->_iftch_txt_off;
-	pPROC->iproc_byteinterp[1] = pPROC->iproc_byteinterp[0]
-			+ fblk->_iftch_txt_size - 1;
+	pPROC->iproc_byteinterp[1] = pPROC->iproc_byteinterp[0] + fblk->_iftch_txt_size - 1;
 	/*
 	 * Give CCCPSE a pair of callback addresses. These are in PSW format.
 	 */
 	pPROC->iproc_nppsw[0] = 0;
 	pPROC->iproc_pepsw[0] = 0;
-	pPROC->iproc_nppsw[1] = (unsigned long int) &ztpf_nonpreemptible_err_ep;
-	pPROC->iproc_pepsw[1] = (unsigned long int) &ztpf_preemptible_err_ep;
+	pPROC->iproc_nppsw[1] = (unsigned long int)&ztpf_nonpreemptible_err_ep;
+	pPROC->iproc_pepsw[1] = (unsigned long int)&ztpf_preemptible_err_ep;
 	/*
 	 * Unlock the process block and put us back in the normal problem
 	 * state key.

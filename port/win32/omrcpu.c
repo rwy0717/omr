@@ -28,10 +28,8 @@
  * Functions setting CPU attributes.
  */
 
-
 #include <windows.h>
 #include "omrport.h"
-
 
 /**
  * PortLibrary startup.
@@ -65,8 +63,7 @@ omrcpu_startup(struct OMRPortLibrary *portLibrary)
  */
 void
 omrcpu_shutdown(struct OMRPortLibrary *portLibrary)
-{
-}
+{}
 
 /**
  * @brief CPU Control operations.
@@ -88,5 +85,3 @@ omrcpu_get_cache_line_size(struct OMRPortLibrary *portLibrary, int32_t *lineSize
 {
 	return OMRPORT_ERROR_NOT_SUPPORTED_ON_THIS_PLATFORM;
 }
-
-

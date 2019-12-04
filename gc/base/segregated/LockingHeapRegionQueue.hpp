@@ -27,23 +27,21 @@
 #define ASSERT_LEVEL 0
 #define assert1(expr) assert((ASSERT_LEVEL < 1) || (expr));
 
-#include "omrcfg.h"
-#include "modronopt.h"
-
 #include "AtomicOperations.hpp"
 #include "Debug.hpp"
 #include "EnvironmentBase.hpp"
 #include "HeapRegionDescriptorSegregated.hpp"
 #include "HeapRegionQueue.hpp"
+#include "modronopt.h"
+#include "omrcfg.h"
 
 #if defined(OMR_GC_SEGREGATED_HEAP)
 
-class MM_LockingHeapRegionQueue : public MM_HeapRegionQueue
-{
-/* For efficient pushFront operation */
-friend class MM_LockingFreeHeapRegionList;
-	
-/* Data members & types */
+class MM_LockingHeapRegionQueue : public MM_HeapRegionQueue {
+	/* For efficient pushFront operation */
+	friend class MM_LockingFreeHeapRegionList;
+
+	/* Data members & types */
 public:
 protected:
 private:
@@ -52,11 +50,12 @@ private:
 	bool _needLock;
 	omrthread_monitor_t _lockMonitor;
 	uintptr_t _totalRegionsCount;
-	
+
 public:
-	static MM_LockingHeapRegionQueue *newInstance(MM_EnvironmentBase *env, RegionListKind regionListKind, bool singleRegionOnly, bool concurrentAccess, bool trackFreeBytes = false);
+	static MM_LockingHeapRegionQueue *newInstance(MM_EnvironmentBase *env, RegionListKind regionListKind,
+	        bool singleRegionOnly, bool concurrentAccess, bool trackFreeBytes = false);
 	virtual void kill(MM_EnvironmentBase *env);
-	
+
 	bool initialize(MM_EnvironmentBase *env);
 	virtual void tearDown(MM_EnvironmentBase *env);
 
@@ -66,13 +65,14 @@ public:
 	 * region push and pop operations are used and updateCounts doesn't get called on a region that lives
 	 * on the list.
 	 */
-	MM_LockingHeapRegionQueue(RegionListKind regionListKind, bool singleRegionOnly, bool concurrentAccess, bool trackFreeBytes) :
-		MM_HeapRegionQueue(regionListKind, singleRegionOnly, trackFreeBytes),
-		_head(NULL),
-		_tail(NULL),
-		_needLock(concurrentAccess),
-		_lockMonitor(NULL),
-		_totalRegionsCount(0)
+	MM_LockingHeapRegionQueue(
+	        RegionListKind regionListKind, bool singleRegionOnly, bool concurrentAccess, bool trackFreeBytes)
+	        : MM_HeapRegionQueue(regionListKind, singleRegionOnly, trackFreeBytes)
+	        , _head(NULL)
+	        , _tail(NULL)
+	        , _needLock(concurrentAccess)
+	        , _lockMonitor(NULL)
+	        , _totalRegionsCount(0)
 	{
 		_typeId = __FUNCTION__;
 	}
@@ -91,7 +91,7 @@ public:
 	/* enqueue src at the _end_ of the receiver's queue */
 	virtual void enqueue(MM_HeapRegionQueue *srcAsPQ)
 	{
-		MM_LockingHeapRegionQueue* src = MM_LockingHeapRegionQueue::asLockingHeapRegionQueue(srcAsPQ);
+		MM_LockingHeapRegionQueue *src = MM_LockingHeapRegionQueue::asLockingHeapRegionQueue(srcAsPQ);
 		if (NULL == src->_head) { /* Nothing to move - single read needs no lock */
 			return;
 		}
@@ -106,7 +106,7 @@ public:
 		src->_tail = NULL;
 		src->_length = 0;
 		src->_totalRegionsCount = 0;
-		
+
 		/* Add to back of self */
 		front->setPrev(_tail); /* OK even if _tail is NULL */
 		if (_tail == NULL) {
@@ -117,7 +117,7 @@ public:
 		_tail = back;
 		_length += srcLength;
 		_totalRegionsCount += srcRegionsCount;
-		
+
 		src->unlock();
 		unlock();
 	}
@@ -144,7 +144,7 @@ public:
 
 	virtual uintptr_t dequeue(MM_HeapRegionQueue *targetAsPQ, uintptr_t count)
 	{
-		MM_LockingHeapRegionQueue* target = MM_LockingHeapRegionQueue::asLockingHeapRegionQueue(targetAsPQ);
+		MM_LockingHeapRegionQueue *target = MM_LockingHeapRegionQueue::asLockingHeapRegionQueue(targetAsPQ);
 		lock();
 		target->lock();
 		uintptr_t moved = dequeueInternal(target, count);
@@ -159,23 +159,28 @@ public:
 	/**
 	 * Cast a HeapRegionQueue as a LockingHeapRegionQueue
 	 */
-	MMINLINE static MM_LockingHeapRegionQueue* asLockingHeapRegionQueue(MM_HeapRegionQueue * pl) { return (MM_LockingHeapRegionQueue *)pl; }
+	MMINLINE static MM_LockingHeapRegionQueue *asLockingHeapRegionQueue(MM_HeapRegionQueue *pl)
+	{
+		return (MM_LockingHeapRegionQueue *)pl;
+	}
 
 protected:
-private:		
-	MMINLINE void lock() {
+private:
+	MMINLINE void lock()
+	{
 		if (_needLock) {
 			omrthread_monitor_enter(_lockMonitor);
 		}
 	}
-	MMINLINE void unlock() {
+	MMINLINE void unlock()
+	{
 		if (_needLock) {
 			omrthread_monitor_exit(_lockMonitor);
 		}
 	}
-	
+
 	void enqueueInternal(MM_HeapRegionDescriptorSegregated *region)
-	{ 
+	{
 		assert1(NULL == region->getNext() && NULL == region->getPrev());
 		if (NULL == _head) {
 			_head = _tail = region;
@@ -217,7 +222,7 @@ private:
 			}
 		}
 		return result;
-	}	
+	}
 };
 
 #endif /* OMR_GC_SEGREGATED_HEAP */

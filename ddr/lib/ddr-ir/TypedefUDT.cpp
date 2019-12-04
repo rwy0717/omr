@@ -21,18 +21,13 @@
 
 #include "ddr/ir/TypedefUDT.hpp"
 
-TypedefUDT::TypedefUDT(unsigned int lineNumber)
-	: UDT(0, lineNumber)
-	, _aliasedType(NULL)
-	, _modifiers()
+TypedefUDT::TypedefUDT(unsigned int lineNumber) : UDT(0, lineNumber), _aliasedType(NULL), _modifiers()
 {
 	/* A typedef is opaque only if an overrides file says so. */
 	_opaque = false;
 }
 
-TypedefUDT::~TypedefUDT()
-{
-}
+TypedefUDT::~TypedefUDT() {}
 
 DDR_RC
 TypedefUDT::acceptVisitor(const TypeVisitor &visitor)
@@ -75,7 +70,7 @@ TypedefUDT::getBaseType()
 }
 
 bool
-TypedefUDT::operator==(const Type & rhs) const
+TypedefUDT::operator==(const Type &rhs) const
 {
 	return rhs.compareToTypedef(*this);
 }
@@ -83,7 +78,5 @@ TypedefUDT::operator==(const Type & rhs) const
 bool
 TypedefUDT::compareToTypedef(const TypedefUDT &other) const
 {
-	return compareToType(other)
-		&& *_aliasedType == *other._aliasedType
-		&& _modifiers == other._modifiers;
+	return compareToType(other) && *_aliasedType == *other._aliasedType && _modifiers == other._modifiers;
 }

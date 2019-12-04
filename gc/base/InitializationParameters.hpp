@@ -23,9 +23,8 @@
 #if !defined(INITIALIZATIONPARAMETERS_HPP_)
 #define INITIALIZATIONPARAMETERS_HPP_
 
-#include "modronbase.h"
-
 #include "BaseNonVirtual.hpp"
+#include "modronbase.h"
 
 /**
  * Wrapper class for passing memoryspace parameters into newInstance() methods
@@ -49,8 +48,7 @@ public:
 		_maximumSpaceSize = 0;
 	}
 
-	MM_InitializationParameters()
-		: MM_BaseNonVirtual()
+	MM_InitializationParameters() : MM_BaseNonVirtual()
 	{
 		_typeId = __FUNCTION__;
 		clear();

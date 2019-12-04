@@ -27,8 +27,6 @@
  */
 #include "omrport.h"
 
-
-
 /**
  * Query OS for timestamp.
  * Retrieve the current value of system clock and convert to milliseconds since
@@ -107,7 +105,8 @@ omrtime_hires_frequency(struct OMRPortLibrary *portLibrary)
  *  \arg OMRPORT_TIME_DELTA_IN_NANOSECONDS return timer value in nanoseconds.
  */
 uint64_t
-omrtime_hires_delta(struct OMRPortLibrary *portLibrary, uint64_t startTime, uint64_t endTime, uint64_t requiredResolution)
+omrtime_hires_delta(
+        struct OMRPortLibrary *portLibrary, uint64_t startTime, uint64_t endTime, uint64_t requiredResolution)
 {
 	return 0;
 }
@@ -146,8 +145,8 @@ omrtime_usec_clock(struct OMRPortLibrary *portLibrary)
  * the highest calendar time resolution supported will be converted to nanoseconds.
  *
  * @param[in] portLibrary The port library.
- * @param[out] success Indicates if the call was successful 
- *  
+ * @param[out] success Indicates if the call was successful
+ *
  * @return time value in nanoseconds on success.
  *
  */
@@ -168,8 +167,7 @@ omrtime_current_time_nanos(struct OMRPortLibrary *portLibrary, uintptr_t *succes
  */
 void
 omrtime_shutdown(struct OMRPortLibrary *portLibrary)
-{
-}
+{}
 /**
  * PortLibrary startup.
  *
@@ -189,5 +187,3 @@ omrtime_startup(struct OMRPortLibrary *portLibrary)
 {
 	return 0;
 }
-
-

@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 /**
  * Description: Calls an extensible class member function by explicitly
  *    dereferencing `this`, which is not allowed.
@@ -30,20 +29,23 @@
 
 #define MACRO_THIS this
 
-namespace OMR
-{
+namespace OMR {
 
-class OMR_EXTENSIBLE ExtClass
-   {
-   public:
-   void functionCalled();   // function to be called
-   void callingFunction();  // function that will make call
-                            //    with explicit `this`
-   };
+class OMR_EXTENSIBLE ExtClass {
+public:
+	void functionCalled(); // function to be called
+	void callingFunction(); // function that will make call
+	                        //    with explicit `this`
+};
 
 } // namespace OMR
 
-void OMR::ExtClass::functionCalled() {}
+void
+OMR::ExtClass::functionCalled()
+{}
 
-void OMR::ExtClass::callingFunction() { MACRO_THIS->functionCalled(); }
-
+void
+OMR::ExtClass::callingFunction()
+{
+	MACRO_THIS->functionCalled();
+}

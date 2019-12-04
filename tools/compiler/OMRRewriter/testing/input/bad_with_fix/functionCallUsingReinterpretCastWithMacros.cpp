@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 /**
  * Description: Calls an extensible class member function by down
  *    casting `this` using `reinterpret_cast`, which is not allowed.
@@ -31,21 +30,27 @@
 #define CONCRETE_CLASS_MACRO TR::ExtClass
 #define THIS_MACRO this
 
-namespace OMR
-{
+namespace OMR {
 
-class OMR_EXTENSIBLE ExtClass
-   {
-   public:
-   void functionCalled();   // function to be called
-   void callingFunction();  // function that will make call
-                            //    with reinterpret down cast
-   };
+class OMR_EXTENSIBLE ExtClass {
+public:
+	void functionCalled(); // function to be called
+	void callingFunction(); // function that will make call
+	                        //    with reinterpret down cast
+};
 
 } // namespace OMR
 
-namespace TR { class OMR_EXTENSIBLE ExtClass : public OMR::ExtClass {}; }
+namespace TR {
+class OMR_EXTENSIBLE ExtClass : public OMR::ExtClass {};
+} // namespace TR
 
-void OMR::ExtClass::functionCalled() {}
+void
+OMR::ExtClass::functionCalled()
+{}
 
-void OMR::ExtClass::callingFunction() { reinterpret_cast<CONCRETE_CLASS_MACRO *>(THIS_MACRO)->functionCalled(); }
+void
+OMR::ExtClass::callingFunction()
+{
+	reinterpret_cast<CONCRETE_CLASS_MACRO *>(THIS_MACRO)->functionCalled();
+}

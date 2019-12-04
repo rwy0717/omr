@@ -36,7 +36,8 @@ typedef struct OMRZOSLEConditionHandlerRecord {
 	sigjmp_buf returnBuf;
 	struct __jumpinfo farJumpInfo;
 	uint32_t flags;
-	uint32_t recursiveCheck; /* if this is set to 1, the handler corresponding to this record has been invoked recursively */
+	uint32_t recursiveCheck; /* if this is set to 1, the handler corresponding to this record has been invoked
+	                            recursively */
 } OMRZOSLEConditionHandlerRecord;
 
 #endif /* leconditionhandler_h */

@@ -23,10 +23,9 @@
 /* windows.h defined uintptr_t.  Ignore its definition */
 #define UDATA UDATA_win32_
 #include <windows.h>
-#undef UDATA	/* this is safe because our UDATA is a typedef, not a macro */
+#undef UDATA /* this is safe because our UDATA is a typedef, not a macro */
 #include "omrportpriv.h"
 #include "omrportptb.h"
-
 
 /**
  * @internal
@@ -72,7 +71,8 @@ omrport_free_ptBuffer(struct OMRPortLibrary *portLibrary, PortlibPTBuffers_t ptB
  * 	using @ref omrmem_free_memory
  */
 wchar_t *
-port_convertFromUTF8(OMRPortLibrary *portLibrary, const char *string, wchar_t *unicodeBuffer, uintptr_t unicodeBufferSize)
+port_convertFromUTF8(
+        OMRPortLibrary *portLibrary, const char *string, wchar_t *unicodeBuffer, uintptr_t unicodeBufferSize)
 {
 	wchar_t *unicodeString;
 	uintptr_t length;
@@ -84,12 +84,15 @@ port_convertFromUTF8(OMRPortLibrary *portLibrary, const char *string, wchar_t *u
 	if (length < unicodeBufferSize) {
 		unicodeString = unicodeBuffer;
 	} else {
-		unicodeString = portLibrary->mem_allocate_memory(portLibrary, (length + 1) * 2, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
+		unicodeString = portLibrary->mem_allocate_memory(
+		        portLibrary, (length + 1) * 2, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 		if (NULL == unicodeString) {
 			return NULL;
 		}
 	}
-	if (0 == MultiByteToWideChar(OS_ENCODING_CODE_PAGE, OS_ENCODING_MB_FLAGS, string, -1, unicodeString, (int)length + 1)) {
+	if (0
+	        == MultiByteToWideChar(
+	                OS_ENCODING_CODE_PAGE, OS_ENCODING_MB_FLAGS, string, -1, unicodeString, (int)length + 1)) {
 		portLibrary->error_set_last_error(portLibrary, GetLastError(), OMRPORT_ERROR_OPFAILED);
 		if (unicodeString != unicodeBuffer) {
 			portLibrary->mem_free_memory(portLibrary, unicodeString);
@@ -113,10 +116,11 @@ port_convertFromUTF8(OMRPortLibrary *portLibrary, const char *string, wchar_t *u
 int32_t
 port_convertToUTF8(OMRPortLibrary *portLibrary, const wchar_t *unicodeString, char *utf8Buffer, uintptr_t size)
 {
-	if (0 == WideCharToMultiByte(OS_ENCODING_CODE_PAGE, OS_ENCODING_WC_FLAGS, unicodeString, -1, utf8Buffer, (int)size, NULL, NULL)) {
+	if (0
+	        == WideCharToMultiByte(OS_ENCODING_CODE_PAGE, OS_ENCODING_WC_FLAGS, unicodeString, -1, utf8Buffer,
+	                (int)size, NULL, NULL)) {
 		portLibrary->error_set_last_error(portLibrary, GetLastError(), OMRPORT_ERROR_OPFAILED); /* continue */
 		return -1;
 	}
 	return 0;
 }
-

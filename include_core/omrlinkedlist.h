@@ -30,7 +30,7 @@
 		(element)->linkPrevious = (after); \
 		((element)->linkNext = (after)->linkNext)->linkPrevious = (element); \
 		(after)->linkNext = (element); \
-	} while(0)
+	} while (0)
 
 #define J9_LINKED_LIST_ADD_BEFORE(root, before, element) \
 	do { \
@@ -40,7 +40,7 @@
 		if ((before) == (root)) { \
 			(root) = (element); \
 		} \
-	} while(0)
+	} while (0)
 
 #define J9_LINKED_LIST_ADD_FIRST(root, element) \
 	do { \
@@ -49,7 +49,7 @@
 		} else { \
 			J9_LINKED_LIST_ADD_BEFORE(root, root, element); \
 		} \
-	} while(0)
+	} while (0)
 
 #define J9_LINKED_LIST_ADD_LAST(root, element) \
 	do { \
@@ -60,7 +60,7 @@
 			((element)->linkPrevious = (root)->linkPrevious)->linkNext = (element); \
 			(root)->linkPrevious = (element); \
 		} \
-	} while(0)
+	} while (0)
 
 #define J9_LINKED_LIST_REMOVE(root, element) \
 	do { \
@@ -73,7 +73,7 @@
 		} \
 		(element)->linkPrevious->linkNext = (element)->linkNext; \
 		(element)->linkNext->linkPrevious = (element)->linkPrevious; \
-	} while(0)
+	} while (0)
 
 #define J9_LINKED_LIST_REMOVE_FIRST(root, element) \
 	do { \
@@ -85,35 +85,26 @@
 			(element)->linkPrevious->linkNext = (element)->linkNext; \
 			(element)->linkNext->linkPrevious = (element)->linkPrevious; \
 		} \
-	} while(0)
+	} while (0)
 
-#define J9_LINKED_LIST_IS_EMPTY(root) \
-	((root) == NULL)
+#define J9_LINKED_LIST_IS_EMPTY(root) ((root) == NULL)
 
-#define J9_LINKED_LIST_START_DO(root) \
-	(root)
+#define J9_LINKED_LIST_START_DO(root) (root)
 
-#define J9_LINKED_LIST_NEXT_DO(root, element) \
-	((root) == (element)->linkNext ? NULL : (element)->linkNext)
+#define J9_LINKED_LIST_NEXT_DO(root, element) ((root) == (element)->linkNext ? NULL : (element)->linkNext)
 
-#define J9_LINKED_LIST_REVERSE_START_DO(root) \
-	(J9_LINKED_LIST_IS_EMPTY(root) ? NULL : (root)->linkPrevious)
+#define J9_LINKED_LIST_REVERSE_START_DO(root) (J9_LINKED_LIST_IS_EMPTY(root) ? NULL : (root)->linkPrevious)
 
-#define J9_LINKED_LIST_REVERSE_NEXT_DO(root, element) \
-	((root) == (element) ? NULL : (element)->linkPrevious)
+#define J9_LINKED_LIST_REVERSE_NEXT_DO(root, element) ((root) == (element) ? NULL : (element)->linkPrevious)
 
 /* Linear doubly linked list macros */
-#define J9_LINEAR_LINKED_LIST_IS_EMPTY(root) \
-	((root) == NULL)
+#define J9_LINEAR_LINKED_LIST_IS_EMPTY(root) ((root) == NULL)
 
-#define J9_LINEAR_LINKED_LIST_IS_TAIL(linkNext, linkPrevious, root, element) \
-	((element)->linkNext == NULL)
+#define J9_LINEAR_LINKED_LIST_IS_TAIL(linkNext, linkPrevious, root, element) ((element)->linkNext == NULL)
 
-#define J9_LINEAR_LINKED_LIST_START_DO(root) \
-	(root)
+#define J9_LINEAR_LINKED_LIST_START_DO(root) (root)
 
-#define J9_LINEAR_LINKED_LIST_NEXT_DO(linkNext, linkPrevious, root, element) \
-	((element)->linkNext)
+#define J9_LINEAR_LINKED_LIST_NEXT_DO(linkNext, linkPrevious, root, element) ((element)->linkNext)
 
 #define J9_LINEAR_LINKED_LIST_ADD(linkNext, linkPrevious, root, element) \
 	do { \
@@ -124,7 +115,7 @@
 		} else { \
 			J9_LINEAR_LINKED_LIST_ADD_BEFORE(linkNext, linkPrevious, root, root, element); \
 		} \
-	} while(0)
+	} while (0)
 
 #define J9_LINEAR_LINKED_LIST_ADD_BEFORE(linkNext, linkPrevious, root, before, element) \
 	do { \
@@ -138,18 +129,18 @@
 		if ((before) == (root)) { \
 			(root) = (element); \
 		} \
-	} while(0)
+	} while (0)
 
 #define J9_LINEAR_LINKED_LIST_ADD_AFTER(linkNext, linkPrevious, root, after, element) \
 	do { \
 		(element)->linkPrevious = (after); \
 		if ((after)->linkNext == NULL) { \
 			(element)->linkNext = NULL; \
-		} else {\
+		} else { \
 			((element)->linkNext = (after)->linkNext)->linkPrevious = (element); \
 		} \
 		(after)->linkNext = (element); \
-	} while(0)
+	} while (0)
 
 #define J9_LINEAR_LINKED_LIST_REMOVE(linkNext, linkPrevious, root, element) \
 	do { \
@@ -160,7 +151,7 @@
 		} \
 		if ((element)->linkNext != NULL) { \
 			(element)->linkNext->linkPrevious = (element)->linkPrevious; \
-		}\
-	} while(0)
+		} \
+	} while (0)
 
 #endif /* omrlinkedlist_h */

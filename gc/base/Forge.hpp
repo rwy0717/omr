@@ -23,13 +23,11 @@
 #if !defined(FORGE_HPP_)
 #define FORGE_HPP_
 
-#include "omrcfg.h"
-
-#include "omrcomp.h"
-#include "thread_api.h"
-#include "omrport.h"
 #include "AllocationCategory.hpp"
-
+#include "omrcfg.h"
+#include "omrcomp.h"
+#include "omrport.h"
+#include "thread_api.h"
 #include <new>
 
 class MM_EnvironmentBase;
@@ -40,31 +38,31 @@ namespace GC {
 
 class Forge {
 
-/* Data Members */
+	/* Data Members */
 private:
-	OMRPortLibrary* _portLibrary;
-	
-/* Function Members */
+	OMRPortLibrary *_portLibrary;
+
+	/* Function Members */
 public:
 	/**
 	 * Initialize internal structures of the memory forge.  An instance of Forge must be initialized before
 	 * the methods allocate or free are called.
-	 * 
+	 *
 	 * @param[in] port The portlibrary the forge will make allocations through.
 	 * @return true if the forge was successfully initialized, otherwise returns false.  A instance of Forge
 	 * 		   should not be used before it has been successfully initialized.
 	 */
-	bool initialize(OMRPortLibrary* port);
-	
+	bool initialize(OMRPortLibrary *port);
+
 	/**
-	 * Release any internal structures of the memory forge.  After tear down, there should be no calls to the 
+	 * Release any internal structures of the memory forge.  After tear down, there should be no calls to the
 	 * methods allocate or free.
-	 * 
+	 *
 	 */
 	void tearDown();
 
 	/**
-	 * Allocates the amount of memory requested in bytesRequested.  Returns a pointer to the allocated memory, 
+	 * Allocates the amount of memory requested in bytesRequested.  Returns a pointer to the allocated memory,
 	 * or NULL if the request could not be performed.  This function is a wrapper of omrmem_allocate_memory.
 	 *
 	 * @param[in] byesRequested - the number of bytes to allocate
@@ -73,16 +71,16 @@ public:
 	 * 						 the OMR_GET_CALLSITE() macro
 	 * @return a pointer to the allocated memory, or NULL if the request could not be performed
 	 */
-	void* allocate(std::size_t bytesRequested, AllocationCategory::Enum category, const char* callsite);
+	void *allocate(std::size_t bytesRequested, AllocationCategory::Enum category, const char *callsite);
 
 	/**
 	 * Deallocate memory that has been allocated by the garbage collector.  This function should not be called
-	 * to deallocate memory that has not been allocated by either the allocate or reallocate functions.  This 
+	 * to deallocate memory that has not been allocated by either the allocate or reallocate functions.  This
 	 * function is a wrapper of omrmem_free_memory.
 	 *
 	 * @param[in] memoryPointer - a pointer to the memory that will be freed
 	 */
-	void free(void* memoryPointer);
+	void free(void *memoryPointer);
 };
 
 } // namespace GC
@@ -90,19 +88,25 @@ public:
 
 /**
  * Usage:
- *   MyStruct* s = new(forge, AllocationCategory::FIXED, OMR_GET_CALLSITE(), std::nothrow) MyStruct(constructor params...);
+ *   MyStruct* s = new(forge, AllocationCategory::FIXED, OMR_GET_CALLSITE(), std::nothrow) MyStruct(constructor
+ * params...);
  */
-inline void*
-operator new(std::size_t size, OMR::GC::Forge* forge, OMR::GC::AllocationCategory::Enum category, const char* site, const std::nothrow_t&) throw() {
+inline void *
+operator new(std::size_t size, OMR::GC::Forge *forge, OMR::GC::AllocationCategory::Enum category, const char *site,
+        const std::nothrow_t &) throw()
+{
 	return forge->allocate(size, category, site);
 }
 
 /**
  * Usage:
- *   MyStruct* s = new(forge, AllocationCategory::FIXED, OMR_GET_CALLSITE(), std::nothrow) MyStruct(constructor params...);
+ *   MyStruct* s = new(forge, AllocationCategory::FIXED, OMR_GET_CALLSITE(), std::nothrow) MyStruct(constructor
+ * params...);
  */
-inline void*
-operator new[](std::size_t size, OMR::GC::Forge* forge, OMR::GC::AllocationCategory::Enum category, const char* site, const std::nothrow_t&) throw() {
+inline void *
+operator new[](std::size_t size, OMR::GC::Forge *forge, OMR::GC::AllocationCategory::Enum category, const char *site,
+        const std::nothrow_t &) throw()
+{
 	return operator new(size, forge, category, site, std::nothrow);
 }
 

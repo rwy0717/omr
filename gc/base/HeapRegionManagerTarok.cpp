@@ -20,31 +20,37 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-#include "omrcfg.h"
+#include "HeapRegionManagerTarok.hpp"
 
 #include "GCExtensionsBase.hpp"
 #include "Heap.hpp"
+#include "HeapMemorySnapshot.hpp"
 #include "HeapRegionDescriptor.hpp"
 #include "HeapRegionManager.hpp"
 #include "MemoryManager.hpp"
-#include "HeapMemorySnapshot.hpp"
+#include "omrcfg.h"
 
-#include "HeapRegionManagerTarok.hpp"
-
-MM_HeapRegionManagerTarok::MM_HeapRegionManagerTarok(MM_EnvironmentBase *env, uintptr_t regionSize, uintptr_t tableDescriptorSize, MM_RegionDescriptorInitializer regionDescriptorInitializer, MM_RegionDescriptorDestructor regionDescriptorDestructor)
-	: MM_HeapRegionManager(env, regionSize, tableDescriptorSize, regionDescriptorInitializer, regionDescriptorDestructor)
-	, _freeRegionTableSize(0)
-	, _freeRegionTable(NULL)
+MM_HeapRegionManagerTarok::MM_HeapRegionManagerTarok(MM_EnvironmentBase *env, uintptr_t regionSize,
+        uintptr_t tableDescriptorSize, MM_RegionDescriptorInitializer regionDescriptorInitializer,
+        MM_RegionDescriptorDestructor regionDescriptorDestructor)
+        : MM_HeapRegionManager(
+                env, regionSize, tableDescriptorSize, regionDescriptorInitializer, regionDescriptorDestructor)
+        , _freeRegionTableSize(0)
+        , _freeRegionTable(NULL)
 {
 	_typeId = __FUNCTION__;
 }
 
 MM_HeapRegionManagerTarok *
-MM_HeapRegionManagerTarok::newInstance(MM_EnvironmentBase *env, uintptr_t regionSize, uintptr_t tableDescriptorSize, MM_RegionDescriptorInitializer regionDescriptorInitializer, MM_RegionDescriptorDestructor regionDescriptorDestructor)
+MM_HeapRegionManagerTarok::newInstance(MM_EnvironmentBase *env, uintptr_t regionSize, uintptr_t tableDescriptorSize,
+        MM_RegionDescriptorInitializer regionDescriptorInitializer,
+        MM_RegionDescriptorDestructor regionDescriptorDestructor)
 {
-	MM_HeapRegionManagerTarok *regionManager = (MM_HeapRegionManagerTarok *)env->getForge()->allocate(sizeof(MM_HeapRegionManagerTarok), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+	MM_HeapRegionManagerTarok *regionManager = (MM_HeapRegionManagerTarok *)env->getForge()->allocate(
+	        sizeof(MM_HeapRegionManagerTarok), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
 	if (NULL != regionManager) {
-		new(regionManager) MM_HeapRegionManagerTarok(env, regionSize, tableDescriptorSize, regionDescriptorInitializer, regionDescriptorDestructor);
+		new (regionManager) MM_HeapRegionManagerTarok(
+		        env, regionSize, tableDescriptorSize, regionDescriptorInitializer, regionDescriptorDestructor);
 		if (!regionManager->initialize(env)) {
 			regionManager->kill(env);
 			regionManager = NULL;
@@ -53,7 +59,7 @@ MM_HeapRegionManagerTarok::newInstance(MM_EnvironmentBase *env, uintptr_t region
 	return regionManager;
 }
 
-bool 
+bool
 MM_HeapRegionManagerTarok::initialize(MM_EnvironmentBase *env)
 {
 	bool result = MM_HeapRegionManager::initialize(env);
@@ -64,7 +70,8 @@ MM_HeapRegionManagerTarok::initialize(MM_EnvironmentBase *env)
 		_freeRegionTableSize = maximumNodeNumber + 1;
 
 		uintptr_t freeRegionTableSizeInBytes = _freeRegionTableSize * sizeof(MM_HeapRegionDescriptor *);
-		_freeRegionTable = (MM_HeapRegionDescriptor **)env->getForge()->allocate(freeRegionTableSizeInBytes, OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+		_freeRegionTable = (MM_HeapRegionDescriptor **)env->getForge()->allocate(
+		        freeRegionTableSizeInBytes, OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
 		if (NULL == _freeRegionTable) {
 			return false;
 		}
@@ -74,7 +81,7 @@ MM_HeapRegionManagerTarok::initialize(MM_EnvironmentBase *env)
 	return result;
 }
 
-void 
+void
 MM_HeapRegionManagerTarok::tearDown(MM_EnvironmentBase *env)
 {
 	if (NULL != _freeRegionTable) {
@@ -93,7 +100,8 @@ MM_HeapRegionManagerTarok::areFreeRegionsForNode(MM_EnvironmentBase *env, uintpt
 }
 
 MM_HeapRegionDescriptor *
-MM_HeapRegionManagerTarok::acquireSingleTableRegion(MM_EnvironmentBase *env, MM_MemorySubSpace *subSpace, uintptr_t numaNode)
+MM_HeapRegionManagerTarok::acquireSingleTableRegion(
+        MM_EnvironmentBase *env, MM_MemorySubSpace *subSpace, uintptr_t numaNode)
 {
 	MM_HeapRegionDescriptor *toReturn = NULL;
 	writeLock();
@@ -109,7 +117,8 @@ MM_HeapRegionManagerTarok::acquireSingleTableRegion(MM_EnvironmentBase *env, MM_
 }
 
 MM_HeapRegionDescriptor *
-MM_HeapRegionManagerTarok::internalAcquireSingleTableRegion(MM_EnvironmentBase *env, MM_MemorySubSpace *subSpace, uintptr_t freeListIndex)
+MM_HeapRegionManagerTarok::internalAcquireSingleTableRegion(
+        MM_EnvironmentBase *env, MM_MemorySubSpace *subSpace, uintptr_t freeListIndex)
 {
 	Assert_MM_true(NULL != _freeRegionTable[freeListIndex]);
 
@@ -193,13 +202,14 @@ void
 MM_HeapRegionManagerTarok::destroyRegionTable(MM_EnvironmentBase *env)
 {
 	if (NULL != _regionTable) {
-		 internalFreeRegionTable(env, _regionTable, _tableRegionCount);
-		 _regionTable = NULL;
+		internalFreeRegionTable(env, _regionTable, _tableRegionCount);
+		_regionTable = NULL;
 	}
 }
 
 void
-MM_HeapRegionManagerTarok::internalLinkRegions(MM_EnvironmentBase *env, MM_HeapRegionDescriptor *headRegion, uintptr_t count)
+MM_HeapRegionManagerTarok::internalLinkRegions(
+        MM_EnvironmentBase *env, MM_HeapRegionDescriptor *headRegion, uintptr_t count)
 {
 	Assert_MM_true(0 < count);
 	MM_HeapRegionDescriptor *region = headRegion;
@@ -207,16 +217,17 @@ MM_HeapRegionManagerTarok::internalLinkRegions(MM_EnvironmentBase *env, MM_HeapR
 	for (uintptr_t i = 0; i < count; i++) {
 		region->_headOfSpan = region;
 		region->_regionsInSpan = 1;
-		MM_HeapRegionDescriptor *nextRegion = (MM_HeapRegionDescriptor *) ((uintptr_t)region + _tableDescriptorSize);
+		MM_HeapRegionDescriptor *nextRegion =
+		        (MM_HeapRegionDescriptor *)((uintptr_t)region + _tableDescriptorSize);
 		region->_nextInSet = nextRegion;
 		region = nextRegion;
 	}
 
 	/* set the very last region's nextInSet to NULL. */
-	MM_HeapRegionDescriptor *lastRegion = (MM_HeapRegionDescriptor *) ((uintptr_t)headRegion + ((count -1) * _tableDescriptorSize));
+	MM_HeapRegionDescriptor *lastRegion =
+	        (MM_HeapRegionDescriptor *)((uintptr_t)headRegion + ((count - 1) * _tableDescriptorSize));
 	lastRegion->_nextInSet = NULL;
 }
-
 
 bool
 MM_HeapRegionManagerTarok::enableRegionsInTable(MM_EnvironmentBase *env, MM_MemoryHandle *handle)
@@ -226,7 +237,7 @@ MM_HeapRegionManagerTarok::enableRegionsInTable(MM_EnvironmentBase *env, MM_Memo
 	MM_MemoryManager *memoryManager = extensions->memoryManager;
 	void *lowHeapEdge = memoryManager->getHeapBase(handle);
 	void *highHeapEdge = memoryManager->getHeapTop(handle);
-	
+
 	/* maintained for RTJ */
 	setNodeAndLinkRegions(env, lowHeapEdge, highHeapEdge, 0);
 
@@ -234,14 +245,16 @@ MM_HeapRegionManagerTarok::enableRegionsInTable(MM_EnvironmentBase *env, MM_Memo
 }
 
 void
-MM_HeapRegionManagerTarok::setNodeAndLinkRegions(MM_EnvironmentBase *env, void *lowHeapEdge, void *highHeapEdge, uintptr_t numaNode)
+MM_HeapRegionManagerTarok::setNodeAndLinkRegions(
+        MM_EnvironmentBase *env, void *lowHeapEdge, void *highHeapEdge, uintptr_t numaNode)
 {
 	uintptr_t regionCount = 0;
 	MM_HeapRegionDescriptor *firstRegion = NULL;
 
-	Trc_MM_HeapRegionManager_enableRegionsInTable_Entry(env->getLanguageVMThread(), lowHeapEdge, highHeapEdge, numaNode);
+	Trc_MM_HeapRegionManager_enableRegionsInTable_Entry(
+	        env->getLanguageVMThread(), lowHeapEdge, highHeapEdge, numaNode);
 	if (highHeapEdge > lowHeapEdge) {
-		for (uint8_t* address = (uint8_t*)lowHeapEdge; address < highHeapEdge; address += getRegionSize()) {
+		for (uint8_t *address = (uint8_t *)lowHeapEdge; address < highHeapEdge; address += getRegionSize()) {
 			MM_HeapRegionDescriptor *region = tableDescriptorForAddress(address);
 			region->setNumaNode(numaNode);
 			regionCount += 1;
@@ -252,7 +265,8 @@ MM_HeapRegionManagerTarok::setNodeAndLinkRegions(MM_EnvironmentBase *env, void *
 		_freeRegionTable[numaNode] = firstRegion;
 		internalLinkRegions(env, firstRegion, regionCount);
 	}
-	Trc_MM_HeapRegionManager_enableRegionsInTable_Exit(env->getLanguageVMThread(), regionCount, firstRegion, numaNode);
+	Trc_MM_HeapRegionManager_enableRegionsInTable_Exit(
+	        env->getLanguageVMThread(), regionCount, firstRegion, numaNode);
 }
 
 void
@@ -260,7 +274,9 @@ MM_HeapRegionManagerTarok::releaseTableRegions(MM_EnvironmentBase *env, MM_HeapR
 {
 	writeLock();
 	/* must be a table region */
-	Assert_MM_true((region >= _regionTable) && (region < (MM_HeapRegionDescriptor *)((uintptr_t)_regionTable + (_tableRegionCount * _tableDescriptorSize))));
+	Assert_MM_true((region >= _regionTable)
+	        && (region < (MM_HeapRegionDescriptor *)((uintptr_t)_regionTable
+	                    + (_tableRegionCount * _tableDescriptorSize))));
 	internalReleaseTableRegions(env, region);
 	_totalHeapSize -= region->getSize();
 	writeUnlock();
@@ -271,7 +287,8 @@ MM_HeapRegionManagerTarok::internalReleaseTableRegions(MM_EnvironmentBase *env, 
 {
 	/* must be an allocated table region */
 	Assert_MM_true(rootRegion >= _regionTable);
-	Assert_MM_true(rootRegion < (MM_HeapRegionDescriptor *)((uintptr_t)_regionTable + (_tableRegionCount * _tableDescriptorSize)));
+	Assert_MM_true(rootRegion
+	        < (MM_HeapRegionDescriptor *)((uintptr_t)_regionTable + (_tableRegionCount * _tableDescriptorSize)));
 	Assert_MM_true(NULL == rootRegion->_nextInSet);
 	Assert_MM_true(rootRegion->_isAllocated);
 
@@ -284,12 +301,12 @@ MM_HeapRegionManagerTarok::internalReleaseTableRegions(MM_EnvironmentBase *env, 
 	_freeRegionTable[freeListIndex] = rootRegion;
 }
 
-MM_HeapMemorySnapshot*
-MM_HeapRegionManagerTarok::getHeapMemorySnapshot(MM_GCExtensionsBase *extensions, MM_HeapMemorySnapshot* snapshot, bool gcEnd)
+MM_HeapMemorySnapshot *
+MM_HeapRegionManagerTarok::getHeapMemorySnapshot(
+        MM_GCExtensionsBase *extensions, MM_HeapMemorySnapshot *snapshot, bool gcEnd)
 {
 	MM_Heap *heap = extensions->getHeap();
 	snapshot->_totalHeapSize = heap->getActiveMemorySize();
 	snapshot->_freeHeapSize = heap->getApproximateFreeMemorySize();
 	return snapshot;
 }
-

@@ -36,26 +36,21 @@ class MM_MarkingScheme;
 /**
  * Provides language-specific support for marking.
  */
-class MM_MarkingDelegate
-{
+class MM_MarkingDelegate {
 	/*
 	 * Data members
 	 */
 private:
-
 protected:
 	GC_ObjectModel *_objectModel;
 	MM_MarkingScheme *_markingScheme;
 
 public:
-
 	/*
 	 * Function members
 	 */
 private:
-
 protected:
-
 public:
 	/**
 	 * Initialize the delegate.
@@ -64,8 +59,7 @@ public:
 	 * @param markingScheme the MM_MarkingScheme that the delegate is bound to
 	 * @return true if delegate initialized successfully
 	 */
-	MMINLINE bool
-	initialize(MM_EnvironmentBase *env, MM_MarkingScheme *markingScheme)
+	MMINLINE bool initialize(MM_EnvironmentBase *env, MM_MarkingScheme *markingScheme)
 	{
 		_objectModel = &(env->getExtensions()->objectModel);
 		_markingScheme = markingScheme;
@@ -81,7 +75,7 @@ public:
 	 *
 	 * @param env The environment for the calling thread
 	 */
-	MMINLINE void masterSetupForGC(MM_EnvironmentBase *env) { }
+	MMINLINE void masterSetupForGC(MM_EnvironmentBase *env) {}
 
 	/**
 	 * This method is called on the master garbage collection thread at the beginning of the marking
@@ -92,7 +86,7 @@ public:
 	 *
 	 * @param env the current environment
 	 */
-	MMINLINE void masterSetupForWalk(MM_EnvironmentBase *env) { }
+	MMINLINE void masterSetupForWalk(MM_EnvironmentBase *env) {}
 
 	/**
 	 * This method is called on the master garbage collection thread at the end of the marking phase
@@ -114,7 +108,7 @@ public:
 	 *
 	 * @param env The environment for the calling thread
 	 */
-	MMINLINE void workerSetupForGC(MM_EnvironmentBase *env) { }
+	MMINLINE void workerSetupForGC(MM_EnvironmentBase *env) {}
 
 	/**
 	 * This method is called on each worker thread participating in garbage collection at the end
@@ -127,7 +121,8 @@ public:
 	 */
 	MMINLINE void workerCompleteGC(MM_EnvironmentBase *env)
 	{
-		/* All threads flush buffers before this point, and complete any remaining language-specific marking tasks */
+		/* All threads flush buffers before this point, and complete any remaining language-specific marking
+		 * tasks */
 		if (env->_currentTask->synchronizeGCThreadsAndReleaseSingleThread(env, UNIQUE_ID)) {
 			/* Perform single-threaded tasks here */
 			env->_currentTask->releaseSynchronizedGCThreads(env);
@@ -142,7 +137,7 @@ public:
 	 *
 	 * @param env The environment for the calling thread
 	 */
-	MMINLINE void workerCleanupAfterGC(MM_EnvironmentBase *env) { }
+	MMINLINE void workerCleanupAfterGC(MM_EnvironmentBase *env) {}
 
 	/**
 	 * This method is called on each active thread to commence root scanning. Each thread should scan its own
@@ -157,22 +152,24 @@ public:
 	void scanRoots(MM_EnvironmentBase *env);
 
 	/**
-	 * This method is called for every live object discovered during marking. It must return an object scanner instance that
-	 * is appropriate for the type of object to be scanned.
+	 * This method is called for every live object discovered during marking. It must return an object scanner
+	 * instance that is appropriate for the type of object to be scanned.
 	 *
 	 * @param env The environment for the calling thread
 	 * @param objectPtr Points to the heap object to be scanned
 	 * @param reason Enumerator identifying the reason for scanning this object
-	 * @param sizeToDo For pointer arrays (which may be split into multiple subsegments for parallelization), stop after scanning this many bytes
+	 * @param sizeToDo For pointer arrays (which may be split into multiple subsegments for parallelization), stop
+	 * after scanning this many bytes
 	 * @return An object scanner instance that is appropriate for the type of object to be scanned
 	 *
 	 * @see GC_ObjectScanner
 	 * @see GC_ObjectModel::getSizeInBytesWithHeader()
 	 */
-	MMINLINE GC_ObjectScanner *
-	getObjectScanner(MM_EnvironmentBase *env, omrobjectptr_t objectPtr, void *scannerSpace, MM_MarkingSchemeScanReason reason, uintptr_t *sizeToDo)
+	MMINLINE GC_ObjectScanner *getObjectScanner(MM_EnvironmentBase *env, omrobjectptr_t objectPtr,
+	        void *scannerSpace, MM_MarkingSchemeScanReason reason, uintptr_t *sizeToDo)
 	{
-		GC_MixedObjectScanner *objectScanner = GC_MixedObjectScanner::newInstance(env, objectPtr, scannerSpace, 0);
+		GC_MixedObjectScanner *objectScanner =
+		        GC_MixedObjectScanner::newInstance(env, objectPtr, scannerSpace, 0);
 		*sizeToDo = sizeof(fomrobject_t) + objectScanner->getBytesRemaining();
 		return objectScanner;
 	}
@@ -186,7 +183,7 @@ public:
 	 *
 	 * @param env The environment for the calling thread
 	 */
-	MMINLINE void handleWorkPacketOverflowItem(MM_EnvironmentBase *env, omrobjectptr_t objectPtr) { }
+	MMINLINE void handleWorkPacketOverflowItem(MM_EnvironmentBase *env, omrobjectptr_t objectPtr) {}
 
 	/**
 	 * This method is called after the object graph depending from the root set has been traversed and all live
@@ -199,15 +196,12 @@ public:
 	 *
 	 * @param env The environment for the calling thread
 	 */
-	MMINLINE void completeMarking(MM_EnvironmentBase *env) { }
+	MMINLINE void completeMarking(MM_EnvironmentBase *env) {}
 
 	/**
 	 * Constructor.
 	 */
-	MMINLINE MM_MarkingDelegate()
-		: _objectModel(NULL)
-		, _markingScheme(NULL)
-	{ }
+	MMINLINE MM_MarkingDelegate() : _objectModel(NULL), _markingScheme(NULL) {}
 };
 
 #endif /* MARKINGDELEGATE_HPP_ */

@@ -23,20 +23,19 @@
 #if !defined(ALLOCATEINITIALIZATION_HPP_)
 #define ALLOCATEINITIALIZATION_HPP_
 
-#include "ModronAssertions.h"
-#include "objectdescription.h"
-#include "omrgcconsts.h"
-#include "omrmodroncore.h"
-#include "omrutil.h"
-
 #include "AllocateDescription.hpp"
 #include "AtomicOperations.hpp"
 #include "Base.hpp"
 #include "EnvironmentBase.hpp"
 #include "GCExtensionsBase.hpp"
 #include "Heap.hpp"
+#include "ModronAssertions.h"
 #include "ObjectAllocationInterface.hpp"
 #include "ObjectModel.hpp"
+#include "objectdescription.h"
+#include "omrgcconsts.h"
+#include "omrmodroncore.h"
+#include "omrutil.h"
 
 #if defined(OMR_VALGRIND_MEMCHECK)
 #include "MemcheckWrapper.hpp"
@@ -65,22 +64,23 @@
  * allocation category and cast the received allocation initialization instance
  * to the appropriate subclass to complete object initialization for the category.
  */
-class MM_AllocateInitialization : public MM_Base
-{
-/*
- * Member data and types
- */
+class MM_AllocateInitialization : public MM_Base {
+	/*
+	 * Member data and types
+	 */
 private:
-/* Subclasses should only define language specific properties
- * required to initialize an allocated object.
- */
+	/* Subclasses should only define language specific properties
+	 * required to initialize an allocated object.
+	 */
 
 protected:
-	const uintptr_t _allocationCategory;		/**< language-defined object category used in GC_ObjectModel::initializeAllocation() */
-	const uintptr_t _requestedSizeInBytes;		/**< minimum number of bytes to allocate for object header+instance data */
-	bool _isAllocatable;						/**< this is set if the allocation should not proceed */
+	const uintptr_t _allocationCategory; /**< language-defined object category used in
+	                                        GC_ObjectModel::initializeAllocation() */
+	const uintptr_t _requestedSizeInBytes; /**< minimum number of bytes to allocate for object header+instance data
+	                                        */
+	bool _isAllocatable; /**< this is set if the allocation should not proceed */
 
-	MM_AllocateDescription _allocateDescription;/**< mutable allocation descriptor holds actual allocation terms */
+	MM_AllocateDescription _allocateDescription; /**< mutable allocation descriptor holds actual allocation terms */
 
 public:
 	/**
@@ -89,33 +89,39 @@ public:
 	 * @see selectObjectAllocationFlags(bool indexable, bool tenured, bool noZeroMemory, bool noGc)
 	 */
 	enum ObjectAllocationFlags {
-		allocate_tenured = OMR_GC_ALLOCATE_OBJECT_TENURED				/**< select this flag to allocate in old space (gencon only) */
-		, allocate_no_zero_memory = OMR_GC_ALLOCATE_OBJECT_NON_ZERO_TLH	/**< select this flag to inhibit zeroing of allocated heap memory */
-		, allocate_no_gc = OMR_GC_ALLOCATE_OBJECT_NO_GC					/**< select this flag to inhibit collector cycle start on allocation failure */
-		, allocate_indexable = OMR_GC_ALLOCATE_OBJECT_INDEXABLE			/**< select this flag to allocate an indexable object */
+		allocate_tenured = OMR_GC_ALLOCATE_OBJECT_TENURED /**< select this flag to allocate in old space (gencon
+		                                                     only) */
+		,
+		allocate_no_zero_memory = OMR_GC_ALLOCATE_OBJECT_NON_ZERO_TLH /**< select this flag to inhibit zeroing
+		                                                                 of allocated heap memory */
+		,
+		allocate_no_gc = OMR_GC_ALLOCATE_OBJECT_NO_GC /**< select this flag to inhibit collector cycle start on
+		                                                 allocation failure */
+		,
+		allocate_indexable = OMR_GC_ALLOCATE_OBJECT_INDEXABLE /**< select this flag to allocate an indexable
+		                                                         object */
 	};
 
-/*
- * Member functions
- */
+	/*
+	 * Member functions
+	 */
 private:
-	MMINLINE bool
-	shouldZeroMemory(MM_EnvironmentBase *env)
+	MMINLINE bool shouldZeroMemory(MM_EnvironmentBase *env)
 	{
 		/* wipe allocated space if requested (NON_ZERO_TLH flag set is a request to not clear) */
 		bool shouldZero = !_allocateDescription.getNonZeroTLHFlag();
 #if defined(OMR_GC_BATCH_CLEAR_TLH)
-		/* Even if clearing is requested, we may decide not to so if the allocation comes from a batch cleared TLH */
+		/* Even if clearing is requested, we may decide not to so if the allocation comes from a batch cleared
+		 * TLH */
 		shouldZero &= !(_allocateDescription.isCompletedFromTlh() && env->getExtensions()->batchClearTLH);
 #endif /* OMR_GC_BATCH_CLEAR_TLH */
 		return shouldZero;
 	}
 
 protected:
-
 public:
-	MMINLINE static uintptr_t
-	selectObjectAllocationFlags(bool indexable, bool tenured, bool noZeroMemory, bool noGc)
+	MMINLINE static uintptr_t selectObjectAllocationFlags(
+	        bool indexable, bool tenured, bool noZeroMemory, bool noGc)
 	{
 		uintptr_t selectedFlags = 0;
 
@@ -142,18 +148,15 @@ public:
 	MMINLINE uintptr_t getRequestedSizeInBytes() { return _requestedSizeInBytes; }
 	MMINLINE MM_AllocateDescription *getAllocateDescription() { return &_allocateDescription; }
 
-	MMINLINE bool
-	isGCAllowed()
+	MMINLINE bool isGCAllowed()
 	{
 		return 0 == (OMR_GC_ALLOCATE_OBJECT_NO_GC & _allocateDescription.getAllocateFlags());
 	}
 
-	MMINLINE bool
-	isIndexable()
+	MMINLINE bool isIndexable()
 	{
 		return 0 != (OMR_GC_ALLOCATE_OBJECT_INDEXABLE & _allocateDescription.getAllocateFlags());
 	}
-
 
 	/**
 	 * Object allocator and initializer. Will return NULL if !isAllocatable() or
@@ -170,8 +173,7 @@ public:
 	 * @return Pointer to the initialized object, or NULL
 	 *
 	 */
-	MMINLINE omrobjectptr_t
-	allocateAndInitializeObject(OMR_VMThread *omrVMThread)
+	MMINLINE omrobjectptr_t allocateAndInitializeObject(OMR_VMThread *omrVMThread)
 	{
 		MM_EnvironmentBase *env = MM_EnvironmentBase::getEnvironment(omrVMThread);
 		GC_ObjectModel *objectModel = &(env->getExtensions()->objectModel);
@@ -192,40 +194,49 @@ public:
 		omrobjectptr_t objectPtr = NULL;
 		if (isAllocatable()) {
 			void *heapBytes = NULL;
-			
-			_allocateDescription.setBytesRequested(objectModel->adjustSizeInBytes(_allocateDescription.getBytesRequested()));
+
+			_allocateDescription.setBytesRequested(
+			        objectModel->adjustSizeInBytes(_allocateDescription.getBytesRequested()));
 			if (isIndexable()) {
 				heapBytes = env->_objectAllocationInterface->allocateArrayletSpine(env,
-						&_allocateDescription, _allocateDescription.getMemorySpace(), isGCAllowed());
+				        &_allocateDescription, _allocateDescription.getMemorySpace(), isGCAllowed());
 			} else {
-				heapBytes = env->_objectAllocationInterface->allocateObject(env,
-						&_allocateDescription, _allocateDescription.getMemorySpace(), isGCAllowed());
+				heapBytes = env->_objectAllocationInterface->allocateObject(env, &_allocateDescription,
+				        _allocateDescription.getMemorySpace(), isGCAllowed());
 			}
 			_allocateDescription.setAllocationSucceeded(NULL != heapBytes);
 
 			if (NULL != heapBytes) {
 #if defined(OMR_VALGRIND_MEMCHECK)
-				valgrindMempoolAlloc(env->getExtensions(),(uintptr_t) heapBytes, _allocateDescription.getBytesRequested());
+				valgrindMempoolAlloc(env->getExtensions(), (uintptr_t)heapBytes,
+				        _allocateDescription.getBytesRequested());
 #endif /* defined(OMR_VALGRIND_MEMCHECK) */
 
-				/* wipe allocated space if requested and allowed (NON_ZERO_TLH flag set inhibits zeroing) */
+				/* wipe allocated space if requested and allowed (NON_ZERO_TLH flag set inhibits
+				 * zeroing) */
 				if (shouldZeroMemory(env)) {
 					OMRZeroMemory(heapBytes, _allocateDescription.getContiguousBytes());
 				}
 
-				/* set the OMR flags in the object header to match those set by memory space in allocate description */
-				objectModel->setObjectFlags((omrobjectptr_t)heapBytes, OMR_OBJECT_METADATA_FLAGS_MASK, _allocateDescription.getObjectFlags());
+				/* set the OMR flags in the object header to match those set by memory space in allocate
+				 * description */
+				objectModel->setObjectFlags((omrobjectptr_t)heapBytes, OMR_OBJECT_METADATA_FLAGS_MASK,
+				        _allocateDescription.getObjectFlags());
 				/* let the language object model perform its header and object initialization */
 				objectPtr = objectModel->initializeAllocation(env, heapBytes, this);
 
-				/* if object model initialization fails heapBytes will become floating garbage to be recovered in next GC */
+				/* if object model initialization fails heapBytes will become floating garbage to be
+				 * recovered in next GC */
 				if (NULL != objectPtr) {
 					/* in case the object escapes to another thread... */
 					MM_AtomicOperations::writeBarrier();
-					/* reflect the current OMR flags in the object header back into allocate description */
-					_allocateDescription.setObjectFlags((uint32_t)objectModel->getObjectFlags(objectPtr));
+					/* reflect the current OMR flags in the object header back into allocate
+					 * description */
+					_allocateDescription.setObjectFlags(
+					        (uint32_t)objectModel->getObjectFlags(objectPtr));
 #if defined(OMR_GC_ALLOCATION_TAX)
-					/* if concurrent mark is enabled thread might have to pay tax - must save/restore allocated object in case of GC */
+					/* if concurrent mark is enabled thread might have to pay tax - must
+					 * save/restore allocated object in case of GC */
 					env->saveObjects(objectPtr);
 					_allocateDescription.payAllocationTax(env);
 					env->restoreObjects(&objectPtr);
@@ -264,17 +275,15 @@ public:
 	 * @see getAllocateDescription()
 	 * @see initializeAllocationDescription(MM_EnvironmentBase *)
 	 */
-	MM_AllocateInitialization(MM_EnvironmentBase *env,
-			uintptr_t allocationCategory,
-			uintptr_t requiredSizeInBytes,
-			uintptr_t objectAllocationFlags = 0
-	) : MM_Base()
-		, _allocationCategory(allocationCategory)
-		, _requestedSizeInBytes(requiredSizeInBytes)
-		, _isAllocatable(true)
-		, _allocateDescription(_requestedSizeInBytes, objectAllocationFlags,
-				0 == (OMR_GC_ALLOCATE_OBJECT_NO_GC & objectAllocationFlags),
-				0 == (OMR_GC_ALLOCATE_OBJECT_NO_GC & objectAllocationFlags))
+	MM_AllocateInitialization(MM_EnvironmentBase *env, uintptr_t allocationCategory, uintptr_t requiredSizeInBytes,
+	        uintptr_t objectAllocationFlags = 0)
+	        : MM_Base()
+	        , _allocationCategory(allocationCategory)
+	        , _requestedSizeInBytes(requiredSizeInBytes)
+	        , _isAllocatable(true)
+	        , _allocateDescription(_requestedSizeInBytes, objectAllocationFlags,
+	                  0 == (OMR_GC_ALLOCATE_OBJECT_NO_GC & objectAllocationFlags),
+	                  0 == (OMR_GC_ALLOCATE_OBJECT_NO_GC & objectAllocationFlags))
 	{
 		if (_allocateDescription.getTenuredFlag()) {
 			_allocateDescription.setMemorySpace(env->getExtensions()->heap->getDefaultMemorySpace());

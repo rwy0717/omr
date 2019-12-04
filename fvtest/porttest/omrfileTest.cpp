@@ -46,33 +46,31 @@
 #define J9S_ISGID 02000
 #define J9S_ISUID 04000
 
-#define FILE_OPEN_FUNCTION			omrfile_open_helper
-#define FILE_CLOSE_FUNCTION			omrfile_close_helper
-#define FILE_LOCK_BYTES_FUNCTION	omrfile_lock_bytes_helper
-#define FILE_UNLOCK_BYTES_FUNCTION	omrfile_unlock_bytes_helper
-#define FILE_READ_FUNCTION			omrfile_read_helper
-#define FILE_WRITE_FUNCTION			omrfile_write_helper
-#define FILE_SET_LENGTH_FUNCTION	omrfile_set_length_helper
-#define FILE_FLENGTH_FUNCTION		omrfile_flength_helper
+#define FILE_OPEN_FUNCTION omrfile_open_helper
+#define FILE_CLOSE_FUNCTION omrfile_close_helper
+#define FILE_LOCK_BYTES_FUNCTION omrfile_lock_bytes_helper
+#define FILE_UNLOCK_BYTES_FUNCTION omrfile_unlock_bytes_helper
+#define FILE_READ_FUNCTION omrfile_read_helper
+#define FILE_WRITE_FUNCTION omrfile_write_helper
+#define FILE_SET_LENGTH_FUNCTION omrfile_set_length_helper
+#define FILE_FLENGTH_FUNCTION omrfile_flength_helper
 
-#define FILE_OPEN_FUNCTION_NAME			(isAsync? "omrfile_blockingasync_open" : "omrfile_open")
-#define FILE_CLOSE_FUNCTION_NAME		(isAsync? "omrfile_blockingasync_close" : "omrfile_close")
-#define FILE_LOCK_BYTES_FUNCTION_NAME	(isAsync? "omrfile_blockingasync_lock_bytes" : "omrfile_lock_bytes")
-#define FILE_UNLOCK_BYTES_FUNCTION_NAME	(isAsync? "omrfile_blockingasync_unlock_bytes" : "omrfile_unlock_bytes")
-#define FILE_READ_FUNCTION_NAME			(isAsync? "omrfile_blockingasync_read" : "omrfile_read")
-#define FILE_WRITE_FUNCTION_NAME		(isAsync? "omrfile_blockingasync_write" : "omrfile_write")
-#define FILE_SET_LENGTH_FUNCTION_NAME	(isAsync? "omrfile_blockingasync_set_length" : "omrfile_set_length")
-#define FILE_FLENGTH_FUNCTION_NAME		(isAsync? "omrfile_blockingasync_flength" : "omrfile_flength")
+#define FILE_OPEN_FUNCTION_NAME (isAsync ? "omrfile_blockingasync_open" : "omrfile_open")
+#define FILE_CLOSE_FUNCTION_NAME (isAsync ? "omrfile_blockingasync_close" : "omrfile_close")
+#define FILE_LOCK_BYTES_FUNCTION_NAME (isAsync ? "omrfile_blockingasync_lock_bytes" : "omrfile_lock_bytes")
+#define FILE_UNLOCK_BYTES_FUNCTION_NAME (isAsync ? "omrfile_blockingasync_unlock_bytes" : "omrfile_unlock_bytes")
+#define FILE_READ_FUNCTION_NAME (isAsync ? "omrfile_blockingasync_read" : "omrfile_read")
+#define FILE_WRITE_FUNCTION_NAME (isAsync ? "omrfile_blockingasync_write" : "omrfile_write")
+#define FILE_SET_LENGTH_FUNCTION_NAME (isAsync ? "omrfile_blockingasync_set_length" : "omrfile_set_length")
+#define FILE_FLENGTH_FUNCTION_NAME (isAsync ? "omrfile_blockingasync_flength" : "omrfile_flength")
 
 static BOOLEAN isAsync = FALSE;
 
-#define APPEND_ASYNC(testName) (isAsync ?  #testName "_async" : #testName )
+#define APPEND_ASYNC(testName) (isAsync ? #testName "_async" : #testName)
 
-class PortFileTest2 : public ::testing::Test
-{
+class PortFileTest2 : public ::testing::Test {
 protected:
-	static void
-	TearDownTestCase()
+	static void TearDownTestCase()
 	{
 		testFileCleanUp("tfileTest");
 		testFileCleanUp("omrfile_test");
@@ -98,64 +96,64 @@ fileWrite(struct OMRPortLibrary *portLibrary, intptr_t fd, const char *format, .
 	va_end(args);
 }
 
-
 intptr_t
 omrfile_open_helper(struct OMRPortLibrary *portLibrary, const char *path, int32_t flags, int32_t mode)
 {
 	OMRPORT_ACCESS_FROM_OMRPORT(portLibrary);
-	return isAsync? omrfile_blockingasync_open(path, flags, mode) : omrfile_open(path, flags, mode);
+	return isAsync ? omrfile_blockingasync_open(path, flags, mode) : omrfile_open(path, flags, mode);
 }
 
 int32_t
 omrfile_close_helper(struct OMRPortLibrary *portLibrary, intptr_t fd)
 {
 	OMRPORT_ACCESS_FROM_OMRPORT(portLibrary);
-	return isAsync? omrfile_blockingasync_close(fd) : omrfile_close(fd);
+	return isAsync ? omrfile_blockingasync_close(fd) : omrfile_close(fd);
 }
 
 int32_t
-omrfile_lock_bytes_helper(struct OMRPortLibrary *portLibrary, intptr_t fd, int32_t lockFlags, uint64_t offset, uint64_t length)
+omrfile_lock_bytes_helper(
+        struct OMRPortLibrary *portLibrary, intptr_t fd, int32_t lockFlags, uint64_t offset, uint64_t length)
 {
 	OMRPORT_ACCESS_FROM_OMRPORT(portLibrary);
-	return isAsync? omrfile_blockingasync_lock_bytes(fd, lockFlags, offset, length) : omrfile_lock_bytes(fd, lockFlags, offset, length);
+	return isAsync ? omrfile_blockingasync_lock_bytes(fd, lockFlags, offset, length)
+	               : omrfile_lock_bytes(fd, lockFlags, offset, length);
 }
 
 int32_t
 omrfile_unlock_bytes_helper(struct OMRPortLibrary *portLibrary, intptr_t fd, uint64_t offset, uint64_t length)
 {
 	OMRPORT_ACCESS_FROM_OMRPORT(portLibrary);
-	return isAsync? omrfile_blockingasync_unlock_bytes(fd, offset, length) : omrfile_unlock_bytes(fd, offset, length);
+	return isAsync ? omrfile_blockingasync_unlock_bytes(fd, offset, length)
+	               : omrfile_unlock_bytes(fd, offset, length);
 }
 
 intptr_t
 omrfile_read_helper(struct OMRPortLibrary *portLibrary, intptr_t fd, void *buf, intptr_t nbytes)
 {
 	OMRPORT_ACCESS_FROM_OMRPORT(portLibrary);
-	return isAsync? omrfile_blockingasync_read(fd, buf, nbytes) : omrfile_read(fd, buf, nbytes);
+	return isAsync ? omrfile_blockingasync_read(fd, buf, nbytes) : omrfile_read(fd, buf, nbytes);
 }
 
 intptr_t
 omrfile_write_helper(struct OMRPortLibrary *portLibrary, intptr_t fd, void *buf, intptr_t nbytes)
 {
 	OMRPORT_ACCESS_FROM_OMRPORT(portLibrary);
-	return isAsync? omrfile_blockingasync_write(fd, buf, nbytes) : omrfile_write(fd, buf, nbytes);
+	return isAsync ? omrfile_blockingasync_write(fd, buf, nbytes) : omrfile_write(fd, buf, nbytes);
 }
 
 int32_t
 omrfile_set_length_helper(struct OMRPortLibrary *portLibrary, intptr_t fd, I_64 newLength)
 {
 	OMRPORT_ACCESS_FROM_OMRPORT(portLibrary);
-	return isAsync? omrfile_blockingasync_set_length(fd, newLength) : omrfile_set_length(fd, newLength);
+	return isAsync ? omrfile_blockingasync_set_length(fd, newLength) : omrfile_set_length(fd, newLength);
 }
 
 I_64
 omrfile_flength_helper(struct OMRPortLibrary *portLibrary, intptr_t fd)
 {
 	OMRPORT_ACCESS_FROM_OMRPORT(portLibrary);
-	return isAsync? omrfile_blockingasync_flength(fd) : omrfile_flength(fd);
+	return isAsync ? omrfile_blockingasync_flength(fd) : omrfile_flength(fd);
 }
-
-
 
 /**
  * Verify port library properly setup to run file tests
@@ -253,7 +251,8 @@ TEST_F(PortFileTest2, file_test0)
 		}
 
 		if (NULL == OMRPORTLIB->file_blockingasync_unlock_bytes) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "portLibrary->file_blockingasync_unlock_bytes is NULL\n");
+			outputErrorMessage(
+			        PORTTEST_ERROR_ARGS, "portLibrary->file_blockingasync_unlock_bytes is NULL\n");
 		}
 
 		/* omrfile_test9 */
@@ -456,7 +455,8 @@ TEST_F(PortFileTest2, file_test3)
 	/* having hopefully shoved this stuff onto file we need to read it back and check its as expected! */
 	rc = FILE_CLOSE_FUNCTION(OMRPORTLIB, fd1);
 	if (0 != rc) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc, 0);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc, 0);
 		goto exit;
 	}
 
@@ -473,13 +473,15 @@ TEST_F(PortFileTest2, file_test3)
 	}
 
 	if (strlen(readBufPtr) != strlen(expectedResult)) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_read_text() returned %d expected %d\n", strlen(readBufPtr), strlen(expectedResult));
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_read_text() returned %d expected %d\n",
+		        strlen(readBufPtr), strlen(expectedResult));
 		goto exit;
 	}
 
 	/* omrfile_read_text(): translation from IBM1047 to ASCII is done on zOS */
 	if (strcmp(readBufPtr, expectedResult)) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_read_text() returned \"%s\" expected \"%s\"\n", readBufPtr , expectedResult);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_read_text() returned \"%s\" expected \"%s\"\n",
+		        readBufPtr, expectedResult);
 		goto exit;
 	}
 
@@ -492,7 +494,8 @@ exit:
 /**
  */
 void
-openFlagTest(struct OMRPortLibrary *portLibrary, const char *testName, const char *pathName, int32_t flags, int32_t mode)
+openFlagTest(
+        struct OMRPortLibrary *portLibrary, const char *testName, const char *pathName, int32_t flags, int32_t mode)
 {
 	OMRPORT_ACCESS_FROM_OMRPORT(portLibrary);
 	intptr_t fd;
@@ -508,46 +511,53 @@ openFlagTest(struct OMRPortLibrary *portLibrary, const char *testName, const cha
 	/* Open, should succeed */
 	fd = FILE_OPEN_FUNCTION(OMRPORTLIB, pathName, flags, mode);
 	if (-1 == fd) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected valid file handle\n", FILE_OPEN_FUNCTION_NAME, -1);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected valid file handle\n",
+		        FILE_OPEN_FUNCTION_NAME, -1);
 	}
 	/* Verify the filesystem sees it */
 	rc = omrfile_stat(pathName, 0, &buf);
 	if (rc != 0) {
 		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat() returned %d, expected %d\n", rc, 0);
 	} else if (buf.isFile != 1) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat() set buf.isFile = %d, expected %d\n", buf.isFile, 1);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrfile_stat() set buf.isFile = %d, expected %d\n", buf.isFile, 1);
 	}
 
 	/* Close the file, should succeed */
 	rc = FILE_CLOSE_FUNCTION(OMRPORTLIB, fd);
 	if (0 != rc) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc, 0);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc, 0);
 	}
 	/* The file should still exist */
 	rc = omrfile_stat(pathName, 0, &buf);
 	if (rc != 0) {
 		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat() returned %d, expected %d\n", rc, 0);
 	} else if (buf.isFile != 1) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat() set buf.isFile = %d, expected %d\n", buf.isFile, 1);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrfile_stat() set buf.isFile = %d, expected %d\n", buf.isFile, 1);
 	}
 
 	/* Open again, should succeed */
 	fd = FILE_OPEN_FUNCTION(OMRPORTLIB, pathName, flags, mode);
 	if (-1 == fd) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected valid file handle\n", FILE_OPEN_FUNCTION_NAME, -1);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected valid file handle\n",
+		        FILE_OPEN_FUNCTION_NAME, -1);
 	}
 	/* The file should still exist */
 	rc = omrfile_stat(pathName, 0, &buf);
 	if (rc != 0) {
 		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat() returned %d, expected %d\n", rc, 0);
 	} else if (buf.isFile != 1) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat() set buf.isFile = %d, expected %d\n", buf.isFile, 1);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrfile_stat() set buf.isFile = %d, expected %d\n", buf.isFile, 1);
 	}
 
 	/* Close the file references, should succeed */
 	rc = FILE_CLOSE_FUNCTION(OMRPORTLIB, fd);
 	if (0 != rc) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc, 0);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc, 0);
 	}
 
 	/* Delete this file, should succeed */
@@ -584,28 +594,33 @@ TEST_F(PortFileTest2, file_test4)
 		/* Query a file that should not be there */
 		rc = omrfile_attr(localFilename);
 		if (rc >= 0) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_attr(%s) returned %d expected %d\n", localFilename, rc, -1);
+			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_attr(%s) returned %d expected %d\n",
+			        localFilename, rc, -1);
 		}
 
 		/* Still should not be there */
 		rc = omrfile_attr(localFilename);
 		if (rc >= 0) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_attr(%s) returned %d expected %d\n", localFilename, rc, -1);
+			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_attr(%s) returned %d expected %d\n",
+			        localFilename, rc, -1);
 		}
 
 		/* A directory we know is there, how about the one we are in? */
 		rc = omrfile_attr(".");
 		if (EsIsDir != rc) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_attr(%s) returned %d expected %d\n", ".", rc, EsIsDir);
+			outputErrorMessage(
+			        PORTTEST_ERROR_ARGS, "omrfile_attr(%s) returned %d expected %d\n", ".", rc, EsIsDir);
 		}
 
 		/* Query a file that should be there  */
 		rc = omrfile_attr(knownFile);
 		if (EsIsFile != rc) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_attr(%s) returned %d expected %d\n", knownFile, rc, EsIsFile);
+			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_attr(%s) returned %d expected %d\n", knownFile,
+			        rc, EsIsFile);
 		}
 	} else {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_get_executable_name(\"java.properties\", &knownFile) failed\n");
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "omrsysinfo_get_executable_name(\"java.properties\", &knownFile) failed\n");
 	}
 
 	/* Don't delete executable name (knownFile); system-owned. */
@@ -636,36 +651,42 @@ TEST_F(PortFileTest2, file_test5)
 	/* There should be no directory or file named above, they are not that usual */
 	rc = omrfile_stat(dirName, 0, &buf);
 	if (rc >= 0) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat(\"%s\") returned %d expected %d\n", dirName, rc, -1);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrfile_stat(\"%s\") returned %d expected %d\n", dirName, rc, -1);
 	}
 	rc = omrfile_stat(fileName, 0, &buf);
 	if (rc >= 0) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat(\"%s\") returned %d expected %d\n", dirName, rc, -1);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrfile_stat(\"%s\") returned %d expected %d\n", dirName, rc, -1);
 	}
 
 	/* try opening a "new" file, expect success. Requires one of read/write attributes too */
 	fd = FILE_OPEN_FUNCTION(OMRPORTLIB, fileName, EsOpenCreate | EsOpenRead | EsOpenWrite, 0666);
 	if (-1 == fd) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s(\"%s\") returned %d expected valid file handle\n", FILE_OPEN_FUNCTION_NAME, fileName, -1);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s(\"%s\") returned %d expected valid file handle\n",
+		        FILE_OPEN_FUNCTION_NAME, fileName, -1);
 		goto exit;
 	}
 
 	/* Close the file, expect success */
 	rc = FILE_CLOSE_FUNCTION(OMRPORTLIB, fd);
 	if (0 != rc) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc, 0);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc, 0);
 	}
 
 	/* Create the directory, expect success */
 	rc = omrfile_mkdir(dirName);
 	if (rc < 0) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_mkdir(\"%s\") returned %d expected %d\n", dirName, rc, -1);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrfile_mkdir(\"%s\") returned %d expected %d\n", dirName, rc, -1);
 	}
 
 	/* Remove the directory, expect success */
 	rc = omrfile_unlinkdir(dirName);
 	if (rc < 0) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_unlinkdir(\"%s\") returned %d expected %d\n", dirName, rc, -1);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrfile_unlinkdir(\"%s\") returned %d expected %d\n", dirName, rc, -1);
 	}
 
 	/* Remove the file, expect success */
@@ -677,23 +698,27 @@ TEST_F(PortFileTest2, file_test5)
 	/* The file and directory should now be gone */
 	rc = omrfile_stat(dirName, 0, &buf);
 	if (rc >= 0) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat(\"%s\") returned %d expected %d\n", dirName, rc, -1);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrfile_stat(\"%s\") returned %d expected %d\n", dirName, rc, -1);
 	}
 	rc = omrfile_stat(fileName, 0, &buf);
 	if (rc >= 0) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat(\"%s\") returned %d expected %d\n", dirName, rc, -1);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrfile_stat(\"%s\") returned %d expected %d\n", dirName, rc, -1);
 	}
 
 	/* try to open a file with no name, should fail */
 	fd = FILE_OPEN_FUNCTION(OMRPORTLIB, NULL, EsOpenWrite | EsOpenCreate, 0);
 	if (-1 != fd) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned valid file handle expected -1\n", FILE_OPEN_FUNCTION_NAME);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "%s() returned valid file handle expected -1\n", FILE_OPEN_FUNCTION_NAME);
 	}
 
 	/* try to close a non existant file, should fail */
 	rc = FILE_CLOSE_FUNCTION(OMRPORTLIB, -1);
 	if (0 == rc) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc, -1);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc, -1);
 	}
 
 exit:
@@ -731,7 +756,8 @@ TEST_F(PortFileTest2, file_test6)
 	/* Create a new file, will fail if the file exists.  Expect success */
 	fd1 = FILE_OPEN_FUNCTION(OMRPORTLIB, path1, EsOpenCreateNew | EsOpenRead | EsOpenWrite, 0666);
 	if (-1 == fd1) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected file handle\n", FILE_OPEN_FUNCTION_NAME, -1);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "%s() returned %d expected file handle\n", FILE_OPEN_FUNCTION_NAME, -1);
 		goto exit;
 	}
 	/* Verify the filesystem sees it */
@@ -742,38 +768,44 @@ TEST_F(PortFileTest2, file_test6)
 	/* Try and create this file again, expect failure */
 	fd2 = FILE_OPEN_FUNCTION(OMRPORTLIB, path1, EsOpenCreateNew, 0666);
 	if (-1 != fd2) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned valid file handle expected -1\n", FILE_OPEN_FUNCTION_NAME);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "%s() returned valid file handle expected -1\n", FILE_OPEN_FUNCTION_NAME);
 	}
 	/* Verify the filesystem sees it */
 	rc = omrfile_stat(path1, 0, &buf);
 	if (rc != 0) {
 		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat() returned %d, expected %d\n", rc, 0);
 	} else if (buf.isFile != 1) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat() set buf.isFile = %d, expected %d\n", buf.isFile, 1);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrfile_stat() set buf.isFile = %d, expected %d\n", buf.isFile, 1);
 	}
 	/* Close the invalid file handle (from second attempt), expect failure */
 	rc = FILE_CLOSE_FUNCTION(OMRPORTLIB, fd2);
 	if (0 == rc) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc, -1);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc, -1);
 	}
 	/* The file should still exist */
 	rc = omrfile_stat(path1, 0, &buf);
 	if (rc != 0) {
 		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat() returned %d, expected %d\n", rc, 0);
 	} else if (buf.isFile != 1) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat() set buf.isFile = %d, expected %d\n", buf.isFile, 1);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrfile_stat() set buf.isFile = %d, expected %d\n", buf.isFile, 1);
 	}
 	/* Close the valid file handle (from first attempt), expect success */
 	rc = FILE_CLOSE_FUNCTION(OMRPORTLIB, fd1);
 	if (0 != rc) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc, 0);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc, 0);
 	}
 	/* The file should still exist */
 	rc = omrfile_stat(path1, 0, &buf);
 	if (rc != 0) {
 		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat() returned %d, expected %d\n", rc, 0);
 	} else if (buf.isFile != 1) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat() set buf.isFile = %d, expected %d\n", buf.isFile, 1);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrfile_stat() set buf.isFile = %d, expected %d\n", buf.isFile, 1);
 	}
 
 	/*
@@ -783,14 +815,16 @@ TEST_F(PortFileTest2, file_test6)
 	 */
 	fd1 = FILE_OPEN_FUNCTION(OMRPORTLIB, path1, EsOpenCreateNew | EsOpenWrite, 0666);
 	if (-1 != fd1) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned valid file handle expected -1\n", FILE_OPEN_FUNCTION_NAME);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "%s() returned valid file handle expected -1\n", FILE_OPEN_FUNCTION_NAME);
 		FILE_CLOSE_FUNCTION(OMRPORTLIB, fd1);
 	}
-/* TODO once all platforms are ready
-	if(rc != OMRPORT_ERROR_FILE_EXIST) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_open() returned %d expected %d\n", rc, OMRPORT_ERROR_FILE_EXIST);
-	}
-*/
+	/* TODO once all platforms are ready
+	        if(rc != OMRPORT_ERROR_FILE_EXIST) {
+	                        outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_open() returned %d expected %d\n", rc,
+	   OMRPORT_ERROR_FILE_EXIST);
+	        }
+	*/
 	/* Finally delete this file */
 	rc = omrfile_unlink(path1);
 	if (rc < 0) {
@@ -807,33 +841,39 @@ TEST_F(PortFileTest2, file_test6)
 	 */
 	fd2 = FILE_OPEN_FUNCTION(OMRPORTLIB, path2, EsOpenRead, 0444);
 	if (-1 != fd2) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned valid file handle expected -1\n", FILE_OPEN_FUNCTION_NAME);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "%s() returned valid file handle expected -1\n", FILE_OPEN_FUNCTION_NAME);
 	}
 	fd2 = FILE_OPEN_FUNCTION(OMRPORTLIB, path2, EsOpenWrite, 0666);
 	if (-1 != fd2) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned valid file handle expected -1\n", FILE_OPEN_FUNCTION_NAME);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "%s() returned valid file handle expected -1\n", FILE_OPEN_FUNCTION_NAME);
 	}
 	fd2 = FILE_OPEN_FUNCTION(OMRPORTLIB, path2, EsOpenTruncate, 0666);
 	if (-1 != fd2) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned valid file handle expected -1\n", FILE_OPEN_FUNCTION_NAME);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "%s() returned valid file handle expected -1\n", FILE_OPEN_FUNCTION_NAME);
 	}
 	fd2 = FILE_OPEN_FUNCTION(OMRPORTLIB, path2, EsOpenText, 0666);
 	if (-1 != fd2) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned valid file handle expected -1\n", FILE_OPEN_FUNCTION_NAME);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "%s() returned valid file handle expected -1\n", FILE_OPEN_FUNCTION_NAME);
 	}
 	fd2 = FILE_OPEN_FUNCTION(OMRPORTLIB, path2, EsOpenAppend, 0666);
 	if (-1 != fd2) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned valid file handle expected -1\n", FILE_OPEN_FUNCTION_NAME);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "%s() returned valid file handle expected -1\n", FILE_OPEN_FUNCTION_NAME);
 	}
-/* TODO
- * Different behaviour on windows/UNIX.  Which is right?  Unix states must be one of read/write/execute
- *
-	fd2 = omrfile_open(path2, EsOpenCreate, 0444);
-	omrfile_close(fd2);
-	if (-1 != fd2) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_open() returned valid file handle expected -1\n");
-	}
- */
+	/* TODO
+	 * Different behaviour on windows/UNIX.  Which is right?  Unix states must be one of read/write/execute
+	 *
+	        fd2 = omrfile_open(path2, EsOpenCreate, 0444);
+	        omrfile_close(fd2);
+	        if (-1 != fd2) {
+	                outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_open() returned valid file handle expected
+	 -1\n");
+	        }
+	 */
 
 	/* The file should not exist */
 	rc = omrfile_stat(path2, 0, &buf);
@@ -848,9 +888,9 @@ TEST_F(PortFileTest2, file_test6)
 	openFlagTest(OMRPORTLIB, testName, path3, EsOpenWrite | EsOpenCreate, 0666);
 
 	/* flags = EsOpenTruncate */
-/*
-	openFlagTest(OMRPORTLIB, testName, path3, EsOpenTruncate | EsOpenCreate);
-*/
+	/*
+	        openFlagTest(OMRPORTLIB, testName, path3, EsOpenTruncate | EsOpenCreate);
+	*/
 
 	/* flags = EsOpenAppend, needs read/write and create */
 	openFlagTest(OMRPORTLIB, testName, path3, EsOpenAppend | EsOpenCreate | EsOpenWrite, 0666);
@@ -910,7 +950,8 @@ TEST_F(PortFileTest2, file_test7)
 	/* open "new" file - if file exists then should still work */
 	fd = FILE_OPEN_FUNCTION(OMRPORTLIB, fileName, EsOpenWrite | EsOpenCreate, 0666);
 	if (-1 == fd) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected valid file handle\n", FILE_OPEN_FUNCTION_NAME, -1);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected valid file handle\n",
+		        FILE_OPEN_FUNCTION_NAME, -1);
 		goto exit;
 	}
 
@@ -918,44 +959,51 @@ TEST_F(PortFileTest2, file_test7)
 	expectedReturnValue = sizeof(inputLine);
 	rc = FILE_WRITE_FUNCTION(OMRPORTLIB, fd, inputLine, expectedReturnValue);
 	if (rc != expectedReturnValue) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_WRITE_FUNCTION_NAME, rc, expectedReturnValue);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_WRITE_FUNCTION_NAME, rc,
+		        expectedReturnValue);
 		goto exit;
 	}
 
 	rc = FILE_CLOSE_FUNCTION(OMRPORTLIB, fd);
 	if (0 != rc) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc , 0);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc, 0);
 		goto exit;
 	}
 
 	/* a sneaky test to see that the fd is now useless */
 	rc = FILE_WRITE_FUNCTION(OMRPORTLIB, fd, inputLine, expectedReturnValue);
 	if (rc >= 0) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_WRITE_FUNCTION_NAME, rc, expectedReturnValue);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_WRITE_FUNCTION_NAME, rc,
+		        expectedReturnValue);
 		goto exit;
 	}
 
 	fd = FILE_OPEN_FUNCTION(OMRPORTLIB, fileName, EsOpenRead, 0444);
 	if (-1 == fd) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected valid file handle\n", FILE_OPEN_FUNCTION_NAME, -1);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected valid file handle\n",
+		        FILE_OPEN_FUNCTION_NAME, -1);
 		goto exit;
 	}
 
 	/* lets read back what we wrote */
 	rc = FILE_READ_FUNCTION(OMRPORTLIB, fd, outputLine, 128);
-	if (rc != expectedReturnValue)	{
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d, expected %d\n", FILE_READ_FUNCTION_NAME, rc, expectedReturnValue);
+	if (rc != expectedReturnValue) {
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d, expected %d\n", FILE_READ_FUNCTION_NAME, rc,
+		        expectedReturnValue);
 		goto exit;
 	}
 
 	if (strcmp(outputLine, inputLine)) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Read back data \"%s\" not matching written data \"%s\"\n", outputLine, inputLine);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "Read back data \"%s\" not matching written data \"%s\"\n",
+		        outputLine, inputLine);
 		goto exit;
 	}
 
 	rc = FILE_CLOSE_FUNCTION(OMRPORTLIB, fd);
 	if (0 != rc) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc, 0);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc, 0);
 		goto exit;
 	}
 
@@ -998,31 +1046,37 @@ TEST_F(PortFileTest2, file_test8)
 	/*lets try opening a "new" file - if file exists then should still work */
 	fd = FILE_OPEN_FUNCTION(OMRPORTLIB, fileName, EsOpenWrite | EsOpenCreate | EsOpenTruncate, 0666);
 	if (-1 == fd) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected valid file handle\n", FILE_OPEN_FUNCTION_NAME, -1);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected valid file handle\n",
+		        FILE_OPEN_FUNCTION_NAME, -1);
 		goto exit;
 	}
 
 	prevFilePtr = omrfile_seek(fd, 0, EsSeekCur);
 	if (0 != prevFilePtr) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "File pointer location is wrong after opening file. Expected = 0, Got = %lld", prevFilePtr);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "File pointer location is wrong after opening file. Expected = 0, Got = %lld", prevFilePtr);
 	}
 
 	/* now lets write to it */
 	rc = FILE_WRITE_FUNCTION(OMRPORTLIB, fd, inputLine1, expectedReturnValue);
 
 	if (rc != expectedReturnValue) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_WRITE_FUNCTION_NAME, rc, expectedReturnValue);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_WRITE_FUNCTION_NAME, rc,
+		        expectedReturnValue);
 		goto exit;
 	}
 
 	filePtr = omrfile_seek(fd, 0, EsSeekCur);
 	if (prevFilePtr + expectedReturnValue != filePtr) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "File pointer location is wrong after writing into file. Expected = %lld, Got = %lld", prevFilePtr + expectedReturnValue,  filePtr);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "File pointer location is wrong after writing into file. Expected = %lld, Got = %lld",
+		        prevFilePtr + expectedReturnValue, filePtr);
 	}
 
 	rc = FILE_CLOSE_FUNCTION(OMRPORTLIB, fd);
 	if (0 != rc) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc, 0);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc, 0);
 		goto exit;
 	}
 
@@ -1032,17 +1086,21 @@ TEST_F(PortFileTest2, file_test8)
 #if defined(OMR_OS_WINDOWS)
 	/* Windows sets the file pointer to the end of file as soon as it is opened in append mode. */
 	if (5 != prevFilePtr) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "File pointer location is wrong after opening the file. Expected = 5, Got = %lld", prevFilePtr);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "File pointer location is wrong after opening the file. Expected = 5, Got = %lld", prevFilePtr);
 	}
 #else
-	/* Other platforms set the file pointer to the start of file when it is opened in append mode and update the file pointer to the end only when it is needed in the next call. */
+	/* Other platforms set the file pointer to the start of file when it is opened in append mode and update the
+	 * file pointer to the end only when it is needed in the next call. */
 	if (0 != prevFilePtr) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "File pointer location is wrong after opening the file. Expected = 0, Got = %lld", prevFilePtr);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "File pointer location is wrong after opening the file. Expected = 0, Got = %lld", prevFilePtr);
 	}
 #endif /* defined(OMR_OS_WINDOWS) */
 
 	if (-1 == fd) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected valid file handle\n", FILE_OPEN_FUNCTION_NAME, -1);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected valid file handle\n",
+		        FILE_OPEN_FUNCTION_NAME, -1);
 		goto exit;
 	}
 
@@ -1051,13 +1109,15 @@ TEST_F(PortFileTest2, file_test8)
 	rc = FILE_WRITE_FUNCTION(OMRPORTLIB, fd, inputLine2, expectedReturnValue);
 
 	if (rc != expectedReturnValue) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_WRITE_FUNCTION_NAME, rc, expectedReturnValue);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_WRITE_FUNCTION_NAME, rc,
+		        expectedReturnValue);
 		goto exit;
 	}
 
 	filePtr = omrfile_seek(fd, 0, EsSeekCur);
 	if (10 != filePtr) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "File pointer location is wrong after writing into file. Expected = 10, Got = %lld", filePtr);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "File pointer location is wrong after writing into file. Expected = 10, Got = %lld", filePtr);
 	}
 
 	rc = FILE_CLOSE_FUNCTION(OMRPORTLIB, fd);
@@ -1068,30 +1128,36 @@ TEST_F(PortFileTest2, file_test8)
 
 	fd = FILE_OPEN_FUNCTION(OMRPORTLIB, fileName, EsOpenRead, 0444);
 	if (-1 == fd) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected valid file handle\n", FILE_OPEN_FUNCTION_NAME, -1);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected valid file handle\n",
+		        FILE_OPEN_FUNCTION_NAME, -1);
 		goto exit;
 	}
 
 	prevFilePtr = omrfile_seek(fd, 0, EsSeekCur);
 	if (0 != prevFilePtr) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "File pointer location is wrong after opening the file. Expected = 0, Got = %lld", prevFilePtr);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "File pointer location is wrong after opening the file. Expected = 0, Got = %lld", prevFilePtr);
 	}
 
 	/* lets read back what we wrote */
 	expectedReturnValue = 10;
 	rc = FILE_READ_FUNCTION(OMRPORTLIB, fd, outputLine, expectedReturnValue);
 	if (rc != expectedReturnValue) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d, expected %d\n", FILE_READ_FUNCTION_NAME, rc, expectedReturnValue);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d, expected %d\n", FILE_READ_FUNCTION_NAME, rc,
+		        expectedReturnValue);
 		goto exit;
 	}
 
 	filePtr = omrfile_seek(fd, 0, EsSeekCur);
 	if (prevFilePtr + expectedReturnValue != filePtr) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "File pointer location is wrong after reading from file. Expected = %lld, Got = %lld", prevFilePtr + expectedReturnValue, filePtr);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "File pointer location is wrong after reading from file. Expected = %lld, Got = %lld",
+		        prevFilePtr + expectedReturnValue, filePtr);
 	}
 
 	if (strcmp(expectedOutput, outputLine)) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Read back data \"%s\" not matching expected data \"%s\"\n", outputLine, expectedOutput);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "Read back data \"%s\" not matching expected data \"%s\"\n",
+		        outputLine, expectedOutput);
 		goto exit;
 	}
 
@@ -1106,7 +1172,6 @@ exit:
 	omrfile_unlink(fileName);
 	reportTestExit(OMRPORTLIB, testName);
 }
-
 
 /**
  * Verify port file system.
@@ -1141,7 +1206,8 @@ TEST_F(PortFileTest2, file_test9)
 
 		if (i != 0) {
 			if (-1 == lastmod) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_lastmod() returned -1, iteration %d\n", i + 1);
+				outputErrorMessage(
+				        PORTTEST_ERROR_ARGS, "omrfile_lastmod() returned -1, iteration %d\n", i + 1);
 				goto exit;
 			}
 		} else {
@@ -1151,14 +1217,17 @@ TEST_F(PortFileTest2, file_test9)
 
 		fd = FILE_OPEN_FUNCTION(OMRPORTLIB, fileName, EsOpenCreate | EsOpenWrite | EsOpenAppend, 0666);
 		if (-1 == fd) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned -1 expected valid file handle iteration %d\n", FILE_OPEN_FUNCTION_NAME, i + 1);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "%s() returned -1 expected valid file handle iteration %d\n", FILE_OPEN_FUNCTION_NAME,
+			        i + 1);
 			goto exit;
 		}
 
 		/* make sure we are actually writing something to the file */
 		length = omrfile_length(fileName);
 		if (length != i) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_length() returned %lld expected %d\n", length, i);
+			outputErrorMessage(
+			        PORTTEST_ERROR_ARGS, "omrfile_length() returned %lld expected %d\n", length, i);
 			goto exit;
 		}
 
@@ -1167,26 +1236,30 @@ TEST_F(PortFileTest2, file_test9)
 			savedLength = length;
 			newLength = FILE_SET_LENGTH_FUNCTION(OMRPORTLIB, fd, length - 1);
 			if (0 != newLength) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %lld expected %d\n", FILE_SET_LENGTH_FUNCTION_NAME, newLength, 0);
+				outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %lld expected %d\n",
+				        FILE_SET_LENGTH_FUNCTION_NAME, newLength, 0);
 				goto exit;
 			}
 
 			/* Verify see correct length */
 			length = omrfile_length(fileName);
 			if (length != (savedLength - 1)) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_length() returned %lld expected %lld\n", length, savedLength - 1);
+				outputErrorMessage(PORTTEST_ERROR_ARGS,
+				        "omrfile_length() returned %lld expected %lld\n", length, savedLength - 1);
 				goto exit;
 			}
 
 			/* Restore length */
 			newLength = FILE_SET_LENGTH_FUNCTION(OMRPORTLIB, fd, savedLength);
 			if (0 != newLength) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %lld expected %d\n", FILE_SET_LENGTH_FUNCTION_NAME, newLength, 0);
+				outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %lld expected %d\n",
+				        FILE_SET_LENGTH_FUNCTION_NAME, newLength, 0);
 				goto exit;
 			}
 			length = omrfile_length(fileName);
 			if (length != savedLength) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_length() returned %lld expected %lld\n", length, savedLength);
+				outputErrorMessage(PORTTEST_ERROR_ARGS,
+				        "omrfile_length() returned %lld expected %lld\n", length, savedLength);
 				goto exit;
 			}
 		}
@@ -1194,19 +1267,22 @@ TEST_F(PortFileTest2, file_test9)
 		/* Write something to the file and close it */
 		rc = FILE_WRITE_FUNCTION(OMRPORTLIB, fd, (char *)"a", 1);
 		if (1 != rc) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected 1, iteration %d\n", FILE_WRITE_FUNCTION_NAME, rc, i + 1);
+			outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected 1, iteration %d\n",
+			        FILE_WRITE_FUNCTION_NAME, rc, i + 1);
 			goto exit;
 		}
 		rc = FILE_CLOSE_FUNCTION(OMRPORTLIB, fd);
 		if (0 != rc) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d, iteration %d\n", FILE_CLOSE_FUNCTION_NAME, rc, 0, i + 1);
+			outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d, iteration %d\n",
+			        FILE_CLOSE_FUNCTION_NAME, rc, 0, i + 1);
 			goto exit;
 		}
 
 		/* lastmod should have advanced due to the delay */
 		lastmod = omrfile_lastmod(fileName);
 		if (-1 == lastmod) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_lastmod() returned %d expected %d, iteration %d\n", lastmod, -1, i + 1);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "omrfile_lastmod() returned %d expected %d, iteration %d\n", lastmod, -1, i + 1);
 			goto exit;
 		}
 
@@ -1259,7 +1335,8 @@ TEST_F(PortFileTest2, file_test10)
 	 */
 	fd = FILE_OPEN_FUNCTION(OMRPORTLIB, fileName, EsOpenWrite | EsOpenCreate | EsOpenTruncate, 0666);
 	if (-1 == fd) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected valid file handle\n", FILE_OPEN_FUNCTION_NAME, -1);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected valid file handle\n",
+		        FILE_OPEN_FUNCTION_NAME, -1);
 		goto exit;
 	}
 	omrfile_sync(fd); /* need this to ensure that length matches what we expect */
@@ -1275,7 +1352,8 @@ TEST_F(PortFileTest2, file_test10)
 	expectedReturnValue = sizeof(inputLine1);
 	rc = FILE_WRITE_FUNCTION(OMRPORTLIB, fd, inputLine1, expectedReturnValue);
 	if (rc != expectedReturnValue) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_WRITE_FUNCTION_NAME, rc, expectedReturnValue);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_WRITE_FUNCTION_NAME, rc,
+		        expectedReturnValue);
 		goto exit;
 	}
 
@@ -1289,7 +1367,8 @@ TEST_F(PortFileTest2, file_test10)
 
 	fd = FILE_OPEN_FUNCTION(OMRPORTLIB, fileName, EsOpenWrite, 0666);
 	if (-1 == fd) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected valid file handle\n", FILE_OPEN_FUNCTION_NAME, -1);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected valid file handle\n",
+		        FILE_OPEN_FUNCTION_NAME, -1);
 		goto exit;
 	}
 
@@ -1298,7 +1377,8 @@ TEST_F(PortFileTest2, file_test10)
 	expectedOffset = 0;
 	resultingOffset = omrfile_seek(fd, offset, EsSeekCur);
 	if (resultingOffset != expectedOffset) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_seek() returned %lld expected %lld\n", resultingOffset, expectedOffset);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_seek() returned %lld expected %lld\n", resultingOffset,
+		        expectedOffset);
 		goto exit;
 	}
 
@@ -1307,7 +1387,8 @@ TEST_F(PortFileTest2, file_test10)
 	expectedOffset = 40;
 	resultingOffset = omrfile_seek(fd, offset, EsSeekSet);
 	if (resultingOffset != expectedOffset) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_seek() returned %lld expected %lld\n", resultingOffset, expectedOffset);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_seek() returned %lld expected %lld\n", resultingOffset,
+		        expectedOffset);
 		goto exit;
 	}
 
@@ -1316,14 +1397,16 @@ TEST_F(PortFileTest2, file_test10)
 	rc = FILE_WRITE_FUNCTION(OMRPORTLIB, fd, inputLine2, expectedReturnValue);
 	omrfile_sync(fd); /* need this to ensure that length matches what we expect */
 	if (rc != expectedReturnValue) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_WRITE_FUNCTION_NAME, rc, expectedReturnValue);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_WRITE_FUNCTION_NAME, rc,
+		        expectedReturnValue);
 		goto exit;
 	}
 
 	/* now lets look at file length */
 	fileLength = omrfile_length(fileName);
 	if (fileLength != expectedFileLength) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_length() returned %lld expected %lld\n", fileLength, expectedFileLength);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_length() returned %lld expected %lld\n", fileLength,
+		        expectedFileLength);
 		goto exit;
 	}
 
@@ -1332,7 +1415,8 @@ TEST_F(PortFileTest2, file_test10)
 	 */
 	resultingOffset = omrfile_seek(fd, fileLength + 5, EsSeekSet);
 	if (resultingOffset != fileLength + 5) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_seek() returned %lld expected %lld\n", resultingOffset, fileLength + 5);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_seek() returned %lld expected %lld\n", resultingOffset,
+		        fileLength + 5);
 		goto exit;
 	}
 	omrfile_sync(fd); /* need this to ensure that length matches what we expect */
@@ -1340,7 +1424,8 @@ TEST_F(PortFileTest2, file_test10)
 	/* now lets look at file length */
 	fileLength = omrfile_length(fileName);
 	if (fileLength != expectedFileLength) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_length() returned %lld expected %lld\n", fileLength, expectedFileLength);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_length() returned %lld expected %lld\n", fileLength,
+		        expectedFileLength);
 		goto exit;
 	}
 
@@ -1358,7 +1443,8 @@ TEST_F(PortFileTest2, file_test10)
 	expectedFileLength += 6; /* we seeked 5 past end and have written 1 more */
 	fileLength = omrfile_length(fileName);
 	if (fileLength != expectedFileLength) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_length() returned %lld expected %lld\n", fileLength, expectedFileLength);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_length() returned %lld expected %lld\n", fileLength,
+		        expectedFileLength);
 		goto exit;
 	}
 
@@ -1367,7 +1453,8 @@ TEST_F(PortFileTest2, file_test10)
 	expectedOffset = 40;
 	resultingOffset = omrfile_seek(fd, offset, EsSeekSet);
 	if (resultingOffset != expectedOffset) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_seek() returned %lld expected %lld\n", resultingOffset, expectedOffset);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_seek() returned %lld expected %lld\n", resultingOffset,
+		        expectedOffset);
 		goto exit;
 	}
 
@@ -1438,7 +1525,8 @@ TEST_F(PortFileTest2, file_test11)
 	if (rc != 0) {
 		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat() returned %d expected %d\n", rc, 0);
 	} else if (buf.isDir != 1) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat() set buf.isDir = %d, expected %d\n", buf.isDir, 1);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrfile_stat() set buf.isDir = %d, expected %d\n", buf.isDir, 1);
 	}
 
 	/* Create the directory again, expect failure */
@@ -1488,7 +1576,8 @@ TEST_F(PortFileTest2, file_test11)
 	if (rc != 0) {
 		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat() returned %d expected %d\n", rc, 0);
 	} else if (buf.isDir != 1) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat() set buf.isDir = %d, expected %d\n", buf.isDir, 1);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrfile_stat() set buf.isDir = %d, expected %d\n", buf.isDir, 1);
 	}
 
 	/* Remove this directory, expect failure (too high) */
@@ -1563,7 +1652,7 @@ TEST_F(PortFileTest2, file_test12)
 		goto exit;
 	}
 
-	fd2 = FILE_OPEN_FUNCTION(OMRPORTLIB, pathName2, EsOpenCreate | EsOpenWrite , 0666);
+	fd2 = FILE_OPEN_FUNCTION(OMRPORTLIB, pathName2, EsOpenCreate | EsOpenWrite, 0666);
 	if (-1 == fd2) {
 		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() failed\n", FILE_OPEN_FUNCTION_NAME);
 		goto exit;
@@ -1592,7 +1681,7 @@ TEST_F(PortFileTest2, file_test12)
 	}
 
 	/* try open of file just unlinked: Don't use helper as expect failure */
-	fd1 = FILE_OPEN_FUNCTION(OMRPORTLIB, pathName1, EsOpenWrite , 0666);
+	fd1 = FILE_OPEN_FUNCTION(OMRPORTLIB, pathName1, EsOpenWrite, 0666);
 	if (-1 != fd1) {
 		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() failed\n", FILE_OPEN_FUNCTION_NAME);
 		goto exit;
@@ -1681,27 +1770,31 @@ TEST_F(PortFileTest2, file_test13)
 	/* now rename it */
 	rc = omrfile_move(dir1, dir2);
 	if (0 != rc) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_move() from %s to %s returned %d, expected %d\n", dir1, dir2, rc, 0);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_move() from %s to %s returned %d, expected %d\n", dir1,
+		        dir2, rc, 0);
 		goto exit;
 	}
 
 	/* create a file within the directory */
 	fd1 = FILE_OPEN_FUNCTION(OMRPORTLIB, pathName1, EsOpenCreate | EsOpenWrite, 0666);
 	if (-1 == fd1) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected valid file handle\n", FILE_OPEN_FUNCTION_NAME, -1);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected valid file handle\n",
+		        FILE_OPEN_FUNCTION_NAME, -1);
 		goto exit;
 	}
 
 	/* so close it and try again */
 	rc = FILE_CLOSE_FUNCTION(OMRPORTLIB, fd1); /* should have 0 length file */
 	if (0 != rc) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc, 0);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc, 0);
 		goto exit;
 	}
 
 	rc = omrfile_move(pathName1, pathName2);
 	if (0 != rc) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_move() from %s to %s returned %d, expected %d\n", pathName1, pathName2, rc, 0);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_move() from %s to %s returned %d, expected %d\n",
+		        pathName1, pathName2, rc, 0);
 		goto exit;
 	}
 
@@ -1786,14 +1879,16 @@ TEST_F(PortFileTest2, file_test14)
 	/* try opening a "new" file - if file exists then should still work */
 	fd1 = FILE_OPEN_FUNCTION(OMRPORTLIB, pathName1, EsOpenWrite | EsOpenCreate, 0666);
 	if (-1 == fd1) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected valid file handle\n", FILE_OPEN_FUNCTION_NAME, -1);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected valid file handle\n",
+		        FILE_OPEN_FUNCTION_NAME, -1);
 		goto exit;
 	}
 
 	/* try opening a "new" file - if file exists then should still work */
 	fd2 = FILE_OPEN_FUNCTION(OMRPORTLIB, pathName2, EsOpenWrite | EsOpenCreate, 0666);
 	if (-1 == fd2) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected valid file handle\n", FILE_OPEN_FUNCTION_NAME, -1);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected valid file handle\n",
+		        FILE_OPEN_FUNCTION_NAME, -1);
 		goto exit;
 	}
 
@@ -1801,88 +1896,91 @@ TEST_F(PortFileTest2, file_test14)
 	expectedReturnValue = sizeof("test");
 	rc = FILE_WRITE_FUNCTION(OMRPORTLIB, fd1, (char *)"test", expectedReturnValue);
 	if (rc != expectedReturnValue) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_WRITE_FUNCTION_NAME, rc, expectedReturnValue);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_WRITE_FUNCTION_NAME, rc,
+		        expectedReturnValue);
 		goto exit;
 	}
 
 	rc = FILE_WRITE_FUNCTION(OMRPORTLIB, fd2, (char *)"test", expectedReturnValue);
 	if (rc != expectedReturnValue) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_WRITE_FUNCTION_NAME, rc, expectedReturnValue);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_WRITE_FUNCTION_NAME, rc,
+		        expectedReturnValue);
 		goto exit;
 	}
 
 	/* close this one */
 	rc = FILE_CLOSE_FUNCTION(OMRPORTLIB, fd1);
 	if (0 != rc) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc, 0);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc, 0);
 		goto exit;
 	}
 
 	/* Now we can test findfirst etc..... */
 	handle = omrfile_findfirst("gobbledygook*", resultbuffer);
-	if ((uintptr_t) - 1 != handle) {
+	if ((uintptr_t)-1 != handle) {
 		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_findfirst() returned valid handle expected -1\n");
 		goto exit;
 	}
 
-/*
- * TODO: different behaviour on windows/Linux
- *
-	handle = omrfile_findfirst(search, resultbuffer);
-	if (-1 == handle) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_findfirst() returned -1 expected a valid handle\n");
-		goto exit;
-	}
+	/*
+	 * TODO: different behaviour on windows/Linux
+	 *
+	        handle = omrfile_findfirst(search, resultbuffer);
+	        if (-1 == handle) {
+	                outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_findfirst() returned -1 expected a valid
+	 handle\n"); goto exit;
+	        }
 
-	memset(fullname,0,sizeof(fullname));
-	strcat(fullname,dir1);
-	strcat(fullname,DIR_SEPARATOR_STR);
-	strcat(fullname,resultbuffer);
-	attrRc = omrfile_attr(fullname);
-	if (EsIsFile == attrRc) {
-		fileCount++;
-	}
-	if (EsIsDir == attrRc) {
-		dirCount++;
-	}
+	        memset(fullname,0,sizeof(fullname));
+	        strcat(fullname,dir1);
+	        strcat(fullname,DIR_SEPARATOR_STR);
+	        strcat(fullname,resultbuffer);
+	        attrRc = omrfile_attr(fullname);
+	        if (EsIsFile == attrRc) {
+	                fileCount++;
+	        }
+	        if (EsIsDir == attrRc) {
+	                dirCount++;
+	        }
 
-	rc = 0;
-	while (rc != -1) {
-		count ++;
-		rc = omrfile_findnext(handle, resultbuffer);
-		if (rc >= 0) {
-			memset(fullname,0,sizeof(fullname));
-			strcat(fullname,dir1);
-			strcat(fullname,DIR_SEPARATOR_STR);
-			strcat(fullname,resultbuffer);
-			attrRc = omrfile_attr(fullname);
+	        rc = 0;
+	        while (rc != -1) {
+	                count ++;
+	                rc = omrfile_findnext(handle, resultbuffer);
+	                if (rc >= 0) {
+	                        memset(fullname,0,sizeof(fullname));
+	                        strcat(fullname,dir1);
+	                        strcat(fullname,DIR_SEPARATOR_STR);
+	                        strcat(fullname,resultbuffer);
+	                        attrRc = omrfile_attr(fullname);
 
-			if (EsIsFile == attrRc) {
-				fileCount++;
-			}
-			if (EsIsDir == attrRc) {
-				dirCount++;
-			}
-		}
-	}
+	                        if (EsIsFile == attrRc) {
+	                                fileCount++;
+	                        }
+	                        if (EsIsDir == attrRc) {
+	                                dirCount++;
+	                        }
+	                }
+	        }
 
-	if (fileCount != expectedFileCount)	{
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "file count incorrrect, found %d expected %d\n", fileCount, expectedFileCount);
-		goto exit;
-	}
+	        if (fileCount != expectedFileCount)	{
+	                outputErrorMessage(PORTTEST_ERROR_ARGS, "file count incorrrect, found %d expected %d\n",
+	 fileCount, expectedFileCount); goto exit;
+	        }
 
-	if (dirCount != expectedDirCount) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "directory count incorrect, found %d expected %d\n", dirCount, expectedDirCount);
-		goto exit;
-	}
+	        if (dirCount != expectedDirCount) {
+	                outputErrorMessage(PORTTEST_ERROR_ARGS, "directory count incorrect, found %d expected %d\n",
+	 dirCount, expectedDirCount); goto exit;
+	        }
 
-	if (count != expectedCount) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "count incorrect, found %d expected %d\n", count, expectedCount);
-		goto exit;
-	}
-	omrfile_findclose(handle);
- *
- */
+	        if (count != expectedCount) {
+	                outputErrorMessage(PORTTEST_ERROR_ARGS, "count incorrect, found %d expected %d\n", count,
+	 expectedCount); goto exit;
+	        }
+	        omrfile_findclose(handle);
+	 *
+	 */
 
 exit:
 	FILE_CLOSE_FUNCTION(OMRPORTLIB, fd1);
@@ -1915,7 +2013,8 @@ TEST_F(PortFileTest2, file_test15)
 
 	fd = FILE_OPEN_FUNCTION(OMRPORTLIB, fileName, EsOpenCreate | EsOpenWrite | EsOpenAppend, 0666);
 	if (-1 == fd) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned -1 expected valid file handle\n", FILE_OPEN_FUNCTION_NAME);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "%s() returned -1 expected valid file handle\n", FILE_OPEN_FUNCTION_NAME);
 		goto exit;
 	}
 
@@ -1930,7 +2029,8 @@ TEST_F(PortFileTest2, file_test15)
 		lastmod = omrfile_lastmod(fileName);
 		if (0 != i) {
 			if (-1 == lastmod) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_lastmod() returned -1, iteration %d\n", i + 1);
+				outputErrorMessage(
+				        PORTTEST_ERROR_ARGS, "omrfile_lastmod() returned -1, iteration %d\n", i + 1);
 				goto exit;
 			}
 		} else {
@@ -1941,27 +2041,31 @@ TEST_F(PortFileTest2, file_test15)
 		/* make sure we are actually writing something to the file */
 		length = omrfile_length(fileName);
 		if (length != i) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_length() returned %lld expected %d\n", length, i);
+			outputErrorMessage(
+			        PORTTEST_ERROR_ARGS, "omrfile_length() returned %lld expected %d\n", length, i);
 			goto exit;
 		}
 
 		/* Write something to the file and close it */
 		rc = FILE_WRITE_FUNCTION(OMRPORTLIB, fd, (char *)"a", 1);
 		if (1 != rc) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected 1, iteration %d\n", FILE_WRITE_FUNCTION_NAME, rc, i + 1);
+			outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected 1, iteration %d\n",
+			        FILE_WRITE_FUNCTION_NAME, rc, i + 1);
 			goto exit;
 		}
 
 		rc = omrfile_sync(fd);
 		if (0 != rc) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_sync() returned %d expected %d, iteration %d\n", rc, 0, i + 1);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "omrfile_sync() returned %d expected %d, iteration %d\n", rc, 0, i + 1);
 			goto exit;
 		}
 
 		/* lastmod should have advanced due to the delay */
 		lastmod = omrfile_lastmod(fileName);
 		if (-1 == lastmod) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_lastmod() returned %d expected %d, iteration %d\n", lastmod, -1, i + 1);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "omrfile_lastmod() returned %d expected %d, iteration %d\n", lastmod, -1, i + 1);
 			goto exit;
 		}
 
@@ -2035,7 +2139,8 @@ TEST_F(PortFileTest2, file_test17)
 	/* having hopefully shoved this stuff onto file we need to read it back and check its as expected! */
 	rc = FILE_CLOSE_FUNCTION(OMRPORTLIB, fd1);
 	if (0 != rc) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc, 0);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc, 0);
 		goto exit;
 	}
 
@@ -2052,13 +2157,15 @@ TEST_F(PortFileTest2, file_test17)
 	}
 
 	if (strlen(readBufPtr) != strlen(expectedResult)) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_read_text() returned %d expected %d\n", strlen(readBufPtr), strlen(expectedResult));
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_read_text() returned %d expected %d\n",
+		        strlen(readBufPtr), strlen(expectedResult));
 		goto exit;
 	}
 
 	/* omrfile_read_text(): translation from IBM1047 to ASCII is done on zOS */
 	if (strcmp(readBufPtr, expectedResult)) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_read_text() returned \"%s\" expected \"%s\"\n", readBufPtr , expectedResult);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_read_text() returned \"%s\" expected \"%s\"\n",
+		        readBufPtr, expectedResult);
 		goto exit;
 	}
 
@@ -2096,7 +2203,9 @@ omrfile_create_file(OMRPortLibrary *portLibrary, const char *filename, int32_t o
 	if (-1 == createFd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Create of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Create of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		return returnFd;
 	}
 
@@ -2104,7 +2213,9 @@ omrfile_create_file(OMRPortLibrary *portLibrary, const char *filename, int32_t o
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Write to file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Write to file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber,
+		        lastErrorMessage);
 		omrfile_close(createFd);
 		return returnFd;
 	}
@@ -2113,7 +2224,9 @@ omrfile_create_file(OMRPortLibrary *portLibrary, const char *filename, int32_t o
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber,
+		        lastErrorMessage);
 		return returnFd;
 	}
 
@@ -2124,7 +2237,9 @@ omrfile_create_file(OMRPortLibrary *portLibrary, const char *filename, int32_t o
 		if (-1 == returnFd) {
 			lastErrorMessage = (char *)omrerror_last_error_message();
 			lastErrorNumber = omrerror_last_error_number();
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Open of file %s in mode %d failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, openMode, lastErrorNumber, lastErrorMessage);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Open of file %s in mode %d failed: lastErrorNumber=%d, lastErrorMessage=%s\n",
+			        filename, openMode, lastErrorNumber, lastErrorMessage);
 			return returnFd;
 		}
 	}
@@ -2156,7 +2271,9 @@ omrfile_create_status_file(OMRPortLibrary *portLibrary, const char *filename, co
 	if (-1 == createFd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Create of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Create of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		return -1;
 	}
 
@@ -2164,7 +2281,9 @@ omrfile_create_status_file(OMRPortLibrary *portLibrary, const char *filename, co
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber,
+		        lastErrorMessage);
 		return -1;
 	}
 
@@ -2218,12 +2337,15 @@ TEST_F(PortFileTest2, file_test18)
 		goto exit;
 	}
 
-	lockRc = FILE_LOCK_BYTES_FUNCTION(OMRPORTLIB, fd, OMRPORT_FILE_READ_LOCK | OMRPORT_FILE_NOWAIT_FOR_LOCK, offset, length);
+	lockRc = FILE_LOCK_BYTES_FUNCTION(
+	        OMRPORTLIB, fd, OMRPORT_FILE_READ_LOCK | OMRPORT_FILE_NOWAIT_FOR_LOCK, offset, length);
 
 	if (0 != lockRc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Locking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset, length, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Locking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset,
+		        length, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -2232,7 +2354,9 @@ TEST_F(PortFileTest2, file_test18)
 	if (0 != unlockRc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Unlocking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset, length, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Unlocking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset,
+		        length, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -2270,12 +2394,15 @@ TEST_F(PortFileTest2, file_test19)
 		goto exit;
 	}
 
-	lockRc = FILE_LOCK_BYTES_FUNCTION(OMRPORTLIB, fd, OMRPORT_FILE_WRITE_LOCK | OMRPORT_FILE_NOWAIT_FOR_LOCK, offset, length);
+	lockRc = FILE_LOCK_BYTES_FUNCTION(
+	        OMRPORTLIB, fd, OMRPORT_FILE_WRITE_LOCK | OMRPORT_FILE_NOWAIT_FOR_LOCK, offset, length);
 
 	if (0 != lockRc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Locking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset, length, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Locking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset,
+		        length, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -2284,7 +2411,9 @@ TEST_F(PortFileTest2, file_test19)
 	if (0 != unlockRc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Unlocking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset, length, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Unlocking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset,
+		        length, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 	omrfile_unlink(testFile);
@@ -2348,10 +2477,12 @@ TEST_F(PortFileTest2, file_test20)
 	termstat2 = waitForTestProcess(OMRPORTLIB, pid2);
 
 	if (termstat1 != 0) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Child process 1 exited with status %i: Expected 0.\n", termstat1);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "Child process 1 exited with status %i: Expected 0.\n", termstat1);
 	}
 	if (termstat2 != 0) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Child process 2 exited with status %i: Expected 0.\n", termstat2);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "Child process 2 exited with status %i: Expected 0.\n", termstat2);
 	}
 
 exit:
@@ -2380,12 +2511,15 @@ omrfile_test20_child_1(OMRPortLibrary *portLibrary)
 
 	fd = FILE_OPEN_FUNCTION(OMRPORTLIB, testFile, EsOpenWrite, 0);
 
-	lockRc = FILE_LOCK_BYTES_FUNCTION(OMRPORTLIB, fd, OMRPORT_FILE_WRITE_LOCK | OMRPORT_FILE_NOWAIT_FOR_LOCK, offset, length);
+	lockRc = FILE_LOCK_BYTES_FUNCTION(
+	        OMRPORTLIB, fd, OMRPORT_FILE_WRITE_LOCK | OMRPORT_FILE_NOWAIT_FOR_LOCK, offset, length);
 
 	if (0 != lockRc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Locking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset, length, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Locking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset,
+		        length, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -2400,7 +2534,9 @@ omrfile_test20_child_1(OMRPortLibrary *portLibrary)
 	if (0 != unlockRc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Unlocking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset, length, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Unlocking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset,
+		        length, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -2434,12 +2570,16 @@ omrfile_test20_child_2(OMRPortLibrary *portLibrary)
 
 	fd = FILE_OPEN_FUNCTION(OMRPORTLIB, testFile, EsOpenWrite, 0);
 
-	lockRc = FILE_LOCK_BYTES_FUNCTION(OMRPORTLIB, fd, OMRPORT_FILE_WRITE_LOCK | OMRPORT_FILE_NOWAIT_FOR_LOCK, offset, length);
+	lockRc = FILE_LOCK_BYTES_FUNCTION(
+	        OMRPORTLIB, fd, OMRPORT_FILE_WRITE_LOCK | OMRPORT_FILE_NOWAIT_FOR_LOCK, offset, length);
 
 	if (-1 != lockRc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Locking of bytes %lld for %lld incorrectly succeeded: lastErrorNumber=%d, lastErrorMessage=%s\n", offset, length, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Locking of bytes %lld for %lld incorrectly succeeded: lastErrorNumber=%d, "
+		        "lastErrorMessage=%s\n",
+		        offset, length, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -2503,10 +2643,12 @@ TEST_F(PortFileTest2, file_test21)
 	termstat2 = waitForTestProcess(OMRPORTLIB, pid2);
 
 	if (termstat1 != 0) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Child process 1 exited with status %i: Expected 0.\n", termstat1);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "Child process 1 exited with status %i: Expected 0.\n", termstat1);
 	}
 	if (termstat2 != 0) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Child process 2 exited with status %i: Expected 0.\n", termstat2);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "Child process 2 exited with status %i: Expected 0.\n", termstat2);
 	}
 
 	/* Remove status files */
@@ -2539,12 +2681,15 @@ omrfile_test21_child_1(OMRPortLibrary *portLibrary)
 
 	fd = FILE_OPEN_FUNCTION(OMRPORTLIB, testFile, EsOpenWrite, 0);
 
-	lockRc = FILE_LOCK_BYTES_FUNCTION(OMRPORTLIB, fd, OMRPORT_FILE_WRITE_LOCK | OMRPORT_FILE_NOWAIT_FOR_LOCK, offset, length);
+	lockRc = FILE_LOCK_BYTES_FUNCTION(
+	        OMRPORTLIB, fd, OMRPORT_FILE_WRITE_LOCK | OMRPORT_FILE_NOWAIT_FOR_LOCK, offset, length);
 
 	if (0 != lockRc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Locking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset, length, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Locking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset,
+		        length, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -2559,7 +2704,9 @@ omrfile_test21_child_1(OMRPortLibrary *portLibrary)
 	if (0 != unlockRc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Unlocking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset, length, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Unlocking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset,
+		        length, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -2594,12 +2741,15 @@ omrfile_test21_child_2(OMRPortLibrary *portLibrary)
 
 	fd = FILE_OPEN_FUNCTION(OMRPORTLIB, testFile, EsOpenWrite, 0);
 
-	lockRc = FILE_LOCK_BYTES_FUNCTION(OMRPORTLIB, fd, OMRPORT_FILE_WRITE_LOCK | OMRPORT_FILE_NOWAIT_FOR_LOCK, offset, length);
+	lockRc = FILE_LOCK_BYTES_FUNCTION(
+	        OMRPORTLIB, fd, OMRPORT_FILE_WRITE_LOCK | OMRPORT_FILE_NOWAIT_FOR_LOCK, offset, length);
 
 	if (0 != lockRc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Locking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset, length, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Locking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset,
+		        length, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -2608,7 +2758,9 @@ omrfile_test21_child_2(OMRPortLibrary *portLibrary)
 	if (0 != unlockRc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Unlocking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset, length, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Unlocking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset,
+		        length, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -2676,10 +2828,12 @@ TEST_F(PortFileTest2, file_test22)
 	termstat2 = waitForTestProcess(OMRPORTLIB, pid2);
 
 	if (termstat1 != 0) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Child process 1 exited with status %i: Expected 0.\n", termstat1);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "Child process 1 exited with status %i: Expected 0.\n", termstat1);
 	}
 	if (termstat2 != 0) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Child process 2 exited with status %i: Expected 0.\n", termstat2);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "Child process 2 exited with status %i: Expected 0.\n", termstat2);
 	}
 
 exit:
@@ -2707,12 +2861,15 @@ omrfile_test22_child_1(OMRPortLibrary *portLibrary)
 
 	fd = FILE_OPEN_FUNCTION(OMRPORTLIB, testFile, EsOpenWrite, 0);
 
-	lockRc = FILE_LOCK_BYTES_FUNCTION(OMRPORTLIB, fd, OMRPORT_FILE_WRITE_LOCK | OMRPORT_FILE_NOWAIT_FOR_LOCK, offset, length);
+	lockRc = FILE_LOCK_BYTES_FUNCTION(
+	        OMRPORTLIB, fd, OMRPORT_FILE_WRITE_LOCK | OMRPORT_FILE_NOWAIT_FOR_LOCK, offset, length);
 
 	if (0 != lockRc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Locking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset, length, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Locking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset,
+		        length, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -2729,7 +2886,9 @@ omrfile_test22_child_1(OMRPortLibrary *portLibrary)
 	if (0 != unlockRc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Unlocking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset, length, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Unlocking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset,
+		        length, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -2767,12 +2926,15 @@ omrfile_test22_child_2(OMRPortLibrary *portLibrary)
 
 	omrfile_create_status_file(OMRPORTLIB, testFileTry, testName);
 
-	lockRc = FILE_LOCK_BYTES_FUNCTION(OMRPORTLIB, fd, OMRPORT_FILE_WRITE_LOCK | OMRPORT_FILE_WAIT_FOR_LOCK, offset, length);
+	lockRc = FILE_LOCK_BYTES_FUNCTION(
+	        OMRPORTLIB, fd, OMRPORT_FILE_WRITE_LOCK | OMRPORT_FILE_WAIT_FOR_LOCK, offset, length);
 
 	if (0 != lockRc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Locking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset, length, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Locking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset,
+		        length, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -2781,7 +2943,9 @@ omrfile_test22_child_2(OMRPortLibrary *portLibrary)
 	if (0 != unlockRc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Unlocking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset, length, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Unlocking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset,
+		        length, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -2849,10 +3013,12 @@ TEST_F(PortFileTest2, file_test23)
 	termstat2 = waitForTestProcess(OMRPORTLIB, pid2);
 
 	if (termstat1 != 0) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Child process 1 exited with status %i: Expected 0.\n", termstat1);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "Child process 1 exited with status %i: Expected 0.\n", termstat1);
 	}
 	if (termstat2 != 0) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Child process 2 exited with status %i: Expected 0.\n", termstat2);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "Child process 2 exited with status %i: Expected 0.\n", termstat2);
 	}
 
 	/* Remove status files */
@@ -2886,12 +3052,15 @@ omrfile_test23_child_1(OMRPortLibrary *portLibrary)
 
 	fd = FILE_OPEN_FUNCTION(OMRPORTLIB, testFile, EsOpenRead | EsOpenWrite, 0);
 
-	lockRc = FILE_LOCK_BYTES_FUNCTION(OMRPORTLIB, fd, OMRPORT_FILE_READ_LOCK | OMRPORT_FILE_NOWAIT_FOR_LOCK, offset, length);
+	lockRc = FILE_LOCK_BYTES_FUNCTION(
+	        OMRPORTLIB, fd, OMRPORT_FILE_READ_LOCK | OMRPORT_FILE_NOWAIT_FOR_LOCK, offset, length);
 
 	if (0 != lockRc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Locking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset, length, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Locking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset,
+		        length, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -2906,7 +3075,9 @@ omrfile_test23_child_1(OMRPortLibrary *portLibrary)
 	if (0 != unlockRc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Unlocking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset, length, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Unlocking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset,
+		        length, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -2942,12 +3113,15 @@ omrfile_test23_child_2(OMRPortLibrary *portLibrary)
 
 	fd = FILE_OPEN_FUNCTION(OMRPORTLIB, testFile, EsOpenRead | EsOpenWrite, 0);
 
-	lockRc = FILE_LOCK_BYTES_FUNCTION(OMRPORTLIB, fd, OMRPORT_FILE_READ_LOCK | OMRPORT_FILE_WAIT_FOR_LOCK, offset, length);
+	lockRc = FILE_LOCK_BYTES_FUNCTION(
+	        OMRPORTLIB, fd, OMRPORT_FILE_READ_LOCK | OMRPORT_FILE_WAIT_FOR_LOCK, offset, length);
 
 	if (0 != lockRc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Locking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset, length, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Locking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset,
+		        length, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -2958,7 +3132,9 @@ omrfile_test23_child_2(OMRPortLibrary *portLibrary)
 	if (0 != unlockRc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Unlocking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset, length, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Unlocking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset,
+		        length, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -3026,10 +3202,12 @@ TEST_F(PortFileTest2, file_test24)
 	termstat2 = waitForTestProcess(OMRPORTLIB, pid2);
 
 	if (termstat1 != 0) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Child process 1 exited with status %i: Expected 0.\n", termstat1);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "Child process 1 exited with status %i: Expected 0.\n", termstat1);
 	}
 	if (termstat2 != 0) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Child process 2 exited with status %i: Expected 0.\n", termstat2);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "Child process 2 exited with status %i: Expected 0.\n", termstat2);
 	}
 
 exit:
@@ -3058,12 +3236,15 @@ omrfile_test24_child_1(OMRPortLibrary *portLibrary)
 
 	fd = FILE_OPEN_FUNCTION(OMRPORTLIB, testFile, EsOpenRead | EsOpenWrite, 0);
 
-	lockRc = FILE_LOCK_BYTES_FUNCTION(OMRPORTLIB, fd, OMRPORT_FILE_READ_LOCK | OMRPORT_FILE_NOWAIT_FOR_LOCK, offset, length);
+	lockRc = FILE_LOCK_BYTES_FUNCTION(
+	        OMRPORTLIB, fd, OMRPORT_FILE_READ_LOCK | OMRPORT_FILE_NOWAIT_FOR_LOCK, offset, length);
 
 	if (0 != lockRc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Locking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset, length, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Locking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset,
+		        length, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -3080,7 +3261,9 @@ omrfile_test24_child_1(OMRPortLibrary *portLibrary)
 	if (0 != unlockRc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Unlocking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset, length, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Unlocking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset,
+		        length, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -3118,12 +3301,15 @@ omrfile_test24_child_2(OMRPortLibrary *portLibrary)
 
 	omrfile_create_status_file(OMRPORTLIB, testFileTry, testName);
 
-	lockRc = FILE_LOCK_BYTES_FUNCTION(OMRPORTLIB, fd, OMRPORT_FILE_WRITE_LOCK | OMRPORT_FILE_WAIT_FOR_LOCK, offset, length);
+	lockRc = FILE_LOCK_BYTES_FUNCTION(
+	        OMRPORTLIB, fd, OMRPORT_FILE_WRITE_LOCK | OMRPORT_FILE_WAIT_FOR_LOCK, offset, length);
 
 	if (0 != lockRc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Locking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset, length, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Locking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset,
+		        length, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -3132,7 +3318,9 @@ omrfile_test24_child_2(OMRPortLibrary *portLibrary)
 	if (0 != unlockRc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Unlocking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset, length, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Unlocking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset,
+		        length, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -3211,10 +3399,12 @@ TEST_F(PortFileTest2, file_test25)
 	termstat2 = waitForTestProcess(OMRPORTLIB, pid2);
 
 	if (termstat1 != 0) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Child process 1 exited with status %i: Expected 0.\n", termstat1);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "Child process 1 exited with status %i: Expected 0.\n", termstat1);
 	}
 	if (termstat2 != 0) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Child process 2 exited with status %i: Expected 0.\n", termstat2);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "Child process 2 exited with status %i: Expected 0.\n", termstat2);
 	}
 
 exit:
@@ -3244,12 +3434,15 @@ omrfile_test25_child_1(OMRPortLibrary *portLibrary)
 
 	fd = FILE_OPEN_FUNCTION(OMRPORTLIB, testFile, EsOpenRead | EsOpenWrite, 0);
 
-	lockRc = FILE_LOCK_BYTES_FUNCTION(OMRPORTLIB, fd, OMRPORT_FILE_READ_LOCK | OMRPORT_FILE_NOWAIT_FOR_LOCK, offset, length);
+	lockRc = FILE_LOCK_BYTES_FUNCTION(
+	        OMRPORTLIB, fd, OMRPORT_FILE_READ_LOCK | OMRPORT_FILE_NOWAIT_FOR_LOCK, offset, length);
 
 	if (0 != lockRc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Locking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset, length, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Locking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset,
+		        length, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 	portTestEnv->log("Child 1: Got read lock on bytes %lld for %lld\n", offset, length);
@@ -3268,19 +3461,23 @@ omrfile_test25_child_1(OMRPortLibrary *portLibrary)
 	if (0 != unlockRc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Unlocking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", (offset + 2), (length - 2), lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Unlocking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n",
+		        (offset + 2), (length - 2), lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 	portTestEnv->log("Child 1: Released read lock on bytes %lld for %lld\n", offset, length);
 #endif /* defined(OMR_OS_WINDOWS) || defined(OSX) */
 
-
-	lockRc = FILE_LOCK_BYTES_FUNCTION(OMRPORTLIB, fd, OMRPORT_FILE_WRITE_LOCK | OMRPORT_FILE_WAIT_FOR_LOCK, (offset + 2), length);
+	lockRc = FILE_LOCK_BYTES_FUNCTION(
+	        OMRPORTLIB, fd, OMRPORT_FILE_WRITE_LOCK | OMRPORT_FILE_WAIT_FOR_LOCK, (offset + 2), length);
 
 	if (0 != lockRc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Locking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", (offset + 2), length, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Locking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n",
+		        (offset + 2), length, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 	portTestEnv->log("Child 1: Got write lock on bytes %lld for %lld\n", (offset + 2), length);
@@ -3291,7 +3488,9 @@ omrfile_test25_child_1(OMRPortLibrary *portLibrary)
 	if (0 != unlockRc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Unlocking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset, (length - 2), lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Unlocking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset,
+		        (length - 2), lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 	portTestEnv->log("Child 1: Released read lock on bytes %lld for %lld\n", offset, (length - 2));
@@ -3302,7 +3501,9 @@ omrfile_test25_child_1(OMRPortLibrary *portLibrary)
 	if (0 != unlockRc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Unlocking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", (offset + 2), length, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Unlocking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n",
+		        (offset + 2), length, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 	portTestEnv->log("Child 1: Released write lock on bytes %lld for %lld\n", (offset + 2), length);
@@ -3344,12 +3545,15 @@ omrfile_test25_child_2(OMRPortLibrary *portLibrary)
 	portTestEnv->log("Child 2: Trying for write lock on bytes %lld for %lld\n", offset, length);
 	omrfile_create_status_file(OMRPORTLIB, testFileTry, testName);
 
-	lockRc = FILE_LOCK_BYTES_FUNCTION(OMRPORTLIB, fd, OMRPORT_FILE_WRITE_LOCK | OMRPORT_FILE_WAIT_FOR_LOCK, offset, length);
+	lockRc = FILE_LOCK_BYTES_FUNCTION(
+	        OMRPORTLIB, fd, OMRPORT_FILE_WRITE_LOCK | OMRPORT_FILE_WAIT_FOR_LOCK, offset, length);
 
 	if (0 != lockRc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Locking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset, length, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Locking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset,
+		        length, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 	portTestEnv->log("Child 2: Got write lock on bytes %lld for %lld\n", offset, length);
@@ -3359,7 +3563,9 @@ omrfile_test25_child_2(OMRPortLibrary *portLibrary)
 	if (0 != unlockRc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Unlocking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset, length, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Unlocking of bytes %lld for %lld failed: lastErrorNumber=%d, lastErrorMessage=%s\n", offset,
+		        length, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 	portTestEnv->log("Child 2: Released write lock on bytes %lld for %lld\n", offset, length);
@@ -3394,38 +3600,46 @@ TEST_F(PortFileTest2, file_test26)
 		/* NULL name */
 		rc = omrfile_stat(NULL, 0, &buf);
 		if (rc >= 0) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat(NULL, ..) returned %d expected %d\n", rc, -1);
+			outputErrorMessage(
+			        PORTTEST_ERROR_ARGS, "omrfile_stat(NULL, ..) returned %d expected %d\n", rc, -1);
 		}
 
 		/* Query a file that should not be there */
 		rc = omrfile_stat(localFilename, 0, &buf);
 		if (rc >= 0) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat(%s, ..) returned %d expected %d\n", localFilename, rc, -1);
+			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat(%s, ..) returned %d expected %d\n",
+			        localFilename, rc, -1);
 		}
 
 		/* Still should not be there */
 		rc = omrfile_stat(localFilename, 0, &buf);
 		if (rc >= 0) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat(%s, ..) returned %d expected %d\n", localFilename, rc, -1);
+			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat(%s, ..) returned %d expected %d\n",
+			        localFilename, rc, -1);
 		}
 
 		/* A directory we know is there, how about the one we are in? */
 		rc = omrfile_stat(".", 0, &buf);
 		if (rc != 0) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat(%s, ..) returned %d expected %d\n", ".", rc, 0);
+			outputErrorMessage(
+			        PORTTEST_ERROR_ARGS, "omrfile_stat(%s, ..) returned %d expected %d\n", ".", rc, 0);
 		} else if (buf.isDir != 1) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat(%s, ..) set buf.isDir = %d expected 1\n", ".", buf.isDir);
+			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat(%s, ..) set buf.isDir = %d expected 1\n",
+			        ".", buf.isDir);
 		}
 
 		/* Query a file that should be there  */
 		rc = omrfile_stat(knownFile, 0, &buf);
 		if (rc != 0) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat(%s, ..) returned %d expected %d\n", ".", rc, 0);
+			outputErrorMessage(
+			        PORTTEST_ERROR_ARGS, "omrfile_stat(%s, ..) returned %d expected %d\n", ".", rc, 0);
 		} else if (buf.isFile != 1) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat(%s, ..) set buf.isFile = %d expected 1\n", ".", buf.isFile);
+			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat(%s, ..) set buf.isFile = %d expected 1\n",
+			        ".", buf.isFile);
 		}
 	} else {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_get_executable_name(\"java.properties\", &knownFile) failed\n");
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "omrsysinfo_get_executable_name(\"java.properties\", &knownFile) failed\n");
 	}
 
 	/* Don't delete executable name (knownFile); system-owned. */
@@ -3454,10 +3668,12 @@ TEST_F(PortFileTest2, file_test27)
 	int32_t m;
 	int32_t rc;
 #define nModes 22
-	/* do not attempt to set sticky bit (01000) on files on AIX: will fail if file is on a locally-mounted filesystem
-	 * On OSX, when chmod() returns EPERM, it is called again with bits S_ISGID and S_ISUID ignored and returns success.
+	/* do not attempt to set sticky bit (01000) on files on AIX: will fail if file is on a locally-mounted
+	 * filesystem On OSX, when chmod() returns EPERM, it is called again with bits S_ISGID and S_ISUID ignored and
+	 * returns success.
 	 */
-	int32_t testModes[nModes] = {0, 1, 2, 4, 6, 7, 010, 020, 040, 070, 0100, 0200, 0400, 0700, 0666, 0777, 0755, 0644, 02644, 04755, 06600, 04777};
+	int32_t testModes[nModes] = {0, 1, 2, 4, 6, 7, 010, 020, 040, 070, 0100, 0200, 0400, 0700, 0666, 0777, 0755,
+	        0644, 02644, 04755, 06600, 04777};
 
 	reportTestEntry(OMRPORTLIB, testName);
 
@@ -3489,18 +3705,21 @@ TEST_F(PortFileTest2, file_test27)
 #endif /* defined(OMR_OS_WINDOWS) */
 			rc = omrfile_chmod(localFilename, testModes[m]);
 			if (expectedMode != rc) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_chmod() returned %d expected %d\n", rc, expectedMode);
+				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_chmod() returned %d expected %d\n", rc,
+				        expectedMode);
 				break;
 			}
 			fd2 = FILE_OPEN_FUNCTION(OMRPORTLIB, localFilename, EsOpenWrite, rc);
 			if (0 == (rc & ownerWritable)) {
 				if (-1 != fd2) {
-					outputErrorMessage(PORTTEST_ERROR_ARGS, "opened read-only file for writing fd=%d expected -1\n", rc);
+					outputErrorMessage(PORTTEST_ERROR_ARGS,
+					        "opened read-only file for writing fd=%d expected -1\n", rc);
 					break;
 				}
 			} else {
 				if (-1 == fd2) {
-					outputErrorMessage(PORTTEST_ERROR_ARGS, "opened owner-writable file for writing failed");
+					outputErrorMessage(
+					        PORTTEST_ERROR_ARGS, "opened owner-writable file for writing failed");
 					break;
 				}
 			}
@@ -3508,12 +3727,14 @@ TEST_F(PortFileTest2, file_test27)
 			fd2 = FILE_OPEN_FUNCTION(OMRPORTLIB, localFilename, EsOpenRead, rc);
 			if (0 == (rc & ownerReadable)) {
 				if (-1 != fd2) {
-					outputErrorMessage(PORTTEST_ERROR_ARGS, "opened write-only file for reading fd=%d expected -1\n", rc);
+					outputErrorMessage(PORTTEST_ERROR_ARGS,
+					        "opened write-only file for reading fd=%d expected -1\n", rc);
 					break;
 				}
 			} else {
 				if (-1 == fd2) {
-					outputErrorMessage(PORTTEST_ERROR_ARGS, "opened owner-readable file for reading failed");
+					outputErrorMessage(
+					        PORTTEST_ERROR_ARGS, "opened owner-readable file for reading failed");
 					break;
 				}
 			}
@@ -3524,7 +3745,8 @@ TEST_F(PortFileTest2, file_test27)
 	omrfile_unlink(localFilename);
 	rc = omrfile_chmod(localFilename, 0755);
 	if (-1 != rc) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_chmod() on non-existent file returned %d expected %d\n", rc, -1);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrfile_chmod() on non-existent file returned %d expected %d\n", rc, -1);
 	}
 
 	reportTestExit(OMRPORTLIB, testName);
@@ -3549,7 +3771,8 @@ TEST_F(PortFileTest2, file_test28)
 	int32_t m;
 	int32_t rc;
 #define nModes 22
-	int32_t testModes[nModes] = {0, 1, 2, 4, 6, 7, 01010, 02020, 04040, 070, 0100, 0200, 0400, 0700, 0666, 0777, 0755, 0644, 01644, 02755, 03600, 07777};
+	int32_t testModes[nModes] = {0, 1, 2, 4, 6, 7, 01010, 02020, 04040, 070, 0100, 0200, 0400, 0700, 0666, 0777,
+	        0755, 0644, 01644, 02755, 03600, 07777};
 
 	reportTestEntry(OMRPORTLIB, testName);
 
@@ -3557,7 +3780,8 @@ TEST_F(PortFileTest2, file_test28)
 	omrfile_unlinkdir(localDirectoryName);
 	rc = omrfile_mkdir(localDirectoryName);
 	if (-1 == rc) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() failed for %s: could not create\n", FILE_OPEN_FUNCTION_NAME, localDirectoryName);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() failed for %s: could not create\n",
+		        FILE_OPEN_FUNCTION_NAME, localDirectoryName);
 	} else {
 		for (m = 0; m < nModes; ++m) {
 #if defined(AIXPPC) || defined(J9ZOS390)
@@ -3580,7 +3804,8 @@ TEST_F(PortFileTest2, file_test28)
 #endif /* defined(OMR_OS_WINDOWS) */
 			rc = omrfile_chmod(localDirectoryName, testModes[m]);
 			if (expectedMode != rc) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_chmod() returned %d expected %d\n", rc, expectedMode);
+				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_chmod() returned %d expected %d\n", rc,
+				        expectedMode);
 				break;
 			}
 		}
@@ -3614,7 +3839,8 @@ TEST_F(PortFileTest2, file_test29)
 	gid = omrsysinfo_get_egid();
 	rc = omrfile_chown(testFile, OMRPORT_FILE_IGNORE_ID, gid);
 	if (0 != rc) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_chown() change group returned %d expected %d\n", rc, 0);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrfile_chown() change group returned %d expected %d\n", rc, 0);
 	}
 	uid = omrsysinfo_get_euid();
 	rc = omrfile_chown(testFile, uid, OMRPORT_FILE_IGNORE_ID);
@@ -3630,8 +3856,6 @@ TEST_F(PortFileTest2, file_test29)
 
 	reportTestExit(OMRPORTLIB, testName);
 }
-
-
 
 /**
  *
@@ -3656,43 +3880,58 @@ TEST_F(PortFileTest2, file_test30)
 	 */
 
 	/* create a file that doesn't exist, this should succeed */
-	validFileFd = FILE_OPEN_FUNCTION(OMRPORTLIB, validFilename, EsOpenCreateNew | EsOpenWrite | EsOpenTruncate, 0666);
+	validFileFd =
+	        FILE_OPEN_FUNCTION(OMRPORTLIB, validFilename, EsOpenCreateNew | EsOpenWrite | EsOpenTruncate, 0666);
 	if (-1 == validFileFd) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s failed to create file %s: error_last_error_number %i\n", FILE_OPEN_FUNCTION_NAME, validFilename, omrerror_last_error_number());
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s failed to create file %s: error_last_error_number %i\n",
+		        FILE_OPEN_FUNCTION_NAME, validFilename, omrerror_last_error_number());
 		goto exit;
 	}
 
-	/* try to create the file again, this should fail. The only reason we do this is to have omrfile set the last error code */
-	existingFileFd = FILE_OPEN_FUNCTION(OMRPORTLIB, validFilename, EsOpenCreateNew | EsOpenWrite | EsOpenTruncate, 0666);
+	/* try to create the file again, this should fail. The only reason we do this is to have omrfile set the last
+	 * error code */
+	existingFileFd =
+	        FILE_OPEN_FUNCTION(OMRPORTLIB, validFilename, EsOpenCreateNew | EsOpenWrite | EsOpenTruncate, 0666);
 	if (-1 != existingFileFd) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s should have failed to create existing file: %s\n", FILE_OPEN_FUNCTION_NAME, validFilename);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s should have failed to create existing file: %s\n",
+		        FILE_OPEN_FUNCTION_NAME, validFilename);
 		goto exit;
 	}
 
 	/* try opening a "../" file, expect failure (write open) */
-	invalidFileFd = FILE_OPEN_FUNCTION(OMRPORTLIB, illegalFileName, EsOpenCreateNew | EsOpenWrite | EsOpenTruncate, 0666);
+	invalidFileFd =
+	        FILE_OPEN_FUNCTION(OMRPORTLIB, illegalFileName, EsOpenCreateNew | EsOpenWrite | EsOpenTruncate, 0666);
 	if (-1 == invalidFileFd) {
 		int32_t lastErrorNumber = omrerror_last_error_number();
 
 		if (lastErrorNumber == OMRPORT_ERROR_FILE_EXIST) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrerror_last_error_number(\"%s\") returned %i (OMRPORT_ERROR_FILE_EXIST), anything but would be fine %i\n", illegalFileName, lastErrorNumber);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "omrerror_last_error_number(\"%s\") returned %i (OMRPORT_ERROR_FILE_EXIST), anything "
+			        "but would be fine %i\n",
+			        illegalFileName, lastErrorNumber);
 		}
 
 	} else {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s(\"%s\") did not return failure.\n", FILE_OPEN_FUNCTION_NAME, illegalFileName);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s(\"%s\") did not return failure.\n", FILE_OPEN_FUNCTION_NAME,
+		        illegalFileName);
 	}
 
 	/* try opening a "../" file, expect failure (read open) */
-	invalidFileFd = FILE_OPEN_FUNCTION(OMRPORTLIB, illegalFileName, EsOpenCreateNew | EsOpenRead | EsOpenTruncate, 0666);
+	invalidFileFd =
+	        FILE_OPEN_FUNCTION(OMRPORTLIB, illegalFileName, EsOpenCreateNew | EsOpenRead | EsOpenTruncate, 0666);
 	if (-1 == invalidFileFd) {
 		int32_t lastErrorNumber = omrerror_last_error_number();
 
 		if (lastErrorNumber == OMRPORT_ERROR_FILE_EXIST) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrerror_last_error_number(\"%s\") returned %i (OMRPORT_ERROR_FILE_EXIST), anything but would be fine %i\n", illegalFileName, lastErrorNumber);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "omrerror_last_error_number(\"%s\") returned %i (OMRPORT_ERROR_FILE_EXIST), anything "
+			        "but would be fine %i\n",
+			        illegalFileName, lastErrorNumber);
 		}
 
 	} else {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s(\"%s\") did not return failure.\n", FILE_OPEN_FUNCTION_NAME, illegalFileName);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s(\"%s\") did not return failure.\n", FILE_OPEN_FUNCTION_NAME,
+		        illegalFileName);
 	}
 
 exit:
@@ -3700,7 +3939,8 @@ exit:
 	/* Close the file references, should succeed */
 	rc = FILE_CLOSE_FUNCTION(OMRPORTLIB, validFileFd);
 	if (0 != rc) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc, 0);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc, 0);
 	}
 
 	/* Delete this file, should succeed */
@@ -3730,30 +3970,35 @@ TEST_F(PortFileTest2, file_test31)
 	omrfile_unlink(filename); /* ensure there is no stale file */
 	fileFd = FILE_OPEN_FUNCTION(OMRPORTLIB, filename, EsOpenCreateNew | EsOpenWrite | EsOpenTruncate, 0666);
 	if (-1 == fileFd) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s failed to create file %s: error_last_error_number %i\n", FILE_OPEN_FUNCTION_NAME,
-						   filename, omrerror_last_error_number());
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s failed to create file %s: error_last_error_number %i\n",
+		        FILE_OPEN_FUNCTION_NAME, filename, omrerror_last_error_number());
 		goto exit;
 	}
 	rc = omrfile_stat(filename, 0, &stat);
 	if (rc != 0) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat(%s, ..) returned %d expected %d\n", filename, rc, 0);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrfile_stat(%s, ..) returned %d expected %d\n", filename, rc, 0);
 	}
 	myUid = omrsysinfo_get_euid();
 	myGid = omrsysinfo_get_egid();
 	fileGid = stat.ownerGid;
 
 	if (myUid != stat.ownerUid) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat.ownerUid is %d expected %d\n", stat.ownerUid, myUid);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrfile_stat.ownerUid is %d expected %d\n", stat.ownerUid, myUid);
 	}
 
 	if (myGid != fileGid) {
-		portTestEnv->log("unexpected group ID.  Possibly setgid bit set. Comparing to group of the current directory\n");
+		portTestEnv->log("unexpected group ID.  Possibly setgid bit set. Comparing to group of the current "
+		                 "directory\n");
 		rc = omrfile_stat(".", 0, &stat);
 		if (rc != 0) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat(%s, ..) returned %d expected %d\n", ".", rc, 0);
+			outputErrorMessage(
+			        PORTTEST_ERROR_ARGS, "omrfile_stat(%s, ..) returned %d expected %d\n", ".", rc, 0);
 		}
 		if (fileGid != stat.ownerGid) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat.ownerGid is %d expected %d\n", fileGid, stat.ownerGid);
+			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat.ownerGid is %d expected %d\n", fileGid,
+			        stat.ownerGid);
 		}
 	}
 exit:
@@ -3761,7 +4006,8 @@ exit:
 	/* Close the file references, should succeed */
 	rc = FILE_CLOSE_FUNCTION(OMRPORTLIB, fileFd);
 	if (0 != rc) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc, 0);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc, 0);
 	}
 
 	/* Delete this file, should succeed */
@@ -3919,19 +4165,17 @@ TEST_F(PortFileTest2, file_test32)
 	/*umask vary so we can't test 'isGroupWriteable', 'isGroupReadable', 'isOtherWriteable', or 'isOtherReadable'*/
 #endif /* defined(OMR_OS_WINDOWS) */
 
-
 done:
 	omrfile_unlink(localFilename);
 	portTestEnv->changeIndent(-1);
 	reportTestExit(OMRPORTLIB, testName);
 }
 
-
 TEST_F(PortFileTest2, file_test33)
 {
 	OMRPORT_ACCESS_FROM_OMRPORT(portTestEnv->getPortLibrary());
 
-const char *testName = APPEND_ASYNC(omrfile_test33: test UTF - 8 encoding);
+	const char *testName = APPEND_ASYNC(omrfile_test33 : test UTF - 8 encoding);
 
 	const unsigned char single_byte_utf8[] = {0x24, '\n'}; /* U+0024 $ */
 	const unsigned char two_byte_utf8[] = {0xC2, 0xA2, '\n'}; /* U+00A2 ???*/
@@ -3954,10 +4198,12 @@ const char *testName = APPEND_ASYNC(omrfile_test33: test UTF - 8 encoding);
 
 	omrfile_write_text(1, (const char *)single_byte_utf8, sizeof(char) * 2);
 	omrfile_write_text(1, (const char *)two_byte_utf8, sizeof(char) * 3);
-	omrfile_write_text(1, (const char *)three_byte_utf8, sizeof(char) * 4);		/* Unicode string representation should be printed */
-	omrfile_write_text(1, (const char *)four_byte_utf8, sizeof(char) * 5);		/* '????' should be printed */
-	omrfile_write_text(1, (const char *)invalid_byte_utf8, sizeof(char) * 3);	/* '??' should be printed */
-	omrfile_write_text(1, (const char *)many_byte_utf8, sizeof(char) * 512);	/* Unicode string representation should be printed */
+	omrfile_write_text(1, (const char *)three_byte_utf8, sizeof(char) * 4); /* Unicode string representation should
+	                                                                           be printed */
+	omrfile_write_text(1, (const char *)four_byte_utf8, sizeof(char) * 5); /* '????' should be printed */
+	omrfile_write_text(1, (const char *)invalid_byte_utf8, sizeof(char) * 3); /* '??' should be printed */
+	omrfile_write_text(1, (const char *)many_byte_utf8, sizeof(char) * 512); /* Unicode string representation should
+	                                                                            be printed */
 
 	reportTestExit(OMRPORTLIB, testName);
 }
@@ -3982,7 +4228,8 @@ TEST_F(PortFileTest2, file_test_long_file_name)
 	char *readBufPtr;
 	char *longDirName = "\\abcdefghijklmnopqrstuvwx";
 #define MIN_LENGTH (MAX_PATH + 1)
-#define FILENAME_LENGTH MIN_LENGTH*2 /* double the size to accomodate a file size that is just under twice MIN_LENGTH */
+#define FILENAME_LENGTH \
+	MIN_LENGTH * 2 /* double the size to accomodate a file size that is just under twice MIN_LENGTH */
 	char filePathName[FILENAME_LENGTH];
 	intptr_t fd;
 	char cwd[FILENAME_LENGTH];
@@ -3998,25 +4245,29 @@ TEST_F(PortFileTest2, file_test_long_file_name)
 	basePaths[0] = "."; /* to test a relative path */
 	basePaths[1] = cwd; /* to test an absolute path */
 
-	for (i = 0; i < 2; i ++) {
+	for (i = 0; i < 2; i++) {
 		omrstr_printf(filePathName, FILENAME_LENGTH, "%s", basePaths[i]);
 
 		/* build up a file name that is longer than 256 characters,
 		 * comprised of directories, each of which are less than 256 characters in length*/
 		while (strlen(filePathName) < MIN_LENGTH) {
 
-			omrstr_printf(filePathName + strlen(filePathName), FILENAME_LENGTH - strlen(filePathName), "%s", longDirName);
+			omrstr_printf(filePathName + strlen(filePathName), FILENAME_LENGTH - strlen(filePathName), "%s",
+			        longDirName);
 
 			mkdirRc = omrfile_mkdir(filePathName);
 
 			if ((mkdirRc != 0)) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_mkdir() failed for dir with length %i: %s\n", strlen(filePathName), filePathName);
+				outputErrorMessage(PORTTEST_ERROR_ARGS,
+				        "omrfile_mkdir() failed for dir with length %i: %s\n", strlen(filePathName),
+				        filePathName);
 				goto exit;
 			}
 		}
 
 		/* now append filePathName with the actual filename */
-		omrstr_printf(filePathName + strlen(filePathName), FILENAME_LENGTH - strlen(filePathName), "\\%s", testName);
+		omrstr_printf(
+		        filePathName + strlen(filePathName), FILENAME_LENGTH - strlen(filePathName), "\\%s", testName);
 
 		portTestEnv->log("\ttesting filename: %s\n", filePathName);
 
@@ -4034,7 +4285,8 @@ TEST_F(PortFileTest2, file_test_long_file_name)
 		/* having hopefully shoved this stuff onto file we need to read it back and check its as expected! */
 		rc = FILE_CLOSE_FUNCTION(OMRPORTLIB, fd);
 		if (0 != rc) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc, 0);
+			outputErrorMessage(
+			        PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc, 0);
 			goto exit;
 		}
 
@@ -4051,17 +4303,19 @@ TEST_F(PortFileTest2, file_test_long_file_name)
 		}
 
 		if (strlen(readBufPtr) != strlen(expectedResult)) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_read_text() returned %d expected %d\n", strlen(readBufPtr), strlen(expectedResult));
+			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_read_text() returned %d expected %d\n",
+			        strlen(readBufPtr), strlen(expectedResult));
 			goto exit;
 		}
 
 		/* omrfile_read_text(): translation from IBM1047 to ASCII is done on zOS */
 		if (strcmp(readBufPtr, expectedResult)) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_read_text() returned \"%s\" expected \"%s\"\n", readBufPtr , expectedResult);
+			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_read_text() returned \"%s\" expected \"%s\"\n",
+			        readBufPtr, expectedResult);
 			goto exit;
 		}
 
-exit:
+	exit:
 		FILE_CLOSE_FUNCTION(OMRPORTLIB, fd);
 
 		/* delete the file */
@@ -4072,7 +4326,8 @@ exit:
 
 		/* Now we need to unwind and delete all the directories we created one by one
 		 * 	- we simply delete the base directory because it is not empty.
-		 * Do this by stripping actual name of the filename, then each occurrence of longDirName from the full path.
+		 * Do this by stripping actual name of the filename, then each occurrence of longDirName from the full
+		 * path.
 		 *
 		 * You know you're done when the filePathName doesn't contain the occurrence of longDirName
 		 */
@@ -4085,7 +4340,8 @@ exit:
 
 				unlinkRc = omrfile_unlinkdir(filePathName);
 				if (0 != unlinkRc) {
-					outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_unlinkdir failed: %s\n", filePathName);
+					outputErrorMessage(
+					        PORTTEST_ERROR_ARGS, "omrfile_unlinkdir failed: %s\n", filePathName);
 				}
 
 				filePathName[strlen(filePathName) - lenLongDirName] = '\0';
@@ -4099,7 +4355,6 @@ exit:
 	reportTestExit(OMRPORTLIB, testName);
 }
 #endif /* defined(OMR_OS_WINDOWS) */
-
 
 /**
  * Test omrfile_stat_filesystem ability to measure free disk space
@@ -4156,7 +4411,8 @@ omrfile_test34(struct OMRPortLibrary *portLibrary)
 	}
 
 	if (buf.isRemote) {
-		portTestEnv->log(LEVEL_WARN, "WARNING: Test omrfile_test34 cannot be run on a remote file system.\nSkipping test.\n");
+		portTestEnv->log(LEVEL_WARN,
+		        "WARNING: Test omrfile_test34 cannot be run on a remote file system.\nSkipping test.\n");
 		returnCode = TEST_PASS;
 		goto exit;
 	}
@@ -4189,14 +4445,16 @@ omrfile_test34(struct OMRPortLibrary *portLibrary)
 	if (0 == freeSpaceDelta) {
 		portTestEnv->log("The amount of free disk space does not change after the creation of a file.\n\
 			It can be due to a file of exactly %d bytes being deleted during this test, or omrfile_stat_filesystem failing.\n\
-			The test does not work on a remote file system. Ignore failures on remote file systems.\n", J9FILETEST_FILESIZE);
+			The test does not work on a remote file system. Ignore failures on remote file systems.\n",
+		        J9FILETEST_FILESIZE);
 		returnCode = TEST_FAIL;
 		goto exit;
 	}
 
 	if (buf_before.totalSizeBytes != buf_after.totalSizeBytes) {
 		portTestEnv->log("Total disk space changed between runs, it was %llu changed to %llu.\n\
-				The disk space should not change between runs.\n", buf_before.totalSizeBytes, buf_after.totalSizeBytes);
+				The disk space should not change between runs.\n",
+		        buf_before.totalSizeBytes, buf_after.totalSizeBytes);
 		returnCode = TEST_FAIL;
 		goto exit;
 	}
@@ -4207,7 +4465,8 @@ exit:
 	if (-1 != fd) {
 		rc = FILE_CLOSE_FUNCTION(OMRPORTLIB, fd);
 		if (0 != rc) {
-			portTestEnv->log(LEVEL_ERROR, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc, 0);
+			portTestEnv->log(
+			        LEVEL_ERROR, "%s() returned %d expected %d\n", FILE_CLOSE_FUNCTION_NAME, rc, 0);
 		}
 
 		/* Delete the file, expect success */
@@ -4235,10 +4494,11 @@ omrfile_test34_multiple_tries(struct OMRPortLibrary *portLibrary, int nbOfTries)
 {
 	OMRPORT_ACCESS_FROM_OMRPORT(portLibrary);
 	int i, rc;
-const char *testName = APPEND_ASYNC(omrfile_test34_multiple_tries: _test_omrfile_stat_filesystem_disk_space);
+	const char *testName = APPEND_ASYNC(omrfile_test34_multiple_tries : _test_omrfile_stat_filesystem_disk_space);
 
 	reportTestEntry(OMRPORTLIB, testName);
-	/* The test omrfile_test34 may fail if other processes writes to the hard drive, trying the test nbOfTries times */
+	/* The test omrfile_test34 may fail if other processes writes to the hard drive, trying the test nbOfTries times
+	 */
 	for (i = 0; i < nbOfTries; i++) {
 		rc = omrfile_test34(portLibrary);
 		if (TEST_PASS == rc) {
@@ -4270,48 +4530,56 @@ TEST_F(PortFileTest2, file_test35)
 
 	fd = FILE_OPEN_FUNCTION(OMRPORTLIB, fileName, EsOpenCreate | EsOpenWrite, 0666);
 	if (-1 == fd) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned -1 expected valid file handle", FILE_OPEN_FUNCTION_NAME);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "%s() returned -1 expected valid file handle", FILE_OPEN_FUNCTION_NAME);
 		goto exit;
 	}
 
 	rc = FILE_SET_LENGTH_FUNCTION(OMRPORTLIB, fd, fileLength);
 	if (0 != rc) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %lld expected %d\n", FILE_SET_LENGTH_FUNCTION_NAME, rc, 0);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "%s() returned %lld expected %d\n", FILE_SET_LENGTH_FUNCTION_NAME, rc, 0);
 		goto exit;
 	}
 
 	newLength = omrfile_length(fileName);
 	if (newLength != fileLength) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_length() returned %lld expected %lld\n", newLength, fileLength);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrfile_length() returned %lld expected %lld\n", newLength, fileLength);
 		goto exit;
 	}
 
 	newfLength = FILE_FLENGTH_FUNCTION(OMRPORTLIB, fd);
 	if (newfLength != fileLength) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %lld expected %lld\n", FILE_FLENGTH_FUNCTION_NAME, newfLength, fileLength);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %lld expected %lld\n",
+		        FILE_FLENGTH_FUNCTION_NAME, newfLength, fileLength);
 		goto exit;
 	}
 	if (newfLength != newLength) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %lld expected %lld\n", FILE_FLENGTH_FUNCTION_NAME, newfLength, newLength);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %lld expected %lld\n",
+		        FILE_FLENGTH_FUNCTION_NAME, newfLength, newLength);
 		goto exit;
 	}
 
 	/* Testing that omrfile_flength doesn't change the file_seek offset */
 	offset = omrfile_seek(fd, seekOffset, EsSeekSet);
 	if (seekOffset != offset) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "file_seek() returned %lld expected %lld\n", offset, seekOffset);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "file_seek() returned %lld expected %lld\n", offset, seekOffset);
 		goto exit;
 	}
 
 	newfLength = FILE_FLENGTH_FUNCTION(OMRPORTLIB, fd);
 	if (newfLength != fileLength) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %lld expected %lld\n", FILE_FLENGTH_FUNCTION_NAME, newfLength, fileLength);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %lld expected %lld\n",
+		        FILE_FLENGTH_FUNCTION_NAME, newfLength, fileLength);
 		goto exit;
 	}
 
 	offset = omrfile_seek(fd, 0, EsSeekCur);
 	if (seekOffset != offset) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "file_seek() returned %lld expected %lld\n", offset, seekOffset);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "file_seek() returned %lld expected %lld\n", offset, seekOffset);
 		goto exit;
 	}
 exit:
@@ -4339,11 +4607,15 @@ TEST_F(PortFileTest2, file_test36)
 
 #if !defined(J9ZOS390)
 	if (omrfileFD != nativeFD) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfileFD != nativeFD, they should be the same. omrfileFD: %x, nativeFD: %x\n", omrfileFD, nativeFD);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "omrfileFD != nativeFD, they should be the same. omrfileFD: %x, nativeFD: %x\n", omrfileFD,
+		        nativeFD);
 	}
 #else /* defined(J9ZOS390) */
 	if (omrfileFD == nativeFD) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfileFD == nativeFD, they should be different. omrfileFD: %x, nativeFD: %x\n", omrfileFD, nativeFD);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "omrfileFD == nativeFD, they should be different. omrfileFD: %x, nativeFD: %x\n", omrfileFD,
+		        nativeFD);
 	}
 
 #endif /* defined(J9ZOS390) */
@@ -4351,15 +4623,18 @@ TEST_F(PortFileTest2, file_test36)
 	/* go back and forth with a standard stream.  */
 	nativeFD = omrfile_convert_omrfile_fd_to_native_fd(OMRPORT_TTY_OUT);
 	if (nativeFD < 0) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "nativeFD < 0 , should be non-negative. nativeFD: %x\n", nativeFD);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "nativeFD < 0 , should be non-negative. nativeFD: %x\n", nativeFD);
 	}
 
 	omrfileFD = omrfile_convert_native_fd_to_omrfile_fd(nativeFD);
 	if (omrfileFD == OMRPORT_INVALID_FD) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "j9fileFD == J9PORT_INVALID_FD, they should be the same. j9fileFD: %x\n", omrfileFD);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "j9fileFD == J9PORT_INVALID_FD, they should be the same. j9fileFD: %x\n", omrfileFD);
 	}
 	if (omrfileFD != OMRPORT_TTY_OUT) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "j9fileFD != J9PORT_TTY_OUT, they should be the same. j9fileFD: %x\n", omrfileFD);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "j9fileFD != J9PORT_TTY_OUT, they should be the same. j9fileFD: %x\n", omrfileFD);
 	}
 
 	reportTestExit(OMRPORTLIB, testName);
@@ -4388,7 +4663,11 @@ TEST_F(PortFileTest2, file_test37)
 	/* Invalid fd */
 	rc = omrfile_fstat(-1, &buf);
 	if (rc >= 0) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Negative test failure: omrfile_fstat(-1, ..) on invalid file descriptor is expected to fail but it returned success with rc=%d (ignore the following LastErrorNumber and LastErrorMessage)\n", rc);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Negative test failure: omrfile_fstat(-1, ..) on invalid file descriptor is expected to fail "
+		        "but it returned success with rc=%d (ignore the following LastErrorNumber and "
+		        "LastErrorMessage)\n",
+		        rc);
 	}
 
 	if (0 == omrsysinfo_get_executable_name(NULL, &knownFile)) {
@@ -4397,12 +4676,16 @@ TEST_F(PortFileTest2, file_test37)
 		if (-1 != fd) {
 			rc = omrfile_fstat(fd, &buf);
 			if (0 != rc) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat(...) failed for fd=%d(filename=%s)\n", fd, knownFile);
+				outputErrorMessage(PORTTEST_ERROR_ARGS,
+				        "omrfile_fstat(...) failed for fd=%d(filename=%s)\n", fd, knownFile);
 			} else if (1 != buf.isFile) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat(...) for %s returned buf.isFile = %d, expected 1\n", knownFile, buf.isFile);
+				outputErrorMessage(PORTTEST_ERROR_ARGS,
+				        "omrfile_fstat(...) for %s returned buf.isFile = %d, expected 1\n", knownFile,
+				        buf.isFile);
 			}
 		} else {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() failed to open file %s\n", FILE_OPEN_FUNCTION_NAME, knownFile);
+			outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() failed to open file %s\n",
+			        FILE_OPEN_FUNCTION_NAME, knownFile);
 		}
 	} else {
 		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_get_executable_name(NULL, &knownFile) failed\n");
@@ -4437,24 +4720,32 @@ TEST_F(PortFileTest2, file_test38)
 	if (-1 != fd) {
 		rc = omrfile_fstat(fd, &stat);
 		if (0 != rc) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat(...) failed for fd=%d (filename=%s)\n", fd, filename);
+			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat(...) failed for fd=%d (filename=%s)\n",
+			        fd, filename);
 		} else {
 			myUid = omrsysinfo_get_euid();
 			myGid = omrsysinfo_get_egid();
 			fileGid = stat.ownerGid;
 
 			if (myUid != stat.ownerUid) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat(...) for %s returned ownerUid as %d, expected %d\n", filename, stat.ownerUid, myUid);
+				outputErrorMessage(PORTTEST_ERROR_ARGS,
+				        "omrfile_fstat(...) for %s returned ownerUid as %d, expected %d\n", filename,
+				        stat.ownerUid, myUid);
 			}
 
 			if (myGid != fileGid) {
-				portTestEnv->log("Unexpected group ID. Possibly setgid bit set. Comparing to group of the current directory\n");
+				portTestEnv->log("Unexpected group ID. Possibly setgid bit set. Comparing to group of "
+				                 "the current directory\n");
 				rc = omrfile_stat(".", 0, &stat);
 				if (0 != rc) {
-					outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_stat(...) failed for current directory with rc=%d\n", rc);
+					outputErrorMessage(PORTTEST_ERROR_ARGS,
+					        "omrfile_stat(...) failed for current directory with rc=%d\n", rc);
 				} else {
 					if (fileGid != stat.ownerGid) {
-						outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat(...) for current directory returned ownerGid as %d, expected %d\n", fileGid, stat.ownerGid);
+						outputErrorMessage(PORTTEST_ERROR_ARGS,
+						        "omrfile_fstat(...) for current directory returned ownerGid as "
+						        "%d, expected %d\n",
+						        fileGid, stat.ownerGid);
 					}
 				}
 			}
@@ -4463,16 +4754,19 @@ TEST_F(PortFileTest2, file_test38)
 		/* Close the file references, should succeed */
 		rc = FILE_CLOSE_FUNCTION(OMRPORTLIB, fd);
 		if (0 != rc) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() failed to close the file\n", FILE_CLOSE_FUNCTION_NAME);
+			outputErrorMessage(
+			        PORTTEST_ERROR_ARGS, "%s() failed to close the file\n", FILE_CLOSE_FUNCTION_NAME);
 		}
 
 		/* Delete this file, should succeed */
 		rc = omrfile_unlink(filename);
 		if (0 != rc) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_unlink() failed to delete file %s\n", filename);
+			outputErrorMessage(
+			        PORTTEST_ERROR_ARGS, "omrfile_unlink() failed to delete file %s\n", filename);
 		}
 	} else {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s failed to create file %s\n", FILE_OPEN_FUNCTION_NAME, filename);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "%s failed to create file %s\n", FILE_OPEN_FUNCTION_NAME, filename);
 	}
 
 	reportTestExit(OMRPORTLIB, testName);
@@ -4485,7 +4779,7 @@ TEST_F(PortFileTest2, file_test38)
 TEST_F(PortFileTest2, file_test39)
 {
 	OMRPORT_ACCESS_FROM_OMRPORT(portTestEnv->getPortLibrary());
-const char *testName = APPEND_ASYNC(omrfile_test39: test file permission bits using omrfile_fstat());
+	const char *testName = APPEND_ASYNC(omrfile_test39 : test file permission bits using omrfile_fstat());
 	const char *filename = "tfileTest39.tst";
 	intptr_t fd = -1;
 	J9FileStat stat;
@@ -4508,24 +4802,30 @@ const char *testName = APPEND_ASYNC(omrfile_test39: test file permission bits us
 	if (-1 != fd) {
 		rc = omrfile_fstat(fd, &stat);
 		if (0 != rc) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat(...) failed for fd=%d (filename=%s)\n", fd, filename);
+			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat(...) failed for fd=%d (filename=%s)\n",
+			        fd, filename);
 		} else {
 			if (stat.perm.isUserWriteable != 1) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isUserWriteable != 1'\n");
+				outputErrorMessage(
+				        PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isUserWriteable != 1'\n");
 			}
 			if (stat.perm.isUserReadable != 1) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isUserReadable != 1'\n");
+				outputErrorMessage(
+				        PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isUserReadable != 1'\n");
 			}
-			/*umask vary so we can't test 'isGroupWriteable', 'isGroupReadable', 'isOtherWriteable', or 'isOtherReadable'*/
+			/*umask vary so we can't test 'isGroupWriteable', 'isGroupReadable', 'isOtherWriteable', or
+			 * 'isOtherReadable'*/
 		}
 
 		FILE_CLOSE_FUNCTION(OMRPORTLIB, fd);
 		rc = omrfile_unlink(filename);
 		if (0 != rc) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_unlink() failed to delete the file %s\n", filename);
+			outputErrorMessage(
+			        PORTTEST_ERROR_ARGS, "omrfile_unlink() failed to delete the file %s\n", filename);
 		}
 	} else {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() failed to create file %s with mode=%d\n", FILE_OPEN_FUNCTION_NAME, filename, mode);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() failed to create file %s with mode=%d\n",
+		        FILE_OPEN_FUNCTION_NAME, filename, mode);
 	}
 
 	/*
@@ -4538,24 +4838,30 @@ const char *testName = APPEND_ASYNC(omrfile_test39: test file permission bits us
 	if (-1 != fd) {
 		rc = omrfile_fstat(fd, &stat);
 		if (0 != rc) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat(...) failed for fd=%d (filename=%s)\n", fd, filename);
+			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat(...) failed for fd=%d (filename=%s)\n",
+			        fd, filename);
 		} else {
 			if (stat.perm.isUserWriteable != 0) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isUserWriteable != 0'\n");
+				outputErrorMessage(
+				        PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isUserWriteable != 0'\n");
 			}
 			if (stat.perm.isUserReadable != 1) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isUserReadable != 1'\n");
+				outputErrorMessage(
+				        PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isUserReadable != 1'\n");
 			}
-			/*umask vary so we can't test 'isGroupWriteable', 'isGroupReadable', 'isOtherWriteable', or 'isOtherReadable'*/
+			/*umask vary so we can't test 'isGroupWriteable', 'isGroupReadable', 'isOtherWriteable', or
+			 * 'isOtherReadable'*/
 		}
 
 		FILE_CLOSE_FUNCTION(OMRPORTLIB, fd);
 		rc = omrfile_unlink(filename);
 		if (0 != rc) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_unlink() failed to delete the file %s\n", filename);
+			outputErrorMessage(
+			        PORTTEST_ERROR_ARGS, "omrfile_unlink() failed to delete the file %s\n", filename);
 		}
 	} else {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() failed to create file %s with mode=%d\n", FILE_OPEN_FUNCTION_NAME, filename, mode);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() failed to create file %s with mode=%d\n",
+		        FILE_OPEN_FUNCTION_NAME, filename, mode);
 	}
 
 	/*
@@ -4568,24 +4874,30 @@ const char *testName = APPEND_ASYNC(omrfile_test39: test file permission bits us
 	if (-1 != fd) {
 		rc = omrfile_fstat(fd, &stat);
 		if (0 != rc) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat(...) failed for fd=%d (filename=%s)\n", fd, filename);
+			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat(...) failed for fd=%d (filename=%s)\n",
+			        fd, filename);
 		} else {
 			if (stat.perm.isUserWriteable != 1) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isUserWriteable != 1'\n");
+				outputErrorMessage(
+				        PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isUserWriteable != 1'\n");
 			}
 			if (stat.perm.isUserReadable != 0) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isUserReadable != 0'\n");
+				outputErrorMessage(
+				        PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isUserReadable != 0'\n");
 			}
-			/*umask vary so we can't test 'isGroupWriteable', 'isGroupReadable', 'isOtherWriteable', or 'isOtherReadable'*/
+			/*umask vary so we can't test 'isGroupWriteable', 'isGroupReadable', 'isOtherWriteable', or
+			 * 'isOtherReadable'*/
 		}
 
 		FILE_CLOSE_FUNCTION(OMRPORTLIB, fd);
 		rc = omrfile_unlink(filename);
 		if (0 != rc) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_unlink() failed to delete the file %s\n", filename);
+			outputErrorMessage(
+			        PORTTEST_ERROR_ARGS, "omrfile_unlink() failed to delete the file %s\n", filename);
 		}
 	} else {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() failed to create file %s with mode=%d\n", FILE_OPEN_FUNCTION_NAME, filename, mode);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() failed to create file %s with mode=%d\n",
+		        FILE_OPEN_FUNCTION_NAME, filename, mode);
 	}
 
 	/*
@@ -4599,35 +4911,44 @@ const char *testName = APPEND_ASYNC(omrfile_test39: test file permission bits us
 	if (-1 != fd) {
 		rc = omrfile_fstat(fd, &stat);
 		if (0 != rc) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat(...) failed for fd=%d (filename=%s)\n", fd, filename);
+			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat(...) failed for fd=%d (filename=%s)\n",
+			        fd, filename);
 		} else {
 			if (stat.perm.isUserWriteable != 1) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isUserWriteable != 1'\n");
+				outputErrorMessage(
+				        PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isUserWriteable != 1'\n");
 			}
 			if (stat.perm.isUserReadable != 1) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isUserReadable != 1'\n");
+				outputErrorMessage(
+				        PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isUserReadable != 1'\n");
 			}
 			if (stat.perm.isGroupWriteable != 0) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isGroupWriteable != 0'\n");
+				outputErrorMessage(
+				        PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isGroupWriteable != 0'\n");
 			}
 			if (stat.perm.isGroupReadable != 0) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isGroupReadable != 0'\n");
+				outputErrorMessage(
+				        PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isGroupReadable != 0'\n");
 			}
 			if (stat.perm.isOtherWriteable != 0) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isOtherWriteable != 0'\n");
+				outputErrorMessage(
+				        PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isOtherWriteable != 0'\n");
 			}
 			if (stat.perm.isOtherReadable != 0) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isOtherReadable != 0'\n");
+				outputErrorMessage(
+				        PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isOtherReadable != 0'\n");
 			}
 		}
 
 		FILE_CLOSE_FUNCTION(OMRPORTLIB, fd);
 		rc = omrfile_unlink(filename);
 		if (0 != rc) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_unlink() failed to delete the file %s\n", filename);
+			outputErrorMessage(
+			        PORTTEST_ERROR_ARGS, "omrfile_unlink() failed to delete the file %s\n", filename);
 		}
 	} else {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "5s() failed to create file %s with mode=%d\n", FILE_OPEN_FUNCTION_NAME, filename, mode);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "5s() failed to create file %s with mode=%d\n",
+		        FILE_OPEN_FUNCTION_NAME, filename, mode);
 	}
 
 	/*
@@ -4640,35 +4961,44 @@ const char *testName = APPEND_ASYNC(omrfile_test39: test file permission bits us
 	if (-1 != fd) {
 		rc = omrfile_fstat(fd, &stat);
 		if (0 != rc) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat(...) failed for fd=%d (filename=%s)\n", fd, filename);
+			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat(...) failed for fd=%d (filename=%s)\n",
+			        fd, filename);
 		} else {
 			if (stat.perm.isUserWriteable != 0) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isUserWriteable != 0'\n");
+				outputErrorMessage(
+				        PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isUserWriteable != 0'\n");
 			}
 			if (stat.perm.isUserReadable != 1) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isUserReadable != 1'\n");
+				outputErrorMessage(
+				        PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isUserReadable != 1'\n");
 			}
 			if (stat.perm.isGroupWriteable != 0) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isGroupWriteable != 0'\n");
+				outputErrorMessage(
+				        PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isGroupWriteable != 0'\n");
 			}
 			if (stat.perm.isGroupReadable != 0) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isGroupReadable != 0'\n");
+				outputErrorMessage(
+				        PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isGroupReadable != 0'\n");
 			}
 			if (stat.perm.isOtherWriteable != 0) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isOtherWriteable != 0'\n");
+				outputErrorMessage(
+				        PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isOtherWriteable != 0'\n");
 			}
 			if (stat.perm.isOtherReadable != 0) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isOtherReadable != 0'\n");
+				outputErrorMessage(
+				        PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isOtherReadable != 0'\n");
 			}
 		}
 
 		FILE_CLOSE_FUNCTION(OMRPORTLIB, fd);
 		rc = omrfile_unlink(filename);
 		if (0 != rc) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_unlink() failed to delete the file %s\n", filename);
+			outputErrorMessage(
+			        PORTTEST_ERROR_ARGS, "omrfile_unlink() failed to delete the file %s\n", filename);
 		}
 	} else {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() failed to create file %s with mode=%d\n", FILE_OPEN_FUNCTION_NAME, filename, mode);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() failed to create file %s with mode=%d\n",
+		        FILE_OPEN_FUNCTION_NAME, filename, mode);
 	}
 
 	/*
@@ -4681,44 +5011,51 @@ const char *testName = APPEND_ASYNC(omrfile_test39: test file permission bits us
 	if (-1 != fd) {
 		rc = omrfile_fstat(fd, &stat);
 		if (0 != rc) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat(...) failed for fd=%d (filename=%s)\n", fd, filename);
+			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat(...) failed for fd=%d (filename=%s)\n",
+			        fd, filename);
 		} else {
 			if (stat.perm.isUserWriteable != 1) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isUserWriteable != 1'\n");
+				outputErrorMessage(
+				        PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isUserWriteable != 1'\n");
 			}
 			if (stat.perm.isUserReadable != 0) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isUserReadable != 0'\n");
+				outputErrorMessage(
+				        PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isUserReadable != 0'\n");
 			}
 			if (stat.perm.isGroupWriteable != 0) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isGroupWriteable != 0'\n");
+				outputErrorMessage(
+				        PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isGroupWriteable != 0'\n");
 			}
 			if (stat.perm.isGroupReadable != 0) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isGroupReadable != 0'\n");
+				outputErrorMessage(
+				        PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isGroupReadable != 0'\n");
 			}
 			if (stat.perm.isOtherWriteable != 0) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isOtherWriteable != 0'\n");
+				outputErrorMessage(
+				        PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isOtherWriteable != 0'\n");
 			}
 			if (stat.perm.isOtherReadable != 0) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isOtherReadable != 0'\n");
+				outputErrorMessage(
+				        PORTTEST_ERROR_ARGS, "omrfile_fstat() error 'stat.isOtherReadable != 0'\n");
 			}
 		}
 
 		FILE_CLOSE_FUNCTION(OMRPORTLIB, fd);
 		rc = omrfile_unlink(filename);
 		if (0 != rc) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrfile_unlink() failed to delete the file %s\n", filename);
+			outputErrorMessage(
+			        PORTTEST_ERROR_ARGS, "omrfile_unlink() failed to delete the file %s\n", filename);
 		}
 
 	} else {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "5s() failed to create file %s with mode=%d\n", FILE_OPEN_FUNCTION_NAME, filename, mode);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "5s() failed to create file %s with mode=%d\n",
+		        FILE_OPEN_FUNCTION_NAME, filename, mode);
 	}
 
 	portTestEnv->changeIndent(-1);
 	reportTestExit(OMRPORTLIB, testName);
 }
 #endif /* defined(OMR_OS_WINDOWS) */
-
-
 
 /**
  * Verify port file system.
@@ -4736,7 +5073,6 @@ TEST_F(PortFileTest2, file_test40)
 	intptr_t expectedReturnValue;
 	intptr_t rc = 0;
 
-
 	reportTestEntry(OMRPORTLIB, testName);
 	expectedReturnValue = sizeof(inputLine1) - 1; /* don't want the final 0x00 */
 
@@ -4748,33 +5084,40 @@ TEST_F(PortFileTest2, file_test40)
 
 	prevFilePtr = omrfile_seek(fd, 0, EsSeekCur);
 	if (0 != prevFilePtr) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "File pointer location is wrong after opening file. Expected = 0, Got = %lld", prevFilePtr);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "File pointer location is wrong after opening file. Expected = 0, Got = %lld", prevFilePtr);
 	}
 
 	/* now lets write to it */
 	rc = FILE_WRITE_FUNCTION(OMRPORTLIB, fd, inputLine1, expectedReturnValue);
 
 	if (rc != expectedReturnValue) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_WRITE_FUNCTION_NAME, rc, expectedReturnValue);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %d expected %d\n", FILE_WRITE_FUNCTION_NAME, rc,
+		        expectedReturnValue);
 		goto exit;
 	}
 
 	filePtr = omrfile_seek(fd, 0, EsSeekCur);
 	if (prevFilePtr + expectedReturnValue != filePtr) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "File pointer location is wrong after writing into file. Expected = %lld, Got = %lld", prevFilePtr + expectedReturnValue,  filePtr);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "File pointer location is wrong after writing into file. Expected = %lld, Got = %lld",
+		        prevFilePtr + expectedReturnValue, filePtr);
 	}
 
 	prevFilePtr = filePtr;
 	rc = FILE_SET_LENGTH_FUNCTION(OMRPORTLIB, fd, 100);
 	if (0 != rc) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() returned %lld expected %d\n", FILE_SET_LENGTH_FUNCTION_NAME, rc, 0);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "%s() returned %lld expected %d\n", FILE_SET_LENGTH_FUNCTION_NAME, rc, 0);
 		goto exit;
 	}
 
 	filePtr = omrfile_seek(fd, 0, EsSeekCur);
 
 	if (prevFilePtr != filePtr) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "%s() Changed the location of file pointer. Expected : %lld. Got : %lld \n", FILE_SET_LENGTH_FUNCTION_NAME, prevFilePtr, filePtr);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "%s() Changed the location of file pointer. Expected : %lld. Got : %lld \n",
+		        FILE_SET_LENGTH_FUNCTION_NAME, prevFilePtr, filePtr);
 		goto exit; /* Although we dont need this, lets keep it to make it look like other failure cases */
 	}
 

@@ -27,7 +27,6 @@
 extern "C" {
 #endif
 
-
 /*		DO NOT DIRECTLY INCLUDE THIS FILE 	*/
 /*		Include pool_api.h instead					*/
 
@@ -59,9 +58,8 @@ typedef struct J9PoolPuddle {
 	uintptr_t flags;
 } J9PoolPuddle;
 
-
-#define PUDDLE_KILLED  4
-#define PUDDLE_ACTIVE  2
+#define PUDDLE_KILLED 4
+#define PUDDLE_ACTIVE 2
 
 /*
  * @ddr_namespace: map_to_type=J9Pool
@@ -72,7 +70,8 @@ typedef struct J9Pool {
 	uintptr_t elementsPerPuddle;
 	uintptr_t puddleAllocSize;
 	J9WSRP puddleList;
-	void  *(*memAlloc)(void *userData, uint32_t byteAmount, const char *callsite, uint32_t memoryCategory, uint32_t type, uint32_t *doInit);
+	void *(*memAlloc)(void *userData, uint32_t byteAmount, const char *callsite, uint32_t memoryCategory,
+	        uint32_t type, uint32_t *doInit);
 	void (*memFree)(void *userData, void *ptr, uint32_t type);
 	const char *poolCreatorCallsite;
 	void *userData;
@@ -81,14 +80,14 @@ typedef struct J9Pool {
 	uint32_t memoryCategory;
 } J9Pool;
 
-#define POOL_NO_ZERO  8
-#define POOL_ROUND_TO_PAGE_SIZE  16
-#define POOL_USES_HOLES  32
-#define POOL_NEVER_FREE_PUDDLES  2
-#define POOL_ALLOC_TYPE_PUDDLE  1
-#define POOL_ALWAYS_KEEP_SORTED  4
-#define POOL_ALLOC_TYPE_PUDDLE_LIST  2
-#define POOL_ALLOC_TYPE_POOL  0
+#define POOL_NO_ZERO 8
+#define POOL_ROUND_TO_PAGE_SIZE 16
+#define POOL_USES_HOLES 32
+#define POOL_NEVER_FREE_PUDDLES 2
+#define POOL_ALLOC_TYPE_PUDDLE 1
+#define POOL_ALWAYS_KEEP_SORTED 4
+#define POOL_ALLOC_TYPE_PUDDLE_LIST 2
+#define POOL_ALLOC_TYPE_POOL 0
 
 /*
  * @ddr_namespace: map_to_type=J9PoolState
@@ -102,20 +101,19 @@ typedef struct J9PoolState {
 	uintptr_t flags;
 } J9PoolState;
 
-
-#define POOLSTATE_FOLLOW_NEXT_POINTERS  1
+#define POOLSTATE_FOLLOW_NEXT_POINTERS 1
 
 #define pool_state J9PoolState
 
-#define J9POOLPUDDLE_FIRSTFREESLOT(parm) SRP_GET((parm)->firstFreeSlot, uintptr_t*)
-#define J9POOLPUDDLE_FIRSTELEMENTADDRESS(parm) NNSRP_GET((parm)->firstElementAddress, void*)
-#define J9POOLPUDDLE_PREVPUDDLE(parm) WSRP_GET((parm)->prevPuddle, J9PoolPuddle*)
-#define J9POOLPUDDLE_NEXTPUDDLE(parm) WSRP_GET((parm)->nextPuddle, J9PoolPuddle*)
-#define J9POOLPUDDLE_NEXTAVAILABLEPUDDLE(parm) WSRP_GET((parm)->nextAvailablePuddle, J9PoolPuddle*)
-#define J9POOLPUDDLE_PREVAVAILABLEPUDDLE(parm) WSRP_GET((parm)->prevAvailablePuddle, J9PoolPuddle*)
-#define J9POOL_PUDDLELIST(pool) NNWSRP_GET((pool)->puddleList, J9PoolPuddleList*)
-#define J9POOLPUDDLELIST_NEXTPUDDLE(parm) NNWSRP_GET((parm)->nextPuddle, J9PoolPuddle*)
-#define J9POOLPUDDLELIST_NEXTAVAILABLEPUDDLE(parm) WSRP_GET((parm)->nextAvailablePuddle, J9PoolPuddle*)
+#define J9POOLPUDDLE_FIRSTFREESLOT(parm) SRP_GET((parm)->firstFreeSlot, uintptr_t *)
+#define J9POOLPUDDLE_FIRSTELEMENTADDRESS(parm) NNSRP_GET((parm)->firstElementAddress, void *)
+#define J9POOLPUDDLE_PREVPUDDLE(parm) WSRP_GET((parm)->prevPuddle, J9PoolPuddle *)
+#define J9POOLPUDDLE_NEXTPUDDLE(parm) WSRP_GET((parm)->nextPuddle, J9PoolPuddle *)
+#define J9POOLPUDDLE_NEXTAVAILABLEPUDDLE(parm) WSRP_GET((parm)->nextAvailablePuddle, J9PoolPuddle *)
+#define J9POOLPUDDLE_PREVAVAILABLEPUDDLE(parm) WSRP_GET((parm)->prevAvailablePuddle, J9PoolPuddle *)
+#define J9POOL_PUDDLELIST(pool) NNWSRP_GET((pool)->puddleList, J9PoolPuddleList *)
+#define J9POOLPUDDLELIST_NEXTPUDDLE(parm) NNWSRP_GET((parm)->nextPuddle, J9PoolPuddle *)
+#define J9POOLPUDDLELIST_NEXTAVAILABLEPUDDLE(parm) WSRP_GET((parm)->nextAvailablePuddle, J9PoolPuddle *)
 
 #ifdef __cplusplus
 }

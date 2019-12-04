@@ -20,19 +20,30 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 /**
  * Description: An non-extensible class between two extensible classes,
- *    in an extensible class hierarchy, which is not allowed. 
+ *    in an extensible class hierarchy, which is not allowed.
  */
 
 #define OMR_EXTENSIBLE __attribute__((annotate("OMR_Extensible")))
 
-namespace OMR { class OMR_EXTENSIBLE Class1Ext {}; }
-namespace TR  { class OMR_EXTENSIBLE Class1Ext : public OMR::Class1Ext {}; }
+namespace OMR {
+class OMR_EXTENSIBLE Class1Ext {};
+} // namespace OMR
+namespace TR {
+class OMR_EXTENSIBLE Class1Ext : public OMR::Class1Ext {};
+} // namespace TR
 
-namespace OMR { class Class2NonExt : public TR::Class1Ext {}; }
-namespace TR  { class Class2NonExt : public OMR::Class2NonExt {}; }
+namespace OMR {
+class Class2NonExt : public TR::Class1Ext {};
+} // namespace OMR
+namespace TR {
+class Class2NonExt : public OMR::Class2NonExt {};
+} // namespace TR
 
-namespace OMR { class OMR_EXTENSIBLE Class3Ext : public TR::Class2NonExt {}; }
-namespace TR  { class OMR_EXTENSIBLE Class3Ext : public OMR::Class3Ext {}; }
+namespace OMR {
+class OMR_EXTENSIBLE Class3Ext : public TR::Class2NonExt {};
+} // namespace OMR
+namespace TR {
+class OMR_EXTENSIBLE Class3Ext : public OMR::Class3Ext {};
+} // namespace TR

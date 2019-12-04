@@ -20,21 +20,19 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
-#include "omrcfg.h"
+#include "OMRVMThreadInterface.hpp"
 
 #include "EnvironmentStandard.hpp"
 #include "GCExtensionsBase.hpp"
 #include "ObjectAllocationInterface.hpp"
-
-#include "OMRVMThreadInterface.hpp"
+#include "omrcfg.h"
 
 void
 GC_OMRVMThreadInterface::flushCachesForWalk(MM_EnvironmentBase *env)
 {
 	env->_objectAllocationInterface->flushCache(env);
-	/* If we are in a middle of a concurrent GC, we want to flush GC caches, typically for mutator threads doing GC work.
-	 * (GC threads are  smart enough to do it themselves, before they let the walk occur) */
+	/* If we are in a middle of a concurrent GC, we want to flush GC caches, typically for mutator threads doing GC
+	 * work. (GC threads are  smart enough to do it themselves, before they let the walk occur) */
 	env->flushGCCaches();
 }
 

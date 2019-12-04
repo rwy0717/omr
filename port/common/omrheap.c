@@ -39,34 +39,39 @@ struct J9Heap {
 	uintptr_t largestAllocSizeVisited; /* largest free list entry visited while performing the last allocation */
 };
 
-#define ALIGNMENT_ROUND_DOWN(value) (((uintptr_t) value) & (~(sizeof(uint64_t) - 1)))
-#define ALIGNMENT_ROUND_UP(value) ((((uintptr_t) value) + (sizeof(uint64_t) - 1)) & (~(sizeof(uint64_t) - 1)))
+#define ALIGNMENT_ROUND_DOWN(value) (((uintptr_t)value) & (~(sizeof(uint64_t) - 1)))
+#define ALIGNMENT_ROUND_UP(value) ((((uintptr_t)value) + (sizeof(uint64_t) - 1)) & (~(sizeof(uint64_t) - 1)))
 
-#define GET_SLOT_NUMBER_FROM(heapBase,heapSlot) ((((uintptr_t)heapSlot)-((uintptr_t)heapBase))/sizeof(uint64_t))
+#define GET_SLOT_NUMBER_FROM(heapBase, heapSlot) ((((uintptr_t)heapSlot) - ((uintptr_t)heapBase)) / sizeof(uint64_t))
 
 /* Amount of metadata used for heap management in bytes. A velid heap size should be at least larger than this.
  * We account for the header size plus 2 padding slots for the initial block in the heap.
  */
-#define HEAP_MANAGEMENT_OVERHEAD (sizeof(J9Heap)+2*sizeof(uint64_t))
+#define HEAP_MANAGEMENT_OVERHEAD (sizeof(J9Heap) + 2 * sizeof(uint64_t))
 
 /**
-* Initialize a contiguous region of memory at heapBase as a heap. The size of the heap is bounded by heapSize.
-*
-* @param[in] portLibrary The port library
-* @param[in] heapBase Base address of memory region.
-* @param[in] heapSize The size of the memory region to be used as a heap in bytes.
-* @param[in] heapFlags Flags that can affect the heap. Currently, this is not used and is there for future use, for example, to zero out memory. User must pass in zero.
-*
-* @return pointer to an opaque struct representing the heap on success, NULL on failure.
-*
-* @note this function can also be used to re-initialize a heap -- useful when we want to erase its contents and start from scratch.
-*
-* @note in case heapBase isn't 8-aligned, it will be rounded up to the nearest 8-aligned value and the heap will be created at the 8-aligned value. The same goes for heapSize, it will be rounded down if not 8 aligned.
-*
-* @note the algorithm used in this suballocator is based on the first-fit method in KNUTH, D. E. The Art of Computer Programming. Vol. 1: Fundamental Algorithms. (2nd edition). Addison-Wesley, Reading, Mass., 1973, Sect. 2.5.
-*
-* @note due to the overhead of heap management, the actual available space consumed by the user is less than the size of the heap.
-*/
+ * Initialize a contiguous region of memory at heapBase as a heap. The size of the heap is bounded by heapSize.
+ *
+ * @param[in] portLibrary The port library
+ * @param[in] heapBase Base address of memory region.
+ * @param[in] heapSize The size of the memory region to be used as a heap in bytes.
+ * @param[in] heapFlags Flags that can affect the heap. Currently, this is not used and is there for future use, for
+ * example, to zero out memory. User must pass in zero.
+ *
+ * @return pointer to an opaque struct representing the heap on success, NULL on failure.
+ *
+ * @note this function can also be used to re-initialize a heap -- useful when we want to erase its contents and start
+ * from scratch.
+ *
+ * @note in case heapBase isn't 8-aligned, it will be rounded up to the nearest 8-aligned value and the heap will be
+ * created at the 8-aligned value. The same goes for heapSize, it will be rounded down if not 8 aligned.
+ *
+ * @note the algorithm used in this suballocator is based on the first-fit method in KNUTH, D. E. The Art of Computer
+ * Programming. Vol. 1: Fundamental Algorithms. (2nd edition). Addison-Wesley, Reading, Mass., 1973, Sect. 2.5.
+ *
+ * @note due to the overhead of heap management, the actual available space consumed by the user is less than the size
+ * of the heap.
+ */
 struct J9Heap *
 omrheap_create(struct OMRPortLibrary *portLibrary, void *heapBase, uintptr_t heapSize, uint32_t heapFlags)
 {
@@ -122,16 +127,16 @@ omrheap_create(struct OMRPortLibrary *portLibrary, void *heapBase, uintptr_t hea
 }
 
 /**
-* Suballocate byteAmount bytes from the initialized heap.
-*
-* @param[in] portLibrary The port library
-* @param[in] heap Opaque heap pointer.
-* @param[in] byteAmount number of bytes to be suballocated from the heap.
-*
-* @return pointer to suballocated memory on success, NULL on failure.
-*
-* @note omrheap_allocate and omrheap_free are not thread safe. It is up to the user to serialize access if necessary.
-*/
+ * Suballocate byteAmount bytes from the initialized heap.
+ *
+ * @param[in] portLibrary The port library
+ * @param[in] heap Opaque heap pointer.
+ * @param[in] byteAmount number of bytes to be suballocated from the heap.
+ *
+ * @return pointer to suballocated memory on success, NULL on failure.
+ *
+ * @note omrheap_allocate and omrheap_free are not thread safe. It is up to the user to serialize access if necessary.
+ */
 void *
 omrheap_allocate(struct OMRPortLibrary *portLibrary, struct J9Heap *heap, uintptr_t byteAmount)
 {
@@ -258,7 +263,8 @@ omrheap_allocate(struct OMRPortLibrary *portLibrary, struct J9Heap *heap, uintpt
 			while (nextFreeBlockPaddingCursor < lastSlot) {
 				int64_t size = *nextFreeBlockPaddingCursor;
 				if (size > 0) {
-					heap->firstFreeBlock = (uintptr_t)GET_SLOT_NUMBER_FROM(heap, nextFreeBlockPaddingCursor);
+					heap->firstFreeBlock =
+					        (uintptr_t)GET_SLOT_NUMBER_FROM(heap, nextFreeBlockPaddingCursor);
 					heap->lastAllocSlot = heap->firstFreeBlock;
 					heap->largestAllocSizeVisited = 0;
 					break;
@@ -274,17 +280,18 @@ omrheap_allocate(struct OMRPortLibrary *portLibrary, struct J9Heap *heap, uintpt
 }
 
 /**
-* Free a chunk of memory that was allocated from the heap. address is a memory location returned from calling heap_allocate on the heap
-*
-* @param[in] portLibrary The port library
-* @param[in] heap Opaque pointer of  a heap.
-* @param[in] address  Memory location within the heap to be freed, or NULL.
-*
-* @return nothing.
-*
-* @note passing in a NULL address is OK. omrheap_free simply returns in this case.
-* @note omrheap_allocate and omrheap_free are not thread safe. It is up to the user to serialize access if necessary.
-*/
+ * Free a chunk of memory that was allocated from the heap. address is a memory location returned from calling
+ * heap_allocate on the heap
+ *
+ * @param[in] portLibrary The port library
+ * @param[in] heap Opaque pointer of  a heap.
+ * @param[in] address  Memory location within the heap to be freed, or NULL.
+ *
+ * @return nothing.
+ *
+ * @note passing in a NULL address is OK. omrheap_free simply returns in this case.
+ * @note omrheap_allocate and omrheap_free are not thread safe. It is up to the user to serialize access if necessary.
+ */
 void
 omrheap_free(struct OMRPortLibrary *portLibrary, struct J9Heap *heap, void *address)
 {
@@ -312,7 +319,8 @@ omrheap_free(struct OMRPortLibrary *portLibrary, struct J9Heap *heap, void *addr
 
 	blockTopSlot = GET_SLOT_NUMBER_FROM(heap, thisBlockTopPadding);
 
-	/*determine if the block freed is the first block by checking its slot number. If so there is no previous block to check.*/
+	/*determine if the block freed is the first block by checking its slot number. If so there is no previous block
+	 * to check.*/
 	if (blockTopSlot != (sizeof(J9Heap) / sizeof(uint64_t))) {
 		previousBlockBottomPadding = &thisBlockTopPadding[-1];
 		previousBlockSize = *previousBlockBottomPadding;
@@ -330,7 +338,8 @@ omrheap_free(struct OMRPortLibrary *portLibrary, struct J9Heap *heap, void *addr
 	thisBlockTopPadding[0] = thisBlockSize;
 	thisBlockTopPadding[thisBlockSize + 1] = thisBlockSize;
 
-	/*determine if the block freed is the last block by checking its slot number. If so there is no next block to check.*/
+	/*determine if the block freed is the last block by checking its slot number. If so there is no next block to
+	 * check.*/
 	if (GET_SLOT_NUMBER_FROM(heap, &thisBlockTopPadding[thisBlockSize + 1]) != (totalNumSlots - 1)) {
 		nextBlockTopPadding = &thisBlockTopPadding[thisBlockSize + 2];
 		nextBlockSize = nextBlockTopPadding[0];
@@ -361,20 +370,20 @@ omrheap_free(struct OMRPortLibrary *portLibrary, struct J9Heap *heap, void *addr
 }
 
 /**
-* Change the size of a chunk of memory that was allocated from the heap.
-* If omrheap_reallocate() fails, it will return NULL to indicate that
-* allocation failed, but will not free the memory chunk passed in.
-*
-* @param[in] portLibrary The port library
-* @param[in] heap Opaque heap pointer.
-* @param[in] address Memory location within the heap to be resized.
-* @param[in] byteAmount New size for the memory chunk.
-*
-* @return pointer to re-allocated memory on success, NULL on failure.
-*
-* @note passing in a NULL address is the same as calling omrheap_allocate().
-* @note omrheap_reallocate() is not thread safe. It is up to the user to serialize access if necessary.
-*/
+ * Change the size of a chunk of memory that was allocated from the heap.
+ * If omrheap_reallocate() fails, it will return NULL to indicate that
+ * allocation failed, but will not free the memory chunk passed in.
+ *
+ * @param[in] portLibrary The port library
+ * @param[in] heap Opaque heap pointer.
+ * @param[in] address Memory location within the heap to be resized.
+ * @param[in] byteAmount New size for the memory chunk.
+ *
+ * @return pointer to re-allocated memory on success, NULL on failure.
+ *
+ * @note passing in a NULL address is the same as calling omrheap_allocate().
+ * @note omrheap_reallocate() is not thread safe. It is up to the user to serialize access if necessary.
+ */
 void *
 omrheap_reallocate(struct OMRPortLibrary *portLibrary, struct J9Heap *heap, void *address, uintptr_t byteAmount)
 {
@@ -478,7 +487,8 @@ omrheap_reallocate(struct OMRPortLibrary *portLibrary, struct J9Heap *heap, void
 					while (nextBlockTopPadding < lastSlot) {
 						nextBlockSize = nextBlockTopPadding[0];
 						if (nextBlockSize > 0) {
-							heap->firstFreeBlock = GET_SLOT_NUMBER_FROM(heap, nextBlockTopPadding);
+							heap->firstFreeBlock =
+							        GET_SLOT_NUMBER_FROM(heap, nextBlockTopPadding);
 							break;
 						}
 						nextBlockTopPadding = &nextBlockTopPadding[-nextBlockSize + 2];
@@ -538,16 +548,16 @@ omrheap_reallocate(struct OMRPortLibrary *portLibrary, struct J9Heap *heap, void
 }
 
 /**
-* Queries the size of a block of memory in the heap
-*
-* @param[in] portLibrary The port library
-* @param[in] heap Opaque heap pointer.
-* @param[in] address Memory location returned from omrheap_allocate or omrheap_reallocate
-*
-* @return size of the allocation in bytes
-*
-* @note omrheap_query_size() is not thread safe. It is up to the user to serialize access if necessary.
-*/
+ * Queries the size of a block of memory in the heap
+ *
+ * @param[in] portLibrary The port library
+ * @param[in] heap Opaque heap pointer.
+ * @param[in] address Memory location returned from omrheap_allocate or omrheap_reallocate
+ *
+ * @return size of the allocation in bytes
+ *
+ * @note omrheap_query_size() is not thread safe. It is up to the user to serialize access if necessary.
+ */
 uintptr_t
 omrheap_query_size(struct OMRPortLibrary *portLibrary, struct J9Heap *heap, void *address)
 {
@@ -559,27 +569,26 @@ omrheap_query_size(struct OMRPortLibrary *portLibrary, struct J9Heap *heap, void
 	/*assertion to check we have an occupied block*/
 	Assert_PRT_true(thisBlockTopPadding[0] < 0);
 
-	toReturn = (uintptr_t) - thisBlockTopPadding[0] * sizeof(int64_t);
+	toReturn = (uintptr_t)-thisBlockTopPadding[0] * sizeof(int64_t);
 
 	Trc_PRT_heap_port_omrheap_query_size_Exit(toReturn);
 
 	return toReturn;
 }
 
-
 /**
-* Increase the bounds of the heap by Suballocate byteAmount bytes from the initialized heap.
-* Grow is assumed to happen at the end of the memory range originally used for the heap, i.e.
-* ideal for situations where the heap is backed by uncommitted virtual memory.
-*
-* @param[in] portLibrary The port library
-* @param[in] heap Opaque heap pointer.
-* @param[in] byteAmount number of bytes to be suballocated from the heap.
-*
-* @return TRUE on success, FALSE otherwise.
-*
-* @note omrheap_grow is not thread safe. It is up to the user to serialize access if necessary.
-*/
+ * Increase the bounds of the heap by Suballocate byteAmount bytes from the initialized heap.
+ * Grow is assumed to happen at the end of the memory range originally used for the heap, i.e.
+ * ideal for situations where the heap is backed by uncommitted virtual memory.
+ *
+ * @param[in] portLibrary The port library
+ * @param[in] heap Opaque heap pointer.
+ * @param[in] byteAmount number of bytes to be suballocated from the heap.
+ *
+ * @return TRUE on success, FALSE otherwise.
+ *
+ * @note omrheap_grow is not thread safe. It is up to the user to serialize access if necessary.
+ */
 BOOLEAN
 omrheap_grow(struct OMRPortLibrary *portLibrary, struct J9Heap *heap, uintptr_t growAmount)
 {

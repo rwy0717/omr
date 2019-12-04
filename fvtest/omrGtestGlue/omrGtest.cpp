@@ -22,8 +22,9 @@
 #include "iconvInitialization.cpp"
 
 /* Gtest invokes xlocale, which has function definition for tolower and toupper.
- * This causes compilation issue since the a2e macros (tolower and toupper) automatically replace the function definitions.
- * So we explicitly include <ctype.h> and undefine the macros for gtest, after gtest we then define back the macros.
+ * This causes compilation issue since the a2e macros (tolower and toupper) automatically replace the function
+ * definitions. So we explicitly include <ctype.h> and undefine the macros for gtest, after gtest we then define back
+ * the macros.
  */
 #include <ctype.h>
 #if defined(J9ZOS390) && !defined(OMR_EBCDIC)
@@ -32,8 +33,8 @@
 
 #include "gtest-all.cc"
 
-#define toupper(c)     (islower(c) ? (c & _XUPPER_ASCII) : c)
-#define tolower(c)     (isupper(c) ? (c | _XLOWER_ASCII) : c)
+#define toupper(c) (islower(c) ? (c & _XUPPER_ASCII) : c)
+#define tolower(c) (isupper(c) ? (c | _XLOWER_ASCII) : c)
 
 #else
 #include "gtest-all.cc"

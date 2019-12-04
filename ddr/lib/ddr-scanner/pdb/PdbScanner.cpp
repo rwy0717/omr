@@ -42,42 +42,13 @@
 using std::ios;
 using std::stringstream;
 
-static const char * const baseTypeArray[] = {
-	"<NoType>",
-	"void",
-	"I8", /* This could also be char. */
-	"wchar_t",
-	"I8",
-	"U8",
-	"I32",
-	"U32",
-	"float",
-	"<BCD>",
-	"bool",
-	"short",
-	"unsigned short",
-	"I32", /* This should be just a long */
-	"U32", /* This should be unsigned long */
-	"I8",
-	"I16",
-	"I32",
-	"I64",
-	"__int128",
-	"U8",
-	"U16",
-	"U32",
-	"U64",
-	"U128",
-	"unsigned __int128",
-	"<currency>",
-	"<date>",
-	"VARIANT",
-	"<complex>",
-	"<bit>",
-	"BSTR",
-	"HRESULT",
-	"double"
-};
+static const char *const baseTypeArray[] = {"<NoType>", "void", "I8", /* This could also be char. */
+        "wchar_t", "I8", "U8", "I32", "U32", "float", "<BCD>", "bool", "short", "unsigned short", "I32", /* This should
+                                                                                                            be just a
+                                                                                                            long */
+        "U32", /* This should be unsigned long */
+        "I8", "I16", "I32", "I64", "__int128", "U8", "U16", "U32", "U64", "U128", "unsigned __int128", "<currency>",
+        "<date>", "VARIANT", "<complex>", "<bit>", "BSTR", "HRESULT", "double"};
 
 void
 PdbScanner::addType(UDT *type, NamespaceUDT *outerNamespace)
@@ -189,7 +160,8 @@ PdbScanner::startScan(OMRPortLibrary *portLibrary, Symbol_IR *ir, vector<string>
 }
 
 DDR_RC
-PdbScanner::loadDataFromBinary(const wchar_t *filename, IDiaDataSource **dataSource, IDiaSession **session, IDiaSymbol **symbol)
+PdbScanner::loadDataFromBinary(
+        const wchar_t *filename, IDiaDataSource **dataSource, IDiaSession **session, IDiaSymbol **symbol)
 {
 	DDR_RC rc = DDR_RC_OK;
 	bool isPDBFile = false;
@@ -197,17 +169,19 @@ PdbScanner::loadDataFromBinary(const wchar_t *filename, IDiaDataSource **dataSou
 	const wchar_t *fileExtension = wcsrchr(filename, L'.');
 
 	/* check if file extension is '.pdb' */
-	if ((NULL!= fileExtension) && (0 == wcscmp(fileExtension, L".pdb"))){
+	if ((NULL != fileExtension) && (0 == wcscmp(fileExtension, L".pdb"))) {
 		isPDBFile = true;
 	}
 
 	/* Attemt to co-create the DiaSource instance. On failure to find the required
 	 * dll, instead attempt to find and load the dll first.
 	 */
-	HRESULT hr = CoCreateInstance(__uuidof(DiaSource), NULL, CLSCTX_INPROC_SERVER, __uuidof(IDiaDataSource), (void **)dataSource);
+	HRESULT hr = CoCreateInstance(
+	        __uuidof(DiaSource), NULL, CLSCTX_INPROC_SERVER, __uuidof(IDiaDataSource), (void **)dataSource);
 	if (FAILED(hr)) {
 		ERRMSG("CoCreateInstance failed with HRESULT = %08lX", hr);
-		static const char * const libraries[] = { "MSDIA140", "MSDIA120", "MSDIA100", "MSDIA80", "MSDIA70", "MSDIA60" };
+		static const char *const libraries[] = {
+		        "MSDIA140", "MSDIA120", "MSDIA100", "MSDIA80", "MSDIA70", "MSDIA60"};
 		rc = DDR_RC_ERROR;
 		for (size_t i = 0; i < sizeof(libraries) / sizeof(*libraries); ++i) {
 			HMODULE hmodule = LoadLibrary(libraries[i]);
@@ -215,9 +189,9 @@ PdbScanner::loadDataFromBinary(const wchar_t *filename, IDiaDataSource **dataSou
 				ERRMSG("LoadLibrary failed for %s.dll", libraries[i]);
 				continue;
 			}
-			BOOL (WINAPI *DllGetClassObject)(REFCLSID, REFIID, LPVOID) =
-					(BOOL (WINAPI *)(REFCLSID, REFIID, LPVOID))
-					GetProcAddress(hmodule, "DllGetClassObject");
+			BOOL(WINAPI * DllGetClassObject)
+			(REFCLSID, REFIID, LPVOID) =
+			        (BOOL(WINAPI *)(REFCLSID, REFIID, LPVOID))GetProcAddress(hmodule, "DllGetClassObject");
 			if (NULL == DllGetClassObject) {
 				ERRMSG("Could not find DllGetClassObject in %s.dll", libraries[i]);
 				continue;
@@ -240,7 +214,7 @@ PdbScanner::loadDataFromBinary(const wchar_t *filename, IDiaDataSource **dataSou
 	}
 
 	if (DDR_RC_OK == rc) {
-		if(isPDBFile){
+		if (isPDBFile) {
 			hr = (*dataSource)->loadDataFromPdb(filename);
 		} else {
 			hr = (*dataSource)->loadDataForExe(filename, NULL, NULL);
@@ -320,7 +294,7 @@ PdbScanner::addChildrenSymbols(IDiaSymbol *symbol, enum SymTagEnum symTag, Names
 	IDiaSymbol **childSymbols = NULL;
 	ULONG celt = 0;
 	if ((DDR_RC_OK == rc) && (0 != count)) {
-		childSymbols = new IDiaSymbol*[count];
+		childSymbols = new IDiaSymbol *[count];
 		hr = classSymbols->Next(count, childSymbols, &celt);
 		if (FAILED(hr)) {
 			ERRMSG("Failed to get children symbols with HRESULT = %08lX", hr);
@@ -354,14 +328,16 @@ PdbScanner::addChildrenSymbols(IDiaSymbol *symbol, enum SymTagEnum symTag, Names
 			}
 			if (DDR_RC_OK == rc) {
 				if ((NULL == outerNamespace) || (string::npos == udtName.find("::"))) {
-					/* When adding fields/subtypes to a type, only add fields to a type with no fields
-					 * and only add subtypes to a type with no subtypes. This avoids adding duplicates
-					 * fields/subtypes when scanning multiple files. Children symbols must be processed
-					 * for already existing symbols because fields and subtypes can appear separately.
+					/* When adding fields/subtypes to a type, only add fields to a type with no
+					 * fields and only add subtypes to a type with no subtypes. This avoids adding
+					 * duplicates fields/subtypes when scanning multiple files. Children symbols
+					 * must be processed for already existing symbols because fields and subtypes
+					 * can appear separately.
 					 */
 					if (!alreadyCheckedFields && (SymTagData == childTag)) {
 						alreadyCheckedFields = true;
-						alreadyHadFields = !((ClassType *)outerNamespace)->_fieldMembers.empty();
+						alreadyHadFields =
+						        !((ClassType *)outerNamespace)->_fieldMembers.empty();
 					}
 
 					if (!((SymTagData == childTag) ? alreadyHadFields : alreadyHadSubtypes)) {
@@ -382,7 +358,8 @@ PdbScanner::addChildrenSymbols(IDiaSymbol *symbol, enum SymTagEnum symTag, Names
 	 * here, since they have no associated symbol.
 	 */
 	if (DDR_RC_OK == rc) {
-		for (vector<ULONG>::iterator it = innerTypeSymbols.begin(); it != innerTypeSymbols.end() && DDR_RC_OK == rc; ++it) {
+		for (vector<ULONG>::iterator it = innerTypeSymbols.begin();
+		        it != innerTypeSymbols.end() && DDR_RC_OK == rc; ++it) {
 			rc = addSymbol(childSymbols[*it], outerNamespace);
 			childSymbols[*it]->Release();
 		}
@@ -458,10 +435,7 @@ PdbScanner::addEnumMembers(IDiaSymbol *symbol, EnumUDT *enumUDT)
 		LONG count = 0;
 		enumSymbols->get_Count(&count);
 		members->reserve(count);
-		while (SUCCEEDED(enumSymbols->Next(1, &childSymbol, &celt))
-			&& (1 == celt)
-			&& (DDR_RC_OK == rc)
-		) {
+		while (SUCCEEDED(enumSymbols->Next(1, &childSymbol, &celt)) && (1 == celt) && (DDR_RC_OK == rc)) {
 			string name = "";
 			int value = 0;
 			rc = getName(childSymbol, &name);
@@ -476,30 +450,14 @@ PdbScanner::addEnumMembers(IDiaSymbol *symbol, EnumUDT *enumUDT)
 					rc = DDR_RC_ERROR;
 				} else {
 					switch (variantValue.vt) {
-					case VT_I1:
-						value = variantValue.cVal;
-						break;
-					case VT_I2:
-						value = variantValue.iVal;
-						break;
-					case VT_I4:
-						value = (int)variantValue.lVal;
-						break;
-					case VT_UI1:
-						value = variantValue.bVal;
-						break;
-					case VT_UI2:
-						value = variantValue.uiVal;
-						break;
-					case VT_UI4:
-						value = (int)variantValue.ulVal;
-						break;
-					case VT_INT:
-						value = variantValue.intVal;
-						break;
-					case VT_UINT:
-						value = (int)variantValue.uintVal;
-						break;
+					case VT_I1: value = variantValue.cVal; break;
+					case VT_I2: value = variantValue.iVal; break;
+					case VT_I4: value = (int)variantValue.lVal; break;
+					case VT_UI1: value = variantValue.bVal; break;
+					case VT_UI2: value = variantValue.uiVal; break;
+					case VT_UI4: value = (int)variantValue.ulVal; break;
+					case VT_INT: value = variantValue.intVal; break;
+					case VT_UINT: value = (int)variantValue.uintVal; break;
 					default:
 						ERRMSG("get_value() unexpected variant: 0x%02X", variantValue.vt);
 						rc = DDR_RC_ERROR;
@@ -544,7 +502,7 @@ PdbScanner::createEnumUDT(IDiaSymbol *symbol, NamespaceUDT *outerNamespace)
 
 	string symbolName = "";
 	if (DDR_RC_OK == rc) {
-		 rc = getName(symbol, &symbolName);
+		rc = getName(symbol, &symbolName);
 	}
 
 	if (DDR_RC_OK == rc) {
@@ -611,8 +569,7 @@ PdbScanner::setMemberOffset(IDiaSymbol *symbol, Field *newField)
 
 	if (DDR_RC_OK == rc) {
 		switch (locType) {
-		case LocIsThisRel:
-		{
+		case LocIsThisRel: {
 			LONG loffset = 0;
 			hr = symbol->get_offset(&loffset);
 			if (FAILED(hr)) {
@@ -624,8 +581,7 @@ PdbScanner::setMemberOffset(IDiaSymbol *symbol, Field *newField)
 			break;
 		}
 		case LocIsStatic:
-		case LocIsConstant:
-		{
+		case LocIsConstant: {
 			/* Get offset of static class members. */
 			newField->_isStatic = true;
 			LONG loffset = 0;
@@ -635,8 +591,7 @@ PdbScanner::setMemberOffset(IDiaSymbol *symbol, Field *newField)
 			}
 			break;
 		}
-		case LocIsBitField:
-		{
+		case LocIsBitField: {
 			LONG loffset = 0;
 			hr = symbol->get_offset(&loffset);
 			if (FAILED(hr)) {
@@ -748,7 +703,7 @@ PdbScanner::setTypeUDT(IDiaSymbol *typeSymbol, Type **type, NamespaceUDT *outerU
 				*type = newClass;
 			}
 		} else if (!name.empty()) {
-			PostponedType p = { type, fullName };
+			PostponedType p = {type, fullName};
 			_postponedFields.push_back(p);
 		}
 	}
@@ -800,12 +755,8 @@ PdbScanner::setBaseTypeInt(ULONGLONG ulLen, Type **type)
 	case 2:
 		*type = getType("I16"); /* This also could be a short int. */
 		break;
-	case 4:
-		*type = getType("I32");
-		break;
-	case 8:
-		*type = getType("I64");
-		break;
+	case 4: *type = getType("I32"); break;
+	case 8: *type = getType("I64"); break;
 	default:
 		ERRMSG("Unknown int length: %llu", ulLen);
 		rc = DDR_RC_ERROR;
@@ -824,9 +775,7 @@ PdbScanner::setBaseTypeFloat(ULONGLONG ulLen, Type **type)
 	case 4:
 		*type = getType("float"); /* This could also be an unsigned char */
 		break;
-	case 8:
-		*type = getType("double");
-		break;
+	case 8: *type = getType("double"); break;
 	default:
 		ERRMSG("Unknown float length: %llu", ulLen);
 		rc = DDR_RC_ERROR;
@@ -845,18 +794,10 @@ PdbScanner::setBaseTypeUInt(ULONGLONG ulLen, Type **type)
 	case 1:
 		*type = getType("U8"); /* This could also be an unsigned char. */
 		break;
-	case 2:
-		*type = getType("U16");
-		break;
-	case 4:
-		*type = getType("U32");
-		break;
-	case 8:
-		*type = getType("U64");
-		break;
-	case 16:
-		*type = getType("U128");
-		break;
+	case 2: *type = getType("U16"); break;
+	case 4: *type = getType("U32"); break;
+	case 8: *type = getType("U64"); break;
+	case 16: *type = getType("U128"); break;
 	default:
 		ERRMSG("Unknown int length: %llu", ulLen);
 		rc = DDR_RC_ERROR;
@@ -889,15 +830,9 @@ PdbScanner::setBaseType(IDiaSymbol *typeSymbol, Type **type)
 		switch (baseType) {
 		case btChar:
 		case btWChar:
-		case btUInt:
-			rc = setBaseTypeUInt(ulLen, type);
-			break;
-		case btInt:
-			rc = setBaseTypeInt(ulLen, type);
-			break;
-		case btFloat:
-			rc = setBaseTypeFloat(ulLen, type);
-			break;
+		case btUInt: rc = setBaseTypeUInt(ulLen, type); break;
+		case btInt: rc = setBaseTypeInt(ulLen, type); break;
+		case btFloat: rc = setBaseTypeFloat(ulLen, type); break;
 		default:
 			*type = getType(string(baseTypeArray[baseType])); /* This could also be an unsigned char */
 			break;
@@ -911,68 +846,37 @@ static string
 symTagToString(DWORD value)
 {
 	switch (value) {
-	case SymTagNull:
-		return "SymTagNull";
-	case SymTagExe:
-		return "SymTagExe";
-	case SymTagCompiland:
-		return "SymTagCompiland";
-	case SymTagCompilandDetails:
-		return "SymTagCompilandDetails";
-	case SymTagCompilandEnv:
-		return "SymTagCompilandEnv";
-	case SymTagFunction:
-		return "SymTagFunction";
-	case SymTagBlock:
-		return "SymTagBlock";
-	case SymTagData:
-		return "SymTagData";
-	case SymTagAnnotation:
-		return "SymTagAnnotation";
-	case SymTagLabel:
-		return "SymTagLabel";
-	case SymTagPublicSymbol:
-		return "SymTagPublicSymbol";
-	case SymTagUDT:
-		return "SymTagUDT";
-	case SymTagEnum:
-		return "SymTagEnum";
-	case SymTagFunctionType:
-		return "SymTagFunctionType";
-	case SymTagPointerType:
-		return "SymTagPointerType";
-	case SymTagArrayType:
-		return "SymTagArrayType";
-	case SymTagBaseType:
-		return "SymTagBaseType";
-	case SymTagTypedef:
-		return "SymTagTypedef";
-	case SymTagBaseClass:
-		return "SymTagBaseClass";
-	case SymTagFriend:
-		return "SymTagFriend";
-	case SymTagFunctionArgType:
-		return "SymTagFunctionArgType";
-	case SymTagFuncDebugStart:
-		return "SymTagFuncDebugStart";
-	case SymTagFuncDebugEnd:
-		return "SymTagFuncDebugEnd";
-	case SymTagUsingNamespace:
-		return "SymTagUsingNamespace";
-	case SymTagVTableShape:
-		return "SymTagVTableShape";
-	case SymTagVTable:
-		return "SymTagVTable";
-	case SymTagCustom:
-		return "SymTagCustom";
-	case SymTagThunk:
-		return "SymTagThunk";
-	case SymTagCustomType:
-		return "SymTagCustomType";
-	case SymTagManagedType:
-		return "SymTagManagedType";
-	case SymTagDimension:
-		return "SymTagDimension";
+	case SymTagNull: return "SymTagNull";
+	case SymTagExe: return "SymTagExe";
+	case SymTagCompiland: return "SymTagCompiland";
+	case SymTagCompilandDetails: return "SymTagCompilandDetails";
+	case SymTagCompilandEnv: return "SymTagCompilandEnv";
+	case SymTagFunction: return "SymTagFunction";
+	case SymTagBlock: return "SymTagBlock";
+	case SymTagData: return "SymTagData";
+	case SymTagAnnotation: return "SymTagAnnotation";
+	case SymTagLabel: return "SymTagLabel";
+	case SymTagPublicSymbol: return "SymTagPublicSymbol";
+	case SymTagUDT: return "SymTagUDT";
+	case SymTagEnum: return "SymTagEnum";
+	case SymTagFunctionType: return "SymTagFunctionType";
+	case SymTagPointerType: return "SymTagPointerType";
+	case SymTagArrayType: return "SymTagArrayType";
+	case SymTagBaseType: return "SymTagBaseType";
+	case SymTagTypedef: return "SymTagTypedef";
+	case SymTagBaseClass: return "SymTagBaseClass";
+	case SymTagFriend: return "SymTagFriend";
+	case SymTagFunctionArgType: return "SymTagFunctionArgType";
+	case SymTagFuncDebugStart: return "SymTagFuncDebugStart";
+	case SymTagFuncDebugEnd: return "SymTagFuncDebugEnd";
+	case SymTagUsingNamespace: return "SymTagUsingNamespace";
+	case SymTagVTableShape: return "SymTagVTableShape";
+	case SymTagVTable: return "SymTagVTable";
+	case SymTagCustom: return "SymTagCustom";
+	case SymTagThunk: return "SymTagThunk";
+	case SymTagCustomType: return "SymTagCustomType";
+	case SymTagManagedType: return "SymTagManagedType";
+	case SymTagDimension: return "SymTagDimension";
 #if 0 /* Note: The following are not present in all versions. */
 	case SymTagCallSite:
 		return "SymTagCallSite";
@@ -1023,11 +927,8 @@ PdbScanner::setType(IDiaSymbol *symbol, Type **type, Modifiers *modifiers, Names
 	if (DDR_RC_OK == rc) {
 		switch (symTag) {
 		case SymTagEnum:
-		case SymTagUDT:
-			rc = setTypeUDT(typeSymbol, type, outerUDT);
-			break;
-		case SymTagArrayType:
-		{
+		case SymTagUDT: rc = setTypeUDT(typeSymbol, type, outerUDT); break;
+		case SymTagArrayType: {
 			DWORD size = 0;
 			if (FAILED(typeSymbol->get_count(&size))) {
 				ERRMSG("Failed to get array dimensions.");
@@ -1044,12 +945,8 @@ PdbScanner::setType(IDiaSymbol *symbol, Type **type, Modifiers *modifiers, Names
 				rc = setType(typeSymbol, type, modifiers, outerUDT);
 			}
 			break;
-		case SymTagBaseType:
-			rc = setBaseType(typeSymbol, type);
-			break;
-		case SymTagFunctionType:
-			*type = getType("void");
-			break;
+		case SymTagBaseType: rc = setBaseType(typeSymbol, type); break;
+		case SymTagFunctionType: *type = getType("void"); break;
 		default:
 			ERRMSG("unknown symtag: %lu", symTag);
 			rc = DDR_RC_ERROR;
@@ -1156,7 +1053,7 @@ PdbScanner::setSuperClassName(IDiaSymbol *symbol, ClassUDT *newUDT)
 			if (_typeMap.end() != map_it) {
 				newUDT->_superClass = (ClassUDT *)map_it->second;
 			} else {
-				PostponedType p = { (Type **)&newUDT->_superClass, name };
+				PostponedType p = {(Type **)&newUDT->_superClass, name};
 				_postponedFields.push_back(p);
 			}
 		}
@@ -1301,18 +1198,10 @@ PdbScanner::addSymbol(IDiaSymbol *symbol, NamespaceUDT *outerNamespace)
 
 	if (DDR_RC_OK == rc) {
 		switch (symTag) {
-		case SymTagEnum:
-			rc = createEnumUDT(symbol, outerNamespace);
-			break;
-		case SymTagUDT:
-			rc = createClassUDT(symbol, NULL, outerNamespace);
-			break;
-		case SymTagData:
-			rc = addFieldMember(symbol, (ClassUDT *)outerNamespace);
-			break;
-		case SymTagBaseClass:
-			rc = setSuperClassName(symbol, (ClassUDT *)outerNamespace);
-			break;
+		case SymTagEnum: rc = createEnumUDT(symbol, outerNamespace); break;
+		case SymTagUDT: rc = createClassUDT(symbol, NULL, outerNamespace); break;
+		case SymTagData: rc = addFieldMember(symbol, (ClassUDT *)outerNamespace); break;
+		case SymTagBaseClass: rc = setSuperClassName(symbol, (ClassUDT *)outerNamespace); break;
 		case SymTagVTableShape:
 		case SymTagVTable:
 		case SymTagFunction:

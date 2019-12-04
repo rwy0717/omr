@@ -27,7 +27,7 @@
  */
 #include <stdlib.h>
 #include <pthread.h>
-#include <limits.h>	/* for PTHREAD_STACK_MIN */
+#include <limits.h> /* for PTHREAD_STACK_MIN */
 #if defined(LINUX) || defined(OSX)
 #include <unistd.h> /* required for the _SC_PAGESIZE  constant */
 #endif /* defined(LINUX) || defined(OSX) */
@@ -81,13 +81,13 @@ omrthread_attr_init(omrthread_attr_t *attr)
 		return J9THREAD_ERR_NOMEMORY;
 	}
 
-#if defined (RS6000)
+#if defined(RS6000)
 	/* this is for AIXPPC */
-	/* Solaris, by default, seems to use a fixed priority scheduling mechanism for its multiplexed threads which causes
-	 * a running thread to never give up the CPU once it has started executing. By setting the PTHREAD_SCOPE_SYSTEM flag,
-	 * we are telling the system to use the kernel's time-slicing scheduling algorithm to choose how this thread will be
-	 * scheduled. Effectively the kernel, not the threads library will decide when this thread runs by scheduling it
-	 * among all the other threads that are running on the system.
+	/* Solaris, by default, seems to use a fixed priority scheduling mechanism for its multiplexed threads which
+	 * causes a running thread to never give up the CPU once it has started executing. By setting the
+	 * PTHREAD_SCOPE_SYSTEM flag, we are telling the system to use the kernel's time-slicing scheduling algorithm to
+	 * choose how this thread will be scheduled. Effectively the kernel, not the threads library will decide when
+	 * this thread runs by scheduling it among all the other threads that are running on the system.
 	 */
 	rc = DEBUG_SYSCALL(pthread_attr_setscope(&newAttr->pattr, PTHREAD_SCOPE_SYSTEM));
 	if (rc != 0) {
@@ -100,7 +100,8 @@ omrthread_attr_init(omrthread_attr_t *attr)
 		goto destroy_attr;
 	}
 
-	if (failedToSetAttr(omrthread_attr_set_schedpolicy((omrthread_attr_t *)&newAttr, J9THREAD_SCHEDPOLICY_INHERIT))) {
+	if (failedToSetAttr(
+	            omrthread_attr_set_schedpolicy((omrthread_attr_t *)&newAttr, J9THREAD_SCHEDPOLICY_INHERIT))) {
 		goto destroy_attr;
 	}
 
@@ -127,7 +128,8 @@ omrthread_attr_init(omrthread_attr_t *attr)
 		goto destroy_attr;
 	}
 
-	if (failedToSetAttr(omrthread_attr_set_category((omrthread_attr_t *)&newAttr, J9THREAD_CATEGORY_SYSTEM_THREAD))) {
+	if (failedToSetAttr(
+	            omrthread_attr_set_category((omrthread_attr_t *)&newAttr, J9THREAD_CATEGORY_SYSTEM_THREAD))) {
 		goto destroy_attr;
 	}
 
@@ -388,18 +390,10 @@ setSchedpolicy(pthread_attr_t *pattr, omrthread_schedpolicy_t policy)
 			/* shouldn't happen */
 			rc = J9THREAD_ERR_INVALID_VALUE;
 			break;
-		case J9THREAD_SCHEDPOLICY_OTHER:
-			ospolicy = SCHED_OTHER;
-			break;
-		case J9THREAD_SCHEDPOLICY_RR:
-			ospolicy = SCHED_RR;
-			break;
-		case J9THREAD_SCHEDPOLICY_FIFO:
-			ospolicy = SCHED_FIFO;
-			break;
-		default:
-			rc = J9THREAD_ERR_INVALID_VALUE;
-			break;
+		case J9THREAD_SCHEDPOLICY_OTHER: ospolicy = SCHED_OTHER; break;
+		case J9THREAD_SCHEDPOLICY_RR: ospolicy = SCHED_RR; break;
+		case J9THREAD_SCHEDPOLICY_FIFO: ospolicy = SCHED_FIFO; break;
+		default: rc = J9THREAD_ERR_INVALID_VALUE; break;
 		}
 
 		if (J9THREAD_SUCCESS == rc) {
@@ -438,8 +432,8 @@ setPriority(pthread_attr_t *pattr, omrthread_prio_t priority)
 	}
 
 	/* for non-realtime JVMs, the setting of the priority here may have no effect,
-	 * since we may have previously called pthread_attr_setinheritsched with PTHREAD_INHERIT_SCHED in setSchedpolicy,
-	 * however there is no harm in setting the priority here and checking the value is valid.
+	 * since we may have previously called pthread_attr_setinheritsched with PTHREAD_INHERIT_SCHED in
+	 * setSchedpolicy, however there is no harm in setting the priority here and checking the value is valid.
 	 */
 	rc = DEBUG_SYSCALL(pthread_attr_getschedparam(pattr, &param));
 	if (rc != 0) {
@@ -507,13 +501,9 @@ omrthread_attr_set_category(omrthread_attr_t *attr, uint32_t category)
 	case J9THREAD_USER_DEFINED_THREAD_CATEGORY_2:
 	case J9THREAD_USER_DEFINED_THREAD_CATEGORY_3:
 	case J9THREAD_USER_DEFINED_THREAD_CATEGORY_4:
-	case J9THREAD_USER_DEFINED_THREAD_CATEGORY_5:
-		(*attr)->category = category;
-		break;
+	case J9THREAD_USER_DEFINED_THREAD_CATEGORY_5: (*attr)->category = category; break;
 
-	default:
-		rc = J9THREAD_ERR_INVALID_VALUE;
-		break;
+	default: rc = J9THREAD_ERR_INVALID_VALUE; break;
 	}
 
 	return rc;

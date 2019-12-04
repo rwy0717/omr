@@ -34,7 +34,6 @@
  * still be available, but will simply read the file into allocated memory.
  */
 
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
@@ -53,7 +52,7 @@
 #if defined(AIXPPC)
 #include <sys/shm.h>
 #include <sys/vminfo.h>
-#endif/*AIXPPC*/
+#endif /*AIXPPC*/
 
 /**
  * Map a part of file into memory.
@@ -62,22 +61,24 @@
  * @param [in]  file                       The file descriptor/handle of the already open file to be mapped
  * @param [in]  offset                  The file offset of the part to be mapped
  * @param [in]  size                     The number of bytes to be mapped, if zero, the whole file is mapped
- * @param [in]  mappingName      The name of the file mapping object to be created/opened.  This will be used as the basis of the name (invalid
- *                                                         characters being converted to '_') of the file mapping object on Windows
- *                                                         so that it can be shared between processes.  If a named object is not required, this parameter can be
- *                                                         specified as NULL
+ * @param [in]  mappingName      The name of the file mapping object to be created/opened.  This will be used as the
+ * basis of the name (invalid characters being converted to '_') of the file mapping object on Windows so that it can be
+ * shared between processes.  If a named object is not required, this parameter can be specified as NULL
  * @param [in]   flags                  Flags relating to the mapping:
  * @args                                         OMRPORT_MMAP_FLAG_READ                     read only map
  * @args                                         OMRPORT_MMAP_FLAG_WRITE                   read/write map
  * @args                                         OMRPORT_MMAP_FLAG_COPYONWRITE copy on write map
- * @args                                         OMRPORT_MMAP_FLAG_SHARED              share memory mapping with other processes
- * @args                                         OMRPORT_MMAP_FLAG_PRIVATE              private memory mapping, do not share with other processes (implied by OMRPORT_MMAP_FLAG_COPYONWRITE)
+ * @args                                         OMRPORT_MMAP_FLAG_SHARED              share memory mapping with other
+ * processes
+ * @args                                         OMRPORT_MMAP_FLAG_PRIVATE              private memory mapping, do not
+ * share with other processes (implied by OMRPORT_MMAP_FLAG_COPYONWRITE)
  * @param [in]  categoryCode     Memory allocation category code
  *
  * @return                       A J9MmapHandle struct or NULL is an error has occurred
  */
 J9MmapHandle *
-omrmmap_map_file(struct OMRPortLibrary *portLibrary, intptr_t file, uint64_t offset, uintptr_t size, const char *mappingName, uint32_t flags, uint32_t categoryCode)
+omrmmap_map_file(struct OMRPortLibrary *portLibrary, intptr_t file, uint64_t offset, uintptr_t size,
+        const char *mappingName, uint32_t flags, uint32_t categoryCode)
 {
 	int mmapProt = 0;
 	int mmapFlags = 0;
@@ -117,20 +118,18 @@ omrmmap_map_file(struct OMRPortLibrary *portLibrary, intptr_t file, uint64_t off
 	}
 	if (1 != rwCount) {
 		Trc_PRT_mmap_map_file_unix_invalidFlags();
-		errMsg = portLibrary->nls_lookup_message(portLibrary,
-				 J9NLS_ERROR | J9NLS_DO_NOT_APPEND_NEWLINE,
-				 J9NLS_PORT_MMAP_INVALID_MEMORY_PROTECTION,
-				 NULL);
-		portLibrary->error_set_last_error_with_message(portLibrary, OMRPORT_ERROR_MMAP_MAP_FILE_INVALIDFLAGS, errMsg);
+		errMsg = portLibrary->nls_lookup_message(portLibrary, J9NLS_ERROR | J9NLS_DO_NOT_APPEND_NEWLINE,
+		        J9NLS_PORT_MMAP_INVALID_MEMORY_PROTECTION, NULL);
+		portLibrary->error_set_last_error_with_message(
+		        portLibrary, OMRPORT_ERROR_MMAP_MAP_FILE_INVALIDFLAGS, errMsg);
 		return NULL;
 	}
 	if (spCount > 1) {
 		Trc_PRT_mmap_map_file_unix_invalidFlags();
-		errMsg = portLibrary->nls_lookup_message(portLibrary,
-				 J9NLS_ERROR | J9NLS_DO_NOT_APPEND_NEWLINE,
-				 J9NLS_PORT_MMAP_INVALID_FLAG,
-				 NULL);
-		portLibrary->error_set_last_error_with_message(portLibrary, OMRPORT_ERROR_MMAP_MAP_FILE_INVALIDFLAGS, errMsg);
+		errMsg = portLibrary->nls_lookup_message(
+		        portLibrary, J9NLS_ERROR | J9NLS_DO_NOT_APPEND_NEWLINE, J9NLS_PORT_MMAP_INVALID_FLAG, NULL);
+		portLibrary->error_set_last_error_with_message(
+		        portLibrary, OMRPORT_ERROR_MMAP_MAP_FILE_INVALIDFLAGS, errMsg);
 		return NULL;
 	}
 	Trc_PRT_mmap_map_file_unix_flagsSet(mmapProt, mmapFlags);
@@ -147,7 +146,8 @@ omrmmap_map_file(struct OMRPortLibrary *portLibrary, intptr_t file, uint64_t off
 		size = buf.st_size;
 	}
 
-	if (!(returnVal = (J9MmapHandle *)portLibrary->mem_allocate_memory(portLibrary, sizeof(J9MmapHandle), OMR_GET_CALLSITE(), categoryCode))) {
+	if (!(returnVal = (J9MmapHandle *)portLibrary->mem_allocate_memory(
+	              portLibrary, sizeof(J9MmapHandle), OMR_GET_CALLSITE(), categoryCode))) {
 		Trc_PRT_mmap_map_file_cannotallocatehandle();
 		return NULL;
 	}
@@ -203,15 +203,17 @@ omrmmap_unmap_file(struct OMRPortLibrary *portLibrary, J9MmapHandle *handle)
  * @param [in]  start                      Pointer to the start of the memory mapped area to be synchronised
  * @param [in]  length                  Length of the memory mapped area to be synchronised
  * @param [in]  flags                    Flags controlling the behaviour of the function:
- * @args                                           OMRPORT_MMAP_SYNC_WAIT   Synchronous update required, function will not
- *                                                                     return until file updated.  Note that to achieve this on Windows requires the
- *                                                                     file to be opened with the FILE_FLAG_WRITE_THROUGH flag
- * @args                                           OMRPORT_MMAP_SYNC_ASYNC Asynchronous update required, function returns
- *                                                                    immediately, file will be updated later
+ * @args                                           OMRPORT_MMAP_SYNC_WAIT   Synchronous update required, function will
+ * not return until file updated.  Note that to achieve this on Windows requires the file to be opened with the
+ * FILE_FLAG_WRITE_THROUGH flag
+ * @args                                           OMRPORT_MMAP_SYNC_ASYNC Asynchronous update required, function
+ * returns immediately, file will be updated later
  * @args                                           OMRPORT_MMAP_SYNC_INVALIDATE Requests that other mappings of the same
- *                                                                    file be invalidated, so that they can be updated with the values just written
+ *                                                                    file be invalidated, so that they can be updated
+ * with the values just written
  *
-* @return                                          0 on success, -1 on failure.  Errors will be reported using the usual port library mechanism
+ * @return                                          0 on success, -1 on failure.  Errors will be reported using the
+ * usual port library mechanism
  */
 intptr_t
 omrmmap_msync(struct OMRPortLibrary *portLibrary, void *start, uintptr_t length, uint32_t flags)
@@ -260,8 +262,7 @@ omrmmap_msync(struct OMRPortLibrary *portLibrary, void *start, uintptr_t length,
  */
 void
 omrmmap_shutdown(struct OMRPortLibrary *portLibrary)
-{
-}
+{}
 /**
  * PortLibrary startup.
  *
@@ -295,22 +296,14 @@ omrmmap_startup(struct OMRPortLibrary *portLibrary)
 int32_t
 omrmmap_capabilities(struct OMRPortLibrary *portLibrary)
 {
-	return (OMRPORT_MMAP_CAPABILITY_COPYONWRITE
-			| OMRPORT_MMAP_CAPABILITY_READ
-			| OMRPORT_MMAP_CAPABILITY_PROTECT
-			/* If JSE platforms include WRITE and MSYNC - ZOS included, but currently has own omrmmap.c */
-#if ((defined(LINUX) && defined(J9X86)) \
-  || (defined(LINUXPPC)) \
-  || (defined(LINUX) && defined(S390)) \
-  || (defined(LINUX) && defined(J9HAMMER)) \
-  || (defined(LINUX) && defined(ARM)) \
-  || (defined(LINUX) && defined(AARCH64)) \
-  || (defined(AIXPPC)) \
-  || (defined(OSX)))
-			| OMRPORT_MMAP_CAPABILITY_WRITE
-			| OMRPORT_MMAP_CAPABILITY_MSYNC
+	return (OMRPORT_MMAP_CAPABILITY_COPYONWRITE | OMRPORT_MMAP_CAPABILITY_READ | OMRPORT_MMAP_CAPABILITY_PROTECT
+	/* If JSE platforms include WRITE and MSYNC - ZOS included, but currently has own omrmmap.c */
+#if ((defined(LINUX) && defined(J9X86)) || (defined(LINUXPPC)) || (defined(LINUX) && defined(S390)) \
+        || (defined(LINUX) && defined(J9HAMMER)) || (defined(LINUX) && defined(ARM)) \
+        || (defined(LINUX) && defined(AARCH64)) || (defined(AIXPPC)) || (defined(OSX)))
+	        | OMRPORT_MMAP_CAPABILITY_WRITE | OMRPORT_MMAP_CAPABILITY_MSYNC
 #endif
-		   );
+	);
 }
 
 intptr_t
@@ -337,8 +330,8 @@ omrmmap_dont_need(struct OMRPortLibrary *portLibrary, const void *startAddress, 
 	Trc_PRT_mmap_dont_need(pageSize, startAddress, length);
 
 	if (pageSize > 0 && length >= pageSize) {
-		uintptr_t endAddress = (uintptr_t) startAddress + length;
-		uintptr_t roundedStart = ROUND_UP_TO_POWEROF2((uintptr_t) startAddress, pageSize);
+		uintptr_t endAddress = (uintptr_t)startAddress + length;
+		uintptr_t roundedStart = ROUND_UP_TO_POWEROF2((uintptr_t)startAddress, pageSize);
 		size_t roundedLength = ROUND_DOWN_TO_POWEROF2(endAddress - roundedStart, pageSize);
 		if (roundedLength >= pageSize) {
 

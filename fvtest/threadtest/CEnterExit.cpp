@@ -24,10 +24,7 @@
 /*
  * Thread that acquires and holds a monitor for a time.
  */
-CEnterExit::CEnterExit(CMonitor& monitor, int sleep) :
-	m_monitor(monitor), m_sleep(sleep)
-{
-}
+CEnterExit::CEnterExit(CMonitor &monitor, int sleep) : m_monitor(monitor), m_sleep(sleep) {}
 
 intptr_t
 CEnterExit::Run(void)

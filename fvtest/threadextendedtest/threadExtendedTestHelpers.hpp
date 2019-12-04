@@ -29,23 +29,20 @@
 #include "omrTestHelpers.h"
 #include "testEnvironment.hpp"
 
-class ThreadExtendedTestEnvironment: public BaseEnvironment
-{
-/*
- * Data members
- */
+class ThreadExtendedTestEnvironment : public BaseEnvironment {
+	/*
+	 * Data members
+	 */
 private:
 protected:
 public:
-
-/*
-* Function members
-*/
+	/*
+	 * Function members
+	 */
 private:
 protected:
 public:
-	ThreadExtendedTestEnvironment(int argc, char **argv, OMRPortLibrary *portLibrary) :
-		BaseEnvironment(argc, argv)
+	ThreadExtendedTestEnvironment(int argc, char **argv, OMRPortLibrary *portLibrary) : BaseEnvironment(argc, argv)
 	{
 		portLib = portLibrary;
 	}

@@ -28,14 +28,14 @@
 
 const char *
 TR_X86OpCode::getOpCodeName(TR::CodeGenerator *cg)
-   {
-   return cg->comp()->getDebug()->getOpCodeName(this);
-   }
+{
+	return cg->comp()->getDebug()->getOpCodeName(this);
+}
 
 const char *
 TR_X86OpCode::getMnemonicName(TR::CodeGenerator *cg)
-   {
-   return cg->comp()->getDebug()->getMnemonicName(this);
-   }
+{
+	return cg->comp()->getDebug()->getMnemonicName(this);
+}
 
 #endif // ifdef DEBUG

@@ -32,7 +32,6 @@
  * These functions are not accessible via the port library function table.
  */
 
-
 #include <string.h>
 #include <errno.h>
 #include "omrportpriv.h"
@@ -61,7 +60,8 @@ errorMessage(struct OMRPortLibrary *portLibrary, int32_t errorCode)
 
 	ptBuffers = omrport_tls_peek(portLibrary);
 	if (0 == ptBuffers->errorMessageBufferSize) {
-		ptBuffers->errorMessageBuffer = portLibrary->mem_allocate_memory(portLibrary, J9ERROR_DEFAULT_BUFFER_SIZE, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
+		ptBuffers->errorMessageBuffer = portLibrary->mem_allocate_memory(
+		        portLibrary, J9ERROR_DEFAULT_BUFFER_SIZE, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 		if (NULL == ptBuffers->errorMessageBuffer) {
 			return "";
 		}
@@ -69,23 +69,25 @@ errorMessage(struct OMRPortLibrary *portLibrary, int32_t errorCode)
 	}
 
 #if defined(AIXPPC)
-	/* On AIX, strerror() returns an error string based on current locale encoding. When printing out the error message in file_write_using_iconv(),
-	 * The NLS message (UTF-8) + the error string is converted from UTF-8 to locale encoding. So non-UTF-8 error string needs to be converted to UTF-8 here.
+	/* On AIX, strerror() returns an error string based on current locale encoding. When printing out the error
+	 * message in file_write_using_iconv(), The NLS message (UTF-8) + the error string is converted from UTF-8 to
+	 * locale encoding. So non-UTF-8 error string needs to be converted to UTF-8 here.
 	 */
 	if (0 != strcmp(nl_langinfo(CODESET), "UTF-8")) {
 		char stackBuf[512];
 		uintptr_t bufLen = sizeof(stackBuf);
 
 		memset(stackBuf, '\0', bufLen);
-		if (0 < portLibrary->str_convert(portLibrary, J9STR_CODE_PLATFORM_RAW, J9STR_CODE_UTF8, errString, strlen(errString), stackBuf, bufLen)) {
+		if (0 < portLibrary->str_convert(portLibrary, J9STR_CODE_PLATFORM_RAW, J9STR_CODE_UTF8, errString,
+		            strlen(errString), stackBuf, bufLen)) {
 			errString = stackBuf;
 		}
 	}
 #endif /* defined(AIXPPC) */
 
 	/* Copy from OS to ptBuffers */
-	portLibrary->str_printf(portLibrary, ptBuffers->errorMessageBuffer, ptBuffers->errorMessageBufferSize, "%s", errString);
+	portLibrary->str_printf(
+	        portLibrary, ptBuffers->errorMessageBuffer, ptBuffers->errorMessageBufferSize, "%s", errString);
 	ptBuffers->errorMessageBuffer[ptBuffers->errorMessageBufferSize - 1] = '\0';
 	return ptBuffers->errorMessageBuffer;
 }
-

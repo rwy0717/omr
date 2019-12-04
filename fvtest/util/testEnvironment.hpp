@@ -43,26 +43,21 @@
 #include "omrthread.h"
 #include "omrTest.h"
 
-enum LogLevel {
-	LEVEL_VERBOSE = 0,
-	LEVEL_INFO,
-	LEVEL_WARN,
-	LEVEL_ERROR,
-	LEVEL_OFF
-};
+enum LogLevel { LEVEL_VERBOSE = 0, LEVEL_INFO, LEVEL_WARN, LEVEL_ERROR, LEVEL_OFF };
 
 /**
  * BaseEnvironment provides access to command line arguments for all tests run from main().
  */
-class BaseEnvironment: public ::testing::Environment
-{
+class BaseEnvironment : public ::testing::Environment {
 	/*
 	 * Data members
 	 */
 private:
 	int s_indentLevel;
+
 protected:
 	LogLevel _minLevel;
+
 public:
 	int _argc;
 	char **_argv;
@@ -73,8 +68,7 @@ public:
 	 */
 private:
 protected:
-	virtual void
-	SetUp()
+	virtual void SetUp()
 	{
 		for (int i = 1; i < _argc; i++) {
 			if (0 == strncmp(_argv[i], "-logLevel=", strlen("-logLevel="))) {
@@ -89,60 +83,51 @@ protected:
 					_minLevel = LEVEL_ERROR;
 				} else if (0 == strcmp(logLevelStr, "off")) {
 					_minLevel = LEVEL_OFF;
-				}	else {
-					FAIL() << "Unrecognized -logLevel option, the valid log levels are verbose, info, warn, error, off.";
+				} else {
+					FAIL() << "Unrecognized -logLevel option, the valid log levels are verbose, "
+					          "info, warn, error, off.";
 				}
 			}
 		}
 	}
 
-	virtual void TearDown() { }
+	virtual void TearDown() {}
 
-	virtual void log_vprintf(LogLevel ll, const char *format, va_list args) {
+	virtual void log_vprintf(LogLevel ll, const char *format, va_list args)
+	{
 		if (NULL != portLib) {
 			OMRPORT_ACCESS_FROM_OMRPORT(portLib);
 			if (ll >= _minLevel) {
 				omrtty_vprintf(format, args);
 			}
 		} else {
-			FAIL() << "Log function can only be used by child of BaseEnvironment which has port library initialized!";
+			FAIL() << "Log function can only be used by child of BaseEnvironment which has port library "
+			          "initialized!";
 		}
 	}
 
 public:
 	BaseEnvironment(int argc, char **argv)
-		: ::testing::Environment()
-		, s_indentLevel(0)
-		, _minLevel(LEVEL_ERROR) 
-		, _argc(argc)
-		, _argv(argv)
-		, portLib(NULL)
-	{
-	}
+	        : ::testing::Environment()
+	        , s_indentLevel(0)
+	        , _minLevel(LEVEL_ERROR)
+	        , _argc(argc)
+	        , _argv(argv)
+	        , portLib(NULL)
+	{}
 
-	OMRPortLibrary *
-	getPortLibrary()
+	OMRPortLibrary *getPortLibrary() { return portLib; }
+
+	virtual void indent(LogLevel ll)
 	{
-		return portLib;
-	}
-	
-	virtual void
-	indent(LogLevel ll)
-	{
-        	for (int i = 0; i < s_indentLevel; i++) {
+		for (int i = 0; i < s_indentLevel; i++) {
 			logRaw(ll, "\t");
-        	}
+		}
 	}
 
-	virtual void
-	changeIndent(int delta)
-	{
-        	s_indentLevel += delta;
-	}
+	virtual void changeIndent(int delta) { s_indentLevel += delta; }
 
-
-	virtual void
-	log(const char *format, ...)
+	virtual void log(const char *format, ...)
 	{
 		indent(LEVEL_INFO);
 		va_list args;
@@ -151,8 +136,7 @@ public:
 		va_end(args);
 	}
 
-	virtual void
-	log(LogLevel ll, const char *format, ...)
+	virtual void log(LogLevel ll, const char *format, ...)
 	{
 		indent(ll);
 		va_list args;
@@ -161,24 +145,21 @@ public:
 		va_end(args);
 	}
 
-        virtual void
-        logRaw(const char *format, ...)
-        {
-                va_list args;
-                va_start(args, format);
-                log_vprintf(LEVEL_INFO, format, args);
-                va_end(args);
-        }
-	
-        virtual void
-        logRaw(LogLevel ll, const char *format, ...)
-        {
-                va_list args;
-                va_start(args, format);
-                log_vprintf(ll, format, args);
-                va_end(args);
-        }
+	virtual void logRaw(const char *format, ...)
+	{
+		va_list args;
+		va_start(args, format);
+		log_vprintf(LEVEL_INFO, format, args);
+		va_end(args);
+	}
 
+	virtual void logRaw(LogLevel ll, const char *format, ...)
+	{
+		va_list args;
+		va_start(args, format);
+		log_vprintf(ll, format, args);
+		va_end(args);
+	}
 };
 
 /*
@@ -207,26 +188,24 @@ public:
  * library for all tests run from main(). As a prerequisite, the omrthread library must be
  * initialized and the main test thread attached before instantiating this class and calling
  * RUN_ALL_TESTS() and the main test thread must be detached and the omrthread library shut
- * down after RUN_ALL_TESTS(). The INITIALIZE_THREADLIBRARY_AND_ATTACH() and DETACH_AND_DESTROY_THREADLIBRARY() macros can be used
- * for this purpose.
+ * down after RUN_ALL_TESTS(). The INITIALIZE_THREADLIBRARY_AND_ATTACH() and DETACH_AND_DESTROY_THREADLIBRARY() macros
+ * can be used for this purpose.
  */
-class PortEnvironment: public BaseEnvironment
-{
+class PortEnvironment : public BaseEnvironment {
 	/*
 	 * Data members
 	 */
 private:
 	OMRPortLibrary _portLibrary;
+
 protected:
 public:
-
 	/*
 	 * Function members
 	 */
 private:
 protected:
-	virtual void
-	SetUp()
+	virtual void SetUp()
 	{
 		BaseEnvironment::SetUp();
 
@@ -238,18 +217,15 @@ protected:
 		portLib = &_portLibrary;
 	}
 
-	virtual void
-	TearDown()
+	virtual void TearDown()
 	{
 		_portLibrary.port_shutdown_library(&_portLibrary);
 
 		BaseEnvironment::TearDown();
 	}
+
 public:
-	PortEnvironment(int argc, char **argv)
-		: BaseEnvironment(argc, argv)
-	{
-	}
+	PortEnvironment(int argc, char **argv) : BaseEnvironment(argc, argv) {}
 };
 
 #endif /* TESTENVIRONMENT_HPP_ */

@@ -32,20 +32,21 @@ extern "C" {
 
 /* Template category data to be copied into the thread library structure in omrthread_mem_init */
 #if defined(OMR_THR_FORK_SUPPORT)
-const uint32_t threadCategoryChildren[] = {OMRMEM_CATEGORY_THREADS_RUNTIME_STACK, OMRMEM_CATEGORY_THREADS_NATIVE_STACK, OMRMEM_CATEGORY_OSMUTEXES, OMRMEM_CATEGORY_OSCONDVARS};
-const OMRMemCategory threadCategoryTemplate = { "Threads", OMRMEM_CATEGORY_THREADS, 0, 0, 4, threadCategoryChildren };
-const OMRMemCategory mutexCategoryTemplate = { "OS Mutexes", OMRMEM_CATEGORY_OSMUTEXES, 0, 0, 0, NULL };
-const OMRMemCategory condvarCategoryTemplate = { "OS Condvars", OMRMEM_CATEGORY_OSCONDVARS, 0, 0, 0, NULL };
+const uint32_t threadCategoryChildren[] = {OMRMEM_CATEGORY_THREADS_RUNTIME_STACK, OMRMEM_CATEGORY_THREADS_NATIVE_STACK,
+        OMRMEM_CATEGORY_OSMUTEXES, OMRMEM_CATEGORY_OSCONDVARS};
+const OMRMemCategory threadCategoryTemplate = {"Threads", OMRMEM_CATEGORY_THREADS, 0, 0, 4, threadCategoryChildren};
+const OMRMemCategory mutexCategoryTemplate = {"OS Mutexes", OMRMEM_CATEGORY_OSMUTEXES, 0, 0, 0, NULL};
+const OMRMemCategory condvarCategoryTemplate = {"OS Condvars", OMRMEM_CATEGORY_OSCONDVARS, 0, 0, 0, NULL};
 #else /* defined(OMR_THR_FORK_SUPPORT) */
 const uint32_t threadCategoryChildren[] = {OMRMEM_CATEGORY_THREADS_RUNTIME_STACK, OMRMEM_CATEGORY_THREADS_NATIVE_STACK};
-const OMRMemCategory threadCategoryTemplate = { "Threads", OMRMEM_CATEGORY_THREADS, 0, 0, 2, threadCategoryChildren };
+const OMRMemCategory threadCategoryTemplate = {"Threads", OMRMEM_CATEGORY_THREADS, 0, 0, 2, threadCategoryChildren};
 #endif /* defined(OMR_THR_FORK_SUPPORT) */
-const OMRMemCategory nativeStackCategoryTemplate = { "Native Stack", OMRMEM_CATEGORY_THREADS_NATIVE_STACK, 0, 0, 0, NULL };
-
+const OMRMemCategory nativeStackCategoryTemplate = {
+        "Native Stack", OMRMEM_CATEGORY_THREADS_NATIVE_STACK, 0, 0, 0, NULL};
 
 typedef struct J9ThreadMemoryHeader {
 	uintptr_t blockSize;
-#if ! defined(OMR_ENV_DATA64)
+#if !defined(OMR_ENV_DATA64)
 	/* Padding to ensure 8-byte alignment on 32 bit */
 	uint8_t padding[4];
 #endif
@@ -168,7 +169,6 @@ omrthread_freeWrapper(void *user, void *ptr, uint32_t type)
 	omrthread_free_memory((omrthread_library_t)user, ptr);
 }
 
-
 /**
  * Malloc memory.
  * Helper function used by the library's pools.
@@ -184,7 +184,8 @@ omrthread_freeWrapper(void *user, void *ptr, uint32_t type)
  *
  */
 void *
-omrthread_mallocWrapper(void *user, uint32_t size, const char *callSite, uint32_t memoryCategory, uint32_t type, uint32_t *doInit)
+omrthread_mallocWrapper(
+        void *user, uint32_t size, const char *callSite, uint32_t memoryCategory, uint32_t type, uint32_t *doInit)
 {
 	return omrthread_allocate_memory((omrthread_library_t)user, size, memoryCategory);
 }

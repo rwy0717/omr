@@ -33,7 +33,6 @@
 #include "AtomicSupport.hpp"
 #include "rasTestHelpers.hpp"
 
-
 /*
  * This test covers:
  * - Logging tracepoints concurrently from multiple threads
@@ -64,80 +63,64 @@ typedef struct FailingSubscriberData {
 	uint32_t alarmCount;
 } FailingSubscriberData;
 
-static void startChildThread(OMRTestVM *testVM, omrthread_t *childThread, omrthread_entrypoint_t entryProc, TestChildThreadData *childData);
+static void startChildThread(
+        OMRTestVM *testVM, omrthread_t *childThread, omrthread_entrypoint_t entryProc, TestChildThreadData *childData);
 static omr_error_t waitForChildThread(OMRTestVM *testVM, omrthread_t childThread, TestChildThreadData *childData);
 static int J9THREAD_PROC childThreadMain(void *entryArg);
 
 static omr_error_t countTracepoints(UtSubscription *subscriptionID);
-static omr_error_t countTracepointsIter(void *userData, const char *tpMod, const uint32_t tpModLength, const uint32_t tpId,
-										const UtTraceRecord *record, uint32_t firstParameterOffset, uint32_t parameterDataLength,
-										int32_t isBigEndian);
+static omr_error_t countTracepointsIter(void *userData, const char *tpMod, const uint32_t tpModLength,
+        const uint32_t tpId, const UtTraceRecord *record, uint32_t firstParameterOffset, uint32_t parameterDataLength,
+        int32_t isBigEndian);
 static omr_error_t failOnSecondCall(UtSubscription *subscriptionID);
 static void failOnSecondCallAlarm(UtSubscription *subscriptionID);
 
 static const char *lowercaseAlpha = "abcdefghijklmnopqrstuvwxyz";
 static const char *uppercaseAlpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-static const char *ibmText1[] = {
-	"\"If the bringing of women - half the human race - into the center of",
-	"historical inquiry poses a formidable challenge to historical",
-	"scholarship, it also offers sustaining energy and a source of",
-	"strength.\" Gerder Lerner, 1982",
-	"",
-	"At IBM women have been making contributions to the advancement of",
-	"information technology for almost as long as the company has been in",
-	"existence. Where many companies proudly date their affirmative action",
-	"programs to the 1970s, IBM has been creating meaningful roles for",
-	"female employees since the 1930s.",
-	"",
-	"This tradition was not the result of a happy accident. Instead, it was",
-	"a deliberate and calculated initiative on the part of Thomas J.",
-	"Watson, Sr., IBM's legendary leader. Watson discerned the value women",
-	"could bring to the business equation, and he mandated that his company",
-	"hire and train women to sell and service IBM products.",
-	"",
-	"Soon IBM had so many women professionals in its ranks that the company",
-	"formed a Women's Education Division. Those early pioneers may not have",
-	"realized it then, but block by block they laid the foundation for a",
-	"tradition that lasts to this day.",
-	"",
-	"The tens of thousands of women who have been IBM employees since the",
-	"1930s have built upon that foundation, for women now comprise more",
-	"than 30 percent of the total U.S. employee population. But of even",
-	"greater significance is the impact they've had on the information",
-	"technology industry. That impact has no doubt been farther reaching",
-	"and more enduring than even a visionary like Watson could have",
-	"imagined seven decades ago."
-};
+static const char *ibmText1[] = {"\"If the bringing of women - half the human race - into the center of",
+        "historical inquiry poses a formidable challenge to historical",
+        "scholarship, it also offers sustaining energy and a source of", "strength.\" Gerder Lerner, 1982", "",
+        "At IBM women have been making contributions to the advancement of",
+        "information technology for almost as long as the company has been in",
+        "existence. Where many companies proudly date their affirmative action",
+        "programs to the 1970s, IBM has been creating meaningful roles for", "female employees since the 1930s.", "",
+        "This tradition was not the result of a happy accident. Instead, it was",
+        "a deliberate and calculated initiative on the part of Thomas J.",
+        "Watson, Sr., IBM's legendary leader. Watson discerned the value women",
+        "could bring to the business equation, and he mandated that his company",
+        "hire and train women to sell and service IBM products.", "",
+        "Soon IBM had so many women professionals in its ranks that the company",
+        "formed a Women's Education Division. Those early pioneers may not have",
+        "realized it then, but block by block they laid the foundation for a", "tradition that lasts to this day.", "",
+        "The tens of thousands of women who have been IBM employees since the",
+        "1930s have built upon that foundation, for women now comprise more",
+        "than 30 percent of the total U.S. employee population. But of even",
+        "greater significance is the impact they've had on the information",
+        "technology industry. That impact has no doubt been farther reaching",
+        "and more enduring than even a visionary like Watson could have", "imagined seven decades ago."};
 
-static const char *ibmText2[] = {
-	"Former Chairman Thomas J. Watson, Jr., said in 1957 that IBM \"is a",
-	"company of human beings, not machines; personalities, not products;",
-	"people, not real estate.\" That observation was true long before 1957",
-	"-- and it has remained valid ever since.",
-	"",
-	"IBM was created, sustained and enlarged by a unique assembly of",
-	"talented, able and dedicated men and women who, in a relatively few",
-	"decades, built one of the world's most admired organizations. Starting",
-	"with a product line of scales, clocks and punched card machines, all",
-	"manner of IBM people -- from plant workers and engineers to sales",
-	"representatives and scientists -- planned, devised and delivered",
-	"thousands of innovations that propelled the company and its customers",
-	"into the rapidly-evolving and exciting worlds of electronic data",
-	"processing, information technology and e-business on demand.",
-	"",
-	"Ever since 1911, a global community spanning five generations of",
-	"highly-skilled IBMers working in factories, laboratories, offices and",
-	"cubicles in more than 100 countries have developed, produced and",
-	"brought to the global marketplace an amazing array of devices,",
-	"machines, programs, software and services that have transformed -- and",
-	"even revolutionized -- the myriad activities of business, industry,",
-	"government, education and the home.",
-	"",
-	"Those very special people -- individually and collectively -- who",
-	"built this company from its modest beginnings to what it is today are",
-	"the essence of what sets IBM apart."
-};
+static const char *ibmText2[] = {"Former Chairman Thomas J. Watson, Jr., said in 1957 that IBM \"is a",
+        "company of human beings, not machines; personalities, not products;",
+        "people, not real estate.\" That observation was true long before 1957",
+        "-- and it has remained valid ever since.", "",
+        "IBM was created, sustained and enlarged by a unique assembly of",
+        "talented, able and dedicated men and women who, in a relatively few",
+        "decades, built one of the world's most admired organizations. Starting",
+        "with a product line of scales, clocks and punched card machines, all",
+        "manner of IBM people -- from plant workers and engineers to sales",
+        "representatives and scientists -- planned, devised and delivered",
+        "thousands of innovations that propelled the company and its customers",
+        "into the rapidly-evolving and exciting worlds of electronic data",
+        "processing, information technology and e-business on demand.", "",
+        "Ever since 1911, a global community spanning five generations of",
+        "highly-skilled IBMers working in factories, laboratories, offices and",
+        "cubicles in more than 100 countries have developed, produced and",
+        "brought to the global marketplace an amazing array of devices,",
+        "machines, programs, software and services that have transformed -- and",
+        "even revolutionized -- the myriad activities of business, industry,", "government, education and the home.",
+        "", "Those very special people -- individually and collectively -- who",
+        "built this company from its modest beginnings to what it is today are", "the essence of what sets IBM apart."};
 
 TEST(TraceLogTest, stressTraceBufferManagement)
 {
@@ -149,7 +132,7 @@ TEST(TraceLogTest, stressTraceBufferManagement)
 	const OMR_TI *ti = omr_agent_getTI();
 
 	UtSubscription *failedSubscription = NULL;
-	FailingSubscriberData failData = { 0, 0 };
+	FailingSubscriberData failData = {0, 0};
 
 	omrthread_t childThread[NUM_CHILD_THREADS];
 	TestChildThreadData childData[NUM_CHILD_THREADS];
@@ -181,7 +164,8 @@ TEST(TraceLogTest, stressTraceBufferManagement)
 	 * is fired from unblock_spinlock_threads() via omrthread_monitor_exit(omrVM->_vmThreadListMutex) in
 	 * OMR_Thread_FirstInit().
 	 */
-	OMRTEST_ASSERT_ERROR_NONE(omr_ras_initTraceEngine(&testVM.omrVM, "buffers=1k:maximal=all:maximal=!j9thr", NULL));
+	OMRTEST_ASSERT_ERROR_NONE(
+	        omr_ras_initTraceEngine(&testVM.omrVM, "buffers=1k:maximal=all:maximal=!j9thr", NULL));
 	OMRTEST_ASSERT_ERROR_NONE(OMR_Thread_Init(&testVM.omrVM, NULL, &vmthread, "stressBufferManagement"));
 
 	/* load traceagent */
@@ -192,15 +176,15 @@ TEST(TraceLogTest, stressTraceBufferManagement)
 	/* Initialize the omr_test module for tracing */
 	UT_OMR_TEST_MODULE_LOADED(testVM.omrVM._trcEngine->utIntf);
 
-	OMRTEST_ASSERT_ERROR_NONE(
-		ti->RegisterRecordSubscriber(vmthread, "fail", failOnSecondCall, failOnSecondCallAlarm, (void *)&failData, &failedSubscription));
+	OMRTEST_ASSERT_ERROR_NONE(ti->RegisterRecordSubscriber(
+	        vmthread, "fail", failOnSecondCall, failOnSecondCallAlarm, (void *)&failData, &failedSubscription));
 
 	for (size_t i = 0; i < NUM_CHILD_THREADS; i += 1) {
 		ASSERT_NO_FATAL_FAILURE(startChildThread(&testVM, &childThread[i], childThreadMain, &childData[i]));
 
 		/* Create a subscription for each thread */
-		OMRTEST_ASSERT_ERROR_NONE(
-			ti->RegisterRecordSubscriber(vmthread, "child", countTracepoints, NULL, (void *)&childData[i], &subscriptionID[i]));
+		OMRTEST_ASSERT_ERROR_NONE(ti->RegisterRecordSubscriber(
+		        vmthread, "child", countTracepoints, NULL, (void *)&childData[i], &subscriptionID[i]));
 	}
 	for (size_t i = 0; i < NUM_CHILD_THREADS; i += 1) {
 		ASSERT_EQ(1, omrthread_resume(childThread[i]));
@@ -213,8 +197,7 @@ TEST(TraceLogTest, stressTraceBufferManagement)
 	UT_OMR_TEST_MODULE_UNLOADED(testVM.omrVM._trcEngine->utIntf);
 
 	/* The failed subscriber should have deregistered itself */
-	OMRTEST_ASSERT_ERROR(OMR_ERROR_ILLEGAL_ARGUMENT,
-						 ti->DeregisterRecordSubscriber(vmthread, failedSubscription));
+	OMRTEST_ASSERT_ERROR(OMR_ERROR_ILLEGAL_ARGUMENT, ti->DeregisterRecordSubscriber(vmthread, failedSubscription));
 
 	/* Unload the traceagent */
 	OMRTEST_ASSERT_ERROR_NONE(omr_agent_callOnUnload(agent));
@@ -245,7 +228,8 @@ TEST(TraceLogTest, stressTraceBufferManagement)
 }
 
 static void
-startChildThread(OMRTestVM *testVM, omrthread_t *childThread, omrthread_entrypoint_t entryProc, TestChildThreadData *childData)
+startChildThread(
+        OMRTestVM *testVM, omrthread_t *childThread, omrthread_entrypoint_t entryProc, TestChildThreadData *childData)
 {
 	ASSERT_NO_FATAL_FAILURE(createThread(childThread, TRUE, J9THREAD_CREATE_JOINABLE, entryProc, childData));
 	childData->osThread = *childThread;
@@ -314,7 +298,7 @@ childThreadMain(void *entryArg)
  */
 static omr_error_t
 countTracepointsIter(void *userData, const char *tpMod, const uint32_t tpModLength, const uint32_t tpId,
-					 const UtTraceRecord *record, uint32_t firstParameterOffset, uint32_t parameterDataLength, int32_t isBigEndian)
+        const UtTraceRecord *record, uint32_t firstParameterOffset, uint32_t parameterDataLength, int32_t isBigEndian)
 {
 	TestChildThreadData *childData = (TestChildThreadData *)userData;
 	const uint32_t omr_test_len = sizeof("omr_test") - 1;
@@ -329,10 +313,11 @@ countTracepointsIter(void *userData, const char *tpMod, const uint32_t tpModLeng
 				if (1 == childData->traceDataCount) {
 					uint8_t *data = (uint8_t *)record + firstParameterOffset;
 					if ((parameterDataLength != strlen(childData->traceData[0]) + 1)
-						|| (0 != memcmp(childData->traceData[0], data, parameterDataLength))
-					) {
-						fprintf(stderr, "data mismatch, expected=\"%s\", actual=(%u bytes) \"%*s\"\n",
-								childData->traceData[0], parameterDataLength, parameterDataLength, data);
+					        || (0 != memcmp(childData->traceData[0], data, parameterDataLength))) {
+						fprintf(stderr,
+						        "data mismatch, expected=\"%s\", actual=(%u bytes) \"%*s\"\n",
+						        childData->traceData[0], parameterDataLength,
+						        parameterDataLength, data);
 						abort();
 					}
 				}
@@ -355,7 +340,8 @@ countTracepoints(UtSubscription *subscriptionID)
 	EXPECT_TRUE(NULL != childData->osThread);
 
 	if ((omrthread_t)(uintptr_t)traceRecord->threadSyn1 == childData->osThread) {
-		processTraceRecord(&childData->wrapBuffer, subscriptionID, countTracepointsIter, subscriptionID->userData);
+		processTraceRecord(
+		        &childData->wrapBuffer, subscriptionID, countTracepointsIter, subscriptionID->userData);
 	}
 	return OMR_ERROR_NONE;
 }

@@ -27,8 +27,14 @@
  */
 #ifndef OMR_CPU_CONNECTOR
 #define OMR_CPU_CONNECTOR
-namespace OMR { namespace X86 { class CPU; } }
-namespace OMR { typedef OMR::X86::CPU CPUConnector; }
+namespace OMR {
+namespace X86 {
+class CPU;
+}
+} // namespace OMR
+namespace OMR {
+typedef OMR::X86::CPU CPUConnector;
+}
 #else
 #error OMR::X86::CPU expected to be a primary connector, but an OMR connector is already defined
 #endif
@@ -38,61 +44,55 @@ namespace OMR { typedef OMR::X86::CPU CPUConnector; }
 #include "env/jittypes.h"
 
 struct TR_X86CPUIDBuffer;
-namespace TR { class Compilation; }
+namespace TR {
+class Compilation;
+}
 
+namespace OMR {
 
-namespace OMR
-{
+namespace X86 {
 
-namespace X86
-{
-
-class CPU : public OMR::CPU
-   {
+class CPU : public OMR::CPU {
 protected:
-
-   CPU() : OMR::CPU() {}
+	CPU() : OMR::CPU() {}
 
 public:
+	TR_X86CPUIDBuffer *queryX86TargetCPUID();
+	const char *getX86ProcessorVendorId();
+	uint32_t getX86ProcessorSignature();
+	uint32_t getX86ProcessorFeatureFlags();
+	uint32_t getX86ProcessorFeatureFlags2();
+	uint32_t getX86ProcessorFeatureFlags8();
 
-   TR_X86CPUIDBuffer *queryX86TargetCPUID();
-   const char *getX86ProcessorVendorId();
-   uint32_t getX86ProcessorSignature();
-   uint32_t getX86ProcessorFeatureFlags();
-   uint32_t getX86ProcessorFeatureFlags2();
-   uint32_t getX86ProcessorFeatureFlags8();
+	bool getSupportsHardwareSQRT();
 
-   bool getSupportsHardwareSQRT();
+	bool testOSForSSESupport();
 
-   bool testOSForSSESupport();
+	/** @brief Determines whether the Transactional Memory (TM) facility is available on the current processor.
+	 *
+	 *  @return true if TM is available, false otherwise.
+	 */
+	bool supportsTransactionalMemoryInstructions();
 
+	/**
+	 * @brief Answers whether the distance between a target and source address
+	 *        is within the reachable RIP displacement range.
+	 *
+	 * @param[in] : targetAddress : the address of the target
+	 *
+	 * @param[in] : sourceAddress : the address of the instruction following the
+	 *                 branch instruction.
+	 *
+	 * @return true if the target is within range; false otherwise.
+	 */
+	bool isTargetWithinRIPRange(intptrj_t targetAddress, intptrj_t sourceAddress)
+	{
+		return targetAddress == sourceAddress + (int32_t)(targetAddress - sourceAddress);
+	}
+};
 
-   /** @brief Determines whether the Transactional Memory (TM) facility is available on the current processor.
-    *
-    *  @return true if TM is available, false otherwise.
-    */
-   bool supportsTransactionalMemoryInstructions();
+} // namespace X86
 
-   /**
-    * @brief Answers whether the distance between a target and source address
-    *        is within the reachable RIP displacement range.
-    *
-    * @param[in] : targetAddress : the address of the target
-    *
-    * @param[in] : sourceAddress : the address of the instruction following the
-    *                 branch instruction.
-    *
-    * @return true if the target is within range; false otherwise.
-    */
-   bool isTargetWithinRIPRange(intptrj_t targetAddress, intptrj_t sourceAddress)
-      {
-      return targetAddress == sourceAddress + (int32_t)(targetAddress - sourceAddress);
-      }
-
-   };
-
-}
-
-}
+} // namespace OMR
 
 #endif

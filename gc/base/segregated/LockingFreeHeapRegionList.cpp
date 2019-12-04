@@ -20,25 +20,27 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
+#include "LockingFreeHeapRegionList.hpp"
+
+#include "modronopt.h"
 #include "omrcfg.h"
 #include "omrcomp.h"
-#include "modronopt.h"
 #include "sizeclasses.h"
-
-#include "LockingFreeHeapRegionList.hpp"
 
 #if defined(OMR_GC_SEGREGATED_HEAP)
 
 MM_LockingFreeHeapRegionList *
-MM_LockingFreeHeapRegionList::newInstance(MM_EnvironmentBase *env, MM_HeapRegionList::RegionListKind regionListKind, bool singleRegionsOnly)
+MM_LockingFreeHeapRegionList::newInstance(
+        MM_EnvironmentBase *env, MM_HeapRegionList::RegionListKind regionListKind, bool singleRegionsOnly)
 {
-	MM_LockingFreeHeapRegionList *fpl = (MM_LockingFreeHeapRegionList *)env->getForge()->allocate(sizeof(MM_LockingFreeHeapRegionList), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+	MM_LockingFreeHeapRegionList *fpl = (MM_LockingFreeHeapRegionList *)env->getForge()->allocate(
+	        sizeof(MM_LockingFreeHeapRegionList), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
 	if (fpl) {
 		new (fpl) MM_LockingFreeHeapRegionList(regionListKind, singleRegionsOnly);
 		if (!fpl->initialize(env)) {
 			fpl->kill(env);
 			return NULL;
-		}		
+		}
 	}
 	return fpl;
 }
@@ -58,7 +60,7 @@ MM_LockingFreeHeapRegionList::initialize(MM_EnvironmentBase *env)
 	}
 	return true;
 }
-	
+
 void
 MM_LockingFreeHeapRegionList::tearDown(MM_EnvironmentBase *env)
 {
@@ -73,7 +75,6 @@ MM_LockingFreeHeapRegionList::getTotalRegions()
 {
 	return _totalRegionsCount;
 }
-
 
 void
 MM_LockingFreeHeapRegionList::showList(MM_EnvironmentBase *env)
@@ -92,8 +93,9 @@ MM_LockingFreeHeapRegionList::showList(MM_EnvironmentBase *env)
 	unlock();
 }
 
-MM_HeapRegionDescriptorSegregated*
-MM_LockingFreeHeapRegionList::allocate(MM_EnvironmentBase *env, uintptr_t szClass, uintptr_t numRegions, uintptr_t maxExcess)
+MM_HeapRegionDescriptorSegregated *
+MM_LockingFreeHeapRegionList::allocate(
+        MM_EnvironmentBase *env, uintptr_t szClass, uintptr_t numRegions, uintptr_t maxExcess)
 {
 	lock();
 	for (MM_HeapRegionDescriptorSegregated *cur = _head; cur != NULL; cur = cur->getNext()) {
@@ -101,7 +103,8 @@ MM_LockingFreeHeapRegionList::allocate(MM_EnvironmentBase *env, uintptr_t szClas
 		if ((currentSize >= numRegions) && cur->isCommitted()) {
 			uintptr_t leftOver = currentSize - numRegions;
 			if (leftOver < maxExcess) {
-				/* The detach call is safe even though we are iterating over the list because iterations stops immediately. */
+				/* The detach call is safe even though we are iterating over the list because iterations
+				 * stops immediately. */
 				detachInternal(cur);
 				if (leftOver > 0) {
 					MM_HeapRegionDescriptorSegregated *remainder = cur->splitRange(numRegions);

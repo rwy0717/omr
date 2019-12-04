@@ -20,29 +20,26 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #ifndef VMREGISTER_INCL
 #define VMREGISTER_INCL
 
 #include "JitBuilder.hpp"
 
-class VMRegisterMethod : public OMR::JitBuilder::MethodBuilder
-   {
-   public:
-   VMRegisterMethod(OMR::JitBuilder::TypeDictionary *);
-   virtual bool buildIL();
-   };
+class VMRegisterMethod : public OMR::JitBuilder::MethodBuilder {
+public:
+	VMRegisterMethod(OMR::JitBuilder::TypeDictionary *);
+	virtual bool buildIL();
+};
 
 typedef struct VMRegisterStruct {
-   int8_t *values;
-   int32_t count;
+	int8_t *values;
+	int32_t count;
 } VMRegisterStruct;
 
-class VMRegisterInStructMethod : public OMR::JitBuilder::MethodBuilder
-   {
-   public:
-   VMRegisterInStructMethod(OMR::JitBuilder::TypeDictionary *);
-   virtual bool buildIL();
-   };
+class VMRegisterInStructMethod : public OMR::JitBuilder::MethodBuilder {
+public:
+	VMRegisterInStructMethod(OMR::JitBuilder::TypeDictionary *);
+	virtual bool buildIL();
+};
 
 #endif // !defined(VMREGISTER_INCL)

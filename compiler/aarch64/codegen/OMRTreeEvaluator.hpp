@@ -26,8 +26,14 @@
  */
 #ifndef OMR_TREE_EVALUATOR_CONNECTOR
 #define OMR_TREE_EVALUATOR_CONNECTOR
-namespace OMR { namespace ARM64 { class TreeEvaluator; } }
-namespace OMR { typedef OMR::ARM64::TreeEvaluator TreeEvaluatorConnector; }
+namespace OMR {
+namespace ARM64 {
+class TreeEvaluator;
+}
+} // namespace OMR
+namespace OMR {
+typedef OMR::ARM64::TreeEvaluator TreeEvaluatorConnector;
+}
 #else
 #error OMR::ARM64::TreeEvaluator expected to be a primary connector, but a OMR connector is already defined
 #endif
@@ -37,7 +43,9 @@ namespace OMR { typedef OMR::ARM64::TreeEvaluator TreeEvaluatorConnector; }
 #include "codegen/RealRegister.hpp"
 #include "compile/CompilationTypes.hpp"
 
-namespace TR { class CodeGenerator; }
+namespace TR {
+class CodeGenerator;
+}
 
 /**
  * @brief Helper function for xReturnEvaluators
@@ -47,7 +55,8 @@ namespace TR { class CodeGenerator; }
  * @param[in] i : return type information
  * @param[in] cg : CodeGenerator
  */
-TR::Register *genericReturnEvaluator(TR::Node *node, TR::RealRegister::RegNum rnum, TR_RegisterKinds rk, TR_ReturnInfo i, TR::CodeGenerator *cg);
+TR::Register *genericReturnEvaluator(
+        TR::Node *node, TR::RealRegister::RegNum rnum, TR_RegisterKinds rk, TR_ReturnInfo i, TR::CodeGenerator *cg);
 
 /**
  * @brief Helper function for xloadEvaluators
@@ -67,14 +76,11 @@ TR::Register *commonLoadEvaluator(TR::Node *node, TR::InstOpCode::Mnemonic op, i
  */
 TR::Register *commonStoreEvaluator(TR::Node *node, TR::InstOpCode::Mnemonic op, int32_t memSize, TR::CodeGenerator *cg);
 
-namespace OMR
-{
+namespace OMR {
 
-namespace ARM64
-{
+namespace ARM64 {
 
-class OMR_EXTENSIBLE TreeEvaluator: public OMR::TreeEvaluator
-   {
+class OMR_EXTENSIBLE TreeEvaluator : public OMR::TreeEvaluator {
 public:
 	static TR::Register *unImpOpEvaluator(TR::Node *node, TR::CodeGenerator *cg);
 	static TR::Register *badILOpEvaluator(TR::Node *node, TR::CodeGenerator *cg);
@@ -786,10 +792,12 @@ public:
 
 	static TR::Register *performCall(TR::Node *node, bool isIndirect, TR::CodeGenerator *cg);
 
-	static TR::Instruction *generateVFTMaskInstruction(TR::CodeGenerator *cg, TR::Node *node, TR::Register *dstReg, TR::Register *srcReg, TR::Instruction *preced=NULL);
-	static TR::Instruction *generateVFTMaskInstruction(TR::CodeGenerator *cg, TR::Node *node, TR::Register *reg, TR::Instruction *preced=NULL);
-   };
+	static TR::Instruction *generateVFTMaskInstruction(TR::CodeGenerator *cg, TR::Node *node, TR::Register *dstReg,
+	        TR::Register *srcReg, TR::Instruction *preced = NULL);
+	static TR::Instruction *generateVFTMaskInstruction(
+	        TR::CodeGenerator *cg, TR::Node *node, TR::Register *reg, TR::Instruction *preced = NULL);
+};
 
-} // ARM64
-} // OMR
-#endif //OMR_ARM64_TREE_EVALUATOR_INCL
+} // namespace ARM64
+} // namespace OMR
+#endif // OMR_ARM64_TREE_EVALUATOR_INCL

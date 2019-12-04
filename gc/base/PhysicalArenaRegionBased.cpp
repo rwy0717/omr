@@ -20,19 +20,16 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #include "PhysicalArenaRegionBased.hpp"
-
-#include "omrport.h"
 
 #include "EnvironmentBase.hpp"
 #include "Heap.hpp"
 #include "HeapRegionManager.hpp"
 #include "MemorySpace.hpp"
+#include "PhysicalArenaRegionBased.hpp"
 #include "PhysicalSubArenaRegionBased.hpp"
 #include "PhysicalSubArenaVirtualMemory.hpp"
-
-#include "PhysicalArenaRegionBased.hpp"
+#include "omrport.h"
 
 /**
  * Instantiate a new MM_PhysicalArenaRegionBased object.
@@ -40,10 +37,11 @@
 MM_PhysicalArenaRegionBased *
 MM_PhysicalArenaRegionBased::newInstance(MM_EnvironmentBase *env, MM_Heap *heap)
 {
-	MM_PhysicalArenaRegionBased *arena = (MM_PhysicalArenaRegionBased *)env->getForge()->allocate(sizeof(MM_PhysicalArenaRegionBased), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+	MM_PhysicalArenaRegionBased *arena = (MM_PhysicalArenaRegionBased *)env->getForge()->allocate(
+	        sizeof(MM_PhysicalArenaRegionBased), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
 	if (arena) {
-		new(arena) MM_PhysicalArenaRegionBased(env, heap);
-		if(!arena->initialize(env)) {
+		new (arena) MM_PhysicalArenaRegionBased(env, heap);
+		if (!arena->initialize(env)) {
 			arena->kill(env);
 			return NULL;
 		}
@@ -54,7 +52,7 @@ MM_PhysicalArenaRegionBased::newInstance(MM_EnvironmentBase *env, MM_Heap *heap)
 bool
 MM_PhysicalArenaRegionBased::initialize(MM_EnvironmentBase *env)
 {
-	if(!MM_PhysicalArena::initialize(env)) {
+	if (!MM_PhysicalArena::initialize(env)) {
 		return false;
 	}
 	return true;
@@ -74,40 +72,41 @@ MM_PhysicalArenaRegionBased::detachSubArena(MM_EnvironmentBase *env, MM_Physical
  * Attach a physical subarena of the specified size to the parent arena receiver.
  * This reserves the address space within the receiver for the subarena, and connects the subarena to the list
  * of those associated to the receiver (in address order).  Commit the subarena memory.
- * 
+ *
  * @param subArena The physical sub arena to attach
  * @param size Maximum size the sub arena will have (also the total reserve size).
- * 
+ *
  * @return true if the subarena was attached successfully, false otherwise.
  */
 bool
-MM_PhysicalArenaRegionBased::attachSubArena(MM_EnvironmentBase *env, MM_PhysicalSubArena *subArena, uintptr_t size, uintptr_t attachPolicy)
+MM_PhysicalArenaRegionBased::attachSubArena(
+        MM_EnvironmentBase *env, MM_PhysicalSubArena *subArena, uintptr_t size, uintptr_t attachPolicy)
 {
 	MM_PhysicalSubArenaRegionBased *subArenaToAttach = (MM_PhysicalSubArenaRegionBased *)subArena;
 	MM_PhysicalSubArenaRegionBased *headSubArena = (MM_PhysicalSubArenaRegionBased *)_physicalSubArena;
 	MM_PhysicalSubArenaRegionBased *currentSubArena = headSubArena;
-	
+
 	if (_memorySpace->getMaximumSize() < size) {
 		return false;
 	}
-	
+
 	uintptr_t regionSize = _heap->getHeapRegionManager()->getRegionSize();
 	if (0 != (size % regionSize)) {
 		return false;
 	}
-	
+
 	while (NULL != currentSubArena) {
 		if (currentSubArena == subArenaToAttach) {
 			/* subArena already attached */
 			return true;
 		}
-		
+
 		currentSubArena = currentSubArena->getNextSubArena();
 	}
-	
+
 	subArenaToAttach->setNextSubArena(headSubArena);
 	_physicalSubArena = subArenaToAttach;
-	
+
 	uintptr_t expanded = _physicalSubArena->performExpand(env, size);
 	return (size == expanded);
 }
@@ -117,7 +116,8 @@ MM_PhysicalArenaRegionBased::attachSubArena(MM_EnvironmentBase *env, MM_Physical
  * @return true if the request is valid, false otherwise.
  */
 bool
-MM_PhysicalArenaRegionBased::canResize(MM_EnvironmentBase *env, MM_PhysicalSubArenaRegionBased *subArena, uintptr_t sizeDelta)
+MM_PhysicalArenaRegionBased::canResize(
+        MM_EnvironmentBase *env, MM_PhysicalSubArenaRegionBased *subArena, uintptr_t sizeDelta)
 {
 	/* ensure we are trying to expand by a region size multiple */
 	uintptr_t regionSize = _heap->getHeapRegionManager()->getRegionSize();

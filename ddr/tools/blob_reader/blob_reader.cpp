@@ -87,10 +87,7 @@ struct BlobString {
 	uint16_t length;
 	char data[1]; /* flexible array member */
 
-	void endian_swap()
-	{
-		swap_u16(&length);
-	}
+	void endian_swap() { swap_u16(&length); }
 };
 
 struct BlobStruct {
@@ -165,16 +162,7 @@ struct Structure {
 	vector<Field *> fields;
 	vector<Constant *> constants;
 
-	Structure()
-		: name(NULL)
-		, nameLength(0)
-		, superName(NULL)
-		, superNameLength(0)
-		, size(0)
-		, fields()
-		, constants()
-	{
-	}
+	Structure() : name(NULL), nameLength(0), superName(NULL), superNameLength(0), size(0), fields(), constants() {}
 };
 
 static bool
@@ -242,27 +230,23 @@ main(int argc, char *argv[])
 		 * All version numbers thus far are small: a large version number is interpreted as
 		 * a mismatch between the byte order of this system and the originating system.
 		 */
-		const bool swapsNeeded = blobHdrV1.coreVersion > (uint32_t) 0xFFFF;
+		const bool swapsNeeded = blobHdrV1.coreVersion > (uint32_t)0xFFFF;
 
 		if (swapsNeeded) {
 			blobHdrV1.endian_swap();
 		}
 
-		omrfile_printf(OMRPORT_TTY_OUT, "Blob Header:\n"
-				" coreVersion: %u\n"
-				" sizeofBool: %u\n"
-				" sizeofUDATA: %u\n"
-				" bitfieldFormat: %u\n" /* see initializeBitfieldEncoding in j9ddr.c */
-				" structDataSize: %u\n"
-				" stringTableDataSize: %u\n"
-				" structureCount: %u\n",
-				blobHdrV1.coreVersion,
-				blobHdrV1.sizeofBool,
-				blobHdrV1.sizeofUDATA,
-				blobHdrV1.bitfieldFormat,
-				blobHdrV1.structDataSize,
-				blobHdrV1.stringTableDataSize,
-				blobHdrV1.structureCount);
+		omrfile_printf(OMRPORT_TTY_OUT,
+		        "Blob Header:\n"
+		        " coreVersion: %u\n"
+		        " sizeofBool: %u\n"
+		        " sizeofUDATA: %u\n"
+		        " bitfieldFormat: %u\n" /* see initializeBitfieldEncoding in j9ddr.c */
+		        " structDataSize: %u\n"
+		        " stringTableDataSize: %u\n"
+		        " structureCount: %u\n",
+		        blobHdrV1.coreVersion, blobHdrV1.sizeofBool, blobHdrV1.sizeofUDATA, blobHdrV1.bitfieldFormat,
+		        blobHdrV1.structDataSize, blobHdrV1.stringTableDataSize, blobHdrV1.structureCount);
 
 		/* read the file into memory */
 		const size_t blobLength = blobHdrV1.structDataSize + blobHdrV1.stringTableDataSize;
@@ -282,8 +266,8 @@ main(int argc, char *argv[])
 		{
 			omrfile_printf(OMRPORT_TTY_OUT, "\n== STRINGS ==\n");
 
-			const uint8_t * const stringDataStart = blobBuffer + blobHdrV1.structDataSize;
-			const uint8_t * const stringDataEnd = stringDataStart + blobHdrV1.stringTableDataSize;
+			const uint8_t *const stringDataStart = blobBuffer + blobHdrV1.structDataSize;
+			const uint8_t *const stringDataEnd = stringDataStart + blobHdrV1.stringTableDataSize;
 			const uint8_t *currentString = stringDataStart;
 
 			for (uint32_t stringNum = 1; currentString < stringDataEnd; ++stringNum) {
@@ -299,7 +283,9 @@ main(int argc, char *argv[])
 				/* The format of the printed list is:
 				 * #: <offset in string data> [<string length>] <string data>
 				 */
-				omrfile_printf(OMRPORT_TTY_OUT, "%5u: %8zx [%zu] %.*s\n", stringNum, (uintptr_t)(currentString - stringDataStart), blobString->length, blobString->length, blobString->data);
+				omrfile_printf(OMRPORT_TTY_OUT, "%5u: %8zx [%zu] %.*s\n", stringNum,
+				        (uintptr_t)(currentString - stringDataStart), blobString->length,
+				        blobString->length, blobString->data);
 
 				/* NOTE stringTableDataSize includes the space for the lengths */
 				currentString += blobString->length + sizeof(blobString->length) + padding;
@@ -308,9 +294,8 @@ main(int argc, char *argv[])
 
 		/* read structuress */
 		{
-			const uint8_t * const stringDataStart = blobBuffer + blobHdrV1.structDataSize;
-	#define BLOBSTRING_AT(offset) \
-			((const BlobString *)(stringDataStart + (offset)))
+			const uint8_t *const stringDataStart = blobBuffer + blobHdrV1.structDataSize;
+#define BLOBSTRING_AT(offset) ((const BlobString *)(stringDataStart + (offset)))
 
 			/* set offset to start of struct data */
 			const uint8_t *currentStruct = blobBuffer;
@@ -383,33 +368,28 @@ main(int argc, char *argv[])
 			omrfile_printf(OMRPORT_TTY_OUT, "\n== STRUCTS ==\n");
 			for (size_t i = 0; i < structs.size(); ++i) {
 				Structure *builtStruct = structs[i];
-				omrfile_printf(OMRPORT_TTY_OUT, "\nStruct name: %.*s\n",
-						builtStruct->nameLength,
-						builtStruct->name);
+				omrfile_printf(OMRPORT_TTY_OUT, "\nStruct name: %.*s\n", builtStruct->nameLength,
+				        builtStruct->name);
 				if (NULL == builtStruct->superName) {
 					omrfile_printf(OMRPORT_TTY_OUT, " no superName\n");
 				} else {
 					omrfile_printf(OMRPORT_TTY_OUT, " superName: %.*s\n",
-							builtStruct->superNameLength,
-							builtStruct->superName);
+					        builtStruct->superNameLength, builtStruct->superName);
 				}
-				omrfile_printf(OMRPORT_TTY_OUT, " sizeOf: %zu\n"
-						" fieldCount: %zu\n"
-						" constCount: %zu\n",
-						builtStruct->size,
-						builtStruct->fields.size(),
-						builtStruct->constants.size());
+				omrfile_printf(OMRPORT_TTY_OUT,
+				        " sizeOf: %zu\n"
+				        " fieldCount: %zu\n"
+				        " constCount: %zu\n",
+				        builtStruct->size, builtStruct->fields.size(), builtStruct->constants.size());
 
 				/* print fields in the structure */
 				for (size_t j = 0; j < builtStruct->fields.size(); ++j) {
 					Field *field = builtStruct->fields[j];
 
 					omrfile_printf(OMRPORT_TTY_OUT, " Field declaredName: %.*s\n",
-							field->nameLength,
-							field->name);
-					omrfile_printf(OMRPORT_TTY_OUT, "  declaredType: %.*s\n",
-							field->typeLength,
-							field->type);
+					        field->nameLength, field->name);
+					omrfile_printf(OMRPORT_TTY_OUT, "  declaredType: %.*s\n", field->typeLength,
+					        field->type);
 					omrfile_printf(OMRPORT_TTY_OUT, "  offset: %u\n", field->offset);
 					delete field;
 				}
@@ -418,15 +398,14 @@ main(int argc, char *argv[])
 				for (size_t j = 0; j < builtStruct->constants.size(); ++j) {
 					Constant *constant = builtStruct->constants[j];
 
-					omrfile_printf(OMRPORT_TTY_OUT, " Constant name: %.*s\n",
-							constant->nameLength,
-							constant->name);
+					omrfile_printf(OMRPORT_TTY_OUT, " Constant name: %.*s\n", constant->nameLength,
+					        constant->name);
 					omrfile_printf(OMRPORT_TTY_OUT, "  value: %llu\n", constant->value);
 					delete constant;
 				}
 				delete builtStruct;
 			}
-	#undef BLOBSTRING_AT
+#undef BLOBSTRING_AT
 		}
 	}
 

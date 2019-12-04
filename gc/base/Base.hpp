@@ -40,8 +40,7 @@
  * Base Class
  * @ingroup GC_Base_Core
  */
-class MM_Base
-{
+class MM_Base {
 private:
 protected:
 public:

@@ -29,7 +29,7 @@ sysTranslate(const char *source, int length, char *trtable, char *xlate_buf)
 {
 	int i;
 
-	memcpy(xlate_buf, source, length);  /* copy source to target */
+	memcpy(xlate_buf, source, length); /* copy source to target */
 
 	i = 0;
 
@@ -39,14 +39,13 @@ sysTranslate(const char *source, int length, char *trtable, char *xlate_buf)
 	 */
 	for (; length > 255; i += 256, length -= 256) {
 		__tr(xlate_buf + i, trtable, 255);
-
 	}
 #endif
 
-	for (; length > 0; i++, length--) {      /* translate */
+	for (; length > 0; i++, length--) { /* translate */
 		xlate_buf[i] = trtable[source[i]];
 	}
 
-	xlate_buf[i] = '\0';                /* null terminate */
+	xlate_buf[i] = '\0'; /* null terminate */
 	return xlate_buf;
 }

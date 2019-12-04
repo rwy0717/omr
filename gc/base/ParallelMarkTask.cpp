@@ -20,19 +20,16 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
-#include "omrcfg.h"
-#include "omrmodroncore.h"
-#include "omrport.h"
-#include "modronopt.h"
-#include "ut_j9mm.h"
-
 #include "ParallelMarkTask.hpp"
 
 #include "EnvironmentBase.hpp"
 #include "MarkingScheme.hpp"
 #include "WorkStack.hpp"
-
+#include "modronopt.h"
+#include "omrcfg.h"
+#include "omrmodroncore.h"
+#include "omrport.h"
+#include "ut_j9mm.h"
 
 uintptr_t
 MM_ParallelMarkTask::getVMStateID()
@@ -56,7 +53,7 @@ MM_ParallelMarkTask::run(MM_EnvironmentBase *env)
 void
 MM_ParallelMarkTask::setup(MM_EnvironmentBase *env)
 {
-	if(env->isMasterThread()) {
+	if (env->isMasterThread()) {
 		Assert_MM_true(_cycleState == env->_cycleState);
 	} else {
 		Assert_MM_true(NULL == env->_cycleState);
@@ -74,22 +71,20 @@ MM_ParallelMarkTask::cleanup(MM_EnvironmentBase *env)
 	} else {
 		env->_cycleState = NULL;
 	}
-	
-	/* record the thread-specific parallelism stats in the trace buffer. This partially duplicates info in -Xtgc:parallel */
+
+	/* record the thread-specific parallelism stats in the trace buffer. This partially duplicates info in
+	 * -Xtgc:parallel */
 	OMRPORT_ACCESS_FROM_OMRPORT(env->getPortLibrary());
-	Trc_MM_ParallelMarkTask_parallelStats(
-		env->getLanguageVMThread(),
-		(uint32_t)env->getSlaveID(),
-		(uint32_t)omrtime_hires_delta(0, env->_workPacketStats._workStallTime, OMRPORT_TIME_DELTA_IN_MILLISECONDS),
-		(uint32_t)omrtime_hires_delta(0, env->_workPacketStats._completeStallTime, OMRPORT_TIME_DELTA_IN_MILLISECONDS),
-		(uint32_t)omrtime_hires_delta(0, env->_markStats._syncStallTime, OMRPORT_TIME_DELTA_IN_MILLISECONDS),
-		(uint32_t)env->_workPacketStats._workStallCount,
-		(uint32_t)env->_workPacketStats._completeStallCount,
-		(uint32_t)env->_markStats._syncStallCount,
-		env->_workPacketStats.workPacketsAcquired,
-		env->_workPacketStats.workPacketsReleased,
-		env->_workPacketStats.workPacketsExchanged,
-		0/* TODO CRG figure out to get the array split size*/);
+	Trc_MM_ParallelMarkTask_parallelStats(env->getLanguageVMThread(), (uint32_t)env->getSlaveID(),
+	        (uint32_t)omrtime_hires_delta(
+	                0, env->_workPacketStats._workStallTime, OMRPORT_TIME_DELTA_IN_MILLISECONDS),
+	        (uint32_t)omrtime_hires_delta(
+	                0, env->_workPacketStats._completeStallTime, OMRPORT_TIME_DELTA_IN_MILLISECONDS),
+	        (uint32_t)omrtime_hires_delta(0, env->_markStats._syncStallTime, OMRPORT_TIME_DELTA_IN_MILLISECONDS),
+	        (uint32_t)env->_workPacketStats._workStallCount, (uint32_t)env->_workPacketStats._completeStallCount,
+	        (uint32_t)env->_markStats._syncStallCount, env->_workPacketStats.workPacketsAcquired,
+	        env->_workPacketStats.workPacketsReleased, env->_workPacketStats.workPacketsExchanged,
+	        0 /* TODO CRG figure out to get the array split size*/);
 }
 
 #if defined(J9MODRON_TGC_PARALLEL_STATISTICS)
@@ -111,8 +106,8 @@ MM_ParallelMarkTask::synchronizeGCThreadsAndReleaseMaster(MM_EnvironmentBase *en
 	bool result = MM_ParallelTask::synchronizeGCThreadsAndReleaseMaster(env, id);
 	uint64_t endTime = omrtime_hires_clock();
 	env->_markStats.addToSyncStallTime(startTime, endTime);
-	
-	return result;	
+
+	return result;
 }
 
 bool
@@ -128,4 +123,3 @@ MM_ParallelMarkTask::synchronizeGCThreadsAndReleaseSingleThread(MM_EnvironmentBa
 }
 
 #endif /* J9MODRON_TGC_PARALLEL_STATISTICS */
-

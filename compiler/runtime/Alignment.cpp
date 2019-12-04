@@ -29,6 +29,6 @@
 //
 uint8_t *
 align(uint8_t *ptr, uint32_t alignmentMask)
-   {
-   return (uint8_t*)((size_t)(ptr + alignmentMask) & (~(size_t)alignmentMask));
-   }
+{
+	return (uint8_t *)((size_t)(ptr + alignmentMask) & (~(size_t)alignmentMask));
+}

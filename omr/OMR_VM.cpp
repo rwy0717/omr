@@ -46,9 +46,10 @@ omr_attach_vm_to_runtime(OMR_VM *vm)
 	omrthread_t self = NULL;
 
 	if (0 == omrthread_attach_ex(&self, J9THREAD_ATTR_DEFAULT)) {
-		if ((0 == omrthread_tls_alloc(&vm->_vmThreadKey)) &&
-			(0 == omrthread_monitor_init_with_name(&vm->_vmThreadListMutex, 0, "OMR VM thread list mutex"))
-		) {
+		if ((0 == omrthread_tls_alloc(&vm->_vmThreadKey))
+		        && (0
+		                == omrthread_monitor_init_with_name(
+		                        &vm->_vmThreadListMutex, 0, "OMR VM thread list mutex"))) {
 			rc = attachVM(vm->_runtime, vm);
 		} else {
 			rc = OMR_ERROR_OUT_OF_NATIVE_MEMORY;
@@ -59,7 +60,6 @@ omr_attach_vm_to_runtime(OMR_VM *vm)
 	}
 
 	return rc;
-
 }
 
 omr_error_t
@@ -80,7 +80,6 @@ omr_detach_vm_from_runtime(OMR_VM *vm)
 	}
 
 	return rc;
-
 }
 
 omr_error_t
@@ -240,5 +239,4 @@ omr_vm_postForkChild(OMR_VM *omrVM)
 }
 
 #endif /* defined(OMR_THR_FORK_SUPPORT) */
-
 }

@@ -20,20 +20,20 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #include "MemoryManager.hpp"
 
-#include "ModronAssertions.h"
 #include "GCExtensionsBase.hpp"
+#include "ModronAssertions.h"
 #include "NonVirtualMemory.hpp"
 #if defined(OMR_VALGRIND_MEMCHECK)
 #include "MemcheckWrapper.hpp"
 #endif /* defined(OMR_VALGRIND_MEMCHECK) */
 
-MM_MemoryManager*
-MM_MemoryManager::newInstance(MM_EnvironmentBase* env)
+MM_MemoryManager *
+MM_MemoryManager::newInstance(MM_EnvironmentBase *env)
 {
-	MM_MemoryManager* memoryManager = (MM_MemoryManager*)env->getForge()->allocate(sizeof(MM_MemoryManager), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+	MM_MemoryManager *memoryManager = (MM_MemoryManager *)env->getForge()->allocate(
+	        sizeof(MM_MemoryManager), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
 
 	if (NULL != memoryManager) {
 		new (memoryManager) MM_MemoryManager(env);
@@ -47,24 +47,25 @@ MM_MemoryManager::newInstance(MM_EnvironmentBase* env)
 }
 
 void
-MM_MemoryManager::kill(MM_EnvironmentBase* env)
+MM_MemoryManager::kill(MM_EnvironmentBase *env)
 {
 	env->getForge()->free(this);
 }
 
 bool
-MM_MemoryManager::initialize(MM_EnvironmentBase* env)
+MM_MemoryManager::initialize(MM_EnvironmentBase *env)
 {
 	return true;
 }
 
 bool
-MM_MemoryManager::createVirtualMemoryForHeap(MM_EnvironmentBase* env, MM_MemoryHandle* handle, uintptr_t heapAlignment, uintptr_t size, uintptr_t tailPadding, void* preferredAddress, void* ceiling)
+MM_MemoryManager::createVirtualMemoryForHeap(MM_EnvironmentBase *env, MM_MemoryHandle *handle, uintptr_t heapAlignment,
+        uintptr_t size, uintptr_t tailPadding, void *preferredAddress, void *ceiling)
 {
 	Assert_MM_true(NULL != handle);
-	MM_GCExtensionsBase* extensions = env->getExtensions();
+	MM_GCExtensionsBase *extensions = env->getExtensions();
 
-	MM_VirtualMemory* instance = NULL;
+	MM_VirtualMemory *instance = NULL;
 	uintptr_t mode = (OMRPORT_VMEM_MEMORY_MODE_READ | OMRPORT_VMEM_MEMORY_MODE_WRITE);
 	uintptr_t options = 0;
 	uint32_t memoryCategory = OMRMEM_CATEGORY_MM_RUNTIME_HEAP;
@@ -84,10 +85,12 @@ MM_MemoryManager::createVirtualMemoryForHeap(MM_EnvironmentBase* env, MM_MemoryH
 		 * Virtual Memory can return heap size shorter by a region (and here region size == section size)
 		 * So to guarantee desired heap size over-allocate it by full Concurrent_Scavenger_page_size
 		 */
-		concurrentScavengerPageSize = extensions->getConcurrentScavengerPageSectionSize() * CONCURRENT_SCAVENGER_PAGE_SECTIONS;
+		concurrentScavengerPageSize = extensions->getConcurrentScavengerPageSectionSize()
+		        * CONCURRENT_SCAVENGER_PAGE_SECTIONS;
 		allocateSize += concurrentScavengerPageSize;
 		if (extensions->isDebugConcurrentScavengerPageAlignment()) {
-			omrtty_printf("Requested heap size 0x%zx has been extended to 0x%zx for guaranteed alignment\n", size, allocateSize);
+			omrtty_printf("Requested heap size 0x%zx has been extended to 0x%zx for guaranteed alignment\n",
+			        size, allocateSize);
 		}
 	} else {
 		if (heapAlignment > pageSize) {
@@ -96,17 +99,18 @@ MM_MemoryManager::createVirtualMemoryForHeap(MM_EnvironmentBase* env, MM_MemoryH
 	}
 
 #if defined(OMR_GC_DOUBLE_MAP_ARRAYLETS)
-	if(extensions->isVLHGC() && extensions->indexableObjectModel.isDoubleMappingEnabled()) {
+	if (extensions->isVLHGC() && extensions->indexableObjectModel.isDoubleMappingEnabled()) {
 		mode |= OMRPORT_VMEM_MEMORY_MODE_SHARE_FILE_OPEN;
 	}
 #endif /* defined(OMR_GC_DOUBLE_MAP_ARRAYLETS) */
 
 #if defined(OMR_GC_MODRON_SCAVENGER)
 	if (extensions->enableSplitHeap) {
-		/* currently (ceiling != NULL) is using to recognize CompressedRefs so must be NULL for 32 bit platforms */
+		/* currently (ceiling != NULL) is using to recognize CompressedRefs so must be NULL for 32 bit platforms
+		 */
 		Assert_MM_true(NULL == ceiling);
 
-		switch(extensions->splitHeapSection) {
+		switch (extensions->splitHeapSection) {
 		case MM_GCExtensionsBase::HEAP_INITIALIZATION_SPLIT_HEAP_TENURE:
 			/* trying to get Tenure at the bottom of virtual memory */
 			options |= OMRPORT_VMEM_ALLOC_DIR_BOTTOM_UP;
@@ -116,23 +120,22 @@ MM_MemoryManager::createVirtualMemoryForHeap(MM_EnvironmentBase* env, MM_MemoryH
 			options |= OMRPORT_VMEM_ALLOC_DIR_TOP_DOWN;
 			break;
 		case MM_GCExtensionsBase::HEAP_INITIALIZATION_SPLIT_HEAP_UNKNOWN:
-		default:
-			Assert_MM_unreachable();
-			break;
+		default: Assert_MM_unreachable(); break;
 		}
 	}
 #endif /* defined(OMR_GC_MODRON_SCAVENGER) */
 
 	if (NULL == ceiling) {
-		instance = MM_VirtualMemory::newInstance(env, heapAlignment, allocateSize, pageSize, pageFlags, tailPadding, preferredAddress,
-												 ceiling, mode, options, memoryCategory);
+		instance = MM_VirtualMemory::newInstance(env, heapAlignment, allocateSize, pageSize, pageFlags,
+		        tailPadding, preferredAddress, ceiling, mode, options, memoryCategory);
 
 #if defined(OMR_ENV_DATA64) && defined(OMR_GC_FULL_POINTERS)
 		if (!env->compressObjectReferences()) {
 			if (1 == extensions->fvtest_enableReadBarrierVerification) {
-				MM_VirtualMemory* instanceShadow = MM_VirtualMemory::newInstance(env, heapAlignment, allocateSize, pageSize, pageFlags,
-						tailPadding, preferredAddress, (void*)OMR_MIN(NON_SCALING_LOW_MEMORY_HEAP_CEILING,
-						(uintptr_t)ceiling), mode, options, memoryCategory);
+				MM_VirtualMemory *instanceShadow = MM_VirtualMemory::newInstance(env, heapAlignment,
+				        allocateSize, pageSize, pageFlags, tailPadding, preferredAddress,
+				        (void *)OMR_MIN(NON_SCALING_LOW_MEMORY_HEAP_CEILING, (uintptr_t)ceiling), mode,
+				        options, memoryCategory);
 
 				extensions->shadowHeapBase = instanceShadow->getHeapBase();
 				extensions->shadowHeapTop = instanceShadow->getHeapTop();
@@ -149,23 +152,27 @@ MM_MemoryManager::createVirtualMemoryForHeap(MM_EnvironmentBase* env, MM_MemoryH
 			 * The ceiling for such platforms is set maximum memory value be supported (32G for 3-bit shift)
 			 * The ceiling it is 0 for all other platforms
 			 */
-			/* NON_SCALING_LOW_MEMORY_HEAP_CEILING is set to 4G for 64-bit platforms only, 0 for 32-bit platforms */
+			/* NON_SCALING_LOW_MEMORY_HEAP_CEILING is set to 4G for 64-bit platforms only, 0 for 32-bit
+			 * platforms */
 			Assert_MM_true(NON_SCALING_LOW_MEMORY_HEAP_CEILING > 0);
-		
+
 			/*
 			 * Usually the suballocator memory should be allocated first (before heap) however
 			 * in case when preferred address is specified we will try to allocate heap first
 			 * to avoid possible interference with requested heap location
 			 */
 			bool shouldHeapBeAllocatedFirst = (NULL != preferredAddress);
-			void* startAllocationAddress = preferredAddress;
+			void *startAllocationAddress = preferredAddress;
 
-			/* Set the commit size for the sub allocator. This needs to be completed before the call to omrmem_ensure_capacity32 */
+			/* Set the commit size for the sub allocator. This needs to be completed before the call to
+			 * omrmem_ensure_capacity32 */
 			omrport_control(OMRPORT_CTLDATA_ALLOCATE32_COMMIT_SIZE, extensions->suballocatorCommitSize);
 
 			if (!shouldHeapBeAllocatedFirst) {
-				if (OMRPORT_ENSURE_CAPACITY_FAILED == omrmem_ensure_capacity32(extensions->suballocatorInitialSize)) {
-					extensions->heapInitializationFailureReason = MM_GCExtensionsBase::HEAP_INITIALIZATION_FAILURE_REASON_CAN_NOT_ALLOCATE_LOW_MEMORY_RESERVE;
+				if (OMRPORT_ENSURE_CAPACITY_FAILED
+				        == omrmem_ensure_capacity32(extensions->suballocatorInitialSize)) {
+					extensions->heapInitializationFailureReason = MM_GCExtensionsBase::
+					        HEAP_INITIALIZATION_FAILURE_REASON_CAN_NOT_ALLOCATE_LOW_MEMORY_RESERVE;
 					return false;
 				}
 			}
@@ -179,28 +186,38 @@ MM_MemoryManager::createVirtualMemoryForHeap(MM_EnvironmentBase* env, MM_MemoryH
 			/*
 			 * On ZOS an address space below 2G can not be taken for virtual memory
 			 */
-#define TWO_GB_ADDRESS ((void*)((uintptr_t)2 * 1024 * 1024 * 1024))
+#define TWO_GB_ADDRESS ((void *)((uintptr_t)2 * 1024 * 1024 * 1024))
 			if (NULL == preferredAddress) {
 				startAllocationAddress = TWO_GB_ADDRESS;
 			}
 #endif /* defined(J9ZOS39064) */
 
-			void* requestedTopAddress = (void*)((uintptr_t)startAllocationAddress + allocateSize + tailPadding);
+			void *requestedTopAddress =
+			        (void *)((uintptr_t)startAllocationAddress + allocateSize + tailPadding);
 
 			if (extensions->isConcurrentScavengerHWSupported()) {
-				void * ceilingToRequest = ceiling;
+				void *ceilingToRequest = ceiling;
 				/* Requested top address might be higher then ceiling because of added chunk */
-				if ((requestedTopAddress > ceiling) && ((void *)((uintptr_t)requestedTopAddress - concurrentScavengerPageSize) <= ceiling)) {
-					/* ZOS 2_TO_64/2_TO_32 options would not allow memory request larger then 64G/32G so total requested size including tail padding should not exceed it */
-					allocateSize = (uintptr_t)ceiling - (uintptr_t)startAllocationAddress - tailPadding;
+				if ((requestedTopAddress > ceiling)
+				        && ((void *)((uintptr_t)requestedTopAddress - concurrentScavengerPageSize)
+				                <= ceiling)) {
+					/* ZOS 2_TO_64/2_TO_32 options would not allow memory request larger then
+					 * 64G/32G so total requested size including tail padding should not exceed it
+					 */
+					allocateSize = (uintptr_t)ceiling - (uintptr_t)startAllocationAddress
+					        - tailPadding;
 
 					if (extensions->isDebugConcurrentScavengerPageAlignment()) {
-						omrtty_printf("Total allocate size exceeds ceiling %p, reduce allocate size to 0x%zx\n", ceiling, allocateSize);
+						omrtty_printf("Total allocate size exceeds ceiling %p, reduce allocate "
+						              "size to 0x%zx\n",
+						        ceiling, allocateSize);
 					}
 					/*
-					 * There is no way that Nursery will be pushed above ceiling for valid memory options however we have
-					 * no idea about start address. So to guarantee an allocation up to the ceiling we need to request extended chunk of memory. 
-					 * Set ceiling to NULL to disable ceiling control. This required bottom-up direction for allocation.
+					 * There is no way that Nursery will be pushed above ceiling for valid memory
+					 * options however we have no idea about start address. So to guarantee an
+					 * allocation up to the ceiling we need to request extended chunk of memory. Set
+					 * ceiling to NULL to disable ceiling control. This required bottom-up direction
+					 * for allocation.
 					 */
 					ceilingToRequest = NULL;
 				}
@@ -208,11 +225,14 @@ MM_MemoryManager::createVirtualMemoryForHeap(MM_EnvironmentBase* env, MM_MemoryH
 				options |= OMRPORT_VMEM_ALLOC_DIR_BOTTOM_UP;
 
 				/* An attempt to allocate memory chunk for heap for Concurrent Scavenger */
-				instance = MM_VirtualMemory::newInstance(env, heapAlignment, allocateSize, pageSize, pageFlags, tailPadding, preferredAddress, ceilingToRequest, mode, options, memoryCategory);
+				instance = MM_VirtualMemory::newInstance(env, heapAlignment, allocateSize, pageSize,
+				        pageFlags, tailPadding, preferredAddress, ceilingToRequest, mode, options,
+				        memoryCategory);
 			} else {
 				if (requestedTopAddress <= ceiling) {
 					bool allocationTopDown = true;
-					/* define the scan direction when reserving the GC heap in the range of (4G, 32G) */
+					/* define the scan direction when reserving the GC heap in the range of (4G,
+					 * 32G) */
 #if defined(S390) || defined(J9ZOS390)
 					/* s390 benefits from smaller shift values so allocate direction is bottom up */
 					options |= OMRPORT_VMEM_ALLOC_DIR_BOTTOM_UP;
@@ -222,51 +242,75 @@ MM_MemoryManager::createVirtualMemoryForHeap(MM_EnvironmentBase* env, MM_MemoryH
 #endif /* defined(S390) || defined(J9ZOS390) */
 
 					if (allocationTopDown && extensions->shouldForceSpecifiedShiftingCompression) {
-						/* force to allocate heap top-down from correspondent to shift address */
-						void* maxAddress = (void *)(((uintptr_t)1 << 32) << extensions->forcedShiftingCompressionAmount);
+						/* force to allocate heap top-down from correspondent to shift address
+						 */
+						void *maxAddress = (void *)(((uintptr_t)1 << 32)
+						        << extensions->forcedShiftingCompressionAmount);
 
-						instance = MM_VirtualMemory::newInstance(env, heapAlignment, allocateSize, pageSize, pageFlags, tailPadding, preferredAddress,
-								maxAddress, mode, options, memoryCategory);
+						instance = MM_VirtualMemory::newInstance(env, heapAlignment,
+						        allocateSize, pageSize, pageFlags, tailPadding,
+						        preferredAddress, maxAddress, mode, options, memoryCategory);
 					} else {
-						if (requestedTopAddress < (void*)NON_SCALING_LOW_MEMORY_HEAP_CEILING) {
+						if (requestedTopAddress < (void *)NON_SCALING_LOW_MEMORY_HEAP_CEILING) {
 							/*
 							 * Attempt to allocate heap below 4G
 							 */
-							instance = MM_VirtualMemory::newInstance(env, heapAlignment, allocateSize, pageSize, pageFlags, tailPadding, preferredAddress,
-																	 (void*)OMR_MIN(NON_SCALING_LOW_MEMORY_HEAP_CEILING, (uintptr_t)ceiling), mode, options, memoryCategory);
+							instance = MM_VirtualMemory::newInstance(env, heapAlignment,
+							        allocateSize, pageSize, pageFlags, tailPadding,
+							        preferredAddress,
+							        (void *)OMR_MIN(NON_SCALING_LOW_MEMORY_HEAP_CEILING,
+							                (uintptr_t)ceiling),
+							        mode, options, memoryCategory);
 						}
 
-						if ((NULL == instance) && (ceiling > (void*)NON_SCALING_LOW_MEMORY_HEAP_CEILING)) {
+						if ((NULL == instance)
+						        && (ceiling > (void *)NON_SCALING_LOW_MEMORY_HEAP_CEILING)) {
 
 #define THIRTY_TWO_GB_ADDRESS ((uintptr_t)32 * 1024 * 1024 * 1024)
 							if (requestedTopAddress <= (void *)THIRTY_TWO_GB_ADDRESS) {
 								/*
-								 * If requested object heap size is in range 28G-32G its allocation with 3-bit shift might compromise amount of low memory below 4G
-								 * To prevent this go straight to 4-bit shift if it possible.
-								 * Set of logical conditions to skip allocation attempt below 32G
+								 * If requested object heap size is in range 28G-32G its
+								 * allocation with 3-bit shift might compromise amount
+								 * of low memory below 4G To prevent this go straight to
+								 * 4-bit shift if it possible. Set of logical conditions
+								 * to skip allocation attempt below 32G
 								 *  - 4-bit shift is available option
 								 *  - requested size is larger then 28G (32 minus 4)
-								 *  - allocation direction is top-down, otherwise it does not make sense
+								 *  - allocation direction is top-down, otherwise it
+								 * does not make sense
 								 */
-								bool skipAllocationBelow32G = (ceiling > (void*)THIRTY_TWO_GB_ADDRESS)
-									 && (requestedTopAddress > (void*)(THIRTY_TWO_GB_ADDRESS - NON_SCALING_LOW_MEMORY_HEAP_CEILING))
-									 && allocationTopDown;
+								bool skipAllocationBelow32G =
+								        (ceiling > (void *)THIRTY_TWO_GB_ADDRESS)
+								        && (requestedTopAddress > (void
+								                            *)(THIRTY_TWO_GB_ADDRESS
+								                    - NON_SCALING_LOW_MEMORY_HEAP_CEILING))
+								        && allocationTopDown;
 
 								if (!skipAllocationBelow32G) {
 									/*
 									 * Attempt to allocate heap below 32G
 									 */
-									instance = MM_VirtualMemory::newInstance(env, heapAlignment, allocateSize, pageSize, pageFlags, tailPadding, preferredAddress,
-																			 (void*)OMR_MIN((uintptr_t)THIRTY_TWO_GB_ADDRESS, (uintptr_t)ceiling), mode, options, memoryCategory);
+									instance = MM_VirtualMemory::newInstance(env,
+									        heapAlignment, allocateSize, pageSize,
+									        pageFlags, tailPadding,
+									        preferredAddress,
+									        (void *)OMR_MIN(
+									                (uintptr_t)
+									                        THIRTY_TWO_GB_ADDRESS,
+									                (uintptr_t)ceiling),
+									        mode, options, memoryCategory);
 								}
 							}
 
 							/*
 							 * Attempt to allocate above 32G
 							 */
-							if ((NULL == instance) && (ceiling > (void *)THIRTY_TWO_GB_ADDRESS)) {
-								instance = MM_VirtualMemory::newInstance(env, heapAlignment, allocateSize, pageSize, pageFlags, tailPadding, preferredAddress,
-																		 ceiling, mode, options, memoryCategory);
+							if ((NULL == instance)
+							        && (ceiling > (void *)THIRTY_TWO_GB_ADDRESS)) {
+								instance = MM_VirtualMemory::newInstance(env,
+								        heapAlignment, allocateSize, pageSize,
+								        pageFlags, tailPadding, preferredAddress,
+								        ceiling, mode, options, memoryCategory);
 							}
 						}
 					}
@@ -277,16 +321,20 @@ MM_MemoryManager::createVirtualMemoryForHeap(MM_EnvironmentBase* env, MM_MemoryH
 			 * If preferredAddress is requested check is it really taken: if not - release memory
 			 * for backward compatibility this check should be done for compressedrefs platforms only
 			 */
-			if ((NULL != preferredAddress) && (NULL != instance) && (instance->getHeapBase() != preferredAddress)) {
-				extensions->heapInitializationFailureReason = MM_GCExtensionsBase::HEAP_INITIALIZATION_FAILURE_REASON_CAN_NOT_INSTANTIATE_HEAP;
+			if ((NULL != preferredAddress) && (NULL != instance)
+			        && (instance->getHeapBase() != preferredAddress)) {
+				extensions->heapInitializationFailureReason = MM_GCExtensionsBase::
+				        HEAP_INITIALIZATION_FAILURE_REASON_CAN_NOT_INSTANTIATE_HEAP;
 				instance->kill(env);
 				instance = NULL;
 				return false;
 			}
 
 			if ((NULL != instance) && shouldHeapBeAllocatedFirst) {
-				if (OMRPORT_ENSURE_CAPACITY_FAILED == omrmem_ensure_capacity32(extensions->suballocatorInitialSize)) {
-					extensions->heapInitializationFailureReason = MM_GCExtensionsBase::HEAP_INITIALIZATION_FAILURE_REASON_CAN_NOT_ALLOCATE_LOW_MEMORY_RESERVE;
+				if (OMRPORT_ENSURE_CAPACITY_FAILED
+				        == omrmem_ensure_capacity32(extensions->suballocatorInitialSize)) {
+					extensions->heapInitializationFailureReason = MM_GCExtensionsBase::
+					        HEAP_INITIALIZATION_FAILURE_REASON_CAN_NOT_ALLOCATE_LOW_MEMORY_RESERVE;
 					instance->kill(env);
 					instance = NULL;
 					return false;
@@ -296,16 +344,20 @@ MM_MemoryManager::createVirtualMemoryForHeap(MM_EnvironmentBase* env, MM_MemoryH
 #endif /* defined(OMR_GC_COMPRESSED_POINTERS) */
 		{
 			/*
-			 * Code above might be used for non-compressedrefs platforms but need a few adjustments on it for this:
+			 * Code above might be used for non-compressedrefs platforms but need a few adjustments on it
+			 * for this:
 			 *  - NON_SCALING_LOW_MEMORY_HEAP_CEILING should be set
-			 *  - OMRPORT_VMEM_ZOS_USE2TO32G_AREA flag for ZOS is expected to be used for compressedrefs heap allocation only
+			 *  - OMRPORT_VMEM_ZOS_USE2TO32G_AREA flag for ZOS is expected to be used for compressedrefs
+			 * heap allocation only
 			 */
 			Assert_MM_unimplemented();
 		}
 	}
 
-	if((NULL != instance) && extensions->largePageFailOnError && (instance->getPageSize() != extensions->requestedPageSize)) {
-		extensions->heapInitializationFailureReason = MM_GCExtensionsBase::HEAP_INITIALIZATION_FAILURE_REASON_CAN_NOT_SATISFY_REQUESTED_PAGE_SIZE;
+	if ((NULL != instance) && extensions->largePageFailOnError
+	        && (instance->getPageSize() != extensions->requestedPageSize)) {
+		extensions->heapInitializationFailureReason =
+		        MM_GCExtensionsBase::HEAP_INITIALIZATION_FAILURE_REASON_CAN_NOT_SATISFY_REQUESTED_PAGE_SIZE;
 		instance->kill(env);
 		instance = NULL;
 		return false;
@@ -318,11 +370,11 @@ MM_MemoryManager::createVirtualMemoryForHeap(MM_EnvironmentBase* env, MM_MemoryH
 		handle->setMemoryTop(instance->getHeapTop());
 
 		/*
-		 * Aligning Nursery location to Concurrent Scavenger Page and calculate Concurrent Scavenger Page start address
-		 * There are two possible cases here:
+		 * Aligning Nursery location to Concurrent Scavenger Page and calculate Concurrent Scavenger Page start
+		 * address There are two possible cases here:
 		 * - Nursery fits Concurrent Scavenger Page already = no extra alignment required
-		 * - current Nursery location has crossed Concurrent Scavenger Page boundary so it needs to be pushed higher to
-		 *   have Nursery low address to be aligned to Concurrent Scavenger Page
+		 * - current Nursery location has crossed Concurrent Scavenger Page boundary so it needs to be pushed
+		 * higher to have Nursery low address to be aligned to Concurrent Scavenger Page
 		 */
 		if (extensions->isConcurrentScavengerHWSupported()) {
 			OMRPORT_ACCESS_FROM_ENVIRONMENT(env);
@@ -333,7 +385,8 @@ MM_MemoryManager::createVirtualMemoryForHeap(MM_EnvironmentBase* env, MM_MemoryH
 			uintptr_t nurseryBase = nurseryTop - extensions->maxNewSpaceSize;
 
 			if (extensions->isDebugConcurrentScavengerPageAlignment()) {
-				omrtty_printf("Allocated memory for heap: [%p,%p]\n", handle->getMemoryBase(), handle->getMemoryTop());
+				omrtty_printf("Allocated memory for heap: [%p,%p]\n", handle->getMemoryBase(),
+				        handle->getMemoryTop());
 			}
 
 			uintptr_t baseAligned = MM_Math::roundToCeiling(concurrentScavengerPageSize, nurseryBase + 1);
@@ -341,7 +394,8 @@ MM_MemoryManager::createVirtualMemoryForHeap(MM_EnvironmentBase* env, MM_MemoryH
 
 			if (baseAligned == topAligned) {
 				/* Nursery fits Concurrent Scavenger Page already */
-				extensions->setConcurrentScavengerPageStartAddress((void *)(baseAligned - concurrentScavengerPageSize));
+				extensions->setConcurrentScavengerPageStartAddress(
+				        (void *)(baseAligned - concurrentScavengerPageSize));
 
 				if (extensions->isDebugConcurrentScavengerPageAlignment()) {
 					omrtty_printf("Expected Nursery start address 0x%zx\n", nurseryBase);
@@ -351,7 +405,8 @@ MM_MemoryManager::createVirtualMemoryForHeap(MM_EnvironmentBase* env, MM_MemoryH
 				extensions->setConcurrentScavengerPageStartAddress((void *)baseAligned);
 
 				if (extensions->isDebugConcurrentScavengerPageAlignment()) {
-					omrtty_printf("Expected Nursery start address adjusted to 0x%zx\n", baseAligned);
+					omrtty_printf(
+					        "Expected Nursery start address adjusted to 0x%zx\n", baseAligned);
 				}
 
 				/* Move up entire heap for proper Nursery adjustment */
@@ -359,25 +414,31 @@ MM_MemoryManager::createVirtualMemoryForHeap(MM_EnvironmentBase* env, MM_MemoryH
 				handle->setMemoryBase((void *)heapBase);
 
 				/* top of adjusted Nursery should fit reserved memory */
-				Assert_GC_true_with_message3(env, ((heapBase + size) <= (uintptr_t)handle->getMemoryTop()),
-						"End of projected heap (base 0x%zx + size 0x%zx) is larger then Top allocated %p\n",
-						heapBase, size, handle->getMemoryTop());
+				Assert_GC_true_with_message3(env,
+				        ((heapBase + size) <= (uintptr_t)handle->getMemoryTop()),
+				        "End of projected heap (base 0x%zx + size 0x%zx) is "
+				        "larger then Top allocated %p\n",
+				        heapBase, size, handle->getMemoryTop());
 			}
 
 			/* adjust heap top to lowest possible address */
 			handle->setMemoryTop((void *)(heapBase + size));
 
 			if (extensions->isDebugConcurrentScavengerPageAlignment()) {
-				omrtty_printf("Adjusted heap location: [%p,%p], Concurrent Scavenger Page start address %p, Concurrent Scavenger Page size 0x%zx\n",
-						handle->getMemoryBase(), handle->getMemoryTop(), extensions->getConcurrentScavengerPageStartAddress(), concurrentScavengerPageSize);
+				omrtty_printf("Adjusted heap location: [%p,%p], Concurrent Scavenger Page start "
+				              "address %p, Concurrent Scavenger Page size 0x%zx\n",
+				        handle->getMemoryBase(), handle->getMemoryTop(),
+				        extensions->getConcurrentScavengerPageStartAddress(),
+				        concurrentScavengerPageSize);
 			}
 
 			/*
-			 * Concurrent Scavenger Page location might be aligned out of Compressed References supported memory range
-			 * Fail to initialize in this case
+			 * Concurrent Scavenger Page location might be aligned out of Compressed References supported
+			 * memory range Fail to initialize in this case
 			 */
 			if ((NULL != ceiling) && (handle->getMemoryTop() > ceiling)) {
-				extensions->heapInitializationFailureReason = MM_GCExtensionsBase::HEAP_INITIALIZATION_FAILURE_REASON_CAN_NOT_INSTANTIATE_HEAP;
+				extensions->heapInitializationFailureReason = MM_GCExtensionsBase::
+				        HEAP_INITIALIZATION_FAILURE_REASON_CAN_NOT_INSTANTIATE_HEAP;
 				destroyVirtualMemory(env, handle);
 				instance = NULL;
 			}
@@ -385,7 +446,7 @@ MM_MemoryManager::createVirtualMemoryForHeap(MM_EnvironmentBase* env, MM_MemoryH
 	}
 
 #if defined(OMR_VALGRIND_MEMCHECK)
-	//Use handle's Memory Base to refer valgrind memory pool
+	// Use handle's Memory Base to refer valgrind memory pool
 	valgrindCreateMempool(extensions, env, (uintptr_t)handle->getMemoryBase());
 #endif /* defined(OMR_VALGRIND_MEMCHECK) */
 
@@ -393,22 +454,23 @@ MM_MemoryManager::createVirtualMemoryForHeap(MM_EnvironmentBase* env, MM_MemoryH
 }
 
 bool
-MM_MemoryManager::createVirtualMemoryForMetadata(MM_EnvironmentBase* env, MM_MemoryHandle* handle, uintptr_t alignment, uintptr_t size)
+MM_MemoryManager::createVirtualMemoryForMetadata(
+        MM_EnvironmentBase *env, MM_MemoryHandle *handle, uintptr_t alignment, uintptr_t size)
 {
 	Assert_MM_true(NULL != handle);
 	Assert_MM_true(NULL == handle->getVirtualMemory());
-	MM_GCExtensionsBase* extensions = env->getExtensions();
+	MM_GCExtensionsBase *extensions = env->getExtensions();
 
 	/*
 	 * Can we take already preallocated memory?
 	 */
 	if (NULL != _preAllocated.getVirtualMemory()) {
 		/* base might be not aligned */
-		void* base = (void*)MM_Math::roundToCeiling(alignment, (uintptr_t)_preAllocated.getMemoryBase());
-		void* top = (void*)((uintptr_t)base + MM_Math::roundToCeiling(alignment, size));
+		void *base = (void *)MM_Math::roundToCeiling(alignment, (uintptr_t)_preAllocated.getMemoryBase());
+		void *top = (void *)((uintptr_t)base + MM_Math::roundToCeiling(alignment, size));
 		if (top <= _preAllocated.getMemoryTop()) {
 			/* it is enough room in preallocated memory - take chunk of it */
-			MM_VirtualMemory* instance = _preAllocated.getVirtualMemory();
+			MM_VirtualMemory *instance = _preAllocated.getVirtualMemory();
 			/* Add one more consumer to Virtual Memory instance */
 			instance->incrementConsumerCount();
 
@@ -417,7 +479,8 @@ MM_MemoryManager::createVirtualMemoryForMetadata(MM_EnvironmentBase* env, MM_Mem
 			handle->setMemoryBase(base);
 			handle->setMemoryTop(top);
 
-			/* If it is not all preallocated memory is consumed make correct settings for rest of it, clean otherwise */
+			/* If it is not all preallocated memory is consumed make correct settings for rest of it, clean
+			 * otherwise */
 			if (top < _preAllocated.getMemoryTop()) {
 				/* something left in preallocated */
 				_preAllocated.setMemoryBase(top);
@@ -433,7 +496,7 @@ MM_MemoryManager::createVirtualMemoryForMetadata(MM_EnvironmentBase* env, MM_Mem
 	 */
 	if (NULL == handle->getVirtualMemory()) {
 		uint32_t memoryCategory = OMRMEM_CATEGORY_MM;
-		MM_VirtualMemory* instance = NULL;
+		MM_VirtualMemory *instance = NULL;
 		bool isOverAllocationRequested = false;
 
 		/* memory consumer might expect memory to be aligned so allocate a little bit more */
@@ -441,8 +504,8 @@ MM_MemoryManager::createVirtualMemoryForMetadata(MM_EnvironmentBase* env, MM_Mem
 
 		if (isMetadataAllocatedInVirtualMemory(env)) {
 			uintptr_t tailPadding = 0;
-			void* preferredAddress = NULL;
-			void* ceiling = NULL;
+			void *preferredAddress = NULL;
+			void *ceiling = NULL;
 			uintptr_t mode = (OMRPORT_VMEM_MEMORY_MODE_READ | OMRPORT_VMEM_MEMORY_MODE_WRITE);
 			uintptr_t options = 0;
 
@@ -452,15 +515,17 @@ MM_MemoryManager::createVirtualMemoryForMetadata(MM_EnvironmentBase* env, MM_Mem
 
 			/*
 			 * Preallocation is enabled for all platforms where metadata can be allocated in virtual memory
-			 * Segmentation is enabled for AIX-64 only, so physical page size is used as a segment size for other platforms
-			 * To get advantage of preallocation this memory should be allocated in large pages
+			 * Segmentation is enabled for AIX-64 only, so physical page size is used as a segment size for
+			 * other platforms To get advantage of preallocation this memory should be allocated in large
+			 * pages
 			 */
 			if (isLargePage(env, pageSize)) {
 
 				uintptr_t minimumAllocationUnit = getSegmentSize();
 				if (0 == minimumAllocationUnit) {
 					/*
-					 * Memory is not segmented on this platform, so minimum unit is limited by page size only
+					 * Memory is not segmented on this platform, so minimum unit is limited by page
+					 * size only
 					 */
 					minimumAllocationUnit = pageSize;
 				}
@@ -476,7 +541,8 @@ MM_MemoryManager::createVirtualMemoryForMetadata(MM_EnvironmentBase* env, MM_Mem
 			/*
 			 * Create Virtual Memory instance
 			 */
-			instance = MM_VirtualMemory::newInstance(env, alignment, allocateSize, pageSize, pageFlags, tailPadding, preferredAddress, ceiling, mode, options, memoryCategory);
+			instance = MM_VirtualMemory::newInstance(env, alignment, allocateSize, pageSize, pageFlags,
+			        tailPadding, preferredAddress, ceiling, mode, options, memoryCategory);
 		} else {
 			/*
 			 * Allocate memory using malloc (create NonVirtual Memory instance)
@@ -491,7 +557,7 @@ MM_MemoryManager::createVirtualMemoryForMetadata(MM_EnvironmentBase* env, MM_Mem
 			/* set Virtual Memory parameters to the provided handle */
 			handle->setVirtualMemory(instance);
 			handle->setMemoryBase(instance->getHeapBase());
-			handle->setMemoryTop((void*)((uintptr_t)instance->getHeapBase() + size));
+			handle->setMemoryTop((void *)((uintptr_t)instance->getHeapBase() + size));
 
 			/*
 			 * Setup preallocated memory if over-allocation has been requested
@@ -509,13 +575,13 @@ MM_MemoryManager::createVirtualMemoryForMetadata(MM_EnvironmentBase* env, MM_Mem
 }
 
 void
-MM_MemoryManager::destroyVirtualMemoryForHeap(MM_EnvironmentBase* env, MM_MemoryHandle* handle)
+MM_MemoryManager::destroyVirtualMemoryForHeap(MM_EnvironmentBase *env, MM_MemoryHandle *handle)
 {
 	destroyVirtualMemory(env, handle);
 
 #if defined(OMR_ENV_DATA64) && defined(OMR_GC_FULL_POINTERS)
-	MM_GCExtensionsBase* extensions = env->getExtensions();
-	MM_VirtualMemory* shadowMemory = extensions->shadowHeapHandle.getVirtualMemory();
+	MM_GCExtensionsBase *extensions = env->getExtensions();
+	MM_VirtualMemory *shadowMemory = extensions->shadowHeapHandle.getVirtualMemory();
 	if (NULL != shadowMemory) {
 		shadowMemory->kill(env);
 		extensions->shadowHeapHandle.setVirtualMemory(NULL);
@@ -526,10 +592,10 @@ MM_MemoryManager::destroyVirtualMemoryForHeap(MM_EnvironmentBase* env, MM_Memory
 }
 
 void
-MM_MemoryManager::destroyVirtualMemory(MM_EnvironmentBase* env, MM_MemoryHandle* handle)
+MM_MemoryManager::destroyVirtualMemory(MM_EnvironmentBase *env, MM_MemoryHandle *handle)
 {
 	Assert_MM_true(NULL != handle);
-	MM_VirtualMemory* memory = handle->getVirtualMemory();
+	MM_VirtualMemory *memory = handle->getVirtualMemory();
 	if (NULL != memory) {
 		Assert_MM_true(memory->getConsumerCount() > 0);
 		memory->decrementConsumerCount();
@@ -538,7 +604,8 @@ MM_MemoryManager::destroyVirtualMemory(MM_EnvironmentBase* env, MM_MemoryHandle*
 			memory->kill(env);
 
 			/*
-			 * If this instance has been used as a preallocated (but not taken) memory it should be cleared as well
+			 * If this instance has been used as a preallocated (but not taken) memory it should be cleared
+			 * as well
 			 */
 			if (memory == _preAllocated.getVirtualMemory()) {
 				_preAllocated.setVirtualMemory(NULL);
@@ -553,52 +620,56 @@ MM_MemoryManager::destroyVirtualMemory(MM_EnvironmentBase* env, MM_MemoryHandle*
 #if defined(OMR_VALGRIND_MEMCHECK)
 	valgrindDestroyMempool(env->getExtensions());
 #endif /* defined(OMR_VALGRIND_MEMCHECK) */
-
 }
 
 #if defined(OMR_GC_DOUBLE_MAP_ARRAYLETS)
-void*
-MM_MemoryManager::doubleMapArraylet(MM_MemoryHandle* handle, MM_EnvironmentBase *env, void* arrayletLeaves[], UDATA arrayletLeafCount, UDATA arrayletLeafSize, UDATA byteAmount, struct J9PortVmemIdentifier *newIdentifier, UDATA pageSize)
+void *
+MM_MemoryManager::doubleMapArraylet(MM_MemoryHandle *handle, MM_EnvironmentBase *env, void *arrayletLeaves[],
+        UDATA arrayletLeafCount, UDATA arrayletLeafSize, UDATA byteAmount, struct J9PortVmemIdentifier *newIdentifier,
+        UDATA pageSize)
 {
 	Assert_MM_true(NULL != handle);
-	MM_VirtualMemory* memory = handle->getVirtualMemory();
+	MM_VirtualMemory *memory = handle->getVirtualMemory();
 	Assert_MM_true(NULL != memory);
-	return memory->doubleMapArraylet(env, arrayletLeaves, arrayletLeafCount, arrayletLeafSize, byteAmount, newIdentifier, pageSize);
+	return memory->doubleMapArraylet(
+	        env, arrayletLeaves, arrayletLeafCount, arrayletLeafSize, byteAmount, newIdentifier, pageSize);
 }
 #endif /* defined(OMR_GC_DOUBLE_MAP_ARRAYLETS) */
 
 bool
-MM_MemoryManager::commitMemory(MM_MemoryHandle* handle, void* address, uintptr_t size)
+MM_MemoryManager::commitMemory(MM_MemoryHandle *handle, void *address, uintptr_t size)
 {
 	Assert_MM_true(NULL != handle);
-	MM_VirtualMemory* memory = handle->getVirtualMemory();
+	MM_VirtualMemory *memory = handle->getVirtualMemory();
 	Assert_MM_true(NULL != memory);
 	return memory->commitMemory(address, size);
 }
 
 bool
-MM_MemoryManager::decommitMemory(MM_MemoryHandle* handle, void* address, uintptr_t size, void* lowValidAddress, void* highValidAddress)
+MM_MemoryManager::decommitMemory(
+        MM_MemoryHandle *handle, void *address, uintptr_t size, void *lowValidAddress, void *highValidAddress)
 {
 	Assert_MM_true(NULL != handle);
-	MM_VirtualMemory* memory = handle->getVirtualMemory();
+	MM_VirtualMemory *memory = handle->getVirtualMemory();
 	Assert_MM_true(NULL != memory);
 	return memory->decommitMemory(address, size, lowValidAddress, highValidAddress);
 }
 
 bool
-MM_MemoryManager::isLargePage(MM_EnvironmentBase* env, uintptr_t pageSize)
+MM_MemoryManager::isLargePage(MM_EnvironmentBase *env, uintptr_t pageSize)
 {
 	OMRPORT_ACCESS_FROM_OMRPORT(env->getPortLibrary());
-	uintptr_t* pageSizes = omrvmem_supported_page_sizes();
+	uintptr_t *pageSizes = omrvmem_supported_page_sizes();
 	return pageSize > pageSizes[0];
 }
 
 #if defined(OMR_GC_VLHGC) || defined(OMR_GC_MODRON_SCAVENGER)
 bool
-MM_MemoryManager::setNumaAffinity(const MM_MemoryHandle* handle, uintptr_t numaNode, void* address, uintptr_t byteAmount)
+MM_MemoryManager::setNumaAffinity(
+        const MM_MemoryHandle *handle, uintptr_t numaNode, void *address, uintptr_t byteAmount)
 {
 	Assert_MM_true(NULL != handle);
-	MM_VirtualMemory* memory = handle->getVirtualMemory();
+	MM_VirtualMemory *memory = handle->getVirtualMemory();
 	Assert_MM_true(NULL != memory);
 	return memory->setNumaAffinity(numaNode, address, byteAmount);
 }

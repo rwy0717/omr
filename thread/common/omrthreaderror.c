@@ -32,7 +32,8 @@
 /**
  * Retrieve the os_errno saved in the current omrthread_t.
  * @return OS-specific error code
- * @retval J9THREAD_INVALID_OS_ERRNO One of the following occurred: 1. the calling thread wasn't attached to the thread library; 2. the error code wasn't set.
+ * @retval J9THREAD_INVALID_OS_ERRNO One of the following occurred: 1. the calling thread wasn't attached to the thread
+ * library; 2. the error code wasn't set.
  */
 omrthread_os_errno_t
 omrthread_get_os_errno(void)
@@ -66,7 +67,6 @@ omrthread_get_os_errno2(void)
 }
 #endif /* J9ZOS390 */
 
-
 /**
  * Retrieve a string description corresponding to a J9THREAD_ERR_xxx value.
  * Currently only supports return values from omrthread_create().
@@ -78,16 +78,14 @@ omrthread_get_errordesc(intptr_t err)
 {
 	/* the indexing of this array must match the defined return values */
 	static const char *omrthread_create_errordesc[] = {
-		"" /* SUCCESS */,
-		"" /* ERR */,
-		"Invalid priority" /* ERR_INVALID_PRIORITY */,
-		"Can't allocate omrthread_t" /* ERR_CANT_ALLOCATE_J9THREAD_T */,
-		"Can't init condition" /* ERR_CANT_INIT_CONDITION */,
-		"Can't init mutex" /* ERR_CANT_INIT_MUTEX */,
-		"Thread create failed" /* ERR_THREAD_CREATE_FAILED */,
-		"Invalid create attr" /* ERR_INVALID_CREATE_ATTR */,
-		"Can't allocate create attr" /* ERR_CANT_ALLOC_CREATE_ATTR */,
-		"Can't allocate stack" /* ERR_CANT_ALLOC_STACK */
+	        "" /* SUCCESS */, "" /* ERR */, "Invalid priority" /* ERR_INVALID_PRIORITY */,
+	        "Can't allocate omrthread_t" /* ERR_CANT_ALLOCATE_J9THREAD_T */,
+	        "Can't init condition" /* ERR_CANT_INIT_CONDITION */, "Can't init mutex" /* ERR_CANT_INIT_MUTEX */,
+	        "Thread create failed" /* ERR_THREAD_CREATE_FAILED */,
+	        "Invalid create attr" /* ERR_INVALID_CREATE_ATTR */,
+	        "Can't allocate create attr" /* ERR_CANT_ALLOC_CREATE_ATTR */,
+	        "Can't allocate stack" /* ERR_CANT_ALLOC_STACK
+	                                */
 	};
 	const char *errdesc = "";
 

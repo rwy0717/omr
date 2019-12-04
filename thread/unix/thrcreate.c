@@ -25,8 +25,8 @@
 #include "unix/unixthreadattr.h"
 
 intptr_t
-osthread_create(struct J9Thread *self, OSTHREAD *handle, const omrthread_attr_t attr,
-				WRAPPER_FUNC entrypoint, WRAPPER_ARG entryarg)
+osthread_create(struct J9Thread *self, OSTHREAD *handle, const omrthread_attr_t attr, WRAPPER_FUNC entrypoint,
+        WRAPPER_ARG entryarg)
 {
 	intptr_t retCode;
 	unixthread_attr_t ux;

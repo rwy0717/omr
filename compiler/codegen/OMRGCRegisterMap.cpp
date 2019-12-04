@@ -21,7 +21,8 @@
 
 #include "codegen/GCRegisterMap.hpp"
 
-TR::GCRegisterMap * OMR::GCRegisterMap::self()
-   {
-   return static_cast<TR::GCRegisterMap*>(this);
-   }
+TR::GCRegisterMap *
+OMR::GCRegisterMap::self()
+{
+	return static_cast<TR::GCRegisterMap *>(this);
+}

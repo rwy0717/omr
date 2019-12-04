@@ -37,9 +37,6 @@
 #include "omrport.h"
 #include "ut_omrport.h"
 
-
-
-
 /**
  * Map a part of file into memory.
  *
@@ -47,22 +44,23 @@
  * @param [in]  file			The file descriptor/handle of the already open file to be mapped
  * @param [in]  offset			The file offset of the part to be mapped
  * @param [in]  size			The number of bytes to be mapped, if zero, the whole file is mapped
- * @param [in]  mappingName		The name of the file mapping object to be created/opened.  This will be used as the basis of the name (invalid
- *                              characters being converted to '_') of the file mapping object on Windows
- *                              so that it can be shared between processes.  If a named object is not required, this parameter can be
- *                              specified as NULL
+ * @param [in]  mappingName		The name of the file mapping object to be created/opened.  This will be used as
+ * the basis of the name (invalid characters being converted to '_') of the file mapping object on Windows so that it
+ * can be shared between processes.  If a named object is not required, this parameter can be specified as NULL
  * @param [in]  flags			Flags relating to the mapping:
  * @args                        	OMRPORT_MMAP_FLAG_READ           read only map
  * @args                            OMRPORT_MMAP_FLAG_WRITE          read/write map
  * @args                            OMRPORT_MMAP_FLAG_COPYONWRITE 	copy on write map
  * @args                            OMRPORT_MMAP_FLAG_SHARED         share memory mapping with other processes
- * @args                            OMRPORT_MMAP_FLAG_PRIVATE        private memory mapping, do not share with other processes (implied by OMRPORT_MMAP_FLAG_COPYONWRITE)
+ * @args                            OMRPORT_MMAP_FLAG_PRIVATE        private memory mapping, do not share with other
+ * processes (implied by OMRPORT_MMAP_FLAG_COPYONWRITE)
  * @param [in]  category        Memory allocation category code
  *
  * @return                      A J9MmapHandle struct or NULL is an error has occurred
  */
 J9MmapHandle *
-omrmmap_map_file(struct OMRPortLibrary *portLibrary, intptr_t file, uint64_t offset, uintptr_t size, const char *mappingName, uint32_t flags, uint32_t category)
+omrmmap_map_file(struct OMRPortLibrary *portLibrary, intptr_t file, uint64_t offset, uintptr_t size,
+        const char *mappingName, uint32_t flags, uint32_t category)
 {
 	/* default implementation will allocate memory and read the file into it */
 	uintptr_t numBytesRead;
@@ -79,7 +77,8 @@ omrmmap_map_file(struct OMRPortLibrary *portLibrary, intptr_t file, uint64_t off
 	}
 
 	/* ensure that allocated memory is 8 byte aligned, just in case it matters */
-	allocPointer = portLibrary->mem_allocate_memory(portLibrary, size + 8, OMR_GET_CALLSITE() , OMRMEM_CATEGORY_PORT_LIBRARY);
+	allocPointer = portLibrary->mem_allocate_memory(
+	        portLibrary, size + 8, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 	Trc_PRT_mmap_map_file_default_allocPointer(allocPointer, size + 8);
 
 	if (allocPointer == NULL) {
@@ -98,7 +97,8 @@ omrmmap_map_file(struct OMRPortLibrary *portLibrary, intptr_t file, uint64_t off
 	numBytesRead = 0;
 	rc = 0;
 	while (size - numBytesRead > 0) {
-		rc = portLibrary->file_read(portLibrary, file, (void *)(((uintptr_t)mappedMemory) + numBytesRead), size - numBytesRead);
+		rc = portLibrary->file_read(
+		        portLibrary, file, (void *)(((uintptr_t)mappedMemory) + numBytesRead), size - numBytesRead);
 		if (rc == -1) {
 			/* failed to completely read the file */
 			Trc_PRT_mmap_map_file_default_badread();
@@ -109,7 +109,8 @@ omrmmap_map_file(struct OMRPortLibrary *portLibrary, intptr_t file, uint64_t off
 		Trc_PRT_mmap_map_file_default_readingFile(numBytesRead);
 	}
 
-	if (!(returnVal = (J9MmapHandle *)portLibrary->mem_allocate_memory(portLibrary, sizeof(J9MmapHandle), OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY))) {
+	if (!(returnVal = (J9MmapHandle *)portLibrary->mem_allocate_memory(
+	              portLibrary, sizeof(J9MmapHandle), OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY))) {
 		Trc_PRT_mmap_map_file_cannotallocatehandle();
 		portLibrary->mem_free_memory(portLibrary, allocPointer);
 		return NULL;
@@ -145,15 +146,17 @@ omrmmap_unmap_file(struct OMRPortLibrary *portLibrary, J9MmapHandle *handle)
  * @param [in]  start                      Pointer to the start of the memory mapped area to be synchronised
  * @param [in]  length                  Length of the memory mapped area to be synchronised
  * @param [in]  flags                    Flags controlling the behaviour of the function:
- * @args                                           OMRPORT_MMAP_SYNC_WAIT   Synchronous update required, function will not
- *                                                                     return until file updated.  Note that to achieve this on Windows requires the
- *                                                                     file to be opened with the FILE_FLAG_WRITE_THROUGH flag
- * @args                                           OMRPORT_MMAP_SYNC_ASYNC Asynchronous update required, function returns
- *                                                                    immediately, file will be updated later
+ * @args                                           OMRPORT_MMAP_SYNC_WAIT   Synchronous update required, function will
+ * not return until file updated.  Note that to achieve this on Windows requires the file to be opened with the
+ * FILE_FLAG_WRITE_THROUGH flag
+ * @args                                           OMRPORT_MMAP_SYNC_ASYNC Asynchronous update required, function
+ * returns immediately, file will be updated later
  * @args                                           OMRPORT_MMAP_SYNC_INVALIDATE Requests that other mappings of the same
- *                                                                    file be invalidated, so that they can be updated with the values just written
+ *                                                                    file be invalidated, so that they can be updated
+ * with the values just written
  *
-* @return                                          0 on success, -1 on failure.  Errors will be reported using the usual port library mechanism
+ * @return                                          0 on success, -1 on failure.  Errors will be reported using the
+ * usual port library mechanism
  */
 intptr_t
 omrmmap_msync(struct OMRPortLibrary *portLibrary, void *start, uintptr_t length, uint32_t flags)
@@ -191,8 +194,7 @@ omrmmap_startup(struct OMRPortLibrary *portLibrary)
  */
 void
 omrmmap_shutdown(struct OMRPortLibrary *portLibrary)
-{
-}
+{}
 /**
  * Check the capabilities available for J9MMAP at runtime for the current platform
  *
@@ -203,7 +205,7 @@ omrmmap_shutdown(struct OMRPortLibrary *portLibrary)
  * @args                                            OMRPORT_MMAP_CAPABILITY_WRITE
  * @args                                            OMRPORT_MMAP_CAPABILITY_COPYONWRITE
  * @args                                            OMRPORT_MMAP_CAPABILITY_MSYNC
- * @args											OMRPORT_MMAP_CAPABILITY_PROTECT
+ * @args OMRPORT_MMAP_CAPABILITY_PROTECT
  */
 
 int32_t
@@ -213,15 +215,17 @@ omrmmap_capabilities(struct OMRPortLibrary *portLibrary)
 }
 
 /**
- * Sets the protection as specified by flags for the memory pages containing all or part of the interval address->(address+len).
- * The size of the memory page for a specified memory region can be requested via @ref omrmmap_get_region_granularity
+ * Sets the protection as specified by flags for the memory pages containing all or part of the interval
+ * address->(address+len). The size of the memory page for a specified memory region can be requested via @ref
+ * omrmmap_get_region_granularity
  *
  * The memory region must have been aquired using omrmmap_file
  *
  * This call has no effect on the protection of other processes.
  *
- * The specified protection will overwrite any preexisting protection. This means that if the page had previously been marked
- * OMRPORT_PAGE_PROTECT_READ and omrmmap_protect is called with OMRPORT_PAGE_PROTECT_WRITE, it will no longer be readable.
+ * The specified protection will overwrite any preexisting protection. This means that if the page had previously been
+ * marked OMRPORT_PAGE_PROTECT_READ and omrmmap_protect is called with OMRPORT_PAGE_PROTECT_WRITE, it will no longer be
+ * readable.
  *
  * @param[in] portLibrary the Port Library.
  * @param[in] address Pointer to the shared memory region.
@@ -242,7 +246,8 @@ omrmmap_protect(struct OMRPortLibrary *portLibrary, void *address, uintptr_t len
 }
 
 /**
- * Returns the minumum granularity in bytes on which permissions can be set for a memory region containing the address provided.
+ * Returns the minumum granularity in bytes on which permissions can be set for a memory region containing the address
+ * provided.
  *
  * @param[in] address  an address that lies within the region of memory the caller is interested in.
  *
@@ -265,4 +270,3 @@ omrmmap_dont_need(struct OMRPortLibrary *portLibrary, const void *startAddress, 
 {
 	return;
 }
-

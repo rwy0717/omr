@@ -111,7 +111,9 @@ wmain(int argc, wchar_t **argv, wchar_t **envp)
 		for (i = 0; i < envc; i++) {
 			int utf8Length;
 			translated_envp[i] = cursor;
-			if (0 == (utf8Length = WideCharToMultiByte(CP_UTF8, 0, envp[i], -1, cursor, length, NULL, NULL))) {
+			if (0
+			        == (utf8Length = WideCharToMultiByte(
+			                    CP_UTF8, 0, envp[i], -1, cursor, length, NULL, NULL))) {
 				return -1;
 			}
 			cursor += utf8Length;

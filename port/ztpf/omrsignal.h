@@ -27,7 +27,7 @@
 /*
  *	The following structure and user-defined type originally came from
  *	omrsignal.c; apparently custom-implemented for each different kind of
- *	platform. We have moved these here because these are custom for and	
+ *	platform. We have moved these here because these are custom for and
  *	possibly unique to z/TPF at some later time.
  */
 
@@ -36,19 +36,19 @@ struct OMRSignalHandlerRecord {
 	struct OMRPortLibrary *portLibrary;
 	omrsig_handler_fn handler;
 	void *handler_arg;
-	jmp_buf	mark;			
+	jmp_buf mark;
 	uint32_t flags;
 } OMRSignalHandlerRecord;
 
 typedef struct OMRCurrentSignal {
-	int	signal;
+	int signal;
 	siginfo_t *sigInfo;
 	void *contextInfo;
 	uintptr_t breakingEventAddr;
 	uint32_t portLibSignalType;
-	DIB	*ptrDIB;
+	DIB *ptrDIB;
 } OMRCurrentSignal;
 
-void masterSynchSignalHandler(int signal, siginfo_t * sigInfo, void *contextInfo, uintptr_t breakingEventAddr);
+void masterSynchSignalHandler(int signal, siginfo_t *sigInfo, void *contextInfo, uintptr_t breakingEventAddr);
 
 #endif

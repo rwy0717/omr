@@ -102,7 +102,7 @@ omrthread_spinlock_acquire(omrthread_t self, omrthread_monitor_t monitor)
 			}
 			VM_AtomicSupport::yieldCPU();
 			/* begin tight loop */
-			for (uintptr_t spinCount1 = spinCount1Init; spinCount1 > 0; spinCount1--)	{
+			for (uintptr_t spinCount1 = spinCount1Init; spinCount1 > 0; spinCount1--) {
 				VM_AtomicSupport::nop();
 			} /* end tight loop */
 		}
@@ -146,14 +146,14 @@ update_jlm:
 }
 
 /**
-  * Try to atomically swap out a value of SPINLOCK_UNOWNED from
-  * a monitor's spinlockState field for the value SPINLOCK_OWNED.
-  *
-  * @param[in] self the current omrthread_t
-  * @param[in] monitor the monitor whose spinlock will be acquired
-  *
-  * @return 0 on success, -1 on failure
-  */
+ * Try to atomically swap out a value of SPINLOCK_UNOWNED from
+ * a monitor's spinlockState field for the value SPINLOCK_OWNED.
+ *
+ * @param[in] self the current omrthread_t
+ * @param[in] monitor the monitor whose spinlock will be acquired
+ *
+ * @return 0 on success, -1 on failure
+ */
 intptr_t
 omrthread_spinlock_acquire_no_spin(omrthread_t self, omrthread_monitor_t monitor)
 {
@@ -169,13 +169,13 @@ omrthread_spinlock_acquire_no_spin(omrthread_t self, omrthread_monitor_t monitor
 }
 
 /**
-  * Atomically swap in a new value for a monitor's spinlockState.
-  *
-  * @param[in] monitor the monitor to modify
-  * @param[in] newState the new value for spinlockState
-  *
-  * @return the previous value for spinlockState
-  */
+ * Atomically swap in a new value for a monitor's spinlockState.
+ *
+ * @param[in] monitor the monitor to modify
+ * @param[in] newState the new value for spinlockState
+ *
+ * @return the previous value for spinlockState
+ */
 uintptr_t
 omrthread_spinlock_swapState(omrthread_monitor_t monitor, uintptr_t newState)
 {
@@ -228,8 +228,7 @@ omrthread_mcs_lock(omrthread_t self, omrthread_monitor_t monitor, omrthread_mcs_
 
 		/* Install the mcsNode at the tail of the MCS lock queue (monitor->queueTail). */
 		predecessor = (omrthread_mcs_node_t)VM_AtomicSupport::set(
-				(volatile uintptr_t *)&monitor->queueTail,
-				(uintptr_t)mcsNode);
+		        (volatile uintptr_t *)&monitor->queueTail, (uintptr_t)mcsNode);
 	}
 
 	if ((NULL != predecessor) || retry) {
@@ -273,7 +272,7 @@ omrthread_mcs_lock(omrthread_t self, omrthread_monitor_t monitor, omrthread_mcs_
 	} else {
 		/* The lock can be acquired since no predecessor MCS node exists. */
 		mcsNode->blocked = OMRTHREAD_MCS_THREAD_ACQUIRE;
-lockAcquired:
+	lockAcquired:
 		/* monitor->spinlockState is maintained for compatibility with the existing omrthread API. */
 		monitor->spinlockState = J9THREAD_MONITOR_SPINLOCK_OWNED;
 		result = 0;
@@ -321,11 +320,9 @@ omrthread_mcs_trylock(omrthread_t self, omrthread_monitor_t monitor, omrthread_m
 
 	/* If monitor->queueTail is NULL (no-one is waiting to acquire the lock), then it is
 	 * swapped with the mcsNode, and the lock is acquired. */
-	if (oldState == VM_AtomicSupport::lockCompareExchange(
-			(volatile uintptr_t *)&monitor->queueTail,
-			(uintptr_t)oldState,
-			(uintptr_t)mcsNode)
-	) {
+	if (oldState
+	        == VM_AtomicSupport::lockCompareExchange(
+	                (volatile uintptr_t *)&monitor->queueTail, (uintptr_t)oldState, (uintptr_t)mcsNode)) {
 		/* monitor->spinlockState is maintained for compatibility with the existing omrthread API. */
 		monitor->spinlockState = J9THREAD_MONITOR_SPINLOCK_OWNED;
 
@@ -380,7 +377,9 @@ omrthread_mcs_unlock(omrthread_t self, omrthread_monitor_t monitor)
 		 * Release the lock by replacing the mcsNode at the tail of the queue with NULL.
 		 */
 		uintptr_t newState = 0;
-		if ((uintptr_t)mcsNode == VM_AtomicSupport::lockCompareExchange((volatile uintptr_t *)&monitor->queueTail, (uintptr_t)mcsNode, newState)) {
+		if ((uintptr_t)mcsNode
+		        == VM_AtomicSupport::lockCompareExchange(
+		                (volatile uintptr_t *)&monitor->queueTail, (uintptr_t)mcsNode, newState)) {
 			monitor->spinlockState = J9THREAD_MONITOR_SPINLOCK_UNOWNED;
 			goto lockReleased;
 		}
@@ -456,5 +455,4 @@ omrthread_mcs_node_free(omrthread_t self, omrthread_mcs_node_t mcsNode)
 #endif /* defined(OMR_THR_MCS_LOCKS) */
 
 #endif /* OMR_THR_THREE_TIER_LOCKING */
-
 }

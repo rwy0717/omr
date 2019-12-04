@@ -25,15 +25,11 @@
 
 #include "codegen/JBCodeGenerator.hpp"
 
-namespace TR
-{
-class OMR_EXTENSIBLE CodeGenerator : public ::JitBuilder::CodeGeneratorConnector
-   {
-   public:
-
-   CodeGenerator() :
-      ::JitBuilder::CodeGeneratorConnector() {}
-   };
-}
+namespace TR {
+class OMR_EXTENSIBLE CodeGenerator : public ::JitBuilder::CodeGeneratorConnector {
+public:
+	CodeGenerator() : ::JitBuilder::CodeGeneratorConnector() {}
+};
+} // namespace TR
 
 #endif

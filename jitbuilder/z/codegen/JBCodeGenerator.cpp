@@ -20,20 +20,14 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #include "codegen/CodeGenerator.hpp"
 #include "compile/Compilation.hpp"
 #include "env/CompilerEnv.hpp"
 
-namespace JitBuilder
-{
-namespace Z
-{
+namespace JitBuilder {
+namespace Z {
 
-CodeGenerator::CodeGenerator() :
-   JitBuilder::CodeGenerator()
-   {
-   }
+CodeGenerator::CodeGenerator() : JitBuilder::CodeGenerator() {}
 
 } // namespace Z
 } // namespace JitBuilder

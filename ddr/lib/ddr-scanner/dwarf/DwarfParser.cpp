@@ -25,17 +25,17 @@
 static bool findTool(char **buffer, const char *command);
 static void deleteDie(Dwarf_Die die);
 static void cleanUnknownDiesInCU(Dwarf_CU_Context *cu);
-static int parseDwarfInfo(char *line, Dwarf_Die *lastCreatedDie, Dwarf_Die *currentDie,
-	size_t *lastIndent, unordered_map<Dwarf_Die *, Dwarf_Off> *refToPopulate, Dwarf_Error *error);
+static int parseDwarfInfo(char *line, Dwarf_Die *lastCreatedDie, Dwarf_Die *currentDie, size_t *lastIndent,
+        unordered_map<Dwarf_Die *, Dwarf_Off> *refToPopulate, Dwarf_Error *error);
 static int parseCompileUnit(char *line, size_t *lastIndent, Dwarf_Error *error);
-static int parseDwarfDie(char *line, Dwarf_Die *lastCreatedDie,
-	Dwarf_Die *currentDie, size_t *lastIndent, size_t spaces, Dwarf_Error *error);
+static int parseDwarfDie(char *line, Dwarf_Die *lastCreatedDie, Dwarf_Die *currentDie, size_t *lastIndent,
+        size_t spaces, Dwarf_Error *error);
 static void parseTagString(char *string, size_t length, Dwarf_Half *tag);
-static int parseAttribute(char *line, Dwarf_Die *lastCreatedDie,
-	unordered_map<Dwarf_Die *, Dwarf_Off> *refToPopulate, Dwarf_Error *error);
+static int parseAttribute(char *line, Dwarf_Die *lastCreatedDie, unordered_map<Dwarf_Die *, Dwarf_Off> *refToPopulate,
+        Dwarf_Error *error);
 static void parseAttrType(char *string, size_t length, Dwarf_Half *type, Dwarf_Half *form);
-Dwarf_CU_Context * Dwarf_CU_Context::_firstCU;
-Dwarf_CU_Context * Dwarf_CU_Context::_currentCU;
+Dwarf_CU_Context *Dwarf_CU_Context::_firstCU;
+Dwarf_CU_Context *Dwarf_CU_Context::_currentCU;
 
 int
 dwarf_finish(Dwarf_Debug dbg, Dwarf_Error *error)
@@ -57,12 +57,7 @@ dwarf_finish(Dwarf_Debug dbg, Dwarf_Error *error)
 }
 
 int
-dwarf_init(int fd,
-	Dwarf_Unsigned access,
-	Dwarf_Handler errhand,
-	Dwarf_Ptr errarg,
-	Dwarf_Debug *dbg,
-	Dwarf_Error *error)
+dwarf_init(int fd, Dwarf_Unsigned access, Dwarf_Handler errhand, Dwarf_Ptr errarg, Dwarf_Debug *dbg, Dwarf_Error *error)
 {
 	int ret = DW_DLV_OK;
 	Dwarf_CU_Context::_currentCU = NULL;
@@ -90,7 +85,7 @@ dwarf_init(int fd,
 		 */
 		char *toolpath = NULL;
 		if (findTool(&toolpath, "xcrun -f dwarfdump-classic 2>/dev/null")
-		||  findTool(&toolpath, "xcrun -f dwarfdump 2>/dev/null")) {
+		        || findTool(&toolpath, "xcrun -f dwarfdump 2>/dev/null")) {
 			stringstream command;
 			command << toolpath << " " << filepath << " 2>&1";
 			fp = popen(command.str().c_str(), "r");
@@ -118,14 +113,16 @@ dwarf_init(int fd,
 				ret = DW_DLV_ERROR;
 				setError(error, DW_DLE_NOB);
 			} else {
-				ret = parseDwarfInfo(buffer, &lastCreatedDie, &currentDie, &lastIndent, &refToPopulate, error);
+				ret = parseDwarfInfo(
+				        buffer, &lastCreatedDie, &currentDie, &lastIndent, &refToPopulate, error);
 			}
 		}
 		free(buffer);
 		cleanUnknownDiesInCU(Dwarf_CU_Context::_currentCU);
 	}
 	if (DW_DLV_OK == ret) {
-		for (unordered_map<Dwarf_Die *, Dwarf_Off>::iterator it = refToPopulate.begin(); it != refToPopulate.end(); ++it) {
+		for (unordered_map<Dwarf_Die *, Dwarf_Off>::iterator it = refToPopulate.begin();
+		        it != refToPopulate.end(); ++it) {
 			(*it->first) = Dwarf_Die_s::refMap[it->second];
 		}
 		Dwarf_CU_Context::_currentCU = NULL;
@@ -207,9 +204,8 @@ cleanUnknownDiesInCU(Dwarf_CU_Context *cu)
 }
 
 static int
-parseDwarfInfo(char *line, Dwarf_Die *lastCreatedDie, Dwarf_Die *currentDie,
-	size_t *lastIndent, unordered_map<Dwarf_Die *, Dwarf_Off> *refToPopulate,
-	Dwarf_Error *error)
+parseDwarfInfo(char *line, Dwarf_Die *lastCreatedDie, Dwarf_Die *currentDie, size_t *lastIndent,
+        unordered_map<Dwarf_Die *, Dwarf_Off> *refToPopulate, Dwarf_Error *error)
 {
 	int ret = DW_DLV_OK;
 	/* There are two possible formats for a line. Every second line
@@ -236,7 +232,8 @@ parseDwarfInfo(char *line, Dwarf_Die *lastCreatedDie, Dwarf_Die *currentDie,
 			ret = parseCompileUnit(endOfAddress + spaces + 14, lastIndent, error);
 			lastCreatedDie = NULL;
 		} else if (0 == strncmp(endOfAddress + spaces, "TAG_", 4)) {
-			ret = parseDwarfDie(endOfAddress + spaces + 4, lastCreatedDie, currentDie, lastIndent, spaces, error);
+			ret = parseDwarfDie(
+			        endOfAddress + spaces + 4, lastCreatedDie, currentDie, lastIndent, spaces, error);
 			if (DW_DLV_OK == ret && DW_TAG_unknown != (*lastCreatedDie)->_tag) {
 				Dwarf_Die_s::refMap[address] = *lastCreatedDie;
 			}
@@ -269,7 +266,8 @@ static int
 parseCompileUnit(char *line, size_t *lastIndent, Dwarf_Error *error)
 {
 	/* Compile unit lines are of the format:
-	 * 0x00000000: Compile Unit: length = 0x[offset]  version = 0x[version]  abbr_offset = 0x[offset]  addr_size = 0x[size]  (next CU at 0x[offset])
+	 * 0x00000000: Compile Unit: length = 0x[offset]  version = 0x[version]  abbr_offset = 0x[offset]  addr_size =
+	 * 0x[size]  (next CU at 0x[offset])
 	 */
 	int ret = DW_DLV_OK;
 	Dwarf_Unsigned CUheaderLength = 0;
@@ -353,8 +351,8 @@ parseCompileUnit(char *line, size_t *lastIndent, Dwarf_Error *error)
 }
 
 static int
-parseDwarfDie(char *line, Dwarf_Die *lastCreatedDie,
-	Dwarf_Die *currentDie, size_t *lastIndent, size_t spaces, Dwarf_Error *error)
+parseDwarfDie(char *line, Dwarf_Die *lastCreatedDie, Dwarf_Die *currentDie, size_t *lastIndent, size_t spaces,
+        Dwarf_Error *error)
 {
 	int ret = DW_DLV_OK;
 	Dwarf_Half tag = DW_TAG_unknown;
@@ -381,10 +379,10 @@ parseDwarfDie(char *line, Dwarf_Die *lastCreatedDie,
 			(*lastCreatedDie)->_child = newDie;
 		} else if (spaces <= *lastIndent) {
 			/* If the Die is indented equally to the last Die, it is a
-			* sibling Die. If the indentation has decreased, the last
-			* Die would have been updated to one level up the tree when
-			* a "NULL" line indicated there were no more siblings.
-			*/
+			 * sibling Die. If the indentation has decreased, the last
+			 * Die would have been updated to one level up the tree when
+			 * a "NULL" line indicated there were no more siblings.
+			 */
 			newDie->_parent = (*lastCreatedDie)->_parent;
 			(*lastCreatedDie)->_sibling = newDie;
 		}
@@ -396,27 +394,27 @@ parseDwarfDie(char *line, Dwarf_Die *lastCreatedDie,
 }
 
 static const pair<const char *, Dwarf_Half> tagStrings[] = {
-	make_pair("array_type", DW_TAG_array_type),
-	make_pair("base_type", DW_TAG_base_type),
-	make_pair("class_type", DW_TAG_class_type),
-	make_pair("compile_unit", DW_TAG_compile_unit),
-	make_pair("const_type", DW_TAG_const_type),
-	make_pair("enumeration_type", DW_TAG_enumeration_type),
-	make_pair("enumerator", DW_TAG_enumerator),
-	make_pair("inheritance", DW_TAG_inheritance),
-	make_pair("member", DW_TAG_member),
-	make_pair("namespace", DW_TAG_namespace),
-	make_pair("pointer_type", DW_TAG_pointer_type),
-	make_pair("ptr_to_member_type", DW_TAG_ptr_to_member_type),
-	make_pair("restrict_type", DW_TAG_restrict_type),
-	make_pair("shared_type", DW_TAG_shared_type),
-	make_pair("structure_type", DW_TAG_structure_type),
-	make_pair("subprogram", DW_TAG_subprogram),
-	make_pair("subrange_type", DW_TAG_subrange_type),
-	make_pair("subroutine_type", DW_TAG_subroutine_type),
-	make_pair("typedef", DW_TAG_typedef),
-	make_pair("union_type", DW_TAG_union_type),
-	make_pair("volatile_type", DW_TAG_volatile_type),
+        make_pair("array_type", DW_TAG_array_type),
+        make_pair("base_type", DW_TAG_base_type),
+        make_pair("class_type", DW_TAG_class_type),
+        make_pair("compile_unit", DW_TAG_compile_unit),
+        make_pair("const_type", DW_TAG_const_type),
+        make_pair("enumeration_type", DW_TAG_enumeration_type),
+        make_pair("enumerator", DW_TAG_enumerator),
+        make_pair("inheritance", DW_TAG_inheritance),
+        make_pair("member", DW_TAG_member),
+        make_pair("namespace", DW_TAG_namespace),
+        make_pair("pointer_type", DW_TAG_pointer_type),
+        make_pair("ptr_to_member_type", DW_TAG_ptr_to_member_type),
+        make_pair("restrict_type", DW_TAG_restrict_type),
+        make_pair("shared_type", DW_TAG_shared_type),
+        make_pair("structure_type", DW_TAG_structure_type),
+        make_pair("subprogram", DW_TAG_subprogram),
+        make_pair("subrange_type", DW_TAG_subrange_type),
+        make_pair("subroutine_type", DW_TAG_subroutine_type),
+        make_pair("typedef", DW_TAG_typedef),
+        make_pair("union_type", DW_TAG_union_type),
+        make_pair("volatile_type", DW_TAG_volatile_type),
 };
 
 static void
@@ -432,8 +430,8 @@ parseTagString(char *string, size_t length, Dwarf_Half *tag)
 }
 
 static int
-parseAttribute(char *line, Dwarf_Die *lastCreatedDie,
-	unordered_map<Dwarf_Die *, Dwarf_Off> *refToPopulate, Dwarf_Error *error)
+parseAttribute(
+        char *line, Dwarf_Die *lastCreatedDie, unordered_map<Dwarf_Die *, Dwarf_Off> *refToPopulate, Dwarf_Error *error)
 {
 	int ret = DW_DLV_OK;
 
@@ -518,20 +516,20 @@ parseAttribute(char *line, Dwarf_Die *lastCreatedDie,
 }
 
 static const tuple<const char *, Dwarf_Half, Dwarf_Half> attrStrings[] = {
-	make_tuple("byte_size", DW_AT_byte_size, DW_FORM_udata),
-	make_tuple("bit_size", DW_AT_bit_size, DW_FORM_udata),
-	make_tuple("comp_dir", DW_AT_comp_dir, DW_FORM_string),
-	make_tuple("const_value", DW_AT_const_value, DW_FORM_sdata),
-	make_tuple("data_bit_offset", DW_AT_data_bit_offset, DW_FORM_udata),
-	make_tuple("data_member_location", DW_AT_data_member_location, DW_FORM_udata),
-	make_tuple("decl_file", DW_AT_decl_file, DW_FORM_udata),
-	make_tuple("decl_line", DW_AT_decl_line, DW_FORM_udata),
-	make_tuple("external", DW_AT_external, DW_FORM_flag),
-	make_tuple("linkage_name", DW_AT_linkage_name, DW_FORM_string),
-	make_tuple("name", DW_AT_name, DW_FORM_string),
-	make_tuple("specification", DW_AT_specification, DW_FORM_ref1),
-	make_tuple("type", DW_AT_type, DW_FORM_ref1),
-	make_tuple("upper_bound", DW_AT_upper_bound, DW_FORM_udata),
+        make_tuple("byte_size", DW_AT_byte_size, DW_FORM_udata),
+        make_tuple("bit_size", DW_AT_bit_size, DW_FORM_udata),
+        make_tuple("comp_dir", DW_AT_comp_dir, DW_FORM_string),
+        make_tuple("const_value", DW_AT_const_value, DW_FORM_sdata),
+        make_tuple("data_bit_offset", DW_AT_data_bit_offset, DW_FORM_udata),
+        make_tuple("data_member_location", DW_AT_data_member_location, DW_FORM_udata),
+        make_tuple("decl_file", DW_AT_decl_file, DW_FORM_udata),
+        make_tuple("decl_line", DW_AT_decl_line, DW_FORM_udata),
+        make_tuple("external", DW_AT_external, DW_FORM_flag),
+        make_tuple("linkage_name", DW_AT_linkage_name, DW_FORM_string),
+        make_tuple("name", DW_AT_name, DW_FORM_string),
+        make_tuple("specification", DW_AT_specification, DW_FORM_ref1),
+        make_tuple("type", DW_AT_type, DW_FORM_ref1),
+        make_tuple("upper_bound", DW_AT_upper_bound, DW_FORM_udata),
 };
 
 static void
@@ -547,7 +545,6 @@ parseAttrType(char *string, size_t length, Dwarf_Half *type, Dwarf_Half *form)
 	}
 }
 
-
 /* Runs a shell command to get the path for a tool DDR needs (dwarfdump)
  * If successful, returns true and stores the path in 'buffer' variable.
  * If not, returns false.
@@ -560,7 +557,7 @@ findTool(char **buffer, const char *command)
 		size_t cap = 0;
 		ssize_t len = getline(buffer, &cap, fp);
 		/* if xcrun fails to find the tool, then returned length would be 0 */
-		if ((len > 0) &&  ('/' == (*buffer)[0])) {
+		if ((len > 0) && ('/' == (*buffer)[0])) {
 			/* remove the newline consumed by getline */
 			if ('\n' == (*buffer)[len - 1]) {
 				(*buffer)[len - 1] = '\0';

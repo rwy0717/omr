@@ -161,10 +161,11 @@ genSystemCoreUsingGencore(struct OMRPortLibrary *portLibrary, char *filename)
 
 	/* we now have a filename that's an absolute path, generate the core file */
 	coreDumpInfo.name = filename;
-	coreDumpInfo.length = (unsigned int) strlen(filename);
+	coreDumpInfo.length = (unsigned int)strlen(filename);
 
 #if defined(DUMP_DBG)
-	portLibrary->tty_printf(portLibrary, "\tomrdump_create: attempting to generate corefile, filename: %s\n", coreDumpInfo.name);
+	portLibrary->tty_printf(
+	        portLibrary, "\tomrdump_create: attempting to generate corefile, filename: %s\n", coreDumpInfo.name);
 	fflush(stdout);
 #endif
 
@@ -175,11 +176,11 @@ genSystemCoreUsingGencore(struct OMRPortLibrary *portLibrary, char *filename)
 #if defined(DUMP_DBG)
 	portLibrary->tty_printf(portLibrary, "\tomrdump_create: gencore/coredump returned: %i\n", rc);
 	if (rc == -1) {
-		portLibrary->tty_printf(portLibrary, "\tomrdump_create: errno: %u %s\n", errno, portLibrary->error_last_error_message(portLibrary));
+		portLibrary->tty_printf(portLibrary, "\tomrdump_create: errno: %u %s\n", errno,
+		        portLibrary->error_last_error_message(portLibrary));
 	}
 	fflush(stdout);
 #endif
-
 
 	if (rc == 0) {
 		/* check to see if core compression is enabled */
@@ -202,7 +203,6 @@ genSystemCoreUsingGencore(struct OMRPortLibrary *portLibrary, char *filename)
 	return rc;
 }
 
-
 /*
  * Determines the OS's preferred directory for writing core files.
  *
@@ -222,7 +222,8 @@ findOSPreferredCoreDir(struct OMRPortLibrary *portLibrary, char *coreFilePath)
 
 	getPEnvValue(portLibrary, CORE_PATH_ENV_STRING, buffer);
 
-	/* path via the chcore command takes precedence, if it was not set, check the path set via the syscorepath command*/
+	/* path via the chcore command takes precedence, if it was not set, check the path set via the syscorepath
+	 * command*/
 	if (buffer[0] == '\0') {
 		sysconfig(GET_COREPATH, buffer, MAXPATHLEN);
 #if defined(DUMP_DBG)
@@ -286,6 +287,3 @@ getPEnvValue(struct OMRPortLibrary *portLibrary, char *envVar, char *value)
 
 	return -1;
 }
-
-
-

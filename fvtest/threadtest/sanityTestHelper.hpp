@@ -28,7 +28,7 @@ bool SimpleSanity(void);
 void SanityTestNThreads(unsigned int, unsigned int);
 bool TestNThreadsLooping(unsigned int, unsigned int, unsigned int, bool);
 void QuickNDirtyPerformanceTest(unsigned int);
-bool TestBlockingQueue(CThread& self, const unsigned int numThreads);
+bool TestBlockingQueue(CThread &self, const unsigned int numThreads);
 bool TestWaitNotify(unsigned int);
 
 #endif /* SANITYTESTHELPER_HPP_INCLUDED */

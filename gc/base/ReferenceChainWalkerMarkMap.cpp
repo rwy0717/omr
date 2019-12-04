@@ -20,10 +20,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #include "ReferenceChainWalkerMarkMap.hpp"
-
-#include "omrport.h"
 
 #include "EnvironmentBase.hpp"
 #include "Forge.hpp"
@@ -33,6 +30,7 @@
 #include "HeapRegionIterator.hpp"
 #include "HeapRegionManager.hpp"
 #include "MemoryManager.hpp"
+#include "omrport.h"
 
 /**
  * Object creation and destruction
@@ -40,9 +38,10 @@
 MM_ReferenceChainWalkerMarkMap *
 MM_ReferenceChainWalkerMarkMap::newInstance(MM_EnvironmentBase *env, uintptr_t maxHeapSize)
 {
-	MM_ReferenceChainWalkerMarkMap *markMap = (MM_ReferenceChainWalkerMarkMap *)env->getForge()->allocate(sizeof(MM_ReferenceChainWalkerMarkMap), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+	MM_ReferenceChainWalkerMarkMap *markMap = (MM_ReferenceChainWalkerMarkMap *)env->getForge()->allocate(
+	        sizeof(MM_ReferenceChainWalkerMarkMap), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
 	if (NULL != markMap) {
-		new(markMap) MM_ReferenceChainWalkerMarkMap(env, maxHeapSize);
+		new (markMap) MM_ReferenceChainWalkerMarkMap(env, maxHeapSize);
 		if (!markMap->initialize(env)) {
 			markMap->kill(env);
 			markMap = NULL;
@@ -79,43 +78,51 @@ MM_ReferenceChainWalkerMarkMap::clearMapForRegions(MM_EnvironmentBase *env, bool
 	MM_HeapRegionManager *regionManager = heap->getHeapRegionManager();
 	MM_MemoryManager *memoryManager = _extensions->memoryManager;
 	GC_HeapRegionIterator regionIterator(regionManager, true, true);
-	while(NULL != (region = regionIterator.nextRegion())) {
+	while (NULL != (region = regionIterator.nextRegion())) {
 		if (region->isCommitted()) {
-			/* Walk the segment in chunks the size of the heapClearUnit size, checking if the corresponding mark map
-			 * range should  be cleared.
+			/* Walk the segment in chunks the size of the heapClearUnit size, checking if the corresponding
+			 * mark map range should  be cleared.
 			 */
-			uint8_t* heapClearAddress = (uint8_t*)region->getLowAddress();
+			uint8_t *heapClearAddress = (uint8_t *)region->getLowAddress();
 			uintptr_t heapClearSize = region->getSize();
 
 			/* Convert the heap address/size to its corresponding mark map address/size */
-			/* NOTE: We calculate the low and high heap offsets, and build the mark map index and size values
-			 * from these to avoid rounding errors (if we use the size, the conversion routine could get a different
-			 * rounding result then the actual end address)
+			/* NOTE: We calculate the low and high heap offsets, and build the mark map index and size
+			 * values from these to avoid rounding errors (if we use the size, the conversion routine could
+			 * get a different rounding result then the actual end address)
 			 */
 			uintptr_t heapClearOffset = ((uintptr_t)heapClearAddress) - _heapMapBaseDelta;
-			uintptr_t heapMapClearIndex = convertHeapIndexToHeapMapIndex(env, heapClearOffset, sizeof(uintptr_t));
-			uintptr_t heapMapClearSize = convertHeapIndexToHeapMapIndex(env, heapClearOffset + heapClearSize, sizeof(uintptr_t)) - heapMapClearIndex;
+			uintptr_t heapMapClearIndex =
+			        convertHeapIndexToHeapMapIndex(env, heapClearOffset, sizeof(uintptr_t));
+			uintptr_t heapMapClearSize =
+			        convertHeapIndexToHeapMapIndex(env, heapClearOffset + heapClearSize, sizeof(uintptr_t))
+			        - heapMapClearIndex;
 
 			if (commit) {
 				/* commit memory */
 				if (_extensions->isFvtestForceReferenceChainWalkerMarkMapCommitFailure()) {
 					result = false;
-					Trc_MM_ReferenceChainWalkerMarkMap_markMapCommitFailureForced(env->getLanguageVMThread());
+					Trc_MM_ReferenceChainWalkerMarkMap_markMapCommitFailureForced(
+					        env->getLanguageVMThread());
 					break;
 				} else {
-					if (!memoryManager->commitMemory(&_heapMapMemoryHandle, (void *) (((uintptr_t)_heapMapBits) + heapMapClearIndex), heapMapClearSize)) {
+					if (!memoryManager->commitMemory(&_heapMapMemoryHandle,
+					            (void *)(((uintptr_t)_heapMapBits) + heapMapClearIndex),
+					            heapMapClearSize)) {
 						result = false;
 						/* print tracepoint in case of real failure */
-						Trc_MM_ReferenceChainWalkerMarkMap_markMapCommitFailed(env->getLanguageVMThread(), (void *) (((uintptr_t)_heapMapBits) + heapMapClearIndex), heapMapClearSize);
+						Trc_MM_ReferenceChainWalkerMarkMap_markMapCommitFailed(
+						        env->getLanguageVMThread(),
+						        (void *)(((uintptr_t)_heapMapBits) + heapMapClearIndex),
+						        heapMapClearSize);
 						break;
 					}
 				}
 			}
 
 			/* And clear the mark map */
-			OMRZeroMemory((void *) (((uintptr_t)_heapMapBits) + heapMapClearIndex), heapMapClearSize);
+			OMRZeroMemory((void *)(((uintptr_t)_heapMapBits) + heapMapClearIndex), heapMapClearSize);
 		}
 	}
 	return result;
 }
-

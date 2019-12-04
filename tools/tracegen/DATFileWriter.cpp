@@ -30,7 +30,6 @@
 #include "FileUtils.hpp"
 #include "StringUtils.hpp"
 
-
 RCType
 DATFileWriter::writeOutputFiles(J9TDFOptions *options, J9TDFFile *tdf)
 {
@@ -43,7 +42,8 @@ DATFileWriter::writeOutputFiles(J9TDFOptions *options, J9TDFFile *tdf)
 	char explicitChar = 'N';
 	const char *format = NULL;
 
-	const char *fileName = FileUtils::getTargetFileName(options, tdf->fileName, UT_FILENAME_PREFIX, tdf->header.executable, ".pdat");
+	const char *fileName = FileUtils::getTargetFileName(
+	        options, tdf->fileName, UT_FILENAME_PREFIX, tdf->header.executable, ".pdat");
 
 	time_t sourceFileMtime = FileUtils::getMtime(tdf->fileName);
 	time_t targetFileMtime = FileUtils::getMtime(fileName);
@@ -81,30 +81,20 @@ DATFileWriter::writeOutputFiles(J9TDFOptions *options, J9TDFFile *tdf)
 			case UT_MEM_EXCPT_TYPE:
 			case UT_DEBUG_EXCPT_TYPE:
 			case UT_PERF_EXCPT_TYPE:
-			case UT_ASSERT_TYPE:
-				exceptChar = '*';
-				break;
-			default:
-				exceptChar = ' ';
-				break;
+			case UT_ASSERT_TYPE: exceptChar = '*'; break;
+			default: exceptChar = ' '; break;
 			}
 
 			switch (tp->type) {
 			case UT_ENTRY_TYPE:
-			case UT_ENTRY_EXCPT_TYPE:
-				entryExitChar = '>';
-				break;
+			case UT_ENTRY_EXCPT_TYPE: entryExitChar = '>'; break;
 			case UT_EXIT_TYPE:
-			case UT_EXIT_EXCPT_TYPE:
-				entryExitChar = '<';
-				break;
-			default:
-				entryExitChar = ' ';
-				break;
+			case UT_EXIT_EXCPT_TYPE: entryExitChar = '<'; break;
+			default: entryExitChar = ' '; break;
 			}
 
 			if (UT_ASSERT_TYPE == tp->type) {
-				format = (char *) "** ASSERTION FAILED ** at %s:%d: %s";
+				format = (char *)"** ASSERTION FAILED ** at %s:%d: %s";
 			} else {
 				format = tp->format;
 			}
@@ -113,7 +103,8 @@ DATFileWriter::writeOutputFiles(J9TDFOptions *options, J9TDFFile *tdf)
 				explicitChar = 'Y';
 			}
 
-			fprintf(datFile, datLineTemplate, tdf->header.executable, id, tp->type, tp->overhead, tp->level, explicitChar, tp->name, exceptChar, entryExitChar, format);
+			fprintf(datFile, datLineTemplate, tdf->header.executable, id, tp->type, tp->overhead, tp->level,
+			        explicitChar, tp->name, exceptChar, entryExitChar, format);
 			tp = tp->nexttp;
 			id += 1;
 		}

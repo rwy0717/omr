@@ -28,9 +28,8 @@
 #if !defined(CONFIGURATIONGENERATIONAL_HPP_)
 #define CONFIGURATIONGENERATIONAL_HPP_
 
-#include "omrcfg.h"
-
 #include "ConfigurationStandard.hpp"
+#include "omrcfg.h"
 
 #if defined(OMR_GC_MODRON_SCAVENGER)
 
@@ -38,31 +37,33 @@ class MM_EnvironmentBase;
 class MM_MemorySubSpaceSemiSpace;
 class MM_Scavenger;
 
-class MM_ConfigurationGenerational : public MM_ConfigurationStandard
-{
-/* Data members / Types */
+class MM_ConfigurationGenerational : public MM_ConfigurationStandard {
+	/* Data members / Types */
 public:
 protected:
 private:
-
-/* Methods */
+	/* Methods */
 public:
 	static MM_Configuration *newInstance(MM_EnvironmentBase *env);
 
-	virtual MM_MemorySpace *createDefaultMemorySpace(MM_EnvironmentBase *env, MM_Heap *heap, MM_InitializationParameters *parameters);
-	virtual MM_Heap *createHeapWithManager(MM_EnvironmentBase *env, UDATA heapBytesRequested, MM_HeapRegionManager *regionManager);
+	virtual MM_MemorySpace *createDefaultMemorySpace(
+	        MM_EnvironmentBase *env, MM_Heap *heap, MM_InitializationParameters *parameters);
+	virtual MM_Heap *createHeapWithManager(
+	        MM_EnvironmentBase *env, UDATA heapBytesRequested, MM_HeapRegionManager *regionManager);
 
-	virtual void defaultMemorySpaceAllocated(MM_GCExtensionsBase *extensions, void* defaultMemorySpace);
-	
+	virtual void defaultMemorySpaceAllocated(MM_GCExtensionsBase *extensions, void *defaultMemorySpace);
+
 	MM_ConfigurationGenerational(MM_EnvironmentBase *env)
-		: MM_ConfigurationStandard(env, gc_policy_gencon, calculateDefaultRegionSize(env))
+	        : MM_ConfigurationStandard(env, gc_policy_gencon, calculateDefaultRegionSize(env))
 	{
 		_typeId = __FUNCTION__;
 	};
-	
+
 protected:
-	MM_MemorySubSpaceSemiSpace *createSemiSpace(MM_EnvironmentBase *envBase, MM_Heap *heap, MM_Scavenger *scavenger, MM_InitializationParameters *parameters, UDATA numaNode = UDATA_MAX);
-	virtual void tearDown(MM_EnvironmentBase* env);
+	MM_MemorySubSpaceSemiSpace *createSemiSpace(MM_EnvironmentBase *envBase, MM_Heap *heap, MM_Scavenger *scavenger,
+	        MM_InitializationParameters *parameters, UDATA numaNode = UDATA_MAX);
+	virtual void tearDown(MM_EnvironmentBase *env);
+
 private:
 	uintptr_t calculateDefaultRegionSize(MM_EnvironmentBase *env);
 };

@@ -26,8 +26,7 @@
 #include "Port.hpp"
 #include "TDFTypes.hpp"
 
-class DATFileWriter
-{
+class DATFileWriter {
 	/*
 	 * Data members
 	 */

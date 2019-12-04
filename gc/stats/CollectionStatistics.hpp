@@ -23,44 +23,40 @@
 #if !defined(COLLECTIONSTATISTICS_HPP_)
 #define COLLECTIONSTATISTICS_HPP_
 
+#include "Base.hpp"
 #include "omrcfg.h"
 #include "omrcomp.h"
-
-#include "Base.hpp"
 
 /**
  * A collection of interesting statistics for the Heap.
  * @ingroup GC_Stats
  */
-class MM_CollectionStatistics : public MM_Base
-{
+class MM_CollectionStatistics : public MM_Base {
 private:
 protected:
 public:
 	uintptr_t _totalHeapSize; /**< Total active heap size */
 	uintptr_t _totalFreeHeapSize; /**< Total free active heap */
 
-	uint64_t  _startTime;		/**< Collection start time */
-	uint64_t  _endTime;			/**< Collection end time */
+	uint64_t _startTime; /**< Collection start time */
+	uint64_t _endTime; /**< Collection end time */
 
 	omrthread_process_time_t _startProcessTimes; /**< Process (Kernel and User) start time(s) */
-	omrthread_process_time_t _endProcessTimes;   /**< Process (Kernel and User) end time(s) */
+	omrthread_process_time_t _endProcessTimes; /**< Process (Kernel and User) end time(s) */
 private:
 protected:
 public:
-
 	/**
 	 * Create a HeapStats object.
 	 */
-	MM_CollectionStatistics() :
-		MM_Base()
-		,_totalHeapSize(0)
-		,_totalFreeHeapSize(0)
-		,_startTime(0)
-		,_endTime(0)
-		,_startProcessTimes()
-		,_endProcessTimes()
-	{};
+	MM_CollectionStatistics()
+	        : MM_Base()
+	        , _totalHeapSize(0)
+	        , _totalFreeHeapSize(0)
+	        , _startTime(0)
+	        , _endTime(0)
+	        , _startProcessTimes()
+	        , _endProcessTimes(){};
 };
 
 #endif /* COLLECTIONSTATISTICS_HPP_ */

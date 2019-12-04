@@ -33,7 +33,8 @@ ArgParser::parseOptions(int argc, char *argv[], J9TDFOptions *options)
 	RCType rc = RC_OK;
 
 	for (int i = 1; i < argc; i++) {
-		if (StringUtils::startsWithUpperLower(argv[i], "-root") || StringUtils::startsWithUpperLower(argv[i], "-file")) {
+		if (StringUtils::startsWithUpperLower(argv[i], "-root")
+		        || StringUtils::startsWithUpperLower(argv[i], "-file")) {
 			bool parsingRoot = StringUtils::startsWithUpperLower(argv[i], "-root");
 			i++;
 			if (i >= argc) {
@@ -105,7 +106,7 @@ ArgParser::parseOptions(int argc, char *argv[], J9TDFOptions *options)
 			options->verboseOutput = true;
 		} else if (StringUtils::startsWithUpperLower(argv[i], "-debug")) {
 			options->debugOutput = true;
-		} else if (StringUtils::startsWithUpperLower(argv[i], "-w2cd"))	{
+		} else if (StringUtils::startsWithUpperLower(argv[i], "-w2cd")) {
 			options->writeToCurrentDir = true;
 		} else if (StringUtils::startsWithUpperLower(argv[i], "-generateCfiles")) {
 			options->generateCFiles = true;

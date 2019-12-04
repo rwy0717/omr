@@ -24,16 +24,16 @@
  * definitions are permitted.
  */
 
-      EvenOddPair         = LastVRF + 1,      // Assign an even/odd pair to the reg pair
-      LegalEvenOfPair     = LastVRF + 2,      // Assign an even reg that is followed by an unlocked odd register
-      LegalOddOfPair      = LastVRF + 3,      // Assign an odd reg that is preceded by an unlocked even register
-      FPPair              = LastVRF + 4,      // Assign an FP pair to the reg pair
-      LegalFirstOfFPPair  = LastVRF + 5,      // Assign first FP reg of a FP reg Pair
-      LegalSecondOfFPPair = LastVRF + 6,      // Assign second FP reg of a FP reg Pair
-      AssignAny           = LastVRF + 7,      // Assign any register
-      KillVolHighRegs     = LastVRF + 8,      // Kill all volatile access regs
-      MayDefine           = LastVRF + 9,      // This instruction's result should be modelled as live before as this instruction only 'may defines' the register
-      SpilledReg          = LastVRF + 10,     // OOL: Any Spilled register cross OOL sequences
+EvenOddPair = LastVRF + 1, // Assign an even/odd pair to the reg pair
+        LegalEvenOfPair = LastVRF + 2, // Assign an even reg that is followed by an unlocked odd register
+        LegalOddOfPair = LastVRF + 3, // Assign an odd reg that is preceded by an unlocked even register
+        FPPair = LastVRF + 4, // Assign an FP pair to the reg pair
+        LegalFirstOfFPPair = LastVRF + 5, // Assign first FP reg of a FP reg Pair
+        LegalSecondOfFPPair = LastVRF + 6, // Assign second FP reg of a FP reg Pair
+        AssignAny = LastVRF + 7, // Assign any register
+        KillVolHighRegs = LastVRF + 8, // Kill all volatile access regs
+        MayDefine = LastVRF + 9, // This instruction's result should be modelled as live before as this instruction only
+                                 // 'may defines' the register
+        SpilledReg = LastVRF + 10, // OOL: Any Spilled register cross OOL sequences
 
-      NumRegisters        = LastVRF + 1    // (include noReg)
-
+        NumRegisters = LastVRF + 1 // (include noReg)

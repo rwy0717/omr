@@ -24,9 +24,8 @@
 
 #if defined(OMR_GC_MODRON_CONCURRENT_MARK)
 
-#include "ConcurrentGC.hpp"
-
 #include "ConcurrentFinalCleanCardsTask.hpp"
+#include "ConcurrentGC.hpp"
 
 void
 MM_ConcurrentFinalCleanCardsTask::run(MM_EnvironmentBase *envBase)
@@ -57,4 +56,3 @@ MM_ConcurrentFinalCleanCardsTask::cleanup(MM_EnvironmentBase *env)
 }
 
 #endif /* OMR_GC_MODRON_CONCURRENT_MARK */
- 

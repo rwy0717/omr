@@ -22,17 +22,17 @@
 #include "ddr/scanner/dwarf/DwarfFunctions.hpp"
 
 /* Statics to define */
-static const char * const _errmsgs[] = {
-	"No error (0)",
-	"DW_DLE_ATTR_FORM_BAD (1)",
-	"DW_DLE_BADOFF (2) Invalid offset",
-	"DW_DLE_DIE_NULL (3)",
-	"DW_DLE_FNO (4) file not open",
-	"DW_DLE_IA (5) invalid argument",
-	"DW_DLE_IOF (6) I/O failure",
-	"DW_DLE_MAF (7) memory allocation failure",
-	"DW_DLE_NOB (8) not an object file or dSYM bundle not found",
-	"DW_DLE_VMM (9) dwarf format/library version mismatch",
+static const char *const _errmsgs[] = {
+        "No error (0)",
+        "DW_DLE_ATTR_FORM_BAD (1)",
+        "DW_DLE_BADOFF (2) Invalid offset",
+        "DW_DLE_DIE_NULL (3)",
+        "DW_DLE_FNO (4) file not open",
+        "DW_DLE_IA (5) invalid argument",
+        "DW_DLE_IOF (6) I/O failure",
+        "DW_DLE_MAF (7) memory allocation failure",
+        "DW_DLE_NOB (8) not an object file or dSYM bundle not found",
+        "DW_DLE_VMM (9) dwarf format/library version mismatch",
 };
 
 vector<string> Dwarf_CU_Context::_fileList;
@@ -60,7 +60,8 @@ dwarf_srcfiles(Dwarf_Die die, char ***srcfiles, Dwarf_Signed *filecount, Dwarf_E
 			setError(error, DW_DLE_MAF);
 		} else {
 			size_t index = 0;
-			for (str_vect::iterator it = Dwarf_CU_Context::_fileList.begin(); it != Dwarf_CU_Context::_fileList.end(); ++it) {
+			for (str_vect::iterator it = Dwarf_CU_Context::_fileList.begin();
+			        it != Dwarf_CU_Context::_fileList.end(); ++it) {
 				(*srcfiles)[index] = strdup(it->c_str());
 				if (NULL == (*srcfiles)[index]) {
 					ret = DW_DLV_ERROR;
@@ -75,11 +76,7 @@ dwarf_srcfiles(Dwarf_Die die, char ***srcfiles, Dwarf_Signed *filecount, Dwarf_E
 }
 
 int
-dwarf_attr(
-	Dwarf_Die die,
-	Dwarf_Half attr,
-	Dwarf_Attribute *return_attr,
-	Dwarf_Error *error)
+dwarf_attr(Dwarf_Die die, Dwarf_Half attr, Dwarf_Attribute *return_attr, Dwarf_Error *error)
 {
 	int ret = DW_DLV_NO_ENTRY;
 	if (NULL == die) {
@@ -142,7 +139,7 @@ dwarf_dealloc(Dwarf_Debug dbg, void *space, Dwarf_Unsigned type)
 	if (DW_DLA_STRING == type) {
 		free((char *)space);
 	} else if (DW_DLA_LIST == type) {
-		delete[] (void **)space;
+		delete[](void **) space;
 	} else if (DW_DLA_ERROR == type) {
 		delete (Dwarf_Error)space;
 	}
@@ -205,7 +202,7 @@ dwarf_formflag(Dwarf_Attribute attr, Dwarf_Bool *returned_flag, Dwarf_Error *err
 }
 
 int
-dwarf_formudata(Dwarf_Attribute attr, Dwarf_Unsigned  *returned_val, Dwarf_Error *error)
+dwarf_formudata(Dwarf_Attribute attr, Dwarf_Unsigned *returned_val, Dwarf_Error *error)
 {
 	int ret = DW_DLV_OK;
 	if ((NULL == attr) || (NULL == returned_val)) {
@@ -275,11 +272,7 @@ dwarf_global_formref(Dwarf_Attribute attr, Dwarf_Off *return_offset, Dwarf_Error
 }
 
 int
-dwarf_offdie_b(Dwarf_Debug dbg,
-	Dwarf_Off offset,
-	Dwarf_Bool is_info,
-	Dwarf_Die *return_die,
-	Dwarf_Error *error)
+dwarf_offdie_b(Dwarf_Debug dbg, Dwarf_Off offset, Dwarf_Bool is_info, Dwarf_Die *return_die, Dwarf_Error *error)
 {
 	int ret = DW_DLV_OK;
 	if (NULL == return_die) {
@@ -364,13 +357,8 @@ dwarf_formsdata(Dwarf_Attribute attr, Dwarf_Signed *returned_val, Dwarf_Error *e
 }
 
 int
-dwarf_next_cu_header(Dwarf_Debug dbg,
-	Dwarf_Unsigned *cu_header_length,
-	Dwarf_Half *version_stamp,
-	Dwarf_Off *abbrev_offset,
-	Dwarf_Half *address_size,
-	Dwarf_Unsigned *next_cu_header_offset,
-	Dwarf_Error *error)
+dwarf_next_cu_header(Dwarf_Debug dbg, Dwarf_Unsigned *cu_header_length, Dwarf_Half *version_stamp,
+        Dwarf_Off *abbrev_offset, Dwarf_Half *address_size, Dwarf_Unsigned *next_cu_header_offset, Dwarf_Error *error)
 {
 	/* Advance the current CU and return its properties. */
 	int ret = DW_DLV_OK;
@@ -438,78 +426,30 @@ dwarf_get_TAG_name(Dwarf_Half tag, const char **name)
 		ret = DW_DLV_ERROR;
 	} else {
 		switch (tag) {
-		case DW_TAG_unknown:
-			*name = "DW_TAG_unknown";
-			break;
-		case DW_TAG_array_type:
-			*name = "DW_TAG_array_type";
-			break;
-		case DW_TAG_base_type:
-			*name = "DW_TAG_base_type";
-			break;
-		case DW_TAG_class_type:
-			*name = "DW_TAG_class_type";
-			break;
-		case DW_TAG_compile_unit:
-			*name = "DW_TAG_compile_unit";
-			break;
-		case DW_TAG_const_type:
-			*name = "DW_TAG_const_type";
-			break;
-		case DW_TAG_enumeration_type:
-			*name = "DW_TAG_enumeration_type";
-			break;
-		case DW_TAG_enumerator:
-			*name = "DW_TAG_enumerator";
-			break;
-		case DW_TAG_inheritance:
-			*name = "DW_TAG_inheritance";
-			break;
-		case DW_TAG_member:
-			*name = "DW_TAG_member";
-			break;
-		case DW_TAG_namespace:
-			*name = "DW_TAG_namespace";
-			break;
-		case DW_TAG_pointer_type:
-			*name = "DW_TAG_pointer_type";
-			break;
-		case DW_TAG_ptr_to_member_type:
-			*name = "DW_TAG_ptr_to_member_type";
-			break;
-		case DW_TAG_restrict_type:
-			*name = "DW_TAG_restrict_type";
-			break;
-		case DW_TAG_reference_type:
-			*name = "DW_TAG_reference_type";
-			break;
-		case DW_TAG_shared_type:
-			*name = "DW_TAG_shared_type";
-			break;
-		case DW_TAG_structure_type:
-			*name = "DW_TAG_structure_type";
-			break;
-		case DW_TAG_subprogram:
-			*name = "DW_TAG_subprogram";
-			break;
-		case DW_TAG_subrange_type:
-			*name = "DW_TAG_subrange_type";
-			break;
-		case DW_TAG_subroutine_type:
-			*name = "DW_TAG_subroutine_type";
-			break;
-		case DW_TAG_typedef:
-			*name = "DW_TAG_typedef";
-			break;
-		case DW_TAG_union_type:
-			*name = "DW_TAG_union_type";
-			break;
-		case DW_TAG_volatile_type:
-			*name = "DW_TAG_volatile_type";
-			break;
-		default:
-			*name = "unknown";
-			break;
+		case DW_TAG_unknown: *name = "DW_TAG_unknown"; break;
+		case DW_TAG_array_type: *name = "DW_TAG_array_type"; break;
+		case DW_TAG_base_type: *name = "DW_TAG_base_type"; break;
+		case DW_TAG_class_type: *name = "DW_TAG_class_type"; break;
+		case DW_TAG_compile_unit: *name = "DW_TAG_compile_unit"; break;
+		case DW_TAG_const_type: *name = "DW_TAG_const_type"; break;
+		case DW_TAG_enumeration_type: *name = "DW_TAG_enumeration_type"; break;
+		case DW_TAG_enumerator: *name = "DW_TAG_enumerator"; break;
+		case DW_TAG_inheritance: *name = "DW_TAG_inheritance"; break;
+		case DW_TAG_member: *name = "DW_TAG_member"; break;
+		case DW_TAG_namespace: *name = "DW_TAG_namespace"; break;
+		case DW_TAG_pointer_type: *name = "DW_TAG_pointer_type"; break;
+		case DW_TAG_ptr_to_member_type: *name = "DW_TAG_ptr_to_member_type"; break;
+		case DW_TAG_restrict_type: *name = "DW_TAG_restrict_type"; break;
+		case DW_TAG_reference_type: *name = "DW_TAG_reference_type"; break;
+		case DW_TAG_shared_type: *name = "DW_TAG_shared_type"; break;
+		case DW_TAG_structure_type: *name = "DW_TAG_structure_type"; break;
+		case DW_TAG_subprogram: *name = "DW_TAG_subprogram"; break;
+		case DW_TAG_subrange_type: *name = "DW_TAG_subrange_type"; break;
+		case DW_TAG_subroutine_type: *name = "DW_TAG_subroutine_type"; break;
+		case DW_TAG_typedef: *name = "DW_TAG_typedef"; break;
+		case DW_TAG_union_type: *name = "DW_TAG_union_type"; break;
+		case DW_TAG_volatile_type: *name = "DW_TAG_volatile_type"; break;
+		default: *name = "unknown"; break;
 		}
 	}
 	return ret;

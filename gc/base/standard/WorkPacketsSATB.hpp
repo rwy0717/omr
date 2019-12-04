@@ -31,21 +31,22 @@
 
 class MM_IncrementalOverflow;
 
-class MM_WorkPacketsSATB : public MM_WorkPackets
-{
+class MM_WorkPacketsSATB : public MM_WorkPackets {
 protected:
-	MM_PacketList _inUseBarrierPacketList;  /**< List for packets currently being used for the remembered set*/
+	MM_PacketList _inUseBarrierPacketList; /**< List for packets currently being used for the remembered set*/
 
 public:
 	static MM_WorkPacketsSATB *newInstance(MM_EnvironmentBase *env);
-	
+
 	virtual bool initialize(MM_EnvironmentBase *env);
 	virtual void tearDown(MM_EnvironmentBase *env);
-	
-	MM_IncrementalOverflow *getIncrementalOverflowHandler() const { return (MM_IncrementalOverflow*)_overflowHandler; }
-	
 
-	MMINLINE bool inUsePacketsAvailable(MM_EnvironmentBase *env) { return !_inUseBarrierPacketList.isEmpty();}
+	MM_IncrementalOverflow *getIncrementalOverflowHandler() const
+	{
+		return (MM_IncrementalOverflow *)_overflowHandler;
+	}
+
+	MMINLINE bool inUsePacketsAvailable(MM_EnvironmentBase *env) { return !_inUseBarrierPacketList.isEmpty(); }
 
 	virtual MM_Packet *getBarrierPacket(MM_EnvironmentBase *env);
 	virtual void putInUsePacket(MM_EnvironmentBase *env, MM_Packet *packet);
@@ -57,9 +58,7 @@ public:
 	/**
 	 * Create a MM_WorkPacketsRealtime object.
 	 */
-	MM_WorkPacketsSATB(MM_EnvironmentBase *env) :
-		MM_WorkPackets(env)
-		, _inUseBarrierPacketList(NULL)
+	MM_WorkPacketsSATB(MM_EnvironmentBase *env) : MM_WorkPackets(env), _inUseBarrierPacketList(NULL)
 	{
 		_typeId = __FUNCTION__;
 	};
@@ -74,4 +73,3 @@ private:
 };
 #endif /* OMR_GC_REALTIME */
 #endif /* WORKPACKETSSATB_HPP_ */
-

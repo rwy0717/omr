@@ -23,13 +23,11 @@
 #if !defined(VERBOSEWRITERCHAIN_HPP_)
 #define VERBOSEWRITERCHAIN_HPP_
 
+#include "Base.hpp"
+#include "EnvironmentBase.hpp"
+#include "modronbase.h"
 #include "omrcfg.h"
 #include "omrstdarg.h"
-#include "modronbase.h"
-
-#include "Base.hpp"
-
-#include "EnvironmentBase.hpp"
 
 class MM_VerboseBuffer;
 class MM_VerboseWriter;
@@ -38,8 +36,7 @@ class MM_VerboseWriter;
  * This class manages a list of writers. It formats and buffers output, flushing it
  * to the writers when asked.
  */
-class MM_VerboseWriterChain : public MM_Base
-{
+class MM_VerboseWriterChain : public MM_Base {
 public:
 protected:
 private:
@@ -59,8 +56,8 @@ public:
 	 * Add a new verbose writer to the list of active output writers.
 	 * @param writer[in] New writer to add to list.
 	 */
-	void addWriter(MM_VerboseWriter* writer);
-	
+	void addWriter(MM_VerboseWriter *writer);
+
 	/**
 	 * Fetch the first writer in the linked chain of writers.
 	 * @return the first writer
@@ -69,14 +66,15 @@ public:
 
 	/**
 	 * Notify each of the writers in the chain that a GC cycle has ended
-	 * @param env[in] the current thread 
+	 * @param env[in] the current thread
 	 */
 	void endOfCycle(MM_EnvironmentBase *env);
-	
+
 protected:
 	MM_VerboseWriterChain();
 	void tearDown(MM_EnvironmentBase *env);
-	bool initialize(MM_EnvironmentBase* env);
+	bool initialize(MM_EnvironmentBase *env);
+
 private:
 };
 

@@ -20,18 +20,17 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-#include "modronapicore.hpp"
 #include "VerboseWriterFileLoggingSynchronous.hpp"
 
 #include "EnvironmentBase.hpp"
 #include "GCExtensionsBase.hpp"
 #include "VerboseManager.hpp"
-
+#include "modronapicore.hpp"
 #include <string.h>
 
-MM_VerboseWriterFileLoggingSynchronous::MM_VerboseWriterFileLoggingSynchronous(MM_EnvironmentBase *env, MM_VerboseManager *manager)
-	:MM_VerboseWriterFileLogging(env, manager, VERBOSE_WRITER_FILE_LOGGING_SYNCHRONOUS)
-	,_logFileDescriptor(-1)
+MM_VerboseWriterFileLoggingSynchronous::MM_VerboseWriterFileLoggingSynchronous(
+        MM_EnvironmentBase *env, MM_VerboseManager *manager)
+        : MM_VerboseWriterFileLogging(env, manager, VERBOSE_WRITER_FILE_LOGGING_SYNCHRONOUS), _logFileDescriptor(-1)
 {
 	/* No implementation */
 }
@@ -41,14 +40,18 @@ MM_VerboseWriterFileLoggingSynchronous::MM_VerboseWriterFileLoggingSynchronous(M
  * @return Pointer to the new MM_VerboseWriterFileLoggingSynchronous.
  */
 MM_VerboseWriterFileLoggingSynchronous *
-MM_VerboseWriterFileLoggingSynchronous::newInstance(MM_EnvironmentBase *env, MM_VerboseManager *manager, char *filename, uintptr_t numFiles, uintptr_t numCycles)
+MM_VerboseWriterFileLoggingSynchronous::newInstance(
+        MM_EnvironmentBase *env, MM_VerboseManager *manager, char *filename, uintptr_t numFiles, uintptr_t numCycles)
 {
 	MM_GCExtensionsBase *extensions = MM_GCExtensionsBase::getExtensions(env->getOmrVM());
-	
-	MM_VerboseWriterFileLoggingSynchronous *agent = (MM_VerboseWriterFileLoggingSynchronous *)extensions->getForge()->allocate(sizeof(MM_VerboseWriterFileLoggingSynchronous), OMR::GC::AllocationCategory::DIAGNOSTIC, OMR_GET_CALLSITE());
-	if(agent) {
-		new(agent) MM_VerboseWriterFileLoggingSynchronous(env, manager);
-		if(!agent->initialize(env, filename, numFiles, numCycles)) {
+
+	MM_VerboseWriterFileLoggingSynchronous *agent =
+	        (MM_VerboseWriterFileLoggingSynchronous *)extensions->getForge()->allocate(
+	                sizeof(MM_VerboseWriterFileLoggingSynchronous), OMR::GC::AllocationCategory::DIAGNOSTIC,
+	                OMR_GET_CALLSITE());
+	if (agent) {
+		new (agent) MM_VerboseWriterFileLoggingSynchronous(env, manager);
+		if (!agent->initialize(env, filename, numFiles, numCycles)) {
 			agent->kill(env);
 			agent = NULL;
 		}
@@ -61,7 +64,8 @@ MM_VerboseWriterFileLoggingSynchronous::newInstance(MM_EnvironmentBase *env, MM_
  * @return true on success, false otherwise
  */
 bool
-MM_VerboseWriterFileLoggingSynchronous::initialize(MM_EnvironmentBase *env, const char *filename, uintptr_t numFiles, uintptr_t numCycles)
+MM_VerboseWriterFileLoggingSynchronous::initialize(
+        MM_EnvironmentBase *env, const char *filename, uintptr_t numFiles, uintptr_t numCycles)
 {
 	return MM_VerboseWriterFileLogging::initialize(env, filename, numFiles, numCycles);
 }
@@ -84,29 +88,31 @@ bool
 MM_VerboseWriterFileLoggingSynchronous::openFile(MM_EnvironmentBase *env)
 {
 	OMRPORT_ACCESS_FROM_OMRPORT(env->getPortLibrary());
-	MM_GCExtensionsBase* extensions = env->getExtensions();
-	const char* version = omrgc_get_version(env->getOmrVM());
-	
+	MM_GCExtensionsBase *extensions = env->getExtensions();
+	const char *version = omrgc_get_version(env->getOmrVM());
+
 	char *filenameToOpen = expandFilename(env, _currentFile);
 	if (NULL == filenameToOpen) {
 		return false;
 	}
-	
-	_logFileDescriptor = omrfile_open(filenameToOpen, EsOpenRead | EsOpenWrite | EsOpenCreate | EsOpenTruncate, 0666);
-	if(-1 == _logFileDescriptor) {
+
+	_logFileDescriptor =
+	        omrfile_open(filenameToOpen, EsOpenRead | EsOpenWrite | EsOpenCreate | EsOpenTruncate, 0666);
+	if (-1 == _logFileDescriptor) {
 		char *cursor = filenameToOpen;
 		/**
 		 * This may have failed due to directories in the path not being available.
 		 * Try to create these directories and attempt to open again before failing.
 		 */
-		while ( (cursor = strchr(++cursor, DIR_SEPARATOR)) != NULL ) {
+		while ((cursor = strchr(++cursor, DIR_SEPARATOR)) != NULL) {
 			*cursor = '\0';
 			omrfile_mkdir(filenameToOpen);
 			*cursor = DIR_SEPARATOR;
 		}
 
 		/* Try again */
-		_logFileDescriptor = omrfile_open(filenameToOpen, EsOpenRead | EsOpenWrite | EsOpenCreate | EsOpenTruncate, 0666);
+		_logFileDescriptor =
+		        omrfile_open(filenameToOpen, EsOpenRead | EsOpenWrite | EsOpenCreate | EsOpenTruncate, 0666);
 		if (-1 == _logFileDescriptor) {
 			_manager->handleFileOpenError(env, filenameToOpen);
 			extensions->getForge()->free(filenameToOpen);
@@ -115,9 +121,9 @@ MM_VerboseWriterFileLoggingSynchronous::openFile(MM_EnvironmentBase *env)
 	}
 
 	extensions->getForge()->free(filenameToOpen);
-	
+
 	omrfile_printf(_logFileDescriptor, getHeader(env), version);
-	
+
 	return true;
 }
 
@@ -128,8 +134,8 @@ void
 MM_VerboseWriterFileLoggingSynchronous::closeFile(MM_EnvironmentBase *env)
 {
 	OMRPORT_ACCESS_FROM_OMRPORT(env->getPortLibrary());
-	
-	if(-1 != _logFileDescriptor) {
+
+	if (-1 != _logFileDescriptor) {
 		omrfile_write_text(_logFileDescriptor, getFooter(env), strlen(getFooter(env)));
 		omrfile_write_text(_logFileDescriptor, "\n", strlen("\n"));
 		omrfile_close(_logFileDescriptor);
@@ -138,16 +144,16 @@ MM_VerboseWriterFileLoggingSynchronous::closeFile(MM_EnvironmentBase *env)
 }
 
 void
-MM_VerboseWriterFileLoggingSynchronous::outputString(MM_EnvironmentBase *env, const char* string)
+MM_VerboseWriterFileLoggingSynchronous::outputString(MM_EnvironmentBase *env, const char *string)
 {
 	OMRPORT_ACCESS_FROM_OMRPORT(env->getPortLibrary());
 
-	if(-1 == _logFileDescriptor) {
+	if (-1 == _logFileDescriptor) {
 		/* we open the file at the end of the cycle so can't have a final empty file at the end of a run */
 		openFile(env);
 	}
 
-	if(-1 != _logFileDescriptor){
+	if (-1 != _logFileDescriptor) {
 		omrfile_write_text(_logFileDescriptor, string, strlen(string));
 	} else {
 		omrfile_write_text(OMRPORT_TTY_ERR, string, strlen(string));

@@ -24,8 +24,7 @@
 
 #include "ddr/ir/ClassType.hpp"
 
-class UnionUDT : public ClassType
-{
+class UnionUDT : public ClassType {
 public:
 	explicit UnionUDT(size_t size, unsigned int lineNumber = 0);
 	virtual ~UnionUDT();
@@ -33,7 +32,7 @@ public:
 	virtual DDR_RC acceptVisitor(const TypeVisitor &visitor);
 	virtual const string &getSymbolKindName() const;
 
-	bool operator==(const Type & rhs) const;
+	bool operator==(const Type &rhs) const;
 	virtual bool compareToUnion(const UnionUDT &) const;
 };
 

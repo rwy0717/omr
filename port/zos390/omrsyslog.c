@@ -98,12 +98,12 @@ writeToZOSLog(const char *message)
 
 #if !defined(OMR_EBCDIC)
 	/* Convert from the internal ascii format to ebcdic */
-	ebcdicbuf = a2e_func((char *) message, strlen(message));
+	ebcdicbuf = a2e_func((char *)message, strlen(message));
 	if (NULL == ebcdicbuf) {
 		return FALSE;
 	}
 #else
-   ebcdicbuf = message;
+	ebcdicbuf = message;
 #endif /* !defined(OMR_EBCDIC) */
 
 	/* Re-implemented using _console2() instead of WTO, to provided proper multi-line messages. See

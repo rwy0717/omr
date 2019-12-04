@@ -59,11 +59,9 @@ typedef struct protectedWriteInfo {
 	char *address;
 } protectedWriteInfo;
 
-class PortMmapTest : public ::testing::Test
-{
+class PortMmapTest : public ::testing::Test {
 protected:
-	static void
-	TearDownTestCase()
+	static void TearDownTestCase()
 	{
 		testFileCleanUp("mmapTest");
 		testFileCleanUp("omrmmap_test");
@@ -76,7 +74,6 @@ simpleHandlerFunction(struct OMRPortLibrary *portLibrary, uint32_t gpType, void 
 	portTestEnv->log("A crash occured, signal handler invoked (type = 0x%x)\n", gpType);
 	return OMRPORT_SIG_EXCEPTION_RETURN;
 }
-
 
 static uintptr_t
 protectedWriter(OMRPortLibrary *portLibrary, void *arg)
@@ -138,8 +135,6 @@ TEST_F(PortMmapTest, mmap_test0)
 	reportTestExit(OMRPORTLIB, testName);
 }
 
-
-
 /**
  * Verify port memory mapping.
  *
@@ -179,7 +174,9 @@ TEST_F(PortMmapTest, mmap_test1)
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Create of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Create of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -187,7 +184,9 @@ TEST_F(PortMmapTest, mmap_test1)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Write to file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Write to file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber,
+		        lastErrorMessage);
 		omrfile_close(fd);
 		goto exit;
 	}
@@ -196,7 +195,9 @@ TEST_F(PortMmapTest, mmap_test1)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber,
+		        lastErrorMessage);
 		goto exit;
 	}
 
@@ -204,7 +205,9 @@ TEST_F(PortMmapTest, mmap_test1)
 	if (-1 == fileLength) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Getting length of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Getting length of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -212,15 +215,20 @@ TEST_F(PortMmapTest, mmap_test1)
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Open of file %s for mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Open of file %s for mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
-	mmapHandle = (J9MmapHandle *)omrmmap_map_file(fd, 0, (uintptr_t)fileLength, NULL, OMRPORT_MMAP_FLAG_READ, OMRMEM_CATEGORY_PORT_LIBRARY);
+	mmapHandle = (J9MmapHandle *)omrmmap_map_file(
+	        fd, 0, (uintptr_t)fileLength, NULL, OMRPORT_MMAP_FLAG_READ, OMRMEM_CATEGORY_PORT_LIBRARY);
 	if ((NULL == mmapHandle) || (NULL == mmapHandle->pointer)) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Mmap_map_file of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Mmap_map_file of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 	mapAddr = (char *)mmapHandle->pointer;
@@ -230,7 +238,9 @@ TEST_F(PortMmapTest, mmap_test1)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 	}
 
 	if (strcmp(mapAddr + 30, readableText) != 0) {
@@ -274,7 +284,8 @@ TEST_F(PortMmapTest, mmap_test2)
 	reportTestEntry(OMRPORTLIB, testName);
 
 	if (!(mmapCapabilities & OMRPORT_MMAP_CAPABILITY_WRITE)) {
-		portTestEnv->log(LEVEL_ERROR, "OMRPORT_MMAP_CAPABILITY_WRITE not supported on this platform, bypassing test\n");
+		portTestEnv->log(
+		        LEVEL_ERROR, "OMRPORT_MMAP_CAPABILITY_WRITE not supported on this platform, bypassing test\n");
 		goto exit;
 	}
 
@@ -290,7 +301,9 @@ TEST_F(PortMmapTest, mmap_test2)
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Create of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Create of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -298,7 +311,9 @@ TEST_F(PortMmapTest, mmap_test2)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Write to file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Write to file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber,
+		        lastErrorMessage);
 		omrfile_close(fd);
 		goto exit;
 	}
@@ -307,7 +322,9 @@ TEST_F(PortMmapTest, mmap_test2)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber,
+		        lastErrorMessage);
 		goto exit;
 	}
 
@@ -315,7 +332,9 @@ TEST_F(PortMmapTest, mmap_test2)
 	if (-1 == fileLength) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Getting length of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Getting length of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -323,15 +342,20 @@ TEST_F(PortMmapTest, mmap_test2)
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Open of file %s for mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Open of file %s for mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
-	mmapHandle = (J9MmapHandle *)omrmmap_map_file(fd, 0, (uintptr_t)fileLength, NULL, OMRPORT_MMAP_FLAG_WRITE, OMRMEM_CATEGORY_PORT_LIBRARY);
+	mmapHandle = (J9MmapHandle *)omrmmap_map_file(
+	        fd, 0, (uintptr_t)fileLength, NULL, OMRPORT_MMAP_FLAG_WRITE, OMRMEM_CATEGORY_PORT_LIBRARY);
 	if ((NULL == mmapHandle) || (NULL == mmapHandle->pointer)) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Mmap_map_file of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Mmap_map_file of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 	mapAddr = (char *)mmapHandle->pointer;
@@ -340,7 +364,9 @@ TEST_F(PortMmapTest, mmap_test2)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 	}
 
 	strcpy(mapAddr + 30, modifiedText);
@@ -351,7 +377,9 @@ TEST_F(PortMmapTest, mmap_test2)
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Open of file %s for read after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Open of file %s for read after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n",
+		        filename, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -359,7 +387,9 @@ TEST_F(PortMmapTest, mmap_test2)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Read of file %s after update failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Read of file %s after update failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -367,7 +397,9 @@ TEST_F(PortMmapTest, mmap_test2)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s after read failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s after read failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 	}
 
 	if (strcmp(updatedBuffer + 30, modifiedText) != 0) {
@@ -409,7 +441,8 @@ TEST_F(PortMmapTest, mmap_test3)
 	reportTestEntry(OMRPORTLIB, testName);
 
 	if (!(mmapCapabilities & OMRPORT_MMAP_CAPABILITY_COPYONWRITE)) {
-		portTestEnv->log(LEVEL_ERROR, "OMRPORT_MMAP_CAPABILITY_COPYONWRITE not supported on this platform, bypassing test\n");
+		portTestEnv->log(LEVEL_ERROR,
+		        "OMRPORT_MMAP_CAPABILITY_COPYONWRITE not supported on this platform, bypassing test\n");
 		goto exit;
 	}
 
@@ -425,7 +458,9 @@ TEST_F(PortMmapTest, mmap_test3)
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Create of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Create of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -433,7 +468,9 @@ TEST_F(PortMmapTest, mmap_test3)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Write to file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Write to file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber,
+		        lastErrorMessage);
 		omrfile_close(fd);
 		goto exit;
 	}
@@ -442,7 +479,9 @@ TEST_F(PortMmapTest, mmap_test3)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber,
+		        lastErrorMessage);
 		goto exit;
 	}
 
@@ -450,7 +489,9 @@ TEST_F(PortMmapTest, mmap_test3)
 	if (-1 == fileLength) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Getting length of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Getting length of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -458,15 +499,20 @@ TEST_F(PortMmapTest, mmap_test3)
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Open of file %s for mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Open of file %s for mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
-	mmapHandle = (J9MmapHandle *)omrmmap_map_file(fd, 0, (uintptr_t)fileLength, NULL, OMRPORT_MMAP_FLAG_COPYONWRITE, OMRMEM_CATEGORY_PORT_LIBRARY);
+	mmapHandle = (J9MmapHandle *)omrmmap_map_file(
+	        fd, 0, (uintptr_t)fileLength, NULL, OMRPORT_MMAP_FLAG_COPYONWRITE, OMRMEM_CATEGORY_PORT_LIBRARY);
 	if ((NULL == mmapHandle) || (NULL == mmapHandle->pointer)) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Mmap_map_file of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Mmap_map_file of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 	mapAddr = (char *)mmapHandle->pointer;
@@ -475,7 +521,9 @@ TEST_F(PortMmapTest, mmap_test3)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 	}
 
 	strcpy(mapAddr + 30, modifiedText);
@@ -486,7 +534,9 @@ TEST_F(PortMmapTest, mmap_test3)
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Open of file %s for read after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Open of file %s for read after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n",
+		        filename, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -494,7 +544,9 @@ TEST_F(PortMmapTest, mmap_test3)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Read of file %s after update failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Read of file %s after update failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -502,7 +554,9 @@ TEST_F(PortMmapTest, mmap_test3)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s after read failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s after read failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 	}
 
 	if (strcmp(updatedBuffer + 30, readableText) != 0) {
@@ -543,8 +597,10 @@ TEST_F(PortMmapTest, mmap_test4)
 
 	reportTestEntry(OMRPORTLIB, testName);
 
-	if (!(mmapCapabilities & OMRPORT_MMAP_CAPABILITY_WRITE) || !(mmapCapabilities & OMRPORT_MMAP_CAPABILITY_MSYNC)) {
-		portTestEnv->log(LEVEL_ERROR, "OMRPORT_MMAP_CAPABILITY_WRITE or _MSYNC not supported on this platform, bypassing test\n");
+	if (!(mmapCapabilities & OMRPORT_MMAP_CAPABILITY_WRITE)
+	        || !(mmapCapabilities & OMRPORT_MMAP_CAPABILITY_MSYNC)) {
+		portTestEnv->log(LEVEL_ERROR,
+		        "OMRPORT_MMAP_CAPABILITY_WRITE or _MSYNC not supported on this platform, bypassing test\n");
 		goto exit;
 	}
 
@@ -560,7 +616,9 @@ TEST_F(PortMmapTest, mmap_test4)
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Create of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Create of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -568,7 +626,9 @@ TEST_F(PortMmapTest, mmap_test4)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Write to file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Write to file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber,
+		        lastErrorMessage);
 		omrfile_close(fd);
 		goto exit;
 	}
@@ -577,7 +637,9 @@ TEST_F(PortMmapTest, mmap_test4)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber,
+		        lastErrorMessage);
 		goto exit;
 	}
 
@@ -585,7 +647,9 @@ TEST_F(PortMmapTest, mmap_test4)
 	if (-1 == fileLength) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Getting length of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Getting length of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -593,15 +657,20 @@ TEST_F(PortMmapTest, mmap_test4)
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Open of file %s for mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Open of file %s for mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
-	mmapHandle = (J9MmapHandle *)omrmmap_map_file(fd, 0, (uintptr_t)fileLength, NULL, OMRPORT_MMAP_FLAG_WRITE, OMRMEM_CATEGORY_PORT_LIBRARY);
+	mmapHandle = (J9MmapHandle *)omrmmap_map_file(
+	        fd, 0, (uintptr_t)fileLength, NULL, OMRPORT_MMAP_FLAG_WRITE, OMRMEM_CATEGORY_PORT_LIBRARY);
 	if ((NULL == mmapHandle) || (NULL == mmapHandle->pointer)) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Mmap_map_file of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Mmap_map_file of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 	mapAddr = (char *)mmapHandle->pointer;
@@ -610,7 +679,9 @@ TEST_F(PortMmapTest, mmap_test4)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 	}
 
 	strcpy(mapAddr + 30, modifiedText);
@@ -619,14 +690,17 @@ TEST_F(PortMmapTest, mmap_test4)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Msync failed: lastErrorNumber=%d, lastErrorMessage=%s\n", lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "Msync failed: lastErrorNumber=%d, lastErrorMessage=%s\n",
+		        lastErrorNumber, lastErrorMessage);
 	}
 
 	fd = omrfile_open(filename, EsOpenRead, 0660);
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Open of file %s for read after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Open of file %s for read after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n",
+		        filename, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -634,7 +708,9 @@ TEST_F(PortMmapTest, mmap_test4)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Read of file %s after update failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Read of file %s after update failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -642,7 +718,9 @@ TEST_F(PortMmapTest, mmap_test4)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s after read failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s after read failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 	}
 
 	if (strcmp(updatedBuffer + 30, modifiedText) != 0) {
@@ -678,8 +756,10 @@ TEST_F(PortMmapTest, mmap_test5)
 
 	reportTestEntry(OMRPORTLIB, testName);
 
-	if (!(mmapCapabilities & OMRPORT_MMAP_CAPABILITY_WRITE) || !(mmapCapabilities & OMRPORT_MMAP_CAPABILITY_MSYNC)) {
-		portTestEnv->log(LEVEL_ERROR, "OMRPORT_MMAP_CAPABILITY_WRITE or _MSYNC not supported on this platform, bypassing test\n");
+	if (!(mmapCapabilities & OMRPORT_MMAP_CAPABILITY_WRITE)
+	        || !(mmapCapabilities & OMRPORT_MMAP_CAPABILITY_MSYNC)) {
+		portTestEnv->log(LEVEL_ERROR,
+		        "OMRPORT_MMAP_CAPABILITY_WRITE or _MSYNC not supported on this platform, bypassing test\n");
 		goto exit;
 	}
 
@@ -704,10 +784,12 @@ TEST_F(PortMmapTest, mmap_test5)
 	termstat2 = waitForTestProcess(OMRPORTLIB, pid2);
 
 	if (termstat1 != 0) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Child process 1 exited with status %i: Expected 0.\n", termstat1);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "Child process 1 exited with status %i: Expected 0.\n", termstat1);
 	}
 	if (termstat2 != 0) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Child process 2 exited with status %i: Expected 0.\n", termstat2);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "Child process 2 exited with status %i: Expected 0.\n", termstat2);
 	}
 
 exit:
@@ -752,7 +834,9 @@ omrmmap_test5_child_1(OMRPortLibrary *portLibrary)
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Create of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Create of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -760,7 +844,9 @@ omrmmap_test5_child_1(OMRPortLibrary *portLibrary)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Write to file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Write to file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber,
+		        lastErrorMessage);
 		omrfile_close(fd);
 		goto exit;
 	}
@@ -769,7 +855,9 @@ omrmmap_test5_child_1(OMRPortLibrary *portLibrary)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber,
+		        lastErrorMessage);
 		goto exit;
 	}
 
@@ -779,7 +867,9 @@ omrmmap_test5_child_1(OMRPortLibrary *portLibrary)
 	if (-1 == fileLength) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Getting length of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Getting length of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -787,15 +877,20 @@ omrmmap_test5_child_1(OMRPortLibrary *portLibrary)
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Open of file %s for mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Open of file %s for mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
-	mmapHandle = (J9MmapHandle *)omrmmap_map_file(fd, 0, (uintptr_t)fileLength, mappingName, OMRPORT_MMAP_FLAG_WRITE, OMRMEM_CATEGORY_PORT_LIBRARY);
+	mmapHandle = (J9MmapHandle *)omrmmap_map_file(
+	        fd, 0, (uintptr_t)fileLength, mappingName, OMRPORT_MMAP_FLAG_WRITE, OMRMEM_CATEGORY_PORT_LIBRARY);
 	if ((NULL == mmapHandle) || (NULL == mmapHandle->pointer)) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Mmap_map_file of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Mmap_map_file of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 	mapAddr = (char *)mmapHandle->pointer;
@@ -804,7 +899,9 @@ omrmmap_test5_child_1(OMRPortLibrary *portLibrary)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 	}
 
 	portTestEnv->log("Child 1: Mapped file, readable text = \"%s\"\n", mapAddr + 30);
@@ -861,7 +958,9 @@ omrmmap_test5_child_2(OMRPortLibrary *portLibrary)
 	if (-1 == fileLength) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Getting length of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Getting length of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -869,15 +968,20 @@ omrmmap_test5_child_2(OMRPortLibrary *portLibrary)
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Open of file %s for mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Open of file %s for mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
-	mmapHandle = (J9MmapHandle *)omrmmap_map_file(fd, 0, (uintptr_t)fileLength, mappingName, OMRPORT_MMAP_FLAG_WRITE, OMRMEM_CATEGORY_PORT_LIBRARY);
+	mmapHandle = (J9MmapHandle *)omrmmap_map_file(
+	        fd, 0, (uintptr_t)fileLength, mappingName, OMRPORT_MMAP_FLAG_WRITE, OMRMEM_CATEGORY_PORT_LIBRARY);
 	if ((NULL == mmapHandle) || (NULL == mmapHandle->pointer)) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Mmap_map_file of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Mmap_map_file of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 	mapAddr = (char *)mmapHandle->pointer;
@@ -886,7 +990,9 @@ omrmmap_test5_child_2(OMRPortLibrary *portLibrary)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 	}
 
 	portTestEnv->log("Child 2: Mapped file, readable text = \"%s\"\n", mapAddr + 30);
@@ -903,7 +1009,8 @@ omrmmap_test5_child_2(OMRPortLibrary *portLibrary)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Msync failed: lastErrorNumber=%d, lastErrorMessage=%s\n", lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "Msync failed: lastErrorNumber=%d, lastErrorMessage=%s\n",
+		        lastErrorNumber, lastErrorMessage);
 	}
 
 	portTestEnv->log("Child 2: Changed file, readable text = \"%s\"\n", mapAddr + 30);
@@ -924,11 +1031,11 @@ exit:
 }
 
 /**
-* Verify that if mmap has the capability to protect, that we get non-zero from omrmmap_get_region_granularity
-*
-* Verify that if @ref omrmmap.c::omrmmap_protect "omrmmap_protect()" returns  OMRPORT_MMAP_CAPABILITY_PROTECT,
-* 	that @ref omrmmap::omrmmap_get_region_granularity "omrmmap_get_region_granularity()" does not return 0
-*/
+ * Verify that if mmap has the capability to protect, that we get non-zero from omrmmap_get_region_granularity
+ *
+ * Verify that if @ref omrmmap.c::omrmmap_protect "omrmmap_protect()" returns  OMRPORT_MMAP_CAPABILITY_PROTECT,
+ * 	that @ref omrmmap::omrmmap_get_region_granularity "omrmmap_get_region_granularity()" does not return 0
+ */
 TEST_F(PortMmapTest, mmap_test6)
 {
 	OMRPORT_ACCESS_FROM_OMRPORT(portTestEnv->getPortLibrary());
@@ -938,7 +1045,7 @@ TEST_F(PortMmapTest, mmap_test6)
 	intptr_t fd;
 	intptr_t rc;
 
-	char buffer[J9MMAP_PROTECT_TESTS_BUFFER_SIZE ];
+	char buffer[J9MMAP_PROTECT_TESTS_BUFFER_SIZE];
 	int i = 0;
 	const char *readableText = "Here is some readable text in the file";
 	I_64 fileLength = 0;
@@ -950,13 +1057,15 @@ TEST_F(PortMmapTest, mmap_test6)
 
 	reportTestEntry(OMRPORTLIB, testName);
 
-	if (!(mmapCapabilities & OMRPORT_MMAP_CAPABILITY_WRITE) || !(mmapCapabilities & OMRPORT_MMAP_CAPABILITY_MSYNC)) {
-		portTestEnv->log(LEVEL_ERROR, "OMRPORT_MMAP_CAPABILITY_WRITE or _MSYNC not supported on this platform, bypassing test\n");
+	if (!(mmapCapabilities & OMRPORT_MMAP_CAPABILITY_WRITE)
+	        || !(mmapCapabilities & OMRPORT_MMAP_CAPABILITY_MSYNC)) {
+		portTestEnv->log(LEVEL_ERROR,
+		        "OMRPORT_MMAP_CAPABILITY_WRITE or _MSYNC not supported on this platform, bypassing test\n");
 		goto exit;
 	}
 
 	/* Initialize buffer to be written */
-	for (i = 0; i < J9MMAP_PROTECT_TESTS_BUFFER_SIZE ; i++) {
+	for (i = 0; i < J9MMAP_PROTECT_TESTS_BUFFER_SIZE; i++) {
 		buffer[i] = (char)i;
 	}
 	strcpy(buffer + 30, readableText);
@@ -967,7 +1076,9 @@ TEST_F(PortMmapTest, mmap_test6)
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Create of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Create of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -975,7 +1086,9 @@ TEST_F(PortMmapTest, mmap_test6)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Write to file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Write to file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber,
+		        lastErrorMessage);
 		omrfile_close(fd);
 		goto exit;
 	}
@@ -984,7 +1097,9 @@ TEST_F(PortMmapTest, mmap_test6)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber,
+		        lastErrorMessage);
 		goto exit;
 	}
 
@@ -992,7 +1107,9 @@ TEST_F(PortMmapTest, mmap_test6)
 	if (-1 == fileLength) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Getting length of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Getting length of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -1000,15 +1117,20 @@ TEST_F(PortMmapTest, mmap_test6)
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Open of file %s for mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Open of file %s for mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
-	mmapHandle = (J9MmapHandle *)omrmmap_map_file(fd, 0, (uintptr_t)fileLength, NULL, OMRPORT_MMAP_FLAG_WRITE, OMRMEM_CATEGORY_PORT_LIBRARY);
+	mmapHandle = (J9MmapHandle *)omrmmap_map_file(
+	        fd, 0, (uintptr_t)fileLength, NULL, OMRPORT_MMAP_FLAG_WRITE, OMRMEM_CATEGORY_PORT_LIBRARY);
 	if ((NULL == mmapHandle) || (NULL == mmapHandle->pointer)) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Mmap_map_file of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Mmap_map_file of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 	mapAddr = (char *)mmapHandle->pointer;
@@ -1016,19 +1138,26 @@ TEST_F(PortMmapTest, mmap_test6)
 	/* This is the heart of the test */
 	if (mmapCapabilities & OMRPORT_MMAP_CAPABILITY_PROTECT) {
 		if (omrmmap_get_region_granularity(mapAddr) == 0) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Mmap claims to be capable of PROTECT, however, region granularity is 0\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Mmap claims to be capable of PROTECT, however, region granularity is 0\n");
 			goto exit;
 		}
-		rc = omrmmap_protect(mapAddr, (uintptr_t)fileLength, OMRPORT_PAGE_PROTECT_READ | OMRPORT_PAGE_PROTECT_WRITE);
+		rc = omrmmap_protect(
+		        mapAddr, (uintptr_t)fileLength, OMRPORT_PAGE_PROTECT_READ | OMRPORT_PAGE_PROTECT_WRITE);
 		if ((rc & OMRPORT_PAGE_PROTECT_NOT_SUPPORTED) != 0) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Mmap is claims to be capable of PROTECT, however, omrmmap_protect() returns OMRPORT_PAGE_PROTECT_NOT_SUPPORTED\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Mmap is claims to be capable of PROTECT, however, omrmmap_protect() returns "
+			        "OMRPORT_PAGE_PROTECT_NOT_SUPPORTED\n");
 			goto exit;
 		}
 
 	} else {
-		rc = omrmmap_protect(mapAddr, (uintptr_t)fileLength, OMRPORT_PAGE_PROTECT_READ | OMRPORT_PAGE_PROTECT_WRITE);
+		rc = omrmmap_protect(
+		        mapAddr, (uintptr_t)fileLength, OMRPORT_PAGE_PROTECT_READ | OMRPORT_PAGE_PROTECT_WRITE);
 		if ((rc & OMRPORT_PAGE_PROTECT_NOT_SUPPORTED) == 0) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Mmap is not capable of PROTECT, however, omrmmap_protect() does not return OMRPORT_PAGE_PROTECT_NOT_SUPPORTED\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Mmap is not capable of PROTECT, however, omrmmap_protect() does not return "
+			        "OMRPORT_PAGE_PROTECT_NOT_SUPPORTED\n");
 			goto exit;
 		}
 	}
@@ -1038,7 +1167,9 @@ TEST_F(PortMmapTest, mmap_test6)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 	}
 
 	omrmmap_unmap_file(mmapHandle);
@@ -1077,12 +1208,14 @@ TEST_F(PortMmapTest, mmap_test7)
 	reportTestEntry(OMRPORTLIB, testName);
 
 	if ((mmapCapabilities & OMRPORT_MMAP_CAPABILITY_PROTECT) == 0) {
-		portTestEnv->log(LEVEL_ERROR, "OMRPORT_MMAP_CAPABILITY_PROTECT not supported on this platform, bypassing test\n");
+		portTestEnv->log(LEVEL_ERROR,
+		        "OMRPORT_MMAP_CAPABILITY_PROTECT not supported on this platform, bypassing test\n");
 		goto exit;
 	}
 
 	if ((mmapCapabilities & OMRPORT_MMAP_CAPABILITY_READ) == 0) {
-		portTestEnv->log(LEVEL_ERROR, "OMRPORT_MMAP_CAPABILITY_READ not supported on this platform, bypassing test\n");
+		portTestEnv->log(
+		        LEVEL_ERROR, "OMRPORT_MMAP_CAPABILITY_READ not supported on this platform, bypassing test\n");
 		goto exit;
 	}
 
@@ -1098,7 +1231,9 @@ TEST_F(PortMmapTest, mmap_test7)
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Create of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Create of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -1106,7 +1241,9 @@ TEST_F(PortMmapTest, mmap_test7)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Write to file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Write to file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber,
+		        lastErrorMessage);
 		omrfile_close(fd);
 		goto exit;
 	}
@@ -1115,7 +1252,9 @@ TEST_F(PortMmapTest, mmap_test7)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber,
+		        lastErrorMessage);
 		goto exit;
 	}
 
@@ -1123,7 +1262,9 @@ TEST_F(PortMmapTest, mmap_test7)
 	if (-1 == fileLength) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Getting length of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Getting length of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -1131,15 +1272,20 @@ TEST_F(PortMmapTest, mmap_test7)
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Open of file %s for mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Open of file %s for mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
-	mmapHandle = (J9MmapHandle *)omrmmap_map_file(fd, 0, (uintptr_t)fileLength, NULL, OMRPORT_MMAP_FLAG_READ, OMRMEM_CATEGORY_PORT_LIBRARY);
+	mmapHandle = (J9MmapHandle *)omrmmap_map_file(
+	        fd, 0, (uintptr_t)fileLength, NULL, OMRPORT_MMAP_FLAG_READ, OMRMEM_CATEGORY_PORT_LIBRARY);
 	if ((NULL == mmapHandle) || (NULL == mmapHandle->pointer)) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Mmap_map_file of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Mmap_map_file of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 	mapAddr = (char *)mmapHandle->pointer;
@@ -1151,7 +1297,9 @@ TEST_F(PortMmapTest, mmap_test7)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 	}
 
 	if (strcmp(mapAddr + 30, readableText) != 0) {
@@ -1180,8 +1328,8 @@ TEST_F(PortMmapTest, mmap_test8)
 	intptr_t fd;
 	intptr_t rc;
 
-	char buffer[J9MMAP_PROTECT_TESTS_BUFFER_SIZE ];
-	char updatedBuffer[J9MMAP_PROTECT_TESTS_BUFFER_SIZE ];
+	char buffer[J9MMAP_PROTECT_TESTS_BUFFER_SIZE];
+	char updatedBuffer[J9MMAP_PROTECT_TESTS_BUFFER_SIZE];
 	int i = 0;
 	const char *readableText = "Here is some readable text in the file";
 	const char *modifiedText = "This text is modified";
@@ -1195,17 +1343,19 @@ TEST_F(PortMmapTest, mmap_test8)
 	reportTestEntry(OMRPORTLIB, testName);
 
 	if ((mmapCapabilities & OMRPORT_MMAP_CAPABILITY_PROTECT) == 0) {
-		portTestEnv->log(LEVEL_ERROR, "OMRPORT_MMAP_CAPABILITY_PROTECT not supported on this platform, bypassing test\n");
+		portTestEnv->log(LEVEL_ERROR,
+		        "OMRPORT_MMAP_CAPABILITY_PROTECT not supported on this platform, bypassing test\n");
 		goto exit;
 	}
 
 	if ((mmapCapabilities & OMRPORT_MMAP_CAPABILITY_WRITE) == 0) {
-		portTestEnv->log(LEVEL_ERROR, "OMRPORT_MMAP_CAPABILITY_WRITE not supported on this platform, bypassing test\n");
+		portTestEnv->log(
+		        LEVEL_ERROR, "OMRPORT_MMAP_CAPABILITY_WRITE not supported on this platform, bypassing test\n");
 		goto exit;
 	}
 
 	/* Initialize buffer to be written */
-	for (i = 0; i < J9MMAP_PROTECT_TESTS_BUFFER_SIZE ; i++) {
+	for (i = 0; i < J9MMAP_PROTECT_TESTS_BUFFER_SIZE; i++) {
 		buffer[i] = (char)i;
 	}
 	strcpy(buffer + 30, readableText);
@@ -1216,7 +1366,9 @@ TEST_F(PortMmapTest, mmap_test8)
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Create of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Create of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -1224,7 +1376,9 @@ TEST_F(PortMmapTest, mmap_test8)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Write to file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Write to file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber,
+		        lastErrorMessage);
 		omrfile_close(fd);
 		goto exit;
 	}
@@ -1233,7 +1387,9 @@ TEST_F(PortMmapTest, mmap_test8)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber,
+		        lastErrorMessage);
 		goto exit;
 	}
 
@@ -1241,7 +1397,9 @@ TEST_F(PortMmapTest, mmap_test8)
 	if (-1 == fileLength) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Getting length of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Getting length of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -1249,15 +1407,20 @@ TEST_F(PortMmapTest, mmap_test8)
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Open of file %s for mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Open of file %s for mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
-	mmapHandle = (J9MmapHandle *)omrmmap_map_file(fd, 0, (uintptr_t)fileLength, NULL, OMRPORT_MMAP_FLAG_WRITE, OMRMEM_CATEGORY_PORT_LIBRARY);
+	mmapHandle = (J9MmapHandle *)omrmmap_map_file(
+	        fd, 0, (uintptr_t)fileLength, NULL, OMRPORT_MMAP_FLAG_WRITE, OMRMEM_CATEGORY_PORT_LIBRARY);
 	if ((NULL == mmapHandle) || (NULL == mmapHandle->pointer)) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Mmap_map_file of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Mmap_map_file of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 	mapAddr = (char *)mmapHandle->pointer;
@@ -1268,7 +1431,9 @@ TEST_F(PortMmapTest, mmap_test8)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 	}
 
 	strcpy(mapAddr + 30, modifiedText);
@@ -1279,7 +1444,9 @@ TEST_F(PortMmapTest, mmap_test8)
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Open of file %s for read after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Open of file %s for read after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n",
+		        filename, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -1287,7 +1454,9 @@ TEST_F(PortMmapTest, mmap_test8)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Read of file %s after update failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Read of file %s after update failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -1295,7 +1464,9 @@ TEST_F(PortMmapTest, mmap_test8)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s after read failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s after read failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 	}
 
 	if (strcmp(updatedBuffer + 30, modifiedText) != 0) {
@@ -1323,8 +1494,8 @@ TEST_F(PortMmapTest, mmap_test9)
 	intptr_t fd;
 	intptr_t rc;
 
-	char buffer[J9MMAP_PROTECT_TESTS_BUFFER_SIZE ];
-	char updatedBuffer[J9MMAP_PROTECT_TESTS_BUFFER_SIZE ];
+	char buffer[J9MMAP_PROTECT_TESTS_BUFFER_SIZE];
+	char updatedBuffer[J9MMAP_PROTECT_TESTS_BUFFER_SIZE];
 	int i = 0;
 	const char *readableText = "Here is some readable text in the file";
 	const char *modifiedText = "This text is modified";
@@ -1343,17 +1514,19 @@ TEST_F(PortMmapTest, mmap_test9)
 	reportTestEntry(OMRPORTLIB, testName);
 
 	if ((mmapCapabilities & OMRPORT_MMAP_CAPABILITY_PROTECT) == 0) {
-		portTestEnv->log(LEVEL_ERROR, "OMRPORT_MMAP_CAPABILITY_PROTECT not supported on this platform, bypassing test\n");
+		portTestEnv->log(LEVEL_ERROR,
+		        "OMRPORT_MMAP_CAPABILITY_PROTECT not supported on this platform, bypassing test\n");
 		goto exit;
 	}
 
 	if ((mmapCapabilities & OMRPORT_MMAP_CAPABILITY_WRITE) == 0) {
-		portTestEnv->log(LEVEL_ERROR, "OMRPORT_MMAP_CAPABILITY_WRITE not supported on this platform, bypassing test\n");
+		portTestEnv->log(
+		        LEVEL_ERROR, "OMRPORT_MMAP_CAPABILITY_WRITE not supported on this platform, bypassing test\n");
 		goto exit;
 	}
 
 	/* Initialize buffer to be written */
-	for (i = 0; i < J9MMAP_PROTECT_TESTS_BUFFER_SIZE ; i++) {
+	for (i = 0; i < J9MMAP_PROTECT_TESTS_BUFFER_SIZE; i++) {
 		buffer[i] = (char)i;
 	}
 	strcpy(buffer + 30, readableText);
@@ -1364,7 +1537,9 @@ TEST_F(PortMmapTest, mmap_test9)
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Create of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Create of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -1372,7 +1547,9 @@ TEST_F(PortMmapTest, mmap_test9)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Write to file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Write to file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber,
+		        lastErrorMessage);
 		omrfile_close(fd);
 		goto exit;
 	}
@@ -1381,7 +1558,9 @@ TEST_F(PortMmapTest, mmap_test9)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber,
+		        lastErrorMessage);
 		goto exit;
 	}
 
@@ -1389,7 +1568,9 @@ TEST_F(PortMmapTest, mmap_test9)
 	if (-1 == fileLength) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Getting length of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Getting length of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -1397,15 +1578,20 @@ TEST_F(PortMmapTest, mmap_test9)
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Open of file %s for mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Open of file %s for mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
-	mmapHandle = (J9MmapHandle *)omrmmap_map_file(fd, 0, (uintptr_t)fileLength, NULL, OMRPORT_MMAP_FLAG_WRITE | OMRPORT_MMAP_FLAG_SHARED, OMRMEM_CATEGORY_PORT_LIBRARY);
+	mmapHandle = (J9MmapHandle *)omrmmap_map_file(fd, 0, (uintptr_t)fileLength, NULL,
+	        OMRPORT_MMAP_FLAG_WRITE | OMRPORT_MMAP_FLAG_SHARED, OMRMEM_CATEGORY_PORT_LIBRARY);
 	if ((NULL == mmapHandle) || (NULL == mmapHandle->pointer)) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Mmap_map_file of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Mmap_map_file of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 	mapAddr = (char *)mmapHandle->pointer;
@@ -1414,11 +1600,14 @@ TEST_F(PortMmapTest, mmap_test9)
 	rc = omrmmap_protect(mapAddr, (uintptr_t)fileLength, OMRPORT_PAGE_PROTECT_READ);
 	if (rc != 0) {
 		if (rc == OMRPORT_PAGE_PROTECT_NOT_SUPPORTED) {
-			portTestEnv->log(LEVEL_ERROR, "OMRPORT_MMAP_CAPABILITY_PROTECT not supported on this platform, bypassing test\n");
+			portTestEnv->log(LEVEL_ERROR,
+			        "OMRPORT_MMAP_CAPABILITY_PROTECT not supported on this platform, bypassing test\n");
 		} else {
 			lastErrorMessage = (char *)omrerror_last_error_message();
 			lastErrorNumber = omrerror_last_error_number();
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrmmap_protect() failed: lastErrorNumber=%d, lastErrorMessage=%s\n", lastErrorNumber, lastErrorMessage);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "omrmmap_protect() failed: lastErrorNumber=%d, lastErrorMessage=%s\n", lastErrorNumber,
+			        lastErrorMessage);
 		}
 		goto exit;
 	}
@@ -1427,12 +1616,16 @@ TEST_F(PortMmapTest, mmap_test9)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 	}
 
 	/* try to write to region that was set to read only */
 	if (!omrsig_can_protect(signalHandlerFlags)) {
-		portTestEnv->log(LEVEL_ERROR, "Signal handling framework not available, can't test readonly functionality without crashing, bypassing test");
+		portTestEnv->log(LEVEL_ERROR,
+		        "Signal handling framework not available, can't test readonly functionality without crashing, "
+		        "bypassing test");
 		goto exit;
 	} else {
 
@@ -1443,7 +1636,8 @@ TEST_F(PortMmapTest, mmap_test9)
 		writerInfo.address = mapAddr + 30;
 
 		portTestEnv->log("Writing to readonly region - we should crash\n");
-		protectResult = omrsig_protect(protectedWriter, &writerInfo, simpleHandlerFunction, &handlerInfo, signalHandlerFlags, &result);
+		protectResult = omrsig_protect(
+		        protectedWriter, &writerInfo, simpleHandlerFunction, &handlerInfo, signalHandlerFlags, &result);
 
 		if (protectResult == OMRPORT_SIG_EXCEPTION_OCCURRED) {
 			/* test passed */
@@ -1464,7 +1658,9 @@ TEST_F(PortMmapTest, mmap_test9)
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Open of file %s for read after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Open of file %s for read after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n",
+		        filename, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -1472,7 +1668,9 @@ TEST_F(PortMmapTest, mmap_test9)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Read of file %s after update failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Read of file %s after update failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -1480,7 +1678,9 @@ TEST_F(PortMmapTest, mmap_test9)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s after read failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s after read failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 	}
 
 	if (strcmp(updatedBuffer + 30, modifiedText) != 0) {
@@ -1503,8 +1703,8 @@ TEST_F(PortMmapTest, mmap_test10)
 	intptr_t fd;
 	intptr_t rc;
 
-	char buffer[128 ];
-	char updatedBuffer[128 ];
+	char buffer[128];
+	char updatedBuffer[128];
 	uintptr_t i = 0;
 	const char *readableText = "Here is some readable text in the file";
 	const char *modifiedText = "This text is modified";
@@ -1525,12 +1725,14 @@ TEST_F(PortMmapTest, mmap_test10)
 	reportTestEntry(OMRPORTLIB, testName);
 
 	if ((mmapCapabilities & OMRPORT_MMAP_CAPABILITY_PROTECT) == 0) {
-		portTestEnv->log(LEVEL_ERROR, "OMRPORT_MMAP_CAPABILITY_PROTECT not supported on this platform, bypassing test\n");
+		portTestEnv->log(LEVEL_ERROR,
+		        "OMRPORT_MMAP_CAPABILITY_PROTECT not supported on this platform, bypassing test\n");
 		goto exit;
 	}
 
 	if ((mmapCapabilities & OMRPORT_MMAP_CAPABILITY_WRITE) == 0) {
-		portTestEnv->log(LEVEL_ERROR, "OMRPORT_MMAP_CAPABILITY_WRITE not supported on this platform, bypassing test\n");
+		portTestEnv->log(
+		        LEVEL_ERROR, "OMRPORT_MMAP_CAPABILITY_WRITE not supported on this platform, bypassing test\n");
 		goto exit;
 	}
 
@@ -1538,11 +1740,10 @@ TEST_F(PortMmapTest, mmap_test10)
 	pageSize = omrmmap_get_region_granularity(mapAddr);
 	portTestEnv->log("Page size is reported as %d\n", pageSize);
 	/* Initialize buffer to be written - 128 chars with a string right in the middle */
-	for (i = 0; i < 128 ; i++) {
+	for (i = 0; i < 128; i++) {
 		buffer[i] = (char)i;
 	}
 	strcpy(buffer + 30, readableText);
-
 
 	(void)omrfile_unlink(filename);
 
@@ -1550,7 +1751,9 @@ TEST_F(PortMmapTest, mmap_test10)
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Create of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Create of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -1560,7 +1763,9 @@ TEST_F(PortMmapTest, mmap_test10)
 		if (-1 == rc) {
 			lastErrorMessage = (char *)omrerror_last_error_message();
 			lastErrorNumber = omrerror_last_error_number();
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Write to file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Write to file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+			        lastErrorNumber, lastErrorMessage);
 			omrfile_close(fd);
 			goto exit;
 		}
@@ -1572,7 +1777,9 @@ TEST_F(PortMmapTest, mmap_test10)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber,
+		        lastErrorMessage);
 		goto exit;
 	}
 
@@ -1580,26 +1787,34 @@ TEST_F(PortMmapTest, mmap_test10)
 	if (-1 == fileLength) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Getting length of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Getting length of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 	if ((uint64_t)fileLength != pageSize * 2) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "File is wrong length, should be %d but is %d\n", pageSize * 2, fileLength);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "File is wrong length, should be %d but is %d\n", pageSize * 2,
+		        fileLength);
 	}
 
 	fd = omrfile_open(filename, EsOpenRead | EsOpenWrite, 0660);
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Open of file %s for mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Open of file %s for mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
-	mmapHandle = (J9MmapHandle *)omrmmap_map_file(fd, 0, (uintptr_t)fileLength, NULL, OMRPORT_MMAP_FLAG_WRITE | OMRPORT_MMAP_FLAG_SHARED, OMRMEM_CATEGORY_PORT_LIBRARY);
+	mmapHandle = (J9MmapHandle *)omrmmap_map_file(fd, 0, (uintptr_t)fileLength, NULL,
+	        OMRPORT_MMAP_FLAG_WRITE | OMRPORT_MMAP_FLAG_SHARED, OMRMEM_CATEGORY_PORT_LIBRARY);
 	if ((NULL == mmapHandle) || (NULL == mmapHandle->pointer)) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Mmap_map_file of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Mmap_map_file of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 	mapAddr = (char *)mmapHandle->pointer;
@@ -1610,11 +1825,14 @@ TEST_F(PortMmapTest, mmap_test10)
 	rc = omrmmap_protect(mapAddr, (uintptr_t)fileLength / 2, OMRPORT_PAGE_PROTECT_READ);
 	if (rc != 0) {
 		if (rc == OMRPORT_PAGE_PROTECT_NOT_SUPPORTED) {
-			portTestEnv->log(LEVEL_ERROR, "OMRPORT_MMAP_CAPABILITY_PROTECT not supported on this platform, bypassing test\n");
+			portTestEnv->log(LEVEL_ERROR,
+			        "OMRPORT_MMAP_CAPABILITY_PROTECT not supported on this platform, bypassing test\n");
 		} else {
 			lastErrorMessage = (char *)omrerror_last_error_message();
 			lastErrorNumber = omrerror_last_error_number();
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrmmap_protect() failed: lastErrorNumber=%d, lastErrorMessage=%s\n", lastErrorNumber, lastErrorMessage);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "omrmmap_protect() failed: lastErrorNumber=%d, lastErrorMessage=%s\n", lastErrorNumber,
+			        lastErrorMessage);
 		}
 		goto exit;
 	}
@@ -1623,12 +1841,16 @@ TEST_F(PortMmapTest, mmap_test10)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 	}
 
 	/* try to write to region that was set to read only */
 	if (!omrsig_can_protect(signalHandlerFlags)) {
-		portTestEnv->log(LEVEL_ERROR, "Signal handling framework not available, can't test readonly functionality without crashing, bypassing test");
+		portTestEnv->log(LEVEL_ERROR,
+		        "Signal handling framework not available, can't test readonly functionality without crashing, "
+		        "bypassing test");
 		goto exit;
 	} else {
 
@@ -1639,7 +1861,8 @@ TEST_F(PortMmapTest, mmap_test10)
 		writerInfo.address = mapAddr + 30;
 
 		portTestEnv->log("Writing to readonly region - we should crash\n");
-		protectResult = omrsig_protect(protectedWriter, &writerInfo, simpleHandlerFunction, &handlerInfo, signalHandlerFlags, &result);
+		protectResult = omrsig_protect(
+		        protectedWriter, &writerInfo, simpleHandlerFunction, &handlerInfo, signalHandlerFlags, &result);
 
 		if (protectResult == OMRPORT_SIG_EXCEPTION_OCCURRED) {
 			/* test passed */
@@ -1650,7 +1873,9 @@ TEST_F(PortMmapTest, mmap_test10)
 
 	/* try to write to region that is still writable */
 	if (!omrsig_can_protect(signalHandlerFlags)) {
-		portTestEnv->log(LEVEL_ERROR, "Signal handling framework not available, can't test readonly functionality without crashing, bypassing test");
+		portTestEnv->log(LEVEL_ERROR,
+		        "Signal handling framework not available, can't test readonly functionality without crashing, "
+		        "bypassing test");
 		goto exit;
 	} else {
 
@@ -1661,7 +1886,8 @@ TEST_F(PortMmapTest, mmap_test10)
 		writerInfo.shouldCrash = 0;
 
 		portTestEnv->log("Writing to page two region - should be ok\n");
-		protectResult = omrsig_protect(protectedWriter, &writerInfo, simpleHandlerFunction, &handlerInfo, signalHandlerFlags, &result);
+		protectResult = omrsig_protect(
+		        protectedWriter, &writerInfo, simpleHandlerFunction, &handlerInfo, signalHandlerFlags, &result);
 
 		if (protectResult == OMRPORT_SIG_EXCEPTION_OCCURRED) {
 			outputErrorMessage(PORTTEST_ERROR_ARGS, "Crashed writing to writable page\n");
@@ -1671,7 +1897,8 @@ TEST_F(PortMmapTest, mmap_test10)
 	}
 
 	/* set the region back to be writeable */
-	(void)omrmmap_protect(mapAddr, (uintptr_t)fileLength / 2, OMRPORT_PAGE_PROTECT_READ | OMRPORT_PAGE_PROTECT_WRITE);
+	(void)omrmmap_protect(
+	        mapAddr, (uintptr_t)fileLength / 2, OMRPORT_PAGE_PROTECT_READ | OMRPORT_PAGE_PROTECT_WRITE);
 
 	/* verify that we can now write to the file */
 	strcpy(mapAddr + 30, modifiedText);
@@ -1682,7 +1909,9 @@ TEST_F(PortMmapTest, mmap_test10)
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Open of file %s for read after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Open of file %s for read after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n",
+		        filename, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -1690,7 +1919,9 @@ TEST_F(PortMmapTest, mmap_test10)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Read of file %s after update failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Read of file %s after update failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -1698,7 +1929,9 @@ TEST_F(PortMmapTest, mmap_test10)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s after read failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s after read failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 	}
 
 	if (strcmp(updatedBuffer + 30, modifiedText) != 0) {
@@ -1718,8 +1951,8 @@ TEST_F(PortMmapTest, mmap_test11)
 	intptr_t fd;
 	intptr_t rc;
 
-	char buffer[128 ];
-	char updatedBuffer[128 ];
+	char buffer[128];
+	char updatedBuffer[128];
 	uintptr_t i = 0;
 	const char *readableText = "Here is some readable text in the file";
 	const char *modifiedText = "This text is modified";
@@ -1740,12 +1973,14 @@ TEST_F(PortMmapTest, mmap_test11)
 	reportTestEntry(OMRPORTLIB, testName);
 
 	if ((mmapCapabilities & OMRPORT_MMAP_CAPABILITY_PROTECT) == 0) {
-		portTestEnv->log(LEVEL_ERROR, "OMRPORT_MMAP_CAPABILITY_PROTECT not supported on this platform, bypassing test\n");
+		portTestEnv->log(LEVEL_ERROR,
+		        "OMRPORT_MMAP_CAPABILITY_PROTECT not supported on this platform, bypassing test\n");
 		goto exit;
 	}
 
 	if ((mmapCapabilities & OMRPORT_MMAP_CAPABILITY_WRITE) == 0) {
-		portTestEnv->log(LEVEL_ERROR, "OMRPORT_MMAP_CAPABILITY_WRITE not supported on this platform, bypassing test\n");
+		portTestEnv->log(
+		        LEVEL_ERROR, "OMRPORT_MMAP_CAPABILITY_WRITE not supported on this platform, bypassing test\n");
 		goto exit;
 	}
 
@@ -1753,11 +1988,10 @@ TEST_F(PortMmapTest, mmap_test11)
 	pageSize = omrmmap_get_region_granularity(mapAddr);
 	portTestEnv->log("Page size is reported as %d\n", pageSize);
 	/* Initialize buffer to be written - 128 chars with a string right in the middle */
-	for (i = 0; i < 128 ; i++) {
+	for (i = 0; i < 128; i++) {
 		buffer[i] = (char)i;
 	}
 	strcpy(buffer + 30, readableText);
-
 
 	(void)omrfile_unlink(filename);
 
@@ -1765,7 +1999,9 @@ TEST_F(PortMmapTest, mmap_test11)
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Create of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Create of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -1775,7 +2011,9 @@ TEST_F(PortMmapTest, mmap_test11)
 		if (-1 == rc) {
 			lastErrorMessage = (char *)omrerror_last_error_message();
 			lastErrorNumber = omrerror_last_error_number();
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Write to file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Write to file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+			        lastErrorNumber, lastErrorMessage);
 			omrfile_close(fd);
 			goto exit;
 		}
@@ -1787,7 +2025,9 @@ TEST_F(PortMmapTest, mmap_test11)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber,
+		        lastErrorMessage);
 		goto exit;
 	}
 
@@ -1795,26 +2035,34 @@ TEST_F(PortMmapTest, mmap_test11)
 	if (-1 == fileLength) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Getting length of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Getting length of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 	if ((uint64_t)fileLength != pageSize * 3) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "File is wrong length, should be %d but is %d\n", pageSize * 2, fileLength);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "File is wrong length, should be %d but is %d\n", pageSize * 2,
+		        fileLength);
 	}
 
 	fd = omrfile_open(filename, EsOpenRead | EsOpenWrite, 0660);
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Open of file %s for mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Open of file %s for mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
-	mmapHandle = (J9MmapHandle *)omrmmap_map_file(fd, 0, (uintptr_t)fileLength, NULL, OMRPORT_MMAP_FLAG_WRITE | OMRPORT_MMAP_FLAG_SHARED, OMRMEM_CATEGORY_PORT_LIBRARY);
+	mmapHandle = (J9MmapHandle *)omrmmap_map_file(fd, 0, (uintptr_t)fileLength, NULL,
+	        OMRPORT_MMAP_FLAG_WRITE | OMRPORT_MMAP_FLAG_SHARED, OMRMEM_CATEGORY_PORT_LIBRARY);
 	if ((NULL == mmapHandle) || (NULL == mmapHandle->pointer)) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Mmap_map_file of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Mmap_map_file of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 	mapAddr = (char *)mmapHandle->pointer;
@@ -1825,11 +2073,14 @@ TEST_F(PortMmapTest, mmap_test11)
 	rc = omrmmap_protect(mapAddr + pageSize, pageSize, OMRPORT_PAGE_PROTECT_READ);
 	if (rc != 0) {
 		if (rc == OMRPORT_PAGE_PROTECT_NOT_SUPPORTED) {
-			portTestEnv->log(LEVEL_ERROR, "OMRPORT_MMAP_CAPABILITY_PROTECT not supported on this platform, bypassing test\n");
+			portTestEnv->log(LEVEL_ERROR,
+			        "OMRPORT_MMAP_CAPABILITY_PROTECT not supported on this platform, bypassing test\n");
 		} else {
 			lastErrorMessage = (char *)omrerror_last_error_message();
 			lastErrorNumber = omrerror_last_error_number();
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrmmap_protect() failed: lastErrorNumber=%d, lastErrorMessage=%s\n", lastErrorNumber, lastErrorMessage);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "omrmmap_protect() failed: lastErrorNumber=%d, lastErrorMessage=%s\n", lastErrorNumber,
+			        lastErrorMessage);
 		}
 		goto exit;
 	}
@@ -1838,14 +2089,18 @@ TEST_F(PortMmapTest, mmap_test11)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 	}
 	/* Checking we can write into the bit before the locked page */
 	strcpy(mapAddr + 30, modifiedText);
 
 	/* try to write to region that was set to read only */
 	if (!omrsig_can_protect(signalHandlerFlags)) {
-		portTestEnv->log(LEVEL_ERROR, "Signal handling framework not available, can't test readonly functionality without crashing, bypassing test");
+		portTestEnv->log(LEVEL_ERROR,
+		        "Signal handling framework not available, can't test readonly functionality without crashing, "
+		        "bypassing test");
 		goto exit;
 	} else {
 
@@ -1856,7 +2111,8 @@ TEST_F(PortMmapTest, mmap_test11)
 		writerInfo.address = mapAddr + 30 + pageSize;
 
 		portTestEnv->log("Writing to readonly region - we should crash\n");
-		protectResult = omrsig_protect(protectedWriter, &writerInfo, simpleHandlerFunction, &handlerInfo, signalHandlerFlags, &result);
+		protectResult = omrsig_protect(
+		        protectedWriter, &writerInfo, simpleHandlerFunction, &handlerInfo, signalHandlerFlags, &result);
 
 		if (protectResult == OMRPORT_SIG_EXCEPTION_OCCURRED) {
 			/* test passed */
@@ -1867,7 +2123,9 @@ TEST_F(PortMmapTest, mmap_test11)
 
 	/* try to write to region that is still writable */
 	if (!omrsig_can_protect(signalHandlerFlags)) {
-		portTestEnv->log(LEVEL_ERROR, "Signal handling framework not available, can't test readonly functionality without crashing, bypassing test");
+		portTestEnv->log(LEVEL_ERROR,
+		        "Signal handling framework not available, can't test readonly functionality without crashing, "
+		        "bypassing test");
 		goto exit;
 	} else {
 
@@ -1878,7 +2136,8 @@ TEST_F(PortMmapTest, mmap_test11)
 		writerInfo.shouldCrash = 0;
 
 		portTestEnv->log("Writing to page two region - should be ok\n");
-		protectResult = omrsig_protect(protectedWriter, &writerInfo, simpleHandlerFunction, &handlerInfo, signalHandlerFlags, &result);
+		protectResult = omrsig_protect(
+		        protectedWriter, &writerInfo, simpleHandlerFunction, &handlerInfo, signalHandlerFlags, &result);
 
 		if (protectResult == OMRPORT_SIG_EXCEPTION_OCCURRED) {
 			outputErrorMessage(PORTTEST_ERROR_ARGS, "Crashed writing to writable page\n");
@@ -1900,7 +2159,9 @@ TEST_F(PortMmapTest, mmap_test11)
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Open of file %s for read after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Open of file %s for read after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n",
+		        filename, lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -1908,7 +2169,9 @@ TEST_F(PortMmapTest, mmap_test11)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Read of file %s after update failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Read of file %s after update failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -1916,7 +2179,9 @@ TEST_F(PortMmapTest, mmap_test11)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s after read failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s after read failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 	}
 
 	if (strcmp(updatedBuffer + 30, modifiedText) != 0) {
@@ -1972,7 +2237,9 @@ TEST_F(PortMmapTest, mmap_test12)
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Create of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Create of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -1980,7 +2247,9 @@ TEST_F(PortMmapTest, mmap_test12)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Write to file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Write to file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber,
+		        lastErrorMessage);
 		omrfile_close(fd);
 		goto exit;
 	}
@@ -1989,7 +2258,9 @@ TEST_F(PortMmapTest, mmap_test12)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber,
+		        lastErrorMessage);
 		goto exit;
 	}
 
@@ -1997,7 +2268,9 @@ TEST_F(PortMmapTest, mmap_test12)
 	if (-1 == fileLength) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Getting length of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Getting length of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -2005,17 +2278,22 @@ TEST_F(PortMmapTest, mmap_test12)
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Open of file %s for mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Open of file %s for mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
 	getPortLibraryMemoryCategoryData(OMRPORTLIB, &initialBlocks, &initialBytes);
 
-	mmapHandle = (J9MmapHandle *)omrmmap_map_file(fd, 0, (uintptr_t)fileLength, NULL, OMRPORT_MMAP_FLAG_READ, OMRMEM_CATEGORY_PORT_LIBRARY);
+	mmapHandle = (J9MmapHandle *)omrmmap_map_file(
+	        fd, 0, (uintptr_t)fileLength, NULL, OMRPORT_MMAP_FLAG_READ, OMRMEM_CATEGORY_PORT_LIBRARY);
 	if ((NULL == mmapHandle) || (NULL == mmapHandle->pointer)) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Mmap_map_file of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Mmap_map_file of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 	mapAddr = (char *)mmapHandle->pointer;
@@ -2025,18 +2303,25 @@ TEST_F(PortMmapTest, mmap_test12)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 	}
 
 	getPortLibraryMemoryCategoryData(OMRPORTLIB, &finalBlocks, &finalBytes);
 
-	/* Category tests aren't entirely straightforward - because the mmap implementation may have done other allocations as part of the map.*/
+	/* Category tests aren't entirely straightforward - because the mmap implementation may have done other
+	 * allocations as part of the map.*/
 	if (finalBlocks <= initialBlocks) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Block count did not increase as expected. initialBlocks=%zu, finalBlocks=%zu\n", initialBlocks, finalBlocks);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Block count did not increase as expected. initialBlocks=%zu, finalBlocks=%zu\n", initialBlocks,
+		        finalBlocks);
 	}
 
 	if (finalBytes < (initialBytes + fileLength)) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Byte count did not increase as expected. initialBytes=%zu, finalBytes=%zu, fileLength=%lld\n", initialBytes, finalBytes, fileLength);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Byte count did not increase as expected. initialBytes=%zu, finalBytes=%zu, fileLength=%lld\n",
+		        initialBytes, finalBytes, fileLength);
 	}
 
 	if (strcmp(mapAddr + 30, readableText) != 0) {
@@ -2048,11 +2333,15 @@ TEST_F(PortMmapTest, mmap_test12)
 	getPortLibraryMemoryCategoryData(OMRPORTLIB, &finalBlocks, &finalBytes);
 
 	if (finalBlocks != initialBlocks) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Block count did not decrease as expected. initialBlocks=%zu, finalBlocks=%zu\n", initialBlocks, finalBlocks);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Block count did not decrease as expected. initialBlocks=%zu, finalBlocks=%zu\n", initialBlocks,
+		        finalBlocks);
 	}
 
 	if (finalBytes != initialBytes) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Byte count did not decrease as expected. initialBytes=%zu, finalBytes=%zu\n", initialBytes, finalBytes);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Byte count did not decrease as expected. initialBytes=%zu, finalBytes=%zu\n", initialBytes,
+		        finalBytes);
 	}
 
 exit:
@@ -2097,7 +2386,9 @@ TEST_F(PortMmapTest, mmap_test13)
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Create of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Create of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
@@ -2105,7 +2396,9 @@ TEST_F(PortMmapTest, mmap_test13)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Write to file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Write to file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber,
+		        lastErrorMessage);
 		omrfile_close(fd);
 		goto exit;
 	}
@@ -2114,7 +2407,9 @@ TEST_F(PortMmapTest, mmap_test13)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber,
+		        lastErrorMessage);
 		goto exit;
 	}
 
@@ -2122,15 +2417,20 @@ TEST_F(PortMmapTest, mmap_test13)
 	if (-1 == fd) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Open of file %s for mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Open of file %s for mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 
-	mmapHandle = (J9MmapHandle *)omrmmap_map_file(fd, 0, 0, NULL, OMRPORT_MMAP_FLAG_READ, OMRMEM_CATEGORY_PORT_LIBRARY);
+	mmapHandle =
+	        (J9MmapHandle *)omrmmap_map_file(fd, 0, 0, NULL, OMRPORT_MMAP_FLAG_READ, OMRMEM_CATEGORY_PORT_LIBRARY);
 	if ((NULL == mmapHandle) || (NULL == mmapHandle->pointer)) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Mmap_map_file of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Mmap_map_file of file %s failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 		goto exit;
 	}
 	mapAddr = (char *)mmapHandle->pointer;
@@ -2140,7 +2440,9 @@ TEST_F(PortMmapTest, mmap_test13)
 	if (-1 == rc) {
 		lastErrorMessage = (char *)omrerror_last_error_message();
 		lastErrorNumber = omrerror_last_error_number();
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Close of file %s after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Close of file %s after mapping failed: lastErrorNumber=%d, lastErrorMessage=%s\n", filename,
+		        lastErrorNumber, lastErrorMessage);
 	}
 
 	if (0 != strcmp(mapAddr + 30, readableText)) {

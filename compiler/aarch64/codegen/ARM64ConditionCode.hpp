@@ -28,31 +28,35 @@ namespace TR {
  * Condition codes used in B.cond and other instructions
  */
 typedef enum {
-   CC_EQ = 0,
-   CC_NE,
-   CC_CS,
-   CC_CC,
-   CC_MI,
-   CC_PL,
-   CC_VS,
-   CC_VC,
-   CC_HI,
-   CC_LS,
-   CC_GE,
-   CC_LT,
-   CC_GT,
-   CC_LE,
-   CC_AL,
-   CC_Illegal
+	CC_EQ = 0,
+	CC_NE,
+	CC_CS,
+	CC_CC,
+	CC_MI,
+	CC_PL,
+	CC_VS,
+	CC_VC,
+	CC_HI,
+	CC_LS,
+	CC_GE,
+	CC_LT,
+	CC_GT,
+	CC_LE,
+	CC_AL,
+	CC_Illegal
 } ARM64ConditionCode;
 
-} // TR
+} // namespace TR
 
 /**
  * @brief Returns inverted condition code
  * @param[in] cc : condition code
  * @return inverted condition code
  */
-inline TR::ARM64ConditionCode cc_invert(TR::ARM64ConditionCode cc) { return (TR::ARM64ConditionCode)(cc ^ 1); }
+inline TR::ARM64ConditionCode
+cc_invert(TR::ARM64ConditionCode cc)
+{
+	return (TR::ARM64ConditionCode)(cc ^ 1);
+}
 
 #endif

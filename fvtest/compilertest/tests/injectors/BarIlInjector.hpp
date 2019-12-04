@@ -21,23 +21,20 @@
 
 #include "ilgen/IlInjector.hpp"
 
-namespace TR { class TypeDictionary; }
+namespace TR {
+class TypeDictionary;
+}
 
-namespace TestCompiler
-{
-class BarIlInjector : public TR::IlInjector
-   {
-   public:
-   BarIlInjector(TR::TypeDictionary *types, TestDriver *test) :
-      TR::IlInjector(types, test)
-      {}
-   TR_ALLOC(TR_Memory::IlGenerator)
+namespace TestCompiler {
+class BarIlInjector : public TR::IlInjector {
+public:
+	BarIlInjector(TR::TypeDictionary *types, TestDriver *test) : TR::IlInjector(types, test) {}
+	TR_ALLOC(TR_Memory::IlGenerator)
 
-   bool injectIL();
+	bool injectIL();
 
-   protected:
-   TR::Node *indexParameter() { return parameter(0, Int32); }
-
-   };
+protected:
+	TR::Node *indexParameter() { return parameter(0, Int32); }
+};
 
 } // namespace TestCompiler

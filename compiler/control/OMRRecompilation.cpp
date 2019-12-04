@@ -43,24 +43,21 @@
 #include "infra/Timer.hpp"
 
 class TR_OpaqueMethodBlock;
-namespace TR { class Instruction; }
-namespace TR { class SymbolReference; }
+namespace TR {
+class Instruction;
+}
+namespace TR {
+class SymbolReference;
+}
 
-
-OMR::Recompilation::Recompilation(TR::Compilation * comp) :
-   _compilation(comp)
-   {
-   }
-
+OMR::Recompilation::Recompilation(TR::Compilation *comp) : _compilation(comp) {}
 
 void
 OMR::Recompilation::shutdown()
-   {
-   }
-
+{}
 
 TR::Recompilation *
 OMR::Recompilation::self()
-   {
-   return static_cast<TR::Recompilation *>(this);
-   }
+{
+	return static_cast<TR::Recompilation *>(this);
+}

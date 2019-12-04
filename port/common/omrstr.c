@@ -45,7 +45,7 @@
 
 #if defined(LINUX) || defined(AIXPPC) || defined(J9ZOS390) || defined(OSX)
 #include <iconv.h>
-typedef iconv_t  charconvState_t;
+typedef iconv_t charconvState_t;
 #define J9STR_USE_ICONV
 /* need to get the EBCDIC version of nl_langinfo */
 #define J9_USE_ORIG_EBCDIC_LANGINFO 1
@@ -86,7 +86,6 @@ typedef void *charconvState_t; /*dummy type */
 extern const char *utf8;
 extern const char *utf16;
 extern const char *ebcdic;
-
 
 typedef union {
 	uint64_t u64;
@@ -146,31 +145,50 @@ extern uint32_t encodeUTF8Char(uintptr_t unicode, uint8_t *result);
 static const char *parseTagChar(const char *format, J9FormatData *result);
 static void readValues(struct OMRPortLibrary *portLibrary, J9FormatData *result, va_list args);
 static int parseFormatString(struct OMRPortLibrary *portLibrary, J9FormatData *result);
-static uintptr_t writeDoubleToBuffer(char *buf, uintptr_t bufLen, uint64_t width, uint64_t precision, double value, uint8_t type, uint8_t tag);
+static uintptr_t writeDoubleToBuffer(
+        char *buf, uintptr_t bufLen, uint64_t width, uint64_t precision, double value, uint8_t type, uint8_t tag);
 static const char *parseModifier(const char *format, J9FormatData *result);
 static const char *parseType(const char *format, J9FormatData *result);
 static const char *parseWidth(const char *format, J9FormatData *result);
-static uintptr_t writeFormattedString(struct OMRPortLibrary *portLibrary, J9FormatData *data, char *result, uintptr_t length);
+static uintptr_t writeFormattedString(
+        struct OMRPortLibrary *portLibrary, J9FormatData *data, char *result, uintptr_t length);
 static uintptr_t writeSpec(J9FormatData *data, J9FormatSpecifier *spec, char *result, uintptr_t length);
 static const char *parseIndex(const char *format, uint8_t *result);
-static uintptr_t writeStringToBuffer(char *buf, uintptr_t bufLen, uint64_t width, uint64_t precision, const char *value, uint8_t tag);
+static uintptr_t writeStringToBuffer(
+        char *buf, uintptr_t bufLen, uint64_t width, uint64_t precision, const char *value, uint8_t tag);
 static const char *parsePrecision(const char *format, J9FormatData *result);
-static uintptr_t  writeIntToBuffer(char *buf, uintptr_t bufLen, uint64_t width, uint64_t precision, uint64_t value, uint8_t tag, int isSigned, const char *digits);
-static uintptr_t writeUnicodeStringToBuffer(char *buf, uintptr_t bufLen, uint64_t width, uint64_t precision, const uint16_t *value, uint8_t tag);
+static uintptr_t writeIntToBuffer(char *buf, uintptr_t bufLen, uint64_t width, uint64_t precision, uint64_t value,
+        uint8_t tag, int isSigned, const char *digits);
+static uintptr_t writeUnicodeStringToBuffer(
+        char *buf, uintptr_t bufLen, uint64_t width, uint64_t precision, const uint16_t *value, uint8_t tag);
 static void convertUTCMillisToLocalJ9Time(int64_t millisUTC, struct J9TimeInfo *tm);
 static void setJ9TimeToEpoch(struct J9TimeInfo *tm);
-static uint32_t omrstr_subst_time(struct OMRPortLibrary *portLibrary, char *buf, uint32_t bufLen, const char *format, int64_t timeMillis);
-static intptr_t omrstr_set_token_from_buf(struct OMRPortLibrary *portLibrary, struct J9StringTokens *tokens, const char *key, char *tokenBuf, uint32_t tokenLen);
-static int32_t convertPlatformToMutf8(struct OMRPortLibrary *portLibrary, uint32_t codePage, const uint8_t *inBuffer, uintptr_t inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize);
-static int32_t convertMutf8ToPlatform(struct OMRPortLibrary *portLibrary, uint32_t codePage, const uint8_t *inBuffer, uintptr_t inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize);
-static int32_t convertWideToMutf8(const uint8_t **inBuffer, uintptr_t *inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize);
-static int32_t convertUtf8ToMutf8(struct OMRPortLibrary *portLibrary, const uint8_t **inBuffer, uintptr_t *inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize);
-static int32_t convertPlatformToUtf8(struct OMRPortLibrary *portLibrary, const uint8_t *inBuffer, uintptr_t inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize);
-static int32_t convertMutf8ToWide(const uint8_t **inBuffer, uintptr_t *inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize);
-static int32_t convertPlatformToWide(struct OMRPortLibrary *portLibrary, charconvState_t encodingState, uint32_t codePage, const uint8_t **inBuffer, uintptr_t *inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize);
-static int32_t convertWideToPlatform(struct OMRPortLibrary *portLibrary, charconvState_t encodingState, uint32_t codePage, const uint8_t **inBuffer, uintptr_t *inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize);
-static int32_t convertLatin1ToMutf8(struct OMRPortLibrary *portLibrary, const uint8_t **inBuffer, uintptr_t *inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize);
-static int32_t convertMutf8ToLatin1(struct OMRPortLibrary *portLibrary, const uint8_t **inBuffer, uintptr_t *inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize);
+static uint32_t omrstr_subst_time(
+        struct OMRPortLibrary *portLibrary, char *buf, uint32_t bufLen, const char *format, int64_t timeMillis);
+static intptr_t omrstr_set_token_from_buf(struct OMRPortLibrary *portLibrary, struct J9StringTokens *tokens,
+        const char *key, char *tokenBuf, uint32_t tokenLen);
+static int32_t convertPlatformToMutf8(struct OMRPortLibrary *portLibrary, uint32_t codePage, const uint8_t *inBuffer,
+        uintptr_t inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize);
+static int32_t convertMutf8ToPlatform(struct OMRPortLibrary *portLibrary, uint32_t codePage, const uint8_t *inBuffer,
+        uintptr_t inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize);
+static int32_t convertWideToMutf8(
+        const uint8_t **inBuffer, uintptr_t *inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize);
+static int32_t convertUtf8ToMutf8(struct OMRPortLibrary *portLibrary, const uint8_t **inBuffer, uintptr_t *inBufferSize,
+        uint8_t *outBuffer, uintptr_t outBufferSize);
+static int32_t convertPlatformToUtf8(struct OMRPortLibrary *portLibrary, const uint8_t *inBuffer,
+        uintptr_t inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize);
+static int32_t convertMutf8ToWide(
+        const uint8_t **inBuffer, uintptr_t *inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize);
+static int32_t convertPlatformToWide(struct OMRPortLibrary *portLibrary, charconvState_t encodingState,
+        uint32_t codePage, const uint8_t **inBuffer, uintptr_t *inBufferSize, uint8_t *outBuffer,
+        uintptr_t outBufferSize);
+static int32_t convertWideToPlatform(struct OMRPortLibrary *portLibrary, charconvState_t encodingState,
+        uint32_t codePage, const uint8_t **inBuffer, uintptr_t *inBufferSize, uint8_t *outBuffer,
+        uintptr_t outBufferSize);
+static int32_t convertLatin1ToMutf8(struct OMRPortLibrary *portLibrary, const uint8_t **inBuffer,
+        uintptr_t *inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize);
+static int32_t convertMutf8ToLatin1(struct OMRPortLibrary *portLibrary, const uint8_t **inBuffer,
+        uintptr_t *inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize);
 
 #if defined(OMR_OS_WINDOWS)
 static void convertJ9TimeToSYSTEMTIME(J9TimeInfo *j9TimeInfo, SYSTEMTIME *systemTime);
@@ -220,11 +238,13 @@ omrstr_printf(struct OMRPortLibrary *portLibrary, char *buf, uintptr_t bufLen, c
  *                              J9STR_CODE_LATIN1
  *                              J9STR_CODE_PLATFORM_RAW (encoding used by the operating system)
  *                              J9STR_CODE_PLATFORM_OMR_INTERNAL (encoding used by certain operating system calls)
- *                              J9STR_CODE_WINTHREADACP, J9STR_CODE_WINDEFAULTACP (thread and default ANSI code page, Windows only)
+ *                              J9STR_CODE_WINTHREADACP, J9STR_CODE_WINDEFAULTACP (thread and default ANSI code page,
+ *Windows only)
  * @param[in] toCode        Output string encoding.  Only the encodings listed above are allowed.
  * @param[in] inBuffer      Input text to be converted.  May contain embedded null characters.
  * @param[in] inBufferSize  input string size in bytes, not including the terminating null.
- * @param[in] outBuffer     user-allocated output buffer that stores converted characters, ignored if outBufferSize is 0.
+ * @param[in] outBuffer     user-allocated output buffer that stores converted characters, ignored if outBufferSize is
+ *0.
  * @param[in] outBufferSize output buffer size in bytes (zero to request the required output buffer size)
  *
  * @return:
@@ -232,7 +252,8 @@ omrstr_printf(struct OMRPortLibrary *portLibrary, char *buf, uintptr_t bufLen, c
  *  	- the number of bytes required to hold the converted text if outBufferSize is 0.
  *		- the number of bytes written to the buffer indicated by outBuffer.
  * - negative value on failure:
- * 		- OMRPORT_ERROR_STRING_BUFFER_TOO_SMALL, if the size of outBuffer is not large enough to hold the converted text.
+ * 		- OMRPORT_ERROR_STRING_BUFFER_TOO_SMALL, if the size of outBuffer is not large enough to hold the
+ *converted text.
  * 		- OMRPORT_ERROR_STRING_ICONV_OPEN_FAILED, if call iconv_open() failed.
  * 		- OMRPORT_ERROR_STRING_ILLEGAL_STRING if the input string is malformed
  *  	- OMRPORT_ERROR_STRING_UNSUPPORTED_ENCODING if the input or output encoding is not supported
@@ -244,7 +265,8 @@ omrstr_printf(struct OMRPortLibrary *portLibrary, char *buf, uintptr_t bufLen, c
  *  	wide to [modified UTF-8, platform raw]
  *  	[ISO Latin-1 (8859-1), UTF-8, Windows ANSI default and current code pages] to modified UTF-8
  * @note J9STR_CODE_PLATFORM_OMR_INTERNAL is an alias for other encodings depending on the platform.
- * @note J9STR_CODE_PLATFORM is deprecated. Use J9STR_CODE_PLATFORM_OMR_INTERNAL for results of system calls such as getenv (see stdlib.h) and
+ * @note J9STR_CODE_PLATFORM is deprecated. Use J9STR_CODE_PLATFORM_OMR_INTERNAL for results of system calls such as
+ *getenv (see stdlib.h) and
  * @note J9STR_CODE_PLATFORM_RAW where the port library does not do implicit translation.
  */
 #ifndef OS_ENCODING_CODE_PAGE
@@ -252,8 +274,8 @@ omrstr_printf(struct OMRPortLibrary *portLibrary, char *buf, uintptr_t bufLen, c
 #define OS_ENCODING_CODE_PAGE 0
 #endif
 int32_t
-omrstr_convert(struct OMRPortLibrary *portLibrary, int32_t fromCode, int32_t toCode,
-			  uint8_t *inBuffer, uintptr_t inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize)
+omrstr_convert(struct OMRPortLibrary *portLibrary, int32_t fromCode, int32_t toCode, uint8_t *inBuffer,
+        uintptr_t inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize)
 {
 	int32_t result = OMRPORT_ERROR_STRING_UNSUPPORTED_ENCODING;
 
@@ -261,43 +283,41 @@ omrstr_convert(struct OMRPortLibrary *portLibrary, int32_t fromCode, int32_t toC
 	case J9STR_CODE_PLATFORM_RAW: {
 		switch (toCode) {
 		case J9STR_CODE_MUTF8:
-			result = convertPlatformToMutf8(portLibrary, OS_ENCODING_CODE_PAGE, inBuffer, inBufferSize, outBuffer, outBufferSize);
+			result = convertPlatformToMutf8(
+			        portLibrary, OS_ENCODING_CODE_PAGE, inBuffer, inBufferSize, outBuffer, outBufferSize);
 			break;
-		case J9STR_CODE_WIDE:
-			result = OMRPORT_ERROR_STRING_UNSUPPORTED_ENCODING;
-			break;
+		case J9STR_CODE_WIDE: result = OMRPORT_ERROR_STRING_UNSUPPORTED_ENCODING; break;
 		case J9STR_CODE_UTF8:
-			result = convertPlatformToUtf8(portLibrary, (const uint8_t*)inBuffer, inBufferSize, outBuffer, outBufferSize);
+			result = convertPlatformToUtf8(
+			        portLibrary, (const uint8_t *)inBuffer, inBufferSize, outBuffer, outBufferSize);
 			break;
-		default:
-			result = OMRPORT_ERROR_STRING_UNSUPPORTED_ENCODING;
-			break;
+		default: result = OMRPORT_ERROR_STRING_UNSUPPORTED_ENCODING; break;
 		}
-	}
-	break;
+	} break;
 #if defined(OMR_OS_WINDOWS)
 	case J9STR_CODE_WINTHREADACP:
 	case J9STR_CODE_WINDEFAULTACP: {
 		switch (toCode) {
 		case J9STR_CODE_MUTF8:
-			result = convertPlatformToMutf8(portLibrary, (fromCode == J9STR_CODE_WINTHREADACP)? CP_THREAD_ACP: CP_ACP, inBuffer, inBufferSize, outBuffer, outBufferSize);
+			result = convertPlatformToMutf8(portLibrary,
+			        (fromCode == J9STR_CODE_WINTHREADACP) ? CP_THREAD_ACP : CP_ACP, inBuffer, inBufferSize,
+			        outBuffer, outBufferSize);
 			break;
-		default:
-			result = OMRPORT_ERROR_STRING_UNSUPPORTED_ENCODING;
-			break;
+		default: result = OMRPORT_ERROR_STRING_UNSUPPORTED_ENCODING; break;
 		}
-	}
-	break;
+	} break;
 #endif /* defined(OMR_OS_WINDOWS) */
 	case J9STR_CODE_MUTF8: {
 		switch (toCode) {
 		case J9STR_CODE_PLATFORM_RAW:
-			result = convertMutf8ToPlatform(portLibrary, OS_ENCODING_CODE_PAGE, inBuffer, inBufferSize, outBuffer, outBufferSize);
+			result = convertMutf8ToPlatform(
+			        portLibrary, OS_ENCODING_CODE_PAGE, inBuffer, inBufferSize, outBuffer, outBufferSize);
 			break;
 		case J9STR_CODE_LATIN1: {
 			const uint8_t *mutf8Cursor = inBuffer;
 			uintptr_t mutf8Remaining = inBufferSize;
-			result = convertMutf8ToLatin1(portLibrary, &mutf8Cursor, &mutf8Remaining, outBuffer, outBufferSize);
+			result = convertMutf8ToLatin1(
+			        portLibrary, &mutf8Cursor, &mutf8Remaining, outBuffer, outBufferSize);
 			/*
 			 * convertMutf8ToLatin1 is resumable so does not return error if buffer too small.
 			 * In this case we should have consumed all the data
@@ -305,14 +325,15 @@ omrstr_convert(struct OMRPortLibrary *portLibrary, int32_t fromCode, int32_t toC
 			if (mutf8Remaining > 0) {
 				result = OMRPORT_ERROR_STRING_BUFFER_TOO_SMALL;
 			}
-		}
-		break;
+		} break;
 #if defined(OMR_OS_WINDOWS)
 		case J9STR_CODE_WINTHREADACP:
-			result = convertMutf8ToPlatform(portLibrary, CP_THREAD_ACP, inBuffer, inBufferSize, outBuffer, outBufferSize);
+			result = convertMutf8ToPlatform(
+			        portLibrary, CP_THREAD_ACP, inBuffer, inBufferSize, outBuffer, outBufferSize);
 			break;
 		case J9STR_CODE_WINDEFAULTACP:
-			result = convertMutf8ToPlatform(portLibrary, CP_ACP, inBuffer, inBufferSize, outBuffer, outBufferSize);
+			result = convertMutf8ToPlatform(
+			        portLibrary, CP_ACP, inBuffer, inBufferSize, outBuffer, outBufferSize);
 			break;
 #endif /* defined(OMR_OS_WINDOWS) */
 		case J9STR_CODE_WIDE: {
@@ -320,20 +341,16 @@ omrstr_convert(struct OMRPortLibrary *portLibrary, int32_t fromCode, int32_t toC
 			uintptr_t mutf8Remaining = inBufferSize;
 			result = convertMutf8ToWide(&mutf8Cursor, &mutf8Remaining, outBuffer, outBufferSize);
 			/*
-			 * inBuffer parameters are updated to reflect  data untranslated due to insufficient space in the output buffer.
-			 * In this case, all input characters should have been consumed.
+			 * inBuffer parameters are updated to reflect  data untranslated due to insufficient space in
+			 * the output buffer. In this case, all input characters should have been consumed.
 			 */
 			if (mutf8Remaining > 0) {
 				result = OMRPORT_ERROR_STRING_BUFFER_TOO_SMALL;
 			}
+		} break;
+		default: result = OMRPORT_ERROR_STRING_UNSUPPORTED_ENCODING; break;
 		}
-		break;
-		default:
-			result = OMRPORT_ERROR_STRING_UNSUPPORTED_ENCODING;
-			break;
-		}
-	}
-	break;
+	} break;
 	case J9STR_CODE_UTF8: {
 		switch (toCode) {
 		case J9STR_CODE_MUTF8: {
@@ -347,44 +364,35 @@ omrstr_convert(struct OMRPortLibrary *portLibrary, int32_t fromCode, int32_t toC
 			if (utf8Remaining > 0) {
 				result = OMRPORT_ERROR_STRING_BUFFER_TOO_SMALL;
 			}
+		} break;
+		default: result = OMRPORT_ERROR_STRING_UNSUPPORTED_ENCODING; break;
 		}
-		break;
-		default:
-			result = OMRPORT_ERROR_STRING_UNSUPPORTED_ENCODING;
-			break;
-		}
-	}
-	break;
+	} break;
 	case J9STR_CODE_WIDE: {
 		switch (toCode) {
-		case J9STR_CODE_PLATFORM_RAW:
-			result = OMRPORT_ERROR_STRING_UNSUPPORTED_ENCODING;
-			break;
+		case J9STR_CODE_PLATFORM_RAW: result = OMRPORT_ERROR_STRING_UNSUPPORTED_ENCODING; break;
 		case J9STR_CODE_MUTF8: {
 			const uint8_t *wideCursor = inBuffer;
 			uintptr_t wideRemaining = inBufferSize;
 			result = convertWideToMutf8(&wideCursor, &wideRemaining, outBuffer, outBufferSize);
 			/*
-			 * inBuffer parameters are updated to reflect  data untranslated due to insufficient space in the output buffer.
-			 * In this case, all input characters should have been consumed.
+			 * inBuffer parameters are updated to reflect  data untranslated due to insufficient space in
+			 * the output buffer. In this case, all input characters should have been consumed.
 			 */
 			if (wideRemaining > 0) {
 				result = OMRPORT_ERROR_STRING_BUFFER_TOO_SMALL;
 			}
+		} break;
+		default: result = OMRPORT_ERROR_STRING_UNSUPPORTED_ENCODING; break;
 		}
-		break;
-		default:
-			result = OMRPORT_ERROR_STRING_UNSUPPORTED_ENCODING;
-			break;
-		}
-	}
-	break;
+	} break;
 	case J9STR_CODE_LATIN1: {
 		switch (toCode) {
 		case J9STR_CODE_MUTF8: {
 			const uint8_t *latin1Cursor = inBuffer;
 			uintptr_t latin1Remaining = inBufferSize;
-			result = convertLatin1ToMutf8(portLibrary, &latin1Cursor, &latin1Remaining, outBuffer, outBufferSize);
+			result = convertLatin1ToMutf8(
+			        portLibrary, &latin1Cursor, &latin1Remaining, outBuffer, outBufferSize);
 			/*
 			 * convertLatin1ToMutf8 is resumable so does not return error if buffer too small.
 			 * In this case we should have consumed all the data
@@ -393,17 +401,11 @@ omrstr_convert(struct OMRPortLibrary *portLibrary, int32_t fromCode, int32_t toC
 				result = OMRPORT_ERROR_STRING_BUFFER_TOO_SMALL;
 			}
 
+		} break;
+		default: result = OMRPORT_ERROR_STRING_UNSUPPORTED_ENCODING; break;
 		}
-		break;
-		default:
-			result = OMRPORT_ERROR_STRING_UNSUPPORTED_ENCODING;
-			break;
-		}
-	}
-	break;
-	default:
-		result = OMRPORT_ERROR_STRING_UNSUPPORTED_ENCODING;
-		break;
+	} break;
+	default: result = OMRPORT_ERROR_STRING_UNSUPPORTED_ENCODING; break;
 	}
 
 	return result;
@@ -466,8 +468,7 @@ parseFormatString(struct OMRPortLibrary *portLibrary, J9FormatData *result)
 				result->specCount++;
 			}
 			break;
-		default:
-			format++;
+		default: format++;
 		}
 	}
 
@@ -618,8 +619,7 @@ parseModifier(const char *format, J9FormatData *result)
 {
 
 	switch (*format) {
-	case 'z':
-		format++;
+	case 'z': format++;
 #ifdef OMR_ENV_DATA64
 		result->spec[result->specCount].tag |= J9FSPEC_LL;
 #endif
@@ -654,9 +654,7 @@ parseType(const char *format, J9FormatData *result)
 
 	switch (*type) {
 		/* integers */
-	case 'c':
-		result->valueType[index] = J9FTYPE_U32;
-		break;
+	case 'c': result->valueType[index] = J9FTYPE_U32; break;
 	case 'i':
 	case 'd':
 	case 'u':
@@ -677,12 +675,9 @@ parseType(const char *format, J9FormatData *result)
 	case 'E':
 	case 'F':
 	case 'g':
-	case 'G':
-		result->valueType[index] = J9FTYPE_DBL;
-		break;
+	case 'G': result->valueType[index] = J9FTYPE_DBL; break;
 
-	default:
-		return NULL;
+	default: return NULL;
 	}
 
 	return format;
@@ -696,18 +691,10 @@ readValues(struct OMRPortLibrary *portLibrary, J9FormatData *result, va_list arg
 	COPY_VA_LIST(argsCopy, args);
 	for (index = 0; index < result->valueCount; index++) {
 		switch (result->valueType[index]) {
-		case J9FTYPE_U64:
-			result->value[index].u64 = va_arg(argsCopy, uint64_t);
-			break;
-		case J9FTYPE_U32:
-			result->value[index].u64 = va_arg(argsCopy, uint32_t);
-			break;
-		case J9FTYPE_DBL:
-			result->value[index].dbl = va_arg(argsCopy, double);
-			break;
-		case J9FTYPE_PTR:
-			result->value[index].ptr = va_arg(argsCopy, void *);
-			break;
+		case J9FTYPE_U64: result->value[index].u64 = va_arg(argsCopy, uint64_t); break;
+		case J9FTYPE_U32: result->value[index].u64 = va_arg(argsCopy, uint32_t); break;
+		case J9FTYPE_DBL: result->value[index].dbl = va_arg(argsCopy, double); break;
+		case J9FTYPE_PTR: result->value[index].ptr = va_arg(argsCopy, void *); break;
 		case J9FTYPE_IMMEDIATE:
 			/* shouldn't be encountered -- these should all be at the end of the value array */
 			break;
@@ -721,7 +708,7 @@ writeSpec(J9FormatData *data, J9FormatSpecifier *spec, char *result, uintptr_t l
 {
 	J9FormatValue *value = &data->value[spec->index];
 	uint64_t width = data->value[spec->widthIndex].u64;
-	uint64_t precision = data->value[spec->precisionIndex] .u64;
+	uint64_t precision = data->value[spec->precisionIndex].u64;
 	uintptr_t index = 0;
 
 	switch (*spec->type) {
@@ -740,7 +727,8 @@ writeSpec(J9FormatData *data, J9FormatSpecifier *spec, char *result, uintptr_t l
 		break;
 
 	case 'p':
-		index = writeIntToBuffer(result, length, sizeof(uintptr_t) * 2, sizeof(uintptr_t) * 2, (uintptr_t)value->ptr, 0, 0, digits_hex_upper);
+		index = writeIntToBuffer(result, length, sizeof(uintptr_t) * 2, sizeof(uintptr_t) * 2,
+		        (uintptr_t)value->ptr, 0, 0, digits_hex_upper);
 		break;
 
 	case 'c':
@@ -764,9 +752,11 @@ writeSpec(J9FormatData *data, J9FormatSpecifier *spec, char *result, uintptr_t l
 	case 's':
 		if (value->ptr) {
 			if (spec->tag & J9FSPEC_L) {
-				index = writeUnicodeStringToBuffer(result, length, width, precision, (const uint16_t *)value->ptr, spec->tag);
+				index = writeUnicodeStringToBuffer(
+				        result, length, width, precision, (const uint16_t *)value->ptr, spec->tag);
 			} else {
-				index = writeStringToBuffer(result, length, width, precision, (const char *)value->ptr, spec->tag);
+				index = writeStringToBuffer(
+				        result, length, width, precision, (const char *)value->ptr, spec->tag);
 			}
 		} else {
 			index = writeStringToBuffer(result, length, width, precision, "<NULL>", spec->tag);
@@ -803,14 +793,16 @@ writeSpec(J9FormatData *data, J9FormatSpecifier *spec, char *result, uintptr_t l
  * @return The number of bytes written to buf.
  */
 static uintptr_t
-writeIntToBuffer(char *buf, uintptr_t bufLen, uint64_t width, uint64_t precision, uint64_t value, uint8_t tag, int isSigned, const char *digits)
+writeIntToBuffer(char *buf, uintptr_t bufLen, uint64_t width, uint64_t precision, uint64_t value, uint8_t tag,
+        int isSigned, const char *digits)
 {
 	uint32_t index = 0;
 	uint32_t length = 0;
 	uint32_t rightSpace = 0;
 	uint64_t temp;
 	size_t base = strlen(digits);
-	int32_t actualPrecision = 0;	/* precision is specified unsigned, but code may decrement temp values below zero */
+	int32_t actualPrecision = 0; /* precision is specified unsigned, but code may decrement temp values below zero
+	                              */
 	char signChar = 0;
 
 	if (isSigned) {
@@ -839,7 +831,7 @@ writeIntToBuffer(char *buf, uintptr_t bufLen, uint64_t width, uint64_t precision
 	if (precision != J9F_NO_VALUE) {
 		actualPrecision = (int32_t)precision;
 
-		/* subtle: actualPrecision known to be non-negative (hence cast to uint32_t) 
+		/* subtle: actualPrecision known to be non-negative (hence cast to uint32_t)
 		 * for purposes of comparison.
 		 */
 		if ((uint32_t)actualPrecision > length) {
@@ -853,7 +845,7 @@ writeIntToBuffer(char *buf, uintptr_t bufLen, uint64_t width, uint64_t precision
 	}
 
 	if (width != J9F_NO_VALUE) {
-		uint32_t actualWidth = (uint32_t)width; 	/* shorten user-specified width to uint32_t */
+		uint32_t actualWidth = (uint32_t)width; /* shorten user-specified width to uint32_t */
 
 		if (actualWidth > length) {
 			if (tag & J9FFLAG_DASH) {
@@ -1015,7 +1007,8 @@ writeFormattedString(struct OMRPortLibrary *portLibrary, J9FormatData *data, cha
 				break;
 			default:
 				if (result) {
-					index += writeSpec(data, &data->spec[specIndex], result + index, length - index);
+					index +=
+					        writeSpec(data, &data->spec[specIndex], result + index, length - index);
 				} else {
 					index += writeSpec(data, &data->spec[specIndex], result, length);
 				}
@@ -1043,14 +1036,15 @@ writeFormattedString(struct OMRPortLibrary *portLibrary, J9FormatData *data, cha
 		result[index] = 0;
 	}
 
-	if (NULL == result)  {
+	if (NULL == result) {
 		return index + 1; /* For the NUL terminator */
 	}
 
 	return index;
 }
 static uintptr_t
-writeDoubleToBuffer(char *buf, uintptr_t bufLen, uint64_t width, uint64_t precision, double value, uint8_t type, uint8_t tag)
+writeDoubleToBuffer(
+        char *buf, uintptr_t bufLen, uint64_t width, uint64_t precision, double value, uint8_t type, uint8_t tag)
 {
 	char format[sizeof("%+4294967295.4294967295f")];
 	char *formatCursor = format;
@@ -1072,11 +1066,13 @@ writeDoubleToBuffer(char *buf, uintptr_t bufLen, uint64_t width, uint64_t precis
 	}
 
 	if (width != J9F_NO_VALUE) {
-		formatCursor += writeIntToBuffer(formatCursor, lastFormat - formatCursor, J9F_NO_VALUE, J9F_NO_VALUE, width, 'u', 0, digits_dec);
+		formatCursor += writeIntToBuffer(
+		        formatCursor, lastFormat - formatCursor, J9F_NO_VALUE, J9F_NO_VALUE, width, 'u', 0, digits_dec);
 	}
 	if (precision != J9F_NO_VALUE) {
 		*formatCursor++ = '.';
-		formatCursor += writeIntToBuffer(formatCursor, lastFormat - formatCursor, J9F_NO_VALUE, J9F_NO_VALUE, precision, 'u', 0, digits_dec);
+		formatCursor += writeIntToBuffer(formatCursor, lastFormat - formatCursor, J9F_NO_VALUE, J9F_NO_VALUE,
+		        precision, 'u', 0, digits_dec);
 	}
 
 	*formatCursor++ = type;
@@ -1104,8 +1100,7 @@ writeDoubleToBuffer(char *buf, uintptr_t bufLen, uint64_t width, uint64_t precis
  */
 void
 omrstr_shutdown(struct OMRPortLibrary *portLibrary)
-{
-}
+{}
 /**
  * PortLibrary startup.
  *
@@ -1126,7 +1121,8 @@ omrstr_startup(struct OMRPortLibrary *portLibrary)
 	return 0;
 }
 static uintptr_t
-writeUnicodeStringToBuffer(char *buf, uintptr_t bufLen, uint64_t width, uint64_t precision, const uint16_t *value, uint8_t tag)
+writeUnicodeStringToBuffer(
+        char *buf, uintptr_t bufLen, uint64_t width, uint64_t precision, const uint16_t *value, uint8_t tag)
 {
 	uint32_t numberOfUnicodeChar = 0;
 	uint32_t numberOfUTF8Char = 0;
@@ -1234,9 +1230,7 @@ parseIndex(const char *format, uint8_t *result)
 				return format + 1;
 			}
 			/* fall through */
-		default:
-			*result = 0xFF;
-			return start;
+		default: *result = 0xFF; return start;
 		}
 	}
 }
@@ -1258,7 +1252,6 @@ setJ9TimeToEpoch(struct J9TimeInfo *tm)
 	tm->day = 1;
 	tm->month = 1;
 	tm->year = 1970;
-
 }
 
 /*
@@ -1267,13 +1260,15 @@ setJ9TimeToEpoch(struct J9TimeInfo *tm)
  * Converts the UTC time passed in as milli seconds since Epoch to local time as the J9-specific representation of time.
  *
  * @param[in] millisUTC the UTC time passed in as milli seconds since Epoch. Negative values are not allowed.
- * @param[in,out] the local time as the J9-specific representation of time. Will not pass back any values that occurred before Epoch.
+ * @param[in,out] the local time as the J9-specific representation of time. Will not pass back any values that occurred
+ * before Epoch.
  *
  * @return the local time or Epoch
  *
  * @note will not pass back any dates that occurred before Epoch
  */
-static void convertUTCMillisToLocalJ9Time(int64_t millisUTC, struct J9TimeInfo *omrtimeInfo)
+static void
+convertUTCMillisToLocalJ9Time(int64_t millisUTC, struct J9TimeInfo *omrtimeInfo)
 {
 #if !defined(OMR_OS_WINDOWS)
 
@@ -1338,12 +1333,11 @@ static void convertUTCMillisToLocalJ9Time(int64_t millisUTC, struct J9TimeInfo *
 
 	/* Get the TimeZone Information needed to convert to local time */
 	rc = GetTimeZoneInformation(&timeZoneInformation);
-#if ( defined(OMR_OS_WINDOWS) || (_WIN32_WCE>=420) )
+#if (defined(OMR_OS_WINDOWS) || (_WIN32_WCE >= 420))
 	if (rc == TIME_ZONE_ID_INVALID) {
 		return;
 	}
 #endif
-
 
 	/* Note: timeZoneInformation.Bias is the bias to "local time" and does not account for Daylight Saving Time */
 	bias = (int64_t)timeZoneInformation.Bias;
@@ -1380,7 +1374,7 @@ static void convertUTCMillisToLocalJ9Time(int64_t millisUTC, struct J9TimeInfo *
 	if (daylightBeforeStandard) {
 		/* we're in the northern hemisphere */
 		if ((TRUE == firstDateComesBeforeSecondDate(&daylightDateAsJ9TimeInfo, omrtimeInfo))
-			&& (TRUE == firstDateComesBeforeSecondDate(omrtimeInfo, &standardDateAsJ9TimeInfo))) {
+		        && (TRUE == firstDateComesBeforeSecondDate(omrtimeInfo, &standardDateAsJ9TimeInfo))) {
 			standardTime = FALSE;
 		} else {
 			standardTime = TRUE;
@@ -1388,24 +1382,27 @@ static void convertUTCMillisToLocalJ9Time(int64_t millisUTC, struct J9TimeInfo *
 	} else {
 		/* we're in the southern hemisphere */
 		if ((TRUE == firstDateComesBeforeSecondDate(&standardDateAsJ9TimeInfo, omrtimeInfo))
-			&& (TRUE == firstDateComesBeforeSecondDate(omrtimeInfo, &daylightDateAsJ9TimeInfo))) {
+		        && (TRUE == firstDateComesBeforeSecondDate(omrtimeInfo, &daylightDateAsJ9TimeInfo))) {
 			standardTime = TRUE;
 		} else {
 			/* we're in Standard Time*/
 			standardTime = FALSE;
-
 		}
 	}
 
 #if defined(J9STR_DEBUG)
 	if (standardTime) {
-		printf("\t\tconvertUTCMillisToLocalJ9Time: Standard Time. Bias = %i.\n", timeZoneInformation.StandardBias);
+		printf("\t\tconvertUTCMillisToLocalJ9Time: Standard Time. Bias = %i.\n",
+		        timeZoneInformation.StandardBias);
 	} else {
-		printf("\t\tconvertUTCMillisToLocalJ9Time: Daylight Time. Bias = %i.\n", timeZoneInformation.DaylightBias);
+		printf("\t\tconvertUTCMillisToLocalJ9Time: Daylight Time. Bias = %i.\n",
+		        timeZoneInformation.DaylightBias);
 	}
 
-	printf("\t\tmonth/day of DaylightDate: %i/%i\n", timeZoneInformation.DaylightDate.wMonth, timeZoneInformation.DaylightDate.wDay);
-	printf("\t\tmonth/day of StandardDate: %i/%i\n", timeZoneInformation.StandardDate.wMonth, timeZoneInformation.StandardDate.wDay);
+	printf("\t\tmonth/day of DaylightDate: %i/%i\n", timeZoneInformation.DaylightDate.wMonth,
+	        timeZoneInformation.DaylightDate.wDay);
+	printf("\t\tmonth/day of StandardDate: %i/%i\n", timeZoneInformation.StandardDate.wMonth,
+	        timeZoneInformation.StandardDate.wDay);
 #endif
 
 	if (standardTime) {
@@ -1421,14 +1418,14 @@ static void convertUTCMillisToLocalJ9Time(int64_t millisUTC, struct J9TimeInfo *
 	return;
 
 #endif /* !defined(OMR_OS_WINDOWS) */
-
 }
 
 #if defined(OMR_OS_WINDOWS)
 /*
  * @internal
  *
- * Ingnoring the year, returns TRUE if the first date/time of year comes before the second date/time of year, false otherwise.
+ * Ingnoring the year, returns TRUE if the first date/time of year comes before the second date/time of year, false
+ * otherwise.
  *
  * param[in] firstDate
  * param[in] secondDate
@@ -1467,7 +1464,6 @@ firstDateComesBeforeSecondDate(J9TimeInfo *firstDate, J9TimeInfo *secondDate)
 					} else if (firstDate->second == secondDate->second) {
 						/* same date/time, return false */
 						return FALSE;
-
 					}
 				}
 			}
@@ -1521,7 +1517,6 @@ convertSYSTEMTIMEToJ9Time(SYSTEMTIME *systemTime, J9TimeInfo *j9TimeInfo)
 	j9TimeInfo->day = systemTime->wDay;
 	j9TimeInfo->month = systemTime->wMonth;
 	j9TimeInfo->year = systemTime->wYear;
-
 }
 
 /*
@@ -1540,57 +1535,37 @@ static void
 convertTimeMillisToJ9Time(int64_t timeMillis, J9TimeInfo *tm)
 {
 
-#define J9SFT_NUM_MONTHS         (12)
+#define J9SFT_NUM_MONTHS (12)
 #define J9SFT_NUM_SECS_IN_MINUTE (60)
-#define J9SFT_NUM_SECS_IN_HOUR   (60*J9SFT_NUM_SECS_IN_MINUTE)
-#define J9SFT_NUM_SECS_IN_DAY    (24*(int32_t)J9SFT_NUM_SECS_IN_HOUR)
-#define J9SFT_NUM_SECS_IN_YEAR   (365*J9SFT_NUM_SECS_IN_DAY)
-#define J9SFT_NUM_SECS_IN_LEAP_YEAR (366*J9SFT_NUM_SECS_IN_DAY)
-#define J9SFT_NUM_SECS_IN_JAN (31*J9SFT_NUM_SECS_IN_DAY)
-#define J9SFT_NUM_SECS_IN_FEB (28*J9SFT_NUM_SECS_IN_DAY)
-#define J9SFT_NUM_SECS_IN_MAR (31*J9SFT_NUM_SECS_IN_DAY)
-#define J9SFT_NUM_SECS_IN_APR (30*J9SFT_NUM_SECS_IN_DAY)
-#define J9SFT_NUM_SECS_IN_MAY (31*J9SFT_NUM_SECS_IN_DAY)
-#define J9SFT_NUM_SECS_IN_JUN (30*J9SFT_NUM_SECS_IN_DAY)
-#define J9SFT_NUM_SECS_IN_JUL (31*J9SFT_NUM_SECS_IN_DAY)
-#define J9SFT_NUM_SECS_IN_AUG (31*J9SFT_NUM_SECS_IN_DAY)
-#define J9SFT_NUM_SECS_IN_SEP (30*J9SFT_NUM_SECS_IN_DAY)
-#define J9SFT_NUM_SECS_IN_OCT (31*J9SFT_NUM_SECS_IN_DAY)
-#define J9SFT_NUM_SECS_IN_NOV (30*J9SFT_NUM_SECS_IN_DAY)
-#define J9SFT_NUM_SECS_IN_DEC (31*J9SFT_NUM_SECS_IN_DAY)
-#define J9SFT_NUM_SECS_IN_LEAP_FEB (29*J9SFT_NUM_SECS_IN_DAY)
+#define J9SFT_NUM_SECS_IN_HOUR (60 * J9SFT_NUM_SECS_IN_MINUTE)
+#define J9SFT_NUM_SECS_IN_DAY (24 * (int32_t)J9SFT_NUM_SECS_IN_HOUR)
+#define J9SFT_NUM_SECS_IN_YEAR (365 * J9SFT_NUM_SECS_IN_DAY)
+#define J9SFT_NUM_SECS_IN_LEAP_YEAR (366 * J9SFT_NUM_SECS_IN_DAY)
+#define J9SFT_NUM_SECS_IN_JAN (31 * J9SFT_NUM_SECS_IN_DAY)
+#define J9SFT_NUM_SECS_IN_FEB (28 * J9SFT_NUM_SECS_IN_DAY)
+#define J9SFT_NUM_SECS_IN_MAR (31 * J9SFT_NUM_SECS_IN_DAY)
+#define J9SFT_NUM_SECS_IN_APR (30 * J9SFT_NUM_SECS_IN_DAY)
+#define J9SFT_NUM_SECS_IN_MAY (31 * J9SFT_NUM_SECS_IN_DAY)
+#define J9SFT_NUM_SECS_IN_JUN (30 * J9SFT_NUM_SECS_IN_DAY)
+#define J9SFT_NUM_SECS_IN_JUL (31 * J9SFT_NUM_SECS_IN_DAY)
+#define J9SFT_NUM_SECS_IN_AUG (31 * J9SFT_NUM_SECS_IN_DAY)
+#define J9SFT_NUM_SECS_IN_SEP (30 * J9SFT_NUM_SECS_IN_DAY)
+#define J9SFT_NUM_SECS_IN_OCT (31 * J9SFT_NUM_SECS_IN_DAY)
+#define J9SFT_NUM_SECS_IN_NOV (30 * J9SFT_NUM_SECS_IN_DAY)
+#define J9SFT_NUM_SECS_IN_DEC (31 * J9SFT_NUM_SECS_IN_DAY)
+#define J9SFT_NUM_SECS_IN_LEAP_FEB (29 * J9SFT_NUM_SECS_IN_DAY)
 
 	int64_t timeLeft;
 	int32_t i;
 	int32_t *secondsInMonth;
-	int32_t normalSecondsInMonth[12] = {
-		J9SFT_NUM_SECS_IN_JAN,
-		J9SFT_NUM_SECS_IN_FEB,
-		J9SFT_NUM_SECS_IN_MAR,
-		J9SFT_NUM_SECS_IN_APR,
-		J9SFT_NUM_SECS_IN_MAY,
-		J9SFT_NUM_SECS_IN_JUN,
-		J9SFT_NUM_SECS_IN_JUL,
-		J9SFT_NUM_SECS_IN_AUG,
-		J9SFT_NUM_SECS_IN_SEP,
-		J9SFT_NUM_SECS_IN_OCT,
-		J9SFT_NUM_SECS_IN_NOV,
-		J9SFT_NUM_SECS_IN_DEC
-	};
-	int32_t leapYearSecondsInMonth[12] = {
-		J9SFT_NUM_SECS_IN_JAN,
-		J9SFT_NUM_SECS_IN_LEAP_FEB,
-		J9SFT_NUM_SECS_IN_MAR,
-		J9SFT_NUM_SECS_IN_APR,
-		J9SFT_NUM_SECS_IN_MAY,
-		J9SFT_NUM_SECS_IN_JUN,
-		J9SFT_NUM_SECS_IN_JUL,
-		J9SFT_NUM_SECS_IN_AUG,
-		J9SFT_NUM_SECS_IN_SEP,
-		J9SFT_NUM_SECS_IN_OCT,
-		J9SFT_NUM_SECS_IN_NOV,
-		J9SFT_NUM_SECS_IN_DEC
-	};
+	int32_t normalSecondsInMonth[12] = {J9SFT_NUM_SECS_IN_JAN, J9SFT_NUM_SECS_IN_FEB, J9SFT_NUM_SECS_IN_MAR,
+	        J9SFT_NUM_SECS_IN_APR, J9SFT_NUM_SECS_IN_MAY, J9SFT_NUM_SECS_IN_JUN, J9SFT_NUM_SECS_IN_JUL,
+	        J9SFT_NUM_SECS_IN_AUG, J9SFT_NUM_SECS_IN_SEP, J9SFT_NUM_SECS_IN_OCT, J9SFT_NUM_SECS_IN_NOV,
+	        J9SFT_NUM_SECS_IN_DEC};
+	int32_t leapYearSecondsInMonth[12] = {J9SFT_NUM_SECS_IN_JAN, J9SFT_NUM_SECS_IN_LEAP_FEB, J9SFT_NUM_SECS_IN_MAR,
+	        J9SFT_NUM_SECS_IN_APR, J9SFT_NUM_SECS_IN_MAY, J9SFT_NUM_SECS_IN_JUN, J9SFT_NUM_SECS_IN_JUL,
+	        J9SFT_NUM_SECS_IN_AUG, J9SFT_NUM_SECS_IN_SEP, J9SFT_NUM_SECS_IN_OCT, J9SFT_NUM_SECS_IN_NOV,
+	        J9SFT_NUM_SECS_IN_DEC};
 	BOOLEAN leapYear = FALSE;
 
 	if (!tm) {
@@ -1629,7 +1604,7 @@ convertTimeMillisToJ9Time(int64_t timeMillis, J9TimeInfo *tm)
 		/* increment the year and take the appropriate number
 		 * of seconds off the timeLeft
 		 */
-		tm->year ++;
+		tm->year++;
 		timeLeft -= numSecondsInAYear;
 	}
 
@@ -1656,7 +1631,7 @@ convertTimeMillisToJ9Time(int64_t timeMillis, J9TimeInfo *tm)
 		} else {
 			break;
 		}
-		tm->day ++;
+		tm->day++;
 	}
 
 	/* determine the hour of the day */
@@ -1667,7 +1642,7 @@ convertTimeMillisToJ9Time(int64_t timeMillis, J9TimeInfo *tm)
 		} else {
 			break;
 		}
-		tm->hour ++;
+		tm->hour++;
 	}
 
 	/* determine the minute of the hour */
@@ -1678,7 +1653,7 @@ convertTimeMillisToJ9Time(int64_t timeMillis, J9TimeInfo *tm)
 		} else {
 			break;
 		}
-		tm->minute ++;
+		tm->minute++;
 	}
 
 	/* and the rest is seconds */
@@ -1705,7 +1680,6 @@ convertTimeMillisToJ9Time(int64_t timeMillis, J9TimeInfo *tm)
 #undef J9SFT_NUM_SECS_IN_NOV
 #undef J9SFT_NUM_SECS_IN_DEC
 #undef J9SFT_NUM_SECS_IN_LEAP_FEB
-
 }
 
 #endif /* defined(OMR_OS_WINDOWS) */
@@ -1786,12 +1760,12 @@ populateWithDefaultTokens(struct OMRPortLibrary *portLibrary, struct J9StringTok
 	portLibrary->str_set_time_tokens(portLibrary, tokens, timeMillis);
 
 	if (portLibrary->str_set_token(portLibrary, tokens, "pid", "%u", pid)
-		|| portLibrary->str_set_token(portLibrary, tokens, "job", "%s", jobname)
-		|| portLibrary->str_set_token(portLibrary, tokens, "home", "%s", "")
-		|| portLibrary->str_set_token(portLibrary, tokens, "last", "%s", "")
-		|| portLibrary->str_set_token(portLibrary, tokens, "seq", "%04u", 0)
-		|| portLibrary->str_set_token(portLibrary, tokens, "jobid", "%s", jobid)
-		|| portLibrary->str_set_token(portLibrary, tokens, "asid", "%s", asid)) {
+	        || portLibrary->str_set_token(portLibrary, tokens, "job", "%s", jobname)
+	        || portLibrary->str_set_token(portLibrary, tokens, "home", "%s", "")
+	        || portLibrary->str_set_token(portLibrary, tokens, "last", "%s", "")
+	        || portLibrary->str_set_token(portLibrary, tokens, "seq", "%04u", 0)
+	        || portLibrary->str_set_token(portLibrary, tokens, "jobid", "%s", jobid)
+	        || portLibrary->str_set_token(portLibrary, tokens, "asid", "%s", asid)) {
 		/* If any of the above fail, we're out of memory */
 		return -1;
 	}
@@ -1895,7 +1869,6 @@ consumeToken(J9StringTokens *tokens, const char *key)
 	return NULL;
 }
 
-
 /* the largest 64 bit number has 20 digits */
 #define TICK_BUF_SIZE 21
 
@@ -1931,14 +1904,14 @@ omrstr_set_time_tokens(struct OMRPortLibrary *portLibrary, struct J9StringTokens
 	omrstr_subst_time(portLibrary, buf, TICK_BUF_SIZE + 20, "%Y%y%m%d%H%M%S%b%tick", timeMillis);
 
 	if (omrstr_set_token_from_buf(portLibrary, tokens, "Y", buf, 4)
-		|| omrstr_set_token_from_buf(portLibrary, tokens, "y", buf + 4, 2)
-		|| omrstr_set_token_from_buf(portLibrary, tokens, "m", buf + 6, 2)
-		|| omrstr_set_token_from_buf(portLibrary, tokens, "d", buf + 8, 2)
-		|| omrstr_set_token_from_buf(portLibrary, tokens, "H", buf + 10, 2)
-		|| omrstr_set_token_from_buf(portLibrary, tokens, "M", buf + 12, 2)
-		|| omrstr_set_token_from_buf(portLibrary, tokens, "S", buf + 14, 2)
-		|| omrstr_set_token_from_buf(portLibrary, tokens, "b", buf + 16, 3)
-		|| omrstr_set_token_from_buf(portLibrary, tokens, "tick", buf + 19, (uint32_t)strlen(buf + 19))) {
+	        || omrstr_set_token_from_buf(portLibrary, tokens, "y", buf + 4, 2)
+	        || omrstr_set_token_from_buf(portLibrary, tokens, "m", buf + 6, 2)
+	        || omrstr_set_token_from_buf(portLibrary, tokens, "d", buf + 8, 2)
+	        || omrstr_set_token_from_buf(portLibrary, tokens, "H", buf + 10, 2)
+	        || omrstr_set_token_from_buf(portLibrary, tokens, "M", buf + 12, 2)
+	        || omrstr_set_token_from_buf(portLibrary, tokens, "S", buf + 14, 2)
+	        || omrstr_set_token_from_buf(portLibrary, tokens, "b", buf + 16, 3)
+	        || omrstr_set_token_from_buf(portLibrary, tokens, "tick", buf + 19, (uint32_t)strlen(buf + 19))) {
 		/* If any of the above fail, we're out of memory */
 		return -1;
 	}
@@ -1973,9 +1946,11 @@ omrstr_set_time_tokens(struct OMRPortLibrary *portLibrary, struct J9StringTokens
  *	  %job   job name	(z/OS only)
 
  * @parm[in]     portLib  the port library
- * @parm[in]     timeMillis  the UTC time in ms to use for the date/time tokens. This value must be greater than or equal to zero.
+ * @parm[in]     timeMillis  the UTC time in ms to use for the date/time tokens. This value must be greater than or
+ equal to zero.
  *
- * @return the opaque J9StringTokens structure, or NULL if out of memory. The date/time will never be less than Epoch, which is Jan 1st, 1970, 00:00:00 AM.
+ * @return the opaque J9StringTokens structure, or NULL if out of memory. The date/time will never be less than Epoch,
+ which is Jan 1st, 1970, 00:00:00 AM.
  */
 struct J9StringTokens *
 omrstr_create_tokens(struct OMRPortLibrary *portLibrary, int64_t timeMillis)
@@ -1987,9 +1962,8 @@ omrstr_create_tokens(struct OMRPortLibrary *portLibrary, int64_t timeMillis)
 	percentEntry.value = NULL;
 
 	/* The token cookie is actually a pointer to a hash table */
-	tokens = hashTableNew(portLibrary, OMR_GET_CALLSITE(), J9TOKEN_TABLE_INIT_SIZE,
-						  sizeof(J9TokenEntry), J9TOKEN_TABLE_ALIGNMENT, 0,  OMRMEM_CATEGORY_PORT_LIBRARY, tokenHashFn, tokenHashEqualFn,
-						  NULL, NULL);
+	tokens = hashTableNew(portLibrary, OMR_GET_CALLSITE(), J9TOKEN_TABLE_INIT_SIZE, sizeof(J9TokenEntry),
+	        J9TOKEN_TABLE_ALIGNMENT, 0, OMRMEM_CATEGORY_PORT_LIBRARY, tokenHashFn, tokenHashEqualFn, NULL, NULL);
 
 	if (NULL == tokens) {
 		goto fail;
@@ -2002,8 +1976,10 @@ omrstr_create_tokens(struct OMRPortLibrary *portLibrary, int64_t timeMillis)
 	/* Add the special "%" token to simplify the actual token expansion code. Note
 	 * that the key and value are allocated on the heap so the free_tokens code
 	 * doesn't have to handle a special case. */
-	percentEntry.key = (char *)portLibrary->mem_allocate_memory(portLibrary, 2, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
-	percentEntry.value = (char *)portLibrary->mem_allocate_memory(portLibrary, 2, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
+	percentEntry.key = (char *)portLibrary->mem_allocate_memory(
+	        portLibrary, 2, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
+	percentEntry.value = (char *)portLibrary->mem_allocate_memory(
+	        portLibrary, 2, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 	if (NULL == percentEntry.key || NULL == percentEntry.value) {
 		goto fail;
 	}
@@ -2047,7 +2023,8 @@ fail:
  *
  */
 intptr_t
-omrstr_set_token(struct OMRPortLibrary *portLibrary, struct J9StringTokens *tokens, const char *key, const char *format, ...)
+omrstr_set_token(
+        struct OMRPortLibrary *portLibrary, struct J9StringTokens *tokens, const char *key, const char *format, ...)
 {
 	const char *cur = key;
 	char *tokenBuf;
@@ -2104,7 +2081,9 @@ omrstr_set_token(struct OMRPortLibrary *portLibrary, struct J9StringTokens *toke
  * terminator to be subsequently written into these keys.
  *
  */
-static intptr_t omrstr_set_token_from_buf(struct OMRPortLibrary *portLibrary, struct J9StringTokens *tokens, const char *key, char *tokenBuf, uint32_t tokenLen)
+static intptr_t
+omrstr_set_token_from_buf(struct OMRPortLibrary *portLibrary, struct J9StringTokens *tokens, const char *key,
+        char *tokenBuf, uint32_t tokenLen)
 {
 	J9TokenEntry entry;
 	J9TokenEntry *existingEntry;
@@ -2117,17 +2096,21 @@ static intptr_t omrstr_set_token_from_buf(struct OMRPortLibrary *portLibrary, st
 		entry.memLen = TOKEN_BUF_LEN;
 	}
 
-	entry.key = (char *) key;
+	entry.key = (char *)key;
 	entry.keyLen = strlen(key);
 	existingEntry = hashTableFind((J9HashTable *)tokens, &entry);
 
 	if (!existingEntry) {
-		if (NULL == (entry.key = (char *)portLibrary->mem_allocate_memory(portLibrary, entry.keyLen + 1, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY))) {
+		if (NULL
+		        == (entry.key = (char *)portLibrary->mem_allocate_memory(
+		                    portLibrary, entry.keyLen + 1, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY))) {
 			return -1;
 		}
 		memcpy(entry.key, key, entry.keyLen + 1); /* +1 for \0 */
 
-		if (NULL == (entry.value = (char *)portLibrary->mem_allocate_memory(portLibrary, entry.memLen + 1, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY))) {
+		if (NULL
+		        == (entry.value = (char *)portLibrary->mem_allocate_memory(
+		                    portLibrary, entry.memLen + 1, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY))) {
 			portLibrary->mem_free_memory(portLibrary, entry.key);
 			return -1;
 		}
@@ -2146,7 +2129,9 @@ static intptr_t omrstr_set_token_from_buf(struct OMRPortLibrary *portLibrary, st
 		/* don't need to remove this entry, just update its value ! */
 		if (tokenLen > existingEntry->memLen) {
 			/* try growing the memory for the value */
-			if (NULL == (entry.value = (char *)portLibrary->mem_allocate_memory(portLibrary, entry.memLen + 1, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY))) {
+			if (NULL
+			        == (entry.value = (char *)portLibrary->mem_allocate_memory(portLibrary,
+			                    entry.memLen + 1, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY))) {
 				/* failed to allocate so truncate instead */
 				tokenLen = (uint32_t)existingEntry->memLen;
 			} else {
@@ -2189,7 +2174,8 @@ static intptr_t omrstr_set_token_from_buf(struct OMRPortLibrary *portLibrary, st
  * the string, including the NUL terminator is returned.
  */
 uintptr_t
-omrstr_subst_tokens(struct OMRPortLibrary *portLibrary, char *buf, uintptr_t bufLen, const char *format, struct J9StringTokens *tokens)
+omrstr_subst_tokens(struct OMRPortLibrary *portLibrary, char *buf, uintptr_t bufLen, const char *format,
+        struct J9StringTokens *tokens)
 {
 	J9TokenEntry *entry;
 	uintptr_t cnt = 0;
@@ -2220,7 +2206,8 @@ omrstr_subst_tokens(struct OMRPortLibrary *portLibrary, char *buf, uintptr_t buf
 			if (*read == '%' && (entry = consumeToken(tokens, read))) {
 				/* We found an expandable token */
 				uintptr_t maxExpandLen = bufLen - cnt;
-				uintptr_t lengthToCopy = (entry->valueLen < maxExpandLen) ? entry->valueLen : maxExpandLen;
+				uintptr_t lengthToCopy = (entry->valueLen < maxExpandLen) ? entry->valueLen
+				                                                          : maxExpandLen;
 
 				memcpy(write, entry->value, lengthToCopy);
 				write += lengthToCopy;
@@ -2271,27 +2258,23 @@ omrstr_free_tokens(struct OMRPortLibrary *portLibrary, struct J9StringTokens *to
 }
 
 /**
- * Returns the UTC time that was passed in as a formatted string in local time.  Formatted according to the 'format' parameter.
+ * Returns the UTC time that was passed in as a formatted string in local time.  Formatted according to the 'format'
+ * parameter.
  *
  * @param[in] portLibrary  The port library.
  * @param[in,out] buf A pointer to a character buffer where the resulting time string will be stored.
  * @param[in] bufLen The length of the 'buf' character buffer.
  * @param[in] format The format string, ordinary characters placed in the format string are copied.
- * to buf without conversion.  Conversion specifiers are introduced by a '%' character, and are replaced in buf as follows:.
- * <ul>
- * <li>%b The abbreviated month name in english
- * <li>%d The  day  of the month as a decimal number (range 0 to 31).
- * <li>%H The hour as a decimal number using a 24-hour  clock (range 00 to 23).
- * <li>%m The month as a decimal number (range 01 to 12).
- * <li>%M The minute as a decimal number.
- * <li>%S The second as a decimal number.
- * <li>%Y The year as a decimal number including the century.
- * <li>%y The year within the century.
- * <li>%% A literal '%' character.
+ * to buf without conversion.  Conversion specifiers are introduced by a '%' character, and are replaced in buf as
+ * follows:. <ul> <li>%b The abbreviated month name in english <li>%d The  day  of the month as a decimal number (range
+ * 0 to 31). <li>%H The hour as a decimal number using a 24-hour  clock (range 00 to 23). <li>%m The month as a decimal
+ * number (range 01 to 12). <li>%M The minute as a decimal number. <li>%S The second as a decimal number. <li>%Y The
+ * year as a decimal number including the century. <li>%y The year within the century. <li>%% A literal '%' character.
  * <li>all other '%' specifiers will be ignored
  * </ul>
- * @param[in] timeMillis The time value to format.  The value is expressed in milliseconds since January 1st 1970.  Note that
- * the implementation will not do any timezone correction and assumes that this value is in terms of the required timezone.
+ * @param[in] timeMillis The time value to format.  The value is expressed in milliseconds since January 1st 1970.  Note
+ * that the implementation will not do any timezone correction and assumes that this value is in terms of the required
+ * timezone.
  *
  * @return The number of characters placed in the array buf, not including NULL terminator.
  *
@@ -2334,7 +2317,8 @@ omrstr_ftime(struct OMRPortLibrary *portLibrary, char *buf, uint32_t bufLen, con
  * If buf is too small, will return the minimum buf size required.
  */
 static uint32_t
-omrstr_subst_time(struct OMRPortLibrary *portLibrary, char *buf, uint32_t bufLen, const char *format, int64_t timeMillis)
+omrstr_subst_time(
+        struct OMRPortLibrary *portLibrary, char *buf, uint32_t bufLen, const char *format, int64_t timeMillis)
 {
 	int8_t haveTick = 0;
 	uint32_t count = 0;
@@ -2344,9 +2328,8 @@ omrstr_subst_time(struct OMRPortLibrary *portLibrary, char *buf, uint32_t bufLen
 	char ticks[TICK_BUF_SIZE];
 	uint32_t tickSize = 0;
 	J9TimeInfo tm;
-	static const char abbMonthName[12][4] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
-											 "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-											};
+	static const char abbMonthName[12][4] = {
+	        "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
 	convertUTCMillisToLocalJ9Time(timeMillis, &tm);
 
@@ -2358,7 +2341,8 @@ omrstr_subst_time(struct OMRPortLibrary *portLibrary, char *buf, uint32_t bufLen
 			case 'Y':
 				count += 4;
 				if (count <= bufLen) {
-					writeIntToBuffer(write, 4, 4, J9F_NO_VALUE, tm.year, J9FFLAG_ZERO, 0, digits_dec);
+					writeIntToBuffer(
+					        write, 4, 4, J9F_NO_VALUE, tm.year, J9FFLAG_ZERO, 0, digits_dec);
 					write += 4;
 				}
 				read += 2;
@@ -2366,7 +2350,8 @@ omrstr_subst_time(struct OMRPortLibrary *portLibrary, char *buf, uint32_t bufLen
 			case 'y':
 				count += 2;
 				if (count <= bufLen) {
-					writeIntToBuffer(write, 2, 2, J9F_NO_VALUE, tm.year % 100, J9FFLAG_ZERO, 0, digits_dec);
+					writeIntToBuffer(
+					        write, 2, 2, J9F_NO_VALUE, tm.year % 100, J9FFLAG_ZERO, 0, digits_dec);
 					write += 2;
 				}
 				read += 2;
@@ -2374,7 +2359,8 @@ omrstr_subst_time(struct OMRPortLibrary *portLibrary, char *buf, uint32_t bufLen
 			case 'm':
 				count += 2;
 				if (count <= bufLen) {
-					writeIntToBuffer(write, 2, 2, J9F_NO_VALUE, tm.month, J9FFLAG_ZERO, 0, digits_dec);
+					writeIntToBuffer(
+					        write, 2, 2, J9F_NO_VALUE, tm.month, J9FFLAG_ZERO, 0, digits_dec);
 					write += 2;
 				}
 				read += 2;
@@ -2382,7 +2368,8 @@ omrstr_subst_time(struct OMRPortLibrary *portLibrary, char *buf, uint32_t bufLen
 			case 'd':
 				count += 2;
 				if (count <= bufLen) {
-					writeIntToBuffer(write, 2, 2, J9F_NO_VALUE, tm.day, J9FFLAG_ZERO, 0, digits_dec);
+					writeIntToBuffer(
+					        write, 2, 2, J9F_NO_VALUE, tm.day, J9FFLAG_ZERO, 0, digits_dec);
 					write += 2;
 				}
 				read += 2;
@@ -2390,7 +2377,8 @@ omrstr_subst_time(struct OMRPortLibrary *portLibrary, char *buf, uint32_t bufLen
 			case 'H':
 				count += 2;
 				if (count <= bufLen) {
-					writeIntToBuffer(write, 2, 2, J9F_NO_VALUE, tm.hour, J9FFLAG_ZERO, 0, digits_dec);
+					writeIntToBuffer(
+					        write, 2, 2, J9F_NO_VALUE, tm.hour, J9FFLAG_ZERO, 0, digits_dec);
 					write += 2;
 				}
 				read += 2;
@@ -2398,7 +2386,8 @@ omrstr_subst_time(struct OMRPortLibrary *portLibrary, char *buf, uint32_t bufLen
 			case 'M':
 				count += 2;
 				if (count <= bufLen) {
-					writeIntToBuffer(write, 2, 2, J9F_NO_VALUE, tm.minute, J9FFLAG_ZERO, 0, digits_dec);
+					writeIntToBuffer(
+					        write, 2, 2, J9F_NO_VALUE, tm.minute, J9FFLAG_ZERO, 0, digits_dec);
 					write += 2;
 				}
 				read += 2;
@@ -2406,7 +2395,8 @@ omrstr_subst_time(struct OMRPortLibrary *portLibrary, char *buf, uint32_t bufLen
 			case 'S':
 				count += 2;
 				if (count <= bufLen) {
-					writeIntToBuffer(write, 2, 2, J9F_NO_VALUE, tm.second, J9FFLAG_ZERO, 0, digits_dec);
+					writeIntToBuffer(
+					        write, 2, 2, J9F_NO_VALUE, tm.second, J9FFLAG_ZERO, 0, digits_dec);
 					write += 2;
 				}
 				read += 2;
@@ -2414,7 +2404,8 @@ omrstr_subst_time(struct OMRPortLibrary *portLibrary, char *buf, uint32_t bufLen
 			case 'b':
 				count += 3;
 				if (count <= bufLen) {
-					writeStringToBuffer(write, 3, J9F_NO_VALUE, J9F_NO_VALUE, abbMonthName[tm.month - 1], 0);
+					writeStringToBuffer(
+					        write, 3, J9F_NO_VALUE, J9F_NO_VALUE, abbMonthName[tm.month - 1], 0);
 					write += 3;
 				}
 				read += 2;
@@ -2432,7 +2423,8 @@ omrstr_subst_time(struct OMRPortLibrary *portLibrary, char *buf, uint32_t bufLen
 						curTick = portLibrary->time_hires_clock(portLibrary);
 						haveTick = 1;
 					}
-					tickSize = (uint32_t)writeIntToBuffer(ticks, TICK_BUF_SIZE, J9F_NO_VALUE, J9F_NO_VALUE, curTick, J9FSPEC_L, 0, digits_dec);
+					tickSize = (uint32_t)writeIntToBuffer(ticks, TICK_BUF_SIZE, J9F_NO_VALUE,
+					        J9F_NO_VALUE, curTick, J9FSPEC_L, 0, digits_dec);
 					count += tickSize;
 					if (count <= bufLen) {
 						strncpy(write, ticks, tickSize);
@@ -2471,17 +2463,20 @@ omrstr_subst_time(struct OMRPortLibrary *portLibrary, char *buf, uint32_t bufLen
 #define WIDE_CHAR_SIZE 2
 #define BYTE_ORDER_MARK 0xFEFF
 /*
-* Two step process: convert platform encoding to wide characters, then convert wide characters to modified UTF-8.
-*  iconv() is resumable if the output buffer is full, but Windows MultiByteToWideChar() is not.
-*  @param[in] codePage specify the "platform" code page: CP_THREAD_ACP, CP_ACP (Windows ANSI code pages) or OS_ENCODING_CODE_PAGE. Ignored on non-Windows systems
+ * Two step process: convert platform encoding to wide characters, then convert wide characters to modified UTF-8.
+ *  iconv() is resumable if the output buffer is full, but Windows MultiByteToWideChar() is not.
+ *  @param[in] codePage specify the "platform" code page: CP_THREAD_ACP, CP_ACP (Windows ANSI code pages) or
+ * OS_ENCODING_CODE_PAGE. Ignored on non-Windows systems
  * @param[in] inBuffer  input string  to be converted
  * @param[in] inBufferSize input string size in bytes.
  * @param[in] outBuffer user-allocated output buffer that stores converted characters, ignored if inBufferSize is 0.
  * @param[in] outBufferSize output buffer size in bytes (zero to request the required output buffer size)
- * @return number of bytes generated, or required size of output buffer if outBufferSize is 0. Negative error code on failure.
-*/
+ * @return number of bytes generated, or required size of output buffer if outBufferSize is 0. Negative error code on
+ * failure.
+ */
 static int32_t
-convertPlatformToMutf8(struct OMRPortLibrary *portLibrary, uint32_t codePage, const uint8_t *inBuffer, uintptr_t inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize)
+convertPlatformToMutf8(struct OMRPortLibrary *portLibrary, uint32_t codePage, const uint8_t *inBuffer,
+        uintptr_t inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize)
 {
 	uint8_t onStackBuffer[CONVERSION_BUFFER_SIZE];
 	uint8_t *wideBuffer = onStackBuffer;
@@ -2498,11 +2493,14 @@ convertPlatformToMutf8(struct OMRPortLibrary *portLibrary, uint32_t codePage, co
 #if defined(OMR_OS_WINDOWS)
 	uintptr_t requiredBufferSize = 0;
 	encodingState = NULL;
-	/* MultiByteToWideChar is not resumable, so we need a buffer large enough to hold the entire intermediate result */
-	requiredBufferSize = WIDE_CHAR_SIZE * MultiByteToWideChar(codePage, OS_ENCODING_MB_FLAGS, (LPCSTR)inBuffer, (int) inBufferSize,
-						 NULL, 0); /* get required buffer size */
+	/* MultiByteToWideChar is not resumable, so we need a buffer large enough to hold the entire intermediate result
+	 */
+	requiredBufferSize = WIDE_CHAR_SIZE
+	        * MultiByteToWideChar(codePage, OS_ENCODING_MB_FLAGS, (LPCSTR)inBuffer, (int)inBufferSize, NULL,
+	                0); /* get required buffer size */
 	if (requiredBufferSize > CONVERSION_BUFFER_SIZE) {
-		wideBuffer = portLibrary->mem_allocate_memory(portLibrary, requiredBufferSize, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
+		wideBuffer = portLibrary->mem_allocate_memory(
+		        portLibrary, requiredBufferSize, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 		if (NULL == wideBuffer) {
 			return OMRPORT_ERROR_STRING_MEM_ALLOCATE_FAILED;
 		}
@@ -2521,7 +2519,8 @@ convertPlatformToMutf8(struct OMRPortLibrary *portLibrary, uint32_t codePage, co
 #endif
 	/* do the conversion. outBufferSize==0 indicates that only the buffer size is required. */
 	while ((platformRemaining > 0) && ((0 == outBufferSize) || (mutf8Limit > 0))) {
-		int32_t wideBufferPartialSize = convertPlatformToWide(portLibrary, encodingState, codePage, &platformCursor, &platformRemaining, wideBuffer, wideBufferSize);
+		int32_t wideBufferPartialSize = convertPlatformToWide(portLibrary, encodingState, codePage,
+		        &platformCursor, &platformRemaining, wideBuffer, wideBufferSize);
 		const uint8_t *tempWideBuffer = wideBuffer; /* need a mutable copy */
 		uintptr_t mutf8PartialSize = 0;
 		uintptr_t tempWideBufferSize = wideBufferPartialSize;
@@ -2539,7 +2538,7 @@ convertPlatformToMutf8(struct OMRPortLibrary *portLibrary, uint32_t codePage, co
 			return wideBufferPartialSize; /* unrecoverable error */
 		}
 		if (firstConversion) {
-			uint16_t firstChar = *((uint16_t *) wideBuffer);
+			uint16_t firstChar = *((uint16_t *)wideBuffer);
 			firstConversion = FALSE;
 			if (BYTE_ORDER_MARK == firstChar) { /* ignore it */
 				tempWideBuffer += 2;
@@ -2588,21 +2587,23 @@ convertPlatformToMutf8(struct OMRPortLibrary *portLibrary, uint32_t codePage, co
 	iconv_free(portLibrary, OMRPORT_LANG_TO_UTF16_ICONV_DESCRIPTOR, encodingState);
 #endif
 	/* convertWideToMutf8 does null-termination if possible */
-	return (int32_t) resultSize;
+	return (int32_t)resultSize;
 }
 
 /**
  * Two step process: convert modified UTF-8 to wide characters, then wide characters to platform encoding.
  * iconv() both is resumable if the output buffer is full, but Windows WideCharToMultiByte() is not.
  * @param [in] portLibrary port library
- * @param [in] codePage specify the "platform" code page: CP_THREAD_ACP, CP_ACP (Windows ANSI code pages) or OS_ENCODING_CODE_PAGE. Ignored on non-Windows systems
+ * @param [in] codePage specify the "platform" code page: CP_THREAD_ACP, CP_ACP (Windows ANSI code pages) or
+ * OS_ENCODING_CODE_PAGE. Ignored on non-Windows systems
  * @param [in] inBuffer input string to be converted
  * @param [in] inBufferSize input string size in bytes
  * @param [in] outBuffer user-allocated output buffer that stores converted characters, ignored if inBufferSize is 0
  * @param [in] outBufferSize output buffer size in bytes (zero to request the required output buffer size)
  */
 static int32_t
-convertMutf8ToPlatform(struct OMRPortLibrary *portLibrary, uint32_t codePage, const uint8_t *inBuffer, uintptr_t inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize)
+convertMutf8ToPlatform(struct OMRPortLibrary *portLibrary, uint32_t codePage, const uint8_t *inBuffer,
+        uintptr_t inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize)
 {
 	/* need mutable copies */
 	const uint8_t *mutf8Cursor = inBuffer;
@@ -2628,18 +2629,19 @@ convertMutf8ToPlatform(struct OMRPortLibrary *portLibrary, uint32_t codePage, co
 		uintptr_t wideBufferSize = sizeof(wideBuffer);
 		uintptr_t wideBufferCount = 0;
 		int32_t platformPartCount = 0;
-		
+
 		int32_t result = convertMutf8ToWide(&mutf8Cursor, &mutf8Remaining, wideBuffer, wideBufferSize);
 		if (result < 0) { /* conversion error */
 			return result;
 		}
 		wideBufferCount = (uintptr_t)result;
 
-		platformPartCount = convertWideToPlatform(portLibrary, encodingState, codePage, &wideBufferCursor, &wideBufferCount, outCursor, outLimit);
+		platformPartCount = convertWideToPlatform(
+		        portLibrary, encodingState, codePage, &wideBufferCursor, &wideBufferCount, outCursor, outLimit);
 		/*
 		 * convertWideToPlatform may return OMRPORT_ERROR_STRING_BUFFER_TOO_SMALL.
-		 * convertWideToPlatform sets up to MAX_STRING_TERMINATOR_LENGTH bytes bytes after the converted characters to 0,
-		 * depending on the length of the buffer
+		 * convertWideToPlatform sets up to MAX_STRING_TERMINATOR_LENGTH bytes bytes after the converted
+		 * characters to 0, depending on the length of the buffer
 		 */
 		if (platformPartCount < 0) { /* conversion error or output buffer too small */
 #if defined(J9STR_USE_ICONV)
@@ -2661,23 +2663,25 @@ convertMutf8ToPlatform(struct OMRPortLibrary *portLibrary, uint32_t codePage, co
 }
 
 /*
-* convert platform encoding to UTF-8.
+ * convert platform encoding to UTF-8.
  * @param[in]  inBuffer        input string  to be converted.
  * @param[in]  inBufferSize  input string size in bytes.
  * @param[in] outBuffer    user-allocated output buffer that stores converted characters, ignored if inBufferSize is 0.
  * @param[in]  outBufferSize output buffer size in bytes (zero to request the required output buffer size)
-*/
+ */
 static int32_t
-convertPlatformToUtf8(struct OMRPortLibrary *portLibrary, const uint8_t *inBuffer, uintptr_t inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize)
+convertPlatformToUtf8(struct OMRPortLibrary *portLibrary, const uint8_t *inBuffer, uintptr_t inBufferSize,
+        uint8_t *outBuffer, uintptr_t outBufferSize)
 {
 	int32_t resultSize = 0;
 #if defined(J9STR_USE_ICONV)
 	/* J9STR_USE_ICONV is defined on LINUX, AIXPPC and J9ZOS390 at the beginning of the file */
-	char* inbuf =  (char*)inBuffer;
-	char* outbuf = (char*)outBuffer;
+	char *inbuf = (char *)inBuffer;
+	char *outbuf = (char *)outBuffer;
 	size_t inbytesleft = inBufferSize;
-	size_t outbytesleft = outBufferSize - 1 /* space for null-terminator */ ;
-	charconvState_t converter = iconv_get(portLibrary, OMRPORT_LANG_TO_UTF8_ICONV_DESCRIPTOR, utf8, nl_langinfo(CODESET));
+	size_t outbytesleft = outBufferSize - 1 /* space for null-terminator */;
+	charconvState_t converter =
+	        iconv_get(portLibrary, OMRPORT_LANG_TO_UTF8_ICONV_DESCRIPTOR, utf8, nl_langinfo(CODESET));
 
 	if (J9VM_INVALID_ICONV_DESCRIPTOR == converter) {
 		/* no converter available for this code set. Just dump the platform chars */
@@ -2713,7 +2717,6 @@ convertPlatformToUtf8(struct OMRPortLibrary *portLibrary, const uint8_t *inBuffe
 	return resultSize;
 }
 
-
 /*
  * Convert wide char (UTF-16) encoding to modified UTF-8.
  * May terminate early if the output buffer is too small.
@@ -2725,7 +2728,7 @@ convertPlatformToUtf8(struct OMRPortLibrary *portLibrary, const uint8_t *inBuffe
  * @param[in] outBufferSize output buffer size in bytes (zero to request the output buffer size).
  * @return number of bytes generated, or required size of output buffer if outBufferSize is 0.
  * @note callers are responsible for detecting buffer overflow.
-*/
+ */
 static int32_t
 convertWideToMutf8(const uint8_t **inBuffer, uintptr_t *inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize)
 {
@@ -2737,8 +2740,9 @@ convertWideToMutf8(const uint8_t **inBuffer, uintptr_t *inBufferSize, uint8_t *o
 	if (0 == outBufferSize) { /* we just want the length */
 		while (wideRemaining > 0) {
 			uint32_t encodeResult = 0;
-			uint16_t wideChar = *((uint16_t *) wideCursor);
-			encodeResult = encodeUTF8CharN(wideChar, NULL, 3); /* convert one wide character, get the length, ignore the converted result */
+			uint16_t wideChar = *((uint16_t *)wideCursor);
+			encodeResult = encodeUTF8CharN(wideChar, NULL, 3); /* convert one wide character, get the
+			                                                      length, ignore the converted result */
 			if (0 == encodeResult) {
 				return OMRPORT_ERROR_STRING_ILLEGAL_STRING;
 			}
@@ -2750,8 +2754,8 @@ convertWideToMutf8(const uint8_t **inBuffer, uintptr_t *inBufferSize, uint8_t *o
 		uintptr_t outputLimit = outBufferSize;
 		uint8_t *outputCursor = outBuffer;
 		while ((wideRemaining > 0) && (outputLimit > 0)) {
-			uint16_t wideChar = *((uint16_t *) wideCursor);
-			uint32_t encodeResult  = encodeUTF8CharN(wideChar, outputCursor, 3);
+			uint16_t wideChar = *((uint16_t *)wideCursor);
+			uint32_t encodeResult = encodeUTF8CharN(wideChar, outputCursor, 3);
 			if (0 == encodeResult) {
 				return OMRPORT_ERROR_STRING_ILLEGAL_STRING;
 			}
@@ -2766,8 +2770,8 @@ convertWideToMutf8(const uint8_t **inBuffer, uintptr_t *inBufferSize, uint8_t *o
 		}
 	}
 	*inBufferSize = wideRemaining; /* update caller's arguments */
-	*inBuffer = (uint8_t *) wideCursor;
-	if ((outBufferSize > 0) && ((uintptr_t) resultSize < outBufferSize)) {
+	*inBuffer = (uint8_t *)wideCursor;
+	if ((outBufferSize > 0) && ((uintptr_t)resultSize < outBufferSize)) {
 		outBuffer[resultSize] = 0; /* null terminate if possible */
 	}
 	return resultSize;
@@ -2785,9 +2789,10 @@ convertWideToMutf8(const uint8_t **inBuffer, uintptr_t *inBufferSize, uint8_t *o
  * @return number of bytes generated, or required size of output buffer if outBufferSize is 0.
  * @note callers are responsible for detecting buffer overflow.
  *
-*/
+ */
 static int32_t
-convertLatin1ToMutf8(struct OMRPortLibrary *portLibrary, const uint8_t **inBuffer, uintptr_t *inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize)
+convertLatin1ToMutf8(struct OMRPortLibrary *portLibrary, const uint8_t **inBuffer, uintptr_t *inBufferSize,
+        uint8_t *outBuffer, uintptr_t outBufferSize)
 {
 	const uint8_t *latinString = *inBuffer;
 	uintptr_t latinRemaining = *inBufferSize; /* number of untranslated characters in inBuffer */
@@ -2795,13 +2800,13 @@ convertLatin1ToMutf8(struct OMRPortLibrary *portLibrary, const uint8_t **inBuffe
 	uintptr_t mutf8Remaining = outBufferSize; /* number of unused bytes in outBuffer */
 	int32_t resultSize = 0;
 
-	while ((latinRemaining > 0)
-		   && ((mutf8Remaining > 0) || (0 == outBufferSize)) /* outBufferSize == 0 indicates we just want the length */
-		   && (resultSize >= 0)
-	) {
+	while ((latinRemaining > 0) && ((mutf8Remaining > 0) || (0 == outBufferSize)) /* outBufferSize == 0 indicates we
+	                                                                                 just want the length */
+	        && (resultSize >= 0)) {
 		/* still have input data, output space, and no errors */
 		/* convert in CONVERSION_BUFFER_SIZE-size segments */
-		uintptr_t wideLimit = (latinRemaining > CONVERSION_BUFFER_SIZE) ? CONVERSION_BUFFER_SIZE : latinRemaining;
+		uintptr_t wideLimit = (latinRemaining > CONVERSION_BUFFER_SIZE) ? CONVERSION_BUFFER_SIZE
+		                                                                : latinRemaining;
 		uintptr_t latinBytesConsumed = 0;
 		uint16_t localWideBuffer[CONVERSION_BUFFER_SIZE]; /* handle short strings without allocating memory */
 		uint16_t *wideBuffer = localWideBuffer;
@@ -2810,12 +2815,14 @@ convertLatin1ToMutf8(struct OMRPortLibrary *portLibrary, const uint8_t **inBuffe
 		uintptr_t cursor = 0;
 		int32_t mutf8Result = 0;
 
-		/* copy the characters to an array of Unicode characters and transliterate from Unicode to modified UTF-8 */
+		/* copy the characters to an array of Unicode characters and transliterate from Unicode to modified
+		 * UTF-8 */
 		for (cursor = 0; cursor < wideLimit; ++cursor) {
 			wideBuffer[cursor] = latinString[cursor] & 0x00ff;
 		}
 
-		mutf8Result = convertWideToMutf8((const uint8_t **) &wideBuffer, &wideRemaining, mutf8Cursor, mutf8Remaining);
+		mutf8Result =
+		        convertWideToMutf8((const uint8_t **)&wideBuffer, &wideRemaining, mutf8Cursor, mutf8Remaining);
 		latinBytesConsumed = (wideLength - wideRemaining) / 2; /* 1 Latin byte per 2 wide characters */
 		latinRemaining -= latinBytesConsumed;
 		latinString += latinBytesConsumed; /* Now points to first unconsumed character */
@@ -2850,7 +2857,8 @@ convertLatin1ToMutf8(struct OMRPortLibrary *portLibrary, const uint8_t **inBuffe
  * @note callers are responsible for detecting buffer overflow.
  */
 static int32_t
-convertMutf8ToLatin1(struct OMRPortLibrary *portLibrary, const uint8_t **inBuffer, uintptr_t *inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize)
+convertMutf8ToLatin1(struct OMRPortLibrary *portLibrary, const uint8_t **inBuffer, uintptr_t *inBufferSize,
+        uint8_t *outBuffer, uintptr_t outBufferSize)
 {
 	const uint8_t *mutf8String = *inBuffer;
 	uintptr_t mutf8Remaining = *inBufferSize; /* number of untranslated characters in inBuffer */
@@ -2858,13 +2866,13 @@ convertMutf8ToLatin1(struct OMRPortLibrary *portLibrary, const uint8_t **inBuffe
 	uintptr_t latinRemaining = outBufferSize; /* number of unused bytes in outBuffer */
 	int32_t resultSize = 0;
 
-	while ((mutf8Remaining > 0)
-			&& ((latinRemaining > 0) || (0 == outBufferSize)) /* outBufferSize == 0 indicates we just want the length */
-			&& (resultSize >= 0)
-	) {
+	while ((mutf8Remaining > 0) && ((latinRemaining > 0) || (0 == outBufferSize)) /* outBufferSize == 0 indicates we
+	                                                                                 just want the length */
+	        && (resultSize >= 0)) {
 		/* still have input data, output space, and no errors */
 		/* convert in CONVERSION_BUFFER_SIZE-size segments */
-		uintptr_t wideLimit = (mutf8Remaining > CONVERSION_BUFFER_SIZE) ? CONVERSION_BUFFER_SIZE : mutf8Remaining;
+		uintptr_t wideLimit = (mutf8Remaining > CONVERSION_BUFFER_SIZE) ? CONVERSION_BUFFER_SIZE
+		                                                                : mutf8Remaining;
 		uint16_t localWideBuffer[CONVERSION_BUFFER_SIZE]; /* handle short strings without allocating memory */
 		uint16_t *wideBuffer = localWideBuffer;
 		uintptr_t wideLength = wideLimit * 2; /* wide conversion byte length */
@@ -2872,7 +2880,8 @@ convertMutf8ToLatin1(struct OMRPortLibrary *portLibrary, const uint8_t **inBuffe
 		uintptr_t mutf8BytesConsumed = 0;
 
 		/* convert from mutf8 to unicode */
-		int32_t unicodeResultBytes = convertMutf8ToWide(&mutf8String, &mutf8Remaining, (uint8_t *)wideBuffer, wideRemaining);
+		int32_t unicodeResultBytes =
+		        convertMutf8ToWide(&mutf8String, &mutf8Remaining, (uint8_t *)wideBuffer, wideRemaining);
 		mutf8BytesConsumed = (wideLength - wideRemaining) / 2; /* 1 mutf8 byte per 2 wide characters */
 		mutf8Remaining -= mutf8BytesConsumed;
 		mutf8String += mutf8BytesConsumed; /* Now points to first unconsumed character */
@@ -2880,7 +2889,8 @@ convertMutf8ToLatin1(struct OMRPortLibrary *portLibrary, const uint8_t **inBuffe
 			/* conversion error */
 			resultSize = unicodeResultBytes;
 		} else {
-			int32_t latin1CharactersConverted = (unicodeResultBytes / 2); /* Latin1 characters take up only 1 of 2 wide bytes */
+			int32_t latin1CharactersConverted = (unicodeResultBytes / 2); /* Latin1 characters take up only
+			                                                                 1 of 2 wide bytes */
 			resultSize += latin1CharactersConverted;
 			if (outBufferSize != 0) {
 				int32_t cursor = 0;
@@ -2891,7 +2901,6 @@ convertMutf8ToLatin1(struct OMRPortLibrary *portLibrary, const uint8_t **inBuffe
 				latinRemaining -= latin1CharactersConverted;
 				latinString += latin1CharactersConverted;
 			}
-
 		}
 	}
 	if (resultSize >= 0) { /* no error */
@@ -2936,13 +2945,15 @@ checkAndCopyUtfBytes(const uint8_t *utf8Bytes, uintptr_t numBytes, uint8_t *mutf
  * @param[inout]  inBufferSize input string size in bytes.  Updated to number of untranslated characters.
  * @param[in] outBuffer user-allocated output buffer that stores converted characters, ignored if outBufferSize is 0.
  * @param[in] outBufferSize output buffer size in bytes (zero to request the output buffer size).
- * @return number of bytes generated, or required size of output buffer if outBufferSize is 0, not including any final zero byte.
+ * @return number of bytes generated, or required size of output buffer if outBufferSize is 0, not including any final
+ * zero byte.
  * @note invalid characters are replaced with the Unicode code point U+FFFD	(ef bf bd)	(REPLACEMENT CHARACTER)
  * @note callers are responsible for detecting buffer overflow
  *
-*/
+ */
 static int32_t
-convertUtf8ToMutf8(struct OMRPortLibrary *portLibrary, const uint8_t **inBuffer, uintptr_t *inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize)
+convertUtf8ToMutf8(struct OMRPortLibrary *portLibrary, const uint8_t **inBuffer, uintptr_t *inBufferSize,
+        uint8_t *outBuffer, uintptr_t outBufferSize)
 {
 	BOOLEAN lengthOnly = (0 == outBufferSize);
 	const uint8_t *utf8Buffer = *inBuffer;
@@ -2954,7 +2965,8 @@ convertUtf8ToMutf8(struct OMRPortLibrary *portLibrary, const uint8_t **inBuffer,
 	while ((utf8BufferSize > 0) && (lengthOnly || (mutf8BufferSize > 0))) {
 		int32_t consumed = 0;
 		int32_t produced = 0;
-		if ((0 == utf8Buffer[0]) && (lengthOnly || (mutf8BufferSize > 1))) { /* null - convert to double-byte form */
+		if ((0 == utf8Buffer[0]) && (lengthOnly || (mutf8BufferSize > 1))) { /* null - convert to double-byte
+			                                                                form */
 			if (!lengthOnly) {
 				mutf8Buffer[0] = 0xc0;
 				mutf8Buffer[1] = 0x80;
@@ -2967,19 +2979,22 @@ convertUtf8ToMutf8(struct OMRPortLibrary *portLibrary, const uint8_t **inBuffer,
 			if (!lengthOnly) {
 				mutf8Buffer[0] = utf8Buffer[0];
 			}
-		} else if (((utf8Buffer[0] & 0xE0) == 0xC0) && (utf8BufferSize > 1) && (lengthOnly || (mutf8BufferSize > 1))) { /* Double byte UTF-8 */
+		} else if (((utf8Buffer[0] & 0xE0) == 0xC0) && (utf8BufferSize > 1)
+		        && (lengthOnly || (mutf8BufferSize > 1))) { /* Double byte UTF-8 */
 			if (!checkAndCopyUtfBytes(utf8Buffer, 2, mutf8Buffer)) {
 				return OMRPORT_ERROR_STRING_ILLEGAL_STRING;
 			}
 			consumed = 2;
 			produced = 2;
-		} else if (((utf8Buffer[0] & 0xF0) == 0xE0) && (utf8BufferSize > 2) && (lengthOnly || (mutf8BufferSize > 2))) { /* Triple byte UTF-8 */
+		} else if (((utf8Buffer[0] & 0xF0) == 0xE0) && (utf8BufferSize > 2)
+		        && (lengthOnly || (mutf8BufferSize > 2))) { /* Triple byte UTF-8 */
 			if (!checkAndCopyUtfBytes(utf8Buffer, 3, mutf8Buffer)) {
 				return OMRPORT_ERROR_STRING_ILLEGAL_STRING;
 			}
 			consumed = 3;
 			produced = 3;
-		} else if (((utf8Buffer[0] & 0xF8) == 0xF0) && (utf8BufferSize > 3) && (lengthOnly || (mutf8BufferSize > 5))) { /* Quadruple byte UTF-8 */
+		} else if (((utf8Buffer[0] & 0xF8) == 0xF0) && (utf8BufferSize > 3)
+		        && (lengthOnly || (mutf8BufferSize > 5))) { /* Quadruple byte UTF-8 */
 			uint32_t unicodeValue = 0;
 			if (!checkAndCopyUtfBytes(utf8Buffer, 4, NULL)) {
 				return OMRPORT_ERROR_STRING_ILLEGAL_STRING;
@@ -2992,10 +3007,10 @@ convertUtf8ToMutf8(struct OMRPortLibrary *portLibrary, const uint8_t **inBuffer,
 			if (!lengthOnly) {
 				mutf8Buffer[0] = 0xED;
 				mutf8Buffer[1] = 0xA0 + (((unicodeValue >> 16) - 1) & 0x0f); /* (bits 20-16) - 1 */
-				mutf8Buffer[2] = 0x80 | ((unicodeValue & 0x0FC00) >> 10) ; /* bits 15-10 */
+				mutf8Buffer[2] = 0x80 | ((unicodeValue & 0x0FC00) >> 10); /* bits 15-10 */
 				mutf8Buffer[3] = 0xED;
-				mutf8Buffer[4] = 0xB0 | ((unicodeValue & 0x03f0) >> 6) ; /* bits 9-6 */
-				mutf8Buffer[5] = 0x80 | (unicodeValue & 0x03f) ; /* bits 5-0 */
+				mutf8Buffer[4] = 0xB0 | ((unicodeValue & 0x03f0) >> 6); /* bits 9-6 */
+				mutf8Buffer[5] = 0x80 | (unicodeValue & 0x03f); /* bits 5-0 */
 			}
 			consumed = 4;
 			produced = 6;
@@ -3033,11 +3048,12 @@ convertUtf8ToMutf8(struct OMRPortLibrary *portLibrary, const uint8_t **inBuffer,
  * @param[inout] inBufferSize  input string size in bytes. Updated to number of untranslated characters.
  * @param[in] outBuffer user-allocated output buffer that stores converted characters, ignored if outBufferSize is 0.
  * @param[in] outBufferSize output buffer size in bytes (zero to request the output buffer size).
- * @return number of bytes generated, or required size in bytes of output buffer if outBufferSize is 0. Negative error code on failure.
+ * @return number of bytes generated, or required size in bytes of output buffer if outBufferSize is 0. Negative error
+ * code on failure.
  * @note callers are responsible for detecting buffer overflow
-*/
+ */
 static int32_t
-convertMutf8ToWide(const  uint8_t **inBuffer, uintptr_t *inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize)
+convertMutf8ToWide(const uint8_t **inBuffer, uintptr_t *inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize)
 {
 	uintptr_t mutf8Remaining = *inBufferSize; /* number of untranslated bytes in inBuffer */
 	const uint8_t *mutf8Cursor = *inBuffer;
@@ -3071,38 +3087,44 @@ convertMutf8ToWide(const  uint8_t **inBuffer, uintptr_t *inBufferSize, uint8_t *
 			*wideBufferCursor = 0; /* null terminate if possible */
 		}
 	} /* if */
-	*inBuffer = mutf8Cursor;  /* update caller's arguments */
+	*inBuffer = mutf8Cursor; /* update caller's arguments */
 	*inBufferSize = mutf8Remaining;
 	if ((outBufferSize > 0) && ((outBufferSize - resultSize) >= 2)) {
-		uint16_t *terminator = (uint16_t *) &outBuffer[resultSize];
+		uint16_t *terminator = (uint16_t *)&outBuffer[resultSize];
 		*terminator = 0;
 	}
 	return resultSize;
 }
 
 /*
-* transliterate from platform encoding to wide (UTF-16).  The input buffer pointer and size are updated (except on Windows) to allow
-* resumption if the translation failed due to output buffer too small.  The output buffer may not be null.
-* The output buffer may contain additional data such as a byte order mark (0xff, 0xfe or vice versa)
-* Resumable, so it updates its inputs
-* @param [in] portLibrary port library
-* @param [in] encodingState iconv_t on on Linux, z/OS and AIX, void * on Windows (unused)
-* @param[in] codePage specify the "platform" code page: CI_ACP (Windows ANSI code page) or OS_ENCODING_CODE_PAGE.  Ignored on non-Windows systems
-* @param [inout] inBuffer point to start of buffer containing platform-encoded string.  Updated to point to start of first untranslated character
-* @param [inout] inBufferSize size in characters of the platform-encoded string.  Updated to indicate number of remaining untranslated characters.
-* @param [in] outBuffer output buffer.
-* @param [in] outBufferSize size in bytes of wideBuffer
-* @return number of bytes generated, or negative in case of error
-* @note callers are responsible for detecting buffer overflow
-*/
+ * transliterate from platform encoding to wide (UTF-16).  The input buffer pointer and size are updated (except on
+ * Windows) to allow resumption if the translation failed due to output buffer too small.  The output buffer may not be
+ * null. The output buffer may contain additional data such as a byte order mark (0xff, 0xfe or vice versa) Resumable,
+ * so it updates its inputs
+ * @param [in] portLibrary port library
+ * @param [in] encodingState iconv_t on on Linux, z/OS and AIX, void * on Windows (unused)
+ * @param[in] codePage specify the "platform" code page: CI_ACP (Windows ANSI code page) or OS_ENCODING_CODE_PAGE.
+ * Ignored on non-Windows systems
+ * @param [inout] inBuffer point to start of buffer containing platform-encoded string.  Updated to point to start of
+ * first untranslated character
+ * @param [inout] inBufferSize size in characters of the platform-encoded string.  Updated to indicate number of
+ * remaining untranslated characters.
+ * @param [in] outBuffer output buffer.
+ * @param [in] outBufferSize size in bytes of wideBuffer
+ * @return number of bytes generated, or negative in case of error
+ * @note callers are responsible for detecting buffer overflow
+ */
 static int32_t
-convertPlatformToWide(struct OMRPortLibrary *portLibrary, charconvState_t encodingState, uint32_t codePage, const uint8_t **inBuffer, uintptr_t *inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize)
+convertPlatformToWide(struct OMRPortLibrary *portLibrary, charconvState_t encodingState, uint32_t codePage,
+        const uint8_t **inBuffer, uintptr_t *inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize)
 {
 	int32_t resultSize = -1;
 #if defined(OMR_OS_WINDOWS)
-	int32_t mbChars = (int32_t)MultiByteToWideChar(codePage, OS_ENCODING_MB_FLAGS, (LPCSTR)*inBuffer, (int)*inBufferSize, (LPWSTR)outBuffer, (int)outBufferSize);
+	int32_t mbChars = (int32_t)MultiByteToWideChar(codePage, OS_ENCODING_MB_FLAGS, (LPCSTR)*inBuffer,
+	        (int)*inBufferSize, (LPWSTR)outBuffer, (int)outBufferSize);
 	if ((outBufferSize > 0) && (0 == mbChars)) {
-		resultSize = OMRPORT_ERROR_STRING_BUFFER_TOO_SMALL; /* should not happen: caller should have allocated a sufficiently large buffer */
+		resultSize = OMRPORT_ERROR_STRING_BUFFER_TOO_SMALL; /* should not happen: caller should have allocated a
+		                                                       sufficiently large buffer */
 	} else {
 		resultSize = WIDE_CHAR_SIZE * mbChars; /* number of bytes written */
 		*inBufferSize = 0;
@@ -3111,7 +3133,9 @@ convertPlatformToWide(struct OMRPortLibrary *portLibrary, charconvState_t encodi
 	uint8_t *wideBufferCursor = outBuffer; /* make mutable copies */
 	uintptr_t wideBufferLimit = outBufferSize;
 
-	if ((size_t)-1 == iconv(encodingState, (char **)inBuffer, (size_t *)inBufferSize, (char **)&wideBufferCursor, (size_t *)&wideBufferLimit)) { /* iconv updates its inputs */
+	if ((size_t)-1
+	        == iconv(encodingState, (char **)inBuffer, (size_t *)inBufferSize, (char **)&wideBufferCursor,
+	                (size_t *)&wideBufferLimit)) { /* iconv updates its inputs */
 		if (EILSEQ == errno) {
 			*((uint16_t *)wideBufferCursor) = UNICODE_REPLACEMENT_CHARACTER;
 			*inBuffer += 1; /* Skip the invalid character */
@@ -3128,33 +3152,35 @@ convertPlatformToWide(struct OMRPortLibrary *portLibrary, charconvState_t encodi
 	}
 #endif /* defined(OMR_OS_WINDOWS) */
 	if ((outBufferSize > 0) && ((outBufferSize - resultSize) >= 2)) {
-		uint16_t *terminator = (uint16_t *) &outBuffer[resultSize];
+		uint16_t *terminator = (uint16_t *)&outBuffer[resultSize];
 		*terminator = 0;
 	}
 	return resultSize;
 }
 
 /**
- * Transliterate from wide (UTF-16) to platform encoding. The input and output buffer pointers and sizes are updated (except on Windows) to allow
- * resumption if the translation failed due to output buffer too small.
- * Resumable, so it updates its inputs.
- * The output buffer may contain additional data such as a byte order mark (0xff, 0xfe or vice versa).
- * If the buffer is large enough, the byte after the last output character is set to 0.
+ * Transliterate from wide (UTF-16) to platform encoding. The input and output buffer pointers and sizes are updated
+ * (except on Windows) to allow resumption if the translation failed due to output buffer too small. Resumable, so it
+ * updates its inputs. The output buffer may contain additional data such as a byte order mark (0xff, 0xfe or vice
+ * versa). If the buffer is large enough, the byte after the last output character is set to 0.
  * @param [in] portLibrary port library
  * @param [in] encodingState iconv_t on Linux, z/OS and AIX, void * on Windows (unused)
- * @param [in] codePage specify the "platform" code page: CP_THREAD_ACP, CP_ACP (Windows ANSI code pages) or OS_ENCODING_CODE_PAGE. Ignored on non-Windows systems
+ * @param [in] codePage specify the "platform" code page: CP_THREAD_ACP, CP_ACP (Windows ANSI code pages) or
+ * OS_ENCODING_CODE_PAGE. Ignored on non-Windows systems
  * @param [inout] inBuffer input buffer. Updated to point to start of first untranslated character
  * @param [inout] inBufferSize number of wide characters in wideBuffer. Updated to number of untranslated characters
  * @param [in] outBuffer point to start of buffer to receive platform-encoded string
- * @param [in] outBufferSize size in characters of the platformBuffer. Set to 0 to get the length of bytes required to hold the output
+ * @param [in] outBufferSize size in characters of the platformBuffer. Set to 0 to get the length of bytes required to
+ * hold the output
  * @return number of characters generated, or negative in case of error
  */
 static int32_t
-convertWideToPlatform(struct OMRPortLibrary *portLibrary, charconvState_t encodingState, uint32_t codePage, const uint8_t **inBuffer, uintptr_t *inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize)
+convertWideToPlatform(struct OMRPortLibrary *portLibrary, charconvState_t encodingState, uint32_t codePage,
+        const uint8_t **inBuffer, uintptr_t *inBufferSize, uint8_t *outBuffer, uintptr_t outBufferSize)
 {
 	int32_t resultSize = -1;
 #if defined(J9STR_USE_ICONV)
-	uint8_t *platformCursor = (0 == outBufferSize)? NULL : outBuffer;
+	uint8_t *platformCursor = (0 == outBufferSize) ? NULL : outBuffer;
 	uintptr_t platformLimit = outBufferSize;
 	uintptr_t wideRemaining = *inBufferSize;
 
@@ -3170,7 +3196,8 @@ convertWideToPlatform(struct OMRPortLibrary *portLibrary, charconvState_t encodi
 			uintptr_t iconvResult = 0;
 			osbSize = sizeof(onStackBuffer);
 			oldOsbSize = osbSize;
-			iconvResult = iconv(encodingState, (char **)inBuffer, (size_t *) &wideRemaining, &osbCursor, (size_t *) &osbSize); /* input and output pointers and limits are updated */
+			iconvResult = iconv(encodingState, (char **)inBuffer, (size_t *)&wideRemaining, &osbCursor,
+			        (size_t *)&osbSize); /* input and output pointers and limits are updated */
 			resultSize += oldOsbSize - osbSize;
 			if (((size_t)-1 == iconvResult) && (E2BIG != errno)) {
 				resultSize = OMRPORT_ERROR_STRING_ILLEGAL_STRING;
@@ -3180,8 +3207,10 @@ convertWideToPlatform(struct OMRPortLibrary *portLibrary, charconvState_t encodi
 	} else {
 		uintptr_t oldPlatformLimit = platformLimit;
 		/* initialize convertor */
-		uintptr_t iconvResult = iconv(encodingState, NULL, 0, (char **)&platformCursor, (size_t *)&platformLimit);
-		iconvResult = iconv(encodingState, (char **)inBuffer, (size_t *)inBufferSize, (char **)&platformCursor, (size_t *)&platformLimit); /* input and output pointers and limits are updated */
+		uintptr_t iconvResult =
+		        iconv(encodingState, NULL, 0, (char **)&platformCursor, (size_t *)&platformLimit);
+		iconvResult = iconv(encodingState, (char **)inBuffer, (size_t *)inBufferSize, (char **)&platformCursor,
+		        (size_t *)&platformLimit); /* input and output pointers and limits are updated */
 		resultSize = oldPlatformLimit - platformLimit;
 		if ((size_t)-1 == iconvResult) {
 			if (E2BIG == errno) {
@@ -3196,8 +3225,8 @@ convertWideToPlatform(struct OMRPortLibrary *portLibrary, charconvState_t encodi
 #elif defined(OMR_OS_WINDOWS)
 	LPCWSTR wideCursor = (LPCWSTR)*inBuffer;
 	uintptr_t wideRemaining = *inBufferSize / WIDE_CHAR_SIZE;
-	resultSize = WideCharToMultiByte(codePage, OS_ENCODING_MB_FLAGS, wideCursor,
-									 (int)wideRemaining, (LPSTR)outBuffer, (int)outBufferSize, NULL, NULL);
+	resultSize = WideCharToMultiByte(codePage, OS_ENCODING_MB_FLAGS, wideCursor, (int)wideRemaining,
+	        (LPSTR)outBuffer, (int)outBufferSize, NULL, NULL);
 	if (0 == resultSize) {
 		DWORD error = GetLastError();
 		if (ERROR_INSUFFICIENT_BUFFER == error) {

@@ -83,7 +83,7 @@ omrsysinfo_get_CPU_architecture(struct OMRPortLibrary *portLibrary)
 	return OMRPORT_ARCH_PPC;
 #elif defined(_X86_)
 	return OMRPORT_ARCH_X86;
-#elif defined( _AMD64_)
+#elif defined(_AMD64_)
 	return OMRPORT_ARCH_HAMMER;
 #else
 	return "unknown";
@@ -99,7 +99,7 @@ omrsysinfo_get_env(struct OMRPortLibrary *portLibrary, const char *envVar, char 
 	intptr_t result = -1;
 	wchar_t envVarWideCharValueBuffer[ENVVAR_VALUE_BUFFER_LENGTH];
 	wchar_t *envVarWideCharValue = envVarWideCharValueBuffer;
-	wchar_t	*envVarWideCharName = NULL;
+	wchar_t *envVarWideCharName = NULL;
 	wchar_t envVarNameConversionBuffer[ENVVAR_NAME_BUFFER_LENGTH];
 
 	/*
@@ -107,15 +107,20 @@ omrsysinfo_get_env(struct OMRPortLibrary *portLibrary, const char *envVar, char 
 	 * Stack-allocate a buffer large enough to hold typical envvar names.
 	 * If the name is larger than the buffer, a new buffer is dynamically allocated.
 	 */
-	envVarWideCharName = port_convertFromUTF8(portLibrary, envVar, envVarNameConversionBuffer, ENVVAR_NAME_BUFFER_LENGTH);
+	envVarWideCharName =
+	        port_convertFromUTF8(portLibrary, envVar, envVarNameConversionBuffer, ENVVAR_NAME_BUFFER_LENGTH);
 	if (NULL == envVarWideCharName) {
 		return -1;
 	}
-	rc = GetEnvironmentVariableW(envVarWideCharName, envVarWideCharValue, ENVVAR_VALUE_BUFFER_LENGTH); /* Try with the stack buffer first */
+	rc = GetEnvironmentVariableW(envVarWideCharName, envVarWideCharValue, ENVVAR_VALUE_BUFFER_LENGTH); /* Try with
+	                                                                                                      the stack
+	                                                                                                      buffer
+	                                                                                                      first */
 	if ((ENVVAR_VALUE_BUFFER_LENGTH <= rc) && (0 != rc)) {
 		/* if the value fit, rc, which does not include the null, is at most ENVVAR_VALUE_BUFFER_LENGTH-1. */
 		DWORD envVarValueLength = rc;
-		envVarWideCharValue = (wchar_t *)portLibrary->mem_allocate_memory(portLibrary, envVarValueLength * sizeof(wchar_t), OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
+		envVarWideCharValue = (wchar_t *)portLibrary->mem_allocate_memory(portLibrary,
+		        envVarValueLength * sizeof(wchar_t), OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 		if (NULL != envVarWideCharValue) {
 			rc = GetEnvironmentVariableW(envVarWideCharName, envVarWideCharValue, envVarValueLength);
 		} else {
@@ -137,7 +142,8 @@ omrsysinfo_get_env(struct OMRPortLibrary *portLibrary, const char *envVar, char 
 		result = -1;
 	} else {
 		/* Calculate the number of bytes required for the conversion */
-		rc = WideCharToMultiByte(OS_ENCODING_CODE_PAGE, OS_ENCODING_WC_FLAGS, envVarWideCharValue, -1, NULL, 0, NULL, NULL);
+		rc = WideCharToMultiByte(
+		        OS_ENCODING_CODE_PAGE, OS_ENCODING_WC_FLAGS, envVarWideCharValue, -1, NULL, 0, NULL, NULL);
 		if (0 == rc) { /* error, probably bogus Unicode */
 			result = -1;
 		} else if (rc > bufSize) {
@@ -145,8 +151,10 @@ omrsysinfo_get_env(struct OMRPortLibrary *portLibrary, const char *envVar, char 
 			result = rc;
 		} else {
 			/* Do the conversion for real. */
-			rc = WideCharToMultiByte(OS_ENCODING_CODE_PAGE, OS_ENCODING_WC_FLAGS, envVarWideCharValue, -1,  infoString, (int)bufSize, NULL, NULL);
-			Assert_PRT_true(0 != rc); /* Bogus Unicode or buffer too small should be caught by previous tests */
+			rc = WideCharToMultiByte(OS_ENCODING_CODE_PAGE, OS_ENCODING_WC_FLAGS, envVarWideCharValue, -1,
+			        infoString, (int)bufSize, NULL, NULL);
+			Assert_PRT_true(0 != rc); /* Bogus Unicode or buffer too small should be caught by previous
+			                             tests */
 			result = 0;
 		}
 	}
@@ -155,7 +163,6 @@ omrsysinfo_get_env(struct OMRPortLibrary *portLibrary, const char *envVar, char 
 		portLibrary->mem_free_memory(portLibrary, envVarWideCharValue);
 	}
 	return result;
-
 }
 /**
  * Determine the OS type.
@@ -169,24 +176,24 @@ omrsysinfo_get_env(struct OMRPortLibrary *portLibrary, const char *envVar, char 
 const char *
 omrsysinfo_get_OS_type(struct OMRPortLibrary *portLibrary)
 {
-BOOLEAN isServerMajorVersion10 = FALSE;
-/*
-WIN32_WINNT version constants :
+	BOOLEAN isServerMajorVersion10 = FALSE;
+	/*
+	WIN32_WINNT version constants :
 
-#define _WIN32_WINNT_NT4                    0x0400
-#define _WIN32_WINNT_WIN2K                  0x0500
-#define _WIN32_WINNT_WINXP                  0x0501
-#define _WIN32_WINNT_WS03                   0x0502
-#define _WIN32_WINNT_WIN6                   0x0600
-#define _WIN32_WINNT_VISTA                  0x0600
-#define _WIN32_WINNT_WS08                   0x0600
-#define _WIN32_WINNT_LONGHORN               0x0600
-#define _WIN32_WINNT_WIN7                   0x0601
-#define _WIN32_WINNT_WIN8                   0x0602
-#define _WIN32_WINNT_WINBLUE                0x0603
-#define _WIN32_WINNT_WINTHRESHOLD           0x0A00 / * ABRACADABRA_THRESHOLD * /
-#define _WIN32_WINNT_WIN10                  0x0A00 / * ABRACADABRA_THRESHOLD * /
-*/
+	#define _WIN32_WINNT_NT4                    0x0400
+	#define _WIN32_WINNT_WIN2K                  0x0500
+	#define _WIN32_WINNT_WINXP                  0x0501
+	#define _WIN32_WINNT_WS03                   0x0502
+	#define _WIN32_WINNT_WIN6                   0x0600
+	#define _WIN32_WINNT_VISTA                  0x0600
+	#define _WIN32_WINNT_WS08                   0x0600
+	#define _WIN32_WINNT_LONGHORN               0x0600
+	#define _WIN32_WINNT_WIN7                   0x0601
+	#define _WIN32_WINNT_WIN8                   0x0602
+	#define _WIN32_WINNT_WINBLUE                0x0603
+	#define _WIN32_WINNT_WINTHRESHOLD           0x0A00 / * ABRACADABRA_THRESHOLD * /
+	#define _WIN32_WINNT_WIN10                  0x0A00 / * ABRACADABRA_THRESHOLD * /
+	*/
 
 	if (NULL == PPG_si_osType) {
 		char *defaultTypeName = "Windows";
@@ -208,7 +215,7 @@ WIN32_WINNT version constants :
 				isServerMajorVersion10 = TRUE;
 			} else
 #endif /* defined(_WIN32_WINNT_WIN10) && (_WIN32_WINNT_MAXVER >= _WIN32_WINNT_WIN10) */
-			if (IsWindows8Point1OrGreater()) {
+			        if (IsWindows8Point1OrGreater()) {
 				PPG_si_osType = "Windows Server 2012 R2";
 			} else if (IsWindows8OrGreater()) {
 				PPG_si_osType = "Windows Server 2012";
@@ -226,7 +233,7 @@ WIN32_WINNT version constants :
 				PPG_si_osType = "Windows 10";
 			} else
 #endif /* defined(_WIN32_WINNT_WIN10) && (_WIN32_WINNT_MAXVER >= _WIN32_WINNT_WIN10) */
-			if (IsWindows8Point1OrGreater()) {
+			        if (IsWindows8Point1OrGreater()) {
 				PPG_si_osType = "Windows 8.1";
 			} else if (IsWindows8OrGreater()) {
 				PPG_si_osType = "Windows 8";
@@ -240,7 +247,7 @@ WIN32_WINNT version constants :
 		}
 #else /* defined(_WIN32_WINNT_WINBLUE) && (_WIN32_WINNT_MAXVER >= _WIN32_WINNT_WINBLUE) */
 		versionInfo.dwOSVersionInfoSize = sizeof(versionInfo);
-		if (!GetVersionEx((OSVERSIONINFO *) &versionInfo)) {
+		if (!GetVersionEx((OSVERSIONINFO *)&versionInfo)) {
 			return NULL;
 		}
 
@@ -252,9 +259,7 @@ WIN32_WINNT version constants :
 			switch (versionInfo.dwMajorVersion) {
 			case 5: {
 				switch (versionInfo.dwMinorVersion) {
-				case 0:
-					PPG_si_osType = "Windows 2000";
-					break;
+				case 0: PPG_si_osType = "Windows 2000"; break;
 				case 1:
 					PPG_si_osType = "Windows XP"; /* 32-bit */
 					break;
@@ -265,14 +270,10 @@ WIN32_WINNT version constants :
 						break;
 					case VER_NT_DOMAIN_CONTROLLER: /* FALLTHROUGH */
 					case VER_NT_SERVER:
-					default :
-						PPG_si_osType = "Windows Server 2003";
-						break;
+					default: PPG_si_osType = "Windows Server 2003"; break;
 					}
 					break;
-					default:
-						PPG_si_osType = defaultTypeName;
-						break;
+				default: PPG_si_osType = defaultTypeName; break;
 				}
 				break;
 			}
@@ -280,41 +281,21 @@ WIN32_WINNT version constants :
 				switch (versionInfo.wProductType) {
 				case VER_NT_WORKSTATION: {
 					switch (versionInfo.dwMinorVersion) {
-					case 0:
-						PPG_si_osType = "Windows Vista";
-						break;
-					case 1:
-						PPG_si_osType = "Windows 7";
-						break;
-					case 2:
-						PPG_si_osType = "Windows 8";
-						break;
-					case 3:
-						PPG_si_osType = "Windows 8.1";
-						break;
-					default:
-						PPG_si_osType = defaultTypeName;
-						break;
+					case 0: PPG_si_osType = "Windows Vista"; break;
+					case 1: PPG_si_osType = "Windows 7"; break;
+					case 2: PPG_si_osType = "Windows 8"; break;
+					case 3: PPG_si_osType = "Windows 8.1"; break;
+					default: PPG_si_osType = defaultTypeName; break;
 					} /* VER_NT_WORKSTATION */
 					break;
 				}
 				default: {
 					switch (versionInfo.dwMinorVersion) {
-					case 0:
-						PPG_si_osType = "Windows Server 2008";
-						break;
-					case 1:
-						PPG_si_osType = "Windows Server 2008 R2";
-						break;
-					case 2:
-						PPG_si_osType = "Windows Server 2012";
-						break;
-					case 3:
-						PPG_si_osType = "Windows Server 2012 R2";
-						break;
-					default:
-						PPG_si_osType = defaultTypeName;
-						break;
+					case 0: PPG_si_osType = "Windows Server 2008"; break;
+					case 1: PPG_si_osType = "Windows Server 2008 R2"; break;
+					case 2: PPG_si_osType = "Windows Server 2012"; break;
+					case 3: PPG_si_osType = "Windows Server 2012 R2"; break;
+					default: PPG_si_osType = defaultTypeName; break;
 					}
 					break;
 				}
@@ -327,29 +308,19 @@ WIN32_WINNT version constants :
 				switch (versionInfo.wProductType) {
 				case VER_NT_WORKSTATION: {
 					switch (versionInfo.dwMinorVersion) {
-					case 0:
-						PPG_si_osType = "Windows 10";
-						break;
-					default:
-						PPG_si_osType = defaultTypeName;
-						break;
+					case 0: PPG_si_osType = "Windows 10"; break;
+					default: PPG_si_osType = defaultTypeName; break;
 					}
-				}
-				break;
+				} break;
 				default: {
 					/* Starting with major version 10, use the registry to get the version */
 					PPG_si_osType = defaultTypeName;
 					isServerMajorVersion10 = TRUE;
+				} break;
 				}
-				break;
-				}
+			} break;
+			default: PPG_si_osType = defaultTypeName; break;
 			}
-			break;
-			default:
-				PPG_si_osType = defaultTypeName;
-				break;
-			}
-
 		}
 #endif /* defined(_WIN32_WINNT_WINBLUE) && (_WIN32_WINNT_MAXVER >= _WIN32_WINNT_WINBLUE) */
 #define PRODUCT_NAME_KEY "ProductName"
@@ -357,26 +328,36 @@ WIN32_WINNT version constants :
 #define WINDOWS_SERVER_PREFIX "Windows Server version "
 		if (defaultTypeName == PPG_si_osType) {
 			HKEY hKey;
-			if (ERROR_SUCCESS == RegOpenKeyExA(HKEY_LOCAL_MACHINE,
-					"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", 0, KEY_READ, &hKey)) {
+			if (ERROR_SUCCESS
+			        == RegOpenKeyExA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion",
+			                0, KEY_READ, &hKey)) {
 				DWORD valueSize = 0;
 				if (isServerMajorVersion10
-						&& (ERROR_SUCCESS == RegQueryValueExA(hKey, RELEASE_ID_KEY, NULL, NULL, NULL, &valueSize))) {
+				        && (ERROR_SUCCESS
+				                == RegQueryValueExA(
+				                        hKey, RELEASE_ID_KEY, NULL, NULL, NULL, &valueSize))) {
 					char ridBuffer[5]; /* the ReleaseId string format is YYMM */
 					if (sizeof(ridBuffer) >= valueSize) {
-						if (ERROR_SUCCESS == RegQueryValueExA(hKey, RELEASE_ID_KEY, NULL, NULL, (LPBYTE)ridBuffer, &valueSize)) {
+						if (ERROR_SUCCESS
+						        == RegQueryValueExA(hKey, RELEASE_ID_KEY, NULL, NULL,
+						                (LPBYTE)ridBuffer, &valueSize)) {
 							if (0 == strcmp(ridBuffer, "1607")) {
 								PPG_si_osType = "Windows Server 2016";
 							} else if (0 == strcmp(ridBuffer, "1809")) {
 								PPG_si_osType = "Windows Server 2019";
 							} else {
-								size_t bufferSize = sizeof(WINDOWS_SERVER_PREFIX) + valueSize + 1;
-								char *productNameBuffer = portLibrary->mem_allocate_memory(portLibrary,
-										valueSize, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
+								size_t bufferSize = sizeof(WINDOWS_SERVER_PREFIX)
+								        + valueSize + 1;
+								char *productNameBuffer =
+								        portLibrary->mem_allocate_memory(portLibrary,
+								                valueSize, OMR_GET_CALLSITE(),
+								                OMRMEM_CATEGORY_PORT_LIBRARY);
 								if (NULL != productNameBuffer) {
-									/* Print the version string using the format used by Microsoft */
-									portLibrary->str_printf(portLibrary, productNameBuffer, bufferSize,
-											"%s%s", WINDOWS_SERVER_PREFIX, ridBuffer);
+									/* Print the version string using the format
+									 * used by Microsoft */
+									portLibrary->str_printf(portLibrary,
+									        productNameBuffer, bufferSize, "%s%s",
+									        WINDOWS_SERVER_PREFIX, ridBuffer);
 									PPG_si_osTypeOnHeap = productNameBuffer;
 									PPG_si_osType = PPG_si_osTypeOnHeap;
 								}
@@ -386,14 +367,20 @@ WIN32_WINNT version constants :
 				}
 				if (defaultTypeName == PPG_si_osType) {
 					/* query the first time to get the content size of the value. */
-					if (ERROR_SUCCESS == RegQueryValueExA(hKey, PRODUCT_NAME_KEY, NULL, NULL, NULL, &valueSize)) {
-						char *productNameBuffer = portLibrary->mem_allocate_memory(portLibrary, valueSize, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
+					if (ERROR_SUCCESS
+					        == RegQueryValueExA(
+					                hKey, PRODUCT_NAME_KEY, NULL, NULL, NULL, &valueSize)) {
+						char *productNameBuffer = portLibrary->mem_allocate_memory(portLibrary,
+						        valueSize, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 						if (NULL != productNameBuffer) {
 							/* query the second time to get the value */
-							if (ERROR_SUCCESS == RegQueryValueExA(hKey, PRODUCT_NAME_KEY, NULL, NULL, (LPBYTE)productNameBuffer, &valueSize)) {
+							if (ERROR_SUCCESS
+							        == RegQueryValueExA(hKey, PRODUCT_NAME_KEY, NULL, NULL,
+							                (LPBYTE)productNameBuffer, &valueSize)) {
 								PPG_si_osType = PPG_si_osTypeOnHeap = productNameBuffer;
 							} else {
-								portLibrary->mem_free_memory(portLibrary, productNameBuffer);
+								portLibrary->mem_free_memory(
+								        portLibrary, productNameBuffer);
 							}
 						}
 					}
@@ -407,7 +394,8 @@ WIN32_WINNT version constants :
 #if defined(_WIN32_WINNT_WINBLUE) && (_WIN32_WINNT_MAXVER >= _WIN32_WINNT_WINBLUE)
 			Trc_PRT_sysinfo_failed_to_get_os_type();
 #else
-			Trc_PRT_sysinfo_unrecognized_Windows_version(versionInfo.wProductType, versionInfo.dwMinorVersion, versionInfo.dwMajorVersion);
+			Trc_PRT_sysinfo_unrecognized_Windows_version(
+			        versionInfo.wProductType, versionInfo.dwMinorVersion, versionInfo.dwMajorVersion);
 #endif
 		}
 	}
@@ -431,34 +419,34 @@ omrsysinfo_get_OS_version(struct OMRPortLibrary *portLibrary)
 	if (NULL == PPG_si_osVersion) {
 #if defined(_WIN32_WINNT_WINBLUE) && (_WIN32_WINNT_MAXVER >= _WIN32_WINNT_WINBLUE)
 #if defined(_WIN32_WINNT_WIN10) && (_WIN32_WINNT_MAXVER >= _WIN32_WINNT_WIN10)
-			if (IsWindows10OrGreater()) {
-				PPG_si_osVersion = "10.0 build 10240";
-			} else
+		if (IsWindows10OrGreater()) {
+			PPG_si_osVersion = "10.0 build 10240";
+		} else
 #endif /* defined(_WIN32_WINNT_WIN10) && (_WIN32_WINNT_MAXVER >= _WIN32_WINNT_WIN10) */
-			if (IsWindows8Point1OrGreater()) {
-				PPG_si_osVersion = "6.3 build 9600";
-			} else if (IsWindows8OrGreater()) {
-				PPG_si_osVersion = "6.2 build 9200";
-			} else if (IsWindows7SP1OrGreater()) {
-				PPG_si_osVersion = "6.1 build 7601 Sevice Pack 1";
-			} else if (IsWindows7OrGreater()) {
-				PPG_si_osVersion = "6.1 build 7600";
-			} else if (IsWindowsVistaSP2OrGreater()) {
-				PPG_si_osVersion = "6.0 build 6002 Sevice Pack 2";
-			} else if (IsWindowsVistaSP1OrGreater()) {
-				PPG_si_osVersion = "6.0 build 6001 Sevice Pack 1";
-			} else if (IsWindowsVistaOrGreater()) {
-				PPG_si_osVersion = "6.0 build 6000";
-/*  The Windows XP Service Packs do not update the version number. */
-			} else if (IsWindowsXPSP3OrGreater()) {
-				PPG_si_osVersion = "5.1 build 2600 Sevice Pack 3";
-			} else if (IsWindowsXPSP2OrGreater()) {
-				PPG_si_osVersion = "5.1 build 2600 Sevice Pack 2";
-			} else if (IsWindowsXPSP1OrGreater()) {
-				PPG_si_osVersion = "5.1 build 2600 Sevice Pack 1";
-			} else if (IsWindowsXPOrGreater()) {
-				PPG_si_osVersion = "5.1 build 2600";
-			}
+		        if (IsWindows8Point1OrGreater()) {
+			PPG_si_osVersion = "6.3 build 9600";
+		} else if (IsWindows8OrGreater()) {
+			PPG_si_osVersion = "6.2 build 9200";
+		} else if (IsWindows7SP1OrGreater()) {
+			PPG_si_osVersion = "6.1 build 7601 Sevice Pack 1";
+		} else if (IsWindows7OrGreater()) {
+			PPG_si_osVersion = "6.1 build 7600";
+		} else if (IsWindowsVistaSP2OrGreater()) {
+			PPG_si_osVersion = "6.0 build 6002 Sevice Pack 2";
+		} else if (IsWindowsVistaSP1OrGreater()) {
+			PPG_si_osVersion = "6.0 build 6001 Sevice Pack 1";
+		} else if (IsWindowsVistaOrGreater()) {
+			PPG_si_osVersion = "6.0 build 6000";
+			/*  The Windows XP Service Packs do not update the version number. */
+		} else if (IsWindowsXPSP3OrGreater()) {
+			PPG_si_osVersion = "5.1 build 2600 Sevice Pack 3";
+		} else if (IsWindowsXPSP2OrGreater()) {
+			PPG_si_osVersion = "5.1 build 2600 Sevice Pack 2";
+		} else if (IsWindowsXPSP1OrGreater()) {
+			PPG_si_osVersion = "5.1 build 2600 Sevice Pack 1";
+		} else if (IsWindowsXPOrGreater()) {
+			PPG_si_osVersion = "5.1 build 2600";
+		}
 #else /* defined(_WIN32_WINNT_WINBLUE) && (_WIN32_WINNT_MAXVER >= _WIN32_WINNT_WINBLUE) */
 		OSVERSIONINFOW versionInfo;
 		int len = sizeof("0123456789.0123456789 build 0123456789 ") + 1;
@@ -471,21 +459,22 @@ omrsysinfo_get_OS_version(struct OMRPortLibrary *portLibrary)
 		}
 
 		if (NULL != versionInfo.szCSDVersion) {
-			len += WideCharToMultiByte(OS_ENCODING_CODE_PAGE, OS_ENCODING_WC_FLAGS, versionInfo.szCSDVersion, -1, NULL, 0, NULL, NULL);
+			len += WideCharToMultiByte(OS_ENCODING_CODE_PAGE, OS_ENCODING_WC_FLAGS,
+			        versionInfo.szCSDVersion, -1, NULL, 0, NULL, NULL);
 		}
-		buffer = portLibrary->mem_allocate_memory(portLibrary, len, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
+		buffer = portLibrary->mem_allocate_memory(
+		        portLibrary, len, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 		if (NULL == buffer) {
 			return NULL;
 		}
 
 		position = portLibrary->str_printf(portLibrary, buffer, len, "%d.%d build %d",
-										   versionInfo.dwMajorVersion,
-										   versionInfo.dwMinorVersion,
-										   versionInfo.dwBuildNumber & 0x0000FFFF);
+		        versionInfo.dwMajorVersion, versionInfo.dwMinorVersion, versionInfo.dwBuildNumber & 0x0000FFFF);
 
 		if ((NULL != versionInfo.szCSDVersion) && ('\0' != versionInfo.szCSDVersion[0])) {
 			buffer[position++] = ' ';
-			WideCharToMultiByte(OS_ENCODING_CODE_PAGE, OS_ENCODING_WC_FLAGS, versionInfo.szCSDVersion, -1, &buffer[position], (int)(len - position - 1), NULL, NULL);
+			WideCharToMultiByte(OS_ENCODING_CODE_PAGE, OS_ENCODING_WC_FLAGS, versionInfo.szCSDVersion, -1,
+			        &buffer[position], (int)(len - position - 1), NULL, NULL);
 		}
 		PPG_si_osVersion = buffer;
 #endif /* defined(_WIN32_WINNT_WINBLUE) && (_WIN32_WINNT_MAXVER >= _WIN32_WINNT_WINBLUE) */
@@ -578,7 +567,8 @@ find_executable_name(struct OMRPortLibrary *portLibrary, char **result)
 	}
 	unicodeBuffer[length] = '\0';
 
-	utf8Result = portLibrary->mem_allocate_memory(portLibrary, (length + 1) * 3, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
+	utf8Result = portLibrary->mem_allocate_memory(
+	        portLibrary, (length + 1) * 3, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 	if (NULL == utf8Result) {
 		return -1;
 	}
@@ -602,7 +592,7 @@ find_executable_name(struct OMRPortLibrary *portLibrary, char **result)
 intptr_t
 omrsysinfo_get_executable_name(struct OMRPortLibrary *portLibrary, const char *argv0, char **result)
 {
-	(void) argv0; /* @args used */
+	(void)argv0; /* @args used */
 
 	/* Clear any pending error conditions. */
 	portLibrary->error_set_last_error(portLibrary, 0, 0);
@@ -643,7 +633,7 @@ omrsysinfo_get_number_CPUs_by_type(struct OMRPortLibrary *portLibrary, uintptr_t
 		int32_t i = 0;
 		uintptr_t mask = 0x1;
 
-		GetProcessAffinityMask(currentProcess, (PDWORD_PTR) &processAffinity, (PDWORD_PTR) &systemAffinity);
+		GetProcessAffinityMask(currentProcess, (PDWORD_PTR)&processAffinity, (PDWORD_PTR)&systemAffinity);
 		/*
 		 * Count the number of bound CPU's
 		 */
@@ -682,9 +672,9 @@ omrsysinfo_get_number_CPUs_by_type(struct OMRPortLibrary *portLibrary, uintptr_t
 }
 
 /* Paths for pdh memory counters. */
-#define MEMORY_COMMIT_LIMIT_COUNTER_PATH        "\\Memory\\Commit Limit"
-#define MEMORY_COMMITTED_BYTES_COUNTER_PATH     "\\Memory\\Committed Bytes"
-#define MEMORY_CACHE_BYTES_COUNTER_PATH         "\\Memory\\Cache Bytes"
+#define MEMORY_COMMIT_LIMIT_COUNTER_PATH "\\Memory\\Commit Limit"
+#define MEMORY_COMMITTED_BYTES_COUNTER_PATH "\\Memory\\Committed Bytes"
+#define MEMORY_CACHE_BYTES_COUNTER_PATH "\\Memory\\Cache Bytes"
 
 int32_t
 omrsysinfo_get_memory_info(struct OMRPortLibrary *portLibrary, struct J9MemoryInfo *memInfo, ...)
@@ -740,10 +730,8 @@ omrsysinfo_get_memory_info(struct OMRPortLibrary *portLibrary, struct J9MemoryIn
 		return OMRPORT_ERROR_SYSINFO_ERROR_READING_MEMORY_INFO;
 	}
 
-	status = PdhAddCounter(statsHandle,
-						   MEMORY_COMMIT_LIMIT_COUNTER_PATH,
-						   (DWORD_PTR)NULL,
-						   &memoryCommitLimitCounter);
+	status = PdhAddCounter(
+	        statsHandle, MEMORY_COMMIT_LIMIT_COUNTER_PATH, (DWORD_PTR)NULL, &memoryCommitLimitCounter);
 	if (ERROR_SUCCESS != status) {
 		Trc_PRT_sysinfo_get_memory_info_failedAddingCounter("Commit Limit", status);
 		Trc_PRT_sysinfo_get_memory_info_Exit(OMRPORT_ERROR_SYSINFO_ERROR_READING_MEMORY_INFO);
@@ -751,10 +739,8 @@ omrsysinfo_get_memory_info(struct OMRPortLibrary *portLibrary, struct J9MemoryIn
 		return OMRPORT_ERROR_SYSINFO_ERROR_READING_MEMORY_INFO;
 	}
 
-	status = PdhAddCounter(statsHandle,
-						   MEMORY_COMMITTED_BYTES_COUNTER_PATH,
-						   (DWORD_PTR)NULL,
-						   &memoryCommittedBytesCounter);
+	status = PdhAddCounter(
+	        statsHandle, MEMORY_COMMITTED_BYTES_COUNTER_PATH, (DWORD_PTR)NULL, &memoryCommittedBytesCounter);
 	if (ERROR_SUCCESS != status) {
 		Trc_PRT_sysinfo_get_memory_info_failedAddingCounter("Committed Bytes", status);
 		Trc_PRT_sysinfo_get_memory_info_Exit(OMRPORT_ERROR_SYSINFO_ERROR_READING_MEMORY_INFO);
@@ -762,10 +748,7 @@ omrsysinfo_get_memory_info(struct OMRPortLibrary *portLibrary, struct J9MemoryIn
 		return OMRPORT_ERROR_SYSINFO_ERROR_READING_MEMORY_INFO;
 	}
 
-	status = PdhAddCounter(statsHandle,
-						   MEMORY_CACHE_BYTES_COUNTER_PATH,
-						   (DWORD_PTR)NULL,
-						   &memoryCacheBytesCounter);
+	status = PdhAddCounter(statsHandle, MEMORY_CACHE_BYTES_COUNTER_PATH, (DWORD_PTR)NULL, &memoryCacheBytesCounter);
 	if (ERROR_SUCCESS != status) {
 		Trc_PRT_sysinfo_get_memory_info_failedAddingCounter("Cache Bytes", status);
 		Trc_PRT_sysinfo_get_memory_info_Exit(OMRPORT_ERROR_SYSINFO_ERROR_READING_MEMORY_INFO);
@@ -783,20 +766,23 @@ omrsysinfo_get_memory_info(struct OMRPortLibrary *portLibrary, struct J9MemoryIn
 	}
 
 	status = PdhGetRawCounterValue(memoryCommitLimitCounter, (LPDWORD)NULL, &counterValue);
-	if ((ERROR_SUCCESS == status) && ((PDH_CSTATUS_VALID_DATA == counterValue.CStatus) ||
-									  (PDH_CSTATUS_NEW_DATA == counterValue.CStatus))) {
+	if ((ERROR_SUCCESS == status)
+	        && ((PDH_CSTATUS_VALID_DATA == counterValue.CStatus)
+	                || (PDH_CSTATUS_NEW_DATA == counterValue.CStatus))) {
 		memInfo->totalSwap = counterValue.FirstValue;
 	}
 
 	status = PdhGetRawCounterValue(memoryCommittedBytesCounter, (LPDWORD)NULL, &counterValue);
-	if ((ERROR_SUCCESS == status) && ((PDH_CSTATUS_VALID_DATA == counterValue.CStatus) ||
-									  (PDH_CSTATUS_NEW_DATA == counterValue.CStatus))) {
+	if ((ERROR_SUCCESS == status)
+	        && ((PDH_CSTATUS_VALID_DATA == counterValue.CStatus)
+	                || (PDH_CSTATUS_NEW_DATA == counterValue.CStatus))) {
 		memInfo->availSwap = (memInfo->totalSwap - counterValue.FirstValue);
 	}
 
 	status = PdhGetRawCounterValue(memoryCacheBytesCounter, (LPDWORD)NULL, &counterValue);
-	if ((ERROR_SUCCESS == status) && ((PDH_CSTATUS_VALID_DATA == counterValue.CStatus) ||
-									  (PDH_CSTATUS_NEW_DATA == counterValue.CStatus))) {
+	if ((ERROR_SUCCESS == status)
+	        && ((PDH_CSTATUS_VALID_DATA == counterValue.CStatus)
+	                || (PDH_CSTATUS_NEW_DATA == counterValue.CStatus))) {
 		memInfo->cached = counterValue.FirstValue;
 	}
 	/* Note that Windows does not have 'buffered memory' and hence, memInfo->buffered remains -1. */
@@ -817,9 +803,11 @@ omrsysinfo_get_addressable_physical_memory(struct OMRPortLibrary *portLibrary)
 {
 	uint64_t memoryLimit = 0;
 	uint64_t usableMemory = portLibrary->sysinfo_get_physical_memory(portLibrary);
-	
-	if (OMRPORT_LIMIT_LIMITED == portLibrary->sysinfo_get_limit(portLibrary, OMRPORT_RESOURCE_ADDRESS_SPACE, &memoryLimit)) {
-		/* there is a limit on the memory we can use so take the minimum of this usable amount and the physical memory */
+
+	if (OMRPORT_LIMIT_LIMITED
+	        == portLibrary->sysinfo_get_limit(portLibrary, OMRPORT_RESOURCE_ADDRESS_SPACE, &memoryLimit)) {
+		/* there is a limit on the memory we can use so take the minimum of this usable amount and the physical
+		 * memory */
 		usableMemory = OMR_MIN(memoryLimit, usableMemory);
 	}
 	return usableMemory;
@@ -842,14 +830,14 @@ omrsysinfo_get_physical_memory(struct OMRPortLibrary *portLibrary)
 		return J9CONST64(0);
 	}
 
-	return (uint64_t) aMemStatusEx.ullTotalPhys;
+	return (uint64_t)aMemStatusEx.ullTotalPhys;
 }
 
 /**
  * PortLibrary shutdown.
  *
- * This function is called during shutdown of the portLibrary.  Any resources that were created by @ref omrsysinfo_startup
- * should be destroyed here.
+ * This function is called during shutdown of the portLibrary.  Any resources that were created by @ref
+ * omrsysinfo_startup should be destroyed here.
  *
  * @param[in] portLibrary The port library.
  *
@@ -907,7 +895,7 @@ omrsysinfo_startup(struct OMRPortLibrary *portLibrary)
 	 * shouldn't cause failure to startup port library.  Failure will be noticed only
 	 * when the omrsysinfo_get_executable_name() actually gets invoked.
 	 */
-	(void) find_executable_name(portLibrary, &PPG_si_executableName);
+	(void)find_executable_name(portLibrary, &PPG_si_executableName);
 	return 0;
 }
 
@@ -915,17 +903,17 @@ omrsysinfo_startup(struct OMRPortLibrary *portLibrary)
  * Query the operating system for the name of the user associate with the current thread
  *
  * Obtain the value of the name of the user associated with the current thread, and then write it out into the buffer
-* supplied by the user
-*
-* @param[in] portLibrary The port Library
-* @param[out] buffer Buffer for the name of the user
-* @param[in,out] length The length of the buffer
-*
-* @return 0 on success, number of bytes required to hold the
-* information if the output buffer was too small, -1 on failure.
-*
-* @note buffer is undefined on error or when supplied buffer was too small.
-*/
+ * supplied by the user
+ *
+ * @param[in] portLibrary The port Library
+ * @param[out] buffer Buffer for the name of the user
+ * @param[in,out] length The length of the buffer
+ *
+ * @return 0 on success, number of bytes required to hold the
+ * information if the output buffer was too small, -1 on failure.
+ *
+ * @note buffer is undefined on error or when supplied buffer was too small.
+ */
 intptr_t
 omrsysinfo_get_username(struct OMRPortLibrary *portLibrary, char *buffer, uintptr_t length)
 {
@@ -934,7 +922,8 @@ omrsysinfo_get_username(struct OMRPortLibrary *portLibrary, char *buffer, uintpt
 	intptr_t result;
 
 	nameLength = (DWORD)length;
-	unicodeBuffer = portLibrary->mem_allocate_memory(portLibrary, nameLength * 2, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
+	unicodeBuffer = portLibrary->mem_allocate_memory(
+	        portLibrary, nameLength * 2, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 	if (NULL == unicodeBuffer) {
 		return -1;
 	}
@@ -954,7 +943,8 @@ omrsysinfo_get_username(struct OMRPortLibrary *portLibrary, char *buffer, uintpt
 		}
 	} else {
 		/* convert */
-		rc = WideCharToMultiByte(OS_ENCODING_CODE_PAGE, OS_ENCODING_WC_FLAGS, unicodeBuffer, -1, NULL, 0, NULL, NULL);
+		rc = WideCharToMultiByte(
+		        OS_ENCODING_CODE_PAGE, OS_ENCODING_WC_FLAGS, unicodeBuffer, -1, NULL, 0, NULL, NULL);
 		if (0 == rc) {
 			result = -1;
 		} else {
@@ -962,7 +952,8 @@ omrsysinfo_get_username(struct OMRPortLibrary *portLibrary, char *buffer, uintpt
 				/* buffer is too small */
 				result = rc;
 			} else {
-				WideCharToMultiByte(OS_ENCODING_CODE_PAGE, OS_ENCODING_WC_FLAGS, unicodeBuffer, -1,  buffer, (int)length, NULL, NULL);
+				WideCharToMultiByte(OS_ENCODING_CODE_PAGE, OS_ENCODING_WC_FLAGS, unicodeBuffer, -1,
+				        buffer, (int)length, NULL, NULL);
 				result = 0;
 			}
 		}
@@ -974,17 +965,17 @@ omrsysinfo_get_username(struct OMRPortLibrary *portLibrary, char *buffer, uintpt
  * Query the operating system for the name of the group associate with the current thread
  *
  * Obtain the value of the name of the group associated with the current thread, and then write it out into the buffer
-* supplied by the user
-*
-* @param[in] portLibrary The port Library
-* @param[out] buffer Buffer for the name of the group
-* @param[in,out] length The length of the buffer
-*
-* @return 0 on success, number of bytes required to hold the
-* information if the output buffer was too small, -1 on failure.
-*
-* @note buffer is undefined on error or when supplied buffer was too small.
-*/
+ * supplied by the user
+ *
+ * @param[in] portLibrary The port Library
+ * @param[out] buffer Buffer for the name of the group
+ * @param[in,out] length The length of the buffer
+ *
+ * @return 0 on success, number of bytes required to hold the
+ * information if the output buffer was too small, -1 on failure.
+ *
+ * @note buffer is undefined on error or when supplied buffer was too small.
+ */
 intptr_t
 omrsysinfo_get_groupname(struct OMRPortLibrary *portLibrary, char *buffer, uintptr_t length)
 {
@@ -995,7 +986,7 @@ omrsysinfo_get_groupname(struct OMRPortLibrary *portLibrary, char *buffer, uintp
 intptr_t
 omrsysinfo_get_hostname(struct OMRPortLibrary *portLibrary, char *buffer, size_t length)
 {
-	if (0 != gethostname(buffer, (int) length)) {
+	if (0 != gethostname(buffer, (int)length)) {
 		Trc_PRT_sysinfo_gethostname_error(OMRPORT_ERROR_SYSINFO_OPFAILED);
 		return OMRPORT_ERROR_SYSINFO_OPFAILED;
 	}
@@ -1057,11 +1048,13 @@ omrsysinfo_get_CPU_utilization(struct OMRPortLibrary *portLibrary, struct J9Sysi
 		Trc_PRT_sysinfo_get_CPU_utilization_GetSystemTimesFailed(GetLastError());
 		return OMRPORT_ERROR_SYSINFO_GET_STATS_FAILED;
 	}
-	idleTime = (lpIdleTime.dwLowDateTime + (((uint64_t) lpIdleTime.dwHighDateTime) << 32)) * 100; /* FILETIME resolution is 100 ns */
-	kernelActiveTime = (lpKernelTime.dwLowDateTime + (((uint64_t) lpKernelTime.dwHighDateTime) << 32)) * 100
-					   - idleTime; /* kernel time includes idle time */
+	idleTime = (lpIdleTime.dwLowDateTime + (((uint64_t)lpIdleTime.dwHighDateTime) << 32)) * 100; /* FILETIME
+	                                                                                                resolution is
+	                                                                                                100 ns */
+	kernelActiveTime = (lpKernelTime.dwLowDateTime + (((uint64_t)lpKernelTime.dwHighDateTime) << 32)) * 100
+	        - idleTime; /* kernel time includes idle time */
 	Trc_PRT_sysinfo_get_CPU_utilization_GST_result("kernel active", kernelActiveTime);
-	userTime = (lpUserTime.dwLowDateTime + (((uint64_t) lpUserTime.dwHighDateTime) << 32)) * 100;
+	userTime = (lpUserTime.dwLowDateTime + (((uint64_t)lpUserTime.dwHighDateTime) << 32)) * 100;
 	Trc_PRT_sysinfo_get_CPU_utilization_GST_result("user", userTime);
 	cpuTime->cpuTime = kernelActiveTime + userTime;
 	cpuTime->timestamp = portLibrary->time_nano_time(portLibrary);
@@ -1069,7 +1062,7 @@ omrsysinfo_get_CPU_utilization(struct OMRPortLibrary *portLibrary, struct J9Sysi
 		Trc_PRT_sysinfo_get_CPU_utilization_timeFailed();
 		return OMRPORT_ERROR_SYSINFO_INVALID_TIME;
 	}
-	cpuTime->numberOfCpus = (int32_t) portLibrary->sysinfo_get_number_CPUs_by_type(portLibrary, OMRPORT_CPU_ONLINE);
+	cpuTime->numberOfCpus = (int32_t)portLibrary->sysinfo_get_number_CPUs_by_type(portLibrary, OMRPORT_CPU_ONLINE);
 
 	return 0;
 }
@@ -1087,7 +1080,8 @@ omrsysinfo_limit_iterator_hasNext(struct OMRPortLibrary *portLibrary, J9SysinfoL
 }
 
 int32_t
-omrsysinfo_limit_iterator_next(struct OMRPortLibrary *portLibrary, J9SysinfoLimitIteratorState *state, J9SysinfoUserLimitElement *limitElement)
+omrsysinfo_limit_iterator_next(
+        struct OMRPortLibrary *portLibrary, J9SysinfoLimitIteratorState *state, J9SysinfoUserLimitElement *limitElement)
 {
 	return OMRPORT_ERROR_SYSINFO_OPFAILED;
 }
@@ -1095,7 +1089,7 @@ omrsysinfo_limit_iterator_next(struct OMRPortLibrary *portLibrary, J9SysinfoLimi
 static int32_t
 copyEnvToBuffer(struct OMRPortLibrary *portLibrary, void *args)
 {
-	CopyEnvToBufferArgs *copyEnvToBufferArgs = (CopyEnvToBufferArgs *) args;
+	CopyEnvToBufferArgs *copyEnvToBufferArgs = (CopyEnvToBufferArgs *)args;
 	uint8_t *buffer = copyEnvToBufferArgs->buffer;
 	uintptr_t bufferSize = copyEnvToBufferArgs->bufferSizeBytes;
 	BOOLEAN bufferBigEnough = TRUE;
@@ -1125,7 +1119,8 @@ copyEnvToBuffer(struct OMRPortLibrary *portLibrary, void *args)
 		} else {
 			envVars++; /* skip over single terminating null after each individual envVar */
 		}
-		storageRequired += WideCharToMultiByte(OS_ENCODING_CODE_PAGE, OS_ENCODING_WC_FLAGS, envVars, -1, (LPSTR)cursor, 0, NULL, NULL);
+		storageRequired += WideCharToMultiByte(
+		        OS_ENCODING_CODE_PAGE, OS_ENCODING_WC_FLAGS, envVars, -1, (LPSTR)cursor, 0, NULL, NULL);
 		envVars += wcslen(envVars);
 	}
 
@@ -1159,9 +1154,11 @@ copyEnvToBuffer(struct OMRPortLibrary *portLibrary, void *args)
 		} else {
 			envVars++; /* skip over single terminating null after each individual envVar */
 		}
-		spaceForThisEntry = WideCharToMultiByte(OS_ENCODING_CODE_PAGE, OS_ENCODING_WC_FLAGS, envVars, -1, (LPSTR)cursor, 0, NULL, NULL);
+		spaceForThisEntry = WideCharToMultiByte(
+		        OS_ENCODING_CODE_PAGE, OS_ENCODING_WC_FLAGS, envVars, -1, (LPSTR)cursor, 0, NULL, NULL);
 		if (spaceLeft >= (uintptr_t)spaceForThisEntry) {
-			WideCharToMultiByte(OS_ENCODING_CODE_PAGE, 0, envVars, -1, (LPSTR)cursor, spaceForThisEntry, NULL, NULL);
+			WideCharToMultiByte(
+			        OS_ENCODING_CODE_PAGE, 0, envVars, -1, (LPSTR)cursor, spaceForThisEntry, NULL, NULL);
 			copyEnvToBufferArgs->numElements = copyEnvToBufferArgs->numElements + 1;
 			envVars += wcslen(envVars);
 			cursor += spaceForThisEntry;
@@ -1194,7 +1191,8 @@ copyEnvToBuffer(struct OMRPortLibrary *portLibrary, void *args)
 }
 
 int32_t
-omrsysinfo_env_iterator_init(struct OMRPortLibrary *portLibrary, J9SysinfoEnvIteratorState *state, void *buffer, uintptr_t bufferSizeBytes)
+omrsysinfo_env_iterator_init(
+        struct OMRPortLibrary *portLibrary, J9SysinfoEnvIteratorState *state, void *buffer, uintptr_t bufferSizeBytes)
 {
 	int32_t rc;
 	CopyEnvToBufferArgs copyEnvToBufferArgs;
@@ -1237,7 +1235,8 @@ omrsysinfo_env_iterator_hasNext(struct OMRPortLibrary *portLibrary, J9SysinfoEnv
 }
 
 int32_t
-omrsysinfo_env_iterator_next(struct OMRPortLibrary *portLibrary, J9SysinfoEnvIteratorState *state, J9SysinfoEnvElement *envElement)
+omrsysinfo_env_iterator_next(
+        struct OMRPortLibrary *portLibrary, J9SysinfoEnvIteratorState *state, J9SysinfoEnvElement *envElement)
 {
 	if (NULL == state->current) {
 		return OMRPORT_ERROR_SYSINFO_OPFAILED;
@@ -1250,18 +1249,18 @@ omrsysinfo_env_iterator_next(struct OMRPortLibrary *portLibrary, J9SysinfoEnvIte
 }
 
 /* PDH processor object and associated counter names. */
-#define PROCESSOR_OBJECT_NAME                   "Processor"
+#define PROCESSOR_OBJECT_NAME "Processor"
 
-#define PROCESSOR_USER_TIME_COUNTER_NAME        "% User Time"
-#define PROCESSOR_PRIVILEGED_TIME_COUNTER_NAME  "% Privileged Time"
-#define PROCESSOR_IDLE_TIME_COUNTER_NAME        "% Idle Time"
+#define PROCESSOR_USER_TIME_COUNTER_NAME "% User Time"
+#define PROCESSOR_PRIVILEGED_TIME_COUNTER_NAME "% Privileged Time"
+#define PROCESSOR_IDLE_TIME_COUNTER_NAME "% Idle Time"
 
 /* As of now we are dealing with only the above four counters. Update this when more counters
  * are added.
  */
-#define PROCESSOR_COUNTER_CATEGORIES	3
-#define SIZEOF_PDH_HCOUNTER				sizeof(PDH_HCOUNTER)
-#define NS100_TO_USEC					10
+#define PROCESSOR_COUNTER_CATEGORIES 3
+#define SIZEOF_PDH_HCOUNTER sizeof(PDH_HCOUNTER)
+#define NS100_TO_USEC 10
 
 /**
  * Add all instances of a pdh processor counter to the performance query.
@@ -1274,11 +1273,8 @@ omrsysinfo_env_iterator_next(struct OMRPortLibrary *portLibrary, J9SysinfoEnvIte
  * @return 0 on success and -1 on failure.
  */
 static int32_t
-AddCounter(OMRPortLibrary *portLibrary,
-		   PDH_HQUERY statsHandle,
-		   struct J9ProcessorInfos *procInfo,
-		   const char *cntrName,
-		   PDH_HCOUNTER **cntrPtrRef)
+AddCounter(OMRPortLibrary *portLibrary, PDH_HQUERY statsHandle, struct J9ProcessorInfos *procInfo, const char *cntrName,
+        PDH_HCOUNTER **cntrPtrRef)
 {
 	register int32_t cpuCntr;
 	PDH_HCOUNTER *cntrPtr = *cntrPtrRef;
@@ -1287,12 +1283,11 @@ AddCounter(OMRPortLibrary *portLibrary,
 
 	for (cpuCntr = 0; cpuCntr < procInfo->totalProcessorCount + 1; cpuCntr++) {
 		if (0 == cpuCntr) {
-			portLibrary->str_printf(portLibrary, counterPathBuf, sizeof(counterPathBuf), "\\%s(%s)\\%s", PROCESSOR_OBJECT_NAME, "_Total", cntrName);
+			portLibrary->str_printf(portLibrary, counterPathBuf, sizeof(counterPathBuf), "\\%s(%s)\\%s",
+			        PROCESSOR_OBJECT_NAME, "_Total", cntrName);
 		} else {
 			portLibrary->str_printf(portLibrary, counterPathBuf, sizeof(counterPathBuf), "\\%s(%d)\\%s",
-									PROCESSOR_OBJECT_NAME,
-									procInfo->procInfoArray[cpuCntr].proc_id,
-									cntrName);
+			        PROCESSOR_OBJECT_NAME, procInfo->procInfoArray[cpuCntr].proc_id, cntrName);
 		}
 		status = PdhAddCounter(statsHandle, counterPathBuf, (DWORD_PTR)NULL, &(cntrPtr[cpuCntr]));
 		if (ERROR_SUCCESS != status) {
@@ -1332,15 +1327,14 @@ omrsysinfo_get_processor_info(struct OMRPortLibrary *portLibrary, struct J9Proce
 		uintptr_t rootCntrPtrSize = 0;
 
 		/* Obtain the number of processors on the machine. */
-		procInfo->totalProcessorCount = (int32_t)portLibrary->sysinfo_get_number_CPUs_by_type(portLibrary, OMRPORT_CPU_PHYSICAL);
+		procInfo->totalProcessorCount =
+		        (int32_t)portLibrary->sysinfo_get_number_CPUs_by_type(portLibrary, OMRPORT_CPU_PHYSICAL);
 		Assert_PRT_true(0 < procInfo->totalProcessorCount);
 
 		procInfoArraySize = (procInfo->totalProcessorCount + 1) * sizeof(J9ProcessorInfo);
-		procInfo->procInfoArray = portLibrary->mem_allocate_memory(portLibrary,
-								  procInfoArraySize,
-								  OMR_GET_CALLSITE(),
-								  OMRMEM_CATEGORY_PORT_LIBRARY);
-		if (NULL ==  procInfo->procInfoArray) {
+		procInfo->procInfoArray = portLibrary->mem_allocate_memory(
+		        portLibrary, procInfoArraySize, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
+		if (NULL == procInfo->procInfoArray) {
 			Trc_PRT_sysinfo_get_processor_info_memAllocFailed();
 			Trc_PRT_sysinfo_get_processor_info_Exit(OMRPORT_ERROR_SYSINFO_MEMORY_ALLOC_FAILED);
 			return OMRPORT_ERROR_SYSINFO_MEMORY_ALLOC_FAILED;
@@ -1361,15 +1355,14 @@ omrsysinfo_get_processor_info(struct OMRPortLibrary *portLibrary, struct J9Proce
 		/* online field for the aggregate record needs to be -1 */
 		procInfo->procInfoArray[0].online = -1;
 
-		rootCntrPtrSize = (SIZEOF_PDH_HCOUNTER * (procInfo->totalProcessorCount + 1) * PROCESSOR_COUNTER_CATEGORIES);
+		rootCntrPtrSize =
+		        (SIZEOF_PDH_HCOUNTER * (procInfo->totalProcessorCount + 1) * PROCESSOR_COUNTER_CATEGORIES);
 		/* Allocate memory for all processor related counters at once. */
-		rootCntrPtr = (PDH_HCOUNTER *)portLibrary->mem_allocate_memory(portLibrary,
-					  rootCntrPtrSize,
-					  OMR_GET_CALLSITE(),
-					  OMRMEM_CATEGORY_PORT_LIBRARY);
+		rootCntrPtr = (PDH_HCOUNTER *)portLibrary->mem_allocate_memory(
+		        portLibrary, rootCntrPtrSize, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 		if (NULL == rootCntrPtr) {
-			Trc_PRT_sysinfo_get_processor_info_categoryAllocFailed(PROCESSOR_COUNTER_CATEGORIES,
-					PROCESSOR_OBJECT_NAME);
+			Trc_PRT_sysinfo_get_processor_info_categoryAllocFailed(
+			        PROCESSOR_COUNTER_CATEGORIES, PROCESSOR_OBJECT_NAME);
 			portLibrary->mem_free_memory(portLibrary, procInfo->procInfoArray);
 			Trc_PRT_sysinfo_get_processor_info_Exit(OMRPORT_ERROR_SYSINFO_MEMORY_ALLOC_FAILED);
 			return OMRPORT_ERROR_SYSINFO_MEMORY_ALLOC_FAILED;
@@ -1397,7 +1390,8 @@ omrsysinfo_get_processor_info(struct OMRPortLibrary *portLibrary, struct J9Proce
 		}
 
 		/* Add the % Privilege Time - or as Windows calls - privileged time counter. */
-		rc =  AddCounter(portLibrary, statsHandle, procInfo, PROCESSOR_PRIVILEGED_TIME_COUNTER_NAME, &privilegedTimeCounter);
+		rc = AddCounter(portLibrary, statsHandle, procInfo, PROCESSOR_PRIVILEGED_TIME_COUNTER_NAME,
+		        &privilegedTimeCounter);
 		if (0 != rc) {
 			rc = OMRPORT_ERROR_SYSINFO_ERROR_READING_PROCESSOR_INFO;
 			Trc_PRT_sysinfo_get_processor_info_failedAddingCounter("System Time");
@@ -1415,7 +1409,8 @@ omrsysinfo_get_processor_info(struct OMRPortLibrary *portLibrary, struct J9Proce
 		/* Check whether the number of processors have changed since we last obtained this count and
 		 * allocated enough memory for the same.
 		 */
-		if (((int32_t)portLibrary->sysinfo_get_number_CPUs_by_type(portLibrary, OMRPORT_CPU_PHYSICAL)) == procInfo->totalProcessorCount) {
+		if (((int32_t)portLibrary->sysinfo_get_number_CPUs_by_type(portLibrary, OMRPORT_CPU_PHYSICAL))
+		        == procInfo->totalProcessorCount) {
 
 			/* Nailed it! The processor count we obtained seems to hold and thus, we have sufficient space
 			 * to forge ahead with collecting data. Collect current raw data value for all counters in the
@@ -1444,34 +1439,35 @@ omrsysinfo_get_processor_info(struct OMRPortLibrary *portLibrary, struct J9Proce
 	 */
 	for (cpuCntr = 0; cpuCntr < procInfo->totalProcessorCount + 1; cpuCntr++) {
 		status = PdhGetRawCounterValue(userTimeCounter[cpuCntr], (LPDWORD)NULL, &counterValue);
-		if ((ERROR_SUCCESS == status) &&
-			((PDH_CSTATUS_VALID_DATA == counterValue.CStatus) ||
-			 (PDH_CSTATUS_NEW_DATA == counterValue.CStatus))) {
+		if ((ERROR_SUCCESS == status)
+		        && ((PDH_CSTATUS_VALID_DATA == counterValue.CStatus)
+		                || (PDH_CSTATUS_NEW_DATA == counterValue.CStatus))) {
 			procInfo->procInfoArray[cpuCntr].userTime = counterValue.FirstValue / NS100_TO_USEC;
 		}
 
 		status = PdhGetRawCounterValue(privilegedTimeCounter[cpuCntr], (LPDWORD)NULL, &counterValue);
-		if ((ERROR_SUCCESS == status) &&
-			((PDH_CSTATUS_VALID_DATA == counterValue.CStatus) ||
-			 (PDH_CSTATUS_NEW_DATA == counterValue.CStatus))) {
+		if ((ERROR_SUCCESS == status)
+		        && ((PDH_CSTATUS_VALID_DATA == counterValue.CStatus)
+		                || (PDH_CSTATUS_NEW_DATA == counterValue.CStatus))) {
 			procInfo->procInfoArray[cpuCntr].systemTime = counterValue.FirstValue / NS100_TO_USEC;
 		}
 
 		/* On Windows we compute busy times based on system and user times, though we need add the
 		 * Processor Times counter for retrieving the processor timestamp, obtained below.
 		 */
-		procInfo->procInfoArray[cpuCntr].busyTime = procInfo->procInfoArray[cpuCntr].systemTime +
-				procInfo->procInfoArray[cpuCntr].userTime;
+		procInfo->procInfoArray[cpuCntr].busyTime = procInfo->procInfoArray[cpuCntr].systemTime
+		        + procInfo->procInfoArray[cpuCntr].userTime;
 
 		status = PdhGetRawCounterValue(idleTimeCounter[cpuCntr], (LPDWORD)NULL, &counterValue);
-		if ((ERROR_SUCCESS == status) &&
-			((PDH_CSTATUS_VALID_DATA == counterValue.CStatus) ||
-			 (PDH_CSTATUS_NEW_DATA == counterValue.CStatus))) {
+		if ((ERROR_SUCCESS == status)
+		        && ((PDH_CSTATUS_VALID_DATA == counterValue.CStatus)
+		                || (PDH_CSTATUS_NEW_DATA == counterValue.CStatus))) {
 			procInfo->procInfoArray[cpuCntr].idleTime = counterValue.FirstValue / NS100_TO_USEC;
 
 			/* Get the timestamp here itself. */
-			procInfo->timestamp = (((((uint64_t)counterValue.TimeStamp.dwHighDateTime) << 32)) |
-								   (((uint64_t)counterValue.TimeStamp.dwLowDateTime))) / NS100_TO_USEC;
+			procInfo->timestamp = (((((uint64_t)counterValue.TimeStamp.dwHighDateTime) << 32))
+			                              | (((uint64_t)counterValue.TimeStamp.dwLowDateTime)))
+			        / NS100_TO_USEC;
 		}
 
 		procInfo->procInfoArray[cpuCntr].online = OMRPORT_PROCINFO_PROC_ONLINE;
@@ -1513,7 +1509,8 @@ intptr_t
 omrsysinfo_get_cwd(struct OMRPortLibrary *portLibrary, char *buf, uintptr_t bufLen)
 {
 	DWORD pathLengthInWChars = 0;
-	wchar_t *unicodeBuffer = NULL; /* unicode version of CWD, size: pathLengthInWChars*sizeof(wchar_t) plus 1 for terminator and 1 for terminating slash if required */
+	wchar_t *unicodeBuffer = NULL; /* unicode version of CWD, size: pathLengthInWChars*sizeof(wchar_t) plus 1 for
+	                                  terminator and 1 for terminating slash if required */
 	int32_t portConvertRC = -1;
 	DWORD unicodeBufferSizeBytes = 0;
 
@@ -1521,7 +1518,8 @@ omrsysinfo_get_cwd(struct OMRPortLibrary *portLibrary, char *buf, uintptr_t bufL
 		Assert_PRT_true(0 == bufLen);
 	}
 
-	/* GetCurrentDirectoryW returns the numbers of TCHARS needed to store the string. The returned string not necessarily ends with a backslash.
+	/* GetCurrentDirectoryW returns the numbers of TCHARS needed to store the string. The returned string not
+	 * necessarily ends with a backslash.
 	 *     - seeing as we always operate on systems that support, TCHAR is in factt wchar_t
 	 *     - see "Working with Strings"  on MSDN for more information
 	 */
@@ -1539,7 +1537,8 @@ omrsysinfo_get_cwd(struct OMRPortLibrary *portLibrary, char *buf, uintptr_t bufL
 	}
 
 	/* we need a buffer to store the unicode string, as we'll use the supplied buf for the UTF8 conversion */
-	unicodeBuffer = portLibrary->mem_allocate_memory(portLibrary, unicodeBufferSizeBytes, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
+	unicodeBuffer = portLibrary->mem_allocate_memory(
+	        portLibrary, unicodeBufferSizeBytes, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 
 	if (NULL == unicodeBuffer) {
 		Trc_PRT_sysinfo_get_cwd_oome();
@@ -1579,7 +1578,8 @@ omrsysinfo_get_tmp(struct OMRPortLibrary *portLibrary, char *buf, uintptr_t bufL
 		Assert_PRT_true(0 == bufLen);
 	}
 
-	/* GetTempPathW returns the numbers of TCHARS (not including the terminating null character) needed to store string. The returned string ends with a backslash
+	/* GetTempPathW returns the numbers of TCHARS (not including the terminating null character) needed to store
+	 * string. The returned string ends with a backslash
 	 *     - seeing as we always operate on systems that support, TCHAR is in fact wchar_t
 	 *     - see "Working with Strings"  on MSDN for more information
 	 *     Note that the function does not verify that the path exists
@@ -1595,7 +1595,8 @@ omrsysinfo_get_tmp(struct OMRPortLibrary *portLibrary, char *buf, uintptr_t bufL
 	unicodeBufferSizeBytes = (pathLengthInWChars + 1) * sizeof(wchar_t);
 
 	/* we need a buffer to store the unicode string, as we'll use the supplied buf for the UTF8 conversion */
-	unicodeBuffer = portLibrary->mem_allocate_memory(portLibrary, unicodeBufferSizeBytes, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
+	unicodeBuffer = portLibrary->mem_allocate_memory(
+	        portLibrary, unicodeBufferSizeBytes, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 
 	if (NULL == unicodeBuffer) {
 		Trc_PRT_sysinfo_get_tmp_oome();
@@ -1611,7 +1612,8 @@ omrsysinfo_get_tmp(struct OMRPortLibrary *portLibrary, char *buf, uintptr_t bufL
 	}
 
 	/* convert to modified UTF-8. */
-	mutf8Size = portLibrary->str_convert(portLibrary, J9STR_CODE_WIDE, J9STR_CODE_MUTF8, (const char *) unicodeBuffer, (uintptr_t) pathLengthInWChars * sizeof(wchar_t), NULL, 0);
+	mutf8Size = portLibrary->str_convert(portLibrary, J9STR_CODE_WIDE, J9STR_CODE_MUTF8,
+	        (const char *)unicodeBuffer, (uintptr_t)pathLengthInWChars * sizeof(wchar_t), NULL, 0);
 	if (mutf8Size >= 0) {
 		mutf8Size += 1; /* leave enough space to null-terminate the string */
 		/*is buflen big enough? */
@@ -1619,7 +1621,9 @@ omrsysinfo_get_tmp(struct OMRPortLibrary *portLibrary, char *buf, uintptr_t bufL
 			portLibrary->mem_free_memory(portLibrary, unicodeBuffer);
 			return (intptr_t)mutf8Size;
 		} else {
-			mutf8Size = portLibrary->str_convert(portLibrary, J9STR_CODE_WIDE, J9STR_CODE_MUTF8, (const char *) unicodeBuffer, (uintptr_t) pathLengthInWChars * sizeof(wchar_t), buf, bufLen);
+			mutf8Size = portLibrary->str_convert(portLibrary, J9STR_CODE_WIDE, J9STR_CODE_MUTF8,
+			        (const char *)unicodeBuffer, (uintptr_t)pathLengthInWChars * sizeof(wchar_t), buf,
+			        bufLen);
 			if (mutf8Size < 0) {
 				Trc_PRT_sysinfo_get_tmp_failed_str_covert(mutf8Size);
 			}
@@ -1736,32 +1740,36 @@ omrsysinfo_is_running_in_container(struct OMRPortLibrary *portLibrary)
 }
 
 int32_t
-omrsysinfo_cgroup_subsystem_iterator_init(struct OMRPortLibrary *portLibrary, uint64_t subsystem, struct OMRCgroupMetricIteratorState *state)
+omrsysinfo_cgroup_subsystem_iterator_init(
+        struct OMRPortLibrary *portLibrary, uint64_t subsystem, struct OMRCgroupMetricIteratorState *state)
 {
 	return OMRPORT_ERROR_SYSINFO_CGROUP_UNSUPPORTED_PLATFORM;
 }
 
 BOOLEAN
-omrsysinfo_cgroup_subsystem_iterator_hasNext(struct OMRPortLibrary *portLibrary, const struct OMRCgroupMetricIteratorState *state)
+omrsysinfo_cgroup_subsystem_iterator_hasNext(
+        struct OMRPortLibrary *portLibrary, const struct OMRCgroupMetricIteratorState *state)
 {
 	return FALSE;
 }
 
 int32_t
-omrsysinfo_cgroup_subsystem_iterator_metricKey(struct OMRPortLibrary *portLibrary, const struct OMRCgroupMetricIteratorState *state, const char **metricKey)
+omrsysinfo_cgroup_subsystem_iterator_metricKey(
+        struct OMRPortLibrary *portLibrary, const struct OMRCgroupMetricIteratorState *state, const char **metricKey)
 {
 	return OMRPORT_ERROR_SYSINFO_CGROUP_SUBSYSTEM_METRIC_NOT_AVAILABLE;
 }
 
 int32_t
-omrsysinfo_cgroup_subsystem_iterator_next(struct OMRPortLibrary *portLibrary, struct OMRCgroupMetricIteratorState *state, struct OMRCgroupMetricElement *metricElement)
+omrsysinfo_cgroup_subsystem_iterator_next(struct OMRPortLibrary *portLibrary,
+        struct OMRCgroupMetricIteratorState *state, struct OMRCgroupMetricElement *metricElement)
 {
-	return OMRPORT_ERROR_SYSINFO_CGROUP_UNSUPPORTED_PLATFORM;	
+	return OMRPORT_ERROR_SYSINFO_CGROUP_UNSUPPORTED_PLATFORM;
 }
 
 void
-omrsysinfo_cgroup_subsystem_iterator_destroy(struct OMRPortLibrary *portLibrary, struct OMRCgroupMetricIteratorState *state)
+omrsysinfo_cgroup_subsystem_iterator_destroy(
+        struct OMRPortLibrary *portLibrary, struct OMRCgroupMetricIteratorState *state)
 {
 	return;
 }
-

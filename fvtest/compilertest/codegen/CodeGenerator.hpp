@@ -24,15 +24,11 @@
 
 #include "codegen/TestCodeGenerator.hpp"
 
-namespace TR
-{
-class OMR_EXTENSIBLE CodeGenerator : public ::TestCompiler::CodeGeneratorConnector
-   {
-   public:
-
-   CodeGenerator() :
-      ::TestCompiler::CodeGeneratorConnector() {}
-   };
-}
+namespace TR {
+class OMR_EXTENSIBLE CodeGenerator : public ::TestCompiler::CodeGeneratorConnector {
+public:
+	CodeGenerator() : ::TestCompiler::CodeGeneratorConnector() {}
+};
+} // namespace TR
 
 #endif

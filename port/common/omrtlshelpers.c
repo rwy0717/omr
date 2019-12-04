@@ -42,7 +42,6 @@
 #include "omrportptb.h"
 #include "omriconvhelpers.h"
 
-
 /**
  * @internal
  * @brief Per Thread Buffer Support
@@ -62,7 +61,8 @@ omrport_tls_get(struct OMRPortLibrary *portLibrary)
 	if (NULL == ptBuffers) {
 		MUTEX_ENTER(portLibrary->portGlobals->tls_mutex);
 
-		ptBuffers = portLibrary->mem_allocate_memory(portLibrary, sizeof(PortlibPTBuffers_struct), OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
+		ptBuffers = portLibrary->mem_allocate_memory(
+		        portLibrary, sizeof(PortlibPTBuffers_struct), OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 		if (NULL != ptBuffers) {
 			if (0 == omrthread_tls_set(omrthread_self(), portLibrary->portGlobals->tls_key, ptBuffers)) {
 #if defined(J9VM_PROVIDE_ICONV)
@@ -76,7 +76,8 @@ omrport_tls_get(struct OMRPortLibrary *portLibrary)
 #endif /* J9VM_PROVIDE_ICONV */
 				ptBuffers->next = portLibrary->portGlobals->buffer_list;
 				if (portLibrary->portGlobals->buffer_list) {
-					((PortlibPTBuffers_t)portLibrary->portGlobals->buffer_list)->previous = ptBuffers;
+					((PortlibPTBuffers_t)portLibrary->portGlobals->buffer_list)->previous =
+					        ptBuffers;
 				}
 				portLibrary->portGlobals->buffer_list = ptBuffers;
 			} else {
@@ -127,8 +128,8 @@ omrport_tls_free(struct OMRPortLibrary *portLibrary)
  * @brief PortLibrary startup.
  *
  * This function is called during startup of the portLibrary.  Any resources that are required for
- * the portl library thread local storage operations may be created here.  All resources created here should be destroyed
- * in @ref omrport_tls_shutdown.
+ * the portl library thread local storage operations may be created here.  All resources created here should be
+ * destroyed in @ref omrport_tls_shutdown.
  *
  * @param[in] portLibrary The port library
  *
@@ -199,4 +200,3 @@ omrport_tls_peek(struct OMRPortLibrary *portLibrary)
 {
 	return omrthread_tls_get(omrthread_self(), portLibrary->portGlobals->tls_key);
 }
-

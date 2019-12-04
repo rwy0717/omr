@@ -50,7 +50,6 @@
 
 static omrthread_library_t get_default_library(void);
 
-
 /**
  * Initialize a omrthread_monitor_walk_state_t structure used to walk the monitor pools.
  *
@@ -83,9 +82,11 @@ omrthread_monitor_init_walk(omrthread_monitor_walk_state_t *walkState)
  * these GLOBAL_* macros become nops, so no call is made to MACRO_SELF(),
  * and therefore there's no required reference to 'default_library'.
  *
- * @param[in] walkState This is a pointer to a omrthread_monitor_walk_state_t. It should be initialized using omrthread_monitor_init_walk
- * before calling omrthread_monitor_walk to start a new walk. (thread lib will be globally locked on the first call)
- * @return a pointer to a monitor, or NULL if all monitors walked (thread lib will be globally unlocked when NULL is returned).
+ * @param[in] walkState This is a pointer to a omrthread_monitor_walk_state_t. It should be initialized using
+ * omrthread_monitor_init_walk before calling omrthread_monitor_walk to start a new walk. (thread lib will be globally
+ * locked on the first call)
+ * @return a pointer to a monitor, or NULL if all monitors walked (thread lib will be globally unlocked when NULL is
+ * returned).
  *
  * @note As this is currently implemented, this must be called to walk ALL monitors. It can't
  * be used to look for a specific monitor and then quit because the GLOBAL_LOCK be taken when
@@ -191,7 +192,6 @@ omrthread_get_priority(omrthread_t thread)
 	return READU(thread->priority);
 }
 
-
 /**
  * Return a thread's flags.
  *
@@ -266,7 +266,6 @@ omrthread_get_osId(omrthread_t thread)
 	ASSERT(thread);
 	return READU(thread->tid);
 }
-
 
 /**
  * Return a monitor's name.
@@ -369,7 +368,6 @@ omrthread_monitor_get_tracing(omrthread_monitor_t monitor)
 
 #endif /* OMR_THR_JLM */
 
-
 /**
  * Return the default threading library.
  *
@@ -379,7 +377,7 @@ omrthread_monitor_get_tracing(omrthread_monitor_t monitor)
 static omrthread_library_t
 get_default_library(void)
 {
-#if defined (J9VM_OUT_OF_PROCESS)
+#if defined(J9VM_OUT_OF_PROCESS)
 	return dbgGetThreadLibrary();
 #else
 	return GLOBAL_DATA(default_library);

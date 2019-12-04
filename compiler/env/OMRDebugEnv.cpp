@@ -32,10 +32,10 @@
 
 void
 OMR::DebugEnv::breakPoint()
-   {
+{
 #if defined(LINUX) || defined(AIXPPC)
-   raise(SIGTRAP);
+	raise(SIGTRAP);
 #else
-   TR_UNIMPLEMENTED();
+	TR_UNIMPLEMENTED();
 #endif
-   }
+}

@@ -26,18 +26,13 @@
 
 struct OMRPortLibrary;
 
-class TextFile
-{
+class TextFile {
 private:
-	OMRPortLibrary * const _portLibrary;
+	OMRPortLibrary *const _portLibrary;
 	intptr_t _file;
 
 public:
-	explicit TextFile(OMRPortLibrary *portLibrary)
-		: _portLibrary(portLibrary)
-		, _file(-1)
-	{
-	}
+	explicit TextFile(OMRPortLibrary *portLibrary) : _portLibrary(portLibrary), _file(-1) {}
 
 	bool openRead(const char *filename);
 	bool readLine(std::string &line);

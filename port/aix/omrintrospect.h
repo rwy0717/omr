@@ -36,10 +36,11 @@
 
 #ifndef _AIX61
 /* These functions are system calls but are not defined in any of the system headers so we have to declare them here */
-extern int getthrds(pid_t ProcessIdentifier, struct thrdsinfo64 *ThreadBuffer, int ThreadSize, tid_t *IndexPointer, int Count);
-extern int getthrds64(pid_t ProcessIdentifier, struct thrdentry64 *ThreadBuffer, int ThreadSize, tid64_t *IndexPointer, int Count);
+extern int getthrds(
+        pid_t ProcessIdentifier, struct thrdsinfo64 *ThreadBuffer, int ThreadSize, tid_t *IndexPointer, int Count);
+extern int getthrds64(
+        pid_t ProcessIdentifier, struct thrdentry64 *ThreadBuffer, int ThreadSize, tid64_t *IndexPointer, int Count);
 #endif
-
 
 extern int32_t __omrgetsp(void);
 

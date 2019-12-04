@@ -25,8 +25,8 @@
 #include "thrdsup.h"
 #include "threadExtendedTestHelpers.hpp"
 
-#define NUM_ITERATIONS		3
-#define TIME_IN_MILLIS		500
+#define NUM_ITERATIONS 3
+#define TIME_IN_MILLIS 500
 
 /**
  * Generate CPU Load for 1 seconds

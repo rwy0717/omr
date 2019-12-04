@@ -23,10 +23,9 @@
 #if !defined(SWEEPSCHEMESEGREGATED_HPP_)
 #define SWEEPSCHEMESEGREGATED_HPP_
 
+#include "Base.hpp"
 #include "HeapLinkedFreeHeader.hpp"
 #include "MemoryPoolAggregatedCellList.hpp"
-
-#include "Base.hpp"
 
 #if defined(OMR_GC_SEGREGATED_HEAP)
 
@@ -41,8 +40,7 @@ class MM_HeapRegionDescriptorSegregated;
 class MM_MarkMap;
 class MM_MemoryPoolSegregated;
 
-class MM_SweepSchemeSegregated : public MM_BaseVirtual
-{
+class MM_SweepSchemeSegregated : public MM_BaseVirtual {
 	/*
 	 * Data members
 	 */
@@ -51,6 +49,7 @@ protected:
 	MM_MemoryPoolSegregated *_memoryPool;
 	MM_MarkMap *_markMap;
 	MM_GCExtensionsBase *_extensions;
+
 private:
 	bool _isFixHeapForWalk;
 	bool _clearMarkMapAfterSweep; /**< If a region should be unmarked after it is swept */
@@ -61,14 +60,18 @@ private:
 public:
 	static MM_SweepSchemeSegregated *newInstance(MM_EnvironmentBase *env, MM_MarkMap *markMap);
 	void kill(MM_EnvironmentBase *env);
-	
-	MM_MarkMap *getMarkMap(MM_EnvironmentBase * env);
+
+	MM_MarkMap *getMarkMap(MM_EnvironmentBase *env);
 
 	void sweep(MM_EnvironmentBase *env, MM_MemoryPoolSegregated *memoryPool, bool isFixHeapForWalk);
 	virtual void sweepRegion(MM_EnvironmentBase *env, MM_HeapRegionDescriptorSegregated *region);
 
 	bool isClearMarkMapAfterSweep() { return _clearMarkMapAfterSweep; }
-	void setClearMarkMapAfterSweep(bool clearMarkMapAfterSweep) { _clearMarkMapAfterSweep = clearMarkMapAfterSweep; }
+	void setClearMarkMapAfterSweep(bool clearMarkMapAfterSweep)
+	{
+		_clearMarkMapAfterSweep = clearMarkMapAfterSweep;
+	}
+
 protected:
 	bool initialize(MM_EnvironmentBase *env);
 	void tearDown(MM_EnvironmentBase *env);
@@ -81,17 +84,17 @@ protected:
 	/**
 	 * Create a MM_SweepSchemeSegregated object
 	 */
-	MM_SweepSchemeSegregated(MM_EnvironmentBase *env, MM_MarkMap *markMap) :
-		MM_BaseVirtual()
-		,_memoryPool(NULL)
-		,_markMap(markMap)
-		,_extensions(env->getExtensions())
-		,_isFixHeapForWalk(false)
-		,_clearMarkMapAfterSweep(true)
+	MM_SweepSchemeSegregated(MM_EnvironmentBase *env, MM_MarkMap *markMap)
+	        : MM_BaseVirtual()
+	        , _memoryPool(NULL)
+	        , _markMap(markMap)
+	        , _extensions(env->getExtensions())
+	        , _isFixHeapForWalk(false)
+	        , _clearMarkMapAfterSweep(true)
 	{
 		_typeId = __FUNCTION__;
 	};
-	
+
 private:
 	void unmarkRegion(MM_EnvironmentBase *env, MM_HeapRegionDescriptorSegregated *region);
 	void sweepSmallRegion(MM_EnvironmentBase *env, MM_HeapRegionDescriptorSegregated *region);
@@ -102,7 +105,8 @@ private:
 	void incrementalSweepLarge(MM_EnvironmentBase *env);
 	void incrementalCoalesceFreeRegions(MM_EnvironmentBase *env);
 
-	MMINLINE bool addFreeChunk(MM_MemoryPoolAggregatedCellList *memoryPoolACL, uintptr_t *freeChunk, uintptr_t freeChunkSize, uintptr_t minimumFreeEntrySize, uintptr_t freeChunkCellCount)
+	MMINLINE bool addFreeChunk(MM_MemoryPoolAggregatedCellList *memoryPoolACL, uintptr_t *freeChunk,
+	        uintptr_t freeChunkSize, uintptr_t minimumFreeEntrySize, uintptr_t freeChunkCellCount)
 	{
 		bool result = false;
 		bool const compressed = _extensions->compressObjectReferences();
@@ -147,11 +151,10 @@ private:
 	virtual bool updateSweepSmallRegionCount();
 
 	/**
-	 * Calculate the maximum number of regions of a single small region size class to sweep before proceeding to the next size class
-	 * while sweeping small regions.
+	 * Calculate the maximum number of regions of a single small region size class to sweep before proceeding to the
+	 * next size class while sweeping small regions.
 	 */
-	uintptr_t
-	calcSweepSmallRegionsPerIteration(uintptr_t numCellsPerSizeClass)
+	uintptr_t calcSweepSmallRegionsPerIteration(uintptr_t numCellsPerSizeClass)
 	{
 		uintptr_t regionCost = (SWEEP_CELL_COST * numCellsPerSizeClass) + SWEEP_REGION_COST;
 		return 8 * OMR_MAX(1, SWEEP_BUDGET / regionCost);

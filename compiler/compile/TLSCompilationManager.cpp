@@ -24,11 +24,11 @@
 #include "compile/Compilation.hpp"
 
 TR::TLSCompilationManager::TLSCompilationManager(TR::Compilation &comp)
-   {
-   tlsSet(OMR::compilation, &comp);
-   }
+{
+	tlsSet(OMR::compilation, &comp);
+}
 
 TR::TLSCompilationManager::~TLSCompilationManager()
-   {
-   tlsSet(OMR::compilation, NULL);
-   }
+{
+	tlsSet(OMR::compilation, NULL);
+}

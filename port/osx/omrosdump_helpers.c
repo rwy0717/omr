@@ -72,24 +72,23 @@ renameDump(struct OMRPortLibrary *portLibrary, char *filename, pid_t pid, int si
 	waitCoreRC = waitCore(derivedAbsoluteCorePath);
 	if (0 != waitCoreRC) {
 		/* The core file does not exist, bail */
-		portLibrary->str_printf(portLibrary,
-								filename,
-								EsMaxPath,
-								"The core file created by child process with pid = %i was not found. Expected to find core file with name \"%s\"",
-								pid,
-								derivedAbsoluteCorePath);
+		portLibrary->str_printf(portLibrary, filename, EsMaxPath,
+		        "The core file created by child process with pid = %i was not found. Expected to find core "
+		        "file with name \"%s\"",
+		        pid, derivedAbsoluteCorePath);
 		return 1;
 	}
-
 
 	/* Check that the path we found was to a regular file (not to an existing directory, pipe, symlink etc) */
 	if (0 == stat(derivedAbsoluteCorePath, &attrBuf)) {
 		if (!S_ISREG(attrBuf.st_mode)) {
-			portLibrary->nls_printf(portLibrary, J9NLS_ERROR | J9NLS_STDERR, J9NLS_PORT_DUMP_PATH_EXISTS, derivedAbsoluteCorePath);
+			portLibrary->nls_printf(portLibrary, J9NLS_ERROR | J9NLS_STDERR, J9NLS_PORT_DUMP_PATH_EXISTS,
+			        derivedAbsoluteCorePath);
 			return 1;
 		}
 	} else {
-		portLibrary->str_printf(portLibrary, filename, EsMaxPath, "Unable to read file status for core file path \"%s\"", derivedAbsoluteCorePath);
+		portLibrary->str_printf(portLibrary, filename, EsMaxPath,
+		        "Unable to read file status for core file path \"%s\"", derivedAbsoluteCorePath);
 		return 1;
 	}
 
@@ -113,15 +112,19 @@ renameDump(struct OMRPortLibrary *portLibrary, char *filename, pid_t pid, int si
 				strcat(tempPath, filename);
 			}
 			/* Message warning that the -Xdump option was not fully honoured */
-			portLibrary->tty_printf(portLibrary, "Warning: unable to move dump to \"%s\" across file systems (check kernel core_pattern). Using alternate file location \"%s\"\n",
-									filename, tempPath);
+			portLibrary->tty_printf(portLibrary,
+			        "Warning: unable to move dump to \"%s\" across file systems (check kernel "
+			        "core_pattern). Using alternate file location \"%s\"\n",
+			        filename, tempPath);
 			/* Copy the new file destination back into the supplied filename for the RAS messages */
 			strncpy(filename, tempPath, EsMaxPath);
 			renameRC = rename(derivedAbsoluteCorePath, filename);
 		}
 
 		if (0 != renameRC) {
-			portLibrary->tty_printf(portLibrary, "Attempt to rename \"%s\" to \"%s\" failed with error: %s\n", derivedAbsoluteCorePath, filename, strerror(errno));
+			portLibrary->tty_printf(portLibrary,
+			        "Attempt to rename \"%s\" to \"%s\" failed with error: %s\n", derivedAbsoluteCorePath,
+			        filename, strerror(errno));
 			return 1;
 		}
 
@@ -136,7 +139,8 @@ renameDump(struct OMRPortLibrary *portLibrary, char *filename, pid_t pid, int si
 /**
  * Wait for the core dump file to be written.
  *
- * @param[in] path	Absolute path of the expected core file, null terminated. Maximum length including null is PATH_MAX.
+ * @param[in] path	Absolute path of the expected core file, null terminated. Maximum length including null is
+ * PATH_MAX.
  *
  * @return intptr_t	0 if the file was found, otherwise 1 indicating timeout while looking for the file
  *

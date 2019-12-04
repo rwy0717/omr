@@ -27,8 +27,7 @@
 
 class EnumMember;
 
-class NamespaceUDT : public UDT
-{
+class NamespaceUDT : public UDT {
 public:
 	std::vector<UDT *> _subUDTs;
 	std::vector<Macro> _macros;
@@ -41,10 +40,10 @@ public:
 	virtual bool insertUnique(Symbol_IR *ir);
 	virtual const string &getSymbolKindName() const;
 	virtual void addMacro(Macro *macro);
-	virtual std::vector<UDT *> * getSubUDTS();
+	virtual std::vector<UDT *> *getSubUDTS();
 	virtual void renameFieldsAndMacros(const FieldOverride &fieldOverride, Type *replacementType);
 
-	bool operator==(const Type & rhs) const;
+	bool operator==(const Type &rhs) const;
 	virtual bool compareToNamespace(const NamespaceUDT &) const;
 };
 

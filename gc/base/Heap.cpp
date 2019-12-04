@@ -22,8 +22,6 @@
 
 #include "Heap.hpp"
 
-#include "j9nongenerated.h"
-
 #include "AllocationStats.hpp"
 #include "EnvironmentBase.hpp"
 #include "Forge.hpp"
@@ -33,7 +31,7 @@
 #include "HeapStats.hpp"
 #include "MemorySpace.hpp"
 #include "ModronAssertions.h"
-
+#include "j9nongenerated.h"
 #include "mmhook_common.h"
 
 /****************************************
@@ -42,22 +40,21 @@
  */
 
 void
-MM_Heap::kill(MM_EnvironmentBase* env)
+MM_Heap::kill(MM_EnvironmentBase *env)
 {
 	tearDown(env);
 	env->getForge()->free(this);
 }
 
 bool
-MM_Heap::initialize(MM_EnvironmentBase* env)
+MM_Heap::initialize(MM_EnvironmentBase *env)
 {
 	return true;
 }
 
 void
-MM_Heap::tearDown(MM_EnvironmentBase* env)
-{
-}
+MM_Heap::tearDown(MM_EnvironmentBase *env)
+{}
 
 /**
  * Reset the largest free chunk of all memorySubSpaces to 0.
@@ -65,7 +62,7 @@ MM_Heap::tearDown(MM_EnvironmentBase* env)
 void
 MM_Heap::resetLargestFreeEntry()
 {
-	MM_MemorySpace* currentMemorySpace = _memorySpaceList;
+	MM_MemorySpace *currentMemorySpace = _memorySpaceList;
 	while (currentMemorySpace) {
 		currentMemorySpace->resetLargestFreeEntry();
 		currentMemorySpace = currentMemorySpace->getNext();
@@ -73,7 +70,7 @@ MM_Heap::resetLargestFreeEntry()
 }
 
 void
-MM_Heap::registerMemorySpace(MM_MemorySpace* memorySpace)
+MM_Heap::registerMemorySpace(MM_MemorySpace *memorySpace)
 {
 	if (_memorySpaceList) {
 		_memorySpaceList->setPrevious(memorySpace);
@@ -84,10 +81,10 @@ MM_Heap::registerMemorySpace(MM_MemorySpace* memorySpace)
 }
 
 void
-MM_Heap::unregisterMemorySpace(MM_MemorySpace* memorySpace)
+MM_Heap::unregisterMemorySpace(MM_MemorySpace *memorySpace)
 {
-	MM_MemorySpace* previous;
-	MM_MemorySpace* next;
+	MM_MemorySpace *previous;
+	MM_MemorySpace *next;
 	previous = memorySpace->getPrevious();
 	next = memorySpace->getNext();
 
@@ -103,7 +100,7 @@ MM_Heap::unregisterMemorySpace(MM_MemorySpace* memorySpace)
 }
 
 void
-MM_Heap::systemGarbageCollect(MM_EnvironmentBase* env, uint32_t gcCode)
+MM_Heap::systemGarbageCollect(MM_EnvironmentBase *env, uint32_t gcCode)
 {
 	getDefaultMemorySpace()->systemGarbageCollect(env, gcCode);
 }
@@ -115,7 +112,7 @@ MM_Heap::systemGarbageCollect(MM_EnvironmentBase* env, uint32_t gcCode)
 uintptr_t
 MM_Heap::getMemorySize()
 {
-	MM_MemorySpace* currentMemorySpace;
+	MM_MemorySpace *currentMemorySpace;
 	uintptr_t memorySize;
 
 	currentMemorySpace = _memorySpaceList;
@@ -138,7 +135,7 @@ MM_Heap::getMemorySize()
 uintptr_t
 MM_Heap::getActualFreeMemorySize()
 {
-	MM_MemorySpace* currentMemorySpace;
+	MM_MemorySpace *currentMemorySpace;
 	uintptr_t freeMemory;
 
 	currentMemorySpace = _memorySpaceList;
@@ -162,7 +159,7 @@ MM_Heap::getActualFreeMemorySize()
 uintptr_t
 MM_Heap::getApproximateFreeMemorySize()
 {
-	MM_MemorySpace* currentMemorySpace;
+	MM_MemorySpace *currentMemorySpace;
 	uintptr_t freeMemory;
 
 	currentMemorySpace = _memorySpaceList;
@@ -184,7 +181,7 @@ MM_Heap::getActiveMemorySize()
 uintptr_t
 MM_Heap::getActiveMemorySize(uintptr_t includeMemoryType)
 {
-	MM_MemorySpace* currentMemorySpace;
+	MM_MemorySpace *currentMemorySpace;
 	uintptr_t memory;
 
 	currentMemorySpace = _memorySpaceList;
@@ -200,7 +197,7 @@ MM_Heap::getActiveMemorySize(uintptr_t includeMemoryType)
 uintptr_t
 MM_Heap::getActiveLOAMemorySize(uintptr_t includeMemoryType)
 {
-	MM_MemorySpace* currentMemorySpace;
+	MM_MemorySpace *currentMemorySpace;
 	uintptr_t memory;
 
 	currentMemorySpace = _memorySpaceList;
@@ -216,7 +213,7 @@ MM_Heap::getActiveLOAMemorySize(uintptr_t includeMemoryType)
 uintptr_t
 MM_Heap::getActiveSurvivorMemorySize(uintptr_t includeMemoryType)
 {
-	MM_MemorySpace* currentMemorySpace;
+	MM_MemorySpace *currentMemorySpace;
 	uintptr_t memory;
 
 	currentMemorySpace = _memorySpaceList;
@@ -232,7 +229,7 @@ MM_Heap::getActiveSurvivorMemorySize(uintptr_t includeMemoryType)
 uintptr_t
 MM_Heap::getApproximateActiveFreeSurvivorMemorySize(uintptr_t includeMemoryType)
 {
-	MM_MemorySpace* currentMemorySpace;
+	MM_MemorySpace *currentMemorySpace;
 	uintptr_t memory;
 
 	currentMemorySpace = _memorySpaceList;
@@ -244,7 +241,6 @@ MM_Heap::getApproximateActiveFreeSurvivorMemorySize(uintptr_t includeMemoryType)
 
 	return memory;
 }
-
 
 /**
  * Get the sum of all free memory currently available for allocation in all memory spaces.
@@ -271,7 +267,7 @@ MM_Heap::getActualActiveFreeMemorySize()
 uintptr_t
 MM_Heap::getActualActiveFreeMemorySize(uintptr_t includeMemoryType)
 {
-	MM_MemorySpace* currentMemorySpace;
+	MM_MemorySpace *currentMemorySpace;
 	uintptr_t freeMemory;
 
 	currentMemorySpace = _memorySpaceList;
@@ -310,7 +306,7 @@ MM_Heap::getApproximateActiveFreeMemorySize()
 uintptr_t
 MM_Heap::getApproximateActiveFreeMemorySize(uintptr_t includeMemoryType)
 {
-	MM_MemorySpace* currentMemorySpace;
+	MM_MemorySpace *currentMemorySpace;
 	uintptr_t freeMemory;
 
 	currentMemorySpace = _memorySpaceList;
@@ -324,9 +320,9 @@ MM_Heap::getApproximateActiveFreeMemorySize(uintptr_t includeMemoryType)
 }
 
 /**
- * Get the approximate sum of all free LOA memory available for allocation in all memory subspaces of the specified type.
- * This call will return an estimated count of the current size of all free memory of the specified type.  Although this
- * estimate may be accurate, it will consider defered work that may be done to increase current free memory stores.
+ * Get the approximate sum of all free LOA memory available for allocation in all memory subspaces of the specified
+ * type. This call will return an estimated count of the current size of all free memory of the specified type. Although
+ * this estimate may be accurate, it will consider defered work that may be done to increase current free memory stores.
  *
  * @param includeMemoryType memory subspace types to consider in the calculation.
  * @return the total free memory currently available for allocation from subspaces of the specified type.
@@ -334,7 +330,7 @@ MM_Heap::getApproximateActiveFreeMemorySize(uintptr_t includeMemoryType)
 uintptr_t
 MM_Heap::getApproximateActiveFreeLOAMemorySize(uintptr_t includeMemoryType)
 {
-	MM_MemorySpace* currentMemorySpace;
+	MM_MemorySpace *currentMemorySpace;
 	uintptr_t freeMemory;
 
 	currentMemorySpace = _memorySpaceList;
@@ -348,16 +344,15 @@ MM_Heap::getApproximateActiveFreeLOAMemorySize(uintptr_t includeMemoryType)
 }
 
 void
-MM_Heap::mergeHeapStats(MM_HeapStats* heapStats)
+MM_Heap::mergeHeapStats(MM_HeapStats *heapStats)
 {
 	mergeHeapStats(heapStats, (MEMORY_TYPE_OLD | MEMORY_TYPE_NEW));
 }
 
-
 void
-MM_Heap::mergeHeapStats(MM_HeapStats* heapStats, uintptr_t includeMemoryType)
+MM_Heap::mergeHeapStats(MM_HeapStats *heapStats, uintptr_t includeMemoryType)
 {
-	MM_MemorySpace* currentMemorySpace = _memorySpaceList;
+	MM_MemorySpace *currentMemorySpace = _memorySpaceList;
 
 	while (currentMemorySpace) {
 		currentMemorySpace->mergeHeapStats(heapStats, includeMemoryType);
@@ -368,7 +363,7 @@ MM_Heap::mergeHeapStats(MM_HeapStats* heapStats, uintptr_t includeMemoryType)
 void
 MM_Heap::resetHeapStatistics(bool globalCollect)
 {
-	MM_MemorySpace* currentMemorySpace;
+	MM_MemorySpace *currentMemorySpace;
 
 	currentMemorySpace = _memorySpaceList;
 	while (currentMemorySpace) {
@@ -381,9 +376,9 @@ MM_Heap::resetHeapStatistics(bool globalCollect)
  * Reset all memory sub space information before a garbage collection.
  */
 void
-MM_Heap::resetSpacesForGarbageCollect(MM_EnvironmentBase* env)
+MM_Heap::resetSpacesForGarbageCollect(MM_EnvironmentBase *env)
 {
-	MM_MemorySpace* memorySpace;
+	MM_MemorySpace *memorySpace;
 
 	memorySpace = _memorySpaceList;
 	while (memorySpace) {
@@ -397,10 +392,11 @@ MM_Heap::resetSpacesForGarbageCollect(MM_EnvironmentBase* env)
  * @note The low address is inclusive, the high address exclusive.
  */
 bool
-MM_Heap::heapAddRange(MM_EnvironmentBase* env, MM_MemorySubSpace* subspace, uintptr_t size, void* lowAddress, void* highAddress)
+MM_Heap::heapAddRange(
+        MM_EnvironmentBase *env, MM_MemorySubSpace *subspace, uintptr_t size, void *lowAddress, void *highAddress)
 {
-	MM_GCExtensionsBase* extensions = env->getExtensions();
-	MM_GlobalCollector* globalCollector = extensions->getGlobalCollector();
+	MM_GCExtensionsBase *extensions = env->getExtensions();
+	MM_GlobalCollector *globalCollector = extensions->getGlobalCollector();
 
 	bool result = true;
 	if (NULL != globalCollector) {
@@ -417,14 +413,16 @@ MM_Heap::heapAddRange(MM_EnvironmentBase* env, MM_MemorySubSpace* subspace, uint
  *
  */
 bool
-MM_Heap::heapRemoveRange(MM_EnvironmentBase* env, MM_MemorySubSpace* subspace, uintptr_t size, void* lowAddress, void* highAddress, void* lowValidAddress, void* highValidAddress)
+MM_Heap::heapRemoveRange(MM_EnvironmentBase *env, MM_MemorySubSpace *subspace, uintptr_t size, void *lowAddress,
+        void *highAddress, void *lowValidAddress, void *highValidAddress)
 {
-	MM_GCExtensionsBase* extensions = env->getExtensions();
-	MM_GlobalCollector* globalCollector = extensions->getGlobalCollector();
+	MM_GCExtensionsBase *extensions = env->getExtensions();
+	MM_GlobalCollector *globalCollector = extensions->getGlobalCollector();
 
 	bool result = true;
 	if (NULL != globalCollector) {
-		result = globalCollector->heapRemoveRange(env, subspace, size, lowAddress, highAddress, lowValidAddress, highValidAddress);
+		result = globalCollector->heapRemoveRange(
+		        env, subspace, size, lowAddress, highAddress, lowValidAddress, highValidAddress);
 	}
 	return result;
 }
@@ -433,9 +431,9 @@ MM_Heap::heapRemoveRange(MM_EnvironmentBase* env, MM_MemorySubSpace* subspace, u
  * The heap has had its memory shuffled between memory subspaces and/or memory pools.
  */
 void
-MM_Heap::heapReconfigured(MM_EnvironmentBase* env)
+MM_Heap::heapReconfigured(MM_EnvironmentBase *env)
 {
-	MM_GlobalCollector* globalCollector = env->getExtensions()->getGlobalCollector();
+	MM_GlobalCollector *globalCollector = env->getExtensions()->getGlobalCollector();
 
 	if (NULL != globalCollector) {
 		globalCollector->heapReconfigured(env);
@@ -443,10 +441,11 @@ MM_Heap::heapReconfigured(MM_EnvironmentBase* env)
 }
 
 bool
-MM_Heap::objectIsInGap(void* object)
+MM_Heap::objectIsInGap(void *object)
 {
-	/* This is only used by the split heap to check if the given object lies inside the gap between committed regions of the heap.
-	 * Most heap implementations should just inherit this implementation which returns false since they have no gaps.
+	/* This is only used by the split heap to check if the given object lies inside the gap between committed
+	 * regions of the heap. Most heap implementations should just inherit this implementation which returns false
+	 * since they have no gaps.
 	 */
 	return false;
 }
@@ -459,9 +458,9 @@ MM_Heap::objectIsInGap(void* object)
  * it changed since the last GC.
  */
 void
-MM_Heap::initializeCommonGCStartData(MM_EnvironmentBase* env, MM_CommonGCStartData* data)
+MM_Heap::initializeCommonGCStartData(MM_EnvironmentBase *env, MM_CommonGCStartData *data)
 {
-	MM_GCExtensionsBase* extensions = env->getExtensions();
+	MM_GCExtensionsBase *extensions = env->getExtensions();
 	MM_HeapStats stats;
 
 	mergeHeapStats(&stats, MEMORY_TYPE_OLD);
@@ -495,7 +494,7 @@ MM_Heap::initializeCommonGCStartData(MM_EnvironmentBase* env, MM_CommonGCStartDa
  * finished.
  */
 void
-MM_Heap::initializeCommonGCEndData(MM_EnvironmentBase* env, MM_CommonGCEndData* data)
+MM_Heap::initializeCommonGCEndData(MM_EnvironmentBase *env, MM_CommonGCEndData *data)
 {
 	MM_HeapStats stats;
 	mergeHeapStats(&stats, MEMORY_TYPE_OLD);
@@ -505,17 +504,18 @@ MM_Heap::initializeCommonGCEndData(MM_EnvironmentBase* env, MM_CommonGCEndData* 
 /**
  * Initialize the CommonGCData structure for GC start and end events
  */
-struct MM_CommonGCData*
-MM_Heap::initializeCommonGCData(MM_EnvironmentBase* env, struct MM_CommonGCData* data)
+struct MM_CommonGCData *
+MM_Heap::initializeCommonGCData(MM_EnvironmentBase *env, struct MM_CommonGCData *data)
 {
-	MM_GCExtensionsBase* extensions = env->getExtensions();
+	MM_GCExtensionsBase *extensions = env->getExtensions();
 
 	data->nurseryFreeBytes = getApproximateActiveFreeMemorySize(MEMORY_TYPE_NEW);
 	data->nurseryTotalBytes = getActiveMemorySize(MEMORY_TYPE_NEW);
 	data->tenureFreeBytes = getApproximateActiveFreeMemorySize(MEMORY_TYPE_OLD);
 	data->tenureTotalBytes = getActiveMemorySize(MEMORY_TYPE_OLD);
 	data->loaEnabled = (extensions->largeObjectArea ? 1 : 0);
-	data->tenureLOAFreeBytes = (extensions->largeObjectArea ? getApproximateActiveFreeLOAMemorySize(MEMORY_TYPE_OLD) : 0);
+	data->tenureLOAFreeBytes =
+	        (extensions->largeObjectArea ? getApproximateActiveFreeLOAMemorySize(MEMORY_TYPE_OLD) : 0);
 	data->tenureLOATotalBytes = (extensions->largeObjectArea ? getActiveLOAMemorySize(MEMORY_TYPE_OLD) : 0);
 	data->rememberedSetCount = extensions->getRememberedCount();
 	data->immortalFreeBytes = 0;
@@ -531,10 +531,10 @@ MM_Heap::initializeCommonGCData(MM_EnvironmentBase* env, struct MM_CommonGCData*
  * @return Size of the adjustable heap memory
  */
 uintptr_t
-MM_Heap::getActualSoftMxSize(MM_EnvironmentBase* env)
+MM_Heap::getActualSoftMxSize(MM_EnvironmentBase *env)
 {
 	uintptr_t actualSoftMX = 0;
-	MM_GCExtensionsBase* extensions = env->getExtensions();
+	MM_GCExtensionsBase *extensions = env->getExtensions();
 
 	if ((OMR_GC_POLICY_GENCON == env->getOmrVM()->gcPolicy) && (0 != extensions->softMx)) {
 		uintptr_t totalHeapSize = getHeapRegionManager()->getTotalHeapSize();

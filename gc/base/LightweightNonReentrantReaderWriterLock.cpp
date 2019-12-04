@@ -20,10 +20,10 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-#include <assert.h>
+#include "LightweightNonReentrantReaderWriterLock.hpp"
 
 #include "AtomicOperations.hpp"
-#include "LightweightNonReentrantReaderWriterLock.hpp"
+#include <assert.h>
 
 intptr_t
 MM_LightweightNonReentrantReaderWriterLock::initialize(uintptr_t spinCount)
@@ -35,7 +35,8 @@ MM_LightweightNonReentrantReaderWriterLock::initialize(uintptr_t spinCount)
 	_status = LWRW_READER_MODE;
 	MM_AtomicOperations::writeBarrier();
 #else /* defined(J9MODRON_USE_CUSTOM_READERWRITERLOCK) */
-	if (J9THREAD_RWMUTEX_OK != omrthread_rwmutex_init( &_rwmutex, 0, "MM_LightweightNonReentrantReaderWriterLock::_rwmutex" )) {
+	if (J9THREAD_RWMUTEX_OK
+	        != omrthread_rwmutex_init(&_rwmutex, 0, "MM_LightweightNonReentrantReaderWriterLock::_rwmutex")) {
 		ret = LWRW_FAILED_INIT;
 	}
 #endif /* defined(J9MODRON_USE_CUSTOM_READERWRITERLOCK) */
@@ -67,12 +68,13 @@ MM_LightweightNonReentrantReaderWriterLock::enterRead()
 		oldValue |= LWRW_READER_MODE;
 		/* increment reader count */
 		newValue = oldValue + LWRW_INCREMENTAL_BASE_READERS;
-		if (LWRW_MASK_WAITINGWRITERS <= (newValue&LWRW_MASK_WAITINGWRITERS)) {
+		if (LWRW_MASK_WAITINGWRITERS <= (newValue & LWRW_MASK_WAITINGWRITERS)) {
 			// reach max reader count
 			assert(false);
 		}
 
-		uint32_t retValue = MM_AtomicOperations::lockCompareExchangeU32((volatile uint32_t*)&_status, oldValue, newValue);
+		uint32_t retValue =
+		        MM_AtomicOperations::lockCompareExchangeU32((volatile uint32_t *)&_status, oldValue, newValue);
 		if (oldValue == retValue) {
 			break;
 		} else if ((LWRW_READER_MODE == (retValue & LWRW_READER_MODE)) && 0 == (retValue & LWRW_MASK_READERS)) {
@@ -82,7 +84,7 @@ MM_LightweightNonReentrantReaderWriterLock::enterRead()
 
 		MM_AtomicOperations::yieldCPU();
 		/* begin tight loop */
-		for (uintptr_t spinCount = _spinCount; spinCount > 0; spinCount--)	{
+		for (uintptr_t spinCount = _spinCount; spinCount > 0; spinCount--) {
 			MM_AtomicOperations::nop();
 		} /* end tight loop */
 	}
@@ -106,7 +108,8 @@ MM_LightweightNonReentrantReaderWriterLock::exitRead()
 		oldValue = _status;
 		/* decrement reader count */
 		newValue = oldValue - LWRW_INCREMENTAL_BASE_READERS;
-		uint32_t retValue = MM_AtomicOperations::lockCompareExchangeU32((volatile uint32_t*)&_status, oldValue, newValue);
+		uint32_t retValue =
+		        MM_AtomicOperations::lockCompareExchangeU32((volatile uint32_t *)&_status, oldValue, newValue);
 		if (oldValue == retValue) {
 			break;
 		}
@@ -129,18 +132,19 @@ MM_LightweightNonReentrantReaderWriterLock::enterWrite()
 
 	oldValue = LWRW_READER_MODE;
 	newValue = LWRW_WRITER_MODE;
-	retValue = MM_AtomicOperations::lockCompareExchangeU32((volatile uint32_t*)&_status, oldValue, newValue);
+	retValue = MM_AtomicOperations::lockCompareExchangeU32((volatile uint32_t *)&_status, oldValue, newValue);
 	if (oldValue != retValue) {
 		/* the lock is hold by readers or another writer */
 		/* increment writer waiting count */
 		do {
 			oldValue = retValue;
 			newValue = oldValue + LWRW_INCREMENTAL_BASE_WAITINGWRITERS;
-			retValue = MM_AtomicOperations::lockCompareExchangeU32((volatile uint32_t*)&_status, oldValue, newValue);
+			retValue = MM_AtomicOperations::lockCompareExchangeU32(
+			        (volatile uint32_t *)&_status, oldValue, newValue);
 		} while (oldValue != retValue);
 
 		retValue = newValue;
-		for(;;) {
+		for (;;) {
 			/* check no reader */
 			oldValue = (retValue & LWRW_MASK_READERS);
 			/* check reader mode */
@@ -149,17 +153,17 @@ MM_LightweightNonReentrantReaderWriterLock::enterWrite()
 			newValue = oldValue - LWRW_INCREMENTAL_BASE_WAITINGWRITERS;
 			/* set writer mode */
 			newValue &= LWRW_MASK_MODE;
-			retValue = MM_AtomicOperations::lockCompareExchangeU32((volatile uint32_t*)&_status, oldValue, newValue);
+			retValue = MM_AtomicOperations::lockCompareExchangeU32(
+			        (volatile uint32_t *)&_status, oldValue, newValue);
 			if (oldValue == retValue) {
 				break;
 			}
 
 			MM_AtomicOperations::yieldCPU();
 			/* begin tight loop */
-			for (uintptr_t spinCount = _spinCount; spinCount > 0; spinCount--)	{
+			for (uintptr_t spinCount = _spinCount; spinCount > 0; spinCount--) {
 				MM_AtomicOperations::nop();
 			} /* end tight loop */
-
 		}
 	}
 
@@ -184,7 +188,8 @@ MM_LightweightNonReentrantReaderWriterLock::exitWrite()
 		oldValue = _status;
 		/* back to read mode */
 		uint32_t newValue = oldValue | LWRW_READER_MODE;
-		retValue = MM_AtomicOperations::lockCompareExchangeU32((volatile uint32_t*)&_status, oldValue, newValue);
+		retValue =
+		        MM_AtomicOperations::lockCompareExchangeU32((volatile uint32_t *)&_status, oldValue, newValue);
 	} while (oldValue != retValue);
 #else /* defined(J9MODRON_USE_CUSTOM_READERWRITERLOCK) */
 	ret = omrthread_rwmutex_exit_write(_rwmutex);
@@ -192,4 +197,3 @@ MM_LightweightNonReentrantReaderWriterLock::exitWrite()
 
 	return ret;
 }
-

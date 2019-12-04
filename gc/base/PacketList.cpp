@@ -20,23 +20,24 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-#include "omr.h"
+#include "PacketList.hpp"
 
 #include "GCExtensionsBase.hpp"
 #include "LightweightNonReentrantLock.hpp"
 #include "Packet.hpp"
-#include "PacketList.hpp"
+#include "omr.h"
 
-bool 
+bool
 MM_PacketList::initialize(MM_EnvironmentBase *env)
 {
 	MM_GCExtensionsBase *extensions = env->getExtensions();
 	bool result = true;
-	
+
 	_sublistCount = extensions->packetListSplit;
 	Assert_MM_true(0 < _sublistCount);
 
-	_sublists = (struct PacketSublist *)extensions->getForge()->allocate(sizeof(struct PacketSublist) * _sublistCount, OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+	_sublists = (struct PacketSublist *)extensions->getForge()->allocate(
+	        sizeof(struct PacketSublist) * _sublistCount, OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
 	if (NULL == _sublists) {
 		result = false;
 	} else {
@@ -66,16 +67,16 @@ MM_PacketList::tearDown(MM_EnvironmentBase *env)
 	}
 }
 
-void 
+void
 MM_PacketList::pushList(MM_Packet *head, MM_Packet *tail, uintptr_t count)
 {
 	/* just push everything on the first list */
 	PacketSublist *list = &_sublists[0];
 	MM_Packet *current = head;
 	uintptr_t i;
-	
+
 	list->_lock.acquire();
-	
+
 	if (NULL == list->_head) {
 		list->_tail = tail;
 	} else {
@@ -84,7 +85,7 @@ MM_PacketList::pushList(MM_Packet *head, MM_Packet *tail, uintptr_t count)
 	tail->_next = list->_head;
 	list->_head = head;
 	incrementCount(count);
-	
+
 	for (i = 0; i < count; ++i) {
 		current->setSublistIndex(0);
 		current = current->_next;
@@ -97,11 +98,11 @@ bool
 MM_PacketList::popList(MM_Packet **head, MM_Packet **tail, uintptr_t *count)
 {
 	bool didPop = false;
-	
+
 	*head = NULL;
 	*tail = NULL;
 	*count = 0;
-	
+
 	/* acquire all of our locks */
 	for (uintptr_t i = 0; i < _sublistCount; i++) {
 		PacketSublist *list = &_sublists[i];
@@ -111,7 +112,7 @@ MM_PacketList::popList(MM_Packet **head, MM_Packet **tail, uintptr_t *count)
 	/* accumulate all of the packets into a single list */
 	for (uintptr_t i = 0; i < _sublistCount; i++) {
 		PacketSublist *list = &_sublists[i];
-	
+
 		if (NULL != list->_head) {
 			didPop = true;
 
@@ -122,21 +123,21 @@ MM_PacketList::popList(MM_Packet **head, MM_Packet **tail, uintptr_t *count)
 			}
 			Assert_MM_true(NULL != list->_tail);
 			*tail = list->_tail;
-	
+
 			list->_head = NULL;
 			list->_tail = NULL;
 		}
 	}
-	
+
 	*count = _count;
 	_count = 0;
-	
+
 	/* release all of our locks */
 	for (uintptr_t i = 0; i < _sublistCount; i++) {
 		PacketSublist *list = &_sublists[i];
 		list->_lock.release();
 	}
-	
+
 	return didPop;
 }
 
@@ -146,24 +147,24 @@ MM_PacketList::remove(MM_Packet *packetToRemove)
 	PacketSublist *list = &_sublists[packetToRemove->getSublistIndex()];
 	MM_Packet *previous = NULL;
 	MM_Packet *next = NULL;
-	
+
 	list->_lock.acquire();
-	
+
 	previous = packetToRemove->_previous;
 	next = packetToRemove->_next;
-	
+
 	if (NULL == previous) {
 		list->_head = next;
 	} else {
 		previous->_next = next;
 	}
-	
+
 	if (NULL == next) {
 		list->_tail = previous;
 	} else {
 		next->_previous = previous;
 	}
-	
+
 	decrementCount(1);
 
 	list->_lock.release();
@@ -177,15 +178,15 @@ MM_PacketList::remove(MM_Packet *packetToRemove)
  * @return head The first entry in the list
  */
 MM_Packet *
-MM_PacketList::getHead() 
+MM_PacketList::getHead()
 {
 	MM_Packet *result = NULL;
-	
+
 	/* consolidate all lists onto the first list and return its head */
 	MM_Packet *head = NULL;
 	MM_Packet *tail = NULL;
 	uintptr_t count = 0;
-	
+
 	if (popList(&head, &tail, &count)) {
 		pushList(head, tail, count);
 		result = _sublists[0]._head;
@@ -193,4 +194,3 @@ MM_PacketList::getHead()
 
 	return result;
 }
-

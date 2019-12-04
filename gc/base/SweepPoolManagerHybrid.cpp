@@ -20,9 +20,9 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-#include "omrcfg.h"
-
 #include "SweepPoolManagerHybrid.hpp"
+
+#include "omrcfg.h"
 #if defined(OMR_GC_MODRON_STANDARD)
 
 /**
@@ -33,14 +33,15 @@ MM_SweepPoolManagerHybrid *
 MM_SweepPoolManagerHybrid::newInstance(MM_EnvironmentBase *env)
 {
 	MM_SweepPoolManagerHybrid *sweepPoolManager;
-	
-	sweepPoolManager = (MM_SweepPoolManagerHybrid *)env->getForge()->allocate(sizeof(MM_SweepPoolManagerHybrid), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+
+	sweepPoolManager = (MM_SweepPoolManagerHybrid *)env->getForge()->allocate(
+	        sizeof(MM_SweepPoolManagerHybrid), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
 	if (sweepPoolManager) {
-		new(sweepPoolManager) MM_SweepPoolManagerHybrid(env);
-		if (!sweepPoolManager->initialize(env)) { 
-			sweepPoolManager->kill(env);        
-			sweepPoolManager = NULL;            
-		}                                       
+		new (sweepPoolManager) MM_SweepPoolManagerHybrid(env);
+		if (!sweepPoolManager->initialize(env)) {
+			sweepPoolManager->kill(env);
+			sweepPoolManager = NULL;
+		}
 	}
 
 	return sweepPoolManager;

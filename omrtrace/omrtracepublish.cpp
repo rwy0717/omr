@@ -45,13 +45,15 @@ publishTraceBuffer(OMR_TraceThread *currentThr, OMR_TraceBuffer *buf)
 
 	/* only publish a buffer if data has been written to it */
 	if ((bufFlags & UT_TRC_BUFFER_ACTIVE) && !(bufFlags & UT_TRC_BUFFER_NEW)) {
-		const uint32_t newFlags = (bufFlags & (~(UT_TRC_BUFFER_ACTIVE | UT_TRC_BUFFER_NEW))) | UT_TRC_BUFFER_FULL;
+		const uint32_t newFlags = (bufFlags & (~(UT_TRC_BUFFER_ACTIVE | UT_TRC_BUFFER_NEW)))
+		        | UT_TRC_BUFFER_FULL;
 		/* CAS is not needed because flags is modified only by the thread that owns the buffer */
 		buf->flags = newFlags;
 
 		omrthread_monitor_t const subscribersLock = OMR_TRACEGLOBAL(subscribersLock);
 		omrthread_monitor_enter(subscribersLock);
-		for (UtSubscription *subscription = (UtSubscription *)OMR_TRACEGLOBAL(subscribers); subscription; subscription = subscription->next) {
+		for (UtSubscription *subscription = (UtSubscription *)OMR_TRACEGLOBAL(subscribers); subscription;
+		        subscription = subscription->next) {
 			subscription->dataLength = OMR_TRACEGLOBAL(bufferSize);
 			subscription->data = &(buf->record);
 

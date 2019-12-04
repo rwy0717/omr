@@ -62,8 +62,7 @@ omrcpu_startup(struct OMRPortLibrary *portLibrary)
  */
 void
 omrcpu_shutdown(struct OMRPortLibrary *portLibrary)
-{
-}
+{}
 
 /**
  * @brief CPU Control operations.

@@ -42,7 +42,8 @@ typedef struct TestChildThreadData {
 	omr_error_t childRc;
 } TestChildThreadData;
 
-static omr_error_t startTestChildThread(OMRTestVM *testVM, OMR_VMThread *curVMThread, omrthread_t *childThread, TestChildThreadData **childData);
+static omr_error_t startTestChildThread(
+        OMRTestVM *testVM, OMR_VMThread *curVMThread, omrthread_t *childThread, TestChildThreadData **childData);
 static omr_error_t waitForTestChildThread(OMRTestVM *testVM, omrthread_t childThead, TestChildThreadData *childData);
 static int J9THREAD_PROC childThreadMain(void *entryArg);
 
@@ -58,14 +59,14 @@ TEST(RASTraceTest, TraceAgent)
 	omrthread_t childThread = NULL;
 	TestChildThreadData *childData = NULL;
 
-
 	OMRPORT_ACCESS_FROM_OMRPORT(rasTestEnv->getPortLibrary());
 	char *datDir = getTraceDatDir(rasTestEnv->_argc, (const char **)rasTestEnv->_argv);
 
 	OMRTEST_ASSERT_ERROR_NONE(omrTestVMInit(&testVM, OMRPORTLIB));
 
 	/* WARNING: This negative test leaks memory. */
-	OMRTEST_ASSERT_ERROR(omr_ras_initTraceEngine(&testVM.omrVM, "print=all:duck=quack", datDir), OMR_ERROR_ILLEGAL_ARGUMENT);
+	OMRTEST_ASSERT_ERROR(
+	        omr_ras_initTraceEngine(&testVM.omrVM, "print=all:duck=quack", datDir), OMR_ERROR_ILLEGAL_ARGUMENT);
 
 	OMRTEST_ASSERT_ERROR_NONE(omr_ras_initTraceEngine(&testVM.omrVM, "maximal=all", datDir));
 
@@ -144,11 +145,13 @@ TEST(RASTraceTest, TraceAgent)
 }
 
 static omr_error_t
-startTestChildThread(OMRTestVM *testVM, OMR_VMThread *curVMThread, omrthread_t *childThread, TestChildThreadData **childData)
+startTestChildThread(
+        OMRTestVM *testVM, OMR_VMThread *curVMThread, omrthread_t *childThread, TestChildThreadData **childData)
 {
 	omr_error_t rc = OMR_ERROR_NONE;
 	OMRPORT_ACCESS_FROM_OMRPORT(testVM->portLibrary);
-	TestChildThreadData *newChildData = (TestChildThreadData *)omrmem_allocate_memory(sizeof(*newChildData), OMRMEM_CATEGORY_VM);
+	TestChildThreadData *newChildData =
+	        (TestChildThreadData *)omrmem_allocate_memory(sizeof(*newChildData), OMRMEM_CATEGORY_VM);
 	if (NULL == newChildData) {
 		rc = OMR_ERROR_OUT_OF_NATIVE_MEMORY;
 		omrtty_printf("%s:%d ERROR: Failed to alloc newChildData\n", __FILE__, __LINE__);
@@ -167,12 +170,12 @@ startTestChildThread(OMRTestVM *testVM, OMR_VMThread *curVMThread, omrthread_t *
 	}
 
 	if (OMR_ERROR_NONE == rc) {
-		if (0 != omrthread_create_ex(
-			NULL, /* handle */
-			J9THREAD_ATTR_DEFAULT, /* attr */
-			FALSE, /* suspend */
-			childThreadMain, /* entrypoint */
-			newChildData)  /* entryarg */
+		if (0
+		        != omrthread_create_ex(NULL, /* handle */
+		                J9THREAD_ATTR_DEFAULT, /* attr */
+		                FALSE, /* suspend */
+		                childThreadMain, /* entrypoint */
+		                newChildData) /* entryarg */
 		) {
 			rc = OMR_ERROR_OUT_OF_NATIVE_MEMORY;
 			omrtty_printf("%s:%d ERROR: Failed to init shutdownCond monitor\n", __FILE__, __LINE__);

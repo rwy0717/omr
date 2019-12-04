@@ -27,8 +27,14 @@
  */
 #ifndef OMR_REGISTER_CONNECTOR
 #define OMR_REGISTER_CONNECTOR
-namespace OMR { namespace Power { class Register; } }
-namespace OMR { typedef OMR::Power::Register RegisterConnector; }
+namespace OMR {
+namespace Power {
+class Register;
+}
+} // namespace OMR
+namespace OMR {
+typedef OMR::Power::Register RegisterConnector;
+}
 #else
 #error OMR::Power::Register expected to be a primary connector, but a OMR connector is already defined
 #endif
@@ -37,58 +43,49 @@ namespace OMR { typedef OMR::Power::Register RegisterConnector; }
 
 class TR_LiveRegisterInfo;
 
-namespace OMR
-{
+namespace OMR {
 
-namespace Power
-{
+namespace Power {
 
-class OMR_EXTENSIBLE Register: public OMR::Register
-   {
-   protected:
+class OMR_EXTENSIBLE Register : public OMR::Register {
+protected:
+	Register(uint32_t f = 0) : OMR::Register(f) { _liveRegisterInfo._liveRegister = NULL; }
+	Register(TR_RegisterKinds rk) : OMR::Register(rk) { _liveRegisterInfo._liveRegister = NULL; }
+	Register(TR_RegisterKinds rk, uint16_t ar) : OMR::Register(rk, ar) { _liveRegisterInfo._liveRegister = NULL; }
 
-   Register(uint32_t f=0): OMR::Register(f) {_liveRegisterInfo._liveRegister = NULL;}
-   Register(TR_RegisterKinds rk): OMR::Register(rk)  {_liveRegisterInfo._liveRegister = NULL;}
-   Register(TR_RegisterKinds rk, uint16_t ar): OMR::Register(rk, ar) {_liveRegisterInfo._liveRegister = NULL;}
+public:
+	/*
+	 * Getter/setters
+	 */
+	TR_LiveRegisterInfo *getLiveRegisterInfo() { return _liveRegisterInfo._liveRegister; }
+	TR_LiveRegisterInfo *setLiveRegisterInfo(TR_LiveRegisterInfo *p)
+	{
+		return (_liveRegisterInfo._liveRegister = p);
+	}
 
+	uint64_t getInterference() { return _liveRegisterInfo._interference; }
+	uint64_t setInterference(uint64_t i) { return (_liveRegisterInfo._interference = i); }
 
-   public:
-   /*
-    * Getter/setters
-    */
-   TR_LiveRegisterInfo *getLiveRegisterInfo()                       {return _liveRegisterInfo._liveRegister;}
-   TR_LiveRegisterInfo *setLiveRegisterInfo(TR_LiveRegisterInfo *p) {return (_liveRegisterInfo._liveRegister = p);}
+	/*
+	 * Method for manipulating flags
+	 */
+	bool isFlippedCCR() { return _flags.testAny(FlipBranchOffThisCCR); }
+	void setFlippedCCR() { _flags.set(FlipBranchOffThisCCR); }
+	void resetFlippedCCR() { _flags.reset(FlipBranchOffThisCCR); }
 
-   uint64_t getInterference()           {return _liveRegisterInfo._interference;}
-   uint64_t setInterference(uint64_t i) {return (_liveRegisterInfo._interference = i);}
+private:
+	enum { FlipBranchOffThisCCR = 0x4000, // PPC may have swapped register positions in compare
+	};
 
+	// Both x and z also have this union but ppc uses uint64_t instead of uint32_t
+	union {
+		TR_LiveRegisterInfo *_liveRegister; // Live register entry representing this register
+		uint64_t _interference; // Real registers that interfere with this register
+	} _liveRegisterInfo;
+};
 
-   /*
-    * Method for manipulating flags
-    */
-   bool isFlippedCCR()  {return _flags.testAny(FlipBranchOffThisCCR);}
-   void setFlippedCCR() {_flags.set(FlipBranchOffThisCCR);}
-   void resetFlippedCCR() {_flags.reset(FlipBranchOffThisCCR);}
+} // namespace Power
 
-
-   private:
-
-   enum
-      {
-      FlipBranchOffThisCCR          = 0x4000, // PPC may have swapped register positions in compare
-      };
-
-   // Both x and z also have this union but ppc uses uint64_t instead of uint32_t
-   union
-      {
-      TR_LiveRegisterInfo *_liveRegister; // Live register entry representing this register
-      uint64_t             _interference; // Real registers that interfere with this register
-      } _liveRegisterInfo;
-
-   };
-
-}
-
-}
+} // namespace OMR
 
 #endif /* OMR_PPC_REGISTER_INCL */

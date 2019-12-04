@@ -29,8 +29,7 @@
 #include <stdint.h>
 #include <limits>
 
-namespace OMR
-{
+namespace OMR {
 
 inline size_t
 bytes(size_t n)

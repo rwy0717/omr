@@ -20,14 +20,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #include "MemorySubSpace.hpp"
-
-#include <string.h>
-
-#include "omrlinkedlist.h"
-#include "j9nongenerated.h"
-#include "omrport.h"
 
 #include "AllocateDescription.hpp"
 #include "EnvironmentBase.hpp"
@@ -44,6 +37,10 @@
 #include "ModronAssertions.h"
 #include "PercolateStats.hpp"
 #include "PhysicalSubArena.hpp"
+#include "j9nongenerated.h"
+#include "omrlinkedlist.h"
+#include "omrport.h"
+#include <string.h>
 
 /* OMRTODO temporary workaround to allow both ut_j9mm.h and ut_omrmm.h to be included.
  *                 Dependency on ut_j9mm.h should be removed in the future.
@@ -61,10 +58,10 @@ memorySubSpaceAsyncCallbackHandler(OMR_VMThread *omrVMThread)
 {
 	/* TODO: MultiMemorySpace - This is really once for every collector in the system */
 	MM_EnvironmentBase *env = MM_EnvironmentBase::getEnvironment(omrVMThread);
-	if(!env->isThreadScanned()) {
-		MM_MemorySpace *defaultMemorySpace =  env->getExtensions()->heap->getDefaultMemorySpace();
+	if (!env->isThreadScanned()) {
+		MM_MemorySpace *defaultMemorySpace = env->getExtensions()->heap->getDefaultMemorySpace();
 		MM_MemorySubSpace *memorySubSpaceList = defaultMemorySpace->getMemorySubSpaceList();
-		while(memorySubSpaceList) {
+		while (memorySubSpaceList) {
 			memorySubSpaceList->getCollector()->scanThread(env);
 			memorySubSpaceList = memorySubSpaceList->getNext();
 		}
@@ -74,81 +71,79 @@ memorySubSpaceAsyncCallbackHandler(OMR_VMThread *omrVMThread)
 } /* extern "C" */
 
 void
-MM_MemorySubSpace::reportSystemGCStart(MM_EnvironmentBase* env, uint32_t gcCode)
+MM_MemorySubSpace::reportSystemGCStart(MM_EnvironmentBase *env, uint32_t gcCode)
 {
 	OMRPORT_ACCESS_FROM_ENVIRONMENT(env);
 
 	Trc_OMRMM_SystemGCStart(env->getOmrVMThread(),
-						 _extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_NEW),
-						 _extensions->heap->getActiveMemorySize(MEMORY_TYPE_NEW),
-						 _extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_OLD),
-						 _extensions->heap->getActiveMemorySize(MEMORY_TYPE_OLD),
-						 (_extensions->largeObjectArea ? _extensions->heap->getApproximateActiveFreeLOAMemorySize(MEMORY_TYPE_OLD) : 0),
-						 (_extensions->largeObjectArea ? _extensions->heap->getActiveLOAMemorySize(MEMORY_TYPE_OLD) : 0));
+	        _extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_NEW),
+	        _extensions->heap->getActiveMemorySize(MEMORY_TYPE_NEW),
+	        _extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_OLD),
+	        _extensions->heap->getActiveMemorySize(MEMORY_TYPE_OLD),
+	        (_extensions->largeObjectArea
+	                        ? _extensions->heap->getApproximateActiveFreeLOAMemorySize(MEMORY_TYPE_OLD)
+	                        : 0),
+	        (_extensions->largeObjectArea ? _extensions->heap->getActiveLOAMemorySize(MEMORY_TYPE_OLD) : 0));
 	Trc_MM_SystemGCStart(env->getLanguageVMThread(),
-							 _extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_NEW),
-							 _extensions->heap->getActiveMemorySize(MEMORY_TYPE_NEW),
-							 _extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_OLD),
-							 _extensions->heap->getActiveMemorySize(MEMORY_TYPE_OLD),
-							 (_extensions->largeObjectArea ? _extensions->heap->getApproximateActiveFreeLOAMemorySize(MEMORY_TYPE_OLD) : 0),
-							 (_extensions->largeObjectArea ? _extensions->heap->getActiveLOAMemorySize(MEMORY_TYPE_OLD) : 0));
+	        _extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_NEW),
+	        _extensions->heap->getActiveMemorySize(MEMORY_TYPE_NEW),
+	        _extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_OLD),
+	        _extensions->heap->getActiveMemorySize(MEMORY_TYPE_OLD),
+	        (_extensions->largeObjectArea
+	                        ? _extensions->heap->getApproximateActiveFreeLOAMemorySize(MEMORY_TYPE_OLD)
+	                        : 0),
+	        (_extensions->largeObjectArea ? _extensions->heap->getActiveLOAMemorySize(MEMORY_TYPE_OLD) : 0));
 
-	uint64_t exclusiveAccessTimeMicros = omrtime_hires_delta(0, env->getExclusiveAccessTime(), OMRPORT_TIME_DELTA_IN_MICROSECONDS);
-	uint64_t meanExclusiveAccessIdleTimeMicros = omrtime_hires_delta(0, env->getMeanExclusiveAccessIdleTime(), OMRPORT_TIME_DELTA_IN_MICROSECONDS);
-	Trc_MM_ExclusiveAccess(env->getLanguageVMThread(),
-						   (uint32_t)(exclusiveAccessTimeMicros / 1000),
-						   (uint32_t)(exclusiveAccessTimeMicros % 1000),
-						   (uint32_t)(meanExclusiveAccessIdleTimeMicros / 1000),
-						   (uint32_t)(meanExclusiveAccessIdleTimeMicros % 1000),
-						   env->getExclusiveAccessHaltedThreads(),
-						   env->getLastExclusiveAccessResponder(),
-						   env->exclusiveAccessBeatenByOtherThread());
+	uint64_t exclusiveAccessTimeMicros =
+	        omrtime_hires_delta(0, env->getExclusiveAccessTime(), OMRPORT_TIME_DELTA_IN_MICROSECONDS);
+	uint64_t meanExclusiveAccessIdleTimeMicros =
+	        omrtime_hires_delta(0, env->getMeanExclusiveAccessIdleTime(), OMRPORT_TIME_DELTA_IN_MICROSECONDS);
+	Trc_MM_ExclusiveAccess(env->getLanguageVMThread(), (uint32_t)(exclusiveAccessTimeMicros / 1000),
+	        (uint32_t)(exclusiveAccessTimeMicros % 1000), (uint32_t)(meanExclusiveAccessIdleTimeMicros / 1000),
+	        (uint32_t)(meanExclusiveAccessIdleTimeMicros % 1000), env->getExclusiveAccessHaltedThreads(),
+	        env->getLastExclusiveAccessResponder(), env->exclusiveAccessBeatenByOtherThread());
 
 	if (J9_EVENT_IS_HOOKED(_extensions->privateHookInterface, J9HOOK_MM_PRIVATE_SYSTEM_GC_START)) {
 		MM_CommonGCStartData commonData;
 		_extensions->heap->initializeCommonGCStartData(env, &commonData);
 
-		ALWAYS_TRIGGER_J9HOOK_MM_PRIVATE_SYSTEM_GC_START(
-			_extensions->privateHookInterface,
-			env->getOmrVMThread(),
-			omrtime_hires_clock(),
-			J9HOOK_MM_PRIVATE_SYSTEM_GC_START,
-			gcCode,
-			&commonData);
+		ALWAYS_TRIGGER_J9HOOK_MM_PRIVATE_SYSTEM_GC_START(_extensions->privateHookInterface,
+		        env->getOmrVMThread(), omrtime_hires_clock(), J9HOOK_MM_PRIVATE_SYSTEM_GC_START, gcCode,
+		        &commonData);
 	}
 }
 
 void
-MM_MemorySubSpace::reportSystemGCEnd(MM_EnvironmentBase* env)
+MM_MemorySubSpace::reportSystemGCEnd(MM_EnvironmentBase *env)
 {
 	OMRPORT_ACCESS_FROM_ENVIRONMENT(env);
 
 	Trc_OMRMM_SystemGCEnd(env->getOmrVMThread(),
-					   _extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_NEW),
-					   _extensions->heap->getActiveMemorySize(MEMORY_TYPE_NEW),
-					   _extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_OLD),
-					   _extensions->heap->getActiveMemorySize(MEMORY_TYPE_OLD),
-					   (_extensions->largeObjectArea ? _extensions->heap->getApproximateActiveFreeLOAMemorySize(MEMORY_TYPE_OLD) : 0),
-					   (_extensions->largeObjectArea ? _extensions->heap->getActiveLOAMemorySize(MEMORY_TYPE_OLD) : 0));
+	        _extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_NEW),
+	        _extensions->heap->getActiveMemorySize(MEMORY_TYPE_NEW),
+	        _extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_OLD),
+	        _extensions->heap->getActiveMemorySize(MEMORY_TYPE_OLD),
+	        (_extensions->largeObjectArea
+	                        ? _extensions->heap->getApproximateActiveFreeLOAMemorySize(MEMORY_TYPE_OLD)
+	                        : 0),
+	        (_extensions->largeObjectArea ? _extensions->heap->getActiveLOAMemorySize(MEMORY_TYPE_OLD) : 0));
 	Trc_MM_SystemGCEnd(env->getLanguageVMThread(),
-						   _extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_NEW),
-						   _extensions->heap->getActiveMemorySize(MEMORY_TYPE_NEW),
-						   _extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_OLD),
-						   _extensions->heap->getActiveMemorySize(MEMORY_TYPE_OLD),
-						   (_extensions->largeObjectArea ? _extensions->heap->getApproximateActiveFreeLOAMemorySize(MEMORY_TYPE_OLD) : 0),
-						   (_extensions->largeObjectArea ? _extensions->heap->getActiveLOAMemorySize(MEMORY_TYPE_OLD) : 0));
+	        _extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_NEW),
+	        _extensions->heap->getActiveMemorySize(MEMORY_TYPE_NEW),
+	        _extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_OLD),
+	        _extensions->heap->getActiveMemorySize(MEMORY_TYPE_OLD),
+	        (_extensions->largeObjectArea
+	                        ? _extensions->heap->getApproximateActiveFreeLOAMemorySize(MEMORY_TYPE_OLD)
+	                        : 0),
+	        (_extensions->largeObjectArea ? _extensions->heap->getActiveLOAMemorySize(MEMORY_TYPE_OLD) : 0));
 
 	if (J9_EVENT_IS_HOOKED(_extensions->privateHookInterface, J9HOOK_MM_PRIVATE_SYSTEM_GC_END)) {
 		MM_CommonGCEndData commonData;
 		_extensions->heap->initializeCommonGCEndData(env, &commonData);
 
-		ALWAYS_TRIGGER_J9HOOK_MM_PRIVATE_SYSTEM_GC_END(
-			_extensions->privateHookInterface,
-			env->getOmrVMThread(),
-			omrtime_hires_clock(),
-			J9HOOK_MM_PRIVATE_SYSTEM_GC_END,
-			env->getExclusiveAccessTime(),
-			&commonData);
+		ALWAYS_TRIGGER_J9HOOK_MM_PRIVATE_SYSTEM_GC_END(_extensions->privateHookInterface, env->getOmrVMThread(),
+		        omrtime_hires_clock(), J9HOOK_MM_PRIVATE_SYSTEM_GC_END, env->getExclusiveAccessTime(),
+		        &commonData);
 	}
 }
 
@@ -156,15 +151,14 @@ MM_MemorySubSpace::reportSystemGCEnd(MM_EnvironmentBase* env)
  * Report the start of a heap expansion event through hooks.
  */
 void
-MM_MemorySubSpace::reportHeapResizeAttempt(MM_EnvironmentBase* env, uintptr_t amount, uintptr_t type)
+MM_MemorySubSpace::reportHeapResizeAttempt(MM_EnvironmentBase *env, uintptr_t amount, uintptr_t type)
 {
 	OMRPORT_ACCESS_FROM_ENVIRONMENT(env);
 
 	MM_HeapResizeStats *resizeStats = _extensions->heap->getResizeStats();
 
-	uint64_t resizeTime = (type == HEAP_EXPAND)
-						  ? resizeStats->getLastExpandTime()
-						  : resizeStats->getLastContractTime();
+	uint64_t resizeTime = (type == HEAP_EXPAND) ? resizeStats->getLastExpandTime()
+	                                            : resizeStats->getLastContractTime();
 
 	uint32_t gcTimeRatio = 0;
 
@@ -188,30 +182,18 @@ MM_MemorySubSpace::reportHeapResizeAttempt(MM_EnvironmentBase* env, uintptr_t am
 		Assert_MM_true(reason > LOA_EXPAND_LAST_RESIZE_REASON);
 	}
 
-	TRIGGER_J9HOOK_MM_PRIVATE_HEAP_RESIZE(
-		_extensions->privateHookInterface,
-		env->getOmrVMThread(),
-		omrtime_hires_clock(),
-		J9HOOK_MM_PRIVATE_HEAP_RESIZE,
-		type,
-		getTypeFlags(),
-		gcTimeRatio,
-		amount,
-		getActiveMemorySize(),
-		omrtime_hires_delta(0, resizeTime, OMRPORT_TIME_DELTA_IN_MICROSECONDS),
-		reason);
+	TRIGGER_J9HOOK_MM_PRIVATE_HEAP_RESIZE(_extensions->privateHookInterface, env->getOmrVMThread(),
+	        omrtime_hires_clock(), J9HOOK_MM_PRIVATE_HEAP_RESIZE, type, getTypeFlags(), gcTimeRatio, amount,
+	        getActiveMemorySize(), omrtime_hires_delta(0, resizeTime, OMRPORT_TIME_DELTA_IN_MICROSECONDS), reason);
 }
 
 void
-MM_MemorySubSpace::reportPercolateCollect(MM_EnvironmentBase* env)
+MM_MemorySubSpace::reportPercolateCollect(MM_EnvironmentBase *env)
 {
 	OMRPORT_ACCESS_FROM_ENVIRONMENT(env);
-	TRIGGER_J9HOOK_MM_PRIVATE_PERCOLATE_COLLECT(
-		_extensions->privateHookInterface,
-		env->getOmrVMThread(),
-		omrtime_hires_clock(),
-		J9HOOK_MM_PRIVATE_PERCOLATE_COLLECT,
-		(uintptr_t)_extensions->heap->getPercolateStats()->getLastPercolateReason());
+	TRIGGER_J9HOOK_MM_PRIVATE_PERCOLATE_COLLECT(_extensions->privateHookInterface, env->getOmrVMThread(),
+	        omrtime_hires_clock(), J9HOOK_MM_PRIVATE_PERCOLATE_COLLECT,
+	        (uintptr_t)_extensions->heap->getPercolateStats()->getLastPercolateReason());
 }
 
 /**
@@ -230,7 +212,7 @@ MM_MemorySubSpace::getMemoryPoolCount()
  * Event reporting
  */
 void
-MM_MemorySubSpace::reportAllocationFailureStart(MM_EnvironmentBase* env, MM_AllocateDescription* allocDescription)
+MM_MemorySubSpace::reportAllocationFailureStart(MM_EnvironmentBase *env, MM_AllocateDescription *allocDescription)
 {
 	OMRPORT_ACCESS_FROM_ENVIRONMENT(env);
 	generateAllocationFailureStats(env, allocDescription);
@@ -238,101 +220,95 @@ MM_MemorySubSpace::reportAllocationFailureStart(MM_EnvironmentBase* env, MM_Allo
 	env->allocationFailureStartReportIfRequired(allocDescription, getTypeFlags());
 
 	Trc_MM_AllocationFailureCycleStart(env->getLanguageVMThread(),
-									   _extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_NEW),
-									   _extensions->heap->getActiveMemorySize(MEMORY_TYPE_NEW),
-									   _extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_OLD),
-									   _extensions->heap->getActiveMemorySize(MEMORY_TYPE_OLD),
-									   (_extensions->largeObjectArea ? _extensions->heap->getApproximateActiveFreeLOAMemorySize(MEMORY_TYPE_OLD) : 0),
-									   (_extensions->largeObjectArea ? _extensions->heap->getActiveLOAMemorySize(MEMORY_TYPE_OLD) : 0),
-									   allocDescription->getBytesRequested());
+	        _extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_NEW),
+	        _extensions->heap->getActiveMemorySize(MEMORY_TYPE_NEW),
+	        _extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_OLD),
+	        _extensions->heap->getActiveMemorySize(MEMORY_TYPE_OLD),
+	        (_extensions->largeObjectArea
+	                        ? _extensions->heap->getApproximateActiveFreeLOAMemorySize(MEMORY_TYPE_OLD)
+	                        : 0),
+	        (_extensions->largeObjectArea ? _extensions->heap->getActiveLOAMemorySize(MEMORY_TYPE_OLD) : 0),
+	        allocDescription->getBytesRequested());
 
 	Trc_OMRMM_AllocationFailureCycleStart(env->getOmrVMThread(),
-		_extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_NEW),
-		_extensions->heap->getActiveMemorySize(MEMORY_TYPE_NEW),
-		_extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_OLD),
-		_extensions->heap->getActiveMemorySize(MEMORY_TYPE_OLD),
-		(_extensions->largeObjectArea ? _extensions->heap->getApproximateActiveFreeLOAMemorySize(MEMORY_TYPE_OLD) : 0),
-		(_extensions->largeObjectArea ? _extensions->heap->getActiveLOAMemorySize(MEMORY_TYPE_OLD) : 0),
-		allocDescription->getBytesRequested());
+	        _extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_NEW),
+	        _extensions->heap->getActiveMemorySize(MEMORY_TYPE_NEW),
+	        _extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_OLD),
+	        _extensions->heap->getActiveMemorySize(MEMORY_TYPE_OLD),
+	        (_extensions->largeObjectArea
+	                        ? _extensions->heap->getApproximateActiveFreeLOAMemorySize(MEMORY_TYPE_OLD)
+	                        : 0),
+	        (_extensions->largeObjectArea ? _extensions->heap->getActiveLOAMemorySize(MEMORY_TYPE_OLD) : 0),
+	        allocDescription->getBytesRequested());
 
-	uint64_t exclusiveAccessTimeMicros = omrtime_hires_delta(0, env->getExclusiveAccessTime(), OMRPORT_TIME_DELTA_IN_MICROSECONDS);
-	uint64_t meanExclusiveAccessIdleTimeMicros = omrtime_hires_delta(0, env->getMeanExclusiveAccessIdleTime(), OMRPORT_TIME_DELTA_IN_MICROSECONDS);
-	Trc_MM_ExclusiveAccess(env->getLanguageVMThread(),
-						   (uint32_t)(exclusiveAccessTimeMicros / 1000),
-						   (uint32_t)(exclusiveAccessTimeMicros % 1000),
-						   (uint32_t)(meanExclusiveAccessIdleTimeMicros / 1000),
-						   (uint32_t)(meanExclusiveAccessIdleTimeMicros % 1000),
-						   env->getExclusiveAccessHaltedThreads(),
-						   env->getLastExclusiveAccessResponder(),
-						   env->exclusiveAccessBeatenByOtherThread());
+	uint64_t exclusiveAccessTimeMicros =
+	        omrtime_hires_delta(0, env->getExclusiveAccessTime(), OMRPORT_TIME_DELTA_IN_MICROSECONDS);
+	uint64_t meanExclusiveAccessIdleTimeMicros =
+	        omrtime_hires_delta(0, env->getMeanExclusiveAccessIdleTime(), OMRPORT_TIME_DELTA_IN_MICROSECONDS);
+	Trc_MM_ExclusiveAccess(env->getLanguageVMThread(), (uint32_t)(exclusiveAccessTimeMicros / 1000),
+	        (uint32_t)(exclusiveAccessTimeMicros % 1000), (uint32_t)(meanExclusiveAccessIdleTimeMicros / 1000),
+	        (uint32_t)(meanExclusiveAccessIdleTimeMicros % 1000), env->getExclusiveAccessHaltedThreads(),
+	        env->getLastExclusiveAccessResponder(), env->exclusiveAccessBeatenByOtherThread());
 
 	if (J9_EVENT_IS_HOOKED(_extensions->privateHookInterface, J9HOOK_MM_PRIVATE_ALLOCATION_FAILURE_CYCLE_START)) {
 		MM_CommonGCStartData commonData;
 		_extensions->heap->initializeCommonGCStartData(env, &commonData);
 
-		ALWAYS_TRIGGER_J9HOOK_MM_PRIVATE_ALLOCATION_FAILURE_CYCLE_START(
-			_extensions->privateHookInterface,
-			env->getOmrVMThread(),
-			omrtime_hires_clock(),
-			J9HOOK_MM_PRIVATE_ALLOCATION_FAILURE_CYCLE_START,
-			allocDescription->getBytesRequested(),
-			&commonData,
-			getTypeFlags());
+		ALWAYS_TRIGGER_J9HOOK_MM_PRIVATE_ALLOCATION_FAILURE_CYCLE_START(_extensions->privateHookInterface,
+		        env->getOmrVMThread(), omrtime_hires_clock(), J9HOOK_MM_PRIVATE_ALLOCATION_FAILURE_CYCLE_START,
+		        allocDescription->getBytesRequested(), &commonData, getTypeFlags());
 	}
 }
 
 void
-MM_MemorySubSpace::reportAllocationFailureEnd(MM_EnvironmentBase* env)
+MM_MemorySubSpace::reportAllocationFailureEnd(MM_EnvironmentBase *env)
 {
 	OMRPORT_ACCESS_FROM_ENVIRONMENT(env);
 	Trc_MM_AllocationFailureCycleEnd(env->getLanguageVMThread(),
-									 _extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_NEW),
-									 _extensions->heap->getActiveMemorySize(MEMORY_TYPE_NEW),
-									 _extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_OLD),
-									 _extensions->heap->getActiveMemorySize(MEMORY_TYPE_OLD),
-									 (_extensions->largeObjectArea ? _extensions->heap->getApproximateActiveFreeLOAMemorySize(MEMORY_TYPE_OLD) : 0),
-									 (_extensions->largeObjectArea ? _extensions->heap->getActiveLOAMemorySize(MEMORY_TYPE_OLD) : 0));
+	        _extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_NEW),
+	        _extensions->heap->getActiveMemorySize(MEMORY_TYPE_NEW),
+	        _extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_OLD),
+	        _extensions->heap->getActiveMemorySize(MEMORY_TYPE_OLD),
+	        (_extensions->largeObjectArea
+	                        ? _extensions->heap->getApproximateActiveFreeLOAMemorySize(MEMORY_TYPE_OLD)
+	                        : 0),
+	        (_extensions->largeObjectArea ? _extensions->heap->getActiveLOAMemorySize(MEMORY_TYPE_OLD) : 0));
 
 	Trc_OMRMM_AllocationFailureCycleEnd(env->getOmrVMThread(),
-									 _extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_NEW),
-									 _extensions->heap->getActiveMemorySize(MEMORY_TYPE_NEW),
-									 _extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_OLD),
-									 _extensions->heap->getActiveMemorySize(MEMORY_TYPE_OLD),
-									 (_extensions->largeObjectArea ? _extensions->heap->getApproximateActiveFreeLOAMemorySize(MEMORY_TYPE_OLD) : 0),
-									 (_extensions->largeObjectArea ? _extensions->heap->getActiveLOAMemorySize(MEMORY_TYPE_OLD) : 0));
+	        _extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_NEW),
+	        _extensions->heap->getActiveMemorySize(MEMORY_TYPE_NEW),
+	        _extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_OLD),
+	        _extensions->heap->getActiveMemorySize(MEMORY_TYPE_OLD),
+	        (_extensions->largeObjectArea
+	                        ? _extensions->heap->getApproximateActiveFreeLOAMemorySize(MEMORY_TYPE_OLD)
+	                        : 0),
+	        (_extensions->largeObjectArea ? _extensions->heap->getActiveLOAMemorySize(MEMORY_TYPE_OLD) : 0));
 
 	if (J9_EVENT_IS_HOOKED(_extensions->privateHookInterface, J9HOOK_MM_PRIVATE_ALLOCATION_FAILURE_CYCLE_END)) {
 		MM_CommonGCEndData commonData;
 		_extensions->heap->initializeCommonGCEndData(env, &commonData);
 
-		ALWAYS_TRIGGER_J9HOOK_MM_PRIVATE_ALLOCATION_FAILURE_CYCLE_END(
-			_extensions->privateHookInterface,
-			env->getOmrVMThread(),
-			omrtime_hires_clock(),
-			J9HOOK_MM_PRIVATE_ALLOCATION_FAILURE_CYCLE_END,
-			env->getExclusiveAccessTime(),
-			getTypeFlags(),
-			&commonData);
+		ALWAYS_TRIGGER_J9HOOK_MM_PRIVATE_ALLOCATION_FAILURE_CYCLE_END(_extensions->privateHookInterface,
+		        env->getOmrVMThread(), omrtime_hires_clock(), J9HOOK_MM_PRIVATE_ALLOCATION_FAILURE_CYCLE_END,
+		        env->getExclusiveAccessTime(), getTypeFlags(), &commonData);
 	}
 }
 
 void
-MM_MemorySubSpace::reportAcquiredExclusiveToSatisfyAllocate(MM_EnvironmentBase* env, MM_AllocateDescription* allocateDescription)
+MM_MemorySubSpace::reportAcquiredExclusiveToSatisfyAllocate(
+        MM_EnvironmentBase *env, MM_AllocateDescription *allocateDescription)
 {
 	OMRPORT_ACCESS_FROM_ENVIRONMENT(env);
-	Trc_MM_AcquiredExclusiveToSatisfyAllocation(env->getLanguageVMThread(), allocateDescription->getBytesRequested(), getTypeFlags());
+	Trc_MM_AcquiredExclusiveToSatisfyAllocation(
+	        env->getLanguageVMThread(), allocateDescription->getBytesRequested(), getTypeFlags());
 
-	TRIGGER_J9HOOK_MM_PRIVATE_ACQUIRED_EXCLUSIVE_TO_SATISFY_ALLOCATION(
-		_extensions->privateHookInterface,
-		env->getOmrVMThread(),
-		omrtime_hires_clock(),
-		J9HOOK_MM_PRIVATE_ALLOCATION_FAILURE_CYCLE_START,
-		allocateDescription->getBytesRequested(),
-		getTypeFlags());
+	TRIGGER_J9HOOK_MM_PRIVATE_ACQUIRED_EXCLUSIVE_TO_SATISFY_ALLOCATION(_extensions->privateHookInterface,
+	        env->getOmrVMThread(), omrtime_hires_clock(), J9HOOK_MM_PRIVATE_ALLOCATION_FAILURE_CYCLE_START,
+	        allocateDescription->getBytesRequested(), getTypeFlags());
 }
 
 void
-MM_MemorySubSpace::registerMemorySubSpace(MM_MemorySubSpace* memorySubSpace)
+MM_MemorySubSpace::registerMemorySubSpace(MM_MemorySubSpace *memorySubSpace)
 {
 	memorySubSpace->setParent(this);
 
@@ -345,9 +321,9 @@ MM_MemorySubSpace::registerMemorySubSpace(MM_MemorySubSpace* memorySubSpace)
 }
 
 void
-MM_MemorySubSpace::unregisterMemorySubSpace(MM_MemorySubSpace* memorySubSpace)
+MM_MemorySubSpace::unregisterMemorySubSpace(MM_MemorySubSpace *memorySubSpace)
 {
-	MM_MemorySubSpace* previous, *next;
+	MM_MemorySubSpace *previous, *next;
 	previous = memorySubSpace->getPrevious();
 	next = memorySubSpace->getNext();
 
@@ -366,7 +342,7 @@ MM_MemorySubSpace::unregisterMemorySubSpace(MM_MemorySubSpace* memorySubSpace)
  * Set the owning memory space and cascade down the hierarchy.
  */
 void
-MM_MemorySubSpace::setMemorySpace(MM_MemorySpace* memorySpace)
+MM_MemorySubSpace::setMemorySpace(MM_MemorySpace *memorySpace)
 {
 	if (NULL != _physicalSubArena) {
 		_physicalSubArena->setParent(memorySpace->getPhysicalArena());
@@ -389,7 +365,8 @@ MM_MemorySubSpace::getTopLevelMemorySubSpace(uintptr_t typeFlags)
 	Assert_MM_true(typeFlags == (getTypeFlags() & typeFlags));
 	MM_MemorySubSpace *topLevelSubSpace = this;
 
-	while (topLevelSubSpace->getParent() && (typeFlags == (topLevelSubSpace->getParent()->getTypeFlags() & typeFlags))) {
+	while (topLevelSubSpace->getParent()
+	        && (typeFlags == (topLevelSubSpace->getParent()->getTypeFlags() & typeFlags))) {
 		topLevelSubSpace = topLevelSubSpace->getParent();
 	}
 
@@ -407,11 +384,11 @@ MM_MemorySubSpace::isActive()
 }
 
 /**
- * If the child subSpace is active return true, else return false. 
+ * If the child subSpace is active return true, else return false.
  * @note All subSpaces, with the exception of the semi-space, are active by default.
  */
 bool
-MM_MemorySubSpace::isChildActive(MM_MemorySubSpace* memorySubSpace)
+MM_MemorySubSpace::isChildActive(MM_MemorySubSpace *memorySubSpace)
 {
 	return true;
 }
@@ -420,7 +397,7 @@ MM_MemorySubSpace::isChildActive(MM_MemorySubSpace* memorySubSpace)
  * Initialize a memorysubspace
  */
 bool
-MM_MemorySubSpace::initialize(MM_EnvironmentBase* env)
+MM_MemorySubSpace::initialize(MM_EnvironmentBase *env)
 {
 	if (!_lock.initialize(env, &env->getExtensions()->lnrlOptions, "MM_MemorySubSpace:_lock")) {
 		return false;
@@ -450,16 +427,16 @@ MM_MemorySubSpace::initialize(MM_EnvironmentBase* env)
  * Free all internal structures and resource of the receiver, and then free the receiver itself.
  */
 void
-MM_MemorySubSpace::kill(MM_EnvironmentBase* env)
+MM_MemorySubSpace::kill(MM_EnvironmentBase *env)
 {
 	tearDown(env);
 	env->getForge()->free(this);
 }
 
 void
-MM_MemorySubSpace::tearDown(MM_EnvironmentBase* env)
+MM_MemorySubSpace::tearDown(MM_EnvironmentBase *env)
 {
-	MM_MemorySubSpace* child;
+	MM_MemorySubSpace *child;
 
 	/* Kill the subarena */
 	if (NULL != _physicalSubArena) {
@@ -476,7 +453,7 @@ MM_MemorySubSpace::tearDown(MM_EnvironmentBase* env)
 	/* Kill all children */
 	child = _children;
 	while (NULL != child) {
-		MM_MemorySubSpace* next;
+		MM_MemorySubSpace *next;
 		next = child->getNext();
 		child->kill(env);
 		child = next;
@@ -494,10 +471,10 @@ MM_MemorySubSpace::tearDown(MM_EnvironmentBase* env)
 }
 
 bool
-MM_MemorySubSpace::inflate(MM_EnvironmentBase* env)
+MM_MemorySubSpace::inflate(MM_EnvironmentBase *env)
 {
 	bool result;
-	MM_MemorySubSpace* child;
+	MM_MemorySubSpace *child;
 
 	if (_physicalSubArena && !_physicalSubArena->inflate(env)) {
 		return false;
@@ -530,7 +507,7 @@ MM_MemorySubSpace::getActiveMemoryPoolCount()
  * @note In the general case, NULL is returned.
  * @return MM_MemoryPool
  */
-MM_MemoryPool*
+MM_MemoryPool *
 MM_MemorySubSpace::getMemoryPool()
 {
 	return NULL;
@@ -538,44 +515,43 @@ MM_MemorySubSpace::getMemoryPool()
 
 /**
  * Return the memory pool associated with a given storage location.
- * @param Address of stoarge location 
+ * @param Address of stoarge location
  * @return MM_MemoryPool
  */
-MM_MemoryPool*
-MM_MemorySubSpace::getMemoryPool(void* addr)
+MM_MemoryPool *
+MM_MemorySubSpace::getMemoryPool(void *addr)
 {
 	return getMemoryPool();
 }
 
 /**
  * Return the memory pool associated with a given allocation size
- * @param Size of allocation request  
+ * @param Size of allocation request
  * @return MM_MemoryPool
  */
-MM_MemoryPool*
+MM_MemoryPool *
 MM_MemorySubSpace::getMemoryPool(uintptr_t size)
 {
 	return getMemoryPool();
 }
 
 /**
- * Return the memory pool associated with a specified range of storage locations. 
- * 
- * @param addrBase Low address in specified range  
- * @param addrTop High address in  specified range 
+ * Return the memory pool associated with a specified range of storage locations.
+ *
+ * @param addrBase Low address in specified range
+ * @param addrTop High address in  specified range
  * @param highAddr If range spans end of memory pool set to address of first byte
  * which does not belong in returned pool.
  * @return MM_MemoryPool for storage location addrBase
  */
-MM_MemoryPool*
-MM_MemorySubSpace::getMemoryPool(MM_EnvironmentBase* env, void* addrBase, void* addrTop, void*& highAddr)
+MM_MemoryPool *
+MM_MemorySubSpace::getMemoryPool(MM_EnvironmentBase *env, void *addrBase, void *addrTop, void *&highAddr)
 {
 	highAddr = NULL;
 	return getMemoryPool();
 }
 
-
-MM_LargeObjectAllocateStats*
+MM_LargeObjectAllocateStats *
 MM_MemorySubSpace::getLargeObjectAllocateStats()
 {
 	if (NULL == _children) {
@@ -590,7 +566,7 @@ MM_MemorySubSpace::getLargeObjectAllocateStats()
  * @param allocDescription the allocDescription to store the stats of
  */
 void
-MM_MemorySubSpace::generateAllocationFailureStats(MM_EnvironmentBase* env, MM_AllocateDescription* allocDescription)
+MM_MemorySubSpace::generateAllocationFailureStats(MM_EnvironmentBase *env, MM_AllocateDescription *allocDescription)
 {
 	_allocationFailureStats.subSpaceType = getTypeFlags();
 	_allocationFailureStats.allocationFailureSize = allocDescription->getBytesRequested();
@@ -612,7 +588,7 @@ MM_MemorySubSpace::getActualFreeMemorySize()
 	freeMemory = 0;
 
 	/* Call on children */
-	MM_MemorySubSpace* child;
+	MM_MemorySubSpace *child;
 	child = _children;
 	while (child) {
 		freeMemory += child->getActualFreeMemorySize();
@@ -638,7 +614,7 @@ MM_MemorySubSpace::getApproximateFreeMemorySize()
 	freeMemory = 0;
 
 	/* Call on children */
-	MM_MemorySubSpace* child;
+	MM_MemorySubSpace *child;
 	child = _children;
 	while (child) {
 		freeMemory += child->getApproximateFreeMemorySize();
@@ -662,7 +638,7 @@ MM_MemorySubSpace::getActiveMemorySize(uintptr_t includeMemoryType)
 	memory = 0;
 
 	/* Call on children */
-	MM_MemorySubSpace* child;
+	MM_MemorySubSpace *child;
 	child = _children;
 	while (child) {
 		memory += child->getActiveMemorySize(includeMemoryType);
@@ -680,7 +656,7 @@ MM_MemorySubSpace::getActiveLOAMemorySize(uintptr_t includeMemoryType)
 	memory = 0;
 
 	/* Call on children */
-	MM_MemorySubSpace* child;
+	MM_MemorySubSpace *child;
 	child = _children;
 	while (child) {
 		memory += child->getActiveLOAMemorySize(includeMemoryType);
@@ -698,7 +674,7 @@ MM_MemorySubSpace::getActiveSurvivorMemorySize(uintptr_t includeMemoryType)
 	memory = 0;
 
 	/* Call on children */
-	MM_MemorySubSpace* child;
+	MM_MemorySubSpace *child;
 	child = _children;
 	while (child) {
 		memory += child->getActiveSurvivorMemorySize(includeMemoryType);
@@ -722,9 +698,9 @@ MM_MemorySubSpace::getActualActiveFreeMemorySize()
 }
 
 /**
- * Get the sum of all free memory currently available for allocation in the subspace and its children of the specified type.
- * This call will return an accurate count of the current size of all free memory of the specified type.  It will not
- * consider defered work that may be done to increase current free memory stores.
+ * Get the sum of all free memory currently available for allocation in the subspace and its children of the specified
+ * type. This call will return an accurate count of the current size of all free memory of the specified type.  It will
+ * not consider defered work that may be done to increase current free memory stores.
  *
  * @see getApproximateActiveFreeMemorySize(uintptr_t)
  * @param includeMemoryType memory subspace types to consider in the calculation.
@@ -738,7 +714,7 @@ MM_MemorySubSpace::getActualActiveFreeMemorySize(uintptr_t includeMemoryType)
 	freeMemory = 0;
 
 	/* Call on children */
-	MM_MemorySubSpace* child;
+	MM_MemorySubSpace *child;
 	child = _children;
 	while (child) {
 		freeMemory += child->getActualActiveFreeMemorySize(includeMemoryType);
@@ -768,10 +744,9 @@ MM_MemorySubSpace::getApproximateActiveFreeSurvivorMemorySize()
 	return getApproximateActiveFreeSurvivorMemorySize(MEMORY_TYPE_NEW);
 }
 
-
 /**
- * Get the sum of all free LOA memory currently available for allocation in the subspace and its children of the specified type.
- * This call will return an estimated count of the current size of all free memory.  Although this
+ * Get the sum of all free LOA memory currently available for allocation in the subspace and its children of the
+ * specified type. This call will return an estimated count of the current size of all free memory.  Although this
  * estimate may be accurate, it will consider potential defered work that may be done to increase current
  * free memory stores.
  *
@@ -786,7 +761,7 @@ MM_MemorySubSpace::getApproximateActiveFreeLOAMemorySize(uintptr_t includeMemory
 	freeMemory = 0;
 
 	/* Call on children */
-	MM_MemorySubSpace* child;
+	MM_MemorySubSpace *child;
 	child = _children;
 	while (child) {
 		freeMemory += child->getApproximateActiveFreeLOAMemorySize(includeMemoryType);
@@ -804,7 +779,7 @@ MM_MemorySubSpace::getApproximateActiveFreeSurvivorMemorySize(uintptr_t includeM
 	freeMemory = 0;
 
 	/* Call on children */
-	MM_MemorySubSpace* child;
+	MM_MemorySubSpace *child;
 	child = _children;
 	while (child) {
 		freeMemory += child->getApproximateActiveFreeSurvivorMemorySize(includeMemoryType);
@@ -819,7 +794,7 @@ MM_MemorySubSpace::getApproximateActiveFreeSurvivorMemorySize(uintptr_t includeM
  * This call will return an estimated count of the current size of all free memory.  Although this
  * estimate may be accurate, it will consider potential defered work that may be done to increase current
  * free memory stores.
- * 
+ *
  * @see getActualActiveFreeMemorySize()
  * @return the approximate total free memory available for allocation.
  */
@@ -830,9 +805,9 @@ MM_MemorySubSpace::getApproximateActiveFreeMemorySize()
 }
 
 /**
- * Get the approximate sum of all free memory available for allocation in subspace and its children of the specified type.
- * This call will return an estimated count of the current size of all free memory of the specified type.  Although this
- * estimate may be accurate, it will consider defered work that may be done to increase current free memory stores.
+ * Get the approximate sum of all free memory available for allocation in subspace and its children of the specified
+ * type. This call will return an estimated count of the current size of all free memory of the specified type. Although
+ * this estimate may be accurate, it will consider defered work that may be done to increase current free memory stores.
  *
  * @see getActualActiveFreeMemorySize(uintptr_t)
  * @param includeMemoryType memory subspace types to consider in the calculation.
@@ -846,7 +821,7 @@ MM_MemorySubSpace::getApproximateActiveFreeMemorySize(uintptr_t includeMemoryTyp
 	freeMemory = 0;
 
 	/* Call on children */
-	MM_MemorySubSpace* child;
+	MM_MemorySubSpace *child;
 	child = _children;
 	while (child) {
 		freeMemory += child->getApproximateActiveFreeMemorySize(includeMemoryType);
@@ -861,9 +836,9 @@ MM_MemorySubSpace::getApproximateActiveFreeMemorySize(uintptr_t includeMemoryTyp
  */
 
 bool
-MM_MemorySubSpace::completeFreelistRebuildRequired(MM_EnvironmentBase* env)
+MM_MemorySubSpace::completeFreelistRebuildRequired(MM_EnvironmentBase *env)
 {
-	MM_MemorySubSpace* child = _children;
+	MM_MemorySubSpace *child = _children;
 	bool rebuildRequired = false;
 
 	while (!rebuildRequired && child) {
@@ -875,16 +850,16 @@ MM_MemorySubSpace::completeFreelistRebuildRequired(MM_EnvironmentBase* env)
 }
 
 void
-MM_MemorySubSpace::mergeHeapStats(MM_HeapStats* heapStats)
+MM_MemorySubSpace::mergeHeapStats(MM_HeapStats *heapStats)
 {
 	mergeHeapStats(heapStats, (MEMORY_TYPE_OLD | MEMORY_TYPE_NEW));
 }
 
 void
-MM_MemorySubSpace::mergeHeapStats(MM_HeapStats* heapStats, uintptr_t includeMemoryType)
+MM_MemorySubSpace::mergeHeapStats(MM_HeapStats *heapStats, uintptr_t includeMemoryType)
 {
 	/* Call on children */
-	MM_MemorySubSpace* child;
+	MM_MemorySubSpace *child;
 	child = _children;
 
 	while (child) {
@@ -897,7 +872,7 @@ void
 MM_MemorySubSpace::resetHeapStatistics(bool globalCollect)
 {
 	/* Call on children */
-	MM_MemorySubSpace* child;
+	MM_MemorySubSpace *child;
 	child = _children;
 	while (child) {
 		child->resetHeapStatistics(globalCollect);
@@ -908,14 +883,14 @@ MM_MemorySubSpace::resetHeapStatistics(bool globalCollect)
 /**
  * Return the allocation failure stats for this subSpace.
  */
-MM_AllocationFailureStats*
+MM_AllocationFailureStats *
 MM_MemorySubSpace::getAllocationFailureStats()
 {
 	return &_allocationFailureStats;
 }
 
 void
-MM_MemorySubSpace::systemGarbageCollect(MM_EnvironmentBase* env, uint32_t gcCode)
+MM_MemorySubSpace::systemGarbageCollect(MM_EnvironmentBase *env, uint32_t gcCode)
 {
 	if (_parent) {
 		_parent->systemGarbageCollect(env, gcCode);
@@ -940,37 +915,34 @@ MM_MemorySubSpace::systemGarbageCollect(MM_EnvironmentBase* env, uint32_t gcCode
 		if ((J9MMCONSTANT_EXPLICIT_GC_IDLE_GC == gcCode) && (_extensions->gcOnIdle)) {
 			OMRPORT_ACCESS_FROM_ENVIRONMENT(env);
 			uint64_t startTime = omrtime_hires_clock();
-			uintptr_t releasedBytes = _extensions->heap->getDefaultMemorySpace()->releaseFreeMemoryPages(env);
+			uintptr_t releasedBytes =
+			        _extensions->heap->getDefaultMemorySpace()->releaseFreeMemoryPages(env);
 			uint64_t endTime = omrtime_hires_clock();
-			TRIGGER_J9HOOK_MM_PRIVATE_HEAP_RESIZE(
-				_extensions->privateHookInterface,
-				env->getOmrVMThread(),
-				omrtime_hires_clock(),
-				J9HOOK_MM_PRIVATE_HEAP_RESIZE,
-				HEAP_RELEASE_FREE_PAGES,
-				getTypeFlags(),
-				/* GC Time Ratio not applicable for "release free heap pages" */
-				0, 
-				releasedBytes,
-				getActiveMemorySize(),
-				omrtime_hires_delta(startTime, endTime, OMRPORT_TIME_DELTA_IN_MICROSECONDS),
-				/* reason enum variable not applicable/used, so passing univeral value 1 = not found*/
-				1 
-				);
+			TRIGGER_J9HOOK_MM_PRIVATE_HEAP_RESIZE(_extensions->privateHookInterface, env->getOmrVMThread(),
+			        omrtime_hires_clock(), J9HOOK_MM_PRIVATE_HEAP_RESIZE, HEAP_RELEASE_FREE_PAGES,
+			        getTypeFlags(),
+			        /* GC Time Ratio not applicable for "release free heap pages" */
+			        0, releasedBytes, getActiveMemorySize(),
+			        omrtime_hires_delta(startTime, endTime, OMRPORT_TIME_DELTA_IN_MICROSECONDS),
+			        /* reason enum variable not applicable/used, so passing univeral value 1 = not found*/
+			        1);
 		}
 #endif
 	}
 }
 
 bool
-MM_MemorySubSpace::percolateGarbageCollect(MM_EnvironmentBase* env, MM_AllocateDescription* allocDescription, uint32_t gcCode)
+MM_MemorySubSpace::percolateGarbageCollect(
+        MM_EnvironmentBase *env, MM_AllocateDescription *allocDescription, uint32_t gcCode)
 {
 	Trc_MM_MemorySubSpace_percolateGarbageCollect_Entry(env->getLanguageVMThread());
 
 	if (_parent) {
 		bool result = _parent->garbageCollect(env, allocDescription, gcCode);
-		Trc_MM_MemorySubSpace_percolateGarbageCollect_Exit1(env->getLanguageVMThread(), result ? "true" : "false");
-		Trc_OMRMM_MemorySubSpace_percolateGarbageCollect_Exit1(env->getOmrVMThread(), result ? "true" : "false");
+		Trc_MM_MemorySubSpace_percolateGarbageCollect_Exit1(
+		        env->getLanguageVMThread(), result ? "true" : "false");
+		Trc_OMRMM_MemorySubSpace_percolateGarbageCollect_Exit1(
+		        env->getOmrVMThread(), result ? "true" : "false");
 		return result;
 	}
 
@@ -980,7 +952,7 @@ MM_MemorySubSpace::percolateGarbageCollect(MM_EnvironmentBase* env, MM_AllocateD
 }
 
 bool
-MM_MemorySubSpace::garbageCollect(MM_EnvironmentBase* env, MM_AllocateDescription* allocDescription, uint32_t gcCode)
+MM_MemorySubSpace::garbageCollect(MM_EnvironmentBase *env, MM_AllocateDescription *allocDescription, uint32_t gcCode)
 {
 	Trc_MM_MemorySubSpace_garbageCollect_Entry(env->getLanguageVMThread());
 
@@ -1020,7 +992,7 @@ void
 MM_MemorySubSpace::reset()
 {
 	/* Call on children */
-	MM_MemorySubSpace* child;
+	MM_MemorySubSpace *child;
 	child = _children;
 	while (child) {
 		child->reset();
@@ -1032,10 +1004,10 @@ MM_MemorySubSpace::reset()
  * As opposed to reset, which will empty out, this will fill out as if everything is free
  */
 void
-MM_MemorySubSpace::rebuildFreeList(MM_EnvironmentBase* env)
+MM_MemorySubSpace::rebuildFreeList(MM_EnvironmentBase *env)
 {
 	/* Call on children */
-	MM_MemorySubSpace* child;
+	MM_MemorySubSpace *child;
 	child = _children;
 	while (child) {
 		child->rebuildFreeList(env);
@@ -1043,10 +1015,12 @@ MM_MemorySubSpace::rebuildFreeList(MM_EnvironmentBase* env)
 	}
 }
 
-void*
-MM_MemorySubSpace::allocateGeneric(MM_EnvironmentBase* env, MM_AllocateDescription* allocateDescription, AllocationType allocationType, MM_ObjectAllocationInterface* objectAllocationInterface, MM_MemorySubSpace* attemptSubspace)
+void *
+MM_MemorySubSpace::allocateGeneric(MM_EnvironmentBase *env, MM_AllocateDescription *allocateDescription,
+        AllocationType allocationType, MM_ObjectAllocationInterface *objectAllocationInterface,
+        MM_MemorySubSpace *attemptSubspace)
 {
-	void* result = NULL;
+	void *result = NULL;
 
 	switch (allocationType) {
 	case ALLOCATION_TYPE_OBJECT:
@@ -1057,11 +1031,11 @@ MM_MemorySubSpace::allocateGeneric(MM_EnvironmentBase* env, MM_AllocateDescripti
 		break;
 #if defined(OMR_GC_THREAD_LOCAL_HEAP)
 	case ALLOCATION_TYPE_TLH:
-		result = attemptSubspace->allocateTLH(env, allocateDescription, objectAllocationInterface, this, this, false);
+		result = attemptSubspace->allocateTLH(
+		        env, allocateDescription, objectAllocationInterface, this, this, false);
 		break;
 #endif /* defined(OMR_GC_THREAD_LOCAL_HEAP) */
-	default:
-		Assert_MM_unreachable();
+	default: Assert_MM_unreachable();
 	}
 	return result;
 }
@@ -1072,7 +1046,7 @@ MM_MemorySubSpace::allocateGeneric(MM_EnvironmentBase* env, MM_AllocateDescripti
  * @note Public entry point for paying an allocation tax.
  */
 void
-MM_MemorySubSpace::payAllocationTax(MM_EnvironmentBase* env, MM_AllocateDescription* allocDescription)
+MM_MemorySubSpace::payAllocationTax(MM_EnvironmentBase *env, MM_AllocateDescription *allocDescription)
 {
 	payAllocationTax(env, this, allocDescription);
 }
@@ -1081,13 +1055,15 @@ MM_MemorySubSpace::payAllocationTax(MM_EnvironmentBase* env, MM_AllocateDescript
  * Pay the allocation tax for the mutator.
  */
 void
-MM_MemorySubSpace::payAllocationTax(MM_EnvironmentBase* env, MM_MemorySubSpace* baseSubSpace, MM_AllocateDescription* allocDescription)
+MM_MemorySubSpace::payAllocationTax(
+        MM_EnvironmentBase *env, MM_MemorySubSpace *baseSubSpace, MM_AllocateDescription *allocDescription)
 {
 	if (_extensions->payAllocationTax) {
 		if (_parent) {
 			_parent->payAllocationTax(env, baseSubSpace, allocDescription);
 		} else {
-			Assert_MM_true(_usesGlobalCollector); /* If you don't have a parent, you really should be using the global */
+			Assert_MM_true(_usesGlobalCollector); /* If you don't have a parent, you really should be using
+			                                         the global */
 			if (_usesGlobalCollector) {
 				_collector->payAllocationTax(env, this, baseSubSpace, allocDescription);
 			}
@@ -1116,7 +1092,7 @@ MM_MemorySubSpace::setResizable(bool resizable)
  * @return true if the expand size fits into the receivers limits, false otherwise.
  */
 bool
-MM_MemorySubSpace::canExpand(MM_EnvironmentBase* env, uintptr_t expandSize)
+MM_MemorySubSpace::canExpand(MM_EnvironmentBase *env, uintptr_t expandSize)
 {
 	if ((expandSize <= _maximumSize) && (_currentSize <= (_maximumSize - expandSize))) {
 		if (_parent) {
@@ -1132,7 +1108,7 @@ MM_MemorySubSpace::canExpand(MM_EnvironmentBase* env, uintptr_t expandSize)
  * @return the updated expand size
  */
 uintptr_t
-MM_MemorySubSpace::adjustExpansionWithinUserIncrement(MM_EnvironmentBase* env, uintptr_t expandSize)
+MM_MemorySubSpace::adjustExpansionWithinUserIncrement(MM_EnvironmentBase *env, uintptr_t expandSize)
 {
 	return expandSize;
 }
@@ -1144,7 +1120,7 @@ MM_MemorySubSpace::adjustExpansionWithinUserIncrement(MM_EnvironmentBase* env, u
  * @return the amount by which the receiver can expand
  */
 uintptr_t
-MM_MemorySubSpace::maxExpansion(MM_EnvironmentBase* env)
+MM_MemorySubSpace::maxExpansion(MM_EnvironmentBase *env)
 {
 	return _maximumSize - _currentSize;
 }
@@ -1156,7 +1132,7 @@ MM_MemorySubSpace::maxExpansion(MM_EnvironmentBase* env)
  * @return the amount by which the receiver can expand
  */
 uintptr_t
-MM_MemorySubSpace::maxExpansionInSpace(MM_EnvironmentBase* env)
+MM_MemorySubSpace::maxExpansionInSpace(MM_EnvironmentBase *env)
 {
 	uintptr_t max = _maximumSize - _currentSize;
 
@@ -1178,7 +1154,7 @@ MM_MemorySubSpace::maxExpansionInSpace(MM_EnvironmentBase* env)
  * @return the amount by which the receiver can contract
  */
 uintptr_t
-MM_MemorySubSpace::maxContraction(MM_EnvironmentBase* env)
+MM_MemorySubSpace::maxContraction(MM_EnvironmentBase *env)
 {
 	return _currentSize - _minimumSize;
 }
@@ -1190,7 +1166,7 @@ MM_MemorySubSpace::maxContraction(MM_EnvironmentBase* env)
  * @return the amount by which the receiver can contract
  */
 uintptr_t
-MM_MemorySubSpace::maxContractionInSpace(MM_EnvironmentBase* env)
+MM_MemorySubSpace::maxContractionInSpace(MM_EnvironmentBase *env)
 {
 	uintptr_t max = _currentSize - _minimumSize;
 
@@ -1210,7 +1186,7 @@ MM_MemorySubSpace::maxContractionInSpace(MM_EnvironmentBase* env)
  * @return Expand the memory subspace by the required amount
  */
 uintptr_t
-MM_MemorySubSpace::expand(MM_EnvironmentBase* env, uintptr_t expandSize)
+MM_MemorySubSpace::expand(MM_EnvironmentBase *env, uintptr_t expandSize)
 {
 	uintptr_t actualExpandAmount;
 	uint64_t timeStart, timeEnd;
@@ -1244,7 +1220,7 @@ MM_MemorySubSpace::expand(MM_EnvironmentBase* env, uintptr_t expandSize)
  * @return The amount by which we actually managed to contract the heap.
  */
 uintptr_t
-MM_MemorySubSpace::contract(MM_EnvironmentBase* env, uintptr_t contractSize)
+MM_MemorySubSpace::contract(MM_EnvironmentBase *env, uintptr_t contractSize)
 {
 	uint64_t timeStart, timeEnd;
 	OMRPORT_ACCESS_FROM_OMRPORT(env->getPortLibrary());
@@ -1275,7 +1251,8 @@ MM_MemorySubSpace::contract(MM_EnvironmentBase* env, uintptr_t contractSize)
  * Memory described by the range has added to the heap and been made available to the subspace as free memory.
  */
 bool
-MM_MemorySubSpace::expanded(MM_EnvironmentBase* env, MM_PhysicalSubArena* subArena, MM_HeapRegionDescriptor* region, bool canCoalesce)
+MM_MemorySubSpace::expanded(
+        MM_EnvironmentBase *env, MM_PhysicalSubArena *subArena, MM_HeapRegionDescriptor *region, bool canCoalesce)
 {
 	/* Should never get here */
 	Assert_MM_unreachable();
@@ -1287,7 +1264,8 @@ MM_MemorySubSpace::expanded(MM_EnvironmentBase* env, MM_PhysicalSubArena* subAre
  * Memory described by the range has added to the heap and been made available to the subspace as free memory.
  */
 bool
-MM_MemorySubSpace::expanded(MM_EnvironmentBase* env, MM_PhysicalSubArena* subArena, uintptr_t size, void* lowAddress, void* highAddress, bool canCoalesce)
+MM_MemorySubSpace::expanded(MM_EnvironmentBase *env, MM_PhysicalSubArena *subArena, uintptr_t size, void *lowAddress,
+        void *highAddress, bool canCoalesce)
 {
 	/* Should never get here */
 	Assert_MM_unreachable();
@@ -1302,7 +1280,8 @@ MM_MemorySubSpace::expanded(MM_EnvironmentBase* env, MM_PhysicalSubArena* subAre
  * @warn Temporary routine that should not be used.
  */
 void
-MM_MemorySubSpace::addExistingMemory(MM_EnvironmentBase* env, MM_PhysicalSubArena* subArena, uintptr_t size, void* lowAddress, void* highAddress, bool canCoalesce)
+MM_MemorySubSpace::addExistingMemory(MM_EnvironmentBase *env, MM_PhysicalSubArena *subArena, uintptr_t size,
+        void *lowAddress, void *highAddress, bool canCoalesce)
 {
 	/* Should never get here */
 	Assert_MM_unreachable();
@@ -1315,8 +1294,9 @@ MM_MemorySubSpace::addExistingMemory(MM_EnvironmentBase* env, MM_PhysicalSubAren
  * @note This is really a hack for now to explore what is needed for tilted (sliding) new spaces.
  * @warn Temporary routine that should not be used.
  */
-void*
-MM_MemorySubSpace::removeExistingMemory(MM_EnvironmentBase* env, MM_PhysicalSubArena* subArena, uintptr_t size, void* lowAddress, void* highAddress)
+void *
+MM_MemorySubSpace::removeExistingMemory(
+        MM_EnvironmentBase *env, MM_PhysicalSubArena *subArena, uintptr_t size, void *lowAddress, void *highAddress)
 {
 	/* Should never get here */
 	Assert_MM_unreachable();
@@ -1328,7 +1308,8 @@ MM_MemorySubSpace::removeExistingMemory(MM_EnvironmentBase* env, MM_PhysicalSubA
  * @note The low address is inclusive, the high address exclusive.
  */
 bool
-MM_MemorySubSpace::heapAddRange(MM_EnvironmentBase* env, MM_MemorySubSpace* subspace, uintptr_t size, void* lowAddress, void* highAddress)
+MM_MemorySubSpace::heapAddRange(
+        MM_EnvironmentBase *env, MM_MemorySubSpace *subspace, uintptr_t size, void *lowAddress, void *highAddress)
 {
 	bool result = true;
 
@@ -1351,23 +1332,29 @@ MM_MemorySubSpace::heapAddRange(MM_EnvironmentBase* env, MM_MemorySubSpace* subs
  * @note The low address is inclusive, the high address exclusive.
  * @param lowValidAddress The first valid address previous to the lowest in the heap range being removed
  * @param highValidAddress The first valid address following the highest in the heap range being removed
- * 
+ *
  */
 bool
-MM_MemorySubSpace::heapRemoveRange(MM_EnvironmentBase* env, MM_MemorySubSpace* subspace, uintptr_t size, void* lowAddress, void* highAddress, void* lowValidAddress, void* highValidAddress)
+MM_MemorySubSpace::heapRemoveRange(MM_EnvironmentBase *env, MM_MemorySubSpace *subspace, uintptr_t size,
+        void *lowAddress, void *highAddress, void *lowValidAddress, void *highValidAddress)
 {
 	bool result = true;
 
 	_currentSize -= size;
 
 	if (!_usesGlobalCollector && (NULL != _collector)) {
-		result = _collector->heapRemoveRange(env, subspace, size, lowAddress, highAddress, lowValidAddress, highValidAddress);
+		result = _collector->heapRemoveRange(
+		        env, subspace, size, lowAddress, highAddress, lowValidAddress, highValidAddress);
 	}
 
 	if (_parent) {
-		result = result && _parent->heapRemoveRange(env, subspace, size, lowAddress, highAddress, lowValidAddress, highValidAddress);
+		result = result
+		        && _parent->heapRemoveRange(
+		                env, subspace, size, lowAddress, highAddress, lowValidAddress, highValidAddress);
 	} else if (_memorySpace) {
-		result = result && _memorySpace->heapRemoveRange(env, subspace, size, lowAddress, highAddress, lowValidAddress, highValidAddress);
+		result = result
+		        && _memorySpace->heapRemoveRange(
+		                env, subspace, size, lowAddress, highAddress, lowValidAddress, highValidAddress);
 	}
 	return result;
 }
@@ -1377,10 +1364,10 @@ MM_MemorySubSpace::heapRemoveRange(MM_EnvironmentBase* env, MM_MemorySubSpace* s
  * No new memory has been added to a heap reconfiguration.  This call typically is the result
  * of having segment range changes (memory redistributed between segments) or the meaning of
  * memory changed.
- * 
+ *
  */
 void
-MM_MemorySubSpace::heapReconfigured(MM_EnvironmentBase* env)
+MM_MemorySubSpace::heapReconfigured(MM_EnvironmentBase *env)
 {
 	if (!_usesGlobalCollector && (NULL != _collector)) {
 		_collector->heapReconfigured(env);
@@ -1398,7 +1385,7 @@ MM_MemorySubSpace::heapReconfigured(MM_EnvironmentBase* env)
  * @return true if the contraction size fits into the receivers limits, false otherwise.
  */
 bool
-MM_MemorySubSpace::canContract(MM_EnvironmentBase* env, uintptr_t contractSize)
+MM_MemorySubSpace::canContract(MM_EnvironmentBase *env, uintptr_t contractSize)
 {
 	if ((contractSize < _currentSize) && (_minimumSize <= (_currentSize - contractSize))) {
 		if (_parent) {
@@ -1409,12 +1396,12 @@ MM_MemorySubSpace::canContract(MM_EnvironmentBase* env, uintptr_t contractSize)
 	return false;
 }
 
-#if defined (OMR_GC_MODRON_STANDARD)
+#if defined(OMR_GC_MODRON_STANDARD)
 /**
  * Find the free list entry whos end address matches the parameter.
- * 
+ *
  * @param addr Address to match against the high end of a free entry.
- * 
+ *
  * @return The leading address of the free entry whos top matches addr.
  */
 void *
@@ -1426,9 +1413,9 @@ MM_MemorySubSpace::findFreeEntryEndingAtAddr(MM_EnvironmentBase *env, void *addr
 
 /**
  * Find the top of the free list entry whos start address matches the parameter.
- * 
+ *
  * @param addr Address to match against the low end of a free entry.
- * 
+ *
  * @return The trailing address of the free entry whos top matches addr.
  */
 void *
@@ -1441,12 +1428,12 @@ MM_MemorySubSpace::findFreeEntryTopStartingAtAddr(MM_EnvironmentBase *env, void 
 
 /**
  * Get the length of the free chunk at top of the heap.
- * 
+ *
  * @return The length of last chunk, 0 if no free chunk at end of heap.
- * 
+ *
  */
 uintptr_t
-MM_MemorySubSpace::getAvailableContractionSize(MM_EnvironmentBase* env, MM_AllocateDescription* allocDescription)
+MM_MemorySubSpace::getAvailableContractionSize(MM_EnvironmentBase *env, MM_AllocateDescription *allocDescription)
 {
 	Assert_MM_unreachable();
 	return 0;
@@ -1457,22 +1444,24 @@ MM_MemorySubSpace::getAvailableContractionSize(MM_EnvironmentBase* env, MM_Alloc
  * @return Length of free chunk at top of heap, or 0 if chunk at top of heap not free
  */
 uintptr_t
-MM_MemorySubSpace::getAvailableContractionSizeForRangeEndingAt(MM_EnvironmentBase* env, MM_AllocateDescription* allocDescription, void* lowAddr, void* highAddr)
+MM_MemorySubSpace::getAvailableContractionSizeForRangeEndingAt(
+        MM_EnvironmentBase *env, MM_AllocateDescription *allocDescription, void *lowAddr, void *highAddr)
 {
-	MM_MemoryPool* memoryPool = getMemoryPool((highAddr > lowAddr) ? (void*)(((uintptr_t)highAddr) - 1) : highAddr);
+	MM_MemoryPool *memoryPool =
+	        getMemoryPool((highAddr > lowAddr) ? (void *)(((uintptr_t)highAddr) - 1) : highAddr);
 
 	Assert_MM_true(NULL != memoryPool); /* How did we get here? */
 	return memoryPool->getAvailableContractionSizeForRangeEndingAt(env, allocDescription, lowAddr, highAddr);
 }
 
-#if defined (OMR_GC_MODRON_STANDARD)
+#if defined(OMR_GC_MODRON_STANDARD)
 /**
  * Find the address of the first entry on free list entry
  *
  * @return The address of head of free chain
  */
-void*
-MM_MemorySubSpace::getFirstFreeStartingAddr(MM_EnvironmentBase* env)
+void *
+MM_MemorySubSpace::getFirstFreeStartingAddr(MM_EnvironmentBase *env)
 {
 	Assert_MM_unreachable();
 	return NULL;
@@ -1483,8 +1472,8 @@ MM_MemorySubSpace::getFirstFreeStartingAddr(MM_EnvironmentBase* env)
  *
  * @return The address of next free entry or NULL
  */
-void*
-MM_MemorySubSpace::getNextFreeStartingAddr(MM_EnvironmentBase* env, void* currentFree)
+void *
+MM_MemorySubSpace::getNextFreeStartingAddr(MM_EnvironmentBase *env, void *currentFree)
 {
 	Assert_MM_unreachable();
 	return NULL;
@@ -1499,7 +1488,7 @@ MM_MemorySubSpace::getNextFreeStartingAddr(MM_EnvironmentBase* env, void* curren
  *
  */
 void
-MM_MemorySubSpace::moveHeap(MM_EnvironmentBase* env, void* srcBase, void* srcTop, void* dstBase)
+MM_MemorySubSpace::moveHeap(MM_EnvironmentBase *env, void *srcBase, void *srcTop, void *dstBase)
 {
 	Assert_MM_unreachable();
 }
@@ -1512,7 +1501,8 @@ MM_MemorySubSpace::moveHeap(MM_EnvironmentBase* env, void* srcBase, void* srcTop
  * @return the actual amount being expanded
  */
 uintptr_t
-MM_MemorySubSpace::collectorExpand(MM_EnvironmentBase* env, MM_Collector* requestCollector, MM_AllocateDescription* allocDescription)
+MM_MemorySubSpace::collectorExpand(
+        MM_EnvironmentBase *env, MM_Collector *requestCollector, MM_AllocateDescription *allocDescription)
 {
 	/* unless overloaded, a subspace does not get expanded by a collector */
 	return 0;
@@ -1525,9 +1515,8 @@ MM_MemorySubSpace::collectorExpand(MM_EnvironmentBase* env, MM_Collector* reques
  *
  */
 void
-MM_MemorySubSpace::checkResize(MM_EnvironmentBase* env, MM_AllocateDescription* allocDescription, bool _systemGC)
-{
-}
+MM_MemorySubSpace::checkResize(MM_EnvironmentBase *env, MM_AllocateDescription *allocDescription, bool _systemGC)
+{}
 
 /**
  * Perform the resize of the subspace, based on decisions made by checkResize
@@ -1535,7 +1524,7 @@ MM_MemorySubSpace::checkResize(MM_EnvironmentBase* env, MM_AllocateDescription* 
  * @return amount of the resize (negative for contract, positive for expand)
  */
 intptr_t
-MM_MemorySubSpace::performResize(MM_EnvironmentBase* env, MM_AllocateDescription* allocDescription)
+MM_MemorySubSpace::performResize(MM_EnvironmentBase *env, MM_AllocateDescription *allocDescription)
 {
 	return 0;
 }
@@ -1544,8 +1533,9 @@ MM_MemorySubSpace::performResize(MM_EnvironmentBase* env, MM_AllocateDescription
  * Internal Allocation.
  * @todo Provide class documentation
  */
-void*
-MM_MemorySubSpace::collectorAllocate(MM_EnvironmentBase* env, MM_Collector* requestCollector, MM_AllocateDescription* allocDescription)
+void *
+MM_MemorySubSpace::collectorAllocate(
+        MM_EnvironmentBase *env, MM_Collector *requestCollector, MM_AllocateDescription *allocDescription)
 {
 	/* Should not be called */
 	Assert_MM_unreachable();
@@ -1557,8 +1547,9 @@ MM_MemorySubSpace::collectorAllocate(MM_EnvironmentBase* env, MM_Collector* requ
  * Internal Allocation.
  * @todo Provide class documentation
  */
-void*
-MM_MemorySubSpace::collectorAllocateTLH(MM_EnvironmentBase* env, MM_Collector* requestCollector, MM_AllocateDescription* allocDescription, uintptr_t maximumBytesRequired, void*& addrBase, void*& addrTop)
+void *
+MM_MemorySubSpace::collectorAllocateTLH(MM_EnvironmentBase *env, MM_Collector *requestCollector,
+        MM_AllocateDescription *allocDescription, uintptr_t maximumBytesRequired, void *&addrBase, void *&addrTop)
 {
 	/* Should not be called */
 	Assert_MM_unreachable();
@@ -1570,10 +1561,10 @@ MM_MemorySubSpace::collectorAllocateTLH(MM_EnvironmentBase* env, MM_Collector* r
  * Broadcast to allow subspaces that allocation of new TLH's is to be resumed
  */
 void
-MM_MemorySubSpace::setAllocateAtSafePointOnly(MM_EnvironmentBase* env, bool safePoint)
+MM_MemorySubSpace::setAllocateAtSafePointOnly(MM_EnvironmentBase *env, bool safePoint)
 {
 	/* Call on children */
-	MM_MemorySubSpace* child;
+	MM_MemorySubSpace *child;
 	child = _children;
 
 	while (child) {
@@ -1588,8 +1579,8 @@ MM_MemorySubSpace::setAllocateAtSafePointOnly(MM_EnvironmentBase* env, bool safe
 void
 MM_MemorySubSpace::resetLargestFreeEntry()
 {
-	MM_MemorySubSpace* child = _children;
-	MM_MemoryPool* memoryPool = getMemoryPool();
+	MM_MemorySubSpace *child = _children;
+	MM_MemoryPool *memoryPool = getMemoryPool();
 
 	if (NULL != memoryPool) {
 		memoryPool->resetLargestFreeEntry();
@@ -1602,7 +1593,7 @@ MM_MemorySubSpace::resetLargestFreeEntry()
 }
 
 void
-MM_MemorySubSpace::recycleRegion(MM_EnvironmentBase* env, MM_HeapRegionDescriptor* region)
+MM_MemorySubSpace::recycleRegion(MM_EnvironmentBase *env, MM_HeapRegionDescriptor *region)
 {
 	/* Should have been implemented */
 	Assert_MM_unreachable();
@@ -1613,7 +1604,7 @@ MM_MemorySubSpace::recycleRegion(MM_EnvironmentBase* env, MM_HeapRegionDescripto
  * found during Sweep phase of global collect.
  */
 uintptr_t
-MM_MemorySubSpace::findLargestFreeEntry(MM_EnvironmentBase* env, MM_AllocateDescription* allocateDescription)
+MM_MemorySubSpace::findLargestFreeEntry(MM_EnvironmentBase *env, MM_AllocateDescription *allocateDescription)
 {
 	uintptr_t largestFreeEntry = 0;
 	uintptr_t maximumLargestFreeEntry = 0;
@@ -1621,7 +1612,7 @@ MM_MemorySubSpace::findLargestFreeEntry(MM_EnvironmentBase* env, MM_AllocateDesc
 	/*If memory type of MSS appropriate and...  */
 	if (!allocateDescription->getTenuredFlag() || (MEMORY_TYPE_OLD == (getTypeFlags() & MEMORY_TYPE_OLD))) {
 
-		MM_MemoryPool* memoryPool = getMemoryPool();
+		MM_MemoryPool *memoryPool = getMemoryPool();
 
 		/* ..subspace is allocatable and has a memory pool */
 		if (_isAllocatable && memoryPool) {
@@ -1630,7 +1621,7 @@ MM_MemorySubSpace::findLargestFreeEntry(MM_EnvironmentBase* env, MM_AllocateDesc
 	}
 
 	/* Call on children */
-	MM_MemorySubSpace* child = _children;
+	MM_MemorySubSpace *child = _children;
 	while (child) {
 		largestFreeEntry = child->findLargestFreeEntry(env, allocateDescription);
 		maximumLargestFreeEntry = OMR_MAX(largestFreeEntry, maximumLargestFreeEntry);
@@ -1648,7 +1639,7 @@ MM_MemorySubSpace::findLargestFreeEntry(MM_EnvironmentBase* env, MM_AllocateDesc
  * @return the adjusted contract size that is allowed to the receiver.
  */
 uintptr_t
-MM_MemorySubSpace::counterBalanceContract(MM_EnvironmentBase* env, uintptr_t contractSize, uintptr_t contractAlignment)
+MM_MemorySubSpace::counterBalanceContract(MM_EnvironmentBase *env, uintptr_t contractSize, uintptr_t contractAlignment)
 {
 	if (NULL != _parent) {
 		return _parent->counterBalanceContract(env, this, this, contractSize, contractAlignment);
@@ -1658,21 +1649,22 @@ MM_MemorySubSpace::counterBalanceContract(MM_EnvironmentBase* env, uintptr_t con
 
 /**
  * Counter balance a contract.
- * React to a pending contract of the the given subspace by possibly adjusted (expanding) other subspaces to fill minimum
- * quotas, etc.
- * The generic implementation consists of limiting the contraction to set limits.  Override to allow sibling of the
- * contracting subspace to fill any quotas.
+ * React to a pending contract of the the given subspace by possibly adjusted (expanding) other subspaces to fill
+ * minimum quotas, etc. The generic implementation consists of limiting the contraction to set limits.  Override to
+ * allow sibling of the contracting subspace to fill any quotas.
  * @return the adjusted contract size that is allowed to the receiver.
  */
 uintptr_t
-MM_MemorySubSpace::counterBalanceContract(MM_EnvironmentBase* env, MM_MemorySubSpace* previousSubSpace, MM_MemorySubSpace* contractSubSpace, uintptr_t contractSize, uintptr_t contractAlignment)
+MM_MemorySubSpace::counterBalanceContract(MM_EnvironmentBase *env, MM_MemorySubSpace *previousSubSpace,
+        MM_MemorySubSpace *contractSubSpace, uintptr_t contractSize, uintptr_t contractAlignment)
 {
 	uintptr_t adjustedContractSize;
 
 	adjustedContractSize = OMR_MIN(contractSize, maxContraction(env));
 
 	if ((adjustedContractSize != 0) && (NULL != _parent)) {
-		return _parent->counterBalanceContract(env, this, contractSubSpace, adjustedContractSize, contractAlignment);
+		return _parent->counterBalanceContract(
+		        env, this, contractSubSpace, adjustedContractSize, contractAlignment);
 	}
 
 	return adjustedContractSize;
@@ -1680,14 +1672,14 @@ MM_MemorySubSpace::counterBalanceContract(MM_EnvironmentBase* env, MM_MemorySubS
 
 /**
  * Counter balance a contract with an expand.
- * React to a pending contract of a subspace by expanding to filling the remaining quota with the expand request.  The expand request size can
- * be adjusted to be lower.
+ * React to a pending contract of a subspace by expanding to filling the remaining quota with the expand request.  The
+ * expand request size can be adjusted to be lower.
  * @todo adjusting the expand size may have an effect on the virtual addresses - needs to be addressed.
  * @return the adjusted contract size based on the expand that was possible.
  */
 uintptr_t
-MM_MemorySubSpace::counterBalanceContractWithExpand(MM_EnvironmentBase* env, MM_MemorySubSpace* previousSubSpace, MM_MemorySubSpace* contractSubSpace,
-													uintptr_t contractSize, uintptr_t contractAlignment, uintptr_t expandSize)
+MM_MemorySubSpace::counterBalanceContractWithExpand(MM_EnvironmentBase *env, MM_MemorySubSpace *previousSubSpace,
+        MM_MemorySubSpace *contractSubSpace, uintptr_t contractSize, uintptr_t contractAlignment, uintptr_t expandSize)
 {
 	if (NULL != _physicalSubArena) {
 		uintptr_t maximumExpandSize;
@@ -1703,15 +1695,20 @@ MM_MemorySubSpace::counterBalanceContractWithExpand(MM_EnvironmentBase* env, MM_
 		if (maximumExpandSize < adjustedExpandSize) {
 			uintptr_t expandSizeDelta;
 
-			/* The expand request is too large - reduce the amount while keeping the contraction alignment in mind */
-			expandSizeDelta = MM_Math::roundToCeiling(contractAlignment, adjustedExpandSize - maximumExpandSize);
+			/* The expand request is too large - reduce the amount while keeping the contraction alignment
+			 * in mind */
+			expandSizeDelta =
+			        MM_Math::roundToCeiling(contractAlignment, adjustedExpandSize - maximumExpandSize);
 
-			/* If the adjusted expand request has been reduced to 0, then we cannot expand.  Adjust the contraction size to account
-			 * for the lack of an expand, and return the value.  The expandSizeDelta can be increased through rounding to be
-			 * greater than the adjustedExpandSize (hence the >= check)
+			/* If the adjusted expand request has been reduced to 0, then we cannot expand.  Adjust the
+			 * contraction size to account for the lack of an expand, and return the value.  The
+			 * expandSizeDelta can be increased through rounding to be greater than the adjustedExpandSize
+			 * (hence the >= check)
 			 */
 			if (expandSizeDelta >= adjustedExpandSize) {
-				adjustedContractSize = (adjustedContractSize > adjustedExpandSize) ? adjustedContractSize - adjustedExpandSize : 0;
+				adjustedContractSize = (adjustedContractSize > adjustedExpandSize)
+				        ? adjustedContractSize - adjustedExpandSize
+				        : 0;
 				return MM_Math::roundToFloor(contractAlignment, adjustedContractSize);
 			}
 
@@ -1725,11 +1722,14 @@ MM_MemorySubSpace::counterBalanceContractWithExpand(MM_EnvironmentBase* env, MM_
 		/* Check with the PSA for the adjusted counter balance expand size (physical memory restrictions) */
 		uintptr_t psaExpandSize;
 
-		psaExpandSize = _physicalSubArena->checkCounterBalanceExpand(env, contractAlignment, adjustedExpandSize);
+		psaExpandSize =
+		        _physicalSubArena->checkCounterBalanceExpand(env, contractAlignment, adjustedExpandSize);
 		Assert_MM_true(psaExpandSize <= adjustedExpandSize);
 		if (0 == psaExpandSize) {
 			/* No room for expansion, return the adjusted contract size */
-			adjustedContractSize = (adjustedContractSize > adjustedExpandSize) ? adjustedContractSize - adjustedExpandSize : 0;
+			adjustedContractSize = (adjustedContractSize > adjustedExpandSize)
+			        ? adjustedContractSize - adjustedExpandSize
+			        : 0;
 			return MM_Math::roundToFloor(contractAlignment, adjustedContractSize);
 		}
 
@@ -1755,7 +1755,8 @@ MM_MemorySubSpace::counterBalanceContractWithExpand(MM_EnvironmentBase* env, MM_
  * @todo Should the chaining algorithm not put things at the end of the list?
  */
 void
-MM_MemorySubSpace::enqueueCounterBalanceExpand(MM_EnvironmentBase* env, MM_MemorySubSpace* subSpace, uintptr_t expandSize)
+MM_MemorySubSpace::enqueueCounterBalanceExpand(
+        MM_EnvironmentBase *env, MM_MemorySubSpace *subSpace, uintptr_t expandSize)
 {
 	/* Set the counter balancing mode of the subspace */
 	subSpace->_counterBalanceType = MODRON_COUNTER_BALANCE_TYPE_EXPAND;
@@ -1771,14 +1772,14 @@ MM_MemorySubSpace::enqueueCounterBalanceExpand(MM_EnvironmentBase* env, MM_Memor
  * receiver.
  */
 void
-MM_MemorySubSpace::triggerEnqueuedCounterBalancing(MM_EnvironmentBase* env)
+MM_MemorySubSpace::triggerEnqueuedCounterBalancing(MM_EnvironmentBase *env)
 {
-	MM_MemorySubSpace* subSpace;
+	MM_MemorySubSpace *subSpace;
 
 	subSpace = _counterBalanceChainHead;
 
 	while (subSpace) {
-		MM_MemorySubSpace* tmpNext;
+		MM_MemorySubSpace *tmpNext;
 		subSpace->runEnqueuedCounterBalancing(env);
 		tmpNext = subSpace->_counterBalanceChain;
 		subSpace->clearCounterBalancing();
@@ -1794,14 +1795,14 @@ MM_MemorySubSpace::triggerEnqueuedCounterBalancing(MM_EnvironmentBase* env)
  * balance has been decided upon (the resulting size change is unacceptable by the receiver).
  */
 void
-MM_MemorySubSpace::clearEnqueuedCounterBalancing(MM_EnvironmentBase* env)
+MM_MemorySubSpace::clearEnqueuedCounterBalancing(MM_EnvironmentBase *env)
 {
-	MM_MemorySubSpace* subSpace;
+	MM_MemorySubSpace *subSpace;
 
 	subSpace = _counterBalanceChainHead;
 
 	while (subSpace) {
-		MM_MemorySubSpace* tmpNext;
+		MM_MemorySubSpace *tmpNext;
 		tmpNext = subSpace->_counterBalanceChain;
 		subSpace->clearCounterBalancing();
 		subSpace = tmpNext;
@@ -1814,7 +1815,7 @@ MM_MemorySubSpace::clearEnqueuedCounterBalancing(MM_EnvironmentBase* env)
  * Run the counter balancing measures of the receiver.
  */
 void
-MM_MemorySubSpace::runEnqueuedCounterBalancing(MM_EnvironmentBase* env)
+MM_MemorySubSpace::runEnqueuedCounterBalancing(MM_EnvironmentBase *env)
 {
 	OMRPORT_ACCESS_FROM_OMRPORT(env->getPortLibrary());
 
@@ -1837,9 +1838,7 @@ MM_MemorySubSpace::runEnqueuedCounterBalancing(MM_EnvironmentBase* env)
 			}
 
 			break;
-		default:
-			Assert_MM_unreachable();
-			break;
+		default: Assert_MM_unreachable(); break;
 		}
 	}
 }
@@ -1853,7 +1852,7 @@ MM_MemorySubSpace::runEnqueuedCounterBalancing(MM_EnvironmentBase* env)
  * @return True if the pool was replenished with a free entry that can satisfy the size, false otherwise.
  */
 bool
-MM_MemorySubSpace::replenishPoolForAllocate(MM_EnvironmentBase* env, MM_MemoryPool* memoryPool, uintptr_t size)
+MM_MemorySubSpace::replenishPoolForAllocate(MM_EnvironmentBase *env, MM_MemoryPool *memoryPool, uintptr_t size)
 {
 	/* If we have no parent, we're the top most subspace, see if the (global) collector can help us */
 	if (NULL == _parent) {
@@ -1873,9 +1872,9 @@ MM_MemorySubSpace::replenishPoolForAllocate(MM_EnvironmentBase* env, MM_MemoryPo
  * @return true if the given subspace is a descendant of the receiver, false otherwise.
  */
 bool
-MM_MemorySubSpace::isDescendant(MM_MemorySubSpace* memorySubSpace)
+MM_MemorySubSpace::isDescendant(MM_MemorySubSpace *memorySubSpace)
 {
-	MM_MemorySubSpace* currentSubSpace;
+	MM_MemorySubSpace *currentSubSpace;
 
 	currentSubSpace = memorySubSpace;
 	do {
@@ -1900,7 +1899,7 @@ MM_MemorySubSpace::isPartOfSemiSpace()
 }
 
 void
-MM_MemorySubSpace::registerRegion(MM_HeapRegionDescriptor* region)
+MM_MemorySubSpace::registerRegion(MM_HeapRegionDescriptor *region)
 {
 	lockRegionList();
 
@@ -1910,7 +1909,7 @@ MM_MemorySubSpace::registerRegion(MM_HeapRegionDescriptor* region)
 }
 
 void
-MM_MemorySubSpace::unregisterRegion(MM_HeapRegionDescriptor* region)
+MM_MemorySubSpace::unregisterRegion(MM_HeapRegionDescriptor *region)
 {
 	lockRegionList();
 
@@ -1931,20 +1930,20 @@ MM_MemorySubSpace::unlockRegionList()
 	_lock.release();
 }
 
-MM_HeapRegionDescriptor*
+MM_HeapRegionDescriptor *
 MM_MemorySubSpace::getFirstRegion()
 {
 	return _regionList;
 }
 
-MM_HeapRegionDescriptor*
-MM_MemorySubSpace::getNextRegion(MM_HeapRegionDescriptor* region)
+MM_HeapRegionDescriptor *
+MM_MemorySubSpace::getNextRegion(MM_HeapRegionDescriptor *region)
 {
 	return region->_nextRegionInSubSpace;
 }
 
-MM_HeapRegionDescriptor*
-MM_MemorySubSpace::selectRegionForContraction(MM_EnvironmentBase* env, uintptr_t numaNode)
+MM_HeapRegionDescriptor *
+MM_MemorySubSpace::selectRegionForContraction(MM_EnvironmentBase *env, uintptr_t numaNode)
 {
 	Assert_MM_unreachable();
 	return NULL;
@@ -1958,9 +1957,9 @@ MM_MemorySubSpace::wasContractedThisGC(uintptr_t gcCount)
 
 #if defined(OMR_GC_IDLE_HEAP_MANAGER)
 uintptr_t
-MM_MemorySubSpace::releaseFreeMemoryPages(MM_EnvironmentBase* env)
+MM_MemorySubSpace::releaseFreeMemoryPages(MM_EnvironmentBase *env)
 {
 	Assert_MM_unreachable();
-        return 0;
+	return 0;
 }
 #endif

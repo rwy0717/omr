@@ -51,12 +51,8 @@ replaceAll(string str, const string &subStr, const string &newStr)
 }
 
 JavaSupersetGenerator::JavaSupersetGenerator(bool printEmptyTypes)
-	: _file(0)
-	, _portLibrary(NULL)
-	, _printEmptyTypes(printEmptyTypes)
-	, _pendingTypeHeading()
-{
-}
+        : _file(0), _portLibrary(NULL), _printEmptyTypes(printEmptyTypes), _pendingTypeHeading()
+{}
 
 void
 JavaSupersetGenerator::convertJ9BaseTypedef(Type *type, string *typeName)
@@ -102,21 +98,25 @@ JavaSupersetGenerator::replaceBaseTypedef(Type *type, string *name)
 	}
 }
 
-class SupersetFieldVisitor : public TypeVisitor
-{
+class SupersetFieldVisitor : public TypeVisitor {
 private:
-	JavaSupersetGenerator * const _gen;
-	string * const _typeName;
-	string * const _simpleName;
-	string * const _prefixBase;
-	string * const _prefix;
-	string * const _pointerTypeBase;
+	JavaSupersetGenerator *const _gen;
+	string *const _typeName;
+	string *const _simpleName;
+	string *const _prefixBase;
+	string *const _prefix;
+	string *const _pointerTypeBase;
 
 public:
-	SupersetFieldVisitor(JavaSupersetGenerator *gen, string *typeName, string *simpleName, string *prefixBase, string *prefix, string *pointerTypeBase)
-		: _gen(gen), _typeName(typeName), _simpleName(simpleName), _prefixBase(prefixBase), _prefix(prefix), _pointerTypeBase(pointerTypeBase)
-	{
-	}
+	SupersetFieldVisitor(JavaSupersetGenerator *gen, string *typeName, string *simpleName, string *prefixBase,
+	        string *prefix, string *pointerTypeBase)
+	        : _gen(gen)
+	        , _typeName(typeName)
+	        , _simpleName(simpleName)
+	        , _prefixBase(prefixBase)
+	        , _prefix(prefix)
+	        , _pointerTypeBase(pointerTypeBase)
+	{}
 
 	virtual DDR_RC visitType(Type *type) const;
 	virtual DDR_RC visitClass(ClassUDT *type) const;
@@ -159,7 +159,8 @@ SupersetFieldVisitor::visitTypedef(TypedefUDT *type) const
 		*_typeName = replaceAll(type->getFullName(), "::", "$");
 		_gen->convertJ9BaseTypedef(type, _typeName);
 	} else {
-		opaqueType->acceptVisitor(SupersetFieldVisitor(_gen, _typeName, _simpleName, _prefixBase, _prefix, _pointerTypeBase));
+		opaqueType->acceptVisitor(
+		        SupersetFieldVisitor(_gen, _typeName, _simpleName, _prefixBase, _prefix, _pointerTypeBase));
 	}
 
 	string symbolKind = type->getSymbolKindName();
@@ -251,7 +252,8 @@ JavaSupersetGenerator::getFieldType(Field *field, string *assembledTypeName, str
 			typeName = "void";
 			simpleName = "void";
 		} else {
-			rc = fieldType->acceptVisitor(SupersetFieldVisitor(this, &typeName, &simpleName, &prefixBase, &prefix, &pointerTypeBase));
+			rc = fieldType->acceptVisitor(SupersetFieldVisitor(
+			        this, &typeName, &simpleName, &prefixBase, &prefix, &pointerTypeBase));
 		}
 	}
 
@@ -277,10 +279,9 @@ JavaSupersetGenerator::getFieldType(Field *field, string *assembledTypeName, str
 	return rc;
 }
 
-class SupersetVisitor : public TypeVisitor
-{
+class SupersetVisitor : public TypeVisitor {
 private:
-	JavaSupersetGenerator * const _supersetGen;
+	JavaSupersetGenerator *const _supersetGen;
 	const bool _addFieldsOnly;
 	const string _prefix;
 
@@ -288,18 +289,12 @@ private:
 
 public:
 	explicit SupersetVisitor(JavaSupersetGenerator *supersetGen)
-		: _supersetGen(supersetGen)
-		, _addFieldsOnly(false)
-		, _prefix()
-	{
-	}
+	        : _supersetGen(supersetGen), _addFieldsOnly(false), _prefix()
+	{}
 
 	SupersetVisitor(JavaSupersetGenerator *supersetGen, bool addFieldsOnly, const string &prefix)
-		: _supersetGen(supersetGen)
-		, _addFieldsOnly(addFieldsOnly)
-		, _prefix(prefix)
-	{
-	}
+	        : _supersetGen(supersetGen), _addFieldsOnly(addFieldsOnly), _prefix(prefix)
+	{}
 
 	virtual DDR_RC visitType(Type *type) const;
 	virtual DDR_RC visitClass(ClassUDT *type) const;
@@ -337,11 +332,11 @@ JavaSupersetGenerator::printFieldMember(Field *field, const string &prefix)
 				rc = printPendingType();
 
 				if (DDR_RC_OK == rc) {
-					string nameFormatted = prefix + (field->_name == "class" ? "klass" : field->_name);
-					string lineToPrint = "F|" + replaceAll(nameFormatted, ".", "$")
-									    + "|" + nameFormatted
-									    + "|" + replaceAll(assembledTypeName, "::", "$")
-									    + "|" + simpleTypeName + "\n";
+					string nameFormatted = prefix
+					        + (field->_name == "class" ? "klass" : field->_name);
+					string lineToPrint = "F|" + replaceAll(nameFormatted, ".", "$") + "|"
+					        + nameFormatted + "|" + replaceAll(assembledTypeName, "::", "$") + "|"
+					        + simpleTypeName + "\n";
 
 					rc = print(lineToPrint);
 				}
@@ -434,12 +429,12 @@ SupersetVisitor::visitComposite(ClassType *type, Type *superClass) const
 		}
 
 		for (vector<EnumMember *>::const_iterator m = type->_enumMembers.begin();
-				(DDR_RC_OK == rc) && (m != type->_enumMembers.end()); ++m) {
+		        (DDR_RC_OK == rc) && (m != type->_enumMembers.end()); ++m) {
 			rc = _supersetGen->printConstantMember((*m)->_name);
 		}
 
 		for (vector<Macro>::const_iterator m = type->_macros.begin();
-				(DDR_RC_OK == rc) && (m != type->_macros.end()); ++m) {
+		        (DDR_RC_OK == rc) && (m != type->_macros.end()); ++m) {
 			if (DDR_RC_OK == m->getNumeric(NULL)) {
 				rc = _supersetGen->printConstantMember(m->_name);
 			}
@@ -448,14 +443,14 @@ SupersetVisitor::visitComposite(ClassType *type, Type *superClass) const
 
 	if (_addFieldsOnly || !type->isAnonymousType()) {
 		for (vector<Field *>::const_iterator m = type->_fieldMembers.begin();
-				(DDR_RC_OK == rc) && (m != type->_fieldMembers.end()); ++m) {
+		        (DDR_RC_OK == rc) && (m != type->_fieldMembers.end()); ++m) {
 			rc = _supersetGen->printFieldMember(*m, _prefix);
 		}
 	}
 
 	if (!_addFieldsOnly) {
 		for (vector<UDT *>::const_iterator it = type->_subUDTs.begin();
-				(DDR_RC_OK == rc) && (it != type->_subUDTs.end()); ++it) {
+		        (DDR_RC_OK == rc) && (it != type->_subUDTs.end()); ++it) {
 			UDT *nested = *it;
 
 			if (nested->_blacklisted) {
@@ -466,7 +461,8 @@ SupersetVisitor::visitComposite(ClassType *type, Type *superClass) const
 
 			if (nested->isAnonymousType()) {
 				includeSubUDT = false;
-				for (vector<Field *>::const_iterator fit = type->_fieldMembers.begin(); fit != type->_fieldMembers.end(); ++fit) {
+				for (vector<Field *>::const_iterator fit = type->_fieldMembers.begin();
+				        fit != type->_fieldMembers.end(); ++fit) {
 					if ((*fit)->_fieldType == nested) {
 						includeSubUDT = true;
 						break;
@@ -506,7 +502,7 @@ SupersetVisitor::visitEnum(EnumUDT *type) const
 		}
 
 		for (vector<EnumMember *>::const_iterator m = type->_enumMembers.begin();
-				(DDR_RC_OK == rc) && (m != type->_enumMembers.end()); ++m) {
+		        (DDR_RC_OK == rc) && (m != type->_enumMembers.end()); ++m) {
 			rc = _supersetGen->printConstantMember((*m)->_name);
 		}
 	}
@@ -525,7 +521,7 @@ SupersetVisitor::visitNamespace(NamespaceUDT *type) const
 		}
 
 		for (vector<Macro>::const_iterator m = type->_macros.begin();
-				(DDR_RC_OK == rc) && (m != type->_macros.end()); ++m) {
+		        (DDR_RC_OK == rc) && (m != type->_macros.end()); ++m) {
 			if (DDR_RC_OK == m->getNumeric(NULL)) {
 				rc = _supersetGen->printConstantMember(m->_name);
 			}
@@ -534,7 +530,7 @@ SupersetVisitor::visitNamespace(NamespaceUDT *type) const
 
 	if (!_addFieldsOnly) {
 		for (vector<UDT *>::const_iterator v = type->_subUDTs.begin();
-				(DDR_RC_OK == rc) && (v != type->_subUDTs.end()); ++v) {
+		        (DDR_RC_OK == rc) && (v != type->_subUDTs.end()); ++v) {
 			UDT *nested = *v;
 
 			if (!nested->_blacklisted && !nested->isAnonymousType()) {
@@ -557,8 +553,7 @@ JavaSupersetGenerator::printSuperset(OMRPortLibrary *portLibrary, Symbol_IR *ir,
 
 	const SupersetVisitor printer(this);
 
-	for (vector<Type *>::const_iterator v = ir->_types.begin();
-			(DDR_RC_OK == rc) && (v != ir->_types.end()); ++v) {
+	for (vector<Type *>::const_iterator v = ir->_types.begin(); (DDR_RC_OK == rc) && (v != ir->_types.end()); ++v) {
 		Type *type = *v;
 		if (!type->_blacklisted) {
 			rc = type->acceptVisitor(printer);

@@ -19,32 +19,34 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
- 
+
 #include "LargeObjectAllocateStats.hpp"
 
-#include <math.h>
-#include <stdlib.h>
-
-#include "omrport.h"
-
+#include "AtomicOperations.hpp"
 #include "EnvironmentBase.hpp"
 #include "Forge.hpp"
 #include "GCExtensionsBase.hpp"
 #include "ModronAssertions.h"
-#include "AtomicOperations.hpp"
-
+#include "omrport.h"
+#include <math.h>
+#include <stdlib.h>
 
 MM_LargeObjectAllocateStats *
-MM_LargeObjectAllocateStats::newInstance(MM_EnvironmentBase *env, uint16_t maxAllocateSizes, uintptr_t largeObjectThreshold, uintptr_t veryLargeObjectThreshold, float sizeClassRatio, uintptr_t maxHeapSize, uintptr_t tlhMaximumSize, uintptr_t tlhMinimumSize,  uintptr_t factorVeryLargeEntryPool)
+MM_LargeObjectAllocateStats::newInstance(MM_EnvironmentBase *env, uint16_t maxAllocateSizes,
+        uintptr_t largeObjectThreshold, uintptr_t veryLargeObjectThreshold, float sizeClassRatio, uintptr_t maxHeapSize,
+        uintptr_t tlhMaximumSize, uintptr_t tlhMinimumSize, uintptr_t factorVeryLargeEntryPool)
 {
 	MM_LargeObjectAllocateStats *largeObjectAllocateStats;
 
-	largeObjectAllocateStats = (MM_LargeObjectAllocateStats *)env->getForge()->allocate(sizeof(MM_LargeObjectAllocateStats), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+	largeObjectAllocateStats = (MM_LargeObjectAllocateStats *)env->getForge()->allocate(
+	        sizeof(MM_LargeObjectAllocateStats), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
 
-	if(NULL != largeObjectAllocateStats) {
-		new(largeObjectAllocateStats) MM_LargeObjectAllocateStats(env);
+	if (NULL != largeObjectAllocateStats) {
+		new (largeObjectAllocateStats) MM_LargeObjectAllocateStats(env);
 
-		if(!largeObjectAllocateStats->initialize(env, maxAllocateSizes, largeObjectThreshold, veryLargeObjectThreshold, sizeClassRatio, maxHeapSize, tlhMaximumSize, tlhMinimumSize, factorVeryLargeEntryPool)) {
+		if (!largeObjectAllocateStats->initialize(env, maxAllocateSizes, largeObjectThreshold,
+		            veryLargeObjectThreshold, sizeClassRatio, maxHeapSize, tlhMaximumSize, tlhMinimumSize,
+		            factorVeryLargeEntryPool)) {
 			largeObjectAllocateStats->kill(env);
 			return NULL;
 		}
@@ -54,13 +56,15 @@ MM_LargeObjectAllocateStats::newInstance(MM_EnvironmentBase *env, uint16_t maxAl
 }
 
 bool
-MM_LargeObjectAllocateStats::initialize(MM_EnvironmentBase *env, uint16_t maxAllocateSizes, uintptr_t largeObjectThreshold, uintptr_t veryLargeObjectThreshold, float sizeClassRatio, uintptr_t maxHeapSize, uintptr_t tlhMaximumSize, uintptr_t tlhMinimumSize, uintptr_t factorVeryLargeEntryPool)
+MM_LargeObjectAllocateStats::initialize(MM_EnvironmentBase *env, uint16_t maxAllocateSizes,
+        uintptr_t largeObjectThreshold, uintptr_t veryLargeObjectThreshold, float sizeClassRatio, uintptr_t maxHeapSize,
+        uintptr_t tlhMaximumSize, uintptr_t tlhMinimumSize, uintptr_t factorVeryLargeEntryPool)
 {
 	OMRPortLibrary *portLibrary = env->getPortLibrary();
 #if defined(OMR_GC_THREAD_LOCAL_HEAP)
 	_tlhMaximumSize = tlhMaximumSize;
 	_tlhMinimumSize = tlhMinimumSize;
-#endif	
+#endif
 	_maxAllocateSizes = maxAllocateSizes;
 	_largeObjectThreshold = largeObjectThreshold;
 	_sizeClassRatio = sizeClassRatio;
@@ -93,45 +97,55 @@ MM_LargeObjectAllocateStats::initialize(MM_EnvironmentBase *env, uint16_t maxAll
 	 * but at the point where most of extension fields are initialized, maxHeapSize is not known yet
 	 */
 	if (0 == env->getExtensions()->freeMemoryProfileMaxSizeClasses) {
-		uintptr_t largestClassSizeIndex = (uintptr_t)(log((float)maxHeapSize)/log(_sizeClassRatio));
+		uintptr_t largestClassSizeIndex = (uintptr_t)(log((float)maxHeapSize) / log(_sizeClassRatio));
 
-		/* initialize largeObjectAllocationProfilingVeryLargeObjectThreshold and largeObjectAllocationProfilingVeryLargeObjectSizeClass */
+		/* initialize largeObjectAllocationProfilingVeryLargeObjectThreshold and
+		 * largeObjectAllocationProfilingVeryLargeObjectSizeClass */
 		uintptr_t veryLargeEntrySizeClass;
 		if (env->getExtensions()->memoryMax > veryLargeObjectThreshold) {
-			veryLargeEntrySizeClass = (uintptr_t)(log((float)veryLargeObjectThreshold)/log(_sizeClassRatio));
-			env->getExtensions()->largeObjectAllocationProfilingVeryLargeObjectThreshold = (uintptr_t)pow((double)_sizeClassRatio, (double)veryLargeEntrySizeClass);
+			veryLargeEntrySizeClass =
+			        (uintptr_t)(log((float)veryLargeObjectThreshold) / log(_sizeClassRatio));
+			env->getExtensions()->largeObjectAllocationProfilingVeryLargeObjectThreshold =
+			        (uintptr_t)pow((double)_sizeClassRatio, (double)veryLargeEntrySizeClass);
 		} else {
 			veryLargeEntrySizeClass = largestClassSizeIndex + 1;
 			env->getExtensions()->largeObjectAllocationProfilingVeryLargeObjectThreshold = UDATA_MAX;
 		}
 		env->getExtensions()->largeObjectAllocationProfilingVeryLargeObjectSizeClass = veryLargeEntrySizeClass;
 
-		/* to prevent thread race condition -- before largeObjectAllocationProfilingVeryLargeObjectThreshold has been initialized, another thread might use the value, multi-entries is not issue. */
+		/* to prevent thread race condition -- before largeObjectAllocationProfilingVeryLargeObjectThreshold has
+		 * been initialized, another thread might use the value, multi-entries is not issue. */
 		MM_AtomicOperations::writeBarrier();
 		env->getExtensions()->freeMemoryProfileMaxSizeClasses = largestClassSizeIndex + 1;
 	}
 
-	if (!_freeEntrySizeClassStats.initialize(env, _maxAllocateSizes,  env->getExtensions()->freeMemoryProfileMaxSizeClasses, env->getExtensions()->largeObjectAllocationProfilingVeryLargeObjectThreshold, factorVeryLargeEntryPool)) {
+	if (!_freeEntrySizeClassStats.initialize(env, _maxAllocateSizes,
+	            env->getExtensions()->freeMemoryProfileMaxSizeClasses,
+	            env->getExtensions()->largeObjectAllocationProfilingVeryLargeObjectThreshold,
+	            factorVeryLargeEntryPool)) {
 		return false;
 	}
-	_veryLargeEntrySizeClass = env->getExtensions()->largeObjectAllocationProfilingVeryLargeObjectSizeClass; 
+	_veryLargeEntrySizeClass = env->getExtensions()->largeObjectAllocationProfilingVeryLargeObjectSizeClass;
 
 #if defined(OMR_GC_THREAD_LOCAL_HEAP)
-	uintptr_t largestTLHClassSizeIndex = (uintptr_t)(log((float)tlhMaximumSize)/log(_sizeClassRatio));
+	uintptr_t largestTLHClassSizeIndex = (uintptr_t)(log((float)tlhMaximumSize) / log(_sizeClassRatio));
 	uintptr_t maxTLHSizeClasses = largestTLHClassSizeIndex + 1;
 
-	if (!_tlhAllocSizeClassStats.initialize(env, 0,  maxTLHSizeClasses, UDATA_MAX)) {
+	if (!_tlhAllocSizeClassStats.initialize(env, 0, maxTLHSizeClasses, UDATA_MAX)) {
 		return false;
 	}
 #endif
 
-	_sizeClassSizes = (uintptr_t *)env->getForge()->allocate(sizeof(uintptr_t) * _freeEntrySizeClassStats._maxSizeClasses, OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+	_sizeClassSizes =
+	        (uintptr_t *)env->getForge()->allocate(sizeof(uintptr_t) * _freeEntrySizeClassStats._maxSizeClasses,
+	                OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
 
 	if (NULL == _sizeClassSizes) {
 		return false;
 	}
 
-	for (uintptr_t sizeClassIndex = 0; sizeClassIndex < _freeEntrySizeClassStats._maxSizeClasses; sizeClassIndex++) {
+	for (uintptr_t sizeClassIndex = 0; sizeClassIndex < _freeEntrySizeClassStats._maxSizeClasses;
+	        sizeClassIndex++) {
 		/* TODO: this is rather an approximation (at least due to insufficient precision of double math) */
 		_sizeClassSizes[sizeClassIndex] = (uintptr_t)pow((double)_sizeClassRatio, (double)sizeClassIndex);
 	}
@@ -142,27 +156,27 @@ MM_LargeObjectAllocateStats::initialize(MM_EnvironmentBase *env, uint16_t maxAll
 void
 MM_LargeObjectAllocateStats::tearDown(MM_EnvironmentBase *env)
 {
-	if (NULL != _spaceSavingTemp){
+	if (NULL != _spaceSavingTemp) {
 		spaceSavingFree(_spaceSavingTemp);
 		_spaceSavingTemp = NULL;
 	}
 
-	if (NULL != _spaceSavingSizesAveragePercent){
+	if (NULL != _spaceSavingSizesAveragePercent) {
 		spaceSavingFree(_spaceSavingSizesAveragePercent);
 		_spaceSavingSizesAveragePercent = NULL;
 	}
 
-	if (NULL != _spaceSavingSizeClassesAveragePercent){
+	if (NULL != _spaceSavingSizeClassesAveragePercent) {
 		spaceSavingFree(_spaceSavingSizeClassesAveragePercent);
 		_spaceSavingSizeClassesAveragePercent = NULL;
 	}
 
-	if (NULL != _spaceSavingSizes){
+	if (NULL != _spaceSavingSizes) {
 		spaceSavingFree(_spaceSavingSizes);
 		_spaceSavingSizes = NULL;
 	}
 
-	if (NULL != _spaceSavingSizeClasses){
+	if (NULL != _spaceSavingSizeClasses) {
 		spaceSavingFree(_spaceSavingSizeClasses);
 		_spaceSavingSizeClasses = NULL;
 	}
@@ -177,8 +191,6 @@ MM_LargeObjectAllocateStats::tearDown(MM_EnvironmentBase *env)
 		_sizeClassSizes = NULL;
 	}
 }
-
-
 
 void
 MM_LargeObjectAllocateStats::kill(MM_EnvironmentBase *env)
@@ -214,7 +226,8 @@ MM_LargeObjectAllocateStats::allocateObject(uintptr_t allocateSize)
 		spaceSavingUpdate(_spaceSavingSizes, (void *)allocateSize, allocateSize);
 
 		/* find in which size class object belongs to and update the stats for the size class itself. */
-		uintptr_t sizeClass = (uintptr_t)(pow(_sizeClassRatio, (float)ceil(log((float)allocateSize) / _sizeClassRatioLog)));
+		uintptr_t sizeClass =
+		        (uintptr_t)(pow(_sizeClassRatio, (float)ceil(log((float)allocateSize) / _sizeClassRatioLog)));
 		spaceSavingUpdate(_spaceSavingSizeClasses, (void *)sizeClass, sizeClass);
 	}
 }
@@ -227,17 +240,19 @@ MM_LargeObjectAllocateStats::mergeCurrent(MM_LargeObjectAllocateStats *statsToMe
 	uintptr_t i = 0;
 
 	/* merge exact sizes - current  */
-	OMRSpaceSaving* spaceSavingToMerge = statsToMerge->_spaceSavingSizes;
+	OMRSpaceSaving *spaceSavingToMerge = statsToMerge->_spaceSavingSizes;
 
-	for(i = 0; i < spaceSavingGetCurSize(spaceSavingToMerge); i++ ){
-		spaceSavingUpdate(_spaceSavingSizes, spaceSavingGetKthMostFreq(spaceSavingToMerge, i + 1), spaceSavingGetKthMostFreqCount(spaceSavingToMerge, i + 1));
+	for (i = 0; i < spaceSavingGetCurSize(spaceSavingToMerge); i++) {
+		spaceSavingUpdate(_spaceSavingSizes, spaceSavingGetKthMostFreq(spaceSavingToMerge, i + 1),
+		        spaceSavingGetKthMostFreqCount(spaceSavingToMerge, i + 1));
 	}
 
 	/* merge size classes - current */
 	spaceSavingToMerge = statsToMerge->_spaceSavingSizeClasses;
 
-	for(i = 0; i < spaceSavingGetCurSize(spaceSavingToMerge); i++ ){
-		spaceSavingUpdate(_spaceSavingSizeClasses, spaceSavingGetKthMostFreq(spaceSavingToMerge, i + 1), spaceSavingGetKthMostFreqCount(spaceSavingToMerge, i + 1));
+	for (i = 0; i < spaceSavingGetCurSize(spaceSavingToMerge); i++) {
+		spaceSavingUpdate(_spaceSavingSizeClasses, spaceSavingGetKthMostFreq(spaceSavingToMerge, i + 1),
+		        spaceSavingGetKthMostFreqCount(spaceSavingToMerge, i + 1));
 	}
 }
 
@@ -247,17 +262,20 @@ MM_LargeObjectAllocateStats::mergeAverage(MM_LargeObjectAllocateStats *statsToMe
 	uintptr_t i = 0;
 
 	/* merge exact sizes - average */
-	OMRSpaceSaving* spaceSavingToMerge = statsToMerge->_spaceSavingSizesAveragePercent;
+	OMRSpaceSaving *spaceSavingToMerge = statsToMerge->_spaceSavingSizesAveragePercent;
 
-	for(i = 0; i < spaceSavingGetCurSize(spaceSavingToMerge); i++ ){
-		spaceSavingUpdate(_spaceSavingSizesAveragePercent, spaceSavingGetKthMostFreq(spaceSavingToMerge, i + 1), spaceSavingGetKthMostFreqCount(spaceSavingToMerge, i + 1));
+	for (i = 0; i < spaceSavingGetCurSize(spaceSavingToMerge); i++) {
+		spaceSavingUpdate(_spaceSavingSizesAveragePercent, spaceSavingGetKthMostFreq(spaceSavingToMerge, i + 1),
+		        spaceSavingGetKthMostFreqCount(spaceSavingToMerge, i + 1));
 	}
 
 	/* merge size classes - average */
 	spaceSavingToMerge = statsToMerge->_spaceSavingSizeClassesAveragePercent;
 
-	for(i = 0; i < spaceSavingGetCurSize(spaceSavingToMerge); i++ ){
-		spaceSavingUpdate(_spaceSavingSizeClassesAveragePercent, spaceSavingGetKthMostFreq(spaceSavingToMerge, i + 1), spaceSavingGetKthMostFreqCount(spaceSavingToMerge, i + 1));
+	for (i = 0; i < spaceSavingGetCurSize(spaceSavingToMerge); i++) {
+		spaceSavingUpdate(_spaceSavingSizeClassesAveragePercent,
+		        spaceSavingGetKthMostFreq(spaceSavingToMerge, i + 1),
+		        spaceSavingGetKthMostFreqCount(spaceSavingToMerge, i + 1));
 	}
 }
 
@@ -272,7 +290,8 @@ MM_LargeObjectAllocateStats::upSampleAllocStats(MM_EnvironmentBase *env, uintptr
 		float thisSizeTlhBytesAllocated = 0;
 		uintptr_t tlhMaximumSizeClassIndex = getSizeClassIndex(_tlhMaximumSize);
 		uintptr_t tlhMinimumSizeClassIndex = getSizeClassIndex(_tlhMinimumSize);
-		for (uintptr_t sizeClassIndex = tlhMinimumSizeClassIndex; sizeClassIndex <= tlhMaximumSizeClassIndex ; sizeClassIndex++) {
+		for (uintptr_t sizeClassIndex = tlhMinimumSizeClassIndex; sizeClassIndex <= tlhMaximumSizeClassIndex;
+		        sizeClassIndex++) {
 			uintptr_t freeEntrySize = getSizeClassSizes(sizeClassIndex);
 
 			float probabilityAllocFits = 0;
@@ -288,10 +307,13 @@ MM_LargeObjectAllocateStats::upSampleAllocStats(MM_EnvironmentBase *env, uintptr
 		Assert_MM_true(thisSizeTlhBytesAllocated <= (float)totalTlhBytesAllocated);
 		float upSampleRatio = 1.0;
 		if (0 != ((float)totalTlhBytesAllocated - thisSizeTlhBytesAllocated)) {
-			upSampleRatio = ((float)totalTlhBytesAllocated / ((float)totalTlhBytesAllocated - thisSizeTlhBytesAllocated));
+			upSampleRatio = ((float)totalTlhBytesAllocated
+			        / ((float)totalTlhBytesAllocated - thisSizeTlhBytesAllocated));
 		}
 		bytesAllocatedUpSampled = (uintptr_t)(bytesAllocatedUpSampled * upSampleRatio);
-		Trc_MM_LargeObjectAllocateStats_upSample(env->getLanguageVMThread(), allocSize, bytesAllocated, (uintptr_t)thisSizeTlhBytesAllocated, totalTlhBytesAllocated, upSampleRatio, bytesAllocatedUpSampled);
+		Trc_MM_LargeObjectAllocateStats_upSample(env->getLanguageVMThread(), allocSize, bytesAllocated,
+		        (uintptr_t)thisSizeTlhBytesAllocated, totalTlhBytesAllocated, upSampleRatio,
+		        bytesAllocatedUpSampled);
 	}
 #endif
 
@@ -317,7 +339,7 @@ MM_LargeObjectAllocateStats::estimateFragmentation(MM_EnvironmentBase *env)
 	_cpuTimeEstimateFragmentation = 0;
 	_remainingFreeMemoryAfterEstimate = 0;
 	_freeMemoryBeforeEstimate = 0;
-	
+
 	MM_GCExtensionsBase *ext = env->getExtensions();
 	if (0 == spaceSavingGetCurSize(_spaceSavingSizesAveragePercent)) {
 		/* no large allocation -> no (macro) fragmentation */
@@ -332,10 +354,12 @@ MM_LargeObjectAllocateStats::estimateFragmentation(MM_EnvironmentBase *env)
 	/* to speed up calculation, ignore objects with very low frequencies (threshold is set to 0.03% (not 3%)) */
 	const float ignoreObjectPercentThreshold = (float)0.03;
 	uintptr_t objectCount = 0;
-	uintptr_t maxFrequentAllocateSizes = OMR_MIN(ext->freeEntrySizeClassStatsSimulated._maxFrequentAllocateSizes, spaceSavingGetCurSize(_spaceSavingSizesAveragePercent));
+	uintptr_t maxFrequentAllocateSizes = OMR_MIN(ext->freeEntrySizeClassStatsSimulated._maxFrequentAllocateSizes,
+	        spaceSavingGetCurSize(_spaceSavingSizesAveragePercent));
 
-	for(uintptr_t i = 0; i < maxFrequentAllocateSizes; i++ ) {
-		float percent = convertPercentUDATAToFloat(spaceSavingGetKthMostFreqCount(_spaceSavingSizesAveragePercent, i + 1));
+	for (uintptr_t i = 0; i < maxFrequentAllocateSizes; i++) {
+		float percent = convertPercentUDATAToFloat(
+		        spaceSavingGetKthMostFreqCount(_spaceSavingSizesAveragePercent, i + 1));
 		/* reset _fractionFrequentAllocation array */
 		ext->freeEntrySizeClassStatsSimulated._fractionFrequentAllocation[i] = 0;
 		if (percent >= ignoreObjectPercentThreshold) {
@@ -355,79 +379,104 @@ MM_LargeObjectAllocateStats::estimateFragmentation(MM_EnvironmentBase *env)
 	}
 
 	/* take a snapshot of the free memory */
-	uintptr_t initialFreeMemory = _freeEntrySizeClassStats.copyTo(&ext->freeEntrySizeClassStatsSimulated, _sizeClassSizes);
+	uintptr_t initialFreeMemory =
+	        _freeEntrySizeClassStats.copyTo(&ext->freeEntrySizeClassStatsSimulated, _sizeClassSizes);
 	_freeMemoryBeforeEstimate = initialFreeMemory;
 	uintptr_t currentFreeMemory = initialFreeMemory;
 	uintptr_t prevFreeMemory = UDATA_MAX;
 	uintptr_t unsatisfiedAlloc = 0;
 
-	Trc_MM_LargeObjectAllocateStats_estimateFragmentation_entry(env->getLanguageVMThread(), initialFreeMemory, initialFreeMemory >> 20, tlhPercent);
+	Trc_MM_LargeObjectAllocateStats_estimateFragmentation_entry(
+	        env->getLanguageVMThread(), initialFreeMemory, initialFreeMemory >> 20, tlhPercent);
 
 	const uintptr_t maxObjectStrides = 10;
 	const uintptr_t maxTLHStrides = 100;
 	float allocTLHStridesPerObject = (((float)maxTLHStrides) / maxObjectStrides) / objectCount;
 	Assert_MM_true(allocTLHStridesPerObject >= 1.0);
-//#if 1
-//	allocTLHStridesPerObject =1.0;
-//#endif	
+	//#if 1
+	//	allocTLHStridesPerObject =1.0;
+	//#endif
 	float allocTLHStridesFractional = 0.0;
 	uintptr_t stride = 0;
 
 	_TLHSizeClassIndex = 0;
 	_TLHFrequentAllocationSize = 0;
 	/* simulate the allocation in approximately maxObjectStrides strides.
-	 * could be less, if fragmented. could be more if not fragmented (due to probablistic size decay of very large free entries).
-	 * stop up until we cannot satisfy allocate or remaining free memory is less than 1% of initial free memory.
-	 * if we do not make progress (strides are too small), we stop.
+	 * could be less, if fragmented. could be more if not fragmented (due to probablistic size decay of very large
+	 * free entries). stop up until we cannot satisfy allocate or remaining free memory is less than 1% of initial
+	 * free memory. if we do not make progress (strides are too small), we stop.
 	 */
-	for (; (0 == unsatisfiedAlloc) && (currentFreeMemory > initialFreeMemory / 100) && (prevFreeMemory > currentFreeMemory) ; stride++) {
+	for (; (0 == unsatisfiedAlloc) && (currentFreeMemory > initialFreeMemory / 100)
+	        && (prevFreeMemory > currentFreeMemory);
+	        stride++) {
 		/* save currentFreeMemory for checking if make progress in one stride */
 		prevFreeMemory = currentFreeMemory;
-		/* walk over frequent allocates, which will drive the simulation. tlh allocate will interleave with them */
-		for(uintptr_t i = 0; (i < maxFrequentAllocateSizes) && (0 == unsatisfiedAlloc); i++ ) {
-			float objectPercent = convertPercentUDATAToFloat(spaceSavingGetKthMostFreqCount(_spaceSavingSizesAveragePercent, i + 1));
+		/* walk over frequent allocates, which will drive the simulation. tlh allocate will interleave with them
+		 */
+		for (uintptr_t i = 0; (i < maxFrequentAllocateSizes) && (0 == unsatisfiedAlloc); i++) {
+			float objectPercent = convertPercentUDATAToFloat(
+			        spaceSavingGetKthMostFreqCount(_spaceSavingSizesAveragePercent, i + 1));
 
 			if (objectPercent >= ignoreObjectPercentThreshold) {
-				uintptr_t objectSize = (uintptr_t)spaceSavingGetKthMostFreq(_spaceSavingSizesAveragePercent, i + 1);
+				uintptr_t objectSize =
+				        (uintptr_t)spaceSavingGetKthMostFreq(_spaceSavingSizesAveragePercent, i + 1);
 
 				uintptr_t objectAllocBytes = (uintptr_t)((objectPercent * initialFreeMemory) / 100);
-				/* example: for a large object with 30% of all allocates and with 60% of total TLH allocates (10% of other large object allocations)
-				 * in this stride we will simulate allocation of 30 / 10 = 3% for the large object and  30/(30+10) x 60 / 10 = 4.5% (tlhAllocBytesPerObjectPerObjectStride) for TLHs.
-				 * TLHs allocations will be further divided into several strides (allocTLHStridesInteger), where each TLH allocation
+				/* example: for a large object with 30% of all allocates and with 60% of total TLH
+				 * allocates (10% of other large object allocations) in this stride we will simulate
+				 * allocation of 30 / 10 = 3% for the large object and  30/(30+10) x 60 / 10 = 4.5%
+				 * (tlhAllocBytesPerObjectPerObjectStride) for TLHs. TLHs allocations will be further
+				 * divided into several strides (allocTLHStridesInteger), where each TLH allocation
 				 * stride will allocate from different size class.
 				 */
-				uintptr_t tlhAllocBytesPerObject = (uintptr_t)((objectPercent / (100.0 - tlhPercent) * tlhPercent * initialFreeMemory) / 100);
+				uintptr_t tlhAllocBytesPerObject = (uintptr_t)(
+				        (objectPercent / (100.0 - tlhPercent) * tlhPercent * initialFreeMemory) / 100);
 
 				uintptr_t objectAllocBytesPerObjectStride = objectAllocBytes / maxObjectStrides;
 				allocTLHStridesFractional += allocTLHStridesPerObject;
-				uintptr_t allocTLHStridesInteger = (uintptr_t) allocTLHStridesFractional;
-				allocTLHStridesFractional -= (float) allocTLHStridesInteger;
-				uintptr_t tlhAllocBytesPerObjectPerObjectStride = tlhAllocBytesPerObject / maxObjectStrides;
+				uintptr_t allocTLHStridesInteger = (uintptr_t)allocTLHStridesFractional;
+				allocTLHStridesFractional -= (float)allocTLHStridesInteger;
+				uintptr_t tlhAllocBytesPerObjectPerObjectStride = tlhAllocBytesPerObject
+				        / maxObjectStrides;
 
-				Trc_MM_LargeObjectAllocateStats_estimateFragmentation_stride(env->getLanguageVMThread(), stride, currentFreeMemory, currentFreeMemory >> 20, objectSize, objectAllocBytesPerObjectStride, objectAllocBytesPerObjectStride >> 20, tlhAllocBytesPerObjectPerObjectStride, tlhAllocBytesPerObjectPerObjectStride >> 20);
+				Trc_MM_LargeObjectAllocateStats_estimateFragmentation_stride(env->getLanguageVMThread(),
+				        stride, currentFreeMemory, currentFreeMemory >> 20, objectSize,
+				        objectAllocBytesPerObjectStride, objectAllocBytesPerObjectStride >> 20,
+				        tlhAllocBytesPerObjectPerObjectStride,
+				        tlhAllocBytesPerObjectPerObjectStride >> 20);
 
 				if (0 != tlhAllocBytesPerObjectPerObjectStride) {
-					unsatisfiedAlloc = simulateAllocateTLHs(env, tlhAllocBytesPerObjectPerObjectStride, &currentFreeMemory, allocTLHStridesInteger);
+					unsatisfiedAlloc = simulateAllocateTLHs(env,
+					        tlhAllocBytesPerObjectPerObjectStride, &currentFreeMemory,
+					        allocTLHStridesInteger);
 					if (0 != unsatisfiedAlloc) {
 						break;
 					}
 				}
-				
-				/* only apply allocInteger(whole number of frequentAllocation) in simulateAllocateObjects, cumulate fraction part of frequentAllocation for later strides, when the cumulated fraction is bigger than 1, add the "integer" to allocInteger */
-				float allocFractional = objectAllocBytesPerObjectStride / (float) objectSize;
+
+				/* only apply allocInteger(whole number of frequentAllocation) in
+				 * simulateAllocateObjects, cumulate fraction part of frequentAllocation for later
+				 * strides, when the cumulated fraction is bigger than 1, add the "integer" to
+				 * allocInteger */
+				float allocFractional = objectAllocBytesPerObjectStride / (float)objectSize;
 				uintptr_t allocInteger = (uintptr_t)allocFractional;
 
-				ext->freeEntrySizeClassStatsSimulated._fractionFrequentAllocation[i] += (allocFractional-(float)allocInteger);
+				ext->freeEntrySizeClassStatsSimulated._fractionFrequentAllocation[i] +=
+				        (allocFractional - (float)allocInteger);
 				if (1.0 <= ext->freeEntrySizeClassStatsSimulated._fractionFrequentAllocation[i]) {
-					uintptr_t fractionInteger = (uintptr_t) ext->freeEntrySizeClassStatsSimulated._fractionFrequentAllocation[i];
+					uintptr_t fractionInteger = (uintptr_t)ext->freeEntrySizeClassStatsSimulated
+					                                    ._fractionFrequentAllocation[i];
 					allocInteger += fractionInteger;
-					ext->freeEntrySizeClassStatsSimulated._fractionFrequentAllocation[i] -= (float) fractionInteger;
+					ext->freeEntrySizeClassStatsSimulated._fractionFrequentAllocation[i] -=
+					        (float)fractionInteger;
 				}
 				objectAllocBytesPerObjectStride = allocInteger * objectSize;
 
 				if (objectAllocBytesPerObjectStride >= objectSize) {
-					/* TODO: for very large infrequent objects (allocBytes lower (or larger but close to) size), we should also allocate with probability size/allocBytes */
-					unsatisfiedAlloc = simulateAllocateObjects(env, objectAllocBytesPerObjectStride, objectSize, &currentFreeMemory);
+					/* TODO: for very large infrequent objects (allocBytes lower (or larger but
+					 * close to) size), we should also allocate with probability size/allocBytes */
+					unsatisfiedAlloc = simulateAllocateObjects(
+					        env, objectAllocBytesPerObjectStride, objectSize, &currentFreeMemory);
 				}
 
 				/* Ensure we do not wrap around */
@@ -440,7 +489,8 @@ MM_LargeObjectAllocateStats::estimateFragmentation(MM_EnvironmentBase *env)
 
 	Assert_MM_true(remainingFreeMemory == currentFreeMemory);
 
-	Trc_MM_LargeObjectAllocateStats_estimateFragmentation_exit(env->getLanguageVMThread(), remainingFreeMemory, remainingFreeMemory >> 20, unsatisfiedAlloc, unsatisfiedAlloc >> 20);
+	Trc_MM_LargeObjectAllocateStats_estimateFragmentation_exit(env->getLanguageVMThread(), remainingFreeMemory,
+	        remainingFreeMemory >> 20, unsatisfiedAlloc, unsatisfiedAlloc >> 20);
 
 	_timeEstimateFragmentation = omrtime_hires_clock() - startTime;
 	_cpuTimeEstimateFragmentation = omrthread_get_self_cpu_time(env->getOmrVMThread()->_os_thread) - startCPUTime;
@@ -452,7 +502,8 @@ MM_LargeObjectAllocateStats::estimateFragmentation(MM_EnvironmentBase *env)
 }
 
 uintptr_t
-MM_LargeObjectAllocateStats::simulateAllocateObjects(MM_EnvironmentBase *env, uintptr_t allocBytes, uintptr_t objectSize, uintptr_t *currentFreeMemory)
+MM_LargeObjectAllocateStats::simulateAllocateObjects(
+        MM_EnvironmentBase *env, uintptr_t allocBytes, uintptr_t objectSize, uintptr_t *currentFreeMemory)
 {
 	MM_GCExtensionsBase *ext = env->getExtensions();
 	Assert_MM_true(NULL != ext->freeEntrySizeClassStatsSimulated._frequentAllocationHead);
@@ -460,44 +511,66 @@ MM_LargeObjectAllocateStats::simulateAllocateObjects(MM_EnvironmentBase *env, ui
 	uintptr_t allocObjectCount = allocBytes / objectSize;
 	Assert_MM_true(allocObjectCount > 0);
 
-	Trc_MM_LargeObjectAllocateStats_simulateAllocateObjects_entry(env->getLanguageVMThread(), objectSize, allocBytes, allocBytes >> 20, *currentFreeMemory, *currentFreeMemory >> 20);
+	Trc_MM_LargeObjectAllocateStats_simulateAllocateObjects_entry(env->getLanguageVMThread(), objectSize,
+	        allocBytes, allocBytes >> 20, *currentFreeMemory, *currentFreeMemory >> 20);
 
 	/* keep allocating from this size class or any larger */
 	while ((allocBytes > 0) && (sizeClassIndex < ext->freeEntrySizeClassStatsSimulated._maxSizeClasses)) {
 
 		/* any available free entries of this size class? */
 		/* TODO: find a faster way to find next non zero size class index */
-		if ((0 != ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex]) && (objectSize <= _sizeClassSizes[sizeClassIndex])) {
+		if ((0 != ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex])
+		        && (objectSize <= _sizeClassSizes[sizeClassIndex])) {
 			/* dealing with 'regular' size */
 
-			Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_freeEntry_entry(env->getLanguageVMThread(), "Object", "regular", sizeClassIndex, _sizeClassSizes[sizeClassIndex] , ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex]);
+			Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_freeEntry_entry(
+			        env->getLanguageVMThread(), "Object", "regular", sizeClassIndex,
+			        _sizeClassSizes[sizeClassIndex],
+			        ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex]);
 
-			/* go for smallest to largest sizes within a class size; thus start with the 'regular' size and continue with frequent allocate sizes as ordered in the list (ascending) */
+			/* go for smallest to largest sizes within a class size; thus start with the 'regular' size and
+			 * continue with frequent allocate sizes as ordered in the list (ascending) */
 
 			/* find out which fraction of the memory is available (due to rounding) */
 			uintptr_t freeEntryOverAllocSizeRatio = _sizeClassSizes[sizeClassIndex] / objectSize;
 			uintptr_t usedPortionOfFreeEntry = freeEntryOverAllocSizeRatio * objectSize;
-			uintptr_t availableBytes = ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex] * usedPortionOfFreeEntry;
-			Trc_MM_LargeObjectAllocateStats_simulateAllocateObjects_availableBytes(env->getLanguageVMThread(), "regular", availableBytes, ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex], usedPortionOfFreeEntry, freeEntryOverAllocSizeRatio, objectSize);
+			uintptr_t availableBytes = ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex]
+			        * usedPortionOfFreeEntry;
+			Trc_MM_LargeObjectAllocateStats_simulateAllocateObjects_availableBytes(
+			        env->getLanguageVMThread(), "regular", availableBytes,
+			        ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex], usedPortionOfFreeEntry,
+			        freeEntryOverAllocSizeRatio, objectSize);
 
 			float freeEntriesUsed = 0.0;
 
 			if (availableBytes <= allocBytes) {
-				Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_satisfy(env->getLanguageVMThread(), "partial", "regular", _sizeClassSizes[sizeClassIndex], sizeClassIndex);
-				Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_partial(env->getLanguageVMThread(), allocBytes - availableBytes, allocBytes, availableBytes);
+				Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_satisfy(
+				        env->getLanguageVMThread(), "partial", "regular",
+				        _sizeClassSizes[sizeClassIndex], sizeClassIndex);
+				Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_partial(
+				        env->getLanguageVMThread(), allocBytes - availableBytes, allocBytes,
+				        availableBytes);
 
-				/* all available memory of this size will be used (but we my not satisfy all allocation) */
+				/* all available memory of this size will be used (but we my not satisfy all allocation)
+				 */
 				freeEntriesUsed = (float)ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex];
-				*currentFreeMemory -= ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex] * _sizeClassSizes[sizeClassIndex];
+				*currentFreeMemory -= ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex]
+				        * _sizeClassSizes[sizeClassIndex];
 				ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex] = 0;
 				allocBytes -= availableBytes;
 				allocObjectCount = allocBytes / objectSize;
 			} else {
 				/* all allocation is satisfied (and there may be entries of this size left) */
 				freeEntriesUsed = (float)allocObjectCount / (float)freeEntryOverAllocSizeRatio;
-				Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_satisfy(env->getLanguageVMThread(), "full", "regular", _sizeClassSizes[sizeClassIndex], sizeClassIndex);
-				Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_full(env->getLanguageVMThread(), ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex] - (uintptr_t)freeEntriesUsed, ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex], freeEntriesUsed);
-				ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex] -= (uintptr_t)freeEntriesUsed;
+				Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_satisfy(
+				        env->getLanguageVMThread(), "full", "regular", _sizeClassSizes[sizeClassIndex],
+				        sizeClassIndex);
+				Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_full(env->getLanguageVMThread(),
+				        ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex]
+				                - (uintptr_t)freeEntriesUsed,
+				        ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex], freeEntriesUsed);
+				ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex] -=
+				        (uintptr_t)freeEntriesUsed;
 				*currentFreeMemory -= (uintptr_t)freeEntriesUsed * _sizeClassSizes[sizeClassIndex];
 				allocBytes = 0;
 				allocObjectCount = 0;
@@ -505,21 +578,27 @@ MM_LargeObjectAllocateStats::simulateAllocateObjects(MM_EnvironmentBase *env, ui
 
 			/* there are two kind of remainders:
 			 1) freeEntriesUsed of size: freeEntrySize - usedPortionOfFreeEntry
-			 2) up to one of size: freeEntrySize - decimal-fraction-of-freeEntriesUsed-float * usedPortionOfFreeEntry
+			 2) up to one of size: freeEntrySize - decimal-fraction-of-freeEntriesUsed-float *
+			 usedPortionOfFreeEntry
 			*/
 
-			/* we do not know the exact size of free entry(ies). we do know low and hi bounds, and will just approximate it (them) with a random size within the range */
+			/* we do not know the exact size of free entry(ies). we do know low and hi bounds, and will just
+			 * approximate it (them) with a random size within the range */
 			uintptr_t minFreeEntrySize = _sizeClassSizes[sizeClassIndex];
 			uintptr_t maxFreeEntrySize = UDATA_MAX;
 
 			if (NULL != ext->freeEntrySizeClassStatsSimulated._frequentAllocationHead[sizeClassIndex]) {
-				/* since we deal with regular size, first larger size might be the first frequent alloc size, if any */
-				maxFreeEntrySize = ext->freeEntrySizeClassStatsSimulated._frequentAllocationHead[sizeClassIndex]->_size;
+				/* since we deal with regular size, first larger size might be the first frequent alloc
+				 * size, if any */
+				maxFreeEntrySize =
+				        ext->freeEntrySizeClassStatsSimulated._frequentAllocationHead[sizeClassIndex]
+				                ->_size;
 			} else if (sizeClassIndex + 1 < ext->freeEntrySizeClassStatsSimulated._maxSizeClasses) {
 				maxFreeEntrySize = _sizeClassSizes[sizeClassIndex + 1];
 			}
 
-			uintptr_t guessedFreeEntrySize = minFreeEntrySize + (uintptr_t) ((maxFreeEntrySize - minFreeEntrySize) * (float)rand() / RAND_MAX);
+			uintptr_t guessedFreeEntrySize = minFreeEntrySize
+			        + (uintptr_t)((maxFreeEntrySize - minFreeEntrySize) * (float)rand() / RAND_MAX);
 
 			uintptr_t freeEntriesUsedInteger = (uintptr_t)freeEntriesUsed;
 			float freeEntriesUsedFractional = freeEntriesUsed - freeEntriesUsedInteger;
@@ -530,36 +609,50 @@ MM_LargeObjectAllocateStats::simulateAllocateObjects(MM_EnvironmentBase *env, ui
 				if (0 != freeEntriesUsedInteger) {
 					/* no need to decrement anything - we already accounted it for */
 					if (remainderSize >= _largeObjectThreshold) {
-						uintptr_t updatedFreeEntrySize = incrementFreeEntrySizeClassStats(remainderSize, &ext->freeEntrySizeClassStatsSimulated, freeEntriesUsedInteger);
-						Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_remainder(env->getLanguageVMThread(), freeEntriesUsedInteger, remainderSize, updatedFreeEntrySize);
+						uintptr_t updatedFreeEntrySize = incrementFreeEntrySizeClassStats(
+						        remainderSize, &ext->freeEntrySizeClassStatsSimulated,
+						        freeEntriesUsedInteger);
+						Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_remainder(
+						        env->getLanguageVMThread(), freeEntriesUsedInteger,
+						        remainderSize, updatedFreeEntrySize);
 						*currentFreeMemory += updatedFreeEntrySize * freeEntriesUsedInteger;
 					}
 				}
 
 				/* possibly one more remainder of even larger size */
-				remainderSize = guessedFreeEntrySize - (uintptr_t)(freeEntriesUsedFractional * usedPortionOfFreeEntry);
+				remainderSize = guessedFreeEntrySize
+				        - (uintptr_t)(freeEntriesUsedFractional * usedPortionOfFreeEntry);
 
 				/* often it will stay in the same size class, but if not, we have to update counters */
 				if (remainderSize < _sizeClassSizes[sizeClassIndex]) {
-					Assert_MM_true(ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex] > 0);
-					Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_adjustement(env->getLanguageVMThread(), ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex] - 1, ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex]);
+					Assert_MM_true(
+					        ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex] > 0);
+					Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_adjustement(
+					        env->getLanguageVMThread(),
+					        ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex] - 1,
+					        ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex]);
 					ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex] -= 1;
 					*currentFreeMemory -= _sizeClassSizes[sizeClassIndex];
 					if (remainderSize >= _largeObjectThreshold) {
-						uintptr_t updatedFreeEntrySize = incrementFreeEntrySizeClassStats(remainderSize, &ext->freeEntrySizeClassStatsSimulated);
-						Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_remainder(env->getLanguageVMThread(), 1, remainderSize, updatedFreeEntrySize);
+						uintptr_t updatedFreeEntrySize = incrementFreeEntrySizeClassStats(
+						        remainderSize, &ext->freeEntrySizeClassStatsSimulated);
+						Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_remainder(
+						        env->getLanguageVMThread(), 1, remainderSize,
+						        updatedFreeEntrySize);
 						*currentFreeMemory += updatedFreeEntrySize;
 					}
 				}
 			}
 
 			/* done with 'regular' size */
-			Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_freeEntry_exit(env->getLanguageVMThread(), "Object", "regular", sizeClassIndex, ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex]);
-
+			Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_freeEntry_exit(
+			        env->getLanguageVMThread(), "Object", "regular", sizeClassIndex,
+			        ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex]);
 		}
 		if (0 != ext->freeEntrySizeClassStatsSimulated.getFrequentAllocCount(sizeClassIndex)) {
 			/* for each size class, find frequent allocation sizes */
-			MM_FreeEntrySizeClassStats::FrequentAllocation *curr = ext->freeEntrySizeClassStatsSimulated._frequentAllocationHead[sizeClassIndex];
+			MM_FreeEntrySizeClassStats::FrequentAllocation *curr =
+			        ext->freeEntrySizeClassStatsSimulated._frequentAllocationHead[sizeClassIndex];
 			MM_FreeEntrySizeClassStats::FrequentAllocation *next = NULL;
 			MM_FreeEntrySizeClassStats::FrequentAllocation *prev = NULL;
 
@@ -571,12 +664,16 @@ MM_LargeObjectAllocateStats::simulateAllocateObjects(MM_EnvironmentBase *env, ui
 
 			while ((allocBytes > 0) && (NULL != curr)) {
 				uintptr_t currentSize = curr->_size;
-				Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_freeEntry_entry(env->getLanguageVMThread(), "Object", "frequent", sizeClassIndex, currentSize, curr->_count);
+				Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_freeEntry_entry(
+				        env->getLanguageVMThread(), "Object", "frequent", sizeClassIndex, currentSize,
+				        curr->_count);
 
 				uintptr_t freeEntryOverAllocSizeRatio = currentSize / objectSize;
 				uintptr_t usedPortionOfFreeEntry = freeEntryOverAllocSizeRatio * objectSize;
 				uintptr_t availableBytes = curr->_count * usedPortionOfFreeEntry;
-				Trc_MM_LargeObjectAllocateStats_simulateAllocateObjects_availableBytes(env->getLanguageVMThread(), "frequent", availableBytes, curr->_count, usedPortionOfFreeEntry, freeEntryOverAllocSizeRatio, objectSize);
+				Trc_MM_LargeObjectAllocateStats_simulateAllocateObjects_availableBytes(
+				        env->getLanguageVMThread(), "frequent", availableBytes, curr->_count,
+				        usedPortionOfFreeEntry, freeEntryOverAllocSizeRatio, objectSize);
 
 				float freeEntriesUsed = 0;
 
@@ -584,8 +681,12 @@ MM_LargeObjectAllocateStats::simulateAllocateObjects(MM_EnvironmentBase *env, ui
 				Assert_MM_true(0 != curr->_count);
 
 				if (availableBytes <= allocBytes) {
-					Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_satisfy(env->getLanguageVMThread(), "partial", "frequent", curr->_count, sizeClassIndex);
-					Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_partial(env->getLanguageVMThread(), allocBytes - availableBytes, allocBytes, availableBytes);
+					Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_satisfy(
+					        env->getLanguageVMThread(), "partial", "frequent", curr->_count,
+					        sizeClassIndex);
+					Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_partial(
+					        env->getLanguageVMThread(), allocBytes - availableBytes, allocBytes,
+					        availableBytes);
 
 					/* all available memory of this size will be used */
 					freeEntriesUsed = (float)curr->_count;
@@ -597,18 +698,24 @@ MM_LargeObjectAllocateStats::simulateAllocateObjects(MM_EnvironmentBase *env, ui
 				} else {
 					/* all allocation is satisfied */
 					freeEntriesUsed = (float)allocObjectCount / (float)freeEntryOverAllocSizeRatio;
-					Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_satisfy(env->getLanguageVMThread(), "full", "frequent", curr->_count, sizeClassIndex);
-					Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_full(env->getLanguageVMThread(), curr->_count - (uintptr_t)freeEntriesUsed, curr->_count, freeEntriesUsed);
+					Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_satisfy(
+					        env->getLanguageVMThread(), "full", "frequent", curr->_count,
+					        sizeClassIndex);
+					Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_full(
+					        env->getLanguageVMThread(), curr->_count - (uintptr_t)freeEntriesUsed,
+					        curr->_count, freeEntriesUsed);
 					*currentFreeMemory -= (uintptr_t)freeEntriesUsed * currentSize;
 
 					allocBytes = 0;
 					allocObjectCount = 0;
 				}
-				updateFreeEntrySizeClassStats(currentSize, &ext->freeEntrySizeClassStatsSimulated, -((intptr_t)freeEntriesUsed), sizeClassIndex, prev, curr);
+				updateFreeEntrySizeClassStats(currentSize, &ext->freeEntrySizeClassStatsSimulated,
+				        -((intptr_t)freeEntriesUsed), sizeClassIndex, prev, curr);
 
 				/* there are two kind of remainders:
 				 1) freeEntriesUsed of size: freeEntrySize - usedPortionOfFreeEntry
-				 2) up to one of size: freeEntrySize - decimal-fraction-of-freeEntriesUsed-float * usedPortionOfFreeEntry
+				 2) up to one of size: freeEntrySize - decimal-fraction-of-freeEntriesUsed-float *
+				 usedPortionOfFreeEntry
 				*/
 
 				/* TODO: do we need random factor as for regular sizes? */
@@ -623,31 +730,46 @@ MM_LargeObjectAllocateStats::simulateAllocateObjects(MM_EnvironmentBase *env, ui
 					if (0 != freeEntriesUsedInteger) {
 						/* no need to decrement anything - we already accounted it for */
 						if (remainderSize >= _largeObjectThreshold) {
-							uintptr_t updatedFreeEntrySize = incrementFreeEntrySizeClassStats(remainderSize, &ext->freeEntrySizeClassStatsSimulated, freeEntriesUsedInteger);
-							Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_remainder(env->getLanguageVMThread(), freeEntriesUsedInteger, remainderSize, updatedFreeEntrySize);
-							*currentFreeMemory += updatedFreeEntrySize * freeEntriesUsedInteger;
+							uintptr_t updatedFreeEntrySize =
+							        incrementFreeEntrySizeClassStats(remainderSize,
+							                &ext->freeEntrySizeClassStatsSimulated,
+							                freeEntriesUsedInteger);
+							Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_remainder(
+							        env->getLanguageVMThread(), freeEntriesUsedInteger,
+							        remainderSize, updatedFreeEntrySize);
+							*currentFreeMemory += updatedFreeEntrySize
+							        * freeEntriesUsedInteger;
 						}
 					}
 
 					/* possibly one more remainder of even larger size */
-					remainderSize = freeEntrySize - (uintptr_t)(freeEntriesUsedFractional * usedPortionOfFreeEntry);
+					remainderSize = freeEntrySize
+					        - (uintptr_t)(freeEntriesUsedFractional * usedPortionOfFreeEntry);
 
 					if (remainderSize < currentSize) {
 						Assert_MM_true(((intptr_t)curr->_count) > 0);
-						Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_adjustement(env->getLanguageVMThread(), curr->_count - 1, curr->_count);
+						Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_adjustement(
+						        env->getLanguageVMThread(), curr->_count - 1, curr->_count);
 
-						updateFreeEntrySizeClassStats(currentSize, &ext->freeEntrySizeClassStatsSimulated, -1, sizeClassIndex, prev, curr);
+						updateFreeEntrySizeClassStats(currentSize,
+						        &ext->freeEntrySizeClassStatsSimulated, -1, sizeClassIndex,
+						        prev, curr);
 
 						*currentFreeMemory -= currentSize;
 						if (remainderSize >= _largeObjectThreshold) {
-							uintptr_t updatedFreeEntrySize = incrementFreeEntrySizeClassStats(remainderSize, &ext->freeEntrySizeClassStatsSimulated);
-							Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_remainder(env->getLanguageVMThread(), 1, remainderSize, updatedFreeEntrySize);
+							uintptr_t updatedFreeEntrySize =
+							        incrementFreeEntrySizeClassStats(remainderSize,
+							                &ext->freeEntrySizeClassStatsSimulated);
+							Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_remainder(
+							        env->getLanguageVMThread(), 1, remainderSize,
+							        updatedFreeEntrySize);
 							*currentFreeMemory += updatedFreeEntrySize;
 						}
 					}
 				}
 
-				Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_freeEntry_exit(env->getLanguageVMThread(), "Object", "frequent", sizeClassIndex, curr->_count);
+				Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_freeEntry_exit(
+				        env->getLanguageVMThread(), "Object", "frequent", sizeClassIndex, curr->_count);
 
 				/* any allocation left? */
 				if (allocBytes > 0) {
@@ -668,7 +790,8 @@ MM_LargeObjectAllocateStats::simulateAllocateObjects(MM_EnvironmentBase *env, ui
 		}
 	}
 
-	Trc_MM_LargeObjectAllocateStats_simulateAllocateObjects_exit(env->getLanguageVMThread(), objectSize, allocBytes, allocBytes >> 20, *currentFreeMemory, *currentFreeMemory >> 20);
+	Trc_MM_LargeObjectAllocateStats_simulateAllocateObjects_exit(env->getLanguageVMThread(), objectSize, allocBytes,
+	        allocBytes >> 20, *currentFreeMemory, *currentFreeMemory >> 20);
 
 	/* return amount of unsatisfied allocate */
 	return allocBytes;
@@ -677,17 +800,19 @@ MM_LargeObjectAllocateStats::simulateAllocateObjects(MM_EnvironmentBase *env, ui
 MMINLINE uintptr_t
 MM_LargeObjectAllocateStats::getNextSizeClass(uintptr_t sizeClassIndex, uintptr_t maxSizeClasses)
 {
-	return ((sizeClassIndex+1) % maxSizeClasses);
+	return ((sizeClassIndex + 1) % maxSizeClasses);
 }
 
-MMINLINE bool 
-MM_LargeObjectAllocateStats::isFirstIterationCompleteForCurrentStride(uintptr_t sizeClassIndex, uintptr_t maxSizeClasses)
+MMINLINE bool
+MM_LargeObjectAllocateStats::isFirstIterationCompleteForCurrentStride(
+        uintptr_t sizeClassIndex, uintptr_t maxSizeClasses)
 {
 	return (sizeClassIndex == getNextSizeClass(_TLHSizeClassIndex, maxSizeClasses));
 }
 
 uintptr_t
-MM_LargeObjectAllocateStats::simulateAllocateTLHs(MM_EnvironmentBase *env, uintptr_t allocBytes, uintptr_t *currentFreeMemory, uintptr_t strides)
+MM_LargeObjectAllocateStats::simulateAllocateTLHs(
+        MM_EnvironmentBase *env, uintptr_t allocBytes, uintptr_t *currentFreeMemory, uintptr_t strides)
 {
 	MM_GCExtensionsBase *ext = env->getExtensions();
 	Assert_MM_true(NULL != ext->freeEntrySizeClassStatsSimulated._frequentAllocationHead);
@@ -696,15 +821,19 @@ MM_LargeObjectAllocateStats::simulateAllocateTLHs(MM_EnvironmentBase *env, uintp
 	uintptr_t sizeClassIndex = _TLHSizeClassIndex;
 	MM_FreeEntrySizeClassStats::FrequentAllocation *next = NULL;
 	/* using to detect unsatisfied case */
-	bool firstIterationForCurrentStride = true; 
-	uintptr_t allocBytesPerStride = allocBytes/strides;
+	bool firstIterationForCurrentStride = true;
+	uintptr_t allocBytesPerStride = allocBytes / strides;
 	uintptr_t allocBytesForCurrentStride = allocBytesPerStride;
 	uintptr_t maxSizeClasses = ext->freeEntrySizeClassStatsSimulated._maxSizeClasses;
-	
-	Trc_MM_LargeObjectAllocateStats_simulateAllocateTLHs_entry(env->getLanguageVMThread(), allocBytes, allocBytes >> 20, *currentFreeMemory, *currentFreeMemory >> 20);
+
+	Trc_MM_LargeObjectAllocateStats_simulateAllocateTLHs_entry(
+	        env->getLanguageVMThread(), allocBytes, allocBytes >> 20, *currentFreeMemory, *currentFreeMemory >> 20);
 	/* keep allocating from this size class or any larger */
-	while ((allocBytesForCurrentStride > 0) && (firstIterationForCurrentStride || !isFirstIterationCompleteForCurrentStride(sizeClassIndex, maxSizeClasses))) {
-		if (firstIterationForCurrentStride && isFirstIterationCompleteForCurrentStride(sizeClassIndex, maxSizeClasses)) {
+	while ((allocBytesForCurrentStride > 0)
+	        && (firstIterationForCurrentStride
+	                || !isFirstIterationCompleteForCurrentStride(sizeClassIndex, maxSizeClasses))) {
+		if (firstIterationForCurrentStride
+		        && isFirstIterationCompleteForCurrentStride(sizeClassIndex, maxSizeClasses)) {
 			firstIterationForCurrentStride = false;
 		}
 		/* any available free entries of this size class? */
@@ -712,73 +841,116 @@ MM_LargeObjectAllocateStats::simulateAllocateTLHs(MM_EnvironmentBase *env, uintp
 		if (0 == _TLHFrequentAllocationSize) {
 			/* exhaused the current size class. move to next one */
 			if (0 != ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex]) {
-				Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_freeEntry_entry(env->getLanguageVMThread(), "TLH", "regular", sizeClassIndex, _sizeClassSizes[sizeClassIndex] , ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex]);
+				Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_freeEntry_entry(
+				        env->getLanguageVMThread(), "TLH", "regular", sizeClassIndex,
+				        _sizeClassSizes[sizeClassIndex],
+				        ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex]);
 
-				/* go for smallest to largest sizes within a class size; thus start with the 'regular' size and continue with frequent allocate sizes as ordered in the list (ascending) */
+				/* go for smallest to largest sizes within a class size; thus start with the 'regular'
+				 * size and continue with frequent allocate sizes as ordered in the list (ascending) */
 
 				/* dealing with 'regular' size */
-				uintptr_t availableBytes = ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex] * _sizeClassSizes[sizeClassIndex];
+				uintptr_t availableBytes = ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex]
+				        * _sizeClassSizes[sizeClassIndex];
 				float freeEntriesUsed = 0.0;
 
-				Trc_MM_LargeObjectAllocateStats_simulateAllocateTLHs_availableBytes(env->getLanguageVMThread(), "regular", availableBytes, ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex], _sizeClassSizes[sizeClassIndex]);
+				Trc_MM_LargeObjectAllocateStats_simulateAllocateTLHs_availableBytes(
+				        env->getLanguageVMThread(), "regular", availableBytes,
+				        ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex],
+				        _sizeClassSizes[sizeClassIndex]);
 
 				next = ext->freeEntrySizeClassStatsSimulated._frequentAllocationHead[sizeClassIndex];
 				if (availableBytes <= allocBytesForCurrentStride) {
-					Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_satisfy(env->getLanguageVMThread(), "partial", "regular", _sizeClassSizes[sizeClassIndex], sizeClassIndex);
-					Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_partial(env->getLanguageVMThread(), allocBytesForCurrentStride - availableBytes, allocBytesForCurrentStride, availableBytes);
+					Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_satisfy(
+					        env->getLanguageVMThread(), "partial", "regular",
+					        _sizeClassSizes[sizeClassIndex], sizeClassIndex);
+					Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_partial(
+					        env->getLanguageVMThread(), allocBytesForCurrentStride - availableBytes,
+					        allocBytesForCurrentStride, availableBytes);
 
-					/* all available memory of this size will be used (but we my not satisfy all allocation) */
-					freeEntriesUsed = (float)ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex];
+					/* all available memory of this size will be used (but we my not satisfy all
+					 * allocation) */
+					freeEntriesUsed =
+					        (float)ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex];
 					*currentFreeMemory -= availableBytes;
 					ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex] = 0;
 					allocBytesForCurrentStride -= availableBytes;
 				} else {
 					/* all allocation is satisfied (and there may be entries of this size left) */
-					freeEntriesUsed = (float)allocBytesForCurrentStride / (float)_sizeClassSizes[sizeClassIndex];
-					Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_satisfy(env->getLanguageVMThread(), "full", "regular", _sizeClassSizes[sizeClassIndex], sizeClassIndex);
-					Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_full(env->getLanguageVMThread(), ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex] - (uintptr_t)freeEntriesUsed, ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex], freeEntriesUsed);
-					ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex] -= (uintptr_t)freeEntriesUsed;
-					*currentFreeMemory -= (uintptr_t)freeEntriesUsed * _sizeClassSizes[sizeClassIndex];
+					freeEntriesUsed = (float)allocBytesForCurrentStride
+					        / (float)_sizeClassSizes[sizeClassIndex];
+					Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_satisfy(
+					        env->getLanguageVMThread(), "full", "regular",
+					        _sizeClassSizes[sizeClassIndex], sizeClassIndex);
+					Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_full(
+					        env->getLanguageVMThread(),
+					        ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex]
+					                - (uintptr_t)freeEntriesUsed,
+					        ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex],
+					        freeEntriesUsed);
+					ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex] -=
+					        (uintptr_t)freeEntriesUsed;
+					*currentFreeMemory -= (uintptr_t)freeEntriesUsed
+					        * _sizeClassSizes[sizeClassIndex];
 					allocBytesForCurrentStride = 0;
 				}
 
 				/* there is one kind of remainder:
-				 up to one of size: freeEntrySize - decimal-fraction-of-freeEntriesUsed-float * _sizeClassSizes[sizeClassIndex]
+				 up to one of size: freeEntrySize - decimal-fraction-of-freeEntriesUsed-float *
+				 _sizeClassSizes[sizeClassIndex]
 				*/
 
-				/* we do not know the exact size of free entry(ies). we do know low and hi bounds, and will just approximate it (them) with a random size within the range */
+				/* we do not know the exact size of free entry(ies). we do know low and hi bounds, and
+				 * will just approximate it (them) with a random size within the range */
 				uintptr_t minFreeEntrySize = _sizeClassSizes[sizeClassIndex];
 				uintptr_t maxFreeEntrySize = UDATA_MAX;
 
-				if (NULL != ext->freeEntrySizeClassStatsSimulated._frequentAllocationHead[sizeClassIndex]) {
-					/* since we deal with regular size, first larger size might be the first frequent alloc size, if any */
-					maxFreeEntrySize = ext->freeEntrySizeClassStatsSimulated._frequentAllocationHead[sizeClassIndex]->_size;
+				if (NULL
+				        != ext->freeEntrySizeClassStatsSimulated
+				                   ._frequentAllocationHead[sizeClassIndex]) {
+					/* since we deal with regular size, first larger size might be the first
+					 * frequent alloc size, if any */
+					maxFreeEntrySize = ext->freeEntrySizeClassStatsSimulated
+					                           ._frequentAllocationHead[sizeClassIndex]
+					                           ->_size;
 				} else if (sizeClassIndex + 1 < maxSizeClasses) {
 					maxFreeEntrySize = _sizeClassSizes[sizeClassIndex + 1];
 				}
 
-				uintptr_t freeEntrySize = minFreeEntrySize + (uintptr_t) ((maxFreeEntrySize - minFreeEntrySize) * (float)rand() / RAND_MAX);
+				uintptr_t freeEntrySize = minFreeEntrySize
+				        + (uintptr_t)((maxFreeEntrySize - minFreeEntrySize) * (float)rand() / RAND_MAX);
 
 				uintptr_t freeEntriesUsedInteger = (uintptr_t)freeEntriesUsed;
 				float freeEntriesUsedFractional = freeEntriesUsed - freeEntriesUsedInteger;
 
-				uintptr_t remainderSize = freeEntrySize - (uintptr_t)(freeEntriesUsedFractional * _sizeClassSizes[sizeClassIndex]);
+				uintptr_t remainderSize = freeEntrySize
+				        - (uintptr_t)(freeEntriesUsedFractional * _sizeClassSizes[sizeClassIndex]);
 
 				/* often it will stay in the same size class, but if not, we have to update counters */
 				if (remainderSize < _sizeClassSizes[sizeClassIndex]) {
-					Assert_MM_true(((intptr_t)ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex]) > 0);
-					Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_adjustement(env->getLanguageVMThread(), ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex] - 1, ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex]);
+					Assert_MM_true(
+					        ((intptr_t)ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex])
+					        > 0);
+					Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_adjustement(
+					        env->getLanguageVMThread(),
+					        ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex] - 1,
+					        ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex]);
 					ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex] -= 1;
 					*currentFreeMemory -= _sizeClassSizes[sizeClassIndex];
 					if (remainderSize >= _largeObjectThreshold) {
-						uintptr_t updatedFreeEntrySize = incrementFreeEntrySizeClassStats(remainderSize, &ext->freeEntrySizeClassStatsSimulated);
-						Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_remainder(env->getLanguageVMThread(), 1, remainderSize, updatedFreeEntrySize);
+						uintptr_t updatedFreeEntrySize = incrementFreeEntrySizeClassStats(
+						        remainderSize, &ext->freeEntrySizeClassStatsSimulated);
+						Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_remainder(
+						        env->getLanguageVMThread(), 1, remainderSize,
+						        updatedFreeEntrySize);
 						*currentFreeMemory += updatedFreeEntrySize;
 					}
 				}
 
 				/* done with 'regular' size; now deal with frequent alloc sizes */
-				Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_freeEntry_exit(env->getLanguageVMThread(), "TLH", "regular", sizeClassIndex, ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex]);
+				Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_freeEntry_exit(
+				        env->getLanguageVMThread(), "TLH", "regular", sizeClassIndex,
+				        ext->freeEntrySizeClassStatsSimulated._count[sizeClassIndex]);
 				if (0 == allocBytesForCurrentStride) {
 					if (strides > 1) {
 						strides -= 1;
@@ -790,9 +962,12 @@ MM_LargeObjectAllocateStats::simulateAllocateTLHs(MM_EnvironmentBase *env, uintp
 			}
 		}
 
-		if ((allocBytesForCurrentStride > 0) && (0 != ext->freeEntrySizeClassStatsSimulated.getFrequentAllocCount(sizeClassIndex))) {
-			/* for each size class, try to find frequent allocation sizes equal or larger than preserved size */
-			MM_FreeEntrySizeClassStats::FrequentAllocation *curr = ext->freeEntrySizeClassStatsSimulated._frequentAllocationHead[sizeClassIndex];
+		if ((allocBytesForCurrentStride > 0)
+		        && (0 != ext->freeEntrySizeClassStatsSimulated.getFrequentAllocCount(sizeClassIndex))) {
+			/* for each size class, try to find frequent allocation sizes equal or larger than preserved
+			 * size */
+			MM_FreeEntrySizeClassStats::FrequentAllocation *curr =
+			        ext->freeEntrySizeClassStatsSimulated._frequentAllocationHead[sizeClassIndex];
 			MM_FreeEntrySizeClassStats::FrequentAllocation *prev = NULL;
 			if (0 != _TLHFrequentAllocationSize) {
 				while ((NULL != curr) && (curr->_size < _TLHFrequentAllocationSize)) {
@@ -815,19 +990,27 @@ MM_LargeObjectAllocateStats::simulateAllocateTLHs(MM_EnvironmentBase *env, uintp
 
 			while ((allocBytesForCurrentStride > 0) && (NULL != curr)) {
 				uintptr_t currentSize = curr->_size;
-				Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_freeEntry_entry(env->getLanguageVMThread(), "TLH", "frequent", sizeClassIndex, currentSize, curr->_count);
+				Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_freeEntry_entry(
+				        env->getLanguageVMThread(), "TLH", "frequent", sizeClassIndex, currentSize,
+				        curr->_count);
 
 				uintptr_t availableBytes = curr->_count * currentSize;
 				float freeEntriesUsed = 0;
 
-				Trc_MM_LargeObjectAllocateStats_simulateAllocateTLHs_availableBytes(env->getLanguageVMThread(), "frequent", availableBytes, curr->_count, currentSize);
+				Trc_MM_LargeObjectAllocateStats_simulateAllocateTLHs_availableBytes(
+				        env->getLanguageVMThread(), "frequent", availableBytes, curr->_count,
+				        currentSize);
 
 				Assert_MM_true(0 != curr->_count);
 
 				next = curr->_nextInSizeClass;
 				if (availableBytes <= allocBytesForCurrentStride) {
-					Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_satisfy(env->getLanguageVMThread(), "partial", "frequent", curr->_count, sizeClassIndex);
-					Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_partial(env->getLanguageVMThread(), allocBytesForCurrentStride - availableBytes, allocBytesForCurrentStride, availableBytes);
+					Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_satisfy(
+					        env->getLanguageVMThread(), "partial", "frequent", curr->_count,
+					        sizeClassIndex);
+					Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_partial(
+					        env->getLanguageVMThread(), allocBytesForCurrentStride - availableBytes,
+					        allocBytesForCurrentStride, availableBytes);
 
 					/* all available memory of this size will be used */
 					freeEntriesUsed = (float)curr->_count;
@@ -836,16 +1019,22 @@ MM_LargeObjectAllocateStats::simulateAllocateTLHs(MM_EnvironmentBase *env, uintp
 				} else {
 					/* all allocation is satisfied */
 					freeEntriesUsed = (float)allocBytesForCurrentStride / (float)currentSize;
-					Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_satisfy(env->getLanguageVMThread(), "full", "frequent", curr->_count, sizeClassIndex);
-					Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_full(env->getLanguageVMThread(), curr->_count - (uintptr_t)freeEntriesUsed, curr->_count, freeEntriesUsed);
+					Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_satisfy(
+					        env->getLanguageVMThread(), "full", "frequent", curr->_count,
+					        sizeClassIndex);
+					Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_full(
+					        env->getLanguageVMThread(), curr->_count - (uintptr_t)freeEntriesUsed,
+					        curr->_count, freeEntriesUsed);
 
 					*currentFreeMemory -= (uintptr_t)freeEntriesUsed * currentSize;
 					allocBytesForCurrentStride = 0;
 				}
-				updateFreeEntrySizeClassStats(currentSize, &ext->freeEntrySizeClassStatsSimulated, -((intptr_t)freeEntriesUsed), sizeClassIndex, prev, curr);
+				updateFreeEntrySizeClassStats(currentSize, &ext->freeEntrySizeClassStatsSimulated,
+				        -((intptr_t)freeEntriesUsed), sizeClassIndex, prev, curr);
 
 				/* there is one kind of remainder:
-				 up to one of size: freeEntrySize - decimal-fraction-of-freeEntriesUsed-float * curr->_size
+				 up to one of size: freeEntrySize - decimal-fraction-of-freeEntriesUsed-float *
+				 curr->_size
 				*/
 
 				uintptr_t freeEntrySize = currentSize;
@@ -853,23 +1042,30 @@ MM_LargeObjectAllocateStats::simulateAllocateTLHs(MM_EnvironmentBase *env, uintp
 				uintptr_t freeEntriesUsedInteger = (uintptr_t)freeEntriesUsed;
 				float freeEntriesUsedFractional = freeEntriesUsed - freeEntriesUsedInteger;
 
-				uintptr_t remainderSize = freeEntrySize - (uintptr_t)(freeEntriesUsedFractional * currentSize);
+				uintptr_t remainderSize = freeEntrySize
+				        - (uintptr_t)(freeEntriesUsedFractional * currentSize);
 
 				if (remainderSize < currentSize) {
 					Assert_MM_true(((intptr_t)curr->_count) > 0);
-					Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_adjustement(env->getLanguageVMThread(), curr->_count - 1, curr->_count);
+					Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_adjustement(
+					        env->getLanguageVMThread(), curr->_count - 1, curr->_count);
 
-					updateFreeEntrySizeClassStats(currentSize, &ext->freeEntrySizeClassStatsSimulated, -1, sizeClassIndex, prev, curr);
+					updateFreeEntrySizeClassStats(currentSize,
+					        &ext->freeEntrySizeClassStatsSimulated, -1, sizeClassIndex, prev, curr);
 
 					*currentFreeMemory -= currentSize;
 					if (remainderSize >= _largeObjectThreshold) {
-						uintptr_t updatedFreeEntrySize = incrementFreeEntrySizeClassStats(remainderSize, &ext->freeEntrySizeClassStatsSimulated);
-						Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_remainder(env->getLanguageVMThread(), 1, remainderSize, updatedFreeEntrySize);
+						uintptr_t updatedFreeEntrySize = incrementFreeEntrySizeClassStats(
+						        remainderSize, &ext->freeEntrySizeClassStatsSimulated);
+						Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_remainder(
+						        env->getLanguageVMThread(), 1, remainderSize,
+						        updatedFreeEntrySize);
 						*currentFreeMemory += updatedFreeEntrySize;
 					}
 				}
 
-				Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_freeEntry_exit(env->getLanguageVMThread(), "TLH", "frequent", sizeClassIndex, curr->_count);
+				Trc_MM_LargeObjectAllocateStats_simulateAllocateCommon_freeEntry_exit(
+				        env->getLanguageVMThread(), "TLH", "frequent", sizeClassIndex, curr->_count);
 
 				if (0 == allocBytesForCurrentStride) {
 					/* exhausted all allocation for current stride, move to next stride */
@@ -883,7 +1079,7 @@ MM_LargeObjectAllocateStats::simulateAllocateTLHs(MM_EnvironmentBase *env, uintp
 						}
 					}
 				}
-				
+
 				if (allocBytesForCurrentStride > 0) {
 					/* find next non-empty frequent-alloc size */
 					curr = next;
@@ -919,33 +1115,39 @@ MM_LargeObjectAllocateStats::simulateAllocateTLHs(MM_EnvironmentBase *env, uintp
 	} else {
 		allocBytes = allocBytesForCurrentStride + (strides - 1) * allocBytesPerStride;
 	}
-	Trc_MM_LargeObjectAllocateStats_simulateAllocateTLHs_exit(env->getLanguageVMThread(), allocBytesForCurrentStride, allocBytes >> 20, *currentFreeMemory, *currentFreeMemory >> 20);
+	Trc_MM_LargeObjectAllocateStats_simulateAllocateTLHs_exit(env->getLanguageVMThread(),
+	        allocBytesForCurrentStride, allocBytes >> 20, *currentFreeMemory, *currentFreeMemory >> 20);
 	/* return amount of unsatisfied allocate */
 	return allocBytes;
 }
 void
-MM_LargeObjectAllocateStats::averageForSpaceSaving(MM_EnvironmentBase *env, OMRSpaceSaving* spaceSavingToAverageWith, OMRSpaceSaving** spaceSavingAveragePercent, uintptr_t bytesAllocatedThisRound)
+MM_LargeObjectAllocateStats::averageForSpaceSaving(MM_EnvironmentBase *env, OMRSpaceSaving *spaceSavingToAverageWith,
+        OMRSpaceSaving **spaceSavingAveragePercent, uintptr_t bytesAllocatedThisRound)
 {
 	/* no updates, if no allocation this round */
 	if (0 == bytesAllocatedThisRound) {
 		return;
 	}
 
-	/* if bytesAllocatedThisRound == _averageBytesAllocated, the historic average will carry 9/10 weight (new weight is 1/10)
-	 * if bytesAllocatedThisRound = 9 x _averageBytesAllocated, the historic average will will carry 1/2 weight (new weight is 1/2)
-	 * as bytesAllocatedThisRound / _averageBytesAllocated ratio approaches infinity, the historic average weight will approach 0 (new weight approaches 1)
-	 * if _averageBytesAllocated = 9 x bytesAllocatedThisRound, the historic average weight will carry 99/100 weigth (new weight is 1/100)
-	 * as bytesAllocatedThisRound / _averageBytesAllocated approaches 0, the historic average weight will approach 1 (new weight approaches 0)
+	/* if bytesAllocatedThisRound == _averageBytesAllocated, the historic average will carry 9/10 weight (new weight
+	 * is 1/10) if bytesAllocatedThisRound = 9 x _averageBytesAllocated, the historic average will will carry 1/2
+	 * weight (new weight is 1/2) as bytesAllocatedThisRound / _averageBytesAllocated ratio approaches infinity, the
+	 * historic average weight will approach 0 (new weight approaches 1) if _averageBytesAllocated = 9 x
+	 * bytesAllocatedThisRound, the historic average weight will carry 99/100 weigth (new weight is 1/100) as
+	 * bytesAllocatedThisRound / _averageBytesAllocated approaches 0, the historic average weight will approach 1
+	 * (new weight approaches 0)
 	 */
 	float avgWeightBase = (float)0.9;
-	float newWeight = 1 - (10 * avgWeightBase * _averageBytesAllocated) / (bytesAllocatedThisRound + 10 * avgWeightBase * _averageBytesAllocated);
-	Assert_MM_true((0.0 <= newWeight ) && (newWeight <= 1.0));
+	float newWeight = 1
+	        - (10 * avgWeightBase * _averageBytesAllocated)
+	                / (bytesAllocatedThisRound + 10 * avgWeightBase * _averageBytesAllocated);
+	Assert_MM_true((0.0 <= newWeight) && (newWeight <= 1.0));
 
 	spaceSavingClear(_spaceSavingTemp);
 
 	uintptr_t i = 0;
 	/* walk averagePercent values, apply weight and store to temp */
-	for(i = 0; i < spaceSavingGetCurSize(*spaceSavingAveragePercent); i++ ) {
+	for (i = 0; i < spaceSavingGetCurSize(*spaceSavingAveragePercent); i++) {
 		void *key = spaceSavingGetKthMostFreq(*spaceSavingAveragePercent, i + 1);
 		uintptr_t percentsEncoded = spaceSavingGetKthMostFreqCount(*spaceSavingAveragePercent, i + 1);
 		uintptr_t percentsEncodedWeighted = (uintptr_t)(percentsEncoded * (1 - newWeight));
@@ -953,11 +1155,12 @@ MM_LargeObjectAllocateStats::averageForSpaceSaving(MM_EnvironmentBase *env, OMRS
 	}
 
 	/* walk new values, upsample, apply newWeight, encode and add to temp */
-	for(i = 0; i < spaceSavingGetCurSize(spaceSavingToAverageWith); i++ ) {
+	for (i = 0; i < spaceSavingGetCurSize(spaceSavingToAverageWith); i++) {
 		void *key = spaceSavingGetKthMostFreq(spaceSavingToAverageWith, i + 1);
 		uintptr_t bytesAllocated = spaceSavingGetKthMostFreqCount(spaceSavingToAverageWith, i + 1);
 
-		/* TODO: enable upSampleAllocStats, currently do not count the allocation in TLH, due to inaccurate upSample in some cases */
+		/* TODO: enable upSampleAllocStats, currently do not count the allocation in TLH, due to inaccurate
+		 * upSample in some cases */
 		uintptr_t bytesAllocatedUpSampled = bytesAllocated;
 		/*	uintptr_t bytesAllocatedUpSampled = upSampleAllocStats(env, (uintptr_t)key, bytesAllocated); */
 		float bytesAllocatedWeighted = bytesAllocatedUpSampled * newWeight;
@@ -970,22 +1173,25 @@ MM_LargeObjectAllocateStats::averageForSpaceSaving(MM_EnvironmentBase *env, OMRS
 	OMRSpaceSaving *temp = *spaceSavingAveragePercent;
 	*spaceSavingAveragePercent = _spaceSavingTemp;
 	_spaceSavingTemp = temp;
-
 }
 
 void
 MM_LargeObjectAllocateStats::average(MM_EnvironmentBase *env, uintptr_t bytesAllocatedThisRound)
 {
 	averageForSpaceSaving(env, _spaceSavingSizes, &_spaceSavingSizesAveragePercent, bytesAllocatedThisRound);
-	averageForSpaceSaving(env, _spaceSavingSizeClasses, &_spaceSavingSizeClassesAveragePercent, bytesAllocatedThisRound);
+	averageForSpaceSaving(
+	        env, _spaceSavingSizeClasses, &_spaceSavingSizeClassesAveragePercent, bytesAllocatedThisRound);
 
 	const float avgWeight = (float)0.9;
 
-	_averageBytesAllocated = (uintptr_t)((1 - avgWeight) * bytesAllocatedThisRound + avgWeight * _averageBytesAllocated);
+	_averageBytesAllocated =
+	        (uintptr_t)((1 - avgWeight) * bytesAllocatedThisRound + avgWeight * _averageBytesAllocated);
 }
 
 MMINLINE uintptr_t
-MM_LargeObjectAllocateStats::updateFreeEntrySizeClassStats(uintptr_t freeEntrySize, MM_FreeEntrySizeClassStats *freeEntrySizeClassStats, intptr_t count, uintptr_t sizeClassIndex, MM_FreeEntrySizeClassStats::FrequentAllocation* prev, MM_FreeEntrySizeClassStats::FrequentAllocation* curr)
+MM_LargeObjectAllocateStats::updateFreeEntrySizeClassStats(uintptr_t freeEntrySize,
+        MM_FreeEntrySizeClassStats *freeEntrySizeClassStats, intptr_t count, uintptr_t sizeClassIndex,
+        MM_FreeEntrySizeClassStats::FrequentAllocation *prev, MM_FreeEntrySizeClassStats::FrequentAllocation *curr)
 {
 	uintptr_t returnSize = 0;
 	if (sizeClassIndex >= _veryLargeEntrySizeClass) {
@@ -994,7 +1200,8 @@ MM_LargeObjectAllocateStats::updateFreeEntrySizeClassStats(uintptr_t freeEntrySi
 
 			if (0 == curr->_count) {
 				if (NULL == prev) {
-					freeEntrySizeClassStats->_frequentAllocationHead[sizeClassIndex] = curr->_nextInSizeClass;
+					freeEntrySizeClassStats->_frequentAllocationHead[sizeClassIndex] =
+					        curr->_nextInSizeClass;
 				} else {
 					prev->_nextInSizeClass = curr->_nextInSizeClass;
 				}
@@ -1004,7 +1211,8 @@ MM_LargeObjectAllocateStats::updateFreeEntrySizeClassStats(uintptr_t freeEntrySi
 			returnSize = freeEntrySize;
 		} else {
 			if (NULL != freeEntrySizeClassStats->_freeHeadVeryLargeEntry) {
-				MM_FreeEntrySizeClassStats::FrequentAllocation *newVeryLargeEntry = freeEntrySizeClassStats->_freeHeadVeryLargeEntry;
+				MM_FreeEntrySizeClassStats::FrequentAllocation *newVeryLargeEntry =
+				        freeEntrySizeClassStats->_freeHeadVeryLargeEntry;
 				freeEntrySizeClassStats->_freeHeadVeryLargeEntry = newVeryLargeEntry->_nextInSizeClass;
 
 				newVeryLargeEntry->_size = freeEntrySize;
@@ -1013,7 +1221,8 @@ MM_LargeObjectAllocateStats::updateFreeEntrySizeClassStats(uintptr_t freeEntrySi
 				if (NULL != prev) {
 					prev->_nextInSizeClass = newVeryLargeEntry;
 				} else {
-					freeEntrySizeClassStats->_frequentAllocationHead[sizeClassIndex] = newVeryLargeEntry;
+					freeEntrySizeClassStats->_frequentAllocationHead[sizeClassIndex] =
+					        newVeryLargeEntry;
 				}
 				returnSize = freeEntrySize;
 			} else {
@@ -1040,19 +1249,22 @@ MM_LargeObjectAllocateStats::updateFreeEntrySizeClassStats(uintptr_t freeEntrySi
 }
 
 uintptr_t
-MM_LargeObjectAllocateStats::incrementFreeEntrySizeClassStats(uintptr_t freeEntrySize, MM_FreeEntrySizeClassStats *freeEntrySizeClassStats, uintptr_t count)
+MM_LargeObjectAllocateStats::incrementFreeEntrySizeClassStats(
+        uintptr_t freeEntrySize, MM_FreeEntrySizeClassStats *freeEntrySizeClassStats, uintptr_t count)
 {
 	uintptr_t sizeClassIndex = getSizeClassIndex(freeEntrySize);
-	
+
 	/* for this sizeClass, walk the (ascending) list of frequent allocations, and find a match, if any */
-	MM_FreeEntrySizeClassStats::FrequentAllocation *frequentAllocation = freeEntrySizeClassStats->_frequentAllocationHead[sizeClassIndex];
+	MM_FreeEntrySizeClassStats::FrequentAllocation *frequentAllocation =
+	        freeEntrySizeClassStats->_frequentAllocationHead[sizeClassIndex];
 	MM_FreeEntrySizeClassStats::FrequentAllocation *prevFrequentAllocation = NULL;
 	while ((NULL != frequentAllocation) && (freeEntrySize > frequentAllocation->_size)) {
 		prevFrequentAllocation = frequentAllocation;
 		frequentAllocation = frequentAllocation->_nextInSizeClass;
 	}
 
-	return updateFreeEntrySizeClassStats(freeEntrySize, freeEntrySizeClassStats, count, sizeClassIndex, prevFrequentAllocation, frequentAllocation);
+	return updateFreeEntrySizeClassStats(freeEntrySize, freeEntrySizeClassStats, count, sizeClassIndex,
+	        prevFrequentAllocation, frequentAllocation);
 }
 
 uintptr_t
@@ -1078,12 +1290,14 @@ MM_LargeObjectAllocateStats::decrementFreeEntrySizeClassStats(uintptr_t freeEntr
 }
 
 void
-MM_LargeObjectAllocateStats::decrementFreeEntrySizeClassStats(uintptr_t freeEntrySize, MM_FreeEntrySizeClassStats *freeEntrySizeClassStats, uintptr_t count)
+MM_LargeObjectAllocateStats::decrementFreeEntrySizeClassStats(
+        uintptr_t freeEntrySize, MM_FreeEntrySizeClassStats *freeEntrySizeClassStats, uintptr_t count)
 {
 	uintptr_t sizeClassIndex = getSizeClassIndex(freeEntrySize);
 
 	/* for this sizeClass, walk the (ascending) list of frequent allocations, and find a match, if any */
-	MM_FreeEntrySizeClassStats::FrequentAllocation *frequentAllocation = freeEntrySizeClassStats->_frequentAllocationHead[sizeClassIndex];
+	MM_FreeEntrySizeClassStats::FrequentAllocation *frequentAllocation =
+	        freeEntrySizeClassStats->_frequentAllocationHead[sizeClassIndex];
 	MM_FreeEntrySizeClassStats::FrequentAllocation *prevFrequentAllocation = NULL;
 
 	while ((NULL != frequentAllocation) && (freeEntrySize > frequentAllocation->_size)) {
@@ -1091,7 +1305,8 @@ MM_LargeObjectAllocateStats::decrementFreeEntrySizeClassStats(uintptr_t freeEntr
 		frequentAllocation = frequentAllocation->_nextInSizeClass;
 	}
 
-	updateFreeEntrySizeClassStats(freeEntrySize, freeEntrySizeClassStats, -((intptr_t)count), sizeClassIndex, prevFrequentAllocation, frequentAllocation);
+	updateFreeEntrySizeClassStats(freeEntrySize, freeEntrySizeClassStats, -((intptr_t)count), sizeClassIndex,
+	        prevFrequentAllocation, frequentAllocation);
 }
 
 uintptr_t
@@ -1107,14 +1322,19 @@ MM_LargeObjectAllocateStats::getSizeClassIndex(uintptr_t size)
 	 */
 
 	/* the logarithm can not be negative! */
-	Assert_GC_true_with_message2(_env, (logValue >= 0.0), "Error calculation log(), passed %zu, returned %f\n", size, logValue);
-	Assert_GC_true_with_message(_env, (_sizeClassRatioLog > 0.0), "_sizeClassRatioLog is %f but must be larger then zero\n", _sizeClassRatioLog);
+	Assert_GC_true_with_message2(
+	        _env, (logValue >= 0.0), "Error calculation log(), passed %zu, returned %f\n", size, logValue);
+	Assert_GC_true_with_message(_env, (_sizeClassRatioLog > 0.0),
+	        "_sizeClassRatioLog is %f but must be larger then zero\n", _sizeClassRatioLog);
 
 	uintptr_t result = (uintptr_t)(logValue / _sizeClassRatioLog);
 
 	/* the logarithm value is larger then we can accept - probably larger then log(UDATA_MAX) */
-	Assert_GC_true_with_message2(_env, ((_freeEntrySizeClassStats._maxSizeClasses == 0) || (result < _freeEntrySizeClassStats._maxSizeClasses)),
-			"Calculated value of getSizeClassIndex() %zu can not be larger then maximum %zu\n", result, _freeEntrySizeClassStats._maxSizeClasses);
+	Assert_GC_true_with_message2(_env,
+	        ((_freeEntrySizeClassStats._maxSizeClasses == 0)
+	                || (result < _freeEntrySizeClassStats._maxSizeClasses)),
+	        "Calculated value of getSizeClassIndex() %zu can not be larger then maximum %zu\n", result,
+	        _freeEntrySizeClassStats._maxSizeClasses);
 
 	return result;
 }

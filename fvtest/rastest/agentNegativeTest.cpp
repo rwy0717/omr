@@ -37,11 +37,9 @@
 #include "OMR_Agent.hpp"
 #include "rasTestHelpers.hpp"
 
-class RASAgentNegativeTest: public ::testing::TestWithParam<const char *>
-{
+class RASAgentNegativeTest : public ::testing::TestWithParam<const char *> {
 protected:
-	virtual void
-	SetUp()
+	virtual void SetUp()
 	{
 		OMRTEST_ASSERT_ERROR_NONE(omrTestVMInit(&testVM, rasTestEnv->getPortLibrary()));
 #if defined(OMR_OS_WINDOWS)
@@ -53,8 +51,7 @@ protected:
 #endif /* defined(OMR_OS_WINDOWS) */
 	}
 
-	virtual void
-	TearDown()
+	virtual void TearDown()
 	{
 #if defined(OMR_OS_WINDOWS)
 		WSACleanup();
@@ -94,8 +91,8 @@ TEST_P(RASAgentNegativeTest, InvalidAgentCPP)
 }
 
 INSTANTIATE_TEST_CASE_P(InvalidAgentOpts, RASAgentNegativeTest,
-	::testing::Values("invalidAgentMissingOnLoad=test",
-		"invalidAgentMissingOnUnload", "/tmp/invalidAgentPath/agent=def"));
+        ::testing::Values(
+                "invalidAgentMissingOnLoad=test", "invalidAgentMissingOnUnload", "/tmp/invalidAgentPath/agent=def"));
 
 /*
  * Test scenarios for AgentReturnErrorC and AgentReturnErrorCPP:

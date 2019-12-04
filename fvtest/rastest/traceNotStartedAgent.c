@@ -100,7 +100,7 @@ testTraceNotStarted(OMR_TI const *ti, OMR_VMThread *vmThread)
 	void *traceMeta = NULL;
 	int32_t traceMetaLength = 0;
 	UtSubscription *subscriptionID = NULL;
-	const char *setOpts[] = { "blah", NULL, NULL };
+	const char *setOpts[] = {"blah", NULL, NULL};
 
 	if (OMR_ERROR_NONE == testRc) {
 		omr_error_t rc = ti->SetTraceOptions(vmThread, setOpts);
@@ -121,7 +121,8 @@ testTraceNotStarted(OMR_TI const *ti, OMR_VMThread *vmThread)
 	}
 
 	if (OMR_ERROR_NONE == testRc) {
-		omr_error_t rc = ti->RegisterRecordSubscriber(vmThread, "sample", subscribeFunc, alarmFunc, (void *)"my user data", &subscriptionID);
+		omr_error_t rc = ti->RegisterRecordSubscriber(
+		        vmThread, "sample", subscribeFunc, alarmFunc, (void *)"my user data", &subscriptionID);
 		printf("%s: RegisterRecordSubscriber: rc = %d\n", agentName, rc);
 		if (OMR_ERROR_NOT_AVAILABLE != rc) {
 			printf("  Did not get expected rc (%d OMR_ERROR_NOT_AVAILABLE)\n", OMR_ERROR_NOT_AVAILABLE);
@@ -142,7 +143,8 @@ testTraceNotStarted(OMR_TI const *ti, OMR_VMThread *vmThread)
 		omr_error_t rc = ti->DeregisterRecordSubscriber(vmThread, subscriptionID);
 		printf("%s: DeregisterRecordSubscriber: rc = %d\n", agentName, rc);
 		if (OMR_ERROR_ILLEGAL_ARGUMENT != rc) {
-			printf("  Did not get expected rc (%d OMR_ERROR_ILLEGAL_ARGUMENT)\n", OMR_ERROR_ILLEGAL_ARGUMENT);
+			printf("  Did not get expected rc (%d OMR_ERROR_ILLEGAL_ARGUMENT)\n",
+			        OMR_ERROR_ILLEGAL_ARGUMENT);
 			testRc = OMR_ERROR_INTERNAL;
 		}
 	}

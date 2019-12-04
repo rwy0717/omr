@@ -23,10 +23,9 @@
 #if !defined(HEAPVIRTUALMEMORY_HPP_)
 #define HEAPVIRTUALMEMORY_HPP_
 
-#include "omrcomp.h"
-
 #include "Heap.hpp"
 #include "MemoryHandle.hpp"
+#include "omrcomp.h"
 
 class MM_EnvironmentBase;
 class MM_HeapRegionManager;
@@ -38,50 +37,56 @@ protected:
 	MM_MemoryHandle _vmemHandle;
 	uintptr_t _heapAlignment;
 
-	MM_PhysicalArena* _physicalArena;
+	MM_PhysicalArena *_physicalArena;
 
 private:
 protected:
-	bool initialize(MM_EnvironmentBase* env, uintptr_t size);
-	void tearDown(MM_EnvironmentBase* env);
+	bool initialize(MM_EnvironmentBase *env, uintptr_t size);
+	void tearDown(MM_EnvironmentBase *env);
 
 public:
-	static MM_HeapVirtualMemory* newInstance(MM_EnvironmentBase* env, uintptr_t heapAlignment, uintptr_t size, MM_HeapRegionManager* regionManager);
-	virtual void kill(MM_EnvironmentBase* env);
-	
-	/**< returning pointer to our vmem handle (have to specify a pointer to const, to ensure caller will not modify it) */
+	static MM_HeapVirtualMemory *newInstance(
+	        MM_EnvironmentBase *env, uintptr_t heapAlignment, uintptr_t size, MM_HeapRegionManager *regionManager);
+	virtual void kill(MM_EnvironmentBase *env);
+
+	/**< returning pointer to our vmem handle (have to specify a pointer to const, to ensure caller will not modify
+	 * it) */
 	const MM_MemoryHandle *getVmemHandle() { return &_vmemHandle; }
 
 	virtual uintptr_t getPageSize();
 	virtual uintptr_t getPageFlags();
-	virtual void* getHeapBase();
-	virtual void* getHeapTop();
+	virtual void *getHeapBase();
+	virtual void *getHeapTop();
 #if defined(OMR_GC_DOUBLE_MAP_ARRAYLETS)
-	virtual void *doubleMapArraylet(MM_EnvironmentBase *env, void* arrayletLeaves[], UDATA arrayletLeafCount, UDATA arrayletLeafSize, UDATA byteAmount, struct J9PortVmemIdentifier *newIdentifier, UDATA pageSize);
+	virtual void *doubleMapArraylet(MM_EnvironmentBase *env, void *arrayletLeaves[], UDATA arrayletLeafCount,
+	        UDATA arrayletLeafSize, UDATA byteAmount, struct J9PortVmemIdentifier *newIdentifier, UDATA pageSize);
 #endif /* defined(OMR_GC_DOUBLE_MAP_ARRAYLETS) */
 
 	virtual uintptr_t getMaximumPhysicalRange();
 
-	virtual bool attachArena(MM_EnvironmentBase* env, MM_PhysicalArena* arena, uintptr_t size);
-	virtual void detachArena(MM_EnvironmentBase* env, MM_PhysicalArena* arena);
+	virtual bool attachArena(MM_EnvironmentBase *env, MM_PhysicalArena *arena, uintptr_t size);
+	virtual void detachArena(MM_EnvironmentBase *env, MM_PhysicalArena *arena);
 
-	virtual bool commitMemory(void* address, uintptr_t size);
-	virtual bool decommitMemory(void* address, uintptr_t size, void* lowValidAddress, void* highValidAddress);
+	virtual bool commitMemory(void *address, uintptr_t size);
+	virtual bool decommitMemory(void *address, uintptr_t size, void *lowValidAddress, void *highValidAddress);
 
-	virtual uintptr_t calculateOffsetFromHeapBase(void* address);
+	virtual uintptr_t calculateOffsetFromHeapBase(void *address);
 
-	virtual bool heapAddRange(MM_EnvironmentBase* env, MM_MemorySubSpace* subspace, uintptr_t size, void* lowAddress, void* highAddress);
-	virtual bool heapRemoveRange(MM_EnvironmentBase* env, MM_MemorySubSpace* subspace, uintptr_t size, void* lowAddress, void* highAddress, void* lowValidAddress, void* highValidAddress);
-	virtual bool initializeHeapRegionManager(MM_EnvironmentBase* env, MM_HeapRegionManager* manager);
+	virtual bool heapAddRange(MM_EnvironmentBase *env, MM_MemorySubSpace *subspace, uintptr_t size,
+	        void *lowAddress, void *highAddress);
+	virtual bool heapRemoveRange(MM_EnvironmentBase *env, MM_MemorySubSpace *subspace, uintptr_t size,
+	        void *lowAddress, void *highAddress, void *lowValidAddress, void *highValidAddress);
+	virtual bool initializeHeapRegionManager(MM_EnvironmentBase *env, MM_HeapRegionManager *manager);
 
 	/**
 	 * Create a Heap object.
 	 */
-	MM_HeapVirtualMemory(MM_EnvironmentBase* env, uintptr_t heapAlignment, uintptr_t maximumMemorySize, MM_HeapRegionManager* regionManager)
-		: MM_Heap(env, maximumMemorySize, regionManager)
-		, _vmemHandle()
-		, _heapAlignment(heapAlignment)
-		, _physicalArena(NULL)
+	MM_HeapVirtualMemory(MM_EnvironmentBase *env, uintptr_t heapAlignment, uintptr_t maximumMemorySize,
+	        MM_HeapRegionManager *regionManager)
+	        : MM_Heap(env, maximumMemorySize, regionManager)
+	        , _vmemHandle()
+	        , _heapAlignment(heapAlignment)
+	        , _physicalArena(NULL)
 	{
 		_typeId = __FUNCTION__;
 	}

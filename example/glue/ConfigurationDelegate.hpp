@@ -34,23 +34,20 @@ class MM_HeapRegionDescriptor;
 /**
  * Client language delegate for GC configuration must be implemented by all GC clients.
  */
-class MM_ConfigurationDelegate
-{
-/*
- * Member data and types
- */
+class MM_ConfigurationDelegate {
+	/*
+	 * Member data and types
+	 */
 private:
 	const MM_GCPolicy _gcPolicy;
 
 protected:
 public:
-
-/*
- * Member functions
- */
+	/*
+	 * Member functions
+	 */
 private:
 protected:
-
 public:
 	/**
 	 * Initialize the delegate.
@@ -59,8 +56,8 @@ public:
 	 * @param allocationType The allocation type selected for the GC configuration
 	 * @return false if initialization fails
 	 */
-	bool
-	initialize(MM_EnvironmentBase* env, MM_GCWriteBarrierType writeBarrierType, MM_GCAllocationType allocationType)
+	bool initialize(
+	        MM_EnvironmentBase *env, MM_GCWriteBarrierType writeBarrierType, MM_GCAllocationType allocationType)
 	{
 		return true;
 	}
@@ -69,36 +66,35 @@ public:
 	 * Tear down the delegate, releasing any resources held.
 	 * @param env The calling thread environment
 	 */
-	void
-	tearDown(MM_EnvironmentBase* env)
-	{
-		return;
-	}
+	void tearDown(MM_EnvironmentBase *env) { return; }
 
 	/**
-	 * For standard gc policies, an opaque (to OMR) object may be attached to each heap region to maintain language-specific
-	 * per region metadata.
+	 * For standard gc policies, an opaque (to OMR) object may be attached to each heap region to maintain
+	 * language-specific per region metadata.
 	 *
-	 * If the delegate allocates a region extension object in this method, it must set region->_heapRegionDescriptorExtension
-	 * to point to the object.
+	 * If the delegate allocates a region extension object in this method, it must set
+	 * region->_heapRegionDescriptorExtension to point to the object.
 	 *
 	 * @param env The calling thread environment
 	 * @param region the region to attach the region extension to
 	 * @return true unless a required region extension could not be initialized
 	 */
-	bool initializeHeapRegionDescriptorExtension(MM_EnvironmentBase* env, MM_HeapRegionDescriptor *region) { return true; }
+	bool initializeHeapRegionDescriptorExtension(MM_EnvironmentBase *env, MM_HeapRegionDescriptor *region)
+	{
+		return true;
+	}
 
 	/**
-	 * For standard gc policies, an opaque (to OMR) object may be attached to each heap region to maintain language-specific
-	 * per region metadata.
+	 * For standard gc policies, an opaque (to OMR) object may be attached to each heap region to maintain
+	 * language-specific per region metadata.
 	 *
-	 * If the delegate allocated a region extension object in region->_heapRegionDescriptorExtension, it must be deallocated
-	 * in this method and region->_heapRegionDescriptorExtension should be cleared (NULL).
+	 * If the delegate allocated a region extension object in region->_heapRegionDescriptorExtension, it must be
+	 * deallocated in this method and region->_heapRegionDescriptorExtension should be cleared (NULL).
 	 *
 	 * @param env The calling thread environment
 	 * @param region the region to deallocate the region extension from
 	 */
-	void teardownHeapRegionDescriptorExtension(MM_EnvironmentBase* env, MM_HeapRegionDescriptor *region) {}
+	void teardownHeapRegionDescriptorExtension(MM_EnvironmentBase *env, MM_HeapRegionDescriptor *region) {}
 
 	/**
 	 * This method is called just after the heap has been initialized. Delegate may perform
@@ -106,11 +102,7 @@ public:
 	 * @param env The calling thread environment
 	 * @return false if heap initialization fails
 	 */
-	bool
-	heapInitialized(MM_EnvironmentBase* env)
-	{
-		return true;
-	}
+	bool heapInitialized(MM_EnvironmentBase *env) { return true; }
 
 	/**
 	 * The OMR GC preallocates a pool of MM_EnvironmentBase subclass instances on startup. This method is called
@@ -118,11 +110,7 @@ public:
 	 * @param env The calling thread environment
 	 * @return The number of pooled instances to preallocate, or 0 to use default number
 	 */
-	uint32_t
-	getInitialNumberOfPooledEnvironments(MM_EnvironmentBase* env)
-	{
-		return 0;
-	}
+	uint32_t getInitialNumberOfPooledEnvironments(MM_EnvironmentBase *env) { return 0; }
 
 	/**
 	 * The OMR segregated GC requires GC clients to specify a distribution of segment sizes with which
@@ -132,10 +120,7 @@ public:
 	 * @return A pointer to segregated heap size distribution metadata, or NULL if not using segregated heap
 	 */
 #if defined(OMR_GC_SEGREGATED_HEAP)
-	OMR_SizeClasses *getSegregatedSizeClasses(MM_EnvironmentBase *env)
-	{
-		return NULL;
-	}
+	OMR_SizeClasses *getSegregatedSizeClasses(MM_EnvironmentBase *env) { return NULL; }
 #endif /* defined(OMR_GC_SEGREGATED_HEAP) */
 
 	/**
@@ -143,11 +128,7 @@ public:
 	 * @param env The thread environment to initialize
 	 * @return false if environment initialization fails
 	 */
-	bool
-	environmentInitialized(MM_EnvironmentBase* env)
-	{
-		return true;
-	}
+	bool environmentInitialized(MM_EnvironmentBase *env) { return true; }
 
 	/**
 	 * The OMR GC preallocates a pool of collection helper threads. This method is called to allow GC
@@ -155,10 +136,7 @@ public:
 	 * @param env The calling thread environment
 	 * @return The maximum number of GC threads to allocate for the runtime GC
 	 */
-	uintptr_t getMaxGCThreadCount(MM_EnvironmentBase* env)
-	{
-		return 1;
-	}
+	uintptr_t getMaxGCThreadCount(MM_EnvironmentBase *env) { return 1; }
 
 	/**
 	 * This method is called to determine when to start tracking heap fragmentation, which is initially inhibited to
@@ -179,9 +157,7 @@ public:
 	 * Constructor.
 	 * @param gcPolicy The GC policy preselected for the GC configuration.
 	 */
-	MM_ConfigurationDelegate(MM_GCPolicy gcPolicy)
-		: _gcPolicy(gcPolicy)
-	{}
+	MM_ConfigurationDelegate(MM_GCPolicy gcPolicy) : _gcPolicy(gcPolicy) {}
 };
 
 #endif /* CONFIGURATIONDELEGATE_HPP_ */

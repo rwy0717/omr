@@ -31,20 +31,14 @@ class MM_EnvironmentBase;
  * maintain language-specific information relating to a OMR VM thread, for example, local
  * buffers or caches that are maintained on a per thread basis.
  */
-class GC_Environment
-{
+class GC_Environment {
 	/* Data members */
 private:
-
 protected:
-
 public:
-
 	/* Function members */
 private:
-
 protected:
-
 public:
 	GC_Environment() {}
 };
@@ -77,22 +71,17 @@ public:
  * reacquiring non-exclusive VM access immediately after releasing it.
  */
 
-class MM_EnvironmentDelegate
-{
+class MM_EnvironmentDelegate {
 	/* Data members */
 private:
 	MM_EnvironmentBase *_env;
 	GC_Environment _gcEnv;
 
 protected:
-
 public:
-
 	/* Function members */
 private:
-
 protected:
-
 public:
 	/**
 	 * Bind current thread to OMR VM.
@@ -117,8 +106,7 @@ public:
 	 * Initialize the delegate's internal structures and values.
 	 * @return true if initialization completed, false otherwise
 	 */
-	bool
-	initialize(MM_EnvironmentBase *env)
+	bool initialize(MM_EnvironmentBase *env)
 	{
 		_env = env;
 		return true;
@@ -127,13 +115,12 @@ public:
 	/**
 	 * Free any internal structures associated to the receiver.
 	 */
-	void tearDown() { }
+	void tearDown() {}
 
 	/**
 	 * Return the GC_Environment instance for this thread.
 	 */
 	GC_Environment *getGCEnvironment() { return &_gcEnv; }
-
 
 	/**
 	 * Flush any local material relating to GC here. This is called before a GC cycle begins,
@@ -145,7 +132,7 @@ public:
 	 * @see GC_Environment
 	 *
 	 */
-	void flushNonAllocationCaches() { }
+	void flushNonAllocationCaches() {}
 
 	/**
 	 * Set or clear the transient master GC status on this thread. This thread obtains master status
@@ -155,11 +142,11 @@ public:
 	 *
 	 * @param isMasterThread true if thread is acquiring master status, false if losing it
 	 */
-	void setGCMasterThread(bool isMasterThread) { }
+	void setGCMasterThread(bool isMasterThread) {}
 
 	/**
-	 * This will be called for every allocated object.  Note this is not necessarily done when the object is allocated, but will
-	 * done before start of the next gc for all objects allocated since the last gc.
+	 * This will be called for every allocated object.  Note this is not necessarily done when the object is
+	 * allocated, but will done before start of the next gc for all objects allocated since the last gc.
 	 */
 	bool objectAllocationNotify(omrobjectptr_t omrObject) { return true; }
 
@@ -173,7 +160,7 @@ public:
 	 * shared VM access as quickly as possible in that event.
 	 */
 	void acquireVMAccess();
-	
+
 	/**
 	 * Release shared VM acccess.
 	 */
@@ -232,7 +219,7 @@ public:
 	void forceOutOfLineVMAccess() {}
 #endif /* OMR_GC_CONCURRENT_SCAVENGER */
 
-#if defined (OMR_GC_THREAD_LOCAL_HEAP)
+#if defined(OMR_GC_THREAD_LOCAL_HEAP)
 	/**
 	 * Disable inline TLH allocates by hiding the real heap allocation address from
 	 * JIT/Interpreter in realHeapAlloc and setting heapALloc == HeapTop so TLH
@@ -253,9 +240,7 @@ public:
 	bool isInlineTLHAllocateEnabled() { return false; }
 #endif /* OMR_GC_THREAD_LOCAL_HEAP */
 
-	MM_EnvironmentDelegate()
-		: _env(NULL)
-	{ }
+	MM_EnvironmentDelegate() : _env(NULL) {}
 };
 
 #endif /* ENVIRONMENTDELEGATE_HPP_ */

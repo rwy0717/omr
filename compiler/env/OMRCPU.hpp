@@ -27,123 +27,103 @@
  */
 #ifndef OMR_CPU_CONNECTOR
 #define OMR_CPU_CONNECTOR
-namespace OMR { class CPU; }
-namespace OMR { typedef OMR::CPU CPUConnector; }
+namespace OMR {
+class CPU;
+}
+namespace OMR {
+typedef OMR::CPU CPUConnector;
+}
 #endif
 
 #include "env/Processors.hpp"
 
-namespace TR { class CPU; }
+namespace TR {
+class CPU;
+}
 
-namespace TR
-{
+namespace TR {
 // Processor endianness
 //
-enum Endianness
-   {
-   endian_big,
-   endian_little,
-   endian_unknown
-   };
-
+enum Endianness { endian_big, endian_little, endian_unknown };
 
 // Major CPU architecture
 //
-enum MajorArchitecture
-   {
-   arch_x86,
-   arch_z,
-   arch_power,
-   arch_arm,
-   arch_arm64,
-   arch_unknown
-   };
-
+enum MajorArchitecture { arch_x86, arch_z, arch_power, arch_arm, arch_arm64, arch_unknown };
 
 // Minor CPU architecture
 //
-enum MinorArchitecture
-   {
-   m_arch_none,
-   m_arch_i386,
-   m_arch_amd64
-   };
+enum MinorArchitecture { m_arch_none, m_arch_i386, m_arch_amd64 };
 
-}
+} // namespace TR
 
+namespace OMR {
 
-namespace OMR
-{
-
-class CPU
-   {
+class CPU {
 protected:
-
-   CPU() :
-         _processor(TR_NullProcessor),
-         _endianness(TR::endian_unknown),
-         _majorArch(TR::arch_unknown),
-         _minorArch(TR::m_arch_none)
-      {}
+	CPU()
+	        : _processor(TR_NullProcessor)
+	        , _endianness(TR::endian_unknown)
+	        , _majorArch(TR::arch_unknown)
+	        , _minorArch(TR::m_arch_none)
+	{}
 
 public:
+	TR::CPU *self();
 
-   TR::CPU *self();
+	// Initialize CPU info by querying the host processor at compile-time
+	//
+	void initializeByHostQuery();
 
-   // Initialize CPU info by querying the host processor at compile-time
-   //
-   void initializeByHostQuery();
+	TR_Processor setProcessor(TR_Processor p) { return (_processor = p); }
 
-   TR_Processor setProcessor(TR_Processor p) { return(_processor = p); }
+	// Processor identity and generation comparisons
+	//
+	TR_Processor id() { return _processor; }
+	bool is(TR_Processor p) { return _processor == p; }
+	bool isNot(TR_Processor p) { return _processor != p; }
+	bool isAtLeast(TR_Processor p) { return _processor >= p; }
+	bool isLaterThan(TR_Processor p) { return _processor > p; }
+	bool isEarlierThan(TR_Processor p) { return _processor < p; }
+	bool isAtMost(TR_Processor p) { return _processor <= p; }
 
-   // Processor identity and generation comparisons
-   //
-   TR_Processor id() { return _processor; }
-   bool is(TR_Processor p) { return _processor == p; }
-   bool isNot(TR_Processor p) { return _processor != p; }
-   bool isAtLeast(TR_Processor p) { return _processor >= p; }
-   bool isLaterThan(TR_Processor p) { return _processor > p; }
-   bool isEarlierThan(TR_Processor p) { return _processor < p; }
-   bool isAtMost(TR_Processor p) { return _processor <= p; }
+	bool getSupportsHardwareSQRT() { return false; }
+	bool getSupportsHardwareRound() { return false; }
+	bool getSupportsHardwareCopySign() { return false; }
+	bool hasPopulationCountInstruction() { return false; }
+	bool supportsDecimalFloatingPoint() { return false; }
+	bool hasFPU() { return true; }
 
-   bool getSupportsHardwareSQRT() { return false; }
-   bool getSupportsHardwareRound() { return false; }
-   bool getSupportsHardwareCopySign() { return false; }
-   bool hasPopulationCountInstruction() { return false; }
-   bool supportsDecimalFloatingPoint() { return false; }
-   bool hasFPU() { return true; }
+	TR::Endianness endianness() { return _endianness; }
+	void setEndianness(TR::Endianness e) { _endianness = e; }
+	bool isBigEndian() { return _endianness == TR::endian_big; }
+	bool isLittleEndian() { return _endianness == TR::endian_little; }
 
-   TR::Endianness endianness() { return _endianness; }
-   void setEndianness(TR::Endianness e) { _endianness = e; }
-   bool isBigEndian() { return _endianness == TR::endian_big; }
-   bool isLittleEndian() { return _endianness == TR::endian_little; }
+	TR::MajorArchitecture majorArch() { return _majorArch; }
+	void setMajorArch(TR::MajorArchitecture a) { _majorArch = a; }
+	bool isX86() { return _majorArch == TR::arch_x86; }
+	bool isZ() { return _majorArch == TR::arch_z; }
+	bool isPower() { return _majorArch == TR::arch_power; }
+	bool isARM() { return _majorArch == TR::arch_arm; }
+	bool isARM64() { return _majorArch == TR::arch_arm64; }
 
-   TR::MajorArchitecture majorArch() { return _majorArch; }
-   void setMajorArch(TR::MajorArchitecture a) { _majorArch = a; }
-   bool isX86() { return _majorArch == TR::arch_x86; }
-   bool isZ() { return _majorArch == TR::arch_z; }
-   bool isPower() { return _majorArch == TR::arch_power; }
-   bool isARM() { return _majorArch == TR::arch_arm; }
-   bool isARM64() { return _majorArch == TR::arch_arm64; }
+	TR::MinorArchitecture minorArch() { return _minorArch; }
+	void setMinorArch(TR::MinorArchitecture a) { _minorArch = a; }
+	bool isI386() { return _minorArch == TR::m_arch_i386; }
+	bool isAMD64() { return _minorArch == TR::m_arch_amd64; }
 
-   TR::MinorArchitecture minorArch() { return _minorArch; }
-   void setMinorArch(TR::MinorArchitecture a) { _minorArch = a; }
-   bool isI386() { return _minorArch == TR::m_arch_i386; }
-   bool isAMD64() { return _minorArch == TR::m_arch_amd64; }
-
-   /** @brief Determines whether the Transactional Memory (TM) facility is available on the current processor.
-    *
-    *  @return false; this is the default answer unless overridden by an extending class.
-    */
-   bool supportsTransactionalMemoryInstructions() { return false; }
+	/** @brief Determines whether the Transactional Memory (TM) facility is available on the current processor.
+	 *
+	 *  @return false; this is the default answer unless overridden by an extending class.
+	 */
+	bool supportsTransactionalMemoryInstructions() { return false; }
 
 private:
-   TR_Processor _processor;
+	TR_Processor _processor;
 
-   TR::Endianness _endianness;
-   TR::MajorArchitecture _majorArch;
-   TR::MinorArchitecture _minorArch;
-   };
-}
+	TR::Endianness _endianness;
+	TR::MajorArchitecture _majorArch;
+	TR::MinorArchitecture _minorArch;
+};
+} // namespace OMR
 
 #endif

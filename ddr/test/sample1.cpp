@@ -39,38 +39,38 @@ struct A {
 	uint16_t y;
 };
 
-struct A instanceOfA = { 0, 1 };
+struct A instanceOfA = {0, 1};
 
 struct SOA {
 	uint8_t a[10];
 	uint16_t b[10][10];
 };
 
-struct SOA instanceOfSOA = { { 0 }, { 0 } };
+struct SOA instanceOfSOA = {{0}, {0}};
 
 struct IPv4 {
 #if __BYTE_ORDER == __LITTLE_ENDIAN
-	uint8_t ihl :4;
-	uint8_t version :4;
+	uint8_t ihl : 4;
+	uint8_t version : 4;
 #elif __BYTE_ORDER == __BIG_ENDIAN
-	uint8_t version :4;
-	uint8_t ihl :4;
+	uint8_t version : 4;
+	uint8_t ihl : 4;
 #endif
 #if __BYTE_ORDER == __LITTLE_ENDIAN
-	uint8_t ecn :2;
-	uint8_t dscp :6;
+	uint8_t ecn : 2;
+	uint8_t dscp : 6;
 #elif __BYTE_ORDER == __BIG_ENDIAN
-	unsigned int ecn :2;
-	unsigned int dscp :6;
+	unsigned int ecn : 2;
+	unsigned int dscp : 6;
 #endif
 	uint16_t tot_len;
 	uint16_t id;
 #if __BYTE_ORDER == __LITTLE_ENDIAN
-	uint16_t fragOff :13;
-	uint16_t flags :3;
+	uint16_t fragOff : 13;
+	uint16_t flags : 3;
 #elif __BYTE_ORDER == __BIG_ENDIAN
-	uint16_t fragOff :3;
-	uint16_t flags :13;
+	uint16_t fragOff : 3;
+	uint16_t flags : 13;
 #endif
 	uint8_t ttl;
 	uint8_t protocol;
@@ -79,21 +79,21 @@ struct IPv4 {
 	uint32_t daddr;
 };
 
-struct IPv4 instanceOfIPv4 = { 0 };
+struct IPv4 instanceOfIPv4 = {0};
 
 struct C {
 	uint32_t x;
 	uint32_t y;
 };
 
-struct C instanceOfC = { 0, 0 };
+struct C instanceOfC = {0, 0};
 
 struct D {
 	struct C xy;
 	uint32_t z;
 };
 
-struct D instanceOfD = { { 0, 0 }, 0 };
+struct D instanceOfD = {{0, 0}, 0};
 
 struct UDPPacket {
 	struct IPv4 ipHeader;
@@ -106,40 +106,40 @@ struct UDPPacket {
 struct UDPPacket instanceOfUDPPacket;
 
 struct F {
-	uint16_t x :4;
-	uint16_t y :8;
-	uint16_t z :4;
+	uint16_t x : 4;
+	uint16_t y : 8;
+	uint16_t z : 4;
 };
 
-struct F instanceOfF = { 0 };
+struct F instanceOfF = {0};
 
 struct G {
-	uint16_t x :10;
-	uint16_t y :1;
-	uint16_t z :7;
+	uint16_t x : 10;
+	uint16_t y : 1;
+	uint16_t z : 7;
 };
 
-struct G instanceOfG = { 0 };
+struct G instanceOfG = {0};
 
 struct H {
-	uint16_t a :6;
-	uint16_t b :5;
-	uint16_t c :5;
+	uint16_t a : 6;
+	uint16_t b : 5;
+	uint16_t c : 5;
 	uint16_t d;
 };
 
-struct H instanceOfH = { 0 };
+struct H instanceOfH = {0};
 
 struct Empty {};
 struct Empty instanceOfEmpty;
 
 // 3. classes
-class Box
-{
+class Box {
 private:
 	int64_t length;
 	int64_t width;
 	int64_t height;
+
 public:
 	int64_t getLength() { return length; }
 	int64_t getWidth() { return width; }
@@ -150,8 +150,7 @@ public:
 	uint64_t getVolume() { return (length * width * height); }
 };
 
-class RGBColour
-{
+class RGBColour {
 public:
 	uint8_t red;
 	uint8_t green;
@@ -162,7 +161,7 @@ public:
 union Uniondata1 {
 	uint16_t i8;
 	uint32_t f16;
-	uint8_t  arrI8[1];
+	uint8_t arrI8[1];
 };
 
 union Uniondata1 instanceOfUniondata1;
@@ -200,52 +199,49 @@ union Unionjob {
 union Unionjob instanceOfUnionjob;
 
 // 5. Types defined in a namespace
-namespace MyNamespace
-{
-	// - enum
-	enum THINGS { THING1, THING2, THING3 };
+namespace MyNamespace {
+// - enum
+enum THINGS { THING1, THING2, THING3 };
 
-	// - struct
-	struct Q {
-		uint16_t d;
-		uint16_t e[10][10];
-	};
+// - struct
+struct Q {
+	uint16_t d;
+	uint16_t e[10][10];
+};
 
-	// - class
-	class RGBColourV2
-	{
-	private:
-		uint8_t red;
-		uint8_t green;
-		uint8_t blue;
-	public:
-		int64_t getRed() { return red; }
-		int64_t getGreen() { return green; }
-		int64_t getBlue() { return blue; }
-		void setRed(int64_t redIn) { red = (uint8_t)redIn; }
-		void setGreen(int64_t greenIn) { green = (uint8_t)greenIn; }
-		void setBlue(int64_t blueIn) { blue = (uint8_t)blueIn; }
-	};
+// - class
+class RGBColourV2 {
+private:
+	uint8_t red;
+	uint8_t green;
+	uint8_t blue;
 
-	// - typedef
-	typedef unsigned int UDATA;
+public:
+	int64_t getRed() { return red; }
+	int64_t getGreen() { return green; }
+	int64_t getBlue() { return blue; }
+	void setRed(int64_t redIn) { red = (uint8_t)redIn; }
+	void setGreen(int64_t greenIn) { green = (uint8_t)greenIn; }
+	void setBlue(int64_t blueIn) { blue = (uint8_t)blueIn; }
+};
 
-	// - union
-	union Uniondata5 {
-		uint16_t i16;
-		uint32_t f32;
-		uint8_t arrI8[3];
-	};
+// - typedef
+typedef unsigned int UDATA;
 
-	namespace InnerNamespace
-	{
-		struct TypeInInnerNamespace
-		{
-			uint16_t h;
-		};
-		TypeInInnerNamespace instanceOfTypeInInnerNamespace;
-	}
-}
+// - union
+union Uniondata5 {
+	uint16_t i16;
+	uint32_t f32;
+	uint8_t arrI8[3];
+};
+
+namespace InnerNamespace {
+struct TypeInInnerNamespace {
+	uint16_t h;
+};
+TypeInInnerNamespace instanceOfTypeInInnerNamespace;
+} // namespace InnerNamespace
+} // namespace MyNamespace
 
 MyNamespace::Q instanceOfQ;
 MyNamespace::RGBColourV2 instanceOfRGBColourV2;
@@ -257,8 +253,7 @@ MyNamespace::THINGS instanceOfThings;
 class ForwardDeclaredClass;
 
 /* This class has a field who's type is a pointer of the forward declared class. */
-class HasAForwardDeclaredClass
-{
+class HasAForwardDeclaredClass {
 	ForwardDeclaredClass *fieldOfForwardDeclaredClass;
 };
 
@@ -273,12 +268,12 @@ main(int argc, char *argv[])
 {
 	std::cout << "\ncpp_samples: main: Init" << std::endl;
 
-	A a = { NULL, 8 };
+	A a = {NULL, 8};
 
 	std::cout << "\ncpp_samples: main: a.x: " << a.x << std::endl;
 	std::cout << "cpp_samples: main: a.y: " << a.y << std::endl;
 
-	SOA soa = { { 2, 4, 8, 1, 3 }, {{ 1, 4, 7, 9, 0, 4 }, { 8, 2, 9, 1, 6, 3 }} };
+	SOA soa = {{2, 4, 8, 1, 3}, {{1, 4, 7, 9, 0, 4}, {8, 2, 9, 1, 6, 3}}};
 
 	std::cout << "\ncpp_samples: main: soa.a[0]: " << soa.a[0] << std::endl;
 	std::cout << "cpp_samples: main: soa.a[1]: " << soa.a[1] << std::endl;
@@ -291,7 +286,7 @@ main(int argc, char *argv[])
 	std::cout << "cpp_samples: main: soa.b[1][5]: " << soa.b[1][5] << std::endl;
 	std::cout << "cpp_samples: main: soa.b[0][3]: " << soa.b[0][3] << std::endl;
 
-	C c = { 78, 126 };
+	C c = {78, 126};
 
 	std::cout << "\ncpp_samples: main: c.x: " << c.x << std::endl;
 	std::cout << "cpp_samples: main: c.y: " << c.y << std::endl;
@@ -326,9 +321,11 @@ main(int argc, char *argv[])
 	rgb2.green = 13;
 	rgb2.blue = 71;
 
-	std::cout << "Colour: box1: rgb1: Red: " << (short)rgb1.red << " Green: " << (short)rgb1.green << " Blue: " << (short)rgb1.blue << std::endl;
+	std::cout << "Colour: box1: rgb1: Red: " << (short)rgb1.red << " Green: " << (short)rgb1.green
+	          << " Blue: " << (short)rgb1.blue << std::endl;
 
-	std::cout << "Colour: box2: rgb2: Red: " << (short)rgb2.red << " Green: " << (short)rgb2.green << " Blue: " << (short)rgb2.blue << std::endl;
+	std::cout << "Colour: box2: rgb2: Red: " << (short)rgb2.red << " Green: " << (short)rgb2.green
+	          << " Blue: " << (short)rgb2.blue << std::endl;
 
 	sample2();
 

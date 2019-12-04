@@ -22,7 +22,6 @@
 
 #include "thrdsup.h"
 
-
 #if defined(J9_PRIORITY_MAP)
 const int priority_map[J9THREAD_PRIORITY_MAX + 1] = J9_PRIORITY_MAP;
 #else
@@ -38,7 +37,6 @@ initialize_priority_map(void)
 	return 0;
 }
 #endif /* defined(J9_PRIORITY_MAP) */
-
 
 intptr_t
 set_pthread_priority(OSTHREAD handle, omrthread_prio_t j9ThreadPriority)
@@ -68,5 +66,3 @@ set_priority_spread(void)
 	/* This function should not be called on this platform */
 	return -1;
 }
-
-

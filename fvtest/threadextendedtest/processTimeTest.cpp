@@ -34,7 +34,7 @@ void
 systemTimeCpuBurn(void)
 {
 	uintptr_t j = 0;
-	FILE * tempFile = NULL;
+	FILE *tempFile = NULL;
 
 	for (j = 0; j < 100; j++) {
 #if defined(OMR_OS_WINDOWS)
@@ -88,8 +88,7 @@ TEST(ThreadCpuTime, systemCpuTimeIncreasesMonotonically)
 	}
 }
 
-class CpuTimeTest : public ::testing::Test
-{
+class CpuTimeTest : public ::testing::Test {
 protected:
 	virtual void SetUp()
 	{
@@ -115,21 +114,18 @@ TEST_F(CpuTimeTest, increasesMonotonically)
 	}
 }
 
-class ApplicationCpuTimeTest : public CpuTimeTest
-{
+class ApplicationCpuTimeTest : public CpuTimeTest {
 protected:
 	virtual void SetUp()
 	{
-		omrthread_set_category(omrthread_self(),
-		                       J9THREAD_CATEGORY_APPLICATION_THREAD,
-		                       J9THREAD_TYPE_SET_MODIFY);
+		omrthread_set_category(
+		        omrthread_self(), J9THREAD_CATEGORY_APPLICATION_THREAD, J9THREAD_TYPE_SET_MODIFY);
 		CpuTimeTest::SetUp();
 	}
 
 	virtual void TearDown()
 	{
-		omrthread_set_category(omrthread_self(), J9THREAD_CATEGORY_SYSTEM_THREAD,
-		                       J9THREAD_TYPE_SET_MODIFY);
+		omrthread_set_category(omrthread_self(), J9THREAD_CATEGORY_SYSTEM_THREAD, J9THREAD_TYPE_SET_MODIFY);
 	}
 };
 
@@ -160,15 +156,14 @@ TEST_F(ApplicationCpuTimeTest, increasesMonotonically)
 #define NUM_ITERATIONS_MONOTONIC_TEST 500
 #define NUM_ITERATIONS_SYSTEM_CPU_BURN 3000
 
-typedef struct SupportThreadInfo
-{
+typedef struct SupportThreadInfo {
 	uint32_t counter;
 	uint32_t app;
 	uint32_t sync;
 	omrthread_monitor_t synchronization;
 } SupportThreadInfo;
 
-SupportThreadInfo * thrInfo;
+SupportThreadInfo *thrInfo;
 
 /**
  * Generate CPU Load for 1 second
@@ -194,7 +189,7 @@ cpuLoad(void)
  * @param arg The index into the ThreadInfo array
  */
 static int32_t J9THREAD_PROC
-sysThread(void * arg)
+sysThread(void *arg)
 {
 	uintptr_t i = 0;
 	uintptr_t arrayLength = NUM_ITERATIONS_JVM_CPU_USAGE;
@@ -218,8 +213,7 @@ sysThread(void * arg)
 
 	/* Wait for the master thread to get cpu usage thrInfo for all threads */
 	do {
-		omrthread_monitor_wait_interruptable(thrInfo->synchronization,
-		                                     MILLI_TIMEOUT, NANO_TIMEOUT);
+		omrthread_monitor_wait_interruptable(thrInfo->synchronization, MILLI_TIMEOUT, NANO_TIMEOUT);
 	} while (0 == thrInfo->sync);
 
 	omrthread_monitor_exit(thrInfo->synchronization);
@@ -235,7 +229,7 @@ sysThread(void * arg)
  * @param arg The index into the ThreadInfo array
  */
 static int32_t J9THREAD_PROC
-appThread(void * arg)
+appThread(void *arg)
 {
 	uintptr_t i = 0;
 	uintptr_t arrayLength = NUM_ITERATIONS_JVM_CPU_USAGE;
@@ -260,8 +254,7 @@ appThread(void * arg)
 
 	/* Wait for the master thread to get cpu usage thrInfo for all threads */
 	do {
-		omrthread_monitor_wait_interruptable(thrInfo->synchronization,
-		                                     MILLI_TIMEOUT, NANO_TIMEOUT);
+		omrthread_monitor_wait_interruptable(thrInfo->synchronization, MILLI_TIMEOUT, NANO_TIMEOUT);
 	} while (0 == thrInfo->sync);
 
 	omrthread_monitor_exit(thrInfo->synchronization);
@@ -303,14 +296,12 @@ TEST(ThreadExtendedTest, DISABLED_TestThreadCpuTime)
 
 	/* Create the SupportThreadInfo structure for the required number of threads
 	 * and intialize it */
-	thrInfo = (SupportThreadInfo *)omrmem_allocate_memory(
-	        sizeof(SupportThreadInfo), OMRMEM_CATEGORY_THREADS);
+	thrInfo = (SupportThreadInfo *)omrmem_allocate_memory(sizeof(SupportThreadInfo), OMRMEM_CATEGORY_THREADS);
 	ASSERT_TRUE(thrInfo != NULL);
 	thrInfo->counter = 0;
 	thrInfo->sync = 0;
 	thrInfo->app = 0;
-	omrthread_monitor_init_with_name(&thrInfo->synchronization, 0,
-	                                 "threadCpuTimeInfo monitor");
+	omrthread_monitor_init_with_name(&thrInfo->synchronization, 0, "threadCpuTimeInfo monitor");
 
 	ret = omrthread_attr_init(&attr);
 	ASSERT_TRUE(ret == 0);
@@ -320,23 +311,21 @@ TEST(ThreadExtendedTest, DISABLED_TestThreadCpuTime)
 	/* Create the required number of threads */
 	omrthread_monitor_enter(thrInfo->synchronization);
 	for (i = 0; i < NUM_APP_THREAD; i++) {
-		ret = omrthread_create_ex(&(tid[i]), &attr, 0,
-		                          (omrthread_entrypoint_t)appThread, (void *)&tid[i]);
+		ret = omrthread_create_ex(&(tid[i]), &attr, 0, (omrthread_entrypoint_t)appThread, (void *)&tid[i]);
 		ASSERT_TRUE(ret == 0);
 	}
 
 	omrthread_attr_destroy(&attr);
 	/* Now create the system threads */
 	for (i = 0; i < NUM_SYS_THREAD; i++) {
-		ret = omrthread_create_ex(&(tid[i]), J9THREAD_ATTR_DEFAULT, 0,
-		                          (omrthread_entrypoint_t)sysThread, (void *)&tid[i]);
+		ret = omrthread_create_ex(
+		        &(tid[i]), J9THREAD_ATTR_DEFAULT, 0, (omrthread_entrypoint_t)sysThread, (void *)&tid[i]);
 		ASSERT_TRUE(ret == 0);
 	}
 
 	/* Wait for the threads to complete work */
 	do {
-		omrthread_monitor_wait_interruptable(thrInfo->synchronization,
-		                                     MILLI_TIMEOUT, NANO_TIMEOUT);
+		omrthread_monitor_wait_interruptable(thrInfo->synchronization, MILLI_TIMEOUT, NANO_TIMEOUT);
 	} while (thrInfo->counter > 0);
 
 	/* All threads have stopped, now get their cpu usage details */
@@ -348,8 +337,7 @@ TEST(ThreadExtendedTest, DISABLED_TestThreadCpuTime)
 
 	do {
 		/* Ensure that all threads have exited before the master thread exits */
-		omrthread_monitor_wait_interruptable(thrInfo->synchronization,
-		                                     MILLI_TIMEOUT, NANO_TIMEOUT);
+		omrthread_monitor_wait_interruptable(thrInfo->synchronization, MILLI_TIMEOUT, NANO_TIMEOUT);
 	} while (thrInfo->app > 0);
 
 	/* All threads have completed, now get their cpu usage details */

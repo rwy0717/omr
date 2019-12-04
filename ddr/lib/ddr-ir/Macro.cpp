@@ -28,33 +28,32 @@
 #include <string.h>
 
 enum Symbol {
-	OR_OR,   /* || */
+	OR_OR, /* || */
 	AND_AND, /* && */
-	OR,      /* |  */
-	XOR,     /* ^  */
-	AND,     /* &  */
-	EQ_EQ,   /* == */
-	NOT_EQ,  /* != */
-	GT,      /* >  */
-	LT,      /* <  */
-	GT_EQ,   /* >= */
-	LT_EQ,   /* <= */
-	GT_GT,   /* >> */
-	LT_LT,   /* << */
-	PLUS,    /* +  */
-	MINUS,   /* -  */
-	MULT,    /* *  */
-	DIV,     /* /  */
-	REM,     /* %  */
-	NOT,     /* !  */
-	TILDE,   /* ~  */
-	LPAREN,  /* (  */
-	RPAREN,  /* )  */
-	END      /* '\0' or null terminator */
+	OR, /* |  */
+	XOR, /* ^  */
+	AND, /* &  */
+	EQ_EQ, /* == */
+	NOT_EQ, /* != */
+	GT, /* >  */
+	LT, /* <  */
+	GT_EQ, /* >= */
+	LT_EQ, /* <= */
+	GT_GT, /* >> */
+	LT_LT, /* << */
+	PLUS, /* +  */
+	MINUS, /* -  */
+	MULT, /* *  */
+	DIV, /* /  */
+	REM, /* %  */
+	NOT, /* !  */
+	TILDE, /* ~  */
+	LPAREN, /* (  */
+	RPAREN, /* )  */
+	END /* '\0' or null terminator */
 };
 
-class MacroScanner
-{
+class MacroScanner {
 private:
 	char const *_cursor;
 
@@ -64,23 +63,19 @@ private:
 	void skipWhitespace();
 
 public:
-	MacroScanner(char const *cString)
-		: _cursor(cString)
-	{
-	}
+	MacroScanner(char const *cString) : _cursor(cString) {}
 
 	bool validTypeCast(bool *isSigned, size_t *bitWidth);
 	bool atSymbol(Symbol sym);
 	bool readNumber(int64_t *ret);
 };
 
-class MacroParser
-{
-/* data members */
+class MacroParser {
+	/* data members */
 private:
 	MacroScanner _scanner; /* handles reading characters from expression string */
 
-/* function members */
+	/* function members */
 private:
 	bool logicalOr(int64_t *ret);
 	bool logicalAnd(int64_t *ret);
@@ -97,10 +92,7 @@ private:
 	bool validSingleTerm(int64_t *ret);
 
 public:
-	MacroParser(char const *cExpression) :
-		_scanner(cExpression)
-	{
-	}
+	MacroParser(char const *cExpression) : _scanner(cExpression) {}
 
 	bool evaluate(int64_t *ret);
 };
@@ -117,9 +109,8 @@ bool
 MacroScanner::isDigit(char c, int32_t base)
 {
 	if (base > 10) {
-		return (('0' <= c) && (c <= '9'))
-			|| (('a' <= c) && (c < ('a' + base - 10)))
-			|| (('A' <= c) && (c < ('A' + base - 10)));
+		return (('0' <= c) && (c <= '9')) || (('a' <= c) && (c < ('a' + base - 10)))
+		        || (('A' <= c) && (c < ('A' + base - 10)));
 	} else {
 		return ('0' <= c) && (c < ('0' + base));
 	}
@@ -338,10 +329,8 @@ MacroScanner::atSymbol(Symbol sym)
 			return true;
 		}
 		break;
-	case END:
-		return '\0' == _cursor[0];
-	default:
-		break;
+	case END: return '\0' == _cursor[0];
+	default: break;
 	}
 	return false;
 }
@@ -400,7 +389,7 @@ MacroScanner::readNumber(int64_t *ret)
 			} else if (('l' == _cursor[1]) || ('L' == _cursor[1])) {
 				return false;
 			}
-		} else if (('u' == _cursor[0]) || ('U' == _cursor[0])){
+		} else if (('u' == _cursor[0]) || ('U' == _cursor[0])) {
 			if (seenU) {
 				return false;
 			}
@@ -804,15 +793,9 @@ MacroParser::unaryExpression(int64_t *ret)
 	} else if (_scanner.validTypeCast(&isSigned, &bitWidth)) {
 		if (validSingleTerm(&operand)) {
 			switch (bitWidth) {
-			case 8:
-				*ret = isSigned ? (int8_t) operand : (uint8_t) operand;
-				break;
-			case 16:
-				*ret = isSigned ? (int16_t) operand : (uint16_t) operand;
-				break;
-			case 32:
-				*ret = isSigned ? (int32_t) operand : (uint32_t) operand;
-				break;
+			case 8: *ret = isSigned ? (int8_t)operand : (uint8_t)operand; break;
+			case 16: *ret = isSigned ? (int16_t)operand : (uint16_t)operand; break;
+			case 32: *ret = isSigned ? (int32_t)operand : (uint32_t)operand; break;
 			default:
 				/*
 				 * If the bit-width is 64 it has no meaningful effect.

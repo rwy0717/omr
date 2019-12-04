@@ -39,19 +39,15 @@ const int PTR_SIZE = 8;
 /* Number of built in types */
 const unsigned int NUM_BUILT_IN_TYPES = 37;
 
-const string BUILT_IN_TYPES[NUM_BUILT_IN_TYPES + 1] = {"", "int", "char", "short int", "long int", "unsigned char",
-"", "unsigned short int", "unsigned int", "", "long unsigned int", "void", 
-"float", "double", "long double", "", "bool", "", "", "stringptr",
-"", "", "", "", "", "", "", "",
-"", "", "", "long long int", "long long unsigned int", "", "",
-"intptr_t","uintptr_t", "sizetype"};
-const string BUILT_IN_TYPES_THAT_ARE_TYPEDEFS[NUM_BUILT_IN_TYPES + 1] = {"", "", "", "", "", "", "signed char",
-"", "", "unsigned", "", "", "", "", "", "integer", "", "short real", "real", "", "character", "", "", "", "",
-"", "", "integer*1", "integer*2", "integer*4", "wchar", "", "", "logical*8", "integer*8", "", "", ""
-};
-const int BUILT_IN_TYPE_SIZES[NUM_BUILT_IN_TYPES +1 ] = {0, 32, 8, 16, 32, 8, 8, 16, 32, 32,
-32, 0, 32, 64, 128, 32, 8, 32, 64, PTR_SIZE, 8, 8, 16, 32, 32, 64, 128,
-8, 16, 32, 16, 64, 64, 64, 64, 64, 64, 64};
+const string BUILT_IN_TYPES[NUM_BUILT_IN_TYPES + 1] = {"", "int", "char", "short int", "long int", "unsigned char", "",
+        "unsigned short int", "unsigned int", "", "long unsigned int", "void", "float", "double", "long double", "",
+        "bool", "", "", "stringptr", "", "", "", "", "", "", "", "", "", "", "", "long long int",
+        "long long unsigned int", "", "", "intptr_t", "uintptr_t", "sizetype"};
+const string BUILT_IN_TYPES_THAT_ARE_TYPEDEFS[NUM_BUILT_IN_TYPES + 1] = {"", "", "", "", "", "", "signed char", "", "",
+        "unsigned", "", "", "", "", "", "integer", "", "short real", "real", "", "character", "", "", "", "", "", "",
+        "integer*1", "integer*2", "integer*4", "wchar", "", "", "logical*8", "integer*8", "", "", ""};
+const int BUILT_IN_TYPE_SIZES[NUM_BUILT_IN_TYPES + 1] = {0, 32, 8, 16, 32, 8, 8, 16, 32, 32, 32, 0, 32, 64, 128, 32, 8,
+        32, 64, PTR_SIZE, 8, 8, 16, 32, 32, 64, 128, 8, 16, 32, 16, 64, 64, 64, 64, 64, 64, 64};
 
 const string START_OF_FILE[3] = {"debug", "3", "FILE"};
 const string FILE_NAME = "a0";

@@ -39,7 +39,6 @@
 
 #include "omrintrospect.h"
 
-
 int
 getEntryName(uint8_t *entry_point, char **name)
 {
@@ -47,7 +46,7 @@ getEntryName(uint8_t *entry_point, char **name)
 	PPA1_Version3 *ppa;
 	char *namePtr = NULL;
 	uint16_t *nameLenPtr = NULL;
-	uint16_t  nameLen = 0;
+	uint16_t nameLen = 0;
 	uint32_t optional_area_length = 0;
 
 	if (entry_point == NULL) {
@@ -100,7 +99,6 @@ getEntryName(uint8_t *entry_point, char **name)
 			nameLenPtr = (uint16_t *)((uint8_t *)ppa + sizeof(PPA1_Version3) + optional_area_length);
 			nameLen = *nameLenPtr;
 			namePtr = (uint8_t *)nameLenPtr + sizeof(nameLen);
-
 		}
 	}
 
@@ -122,7 +120,8 @@ getEntryName(uint8_t *entry_point, char **name)
  * @return the number of frames in the backtrace.
  */
 uintptr_t
-omrintrospect_backtrace_thread_raw(struct OMRPortLibrary *portLibrary, J9PlatformThread *threadInfo, J9Heap *heap, void *signalInfo)
+omrintrospect_backtrace_thread_raw(
+        struct OMRPortLibrary *portLibrary, J9PlatformThread *threadInfo, J9Heap *heap, void *signalInfo)
 {
 	uintptr_t frameNumber = 0;
 	J9PlatformStackFrame **nextFrame;
@@ -194,7 +193,8 @@ omrintrospect_backtrace_thread_raw(struct OMRPortLibrary *portLibrary, J9Platfor
 		/* have to skip this first frame as we don't want to return a DSA entry for this function as it'll be
 		 * invalid once it returns
 		 */
-		dsaptr = __dsa_prev(dsaptr, __EDCWCCWI_LOGICAL, (int) dsa_format, NULL, NULL, (int *)&callers_dsa_format, NULL, NULL);
+		dsaptr = __dsa_prev(dsaptr, __EDCWCCWI_LOGICAL, (int)dsa_format, NULL, NULL, (int *)&callers_dsa_format,
+		        NULL, NULL);
 		dsa_format = callers_dsa_format;
 
 		if (dsaptr == NULL) {
@@ -224,40 +224,43 @@ omrintrospect_backtrace_thread_raw(struct OMRPortLibrary *portLibrary, J9Platfor
 		program_unit_name_length = 0;
 		statement_id_length = 0;
 
-		/* CAA field CEECAA_STACKDIRECTION holds stack direction... is this for the current frame or initial thread? */
-		ceetbck(&dsaptr,							/* in */
-				&dsa_format,						/* inout */
-				&caaptr,							/* in */
-				&member_id,							/* out */
-				&program_unit_name[0],				/* out */
-				&program_unit_name_length,			/* inout */
-				&program_unit_address,				/* out */
-				&call_instruction_address,			/* inout */
-				&entry_name[0],						/* out */
-				&entry_name_length,					/* inout */
-				&entry_address,						/* out */
-				&callers_call_instruction_address,	/* out */
-				&callers_dsaptr,					/* out */
-				&callers_dsa_format,				/* out */
-				statement_id,						/* out */
-				&statement_id_length,				/* inout */
-				&cibptr,							/* out */
-				&main_program,						/* out */
-				&fc);								/* out */
+		/* CAA field CEECAA_STACKDIRECTION holds stack direction... is this for the current frame or initial
+		 * thread? */
+		ceetbck(&dsaptr, /* in */
+		        &dsa_format, /* inout */
+		        &caaptr, /* in */
+		        &member_id, /* out */
+		        &program_unit_name[0], /* out */
+		        &program_unit_name_length, /* inout */
+		        &program_unit_address, /* out */
+		        &call_instruction_address, /* inout */
+		        &entry_name[0], /* out */
+		        &entry_name_length, /* inout */
+		        &entry_address, /* out */
+		        &callers_call_instruction_address, /* out */
+		        &callers_dsaptr, /* out */
+		        &callers_dsa_format, /* out */
+		        statement_id, /* out */
+		        &statement_id_length, /* inout */
+		        &cibptr, /* out */
+		        &main_program, /* out */
+		        &fc); /* out */
 
 		if (fc.tok_sev != 0) {
 			break;
 		}
 #else
 		errno = 0;
-		callers_dsaptr = __dsa_prev(dsaptr, __EDCWCCWI_PHYSICAL, dsa_format, NULL, NULL, &callers_dsa_format, NULL, NULL);
+		callers_dsaptr = __dsa_prev(
+		        dsaptr, __EDCWCCWI_PHYSICAL, dsa_format, NULL, NULL, &callers_dsa_format, NULL, NULL);
 		if (callers_dsaptr == NULL || errno) {
 			break;
 		}
 #endif
 
 		if (heap == NULL) {
-			*nextFrame = portLibrary->mem_allocate_memory(portLibrary, sizeof(J9PlatformStackFrame), OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
+			*nextFrame = portLibrary->mem_allocate_memory(portLibrary, sizeof(J9PlatformStackFrame),
+			        OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 		} else {
 			*nextFrame = portLibrary->heap_allocate(portLibrary, heap, sizeof(J9PlatformStackFrame));
 		}
@@ -298,7 +301,8 @@ omrintrospect_backtrace_thread_raw(struct OMRPortLibrary *portLibrary, J9Platfor
  * and looks up the symbols for the frames. The format of the string generated is:
  * 		symbol_name (statement_id instruction_pointer [module+offset])
  * If it isn't possible to determine any of the items in the string then they are omitted. If no heap is specified
- * then this function will use malloc to allocate the memory necessary for the symbols which must be freed by the caller.
+ * then this function will use malloc to allocate the memory necessary for the symbols which must be freed by the
+ * caller.
  *
  * @param portLbirary a pointer to an initialized port library
  * @param threadInfo a thread structure populated with a backtrace
@@ -382,25 +386,25 @@ omrintrospect_backtrace_symbols_raw(struct OMRPortLibrary *portLibrary, J9Platfo
 		statement_id_length = MAX_NAME;
 
 #ifndef J9ZOS39064
-		ceetbck((_POINTER *)&frame->base_pointer,				/* in */
-				&format,							/* inout */
-				(_POINTER *)&frame->register1,					/* in */
-				&member_id,							/* out */
-				&program_unit_name[0],				/* out */
-				&program_unit_name_length,			/* inout */
-				&program_unit_address,				/* out */
-				(_INT4 *)&frame->instruction_pointer,/* inout */
-				&entry_name[0],						/* out */
-				&entry_name_length,					/* inout */
-				&entry_address,						/* out */
-				&callers_call_instruction_address,	/* out */
-				&callers_dsaptr,					/* out */
-				&callers_dsa_format,				/* out */
-				statement_id,						/* out */
-				&statement_id_length,				/* inout */
-				&cibptr,							/* out */
-				&main_program,						/* out */
-				&fc);								/* out */
+		ceetbck((_POINTER *)&frame->base_pointer, /* in */
+		        &format, /* inout */
+		        (_POINTER *)&frame->register1, /* in */
+		        &member_id, /* out */
+		        &program_unit_name[0], /* out */
+		        &program_unit_name_length, /* inout */
+		        &program_unit_address, /* out */
+		        (_INT4 *)&frame->instruction_pointer, /* inout */
+		        &entry_name[0], /* out */
+		        &entry_name_length, /* inout */
+		        &entry_address, /* out */
+		        &callers_call_instruction_address, /* out */
+		        &callers_dsaptr, /* out */
+		        &callers_dsa_format, /* out */
+		        statement_id, /* out */
+		        &statement_id_length, /* inout */
+		        &cibptr, /* out */
+		        &main_program, /* out */
+		        &fc); /* out */
 
 #else
 		entry_name_length = 0;
@@ -477,23 +481,29 @@ omrintrospect_backtrace_symbols_raw(struct OMRPortLibrary *portLibrary, J9Platfo
 
 		/* symbol_name+offset (id, instruction_pointer [module+offset]) */
 		if (symbol_name[0] != '\0') {
-			cursor += omrstr_printf(portLibrary, cursor, sizeof(output_buf) - (cursor - output_buf), "%s", symbol_name);
-			cursor += omrstr_printf(portLibrary, cursor, sizeof(output_buf) - (cursor - output_buf), "+0x%x ", symbol_offset);
+			cursor += omrstr_printf(
+			        portLibrary, cursor, sizeof(output_buf) - (cursor - output_buf), "%s", symbol_name);
+			cursor += omrstr_printf(portLibrary, cursor, sizeof(output_buf) - (cursor - output_buf),
+			        "+0x%x ", symbol_offset);
 		}
 		*(cursor++) = '(';
 		if (statement_id[0] != '\0') {
-			cursor += omrstr_printf(portLibrary, cursor, sizeof(output_buf) - (cursor - output_buf), "%.*s, ", statement_id_length, statement_id);
+			cursor += omrstr_printf(portLibrary, cursor, sizeof(output_buf) - (cursor - output_buf),
+			        "%.*s, ", statement_id_length, statement_id);
 		}
-		cursor += omrstr_printf(portLibrary, cursor, sizeof(output_buf) - (cursor - output_buf), "0x%p", frame->instruction_pointer);
+		cursor += omrstr_printf(portLibrary, cursor, sizeof(output_buf) - (cursor - output_buf), "0x%p",
+		        frame->instruction_pointer);
 		if (module_name[0] != '\0') {
-			cursor += omrstr_printf(portLibrary, cursor, sizeof(output_buf) - (cursor - output_buf), " [%s+0x%x]", module_name, module_offset);
+			cursor += omrstr_printf(portLibrary, cursor, sizeof(output_buf) - (cursor - output_buf),
+			        " [%s+0x%x]", module_name, module_offset);
 		}
 		*(cursor++) = ')';
 		*cursor = 0;
 
 		length = (cursor - output_buf) + 1;
 		if (heap == NULL) {
-			frame->symbol = portLibrary->mem_allocate_memory(portLibrary, length, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
+			frame->symbol = portLibrary->mem_allocate_memory(
+			        portLibrary, length, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 		} else {
 			frame->symbol = portLibrary->heap_allocate(portLibrary, heap, length);
 		}

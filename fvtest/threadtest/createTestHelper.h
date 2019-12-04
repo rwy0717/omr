@@ -112,5 +112,4 @@ extern int getRTPolicy(omrthread_prio_t priority);
 typedef int osprio_t;
 extern osprio_t getOsPriority(omrthread_prio_t priority);
 
-
 #endif /*CREATETESTHELPER_H_*/

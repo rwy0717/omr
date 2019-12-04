@@ -31,7 +31,8 @@
 #include "omrportpriv.h"
 
 J9MmapHandle *
-omrmmap_map_file(struct OMRPortLibrary *portLibrary, intptr_t file, uint64_t offset, uintptr_t size, const char *mappingName, uint32_t flags, uint32_t category)
+omrmmap_map_file(struct OMRPortLibrary *portLibrary, intptr_t file, uint64_t offset, uintptr_t size,
+        const char *mappingName, uint32_t flags, uint32_t category)
 {
 	/* default implementation will allocate memory and read the file into it */
 	uintptr_t numBytesRead;
@@ -84,7 +85,8 @@ omrmmap_map_file(struct OMRPortLibrary *portLibrary, intptr_t file, uint64_t off
 	numBytesRead = 0;
 	rc = 0;
 	while (size - numBytesRead > 0) {
-		rc = portLibrary->file_read(portLibrary, file, (void *)(((uintptr_t)mappedMemory) + numBytesRead), size - numBytesRead);
+		rc = portLibrary->file_read(
+		        portLibrary, file, (void *)(((uintptr_t)mappedMemory) + numBytesRead), size - numBytesRead);
 		if (rc == -1) {
 			/* failed to completely read the file */
 			Trc_PRT_mmap_map_file_default_badread();
@@ -95,7 +97,8 @@ omrmmap_map_file(struct OMRPortLibrary *portLibrary, intptr_t file, uint64_t off
 		Trc_PRT_mmap_map_file_default_readingFile(numBytesRead);
 	}
 
-	if (!(returnVal = (J9MmapHandle *)portLibrary->mem_allocate_memory(portLibrary, sizeof(J9MmapHandle), OMR_GET_CALLSITE(), category))) {
+	if (!(returnVal = (J9MmapHandle *)portLibrary->mem_allocate_memory(
+	              portLibrary, sizeof(J9MmapHandle), OMR_GET_CALLSITE(), category))) {
 		Trc_PRT_mmap_map_file_cannotallocatehandle();
 		portLibrary->mem_free_memory(portLibrary, allocPointer);
 		return NULL;
@@ -132,8 +135,7 @@ omrmmap_startup(struct OMRPortLibrary *portLibrary)
 
 void
 omrmmap_shutdown(struct OMRPortLibrary *portLibrary)
-{
-}
+{}
 
 int32_t
 omrmmap_capabilities(struct OMRPortLibrary *portLibrary)
@@ -153,10 +155,10 @@ omrmmap_get_region_granularity(struct OMRPortLibrary *portLibrary, void *address
 	return 0;
 }
 
-#pragma linkage (PGSERRM,OS)
-#pragma map(Pgser_Release,"PGSERRM")
+#pragma linkage(PGSERRM, OS)
+#pragma map(Pgser_Release, "PGSERRM")
 #if defined(OMR_ENV_DATA64)
-#pragma linkage(omrdiscard_data,OS_NOSTACK)
+#pragma linkage(omrdiscard_data, OS_NOSTACK)
 int omrdiscard_data(void *address, int numFrames);
 #endif /*OMR_ENV_DATA64 */
 
@@ -170,8 +172,8 @@ omrmmap_dont_need(struct OMRPortLibrary *portLibrary, const void *startAddress, 
 	Trc_PRT_mmap_dont_need(pageSize, startAddress, length);
 
 	if (pageSize > 0 && length >= pageSize) {
-		uintptr_t endAddress = (uintptr_t) startAddress + length;
-		uintptr_t roundedStart = ROUND_UP_TO_POWEROF2((uintptr_t) startAddress, pageSize);
+		uintptr_t endAddress = (uintptr_t)startAddress + length;
+		uintptr_t roundedStart = ROUND_UP_TO_POWEROF2((uintptr_t)startAddress, pageSize);
 		size_t roundedLength = ROUND_DOWN_TO_POWEROF2(endAddress - roundedStart, pageSize);
 		if (roundedLength >= pageSize) {
 			Trc_PRT_mmap_dont_need_oscall(roundedStart, roundedLength);

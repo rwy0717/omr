@@ -27,14 +27,12 @@
 
 extern ThreadTestEnvironment *omrTestEnv;
 
-class SanityTest: public ::testing::Test
-{
+class SanityTest : public ::testing::Test {
 public:
 	static unsigned int runTime;
-protected:
 
-	static void
-	SetUpTestCase(void)
+protected:
+	static void SetUpTestCase(void)
 	{
 		/* parse the command line options */
 		for (int32_t i = 1; i < omrTestEnv->_argc; i++) {

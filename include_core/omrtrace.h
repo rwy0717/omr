@@ -29,7 +29,7 @@
 
 #include "ute_core.h"
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -41,28 +41,28 @@ extern "C" {
  * =============================================================================
  */
 
-#define UT_DEBUG_KEYWORD              "DEBUG"
-#define UT_FORMAT_KEYWORD             "FORMAT"
-#define UT_SUFFIX_KEYWORD             "SUFFIX"
-#define UT_LIBPATH_KEYWORD            "LIBPATH"
-#define UT_BUFFERS_KEYWORD            "BUFFERS"
-#define UT_MINIMAL_KEYWORD            "MINIMAL"
-#define UT_MAXIMAL_KEYWORD            "MAXIMAL"
-#define UT_COUNT_KEYWORD              "COUNT"
-#define UT_PRINT_KEYWORD              "PRINT"
-#define UT_IPRINT_KEYWORD             "IPRINT"
-#define UT_EXCEPTION_KEYWORD          "EXCEPTION"
-#define UT_NONE_KEYWORD               "NONE"
-#define UT_OUTPUT_KEYWORD             "OUTPUT" /* deprecated */
-#define UT_LEVEL_KEYWORD              "LEVEL"
-#define UT_SUSPEND_KEYWORD            "SUSPEND"
-#define UT_RESUME_KEYWORD             "RESUME"
-#define UT_RESUME_COUNT_KEYWORD       "RESUMECOUNT"
-#define UT_SUSPEND_COUNT_KEYWORD      "SUSPENDCOUNT"
-#define UT_ALL                        "ALL"
-#define UT_BACKTRACE                  "BACKTRACE"
-#define UT_FATAL_ASSERT_KEYWORD       "FATALASSERT"
-#define UT_NO_FATAL_ASSERT_KEYWORD    "NOFATALASSERT"
+#define UT_DEBUG_KEYWORD "DEBUG"
+#define UT_FORMAT_KEYWORD "FORMAT"
+#define UT_SUFFIX_KEYWORD "SUFFIX"
+#define UT_LIBPATH_KEYWORD "LIBPATH"
+#define UT_BUFFERS_KEYWORD "BUFFERS"
+#define UT_MINIMAL_KEYWORD "MINIMAL"
+#define UT_MAXIMAL_KEYWORD "MAXIMAL"
+#define UT_COUNT_KEYWORD "COUNT"
+#define UT_PRINT_KEYWORD "PRINT"
+#define UT_IPRINT_KEYWORD "IPRINT"
+#define UT_EXCEPTION_KEYWORD "EXCEPTION"
+#define UT_NONE_KEYWORD "NONE"
+#define UT_OUTPUT_KEYWORD "OUTPUT" /* deprecated */
+#define UT_LEVEL_KEYWORD "LEVEL"
+#define UT_SUSPEND_KEYWORD "SUSPEND"
+#define UT_RESUME_KEYWORD "RESUME"
+#define UT_RESUME_COUNT_KEYWORD "RESUMECOUNT"
+#define UT_SUSPEND_COUNT_KEYWORD "SUSPENDCOUNT"
+#define UT_ALL "ALL"
+#define UT_BACKTRACE "BACKTRACE"
+#define UT_FATAL_ASSERT_KEYWORD "FATALASSERT"
+#define UT_NO_FATAL_ASSERT_KEYWORD "NOFATALASSERT"
 
 /*
  * =============================================================================
@@ -72,32 +72,31 @@ extern "C" {
 struct OMR_TraceThread;
 
 typedef struct OMR_TraceBuffer {
-	struct OMR_TraceBuffer *next;		/* Next thread/freebuffer           */
-	volatile uint32_t flags;			/* Flags                            */
-	int32_t bufferType;					/* Buffer type                      */
-	struct OMR_TraceThread *thr;		/* The thread that last owned this  */
+	struct OMR_TraceBuffer *next; /* Next thread/freebuffer           */
+	volatile uint32_t flags; /* Flags                            */
+	int32_t bufferType; /* Buffer type                      */
+	struct OMR_TraceThread *thr; /* The thread that last owned this  */
 	/* This section written to disk     */
-	UtTraceRecord record;				/* Disk record                      */
+	UtTraceRecord record; /* Disk record                      */
 } OMR_TraceBuffer;
 
 typedef struct OMR_TraceThread {
-	const void *id;					/* Thread identifier               */
-	const void *synonym1;			/* Alternative thread identifier   */
-	const void *synonym2;			/* And another thread identifier   */
-	const char *name;				/* Thread name                     */
-	unsigned char currentOutputMask;/* Bitmask containing the options
-									 * for the tracepoint currently being formatted
-									 */
-	OMR_TraceBuffer *trcBuf;		/* Trace buffer                    */
-	int32_t suspendResume;			/* Suspend / resume count          */
-	int recursion;					/* Trace recursion indicator       */
-	int indent;						/* Iprint indentation count        */
+	const void *id; /* Thread identifier               */
+	const void *synonym1; /* Alternative thread identifier   */
+	const void *synonym2; /* And another thread identifier   */
+	const char *name; /* Thread name                     */
+	unsigned char currentOutputMask; /* Bitmask containing the options
+	                                  * for the tracepoint currently being formatted
+	                                  */
+	OMR_TraceBuffer *trcBuf; /* Trace buffer                    */
+	int32_t suspendResume; /* Suspend / resume count          */
+	int recursion; /* Trace recursion indicator       */
+	int indent; /* Iprint indentation count        */
 } OMR_TraceThread;
 
 typedef struct OMR_TraceInterface {
 	omr_error_t (*RegisterRecordSubscriber)(struct OMR_TraceThread *thr, const char *description,
-		utsSubscriberCallback func, utsSubscriberAlarmCallback alarm,
-		void *userData, UtSubscription **record);
+	        utsSubscriberCallback func, utsSubscriberAlarmCallback alarm, void *userData, UtSubscription **record);
 	omr_error_t (*DeregisterRecordSubscriber)(struct OMR_TraceThread *thr, UtSubscription *subscriptionID);
 	omr_error_t (*FlushTraceData)(struct OMR_TraceThread *thr);
 	omr_error_t (*GetTraceMetadata)(void **data, int32_t *length);
@@ -144,8 +143,8 @@ typedef struct OMRTraceEngine {
  *
  * @return an OMR error code
  */
-omr_error_t omr_trc_startup(OMR_VM *omrVM, const OMR_TraceLanguageInterface *languageIntf,
-	const char *datDir, const char **opts);
+omr_error_t omr_trc_startup(
+        OMR_VM *omrVM, const OMR_TraceLanguageInterface *languageIntf, const char *datDir, const char **opts);
 
 /**
  * Shut down tracing and free the trace engine data before exiting the process
@@ -223,7 +222,7 @@ void omr_trc_postForkChildHandler(void);
 
 #endif /* defined(OMR_THR_FORK_SUPPORT) */
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 }
 #endif
 

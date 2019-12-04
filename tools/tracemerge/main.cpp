@@ -73,7 +73,7 @@ wmain(int argc, wchar_t **argv, wchar_t **envp)
 	int rc = -1;
 
 	/* Translate argv to UTF-8 */
-	length = argc;	/* 1 null terminator per string */
+	length = argc; /* 1 null terminator per string */
 	for (i = 0; i < argc; i++) {
 		length += (int)(wcslen(argv[i]) * 3);
 	}
@@ -83,14 +83,16 @@ wmain(int argc, wchar_t **argv, wchar_t **envp)
 		int utf8Length;
 
 		translated_argv[i] = cursor;
-		if (0 == (utf8Length = WideCharToMultiByte(OS_ENCODING_CODE_PAGE, OS_ENCODING_WC_FLAGS, argv[i], -1, cursor, length, NULL, NULL))) {
+		if (0
+		        == (utf8Length = WideCharToMultiByte(OS_ENCODING_CODE_PAGE, OS_ENCODING_WC_FLAGS, argv[i], -1,
+		                    cursor, length, NULL, NULL))) {
 			return -1;
 		}
 		cursor += utf8Length;
 		*cursor++ = '\0';
 		length -= utf8Length;
 	}
-	translated_argv[argc] = NULL;	/* NULL terminated the new argv */
+	translated_argv[argc] = NULL; /* NULL terminated the new argv */
 
 	/* Translate argv to UTF-8 */
 	if (envp) {
@@ -98,7 +100,7 @@ wmain(int argc, wchar_t **argv, wchar_t **envp)
 		while (NULL != envp[envc]) {
 			envc++;
 		}
-		length = envc;	/* 1 null terminator per string */
+		length = envc; /* 1 null terminator per string */
 		for (i = 0; i < envc; i++) {
 			length += (int)(wcslen(envp[i]) * 3);
 		}
@@ -107,14 +109,16 @@ wmain(int argc, wchar_t **argv, wchar_t **envp)
 		for (i = 0; i < envc; i++) {
 			int utf8Length;
 			translated_envp[i] = cursor;
-			if (0 == (utf8Length = WideCharToMultiByte(OS_ENCODING_CODE_PAGE, OS_ENCODING_WC_FLAGS, envp[i], -1, cursor, length, NULL, NULL))) {
+			if (0
+			        == (utf8Length = WideCharToMultiByte(OS_ENCODING_CODE_PAGE, OS_ENCODING_WC_FLAGS,
+			                    envp[i], -1, cursor, length, NULL, NULL))) {
 				return -1;
 			}
 			cursor += utf8Length;
 			*cursor++ = '\0';
 			length -= utf8Length;
 		}
-		translated_envp[envc] = NULL;	/* NULL terminated the new envp */
+		translated_envp[envc] = NULL; /* NULL terminated the new envp */
 	}
 
 	rc = translated_main(argc, translated_argv, translated_envp);

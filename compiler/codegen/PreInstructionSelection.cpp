@@ -56,99 +56,85 @@
 
 #define OPT_DETAILS "O^O PRE-INSTRUCTION SELECTION: "
 
-
 void
 OMR::CodeGenerator::setUpStackSizeForCallNode(TR::Node *node)
-   {
-   uint32_t currentArgSize = 0;
+{
+	uint32_t currentArgSize = 0;
 
-   for (int32_t i = node->getFirstArgumentIndex(); i < node->getNumChildren(); ++i)
-      {
-      int32_t roundedSize = node->getChild(i)->getRoundedSize();
+	for (int32_t i = node->getFirstArgumentIndex(); i < node->getNumChildren(); ++i) {
+		int32_t roundedSize = node->getChild(i)->getRoundedSize();
 
-      if (TR::Compiler->target.is64Bit() && node->getChild(i)->getDataType() != TR::Address)
-         {
-         currentArgSize += roundedSize * 2;
-         }
-      else
-         {
-         currentArgSize += roundedSize;
-         }
-      }
+		if (TR::Compiler->target.is64Bit() && node->getChild(i)->getDataType() != TR::Address) {
+			currentArgSize += roundedSize * 2;
+		} else {
+			currentArgSize += roundedSize;
+		}
+	}
 
-   if (currentArgSize > self()->getLargestOutgoingArgSize())
-      {
-      self()->setLargestOutgoingArgSize(currentArgSize);
-      }
-   }
-
+	if (currentArgSize > self()->getLargestOutgoingArgSize()) {
+		self()->setLargestOutgoingArgSize(currentArgSize);
+	}
+}
 
 void
-OMR::CodeGenerator::eliminateLoadsOfLocalsThatAreNotStored(
-      TR::Node *node,
-      int32_t childNum)
-   {
-   if (node->getVisitCount() == self()->comp()->getVisitCount())
-      {
-      return;
-      }
+OMR::CodeGenerator::eliminateLoadsOfLocalsThatAreNotStored(TR::Node *node, int32_t childNum)
+{
+	if (node->getVisitCount() == self()->comp()->getVisitCount()) {
+		return;
+	}
 
-   node->setVisitCount(self()->comp()->getVisitCount());
+	node->setVisitCount(self()->comp()->getVisitCount());
 
-   if (node->getOpCode().isLoadVarDirect() &&
-       node->getSymbolReference()->getSymbol()->isAuto() &&
-       (node->getSymbolReference()->getReferenceNumber() < _numLocalsWhenStoreAnalysisWasDone) &&
-       !node->getSymbol()->castToAutoSymbol()->isLiveLocalIndexUninitialized() &&
-       (!_liveButMaybeUnreferencedLocals ||
-        !_liveButMaybeUnreferencedLocals->get(node->getSymbol()->castToAutoSymbol()->getLiveLocalIndex())) &&
-       !_localsThatAreStored->get(node->getSymbolReference()->getReferenceNumber()) &&
-       performTransformation(self()->comp(), "%sRemoving dead load of sym ref %d at %p\n", OPT_DETAILS, node->getSymbolReference()->getReferenceNumber(), node))
+	if (node->getOpCode().isLoadVarDirect() && node->getSymbolReference()->getSymbol()->isAuto()
+	        && (node->getSymbolReference()->getReferenceNumber() < _numLocalsWhenStoreAnalysisWasDone)
+	        && !node->getSymbol()->castToAutoSymbol()->isLiveLocalIndexUninitialized()
+	        && (!_liveButMaybeUnreferencedLocals
+	                || !_liveButMaybeUnreferencedLocals->get(
+	                        node->getSymbol()->castToAutoSymbol()->getLiveLocalIndex()))
+	        && !_localsThatAreStored->get(node->getSymbolReference()->getReferenceNumber())
+	        && performTransformation(self()->comp(), "%sRemoving dead load of sym ref %d at %p\n", OPT_DETAILS,
+	                node->getSymbolReference()->getReferenceNumber(), node))
 
-      {
-      TR::Node::recreate(node, self()->comp()->il.opCodeForConst(node->getSymbolReference()->getSymbol()->getDataType()));
-      node->setLongInt(0);
-      return;
-      }
+	{
+		TR::Node::recreate(node,
+		        self()->comp()->il.opCodeForConst(node->getSymbolReference()->getSymbol()->getDataType()));
+		node->setLongInt(0);
+		return;
+	}
 
-   int32_t i;
-   for (i=0; i < node->getNumChildren(); i++)
-      {
-      self()->eliminateLoadsOfLocalsThatAreNotStored(node->getChild(i), i);
-      }
-   }
-
+	int32_t i;
+	for (i = 0; i < node->getNumChildren(); i++) {
+		self()->eliminateLoadsOfLocalsThatAreNotStored(node->getChild(i), i);
+	}
+}
 
 void
 OMR::CodeGenerator::prepareNodeForInstructionSelection(TR::Node *node)
-   {
-   if (node->getVisitCount() == self()->comp()->getVisitCount())
-      {
-      if (node->getOpCode().hasSymbolReference() && node->getSymbolReference()->isTempVariableSizeSymRef())
-         {
-         // bcd loads and loadaddr's do not get put into registers so must increment the symbol reference count for commoned nodes too
-         TR::AutomaticSymbol *local = node->getSymbol()->getAutoSymbol();
-         TR_ASSERT(local,"a tempMemSlot should have an auto symbol\n");
-         local->incReferenceCount();
-         }
+{
+	if (node->getVisitCount() == self()->comp()->getVisitCount()) {
+		if (node->getOpCode().hasSymbolReference() && node->getSymbolReference()->isTempVariableSizeSymRef()) {
+			// bcd loads and loadaddr's do not get put into registers so must increment the symbol reference
+			// count for commoned nodes too
+			TR::AutomaticSymbol *local = node->getSymbol()->getAutoSymbol();
+			TR_ASSERT(local, "a tempMemSlot should have an auto symbol\n");
+			local->incReferenceCount();
+		}
 
-      return;
-      }
+		return;
+	}
 
-   if (node->getOpCode().hasSymbolReference())
-      {
-      TR::AutomaticSymbol *local = node->getSymbol()->getAutoSymbol();
-      if (local)
-         {
-         local->incReferenceCount();
-         }
-      }
+	if (node->getOpCode().hasSymbolReference()) {
+		TR::AutomaticSymbol *local = node->getSymbol()->getAutoSymbol();
+		if (local) {
+			local->incReferenceCount();
+		}
+	}
 
-   node->setVisitCount(self()->comp()->getVisitCount());
-   node->setRegister(NULL);
-   node->setHasBeenVisitedForHints(false); // clear this flag for addStorageReferenceHints pass
+	node->setVisitCount(self()->comp()->getVisitCount());
+	node->setRegister(NULL);
+	node->setHasBeenVisitedForHints(false); // clear this flag for addStorageReferenceHints pass
 
-   for (int32_t childCount = node->getNumChildren() - 1; childCount >= 0; childCount--)
-      {
-      self()->prepareNodeForInstructionSelection(node->getChild(childCount));
-      }
-   }
+	for (int32_t childCount = node->getNumChildren() - 1; childCount >= 0; childCount--) {
+		self()->prepareNodeForInstructionSelection(node->getChild(childCount));
+	}
+}

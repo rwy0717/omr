@@ -33,7 +33,8 @@ fillInUnixSignalInfo(struct OMRPortLibrary *portLibrary, void *contextInfo, stru
 }
 
 uint32_t
-infoForSignal(struct OMRPortLibrary *portLibrary, OMRUnixSignalInfo *info, int32_t index, const char **name, void **value)
+infoForSignal(
+        struct OMRPortLibrary *portLibrary, OMRUnixSignalInfo *info, int32_t index, const char **name, void **value)
 {
 	switch (index) {
 	case OMRPORT_SIG_SIGNAL_TYPE:
@@ -84,9 +85,7 @@ infoForSignal(struct OMRPortLibrary *portLibrary, OMRUnixSignalInfo *info, int32
 		*name = "";
 		return OMRPORT_SIG_VALUE_UNDEFINED;
 
-	default:
-		*name = "";
-		return OMRPORT_SIG_VALUE_UNDEFINED;
+	default: *name = ""; return OMRPORT_SIG_VALUE_UNDEFINED;
 	}
 }
 
@@ -161,9 +160,7 @@ infoForFPR(struct OMRPortLibrary *portLibrary, OMRUnixSignalInfo *info, int32_t 
 		*name = "XMM15";
 		*value = &floatState->__fpu_xmm15;
 		return OMRPORT_SIG_VALUE_FLOAT_64;
-	default:
-		*name = "";
-		return OMRPORT_SIG_VALUE_UNDEFINED;
+	default: *name = ""; return OMRPORT_SIG_VALUE_UNDEFINED;
 	}
 }
 
@@ -244,14 +241,13 @@ infoForGPR(struct OMRPortLibrary *portLibrary, OMRUnixSignalInfo *info, int32_t 
 		*name = "R15";
 		*value = &threadState->__r15;
 		return OMRPORT_SIG_VALUE_ADDRESS;
-	default:
-		*name = "";
-		return OMRPORT_SIG_VALUE_UNDEFINED;
+	default: *name = ""; return OMRPORT_SIG_VALUE_UNDEFINED;
 	}
 }
 
 uint32_t
-infoForControl(struct OMRPortLibrary *portLibrary, OMRUnixSignalInfo *info, int32_t index, const char **name, void **value)
+infoForControl(
+        struct OMRPortLibrary *portLibrary, OMRUnixSignalInfo *info, int32_t index, const char **name, void **value)
 {
 	mcontext_t *context = (mcontext_t *)&info->platformSignalInfo.context->uc_mcontext;
 	_STRUCT_X86_THREAD_STATE64 *threadState = &(*context)->__ss;
@@ -305,14 +301,13 @@ infoForControl(struct OMRPortLibrary *portLibrary, OMRUnixSignalInfo *info, int3
 		*name = "FAULTVADDR";
 		*value = &exceptionState->__faultvaddr;
 		return OMRPORT_SIG_VALUE_ADDRESS;
-	default:
-		*name = "";
-		return OMRPORT_SIG_VALUE_UNDEFINED;
+	default: *name = ""; return OMRPORT_SIG_VALUE_UNDEFINED;
 	}
 }
 
 uint32_t
-infoForModule(struct OMRPortLibrary *portLibrary, OMRUnixSignalInfo *info, int32_t index, const char **name, void **value)
+infoForModule(
+        struct OMRPortLibrary *portLibrary, OMRUnixSignalInfo *info, int32_t index, const char **name, void **value)
 {
 	Dl_info *dl_info = &(info->platformSignalInfo.dl_info);
 	mcontext_t *context = (mcontext_t *)&info->platformSignalInfo.context->uc_mcontext;
@@ -350,8 +345,6 @@ infoForModule(struct OMRPortLibrary *portLibrary, OMRUnixSignalInfo *info, int32
 			return OMRPORT_SIG_VALUE_ADDRESS;
 		}
 		return OMRPORT_SIG_VALUE_UNDEFINED;
-	default:
-		*name = "";
-		return OMRPORT_SIG_VALUE_UNDEFINED;
+	default: *name = ""; return OMRPORT_SIG_VALUE_UNDEFINED;
 	}
 }

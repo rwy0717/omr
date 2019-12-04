@@ -20,13 +20,12 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-#include <string.h>
+#include "HeapRegionDescriptorSegregated.hpp"
 
 #include "GCExtensionsBase.hpp"
 #include "HeapRegionManager.hpp"
 #include "MemoryPoolAggregatedCellList.hpp"
-
-#include "HeapRegionDescriptorSegregated.hpp"
+#include <string.h>
 
 #if defined(OMR_GC_SEGREGATED_HEAP)
 
@@ -58,39 +57,47 @@ MM_HeapRegionDescriptorSegregated::tearDown(MM_EnvironmentBase *env)
 }
 
 bool
-MM_HeapRegionDescriptorSegregated::initializer(MM_EnvironmentBase *env, MM_HeapRegionManager *regionManager, MM_HeapRegionDescriptor *descriptor, void *lowAddress, void *highAddress)
+MM_HeapRegionDescriptorSegregated::initializer(MM_EnvironmentBase *env, MM_HeapRegionManager *regionManager,
+        MM_HeapRegionDescriptor *descriptor, void *lowAddress, void *highAddress)
 {
-	new((MM_HeapRegionDescriptorSegregated*)descriptor) MM_HeapRegionDescriptorSegregated(env, lowAddress, highAddress);
-	return ((MM_HeapRegionDescriptorSegregated*)descriptor)->initialize(env, regionManager);
+	new ((MM_HeapRegionDescriptorSegregated *)descriptor)
+	        MM_HeapRegionDescriptorSegregated(env, lowAddress, highAddress);
+	return ((MM_HeapRegionDescriptorSegregated *)descriptor)->initialize(env, regionManager);
 }
 
 void
 MM_HeapRegionDescriptorSegregated::setRange(RegionType type, uintptr_t range)
 {
 	uintptr_t self = _regionManager->mapDescriptorToRegionTableIndex(this);
-	assume(self >= 0 || range==0, "setRange"); /* range zero for special entry */
-	for (uintptr_t index = 0; index<range; index++) {
-		MM_HeapRegionDescriptorSegregated *region = (MM_HeapRegionDescriptorSegregated *)_regionManager->mapRegionTableIndexToDescriptor(self + index);
+	assume(self >= 0 || range == 0, "setRange"); /* range zero for special entry */
+	for (uintptr_t index = 0; index < range; index++) {
+		MM_HeapRegionDescriptorSegregated *region =
+		        (MM_HeapRegionDescriptorSegregated *)_regionManager->mapRegionTableIndexToDescriptor(
+		                self + index);
 		region->setRegionType(type);
 		region->setRangeCount(range - index);
 	}
 	if (range > 0) { /* check for special entries */
-		((MM_HeapRegionDescriptorSegregated *)_regionManager->mapRegionTableIndexToDescriptor(self + range - 1))->setRangeHead(this);
+		((MM_HeapRegionDescriptorSegregated *)_regionManager->mapRegionTableIndexToDescriptor(self + range - 1))
+		        ->setRangeHead(this);
 	}
 	if (range == 1) {
-		((MM_HeapRegionDescriptorSegregated *)_regionManager->mapRegionTableIndexToDescriptor(self))->setRangeCount(1);
+		((MM_HeapRegionDescriptorSegregated *)_regionManager->mapRegionTableIndexToDescriptor(self))
+		        ->setRangeCount(1);
 	}
 }
 /**
  * Split a detached free range - the first portion becomes used
  */
-MM_HeapRegionDescriptorSegregated*
+MM_HeapRegionDescriptorSegregated *
 MM_HeapRegionDescriptorSegregated::splitRange(uintptr_t numRegionsToSplit)
 {
 	uintptr_t range = getRange();
 	assume(isFree() && range > numRegionsToSplit, "splitRange");
 	uintptr_t index = _regionManager->mapDescriptorToRegionTableIndex(this);
-	MM_HeapRegionDescriptorSegregated *second = (MM_HeapRegionDescriptorSegregated *)_regionManager->mapRegionTableIndexToDescriptor(index + numRegionsToSplit);
+	MM_HeapRegionDescriptorSegregated *second =
+	        (MM_HeapRegionDescriptorSegregated *)_regionManager->mapRegionTableIndexToDescriptor(
+	                index + numRegionsToSplit);
 	second->resetTailFree(range - numRegionsToSplit);
 	return second;
 }
@@ -109,8 +116,12 @@ MM_HeapRegionDescriptorSegregated::joinFreeRangeInit(MM_HeapRegionDescriptorSegr
 	if (selfIndex + selfRange == possNextIndex) {
 
 		/* index adjacency makes region adjacency possible */
-		uintptr_t *lastRegion = (uintptr_t *)((MM_HeapRegionDescriptorSegregated *)_regionManager->mapRegionTableIndexToDescriptor(possNextIndex - 1))->getLowAddress();
-		uintptr_t *firstRegion = (uintptr_t *)((MM_HeapRegionDescriptorSegregated *)_regionManager->mapRegionTableIndexToDescriptor(possNextIndex))->getLowAddress();
+		uintptr_t *lastRegion = (uintptr_t *)((MM_HeapRegionDescriptorSegregated *)_regionManager
+		                                              ->mapRegionTableIndexToDescriptor(possNextIndex - 1))
+		                                ->getLowAddress();
+		uintptr_t *firstRegion = (uintptr_t *)((MM_HeapRegionDescriptorSegregated *)_regionManager
+		                                               ->mapRegionTableIndexToDescriptor(possNextIndex))
+		                                 ->getLowAddress();
 
 		if ((uintptr_t)lastRegion + regionSize == (uintptr_t)firstRegion) {
 			/* setFree(selfRange + possNextRange); */
@@ -119,7 +130,6 @@ MM_HeapRegionDescriptorSegregated::joinFreeRangeInit(MM_HeapRegionDescriptorSegr
 		}
 	}
 	return false;
-
 }
 
 void
@@ -133,10 +143,12 @@ MM_HeapRegionDescriptorSegregated::resetTailFree(uintptr_t range)
 {
 	uintptr_t self = _regionManager->mapDescriptorToRegionTableIndex(this);
 	if (range == 1) {
-		((MM_HeapRegionDescriptorSegregated *)_regionManager->mapRegionTableIndexToDescriptor(self))->setRangeCount(1);
+		((MM_HeapRegionDescriptorSegregated *)_regionManager->mapRegionTableIndexToDescriptor(self))
+		        ->setRangeCount(1);
 	}
 	if (range > 0) {
-		((MM_HeapRegionDescriptorSegregated *)_regionManager->mapRegionTableIndexToDescriptor(self + range - 1))->setRangeHead(this);
+		((MM_HeapRegionDescriptorSegregated *)_regionManager->mapRegionTableIndexToDescriptor(self + range - 1))
+		        ->setRangeHead(this);
 	}
 }
 
@@ -174,7 +186,7 @@ MM_HeapRegionDescriptorSegregated::allocateArraylet(MM_EnvironmentBase *env, omr
 	uintptr_t arrayletsPerRegion = env->getExtensions()->arrayletsPerRegion;
 	Assert_MM_true(_nextArrayletIndex <= arrayletsPerRegion);
 
-	for (uintptr_t i=_nextArrayletIndex; i < arrayletsPerRegion; i++) {
+	for (uintptr_t i = _nextArrayletIndex; i < arrayletsPerRegion; i++) {
 		if (isArrayletUnused(i)) {
 			setArrayletParent(i, (uintptr_t *)parentIndexableObject);
 			_memoryPoolACL.addBytesAllocated(env, env->getOmrVM()->_arrayletLeafSize);
@@ -196,7 +208,7 @@ MM_HeapRegionDescriptorSegregated::setArraylet()
 }
 
 void
-MM_HeapRegionDescriptorSegregated::addBytesFreedToArrayletBackout(MM_EnvironmentBase* env)
+MM_HeapRegionDescriptorSegregated::addBytesFreedToArrayletBackout(MM_EnvironmentBase *env)
 {
 	Assert_MM_true(isArraylet());
 
@@ -206,7 +218,7 @@ MM_HeapRegionDescriptorSegregated::addBytesFreedToArrayletBackout(MM_Environment
 }
 
 void
-MM_HeapRegionDescriptorSegregated::addBytesFreedToSmallSpineBackout(MM_EnvironmentBase* env)
+MM_HeapRegionDescriptorSegregated::addBytesFreedToSmallSpineBackout(MM_EnvironmentBase *env)
 {
 	Assert_MM_true(isSmall());
 
@@ -224,7 +236,7 @@ MM_HeapRegionDescriptorSegregated::addBytesFreedToSmallSpineBackout(MM_Environme
 void
 MM_HeapRegionDescriptorSegregated::emptyRegionAllocated(MM_EnvironmentBase *env)
 {
-	MM_GCExtensionsBase* extensions = env->getExtensions();
+	MM_GCExtensionsBase *extensions = env->getExtensions();
 	_memoryPoolACL.setPreSweepFreeBytes(extensions->regionSize);
 
 	if (isSmall()) {
@@ -235,7 +247,8 @@ MM_HeapRegionDescriptorSegregated::emptyRegionAllocated(MM_EnvironmentBase *env)
 		/* We only need to take into account potential internal fragmentation of arraylets, the allocation
 		 * context will call into the allocation tracker for the allocation of the arraylet.
 		 */
-		_memoryPoolACL.addBytesAllocated(env, (extensions->regionSize % env->getOmrVM()->_arrayletLeafSize) * getRange());
+		_memoryPoolACL.addBytesAllocated(
+		        env, (extensions->regionSize % env->getOmrVM()->_arrayletLeafSize) * getRange());
 	} else if (isLarge()) {
 		/* We need to account for the entire allocation. */
 		env->_allocationTracker->addBytesAllocated(env, extensions->regionSize * getRange());
@@ -247,7 +260,7 @@ MM_HeapRegionDescriptorSegregated::emptyRegionAllocated(MM_EnvironmentBase *env)
 void
 MM_HeapRegionDescriptorSegregated::emptyRegionReturned(MM_EnvironmentBase *env)
 {
-	MM_GCExtensionsBase* extensions = env->getExtensions();
+	MM_GCExtensionsBase *extensions = env->getExtensions();
 
 	if (isSmall()) {
 		Assert_MM_true(getRange() == 1);
@@ -255,7 +268,8 @@ MM_HeapRegionDescriptorSegregated::emptyRegionReturned(MM_EnvironmentBase *env)
 		env->_allocationTracker->addBytesFreed(env, (extensions->regionSize - (getNumCells() * getCellSize())));
 	} else if (isArraylet()) {
 		/* We only need to take into account potential internal fragmentation of arraylets. */
-		env->_allocationTracker->addBytesFreed(env, (extensions->regionSize % env->getOmrVM()->_arrayletLeafSize) * getRange());
+		env->_allocationTracker->addBytesFreed(
+		        env, (extensions->regionSize % env->getOmrVM()->_arrayletLeafSize) * getRange());
 	} else if (isLarge()) {
 		/* We need to account for the entire allocation. */
 		env->_allocationTracker->addBytesFreed(env, extensions->regionSize * getRange());
@@ -277,8 +291,7 @@ MM_HeapRegionDescriptorSegregated::updateCounts(MM_EnvironmentBase *env, bool fr
 				_memoryPoolACL.incrementFreeCount();
 			}
 		}
-	} else
-	if (isSmall()) {
+	} else if (isSmall()) {
 		_memoryPoolACL.updateCounts(env, fromFlush);
 	} else if (isLarge()) {
 	}

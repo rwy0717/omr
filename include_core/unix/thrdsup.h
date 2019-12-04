@@ -45,7 +45,6 @@
 #endif /* defined(OSX) */
 #endif /* defined(LINUX) || defined(OSX) || defined(MVS) || defined(J9ZOS390) || defined(OMRZTPF) */
 
-
 #include "omrmutex.h"
 
 #define J9THR_STR(x) #x
@@ -57,15 +56,15 @@ typedef pthread_key_t TLSKEY;
 typedef pthread_cond_t COND;
 
 #if defined(OMR_THR_FORK_SUPPORT)
-typedef pthread_mutex_t* J9OSMutex;
-typedef pthread_cond_t* J9OSCond;
+typedef pthread_mutex_t *J9OSMutex;
+typedef pthread_cond_t *J9OSCond;
 #else /* defined(OMR_THR_FORK_SUPPORT) */
 typedef COND J9OSCond;
 typedef MUTEX J9OSMutex;
 #endif /* defined(OMR_THR_FORK_SUPPORT) */
 
-#define WRAPPER_TYPE void*
-typedef void* WRAPPER_ARG;
+#define WRAPPER_TYPE void *
+typedef void *WRAPPER_ARG;
 #define WRAPPER_RETURN() return NULL
 typedef WRAPPER_TYPE (*WRAPPER_FUNC)(WRAPPER_ARG);
 
@@ -82,7 +81,6 @@ typedef struct zos_sem_t {
 typedef zos_sem_t OSSEMAPHORE;
 #endif /* defined(LINUX) || defined(AIXPPC) */
 
-
 #include "thrtypes.h"
 
 int linux_pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex, const struct timespec *abstime);
@@ -97,7 +95,7 @@ extern struct J9ThreadLibrary default_library;
 extern int priority_map[];
 
 /* For real-time, priority map encodes scheduling policy and priority for each entry */
-#define PRIORITY_MAP_ADJUSTED_POLICY(policy) ((policy)<<24)
+#define PRIORITY_MAP_ADJUSTED_POLICY(policy) ((policy) << 24)
 
 #ifdef OMR_ENV_DATA64
 #define J9DIV_T ldiv_t
@@ -142,43 +140,49 @@ extern pthread_condattr_t *defaultCondAttr;
 #endif /* J9THREAD_USE_MONOTONIC_COND_CLOCK */
 
 #if (defined(MVS) || defined(J9ZOS390) || defined(OMRZTPF))
-#define SETUP_TIMEOUT(ts_, millis, nanos) {								\
-		struct timeval tv_;											\
-		J9DIV_T secs_ = J9DIV(millis, 1000);					\
-		int nanos_ = secs_.rem * 1000000 + nanos;				\
-		gettimeofday(&tv_, NULL);								\
-		nanos_ += tv_.tv_usec * 1000;						\
-		if (nanos_ >= 1000000000) {							\
-			ts_.tv_sec = tv_.tv_sec + secs_.quot + 1;		\
-			ts_.tv_nsec = nanos_ - 1000000000;			\
-		} else {														\
-			ts_.tv_sec = tv_.tv_sec + secs_.quot;			\
-			ts_.tv_nsec = nanos_;								\
-		} }
+#define SETUP_TIMEOUT(ts_, millis, nanos) \
+	{ \
+		struct timeval tv_; \
+		J9DIV_T secs_ = J9DIV(millis, 1000); \
+		int nanos_ = secs_.rem * 1000000 + nanos; \
+		gettimeofday(&tv_, NULL); \
+		nanos_ += tv_.tv_usec * 1000; \
+		if (nanos_ >= 1000000000) { \
+			ts_.tv_sec = tv_.tv_sec + secs_.quot + 1; \
+			ts_.tv_nsec = nanos_ - 1000000000; \
+		} else { \
+			ts_.tv_sec = tv_.tv_sec + secs_.quot; \
+			ts_.tv_nsec = nanos_; \
+		} \
+	}
 #elif defined(OSX)
-#define SETUP_TIMEOUT(ts_, millis, nanos) {						\
-		J9DIV_T secs_ = J9DIV(millis, 1000);					\
-		int nanos_ = secs_.rem * 1000000 + nanos;				\
-		if (nanos_ >= 1000000000) {								\
-			ts_.tv_sec = secs_.quot + 1;						\
-			ts_.tv_nsec = nanos_ - 1000000000;					\
-		} else {												\
-			ts_.tv_sec = secs_.quot;							\
-			ts_.tv_nsec = nanos_;								\
-		} }
+#define SETUP_TIMEOUT(ts_, millis, nanos) \
+	{ \
+		J9DIV_T secs_ = J9DIV(millis, 1000); \
+		int nanos_ = secs_.rem * 1000000 + nanos; \
+		if (nanos_ >= 1000000000) { \
+			ts_.tv_sec = secs_.quot + 1; \
+			ts_.tv_nsec = nanos_ - 1000000000; \
+		} else { \
+			ts_.tv_sec = secs_.quot; \
+			ts_.tv_nsec = nanos_; \
+		} \
+	}
 #else /* defined(OSX) */
-#define SETUP_TIMEOUT(ts_, millis, nanos) {								\
-		J9DIV_T secs_ = J9DIV(millis, 1000);					\
-		int nanos_ = secs_.rem * 1000000 + nanos;				\
- 		clock_gettime(TIMEOUT_CLOCK, &ts_);		\
-		nanos_ += ts_.tv_nsec;									\
-		if (nanos_ >= 1000000000) {							\
-			ts_.tv_sec += secs_.quot + 1;						\
-			ts_.tv_nsec = nanos_ - 1000000000;			\
-		} else {														\
-			ts_.tv_sec += secs_.quot;							\
-			ts_.tv_nsec = nanos_;								\
-		} }
+#define SETUP_TIMEOUT(ts_, millis, nanos) \
+	{ \
+		J9DIV_T secs_ = J9DIV(millis, 1000); \
+		int nanos_ = secs_.rem * 1000000 + nanos; \
+		clock_gettime(TIMEOUT_CLOCK, &ts_); \
+		nanos_ += ts_.tv_nsec; \
+		if (nanos_ >= 1000000000) { \
+			ts_.tv_sec += secs_.quot + 1; \
+			ts_.tv_nsec = nanos_ - 1000000000; \
+		} else { \
+			ts_.tv_sec += secs_.quot; \
+			ts_.tv_nsec = nanos_; \
+		} \
+	}
 #endif /* defined(OSX) */
 /* COND_DESTROY */
 
@@ -190,10 +194,12 @@ extern pthread_condattr_t *defaultCondAttr;
 /* NOTE: a timeout less than zero indicates infinity */
 
 #define COND_WAIT(cond, mutex) \
-	do {	\
-		pthread_cond_wait(&(cond), &(mutex))
+	do { \
+	pthread_cond_wait(&(cond), &(mutex))
 
-#define COND_WAIT_LOOP()	} while(1)
+#define COND_WAIT_LOOP() \
+	} \
+	while (1)
 
 /* THREAD_SELF */
 
@@ -205,28 +211,29 @@ extern pthread_condattr_t *defaultCondAttr;
 #define THREAD_YIELD() (sched_yield())
 
 #ifdef OMR_THR_YIELD_ALG
-#define THREAD_YIELD_NEW(sequentialYields) {\
-	omrthread_t thread = MACRO_SELF();\
-	if (thread->library->yieldAlgorithm ==  J9THREAD_LIB_YIELD_ALGORITHM_INCREASING_USLEEP) {\
-		if ((sequentialYields >> 5 ) != 0){\
-			usleep(thread->library->yieldUsleepMultiplier*16);\
-		} else if ((sequentialYields >> 4 ) != 0){\
-			usleep(thread->library->yieldUsleepMultiplier*8);\
-		} else if ((sequentialYields >> 3 ) != 0){\
-			usleep(thread->library->yieldUsleepMultiplier*4);\
-		} else if ((sequentialYields >> 2 ) != 0){\
-			usleep(thread->library->yieldUsleepMultiplier*2);\
-		} else if ((sequentialYields >> 1 ) != 0){\
-			usleep(thread->library->yieldUsleepMultiplier);\
-		} else {\
-			usleep(thread->library->yieldUsleepMultiplier);\
-		}\
-	} else if (thread->library->yieldAlgorithm ==  J9THREAD_LIB_YIELD_ALGORITHM_CONSTANT_USLEEP){ \
-		usleep(thread->library->yieldUsleepMultiplier);\
-	} else { \
-		sched_yield();\
-	}\
-}
+#define THREAD_YIELD_NEW(sequentialYields) \
+	{ \
+		omrthread_t thread = MACRO_SELF(); \
+		if (thread->library->yieldAlgorithm == J9THREAD_LIB_YIELD_ALGORITHM_INCREASING_USLEEP) { \
+			if ((sequentialYields >> 5) != 0) { \
+				usleep(thread->library->yieldUsleepMultiplier * 16); \
+			} else if ((sequentialYields >> 4) != 0) { \
+				usleep(thread->library->yieldUsleepMultiplier * 8); \
+			} else if ((sequentialYields >> 3) != 0) { \
+				usleep(thread->library->yieldUsleepMultiplier * 4); \
+			} else if ((sequentialYields >> 2) != 0) { \
+				usleep(thread->library->yieldUsleepMultiplier * 2); \
+			} else if ((sequentialYields >> 1) != 0) { \
+				usleep(thread->library->yieldUsleepMultiplier); \
+			} else { \
+				usleep(thread->library->yieldUsleepMultiplier); \
+			} \
+		} else if (thread->library->yieldAlgorithm == J9THREAD_LIB_YIELD_ALGORITHM_CONSTANT_USLEEP) { \
+			usleep(thread->library->yieldUsleepMultiplier); \
+		} else { \
+			sched_yield(); \
+		} \
+	}
 #endif
 #else /* (defined(LINUX) || defined(AIXPPC) || defined(OSX)) */
 #ifdef OMR_THR_YIELD_ALG
@@ -234,11 +241,9 @@ extern pthread_condattr_t *defaultCondAttr;
 #endif
 #endif /* (defined(LINUX) || defined(AIXPPC) || defined(OSX)) */
 
-#if defined(MVS) || defined (J9ZOS390)
+#if defined(MVS) || defined(J9ZOS390)
 #define THREAD_YIELD() (pthread_yield(0))
 #endif
-
-
 
 /* last chance. If it's not defined by now, use yield */
 #ifndef THREAD_YIELD
@@ -249,8 +254,6 @@ extern pthread_condattr_t *defaultCondAttr;
 
 /* pthread_cancel is asynchronous. Use join to wait for it to complete */
 #define THREAD_CANCEL(thread) (pthread_cancel(thread) || pthread_join(thread, NULL))
-
-
 
 /* COND_NOTIFY_ALL */
 
@@ -265,11 +268,11 @@ extern pthread_condattr_t *defaultCondAttr;
 /* NOTE: the calling thread must already own the mutex! */
 
 #if defined(LINUX) && defined(J9X86)
-#define PTHREAD_COND_TIMEDWAIT(x,y,z) linux_pthread_cond_timedwait(x,y,z)
+#define PTHREAD_COND_TIMEDWAIT(x, y, z) linux_pthread_cond_timedwait(x, y, z)
 #elif defined(OSX)
-#define PTHREAD_COND_TIMEDWAIT(x,y,z) pthread_cond_timedwait_relative_np(x,y,z)
+#define PTHREAD_COND_TIMEDWAIT(x, y, z) pthread_cond_timedwait_relative_np(x, y, z)
 #else /* defined(OSX) */
-#define PTHREAD_COND_TIMEDWAIT(x,y,z) pthread_cond_timedwait(x,y,z)
+#define PTHREAD_COND_TIMEDWAIT(x, y, z) pthread_cond_timedwait(x, y, z)
 #endif /* defined(OSX) */
 
 #if defined(J9ZOS390)
@@ -278,16 +281,17 @@ extern pthread_condattr_t *defaultCondAttr;
 #define COND_WAIT_RC_TIMEDOUT ETIMEDOUT
 #endif
 
-#define COND_WAIT_IF_TIMEDOUT(cond, mutex, millis, nanos) 											\
-	do {																													\
-		struct timespec ts_;																							\
-		SETUP_TIMEOUT(ts_, millis, nanos);																						\
-		while (1) {																										\
-				if (PTHREAD_COND_TIMEDWAIT(&(cond), &(mutex), &ts_) == COND_WAIT_RC_TIMEDOUT)
+#define COND_WAIT_IF_TIMEDOUT(cond, mutex, millis, nanos) \
+	do { \
+		struct timespec ts_; \
+		SETUP_TIMEOUT(ts_, millis, nanos); \
+		while (1) { \
+			if (PTHREAD_COND_TIMEDWAIT(&(cond), &(mutex), &ts_) == COND_WAIT_RC_TIMEDOUT)
 
-#define COND_WAIT_TIMED_LOOP()		}	} while(0)
-
-
+#define COND_WAIT_TIMED_LOOP() \
+	} \
+	} \
+	while (0)
 
 /* COND_INIT */
 
@@ -329,8 +333,9 @@ extern pthread_condattr_t *defaultCondAttr;
 #endif
 
 /* Semaphore functions */
-#define SEM_CREATE(threadLibrary, initValue) omrthread_allocate_memory(threadLibrary, sizeof(OSSEMAPHORE), OMRMEM_CATEGORY_THREADS)
-#define	SEM_FREE(lib, s)  	omrthread_free_memory(lib, s);
+#define SEM_CREATE(threadLibrary, initValue) \
+	omrthread_allocate_memory(threadLibrary, sizeof(OSSEMAPHORE), OMRMEM_CATEGORY_THREADS)
+#define SEM_FREE(lib, s) omrthread_free_memory(lib, s);
 
 #if defined(OMR_USE_POSIX_SEMAPHORES)
 #define SEM_INIT(sm, pshrd, inval) (sem_init((sem_t *)(sm), pshrd, inval))
@@ -339,16 +344,14 @@ extern pthread_condattr_t *defaultCondAttr;
 #define SEM_WAIT(smP) (sem_wait((sem_t *)(smP)))
 #define SEM_GETVALUE(smP, intP) (sem_getvalue(smP, intP))
 #elif defined(OMR_USE_OSX_SEMAPHORES)
-#define SEM_INIT(sm, pshrd, inval)	\
-	(semaphore_create(mach_task_self(), (semaphore_t *)(sm), SYNC_POLICY_FIFO, inval))
-#define SEM_DESTROY(sm)	\
-	(semaphore_destroy(mach_task_self(), *(semaphore_t *)(sm)))
+#define SEM_INIT(sm, pshrd, inval) (semaphore_create(mach_task_self(), (semaphore_t *)(sm), SYNC_POLICY_FIFO, inval))
+#define SEM_DESTROY(sm) (semaphore_destroy(mach_task_self(), *(semaphore_t *)(sm)))
 #define SEM_POST(smP) (semaphore_signal(*(semaphore_t *)(smP)))
 #define SEM_WAIT(smP) (semaphore_wait(*(semaphore_t *)(smP)))
 #define SEM_GETVALUE(smP, intP)
 #elif defined(OMR_USE_ZOS_SEMAPHORES)
-#define SEM_INIT(sm,pshrd,inval) (sem_init_zos(sm, pshrd, inval))
-#define SEM_DESTROY(sm)	(sem_destroy_zos(sm))
+#define SEM_INIT(sm, pshrd, inval) (sem_init_zos(sm, pshrd, inval))
+#define SEM_DESTROY(sm) (sem_destroy_zos(sm))
 #define SEM_POST(smP) (sem_post_zos(smP))
 #define SEM_WAIT(smP) (sem_wait_zos(smP))
 #define SEM_GETVALUE(smP, intP) (sem_getvalue_zos(smP, intP))
@@ -359,17 +362,17 @@ extern pthread_condattr_t *defaultCondAttr;
 /* GET_HIRES_CLOCK */
 
 #ifdef OMR_THR_JLM_HOLD_TIMES
-#define GET_HIRES_CLOCK()  getTimebase()
+#define GET_HIRES_CLOCK() getTimebase()
 #endif /* OMR_THR_JLM_HOLD_TIMES */
 /* ENABLE_OS_THREAD_STATS */
 
-#if defined (AIXPPC)
-#define ENABLE_OS_THREAD_STATS(self)\
-	do {\
-		struct rusage usageInfo;\
-		memset(&usageInfo,0,sizeof(usageInfo));\
-		pthread_getrusage_np((self)->handle, &usageInfo, PTHRDSINFO_RUSAGE_START);\
-	} while(0)
+#if defined(AIXPPC)
+#define ENABLE_OS_THREAD_STATS(self) \
+	do { \
+		struct rusage usageInfo; \
+		memset(&usageInfo, 0, sizeof(usageInfo)); \
+		pthread_getrusage_np((self)->handle, &usageInfo, PTHRDSINFO_RUSAGE_START); \
+	} while (0)
 #else
 #define ENABLE_OS_THREAD_STATS(self)
 #endif
@@ -386,18 +389,23 @@ intptr_t j9OSCond_freeAndDestroy(J9OSCond cond);
 intptr_t j9OSCond_notify(J9OSCond cond);
 intptr_t j9OSCond_notifyAll(J9OSCond cond);
 
-#define OMROSCOND_WAIT_IF_TIMEDOUT(cond, mutex, millis, nanos) 							\
-	do {																				\
-		struct timespec ts_;															\
-		SETUP_TIMEOUT(ts_, millis, nanos);												\
-		while (1) {																		\
+#define OMROSCOND_WAIT_IF_TIMEDOUT(cond, mutex, millis, nanos) \
+	do { \
+		struct timespec ts_; \
+		SETUP_TIMEOUT(ts_, millis, nanos); \
+		while (1) { \
 			if (PTHREAD_COND_TIMEDWAIT(cond, mutex, &ts_) == COND_WAIT_RC_TIMEDOUT)
-#define OMROSCOND_WAIT_TIMED_LOOP()		}	} while(0)
+#define OMROSCOND_WAIT_TIMED_LOOP() \
+	} \
+	} \
+	while (0)
 
 #define OMROSCOND_WAIT(cond, mutex) \
-	do {	\
-		pthread_cond_wait((cond), (mutex))
-#define OMROSCOND_WAIT_LOOP()	} while(1)
+	do { \
+	pthread_cond_wait((cond), (mutex))
+#define OMROSCOND_WAIT_LOOP() \
+	} \
+	while (1)
 
 #define OMROSMUTEX_INIT(mutex) j9OSMutex_allocAndInit(&(mutex))
 #define OMROSMUTEX_DESTROY(mutex) j9OSMutex_freeAndDestroy((mutex))
@@ -427,4 +435,4 @@ intptr_t j9OSCond_notifyAll(J9OSCond cond);
 
 #endif /* defined(OMR_THR_FORK_SUPPORT) */
 
-#endif     /* thrdsup_h */
+#endif /* thrdsup_h */

@@ -23,16 +23,14 @@
 #ifndef SCAVENGERCOPYSCANRATIO_HPP_
 #define SCAVENGERCOPYSCANRATIO_HPP_
 
-#include <string.h>
-
-#include "omrcfg.h"
-#include "omrgcconsts.h"
-#include "modronbase.h"
-#include "modronopt.h"
-
 #include "AtomicOperations.hpp"
 #include "Math.hpp"
 #include "ScavengerStats.hpp"
+#include "modronbase.h"
+#include "modronopt.h"
+#include "omrcfg.h"
+#include "omrgcconsts.h"
+#include <string.h>
 
 class MM_EnvironmentBase;
 
@@ -68,61 +66,69 @@ class MM_EnvironmentBase;
  */
 #define SCAVENGER_THREAD_UPDATES_PER_MAJOR_UPDATE 32
 #define SCAVENGER_SLOTS_SCANNED_PER_THREAD_UPDATE 512
-#define SCAVENGER_SLOTS_SCANNED_PER_MAJOR_UPDATE (SCAVENGER_THREAD_UPDATES_PER_MAJOR_UPDATE * SCAVENGER_SLOTS_SCANNED_PER_THREAD_UPDATE)
+#define SCAVENGER_SLOTS_SCANNED_PER_MAJOR_UPDATE \
+	(SCAVENGER_THREAD_UPDATES_PER_MAJOR_UPDATE * SCAVENGER_SLOTS_SCANNED_PER_THREAD_UPDATE)
 
 #define SCAVENGER_SLOTS_SCANNED_SHIFT SCAVENGER_SAMPLE_COUNT_BITS
 #define SCAVENGER_SLOTS_COPIED_SHIFT (SCAVENGER_SLOTS_SCANNED_SHIFT + SCAVENGER_SAMPLE_SLOTS_BITS)
 #define SCAVENGER_THREAD_WAITS_SHIFT (SCAVENGER_SLOTS_COPIED_SHIFT + SCAVENGER_SAMPLE_SLOTS_BITS)
 
 #define SCAVENGER_SLOTS_UPDATE_MASK (((uint64_t)1 << SCAVENGER_SAMPLE_COUNT_BITS) - 1)
-#define SCAVENGER_SLOTS_SCANNED_MASK ((((uint64_t)1 << SCAVENGER_SAMPLE_SLOTS_BITS) - 1) << SCAVENGER_SLOTS_SCANNED_SHIFT)
+#define SCAVENGER_SLOTS_SCANNED_MASK \
+	((((uint64_t)1 << SCAVENGER_SAMPLE_SLOTS_BITS) - 1) << SCAVENGER_SLOTS_SCANNED_SHIFT)
 #define SCAVENGER_SLOTS_COPIED_MASK ((((uint64_t)1 << SCAVENGER_SAMPLE_SLOTS_BITS) - 1) << SCAVENGER_SLOTS_COPIED_SHIFT)
 #define SCAVENGER_THREAD_WAITS_MASK ((((uint64_t)1 << SCAVENGER_SAMPLE_WAITS_BITS) - 1) << SCAVENGER_THREAD_WAITS_SHIFT)
 
 #define SCAVENGER_UPDATE_COUNT_OVERFLOW ((uint64_t)1 << (SCAVENGER_SAMPLE_COUNT_BITS - 1))
-#define SCAVENGER_SLOTS_SCANNED_OVERFLOW ((uint64_t)1 << (SCAVENGER_SLOTS_SCANNED_SHIFT + SCAVENGER_SAMPLE_SLOTS_BITS - 1))
-#define SCAVENGER_SLOTS_COPIED_OVERFLOW ((uint64_t)1 << (SCAVENGER_SLOTS_COPIED_SHIFT + SCAVENGER_SAMPLE_SLOTS_BITS - 1))
-#define SCAVENGER_THREAD_WAITS_OVERFLOW ((uint64_t)1 << (SCAVENGER_THREAD_WAITS_SHIFT + SCAVENGER_SAMPLE_WAITS_BITS - 1))
+#define SCAVENGER_SLOTS_SCANNED_OVERFLOW \
+	((uint64_t)1 << (SCAVENGER_SLOTS_SCANNED_SHIFT + SCAVENGER_SAMPLE_SLOTS_BITS - 1))
+#define SCAVENGER_SLOTS_COPIED_OVERFLOW \
+	((uint64_t)1 << (SCAVENGER_SLOTS_COPIED_SHIFT + SCAVENGER_SAMPLE_SLOTS_BITS - 1))
+#define SCAVENGER_THREAD_WAITS_OVERFLOW \
+	((uint64_t)1 << (SCAVENGER_THREAD_WAITS_SHIFT + SCAVENGER_SAMPLE_WAITS_BITS - 1))
 
-#define SCAVENGER_COUNTER_OVERFLOW (SCAVENGER_THREAD_WAITS_OVERFLOW | SCAVENGER_SLOTS_COPIED_OVERFLOW | SCAVENGER_SLOTS_SCANNED_OVERFLOW | SCAVENGER_SAMPLE_SLOTS_BITS)
+#define SCAVENGER_COUNTER_OVERFLOW \
+	(SCAVENGER_THREAD_WAITS_OVERFLOW | SCAVENGER_SLOTS_COPIED_OVERFLOW | SCAVENGER_SLOTS_SCANNED_OVERFLOW \
+	        | SCAVENGER_SAMPLE_SLOTS_BITS)
 #define SCAVENGER_COUNTER_DEFAULT_ACCUMULATOR 0
 
 #define SCAVENGER_UPDATE_HISTORY_SIZE 16
 
-class MM_ScavengerCopyScanRatio
-{
+class MM_ScavengerCopyScanRatio {
 	/* Data members */
 public:
 	typedef struct UpdateHistory {
-		uint64_t waits;		/* number of stalled treads */
-		uint64_t copied;	/* number of slots copied */
-		uint64_t scanned;	/* number of slots scanned */
-		uint64_t updates;	/* number of thread samples */
-		uint64_t threads;	/* number of active or stalled threads */
-		uint64_t lists;		/* number of nonempty scan lists */
-		uint64_t caches;	/* number of caches in scan queues */
+		uint64_t waits; /* number of stalled treads */
+		uint64_t copied; /* number of slots copied */
+		uint64_t scanned; /* number of slots scanned */
+		uint64_t updates; /* number of thread samples */
+		uint64_t threads; /* number of active or stalled threads */
+		uint64_t lists; /* number of nonempty scan lists */
+		uint64_t caches; /* number of caches in scan queues */
 #if defined(OMR_GC_CONCURRENT_SCAVENGER)
 		uint64_t readObjectBarrierCopy; /* number of object copied by read barrier */
 		uint64_t readObjectBarrierUpdate; /* number of reference slots updates by read barrier */
 #endif /* OMR_GC_CONCURRENT_SCAVENGER */
-		uint64_t time;		/* timestamp of most recent sample included in this record */
+		uint64_t time; /* timestamp of most recent sample included in this record */
 	} UpdateHistory;
 
-
 protected:
-
 private:
-	volatile uint64_t _accumulatingSamples;		/**< accumulator for aggregating per thread wait/copy/s`wait/copy/scanes-- these are periodically latched into _accumulatedSamples and reset */
-	volatile uint64_t _accumulatedSamples;		/**< most recent aggregate wait/copy/scan counts from SCAVENGER_THREAD_UPDATES_PER_MAJOR_UPDATE samples  */
-	volatile uintptr_t _majorUpdateThreadEnv;	/**< a token for the thread that has claimed a major update and owns the critical region wherein the update is effected */
-	uintptr_t _scalingUpdateCount;				/**< the number of times _accumulatingSamples was latched into _accumulatedSamples */
-	uintptr_t _overflowCount;					/**< the number of times _accumulatingSamples overflowed one or more counters */
-	uint64_t _resetTimestamp;					/**< timestamp at reset() */
-	uintptr_t _threadCount;						/**< number of gc threads participating in current gc cycle */
-	uintptr_t _historyFoldingFactor;			/** number of major updates per history record */
-	uintptr_t _historyTableIndex;				/** index of history table record that will receive next major update */
+	volatile uint64_t _accumulatingSamples; /**< accumulator for aggregating per thread
+	                                           wait/copy/s`wait/copy/scanes-- these are periodically latched into
+	                                           _accumulatedSamples and reset */
+	volatile uint64_t _accumulatedSamples; /**< most recent aggregate wait/copy/scan counts from
+	                                          SCAVENGER_THREAD_UPDATES_PER_MAJOR_UPDATE samples  */
+	volatile uintptr_t _majorUpdateThreadEnv; /**< a token for the thread that has claimed a major update and owns
+	                                             the critical region wherein the update is effected */
+	uintptr_t _scalingUpdateCount; /**< the number of times _accumulatingSamples was latched into
+	                                  _accumulatedSamples */
+	uintptr_t _overflowCount; /**< the number of times _accumulatingSamples overflowed one or more counters */
+	uint64_t _resetTimestamp; /**< timestamp at reset() */
+	uintptr_t _threadCount; /**< number of gc threads participating in current gc cycle */
+	uintptr_t _historyFoldingFactor; /** number of major updates per history record */
+	uintptr_t _historyTableIndex; /** index of history table record that will receive next major update */
 	UpdateHistory _historyTable[SCAVENGER_UPDATE_HISTORY_SIZE];
-
 
 	/* Function members */
 public:
@@ -130,16 +136,15 @@ public:
 	 * Default constructor zeros accumulators, so initial scaling factor is 1.0.
 	 */
 	MM_ScavengerCopyScanRatio()
-		:
-		_accumulatingSamples(0)
-		,_accumulatedSamples(SCAVENGER_COUNTER_DEFAULT_ACCUMULATOR)
-		,_majorUpdateThreadEnv(0)
-		,_scalingUpdateCount(0)
-		,_overflowCount(0)
-		,_resetTimestamp(0)
-		,_threadCount(0)
-		,_historyFoldingFactor(1)
-		,_historyTableIndex(0)
+	        : _accumulatingSamples(0)
+	        , _accumulatedSamples(SCAVENGER_COUNTER_DEFAULT_ACCUMULATOR)
+	        , _majorUpdateThreadEnv(0)
+	        , _scalingUpdateCount(0)
+	        , _overflowCount(0)
+	        , _resetTimestamp(0)
+	        , _threadCount(0)
+	        , _historyFoldingFactor(1)
+	        , _historyTableIndex(0)
 	{
 		memset(_historyTable, 0, SCAVENGER_UPDATE_HISTORY_SIZE * sizeof(UpdateHistory));
 	}
@@ -149,28 +154,29 @@ public:
 	 * received yet. Use this form for calculating scaling factor from most recent update.
 	 * @return a value >0.0 and <= 1.0 that can be used to scale copy/scan cache sizes to reduce stalling
 	 */
-	MMINLINE double
-	getScalingFactor(MM_EnvironmentBase* env)
+	MMINLINE double getScalingFactor(MM_EnvironmentBase *env)
 	{
 		uint64_t accumulatedSamples = MM_AtomicOperations::getU64(&_accumulatedSamples);
-		return getScalingFactor(env, _threadCount, waits(accumulatedSamples), copied(accumulatedSamples), scanned(accumulatedSamples), updates(accumulatedSamples));
+		return getScalingFactor(env, _threadCount, waits(accumulatedSamples), copied(accumulatedSamples),
+		        scanned(accumulatedSamples), updates(accumulatedSamples));
 	}
 
 	/**
 	 * Estimate and return maximal lower bound for cache size scaling factor from accumulated wait/copy/scan
 	 * updates, or 0 if none received yet. Use this form for estimating scaling factor from history records.
 	 * @param[in] historyRecord historical record of accumulated wait/copy/scan updates
-	 * @return a value 0.0 <= value <= 1.0 not much less than the average runtime scaling factor returned in time spanned by historyRecord
+	 * @return a value 0.0 <= value <= 1.0 not much less than the average runtime scaling factor returned in time
+	 * spanned by historyRecord
 	 */
-	MMINLINE double
-	getScalingFactor(MM_EnvironmentBase* env, UpdateHistory *historyRecord)
+	MMINLINE double getScalingFactor(MM_EnvironmentBase *env, UpdateHistory *historyRecord)
 	{
 		/* Assert: 0 == historyRecord->updates % SCAVENGER_THREAD_UPDATES_PER_MAJOR_UPDATE */
 		uint64_t majorUpdates = historyRecord->updates / SCAVENGER_THREAD_UPDATES_PER_MAJOR_UPDATE;
 		/* Raise thread count to ceiling to get maximal lower bound for scaling factor estimate */
 		uint64_t threads = (historyRecord->threads + majorUpdates - 1) / majorUpdates;
 		/* Assert: threads <= max(<gc-thread-count>) recorded in historyRecord */
-		return getScalingFactor(env, threads, historyRecord->waits, historyRecord->copied, historyRecord->scanned, historyRecord->updates);
+		return getScalingFactor(env, threads, historyRecord->waits, historyRecord->copied,
+		        historyRecord->scanned, historyRecord->updates);
 	}
 
 	/**
@@ -185,15 +191,16 @@ public:
 	 * @param waitingCount number of waiting threads at current instant
 	 * @return if non zero, it's time for major update. the returned value is to be passed to majorUpdate
 	 */
-	MMINLINE uint64_t
-	update(MM_EnvironmentBase* env, uint64_t *slotsScanned, uint64_t *slotsCopied, uint64_t waitingCount)
+	MMINLINE uint64_t update(
+	        MM_EnvironmentBase *env, uint64_t *slotsScanned, uint64_t *slotsCopied, uint64_t waitingCount)
 	{
 		if (SCAVENGER_SLOTS_SCANNED_PER_THREAD_UPDATE <= *slotsScanned) {
-			uint64_t scannedCount =  *slotsScanned;
-			uint64_t copiedCount =  *slotsCopied;
+			uint64_t scannedCount = *slotsScanned;
+			uint64_t copiedCount = *slotsCopied;
 			*slotsScanned = *slotsCopied = 0;
 
-			/* this thread may have scanned a long array segment resulting in scanned/copied slot counts that must be scaled down to avoid overflow in the accumulator */
+			/* this thread may have scanned a long array segment resulting in scanned/copied slot counts
+			 * that must be scaled down to avoid overflow in the accumulator */
 			while ((SCAVENGER_SLOTS_SCANNED_PER_THREAD_UPDATE << 1) < scannedCount) {
 				/* scale scanned and copied counts identically */
 				scannedCount >>= 1;
@@ -205,31 +212,36 @@ public:
 			uint64_t updateResult = atomicAddThreadUpdate(updateSample);
 			uint64_t updateCount = updates(updateResult);
 
-			/* this next section includes a critical region for the thread that increments the update counter to threshold */
+			/* this next section includes a critical region for the thread that increments the update
+			 * counter to threshold */
 			if (SCAVENGER_THREAD_UPDATES_PER_MAJOR_UPDATE == updateCount) {
-				/* make sure that every other thread knows that a specific thread is performing the major update. if
-				 * this thread gets timesliced in the section below while other free-running threads work up another major
-				 * update, that update will be discarded */
-				 
-				if  (0 == MM_AtomicOperations::lockCompareExchange(&_majorUpdateThreadEnv, 0, (uintptr_t)env)) {
+				/* make sure that every other thread knows that a specific thread is performing the
+				 * major update. if this thread gets timesliced in the section below while other
+				 * free-running threads work up another major update, that update will be discarded */
+
+				if (0
+				        == MM_AtomicOperations::lockCompareExchange(
+				                &_majorUpdateThreadEnv, 0, (uintptr_t)env)) {
 					return updateResult;
 				}
 			}
 		}
-		
+
 		return 0;
 	}
-	
+
 	/**
 	 * Major update of progress stats: a snapshot returned by minor update is stored into _accumulatedSamples.
-	 * This is the value used for subsequent calculations of copy/scan ratios and average wait counts, up until 
+	 * This is the value used for subsequent calculations of copy/scan ratios and average wait counts, up until
 	 * the next major update. Various other parameters (like scan queue metrics) are also updated at this point.
-	 * @param updateResult snapshot of packed wait/copy/scan/update value return by minor update and to be stored up until next major update
+	 * @param updateResult snapshot of packed wait/copy/scan/update value return by minor update and to be stored up
+	 * until next major update
 	 * @param nonEmptyScanLists number of non-empty scan queue lists
 	 * @param cachesQueued total number of items in scan queue lists
 	 */
-	MMINLINE void 
-	majorUpdate(MM_EnvironmentBase* env, uint64_t updateResult, uintptr_t nonEmptyScanLists, uintptr_t cachesQueued) {
+	MMINLINE void majorUpdate(
+	        MM_EnvironmentBase *env, uint64_t updateResult, uintptr_t nonEmptyScanLists, uintptr_t cachesQueued)
+	{
 		if (0 == (SCAVENGER_COUNTER_OVERFLOW & updateResult)) {
 			/* no overflow so latch updateResult into _accumulatedSamples and record the update */
 			MM_AtomicOperations::setU64(&_accumulatedSamples, updateResult);
@@ -251,7 +263,7 @@ public:
 	 * have entered completeScan().
 	 * @param resetHistory if true history will be reset (eg at end of gc after reporting stats)
 	 */
-	void reset(MM_EnvironmentBase* env, bool resetHistory);
+	void reset(MM_EnvironmentBase *env, bool resetHistory);
 
 	/**
 	 * Each accumulator update represents global scanned slot count of at
@@ -277,11 +289,11 @@ public:
 	 * @param[out] recordCount the number of records available
 	 * @return a pointer to the least recent record
 	 */
-	MMINLINE UpdateHistory *
-	getHistory(uintptr_t *recordCount)
+	MMINLINE UpdateHistory *getHistory(uintptr_t *recordCount)
 	{
 		*recordCount = _historyTableIndex;
-		if ((SCAVENGER_UPDATE_HISTORY_SIZE > _historyTableIndex) && (0 < _historyTable[_historyTableIndex].updates)) {
+		if ((SCAVENGER_UPDATE_HISTORY_SIZE > _historyTableIndex)
+		        && (0 < _historyTable[_historyTableIndex].updates)) {
 			*recordCount += 1;
 		}
 		return _historyTable;
@@ -293,10 +305,9 @@ public:
 	 * @param[in] historyRecord historical record of accumulated wait/copy/scan updates
 	 * @return the number of microseconds spanned by this history record
 	 */
-	uint64_t getSpannedMicros(MM_EnvironmentBase* env, UpdateHistory *historyRecord);
+	uint64_t getSpannedMicros(MM_EnvironmentBase *env, UpdateHistory *historyRecord);
 
 protected:
-
 private:
 	/**
 	 * Calculate and return cache size scaling factor from accumulated wait/copy/scan updates, or zero if none
@@ -305,10 +316,10 @@ private:
 	 * @param[in] threadCount total thread count
 	 * @return a value >=0.0 and <= 1.0 that can be used to scale copy/scan cache sizes to reduce stalling
 	 */
-	MMINLINE double
-	getScalingFactor(MM_EnvironmentBase* env, uint64_t threadCount, uint64_t waits, uint64_t copied, uint64_t scanned, uint64_t updates)
+	MMINLINE double getScalingFactor(MM_EnvironmentBase *env, uint64_t threadCount, uint64_t waits, uint64_t copied,
+	        uint64_t scanned, uint64_t updates)
 	{
-		double scalingFactor= 0.0;
+		double scalingFactor = 0.0;
 
 		/* validate scaling factor metrics */
 		if (copied > scanned) {
@@ -321,21 +332,26 @@ private:
 			double copyScanRatio = 1.0;
 			double runRatio = 1.0;
 
-			/* quantize copy/scan counts and round up to nearest slot update rollover so ratio steps down in increments from 1 */
-			uint64_t copyCount = MM_Math::roundToCeilingU64(SCAVENGER_THREAD_UPDATES_PER_MAJOR_UPDATE, copied);
-			uint64_t scanCount = MM_Math::roundToCeilingU64(SCAVENGER_THREAD_UPDATES_PER_MAJOR_UPDATE, scanned);
+			/* quantize copy/scan counts and round up to nearest slot update rollover so ratio steps down in
+			 * increments from 1 */
+			uint64_t copyCount =
+			        MM_Math::roundToCeilingU64(SCAVENGER_THREAD_UPDATES_PER_MAJOR_UPDATE, copied);
+			uint64_t scanCount =
+			        MM_Math::roundToCeilingU64(SCAVENGER_THREAD_UPDATES_PER_MAJOR_UPDATE, scanned);
 			if (0 < scanCount) {
 				copyScanRatio = (double)copyCount / (double)scanCount;
 			}
 
-			/* quantize average waiting thread counts and round up to nearest thread sample count so ratio steps down in increments from 1 */
+			/* quantize average waiting thread counts and round up to nearest thread sample count so ratio
+			 * steps down in increments from 1 */
 			if (0 < threadCount) {
 				uint64_t runCount = threadCount;
 				runCount -= (waits + updates - 1) / updates;
 				runRatio = (double)runCount / (double)threadCount;
 			}
 
-			/* scale more aggressively when threads are stalling, linearly with aggregate copy/scan slot count ratio */
+			/* scale more aggressively when threads are stalling, linearly with aggregate copy/scan slot
+			 * count ratio */
 			scalingFactor = runRatio * copyScanRatio;
 		}
 
@@ -356,14 +372,14 @@ private:
 	 *
 	 * @return The value at _accumulatingSamples
 	 */
-	MMINLINE uint64_t
-	atomicAddThreadUpdate(uint64_t threadUpdate)
+	MMINLINE uint64_t atomicAddThreadUpdate(uint64_t threadUpdate)
 	{
 		uint64_t newValue = 0;
 		/* Stop compiler optimizing away load of oldValue */
 		volatile uint64_t *localAddr = &_accumulatingSamples;
 		uint64_t oldValue = *localAddr;
-		if (oldValue == MM_AtomicOperations::lockCompareExchangeU64(localAddr, oldValue, oldValue + threadUpdate)) {
+		if (oldValue
+		        == MM_AtomicOperations::lockCompareExchangeU64(localAddr, oldValue, oldValue + threadUpdate)) {
 			newValue = oldValue + threadUpdate;
 			uint64_t updateCount = updates(newValue);
 			if (SCAVENGER_THREAD_UPDATES_PER_MAJOR_UPDATE <= updateCount) {
@@ -376,23 +392,30 @@ private:
 		return newValue;
 	}
 
-	MMINLINE uint64_t
-	sample(uint64_t slotsScanned, uint64_t slotsCopied, uint64_t waitingCount)
+	MMINLINE uint64_t sample(uint64_t slotsScanned, uint64_t slotsCopied, uint64_t waitingCount)
 	{
-		return (uint64_t)1 | (slotsScanned << SCAVENGER_SLOTS_SCANNED_SHIFT) | (slotsCopied << SCAVENGER_SLOTS_COPIED_SHIFT) | (waitingCount << SCAVENGER_THREAD_WAITS_SHIFT);
+		return (uint64_t)1 | (slotsScanned << SCAVENGER_SLOTS_SCANNED_SHIFT)
+		        | (slotsCopied << SCAVENGER_SLOTS_COPIED_SHIFT)
+		        | (waitingCount << SCAVENGER_THREAD_WAITS_SHIFT);
 	}
 
 	MMINLINE uint64_t waits(uint64_t samples) { return samples >> SCAVENGER_THREAD_WAITS_SHIFT; }
 
-	MMINLINE uint64_t copied(uint64_t samples) { return (SCAVENGER_SLOTS_COPIED_MASK & samples) >> SCAVENGER_SLOTS_COPIED_SHIFT; }
+	MMINLINE uint64_t copied(uint64_t samples)
+	{
+		return (SCAVENGER_SLOTS_COPIED_MASK & samples) >> SCAVENGER_SLOTS_COPIED_SHIFT;
+	}
 
-	MMINLINE uint64_t scanned(uint64_t samples) { return (SCAVENGER_SLOTS_SCANNED_MASK & samples) >> SCAVENGER_SLOTS_SCANNED_SHIFT; }
+	MMINLINE uint64_t scanned(uint64_t samples)
+	{
+		return (SCAVENGER_SLOTS_SCANNED_MASK & samples) >> SCAVENGER_SLOTS_SCANNED_SHIFT;
+	}
 
 	MMINLINE uint64_t updates(uint64_t samples) { return samples & SCAVENGER_SLOTS_UPDATE_MASK; }
 
-	uintptr_t record(MM_EnvironmentBase* env, uintptr_t nonEmptyScanLists, uintptr_t cachesQueued);
+	uintptr_t record(MM_EnvironmentBase *env, uintptr_t nonEmptyScanLists, uintptr_t cachesQueued);
 
-	void failedUpdate(MM_EnvironmentBase* env, uint64_t copied, uint64_t scanned);
+	void failedUpdate(MM_EnvironmentBase *env, uint64_t copied, uint64_t scanned);
 };
 
 #endif /* SCAVENGERCOPYSCANRATIO_HPP_ */

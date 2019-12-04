@@ -45,8 +45,7 @@
 #include "ddr/ir/Symbol_IR.hpp"
 #include "ddr/ir/TextFile.hpp"
 
-struct Options
-{
+struct Options {
 	const char *macroFile;
 	const char *supersetFile;
 	const char *blobFile;
@@ -57,16 +56,15 @@ struct Options
 	bool showBlacklisted;
 
 	Options()
-		: macroFile(NULL)
-		, supersetFile(NULL)
-		, blobFile(NULL)
-		, overrideListFile(NULL)
-		, debugFiles()
-		, blacklistFile(NULL)
-		, printEmptyTypes(false)
-		, showBlacklisted(false)
-	{
-	}
+	        : macroFile(NULL)
+	        , supersetFile(NULL)
+	        , blobFile(NULL)
+	        , overrideListFile(NULL)
+	        , debugFiles()
+	        , blacklistFile(NULL)
+	        , printEmptyTypes(false)
+	        , showBlacklisted(false)
+	{}
 
 	DDR_RC configure(OMRPortLibrary *portLibrary, int argc, char *argv[]);
 
@@ -268,41 +266,39 @@ Options::configure(OMRPortLibrary *portLibrary, int argc, char *argv[])
 	}
 
 	if (showHelp) {
-		printf(
-			"USAGE\n"
-			"  ddrgen [OPTIONS] files ...\n"
-			"OPTIONS\n"
-			"  -h, --help\n"
-			"      Prints this message.\n"
-			"  -v, --version\n"
-			"      Prints the version information.\n"
-			"  -f FILE, --filelist FILE\n"
-			"      Specify file containing list of input files\n"
-			"  -m FILE, --macrolist FILE\n"
-			"      Specify input list of macros. See macro tool for format.\n"
-			"      Default is macroList in current directory.\n"
-			"  -s FILE, --superset FILE\n"
-			"      Output superset file.\n"
-			"  -b FILE, --blob FILE\n"
-			"      Output binary blob file.\n"
-			"  -o FILE, --overrides FILE\n"
-			"      Optional file containing a list of files which contain rules\n"
-			"      modifying the default treatment of types.\n"
-			"      A typedef is normally expanded unless named in an override\n"
-			"        opaquetype=TypeName\n"
-			"      Field names or their types can be overridden with\n"
-			"        fieldoverride.TypeName.FieldName=NewFieldName\n"
-			"      or\n"
-			"        typeoverride.TypeName.FieldName=NewFieldType\n"
-			"  -l FILE, --blacklist FILE\n"
-			"      Optional file containing list of type names and source file paths to\n"
-			"      ignore. Format is 'file:[filename]' or 'type:[typename]' on each line.\n"
-			"  -e, --show-empty\n"
-			"      Print structures, enums, and unions to the superset and blob even if\n"
-			"      they do not contain any fields. The default behaviour is to hide them.\n"
-			"  -sb, --show-blacklisted\n"
-			"      Print names of types that were blacklisted.\n"
-		  );
+		printf("USAGE\n"
+		       "  ddrgen [OPTIONS] files ...\n"
+		       "OPTIONS\n"
+		       "  -h, --help\n"
+		       "      Prints this message.\n"
+		       "  -v, --version\n"
+		       "      Prints the version information.\n"
+		       "  -f FILE, --filelist FILE\n"
+		       "      Specify file containing list of input files\n"
+		       "  -m FILE, --macrolist FILE\n"
+		       "      Specify input list of macros. See macro tool for format.\n"
+		       "      Default is macroList in current directory.\n"
+		       "  -s FILE, --superset FILE\n"
+		       "      Output superset file.\n"
+		       "  -b FILE, --blob FILE\n"
+		       "      Output binary blob file.\n"
+		       "  -o FILE, --overrides FILE\n"
+		       "      Optional file containing a list of files which contain rules\n"
+		       "      modifying the default treatment of types.\n"
+		       "      A typedef is normally expanded unless named in an override\n"
+		       "        opaquetype=TypeName\n"
+		       "      Field names or their types can be overridden with\n"
+		       "        fieldoverride.TypeName.FieldName=NewFieldName\n"
+		       "      or\n"
+		       "        typeoverride.TypeName.FieldName=NewFieldType\n"
+		       "  -l FILE, --blacklist FILE\n"
+		       "      Optional file containing list of type names and source file paths to\n"
+		       "      ignore. Format is 'file:[filename]' or 'type:[typename]' on each line.\n"
+		       "  -e, --show-empty\n"
+		       "      Print structures, enums, and unions to the superset and blob even if\n"
+		       "      they do not contain any fields. The default behaviour is to hide them.\n"
+		       "  -sb, --show-blacklisted\n"
+		       "      Print names of types that were blacklisted.\n");
 	} else if (showVersion) {
 		printf("Version 0.1\n");
 	}

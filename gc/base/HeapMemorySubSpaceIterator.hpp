@@ -32,11 +32,10 @@ class MM_MemorySubSpace;
 /**
  * Iterate through all visible memory subspaces in the system.
  * Provides a preordered walk of all memory subspaces for a MM_Heap.
- * 
+ *
  * @ingroup GC_Base
- */	
-class MM_HeapMemorySubSpaceIterator
-{
+ */
+class MM_HeapMemorySubSpaceIterator {
 private:
 	MM_MemorySpace *_memorySpace;
 	MM_MemorySubSpace *_memorySubSpace;
@@ -48,14 +47,10 @@ protected:
 public:
 	MM_MemorySubSpace *nextSubSpace();
 
-	MM_HeapMemorySubSpaceIterator(MM_Heap *heap) :
-		_memorySpace(NULL),
-		_memorySubSpace(NULL),
-		_state(0)
+	MM_HeapMemorySubSpaceIterator(MM_Heap *heap) : _memorySpace(NULL), _memorySubSpace(NULL), _state(0)
 	{
 		reset(heap);
 	}
-		
 };
 
 #endif /* HEAPMEMORYSUBSPACEITERATOR_HPP_ */

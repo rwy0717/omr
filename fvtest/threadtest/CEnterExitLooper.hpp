@@ -27,22 +27,15 @@
 
 extern ThreadTestEnvironment *omrTestEnv;
 
-class CEnterExitLooper: public CThread
-{
+class CEnterExitLooper : public CThread {
 public:
-	CEnterExitLooper(CMonitor& monitor, int sleep) :
-		m_keepRunning(true), m_loopCount(0), m_monitor(monitor), m_sleep(sleep)
-	{
-	}
+	CEnterExitLooper(CMonitor &monitor, int sleep)
+	        : m_keepRunning(true), m_loopCount(0), m_monitor(monitor), m_sleep(sleep)
+	{}
 
-	void
-	StopRunning(void)
-	{
-		m_keepRunning = false;
-	}
+	void StopRunning(void) { m_keepRunning = false; }
 
-	void
-	StopAndWaitForDeath(void)
+	void StopAndWaitForDeath(void)
 	{
 		StopRunning();
 		while (!Terminated()) {
@@ -50,33 +43,25 @@ public:
 		}
 	}
 
-	void
-	WaitForTermination(void)
+	void WaitForTermination(void)
 	{
 		while (!Terminated()) {
 			omrthread_sleep(1);
 		}
 	}
 
-	unsigned long
-	LoopCount(void) const
-	{
-		return m_loopCount;
-	}
+	unsigned long LoopCount(void) const { return m_loopCount; }
 
-	void
-	ResetLoopCount(void)
+	void ResetLoopCount(void)
 	{
 		/* unsafe */
 		m_loopCount = 0;
 	}
 
 protected:
-	virtual intptr_t
-	Run(void)
+	virtual intptr_t Run(void)
 	{
-		omrTestEnv->log(LEVEL_VERBOSE,"thread %p running, sleep = %d\n", 
-			m_self, m_sleep);
+		omrTestEnv->log(LEVEL_VERBOSE, "thread %p running, sleep = %d\n", m_self, m_sleep);
 		while (m_keepRunning) {
 			m_monitor.Enter();
 			if (m_sleep > 0) {
@@ -91,7 +76,7 @@ protected:
 
 	volatile bool m_keepRunning;
 	volatile unsigned long m_loopCount;
-	CMonitor& m_monitor;
+	CMonitor &m_monitor;
 	int m_sleep;
 };
 

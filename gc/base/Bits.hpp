@@ -23,9 +23,9 @@
 #if !defined(BITS_HPP_)
 #define BITS_HPP_
 
+#include "modronbase.h"
 #include "omrcfg.h"
 #include "omrcomp.h"
-#include "modronbase.h"
 
 #if defined(OMR_ENV_DATA64)
 #define J9BITS_BITS_IN_SLOT 64
@@ -35,31 +35,23 @@
 
 class MM_Bits {
 public:
-	static MMINLINE uintptr_t convertBytesToSlots(uintptr_t x) {
-		return x >> OMR_LOG_POINTER_SIZE;
-	}
+	static MMINLINE uintptr_t convertBytesToSlots(uintptr_t x) { return x >> OMR_LOG_POINTER_SIZE; }
 
-	static MMINLINE uintptr_t convertSlotsToBytes(uintptr_t x) {
-		return x << OMR_LOG_POINTER_SIZE;
-	}
+	static MMINLINE uintptr_t convertSlotsToBytes(uintptr_t x) { return x << OMR_LOG_POINTER_SIZE; }
 
 	/**
 	 * Checks if the uintptr_t's last bit is set or not.
 	 * @param[in] object The uintptr_t to check
 	 * @return true if the last bit is set, false otherwise.
 	 */
-	static MMINLINE bool isLowTagged(uintptr_t object) {
-		return (object & 1) == 1;
-	}
+	static MMINLINE bool isLowTagged(uintptr_t object) { return (object & 1) == 1; }
 
 	/**
 	 * Returns a uintptr_t with the last 2 bits <i>unset</i>.
 	 * @param[in] object The uintptr_t whose bits you want to unset.
 	 * @return The same uintptr_t, with the last 2 bits unset.
 	 */
-	static MMINLINE uintptr_t untag(uintptr_t object) {
-		return object & ~((uintptr_t)3);
-	}
+	static MMINLINE uintptr_t untag(uintptr_t object) { return object & ~((uintptr_t)3); }
 
 	/**
 	 * Calculate the number of bits set to 1 in the input word.
@@ -70,7 +62,7 @@ public:
 		uintptr_t work, temp;
 
 		work = input;
-		if(0 == work) {
+		if (0 == work) {
 			return 0;
 		}
 
@@ -103,14 +95,14 @@ public:
 	 */
 #if defined(OMR_OS_WINDOWS)
 	/* Implicit return in eax, not seen by compiler.  Disable compile warning C4035: no return value */
-#pragma warning(disable:4035)
+#pragma warning(disable : 4035)
 	MMINLINE static uintptr_t leadingZeroes(uintptr_t input)
 	{
 		_asm {
 			bsf eax, input
 		}
 	}
-#pragma warning(default:4035) /* re-enable warning */
+#pragma warning(default : 4035) /* re-enable warning */
 #endif /* defined(OMR_OS_WINDOWS) */
 
 	/**
@@ -121,7 +113,7 @@ public:
 	 */
 #if defined(OMR_OS_WINDOWS)
 	/* Implicit return in eax, not seen by compiler.  Disable compile warning C4035: no return value */
-#pragma warning(disable:4035)
+#pragma warning(disable : 4035)
 	MMINLINE static uintptr_t trailingZeroes(uintptr_t input)
 	{
 		_asm {
@@ -130,7 +122,7 @@ public:
 			add eax, J9BITS_BITS_IN_SLOT - 1
 		}
 	}
-#pragma warning(default:4035) /* re-enable warning */
+#pragma warning(default : 4035) /* re-enable warning */
 #endif /* defined(OMR_OS_WINDOWS) */
 
 #elif defined(LINUX) && defined(J9HAMMER)
@@ -143,7 +135,7 @@ public:
 	MMINLINE static uintptr_t leadingZeroes(uintptr_t input)
 	{
 		uintptr_t result;
-		asm volatile(" bsfq %1, %0": "=r"(result): "rm"(input) );
+		asm volatile(" bsfq %1, %0" : "=r"(result) : "rm"(input));
 		return result;
 	}
 
@@ -156,17 +148,15 @@ public:
 	MMINLINE static uintptr_t trailingZeroes(uintptr_t input)
 	{
 		uintptr_t result;
-		asm volatile(
-				" bsrq %1, %0;"
-				" neg %0;"
-				" add %2, %0;"
-				: "=r"(result)
-				: "rm"(input), "g"(J9BITS_BITS_IN_SLOT - 1) );
+		asm volatile(" bsrq %1, %0;"
+		             " neg %0;"
+		             " add %2, %0;"
+		             : "=r"(result)
+		             : "rm"(input), "g"(J9BITS_BITS_IN_SLOT - 1));
 		return result;
 	}
 
 #else /* defined(LINUX) && defined(J9HAMMER) */
-
 
 	/**
 	 * Return the number of bits set to 0 before the first bit set to one starting at the lowest
@@ -174,10 +164,7 @@ public:
 	 * @note If the input is 0, the result is undefined.
 	 * @return Number of non-zero bits starting at the lowest significant bit.
 	 */
-	MMINLINE static uintptr_t leadingZeroes(uintptr_t input)
-	{
-		return populationCount(~(input | (0 - input)));
-	}
+	MMINLINE static uintptr_t leadingZeroes(uintptr_t input) { return populationCount(~(input | (0 - input))); }
 
 	/**
 	 * Return the number of bits set to 0 before the first bit set to one starting at the highest

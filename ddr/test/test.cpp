@@ -27,8 +27,8 @@
  */
 
 /* These should be included: */
-#define dolphin			11
-#define fish ((unsigned int)(4))/* Test comment block. */
+#define dolphin 11
+#define fish ((unsigned int)(4)) /* Test comment block. */
 #define whale (7) // Test comment.
 #define octopus dolphin
 

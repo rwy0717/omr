@@ -27,6 +27,4 @@
 
 uintptr_t omrget_userid(char *userid, uintptr_t length);
 
-#endif     /* omrgetuserid_h */
-
-
+#endif /* omrgetuserid_h */

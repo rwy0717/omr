@@ -23,22 +23,20 @@
 #if !defined(BASENONVIRTUAL_HPP_)
 #define BASENONVIRTUAL_HPP_
 
-#include <stdlib.h>
-#include <stddef.h>
 #include "Base.hpp"
+#include <stddef.h>
+#include <stdlib.h>
 
-class MM_BaseNonVirtual : public MM_Base
-{
+class MM_BaseNonVirtual : public MM_Base {
 private:
 protected:
 	/* Used by DDR to figure out runtime types, this is opt-in
 	 * and has to be done by the constructor of each subclass.
 	 * e.g. _typeId = __FUNCTION__;
 	 */
-	const char* _typeId;
-	
+	const char *_typeId;
+
 public:
-	
 	/**
 	 * Create a Base Non Virtual object.
 	 */

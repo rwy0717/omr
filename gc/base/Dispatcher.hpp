@@ -28,11 +28,9 @@
 #if !defined(DISPATCHER_HPP_)
 #define DISPATCHER_HPP_
 
-#include "omrcfg.h"
-
-#include "modronbase.h"
-
 #include "BaseVirtual.hpp"
+#include "modronbase.h"
+#include "omrcfg.h"
 
 class MM_EnvironmentBase;
 class MM_Task;
@@ -47,20 +45,20 @@ class MM_Task;
  * @todo Provide class documentation
  * @ingroup GC_Base_Core
  */
-class MM_Dispatcher : public MM_BaseVirtual
-{
+class MM_Dispatcher : public MM_BaseVirtual {
 private:
 	MM_Task *_task;
-	
+
 protected:
 	bool initialize(MM_EnvironmentBase *env);
-	
+
 	virtual void prepareThreadsForTask(MM_EnvironmentBase *env, MM_Task *task, uintptr_t threadCount);
 	virtual void acceptTask(MM_EnvironmentBase *env);
 	virtual void completeTask(MM_EnvironmentBase *env);
 	virtual void cleanupAfterTask(MM_EnvironmentBase *env);
 
-	virtual uintptr_t recomputeActiveThreadCountForTask(MM_EnvironmentBase *env, MM_Task *task, uintptr_t newThreadCount);
+	virtual uintptr_t recomputeActiveThreadCountForTask(
+	        MM_EnvironmentBase *env, MM_Task *task, uintptr_t newThreadCount);
 
 public:
 	static MM_Dispatcher *newInstance(MM_EnvironmentBase *env);
@@ -81,13 +79,8 @@ public:
 	/**
 	 * Create a Dispatcher object.
 	 */
-	MM_Dispatcher(MM_EnvironmentBase *env) :
-		MM_BaseVirtual(),
-		_task(NULL)
-	{
-		_typeId = __FUNCTION__;
-	};
-	
+	MM_Dispatcher(MM_EnvironmentBase *env) : MM_BaseVirtual(), _task(NULL) { _typeId = __FUNCTION__; };
+
 	friend class MM_Task;
 };
 

@@ -57,7 +57,7 @@ extern PortTestEnvironment *portTestEnv;
 
 #if defined(OMR_ENV_DATA64)
 /* this macro corresponds to the one defined in omrmem32helpers */
-#define HEAP_SIZE_BYTES 8*1024*1024
+#define HEAP_SIZE_BYTES 8 * 1024 * 1024
 #endif
 
 #define COMPLETE_LARGE_REGION 1
@@ -72,7 +72,8 @@ static void shuffleArray(struct OMRPortLibrary *portLibrary, uintptr_t *sizes, u
  * @internal
  * @typdef
  */
-typedef void *(*J9MEM_ALLOCATE_MEMORY_FUNC)(struct OMRPortLibrary *portLibrary, uintptr_t byteAmount, const char *callSite);
+typedef void *(*J9MEM_ALLOCATE_MEMORY_FUNC)(
+        struct OMRPortLibrary *portLibrary, uintptr_t byteAmount, const char *callSite);
 
 /**
  * @internal
@@ -92,7 +93,8 @@ typedef void *(*J9MEM_ALLOCATE_MEMORY_FUNC)(struct OMRPortLibrary *portLibrary, 
  * @param[in] allocName Calling function name to display in errors
  */
 static void
-verifyMemory(struct OMRPortLibrary *portLibrary, const char *testName, char *memPtr, uintptr_t byteAmount, const char *allocName)
+verifyMemory(struct OMRPortLibrary *portLibrary, const char *testName, char *memPtr, uintptr_t byteAmount,
+        const char *allocName)
 {
 	OMRPORT_ACCESS_FROM_OMRPORT(portLibrary);
 	const char testCharA = 'A';
@@ -106,11 +108,12 @@ verifyMemory(struct OMRPortLibrary *portLibrary, const char *testName, char *mem
 	}
 
 	/* TODO alignment */
-/*
-	if (0 != ((uintptr_t)memPtr % sizeof(void*))) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrmem_allocate_memory(%d) pointer mis aligned\n", byteAmount);
-	}
-*/
+	/*
+	        if (0 != ((uintptr_t)memPtr % sizeof(void*))) {
+	                outputErrorMessage(PORTTEST_ERROR_ARGS, "omrmem_allocate_memory(%d) pointer mis aligned\n",
+	   byteAmount);
+	        }
+	*/
 
 	/* TODO double array alignment */
 
@@ -220,8 +223,8 @@ TEST(PortMemTest, mem_test1)
 
 	reportTestEntry(OMRPORTLIB, testName);
 
-	/* First verify that a NULL pointer can be freed, as specified by API docs. This ensures that one can free any pointer returned from
-	 * allocation routines without checking for NULL first.
+	/* First verify that a NULL pointer can be freed, as specified by API docs. This ensures that one can free any
+	 * pointer returned from allocation routines without checking for NULL first.
 	 */
 	memPtr = NULL;
 	omrmem_free_memory(memPtr);
@@ -543,11 +546,14 @@ shuffleArray(struct OMRPortLibrary *portLibrary, uintptr_t *array, uintptr_t len
  * returns a memory location that is below the 4 gig boundary, and as well that the entire region
  * is below the 4 gig boundary.
  *
- * We allocate a variety of sizes comparable to the heap size used in mem_allocate_memory32 implementation (see HEAP_SIZE_BYTES in omrmem32helpers.c):
+ * We allocate a variety of sizes comparable to the heap size used in mem_allocate_memory32 implementation (see
+ * HEAP_SIZE_BYTES in omrmem32helpers.c):
  * 1. size requests that are much smaller than the heap size are satisfied with omrheap suballocation.
- * 2. size requests that are slightly smaller than the heap size will not use omrheap suallocation (because they cannot be satisfied by
- *    suballocating a omrheap due to heap management overhead), but rather given their own vmem allocated chunk.
- * 3. size requests that are greater or equal to the heap size also will not use omrheap suallocation, but rather given their own vmem allocated chunk.
+ * 2. size requests that are slightly smaller than the heap size will not use omrheap suallocation (because they cannot
+ * be satisfied by suballocating a omrheap due to heap management overhead), but rather given their own vmem allocated
+ * chunk.
+ * 3. size requests that are greater or equal to the heap size also will not use omrheap suallocation, but rather given
+ * their own vmem allocated chunk.
  *
  * @note This function does not need to be implemented in terms of
  * @ref omrmem.c::omrmem_free_memory "omrmem_free_memory()", but it may be on some
@@ -567,12 +573,21 @@ TEST(PortMemTest, mem_test7_allocate32)
 	int i = 0;
 
 	uintptr_t allocBlockSizes[] = {
-			0, 1, 512, 4096, 1024 * 1024,
+		0,
+		1,
+		512,
+		4096,
+		1024 * 1024,
 #if defined(OMR_ENV_DATA64)
-			/* Extra sizes for 64-bit platforms to exercise the omrheap API. */
-			HEAP_SIZE_BYTES / 8, HEAP_SIZE_BYTES / 4, HEAP_SIZE_BYTES / 3, HEAP_SIZE_BYTES / 2,
-			HEAP_SIZE_BYTES - 6, HEAP_SIZE_BYTES - 10,
-			HEAP_SIZE_BYTES, HEAP_SIZE_BYTES + 6
+		/* Extra sizes for 64-bit platforms to exercise the omrheap API. */
+		HEAP_SIZE_BYTES / 8,
+		HEAP_SIZE_BYTES / 4,
+		HEAP_SIZE_BYTES / 3,
+		HEAP_SIZE_BYTES / 2,
+		HEAP_SIZE_BYTES - 6,
+		HEAP_SIZE_BYTES - 10,
+		HEAP_SIZE_BYTES,
+		HEAP_SIZE_BYTES + 6
 #endif /* OMR_ENV_DATA64 */
 	};
 	uintptr_t allocBlockSizesLength = sizeof(allocBlockSizes) / sizeof(allocBlockSizes[0]);
@@ -590,7 +605,9 @@ TEST(PortMemTest, mem_test7_allocate32)
 	if (0 == randomSeed) {
 		randomSeed = (int)omrtime_current_time_millis();
 	}
-	portTestEnv->log("Random seed value: %d. Add -srand:[seed] to the command line to reproduce this test manually.\n", randomSeed);
+	portTestEnv->log("Random seed value: %d. Add -srand:[seed] to the command line to reproduce this test "
+	                 "manually.\n",
+	        randomSeed);
 	srand(randomSeed);
 
 	shuffleArray(OMRPORTLIB, allocBlockSizes, allocBlockSizesLength);
@@ -605,7 +622,8 @@ TEST(PortMemTest, mem_test7_allocate32)
 
 #if defined(OMR_ENV_DATA64)
 		if (((uintptr_t)pointer + byteAmount) > MEM32_LIMIT) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Entire memory block allocated by %s is not below 32-bit limit\n", allocName);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Entire memory block allocated by %s is not below 32-bit limit\n", allocName);
 		}
 #endif
 		*returnPtrLocation = pointer;
@@ -631,14 +649,14 @@ TEST(PortMemTest, mem_test7_allocate32)
 	reportTestExit(OMRPORTLIB, testName);
 }
 
-
 /* Dummy categories for omrmem_test8_categories */
 
 #define DUMMY_CATEGORY_ONE 0
 #define DUMMY_CATEGORY_TWO 1
 #define DUMMY_CATEGORY_THREE 2
 
-static uint32_t childrenOfDummyCategoryOne[] = {DUMMY_CATEGORY_TWO, DUMMY_CATEGORY_THREE, OMRMEM_CATEGORY_PORT_LIBRARY, OMRMEM_CATEGORY_UNKNOWN};
+static uint32_t childrenOfDummyCategoryOne[] = {
+        DUMMY_CATEGORY_TWO, DUMMY_CATEGORY_THREE, OMRMEM_CATEGORY_PORT_LIBRARY, OMRMEM_CATEGORY_UNKNOWN};
 
 static OMRMemCategory dummyCategoryOne = {"Dummy One", DUMMY_CATEGORY_ONE, 0, 0, 4, childrenOfDummyCategoryOne};
 
@@ -680,7 +698,8 @@ struct CategoriesState {
 };
 
 static uintptr_t
-categoryWalkFunction(uint32_t categoryCode, const char *categoryName, uintptr_t liveBytes, uintptr_t liveAllocations, BOOLEAN isRoot, uint32_t parentCategoryCode, OMRMemCategoryWalkState *walkState)
+categoryWalkFunction(uint32_t categoryCode, const char *categoryName, uintptr_t liveBytes, uintptr_t liveAllocations,
+        BOOLEAN isRoot, uint32_t parentCategoryCode, OMRMemCategoryWalkState *walkState)
 {
 	OMRPORT_ACCESS_FROM_OMRPORT((OMRPortLibrary *)walkState->userData1);
 	struct CategoriesState *state = (struct CategoriesState *)walkState->userData2;
@@ -688,14 +707,16 @@ categoryWalkFunction(uint32_t categoryCode, const char *categoryName, uintptr_t 
 
 	switch (categoryCode) {
 	case DUMMY_CATEGORY_ONE:
-		if (! isRoot) {
+		if (!isRoot) {
 			outputErrorMessage(PORTTEST_ERROR_ARGS, "DUMMY_CATEGORY_ONE should be a root, and isn't\n");
 			state->otherError = TRUE;
 			return J9MEM_CATEGORIES_STOP_ITERATING;
 		}
 
 		if (categoryName != dummyCategoryOne.name) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "DUMMY_CATEGORY_ONE has the wrong name: %p=%s instead of %p=%s\n", categoryName, categoryName, dummyCategoryOne.name, dummyCategoryOne.name);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "DUMMY_CATEGORY_ONE has the wrong name: %p=%s instead of %p=%s\n", categoryName,
+			        categoryName, dummyCategoryOne.name, dummyCategoryOne.name);
 			state->otherError = TRUE;
 			return J9MEM_CATEGORIES_STOP_ITERATING;
 		}
@@ -714,13 +735,17 @@ categoryWalkFunction(uint32_t categoryCode, const char *categoryName, uintptr_t 
 		}
 
 		if (DUMMY_CATEGORY_ONE != parentCategoryCode) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "DUMMY_CATEGORY_TWO's parent should be DUMMY_CATEGORY_ONE, not %u\n", parentCategoryCode);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "DUMMY_CATEGORY_TWO's parent should be DUMMY_CATEGORY_ONE, not %u\n",
+			        parentCategoryCode);
 			state->otherError = TRUE;
 			return J9MEM_CATEGORIES_STOP_ITERATING;
 		}
 
 		if (categoryName != dummyCategoryTwo.name) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "DUMMY_CATEGORY_TWO has the wrong name: %p=%s instead of %p=%s\n", categoryName, categoryName, dummyCategoryTwo.name, dummyCategoryTwo.name);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "DUMMY_CATEGORY_TWO has the wrong name: %p=%s instead of %p=%s\n", categoryName,
+			        categoryName, dummyCategoryTwo.name, dummyCategoryTwo.name);
 			state->otherError = TRUE;
 			return J9MEM_CATEGORIES_STOP_ITERATING;
 		}
@@ -738,13 +763,17 @@ categoryWalkFunction(uint32_t categoryCode, const char *categoryName, uintptr_t 
 		}
 
 		if (DUMMY_CATEGORY_ONE != parentCategoryCode) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "DUMMY_CATEGORY_THREE's parent should be DUMMY_CATEGORY_ONE, not %u\n", parentCategoryCode);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "DUMMY_CATEGORY_THREE's parent should be DUMMY_CATEGORY_ONE, not %u\n",
+			        parentCategoryCode);
 			state->otherError = TRUE;
 			return J9MEM_CATEGORIES_STOP_ITERATING;
 		}
 
 		if (categoryName != dummyCategoryThree.name) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "DUMMY_CATEGORY_THREE has the wrong name: %p=%s instead of %p=%s\n", categoryName, categoryName, dummyCategoryThree.name, dummyCategoryThree.name);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "DUMMY_CATEGORY_THREE has the wrong name: %p=%s instead of %p=%s\n", categoryName,
+			        categoryName, dummyCategoryThree.name, dummyCategoryThree.name);
 			state->otherError = TRUE;
 			return J9MEM_CATEGORIES_STOP_ITERATING;
 		}
@@ -857,7 +886,8 @@ TEST(PortMemTest, mem_test8_categories)
 	}
 #endif
 	if (categoriesState.otherError) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Some other error hit while walking categories (see messages above).\n");
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "Some other error hit while walking categories (see messages above).\n");
 		goto end;
 	}
 
@@ -875,7 +905,8 @@ TEST(PortMemTest, mem_test8_categories)
 		initialBlocks = categoriesState.portLibraryBlocks;
 		initialBytes = categoriesState.portLibraryBytes;
 		if (categoriesState.otherError) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Some other error hit while walking categories (see messages above).\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Some other error hit while walking categories (see messages above).\n");
 			goto end;
 		}
 
@@ -896,16 +927,21 @@ TEST(PortMemTest, mem_test8_categories)
 		omrmem_free_memory(ptr);
 
 		if (categoriesState.otherError) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Some other error hit while walking categories (see messages above).\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Some other error hit while walking categories (see messages above).\n");
 			goto end;
 		}
 
 		if (finalBlocks != expectedBlocks) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of blocks after allocate. Expected %zd, got %zd.\n", expectedBlocks, finalBlocks);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of blocks after allocate. Expected %zd, got %zd.\n", expectedBlocks,
+			        finalBlocks);
 			goto end;
 		}
 		if (finalBytes < expectedBytes) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of bytes after allocate. Expected %zd, got %zd.\n", expectedBytes, finalBytes);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of bytes after allocate. Expected %zd, got %zd.\n", expectedBytes,
+			        finalBytes);
 			goto end;
 		}
 
@@ -913,16 +949,21 @@ TEST(PortMemTest, mem_test8_categories)
 		finalBlocks = categoriesState.portLibraryBlocks;
 		finalBytes = categoriesState.portLibraryBytes;
 		if (categoriesState.otherError) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Some other error hit while walking categories (see messages above).\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Some other error hit while walking categories (see messages above).\n");
 			goto end;
 		}
 
 		if (finalBlocks != initialBlocks) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of blocks after free. Expected %zd, got %zd.\n", initialBlocks, finalBlocks);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of blocks after free. Expected %zd, got %zd.\n", initialBlocks,
+			        finalBlocks);
 			goto end;
 		}
 		if (finalBytes != initialBytes) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of bytes after free. Expected %zd, got %zd.\n", initialBytes, finalBytes);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of bytes after free. Expected %zd, got %zd.\n", initialBytes,
+			        finalBytes);
 			goto end;
 		}
 	}
@@ -941,7 +982,8 @@ TEST(PortMemTest, mem_test8_categories)
 		initialBlocks = categoriesState.unknownBlocks;
 		initialBytes = categoriesState.unknownBytes;
 		if (categoriesState.otherError) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Some other error hit while walking categories (see messages above).\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Some other error hit while walking categories (see messages above).\n");
 			goto end;
 		}
 
@@ -960,16 +1002,21 @@ TEST(PortMemTest, mem_test8_categories)
 
 		omrmem_free_memory(ptr);
 		if (categoriesState.otherError) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Some other error hit while walking categories (see messages above).\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Some other error hit while walking categories (see messages above).\n");
 			goto end;
 		}
 
 		if (finalBlocks != expectedBlocks) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of blocks after allocate. Expected %zd, got %zd.\n", expectedBlocks, finalBlocks);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of blocks after allocate. Expected %zd, got %zd.\n", expectedBlocks,
+			        finalBlocks);
 			goto end;
 		}
 		if (finalBytes < expectedBytes) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of bytes after allocate. Expected %zd, got %zd.\n", expectedBytes, finalBytes);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of bytes after allocate. Expected %zd, got %zd.\n", expectedBytes,
+			        finalBytes);
 			goto end;
 		}
 
@@ -977,22 +1024,27 @@ TEST(PortMemTest, mem_test8_categories)
 		finalBlocks = categoriesState.unknownBlocks;
 		finalBytes = categoriesState.unknownBytes;
 		if (categoriesState.otherError) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Some other error hit while walking categories (see messages above).\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Some other error hit while walking categories (see messages above).\n");
 			goto end;
 		}
 
 		if (finalBlocks != initialBlocks) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of blocks after free. Expected %zd, got %zd.\n", initialBlocks, finalBlocks);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of blocks after free. Expected %zd, got %zd.\n", initialBlocks,
+			        finalBlocks);
 			goto end;
 		}
 		if (finalBytes != initialBytes) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of bytes after free. Expected %zd, got %zd.\n", initialBytes, finalBytes);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of bytes after free. Expected %zd, got %zd.\n", initialBytes,
+			        finalBytes);
 			goto end;
 		}
 	}
 
 	/* Register our dummy categories */
-	omrport_control(OMRPORT_CTLDATA_MEM_CATEGORIES_SET, (uintptr_t) &dummyCategorySet);
+	omrport_control(OMRPORT_CTLDATA_MEM_CATEGORIES_SET, (uintptr_t)&dummyCategorySet);
 
 	/* Try allocating to one of our user category codes - check the arithmetic is done correctly */
 	{
@@ -1008,7 +1060,8 @@ TEST(PortMemTest, mem_test8_categories)
 		initialBlocks = categoriesState.dummyCategoryOneBlocks;
 		initialBytes = categoriesState.dummyCategoryOneBytes;
 		if (categoriesState.otherError) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Some other error hit while walking categories (see messages above).\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Some other error hit while walking categories (see messages above).\n");
 			goto end;
 		}
 
@@ -1028,15 +1081,20 @@ TEST(PortMemTest, mem_test8_categories)
 		omrmem_free_memory(ptr);
 
 		if (categoriesState.otherError) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Some other error hit while walking categories (see messages above).\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Some other error hit while walking categories (see messages above).\n");
 			goto end;
 		}
 		if (finalBlocks != expectedBlocks) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of blocks after allocate. Expected %zd, got %zd.\n", expectedBlocks, finalBlocks);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of blocks after allocate. Expected %zd, got %zd.\n", expectedBlocks,
+			        finalBlocks);
 			goto end;
 		}
 		if (finalBytes < expectedBytes) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of bytes after allocate. Expected %zd, got %zd.\n", expectedBytes, finalBytes);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of bytes after allocate. Expected %zd, got %zd.\n", expectedBytes,
+			        finalBytes);
 			goto end;
 		}
 
@@ -1044,16 +1102,21 @@ TEST(PortMemTest, mem_test8_categories)
 		finalBlocks = categoriesState.dummyCategoryOneBlocks;
 		finalBytes = categoriesState.dummyCategoryOneBytes;
 		if (categoriesState.otherError) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Some other error hit while walking categories (see messages above).\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Some other error hit while walking categories (see messages above).\n");
 			goto end;
 		}
 
 		if (finalBlocks != initialBlocks) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of blocks after free. Expected %zd, got %zd.\n", initialBlocks, finalBlocks);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of blocks after free. Expected %zd, got %zd.\n", initialBlocks,
+			        finalBlocks);
 			goto end;
 		}
 		if (finalBytes != initialBytes) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of bytes after free. Expected %zd, got %zd.\n", initialBytes, finalBytes);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of bytes after free. Expected %zd, got %zd.\n", initialBytes,
+			        finalBytes);
 			goto end;
 		}
 	}
@@ -1072,7 +1135,8 @@ TEST(PortMemTest, mem_test8_categories)
 		initialBlocks = categoriesState.dummyCategoryOneBlocks;
 		initialBytes = categoriesState.dummyCategoryOneBytes;
 		if (categoriesState.otherError) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Some other error hit while walking categories (see messages above).\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Some other error hit while walking categories (see messages above).\n");
 			goto end;
 		}
 
@@ -1092,15 +1156,20 @@ TEST(PortMemTest, mem_test8_categories)
 		omrmem_free_memory32(ptr);
 
 		if (categoriesState.otherError) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Some other error hit while walking categories (see messages above).\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Some other error hit while walking categories (see messages above).\n");
 			goto end;
 		}
 		if (finalBlocks != expectedBlocks) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of blocks after allocate. Expected %zd, got %zd.\n", expectedBlocks, finalBlocks);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of blocks after allocate. Expected %zd, got %zd.\n", expectedBlocks,
+			        finalBlocks);
 			goto end;
 		}
 		if (finalBytes < expectedBytes) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of bytes after allocate. Expected %zd, got %zd.\n", expectedBytes, finalBytes);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of bytes after allocate. Expected %zd, got %zd.\n", expectedBytes,
+			        finalBytes);
 			goto end;
 		}
 
@@ -1108,16 +1177,21 @@ TEST(PortMemTest, mem_test8_categories)
 		finalBlocks = categoriesState.dummyCategoryOneBlocks;
 		finalBytes = categoriesState.dummyCategoryOneBytes;
 		if (categoriesState.otherError) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Some other error hit while walking categories (see messages above).\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Some other error hit while walking categories (see messages above).\n");
 			goto end;
 		}
 
 		if (finalBlocks != initialBlocks) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of blocks after free. Expected %zd, got %zd.\n", initialBlocks, finalBlocks);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of blocks after free. Expected %zd, got %zd.\n", initialBlocks,
+			        finalBlocks);
 			goto end;
 		}
 		if (finalBytes != initialBytes) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of bytes after free. Expected %zd, got %zd.\n", initialBytes, finalBytes);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of bytes after free. Expected %zd, got %zd.\n", initialBytes,
+			        finalBytes);
 			goto end;
 		}
 	}
@@ -1145,7 +1219,8 @@ TEST(PortMemTest, mem_test8_categories)
 		initialUnused32BitSlabBytes = categoriesState.unused32bitSlabBytes;
 		initialUnused32BitSlabBlocks = categoriesState.unused32bitSlabBlocks;
 		if (categoriesState.otherError) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Some other error hit while walking categories (see messages above).\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Some other error hit while walking categories (see messages above).\n");
 			goto end;
 		}
 
@@ -1169,25 +1244,36 @@ TEST(PortMemTest, mem_test8_categories)
 		omrmem_free_memory32(ptr);
 
 		if (categoriesState.otherError) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Some other error hit while walking categories (see messages above).\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Some other error hit while walking categories (see messages above).\n");
 			goto end;
 		}
 		if (finalBlocks != expectedBlocks) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of blocks after allocate. Expected %zd, got %zd.\n", expectedBlocks, finalBlocks);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of blocks after allocate. Expected %zd, got %zd.\n", expectedBlocks,
+			        finalBlocks);
 			goto end;
 		}
 		if (finalBytes < expectedBytes) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of bytes after allocate. Expected %zd, got %zd.\n", expectedBytes, finalBytes);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of bytes after allocate. Expected %zd, got %zd.\n", expectedBytes,
+			        finalBytes);
 			goto end;
 		}
 		/* Should have the same number of unused slab blocks */
 		if (finalUnused32BitSlabBlocks != initialUnused32BitSlabBlocks) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Number of unused 32bit slab blocks should have stayed the same. Was %zu, now %zu\n", initialUnused32BitSlabBlocks, finalUnused32BitSlabBlocks);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Number of unused 32bit slab blocks should have stayed the same. Was %zu, now %zu\n",
+			        initialUnused32BitSlabBlocks, finalUnused32BitSlabBlocks);
 			goto end;
 		}
 
 		if (finalUnused32BitSlabBytes > minimumExpectedUnused32BitSlabBytes) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected value for unused 32 bit slab bytes. Expected %zu, was %zu. Initial value was %zu.\n", minimumExpectedUnused32BitSlabBytes, finalUnused32BitSlabBytes, initialUnused32BitSlabBytes);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected value for unused 32 bit slab bytes. Expected %zu, was %zu. Initial value "
+			        "was %zu.\n",
+			        minimumExpectedUnused32BitSlabBytes, finalUnused32BitSlabBytes,
+			        initialUnused32BitSlabBytes);
 			goto end;
 		}
 
@@ -1197,24 +1283,33 @@ TEST(PortMemTest, mem_test8_categories)
 		finalUnused32BitSlabBytes = categoriesState.unused32bitSlabBytes;
 		finalUnused32BitSlabBlocks = categoriesState.unused32bitSlabBlocks;
 		if (categoriesState.otherError) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Some other error hit while walking categories (see messages above).\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Some other error hit while walking categories (see messages above).\n");
 			goto end;
 		}
 
 		if (finalBlocks != initialBlocks) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of blocks after free. Expected %zd, got %zd.\n", initialBlocks, finalBlocks);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of blocks after free. Expected %zd, got %zd.\n", initialBlocks,
+			        finalBlocks);
 			goto end;
 		}
 		if (finalBytes != initialBytes) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of bytes after free. Expected %zd, got %zd.\n", initialBytes, finalBytes);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of bytes after free. Expected %zd, got %zd.\n", initialBytes,
+			        finalBytes);
 			goto end;
 		}
 		if (finalUnused32BitSlabBlocks != initialUnused32BitSlabBlocks) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of unused 32 bit slab blocks after free. Expected %zu, now %zu\n", initialUnused32BitSlabBlocks, finalUnused32BitSlabBlocks);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of unused 32 bit slab blocks after free. Expected %zu, now %zu\n",
+			        initialUnused32BitSlabBlocks, finalUnused32BitSlabBlocks);
 			goto end;
 		}
 		if (finalUnused32BitSlabBytes != initialUnused32BitSlabBytes) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of unused 32 bit slab bytes after free. Expected %zu, now %zu\n", initialUnused32BitSlabBytes, finalUnused32BitSlabBytes);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of unused 32 bit slab bytes after free. Expected %zu, now %zu\n",
+			        initialUnused32BitSlabBytes, finalUnused32BitSlabBytes);
 			goto end;
 		}
 	}
@@ -1242,7 +1337,8 @@ TEST(PortMemTest, mem_test8_categories)
 		initialBlocksCat2 = categoriesState.dummyCategoryTwoBlocks;
 		initialBytesCat2 = categoriesState.dummyCategoryTwoBytes;
 		if (categoriesState.otherError) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Some other error hit while walking categories (see messages above).\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Some other error hit while walking categories (see messages above).\n");
 			goto end;
 		}
 
@@ -1264,19 +1360,28 @@ TEST(PortMemTest, mem_test8_categories)
 		finalBytesCat2 = categoriesState.dummyCategoryTwoBytes;
 
 		if (categoriesState.otherError) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Some other error hit while walking categories (see messages above).\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Some other error hit while walking categories (see messages above).\n");
 		}
 		if (finalBlocksCat1 != expectedBlocks1) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of blocks after allocate. Expected %zd, got %zd.\n", expectedBlocks1, finalBlocksCat1);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of blocks after allocate. Expected %zd, got %zd.\n", expectedBlocks1,
+			        finalBlocksCat1);
 		}
 		if (finalBytesCat1 < expectedBytes1) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of bytes after allocate. Expected %zd, got %zd.\n", expectedBytes1, finalBytesCat1);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of bytes after allocate. Expected %zd, got %zd.\n", expectedBytes1,
+			        finalBytesCat1);
 		}
 		if (finalBlocksCat2 != expectedBlocks2) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of blocks after allocate. Expected %zd, got %zd.\n", expectedBlocks2, finalBlocksCat2);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of blocks after allocate. Expected %zd, got %zd.\n", expectedBlocks2,
+			        finalBlocksCat2);
 		}
 		if (finalBytesCat2 < expectedBytes2) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of bytes after allocate. Expected %zd, got %zd.\n", expectedBytes2, finalBytesCat2);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of bytes after allocate. Expected %zd, got %zd.\n", expectedBytes2,
+			        finalBytesCat2);
 		}
 
 		/* reallocate under a different category */
@@ -1295,19 +1400,28 @@ TEST(PortMemTest, mem_test8_categories)
 		finalBytesCat2 = categoriesState.dummyCategoryTwoBytes;
 
 		if (categoriesState.otherError) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Some other error hit while walking categories (see messages above).\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Some other error hit while walking categories (see messages above).\n");
 		}
 		if (finalBlocksCat1 != expectedBlocks1) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of blocks after allocate. Expected %zd, got %zd.\n", expectedBlocks1, finalBlocksCat1);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of blocks after allocate. Expected %zd, got %zd.\n", expectedBlocks1,
+			        finalBlocksCat1);
 		}
 		if (finalBytesCat1 < expectedBytes1) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of bytes after allocate. Expected %zd, got %zd.\n", expectedBytes1, finalBytesCat1);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of bytes after allocate. Expected %zd, got %zd.\n", expectedBytes1,
+			        finalBytesCat1);
 		}
 		if (finalBlocksCat2 != expectedBlocks2) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of blocks after allocate. Expected %zd, got %zd.\n", expectedBlocks2, finalBlocksCat2);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of blocks after allocate. Expected %zd, got %zd.\n", expectedBlocks2,
+			        finalBlocksCat2);
 		}
 		if (finalBytesCat2 < expectedBytes2) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of bytes after allocate. Expected %zd, got %zd.\n", expectedBytes2, finalBytesCat2);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of bytes after allocate. Expected %zd, got %zd.\n", expectedBytes2,
+			        finalBytesCat2);
 		}
 
 		omrmem_free_memory(ptr);
@@ -1318,24 +1432,33 @@ TEST(PortMemTest, mem_test8_categories)
 		finalBlocksCat2 = categoriesState.dummyCategoryTwoBlocks;
 		finalBytesCat2 = categoriesState.dummyCategoryTwoBytes;
 		if (categoriesState.otherError) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Some other error hit while walking categories (see messages above).\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Some other error hit while walking categories (see messages above).\n");
 			goto end;
 		}
 
 		if (finalBlocksCat1 != initialBlocksCat1) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of blocks after free. Expected %zd, got %zd.\n", initialBlocksCat1, finalBlocksCat1);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of blocks after free. Expected %zd, got %zd.\n", initialBlocksCat1,
+			        finalBlocksCat1);
 			goto end;
 		}
 		if (finalBytesCat1 != initialBytesCat1) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of bytes after free. Expected %zd, got %zd.\n", initialBytesCat1, finalBytesCat1);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of bytes after free. Expected %zd, got %zd.\n", initialBytesCat1,
+			        finalBytesCat1);
 			goto end;
 		}
 		if (finalBlocksCat2 != initialBlocksCat2) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of blocks after free. Expected %zd, got %zd.\n", initialBlocksCat2, finalBlocksCat2);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of blocks after free. Expected %zd, got %zd.\n", initialBlocksCat2,
+			        finalBlocksCat2);
 			goto end;
 		}
 		if (finalBytesCat2 != initialBytesCat2) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of bytes after free. Expected %zd, got %zd.\n", initialBytesCat2, finalBytesCat2);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of bytes after free. Expected %zd, got %zd.\n", initialBytesCat2,
+			        finalBytesCat2);
 			goto end;
 		}
 	}
@@ -1354,7 +1477,8 @@ TEST(PortMemTest, mem_test8_categories)
 		initialBlocks = categoriesState.unknownBlocks;
 		initialBytes = categoriesState.unknownBytes;
 		if (categoriesState.otherError) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Some other error hit while walking categories (see messages above).\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Some other error hit while walking categories (see messages above).\n");
 			goto end;
 		}
 
@@ -1376,7 +1500,8 @@ TEST(PortMemTest, mem_test8_categories)
 			goto end;
 		}
 		if (categoriesState.otherError) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Some other error hit while walking categories (see messages above).\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Some other error hit while walking categories (see messages above).\n");
 			omrmem_free_memory(ptr);
 			goto end;
 		}
@@ -1384,11 +1509,15 @@ TEST(PortMemTest, mem_test8_categories)
 		omrmem_free_memory(ptr);
 
 		if (finalBlocks != expectedBlocks) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of blocks after allocate. Expected %zd, got %zd.\n", expectedBlocks, finalBlocks);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of blocks after allocate. Expected %zd, got %zd.\n", expectedBlocks,
+			        finalBlocks);
 			goto end;
 		}
 		if (finalBytes < expectedBytes) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of bytes after allocate. Expected %zd, got %zd.\n", expectedBytes, finalBytes);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of bytes after allocate. Expected %zd, got %zd.\n", expectedBytes,
+			        finalBytes);
 			goto end;
 		}
 
@@ -1396,16 +1525,21 @@ TEST(PortMemTest, mem_test8_categories)
 		finalBlocks = categoriesState.unknownBlocks;
 		finalBytes = categoriesState.unknownBytes;
 		if (categoriesState.otherError) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Some other error hit while walking categories (see messages above).\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Some other error hit while walking categories (see messages above).\n");
 			goto end;
 		}
 
 		if (finalBlocks != initialBlocks) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of blocks after free. Expected %zd, got %zd.\n", initialBlocks, finalBlocks);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of blocks after free. Expected %zd, got %zd.\n", initialBlocks,
+			        finalBlocks);
 			goto end;
 		}
 		if (finalBytes != initialBytes) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of bytes after free. Expected %zd, got %zd.\n", initialBytes, finalBytes);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "Unexpected number of bytes after free. Expected %zd, got %zd.\n", initialBytes,
+			        finalBytes);
 			goto end;
 		}
 	}
@@ -1425,7 +1559,8 @@ static uint32_t categoriesWalked;
  * Used with omrmem_test9_category_walk
  */
 static uintptr_t
-categoryWalkFunction2(uint32_t categoryCode, const char *categoryName, uintptr_t liveBytes, uintptr_t liveAllocations, BOOLEAN isRoot, uint32_t parentCategoryCode, OMRMemCategoryWalkState *walkState)
+categoryWalkFunction2(uint32_t categoryCode, const char *categoryName, uintptr_t liveBytes, uintptr_t liveAllocations,
+        BOOLEAN isRoot, uint32_t parentCategoryCode, OMRMemCategoryWalkState *walkState)
 {
 	categoriesWalked++;
 
@@ -1444,7 +1579,7 @@ TEST(PortMemTest, mem_test9_category_walk)
 	reportTestEntry(OMRPORTLIB, testName);
 
 	/* Register our dummy categories */
-	omrport_control(OMRPORT_CTLDATA_MEM_CATEGORIES_SET, (uintptr_t) &dummyCategorySet);
+	omrport_control(OMRPORT_CTLDATA_MEM_CATEGORIES_SET, (uintptr_t)&dummyCategorySet);
 
 	categoriesWalked = 0;
 
@@ -1455,7 +1590,8 @@ TEST(PortMemTest, mem_test9_category_walk)
 	omrmem_walk_categories(&walkState);
 
 	if (categoriesWalked != 1) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of categories walk. Expected 1, got %u\n", categoriesWalked);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected number of categories walk. Expected 1, got %u\n",
+		        categoriesWalked);
 	}
 
 	/* Reset categories to NULL */

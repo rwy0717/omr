@@ -23,29 +23,24 @@
 #if !defined(CONCURRENTGCSATB_HPP_)
 #define CONCURRENTGCSATB_HPP_
 
-#include "omrcfg.h"
-#include "modronopt.h"
-
-#include "omr.h"
 #include "OMR_VM.hpp"
+#include "modronopt.h"
+#include "omr.h"
+#include "omrcfg.h"
 #if defined(OMR_GC_MODRON_CONCURRENT_MARK)
 
 #include "ConcurrentGC.hpp"
-
 
 /**
  * @todo Provide class documentation
  * @ingroup GC_Modron_Standard
  */
-class MM_ConcurrentGCSATB : public MM_ConcurrentGC
-{
+class MM_ConcurrentGCSATB : public MM_ConcurrentGC {
 	/*
 	 * Data members
 	 */
 private:
-
 public:
-	
 	/*
 	 * Function members
 	 */
@@ -60,11 +55,7 @@ public:
 	static MM_ConcurrentGCSATB *newInstance(MM_EnvironmentBase *env);
 	virtual void kill(MM_EnvironmentBase *env);
 
-	MM_ConcurrentGCSATB(MM_EnvironmentBase *env)
-		: MM_ConcurrentGC(env)
-		{
-			_typeId = __FUNCTION__;
-		}
+	MM_ConcurrentGCSATB(MM_EnvironmentBase *env) : MM_ConcurrentGC(env) { _typeId = __FUNCTION__; }
 };
 
 #endif /* OMR_GC_MODRON_CONCURRENT_MARK */

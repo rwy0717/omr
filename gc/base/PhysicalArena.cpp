@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #include "PhysicalArena.hpp"
 
 #include "EnvironmentBase.hpp"
@@ -29,7 +28,7 @@
 
 /**
  * Determine whether the child sub arena is allowed to expand according to the description given.
- * 
+ *
  * @return true if the expansion is allowed, false otherwise.
  */
 bool
@@ -64,7 +63,7 @@ MM_PhysicalArena::initialize(MM_EnvironmentBase *env)
 void
 MM_PhysicalArena::tearDown(MM_EnvironmentBase *env)
 {
-	if(_attached) {
+	if (_attached) {
 		_heap->detachArena(env, this);
 	}
 }

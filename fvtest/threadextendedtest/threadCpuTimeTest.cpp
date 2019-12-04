@@ -23,32 +23,32 @@
 #include "thread_api.h"
 #include "threadExtendedTestHelpers.hpp"
 
-#define NUM_ITERATIONS	50
+#define NUM_ITERATIONS 50
 
-#define LONG_MILLI_TIMEOUT	900000
-#define MILLI_TIMEOUT		10000
-#define NANO_TIMEOUT		0
+#define LONG_MILLI_TIMEOUT 900000
+#define MILLI_TIMEOUT 10000
+#define NANO_TIMEOUT 0
 
 typedef struct ThreadInfo {
-	uint32_t	tcount;
-	int32_t		error_code;
-	int64_t		cpu_time;
-	int64_t		self_cpu_time;
-	int64_t		other_cpu_time;
-	omrthread_t	j9tid;
+	uint32_t tcount;
+	int32_t error_code;
+	int64_t cpu_time;
+	int64_t self_cpu_time;
+	int64_t other_cpu_time;
+	omrthread_t j9tid;
 } ThreadInfo;
 
 typedef struct SupportThreadInfo {
-	uint32_t			counter;
-	uint32_t			wait;
-	uint32_t			sync;
-	omrthread_monitor_t	synchronization;
-	ThreadInfo		*thread_info;
+	uint32_t counter;
+	uint32_t wait;
+	uint32_t sync;
+	omrthread_monitor_t synchronization;
+	ThreadInfo *thread_info;
 } SupportThreadInfo;
 
 SupportThreadInfo *info;
 
-#define ONESEC	1000 /**< 1 sec in ms */
+#define ONESEC 1000 /**< 1 sec in ms */
 
 /**
  * Generate CPU Load for 1 second
@@ -67,19 +67,19 @@ cpuLoad(void)
 	} while ((end - start) < ONESEC);
 }
 
-#define THREEMINS	180
-#define NANOSEC		1000000000
+#define THREEMINS 180
+#define NANOSEC 1000000000
 
 #define CHECK_AND_SAVE_ERROR(val) \
 	do { \
 		if (-1 == val) { \
-			tinfo->error_code = (int32_t) val; \
+			tinfo->error_code = (int32_t)val; \
 			return -1; \
 		} \
 	} while (0)
 
-#define ERROR_CPU_TIME_STALLED	-2
-#define ERROR_CPU_TIME_MISMATCH	-3
+#define ERROR_CPU_TIME_STALLED -2
+#define ERROR_CPU_TIME_MISMATCH -3
 
 /**
  * This function records thread CPU times using both the omrthread_get_cpu_time
@@ -184,7 +184,8 @@ TEST(ThreadExtendedTest, TestOtherThreadCputime)
 	info->counter = 0;
 	info->wait = 0;
 	info->sync = 0;
-	info->thread_info = (ThreadInfo *)omrmem_allocate_memory(sizeof(ThreadInfo) * THREAD_NUM, OMRMEM_CATEGORY_THREADS);
+	info->thread_info =
+	        (ThreadInfo *)omrmem_allocate_memory(sizeof(ThreadInfo) * THREAD_NUM, OMRMEM_CATEGORY_THREADS);
 	ASSERT_TRUE(info->thread_info != NULL);
 	omrthread_monitor_init_with_name(&info->synchronization, 0, "threadCpuTimeInfo monitor");
 
@@ -193,12 +194,8 @@ TEST(ThreadExtendedTest, TestOtherThreadCputime)
 	for (i = 0; i < THREAD_NUM; i++) {
 		ThreadInfo *tinfo = &info->thread_info[i];
 		tinfo->tcount = i;
-		ret = omrthread_create_ex(
-				  &(tinfo->j9tid),
-				  J9THREAD_ATTR_DEFAULT,
-				  0,
-				  (omrthread_entrypoint_t) runTest,
-				  (void *) &tinfo->tcount);
+		ret = omrthread_create_ex(&(tinfo->j9tid), J9THREAD_ATTR_DEFAULT, 0, (omrthread_entrypoint_t)runTest,
+		        (void *)&tinfo->tcount);
 		ASSERT_TRUE(ret == 0);
 	}
 

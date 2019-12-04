@@ -46,12 +46,11 @@
 /* a2e overrides many functions to use ASCII strings.
  * We need the native EBCDIC string
  */
-#if defined (nl_langinfo)
+#if defined(nl_langinfo)
 #undef nl_langinfo
 #endif
 
 #endif /* defined(J9ZOS390) */
-
 
 /**
  * CRLFNEWLINES will be defined when we require changing newlines from '\n' to '\r\n'
@@ -61,11 +60,11 @@
 #define CRLFNEWLINES
 #endif /* defined(OMR_OS_WINDOWS) */
 
-static intptr_t
-write_all(struct OMRPortLibrary *portLibrary, OMRFileStream *fileStream, const char *buf, intptr_t nbytes);
+static intptr_t write_all(
+        struct OMRPortLibrary *portLibrary, OMRFileStream *fileStream, const char *buf, intptr_t nbytes);
 
-static intptr_t
-transliterate_write_text(struct OMRPortLibrary *portLibrary, OMRFileStream *fileStream, const char *buf, intptr_t nbytes, int32_t toEncoding);
+static intptr_t transliterate_write_text(struct OMRPortLibrary *portLibrary, OMRFileStream *fileStream, const char *buf,
+        intptr_t nbytes, int32_t toEncoding);
 
 /**
  * Write formatted text to a file.
@@ -105,13 +104,15 @@ omrfilestream_vprintf(struct OMRPortLibrary *portLibrary, OMRFileStream *fileStr
 		writeBuffer = localBuffer;
 	} else {
 		Trc_PRT_filestream_vprintf_stackBufferNotBigEnough(fileStream, format, bufferSize);
-		writeBuffer = portLibrary->mem_allocate_memory(portLibrary, bufferSize, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
+		writeBuffer = portLibrary->mem_allocate_memory(
+		        portLibrary, bufferSize, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 	}
 
 	/* format and write out the buffer (truncate into local buffer as last resort) */
 	if (NULL != writeBuffer) {
 		stringSize = portLibrary->str_vprintf(portLibrary, writeBuffer, bufferSize, format, args);
-		portLibrary->filestream_write_text(portLibrary, fileStream, writeBuffer, stringSize, J9STR_CODE_PLATFORM_RAW);
+		portLibrary->filestream_write_text(
+		        portLibrary, fileStream, writeBuffer, stringSize, J9STR_CODE_PLATFORM_RAW);
 		/* dispose of buffer if not on local */
 		if (writeBuffer != localBuffer) {
 			portLibrary->mem_free_memory(portLibrary, writeBuffer);
@@ -120,7 +121,8 @@ omrfilestream_vprintf(struct OMRPortLibrary *portLibrary, OMRFileStream *fileStr
 		Trc_PRT_filestream_vprintf_failedMalloc(fileStream, format, bufferSize);
 		portLibrary->nls_printf(portLibrary, J9NLS_ERROR, J9NLS_PORT_FILE_MEMORY_ALLOCATE_FAILURE);
 		stringSize = portLibrary->str_vprintf(portLibrary, localBuffer, sizeof(localBuffer), format, args);
-		portLibrary->filestream_write_text(portLibrary, fileStream, localBuffer, stringSize, J9STR_CODE_PLATFORM_RAW);
+		portLibrary->filestream_write_text(
+		        portLibrary, fileStream, localBuffer, stringSize, J9STR_CODE_PLATFORM_RAW);
 	}
 
 	Trc_PRT_filestream_vprintf_Exit();
@@ -174,7 +176,8 @@ omrfilestream_printf(struct OMRPortLibrary *portLibrary, OMRFileStream *fileStre
  * @note If an error occurred, the file position is unknown.
  */
 intptr_t
-omrfilestream_write_text(struct OMRPortLibrary *portLibrary, OMRFileStream *fileStream, const char *buf, intptr_t nbytes, int32_t toEncoding)
+omrfilestream_write_text(struct OMRPortLibrary *portLibrary, OMRFileStream *fileStream, const char *buf,
+        intptr_t nbytes, int32_t toEncoding)
 {
 	intptr_t rc = 0;
 #if defined(CRLFNEWLINES)
@@ -203,7 +206,7 @@ omrfilestream_write_text(struct OMRPortLibrary *portLibrary, OMRFileStream *file
 	/* We have to change the line endings.  This must be done entirely before transliteration. */
 
 	/* Count the newlines */
-	for (i = 0; i < ((uintptr_t) nbytes); i++) {
+	for (i = 0; i < ((uintptr_t)nbytes); i++) {
 		if (buf[i] == '\n') {
 			newlineCount += 1;
 		}
@@ -211,11 +214,12 @@ omrfilestream_write_text(struct OMRPortLibrary *portLibrary, OMRFileStream *file
 
 	if (0 < newlineCount) {
 		/* Every newline now requires 2 bytes */
-		uintptr_t bufferSize = ((uintptr_t) nbytes) + newlineCount;
+		uintptr_t bufferSize = ((uintptr_t)nbytes) + newlineCount;
 
 		/* malloc a bigger buffer if it is needed */
 		if (bufferSize > sizeof(stackNewlineBuffer)) {
-			newlineBuffer = portLibrary->mem_allocate_memory(portLibrary, bufferSize, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
+			newlineBuffer = portLibrary->mem_allocate_memory(
+			        portLibrary, bufferSize, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 			if (NULL == newlineBuffer) {
 				Trc_PRT_filestream_write_text_failedMalloc(fileStream, buf, nbytes, rc);
 				Trc_PRT_filestream_write_text_Exit(OMRPORT_ERROR_FILE_OPFAILED);
@@ -231,7 +235,7 @@ omrfilestream_write_text(struct OMRPortLibrary *portLibrary, OMRFileStream *file
 			}
 			newlineBuffer[i] = buf[j];
 		}
-		
+
 		buf = newlineBuffer;
 		nbytes = bufferSize;
 	}
@@ -271,7 +275,8 @@ omrfilestream_write_text(struct OMRPortLibrary *portLibrary, OMRFileStream *file
  * No parameter error checking.
  */
 static intptr_t
-transliterate_write_text(struct OMRPortLibrary *portLibrary, OMRFileStream *fileStream, const char *buf, intptr_t nbytes, int32_t toEncoding)
+transliterate_write_text(struct OMRPortLibrary *portLibrary, OMRFileStream *fileStream, const char *buf,
+        intptr_t nbytes, int32_t toEncoding)
 {
 	char stackExpandedBuffer[512];
 	char *expandedBuffer = stackExpandedBuffer;
@@ -286,10 +291,12 @@ transliterate_write_text(struct OMRPortLibrary *portLibrary, OMRFileStream *file
 	 */
 	rc = portLibrary->str_convert(portLibrary, fromEncoding, toEncoding, buf, nbytes, NULL, 0);
 	if (rc < 0) {
-		Trc_PRT_filestream_write_text_failedStringTransliteration(fileStream, buf, nbytes, toEncoding, (int32_t) rc);
+		Trc_PRT_filestream_write_text_failedStringTransliteration(
+		        fileStream, buf, nbytes, toEncoding, (int32_t)rc);
 		return OMRPORT_ERROR_FILE_OPFAILED;
-	} else if ((size_t) rc > sizeof(stackExpandedBuffer)) {
-		expandedBuffer = portLibrary->mem_allocate_memory(portLibrary, rc, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
+	} else if ((size_t)rc > sizeof(stackExpandedBuffer)) {
+		expandedBuffer = portLibrary->mem_allocate_memory(
+		        portLibrary, rc, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 		if (NULL == expandedBuffer) {
 			Trc_PRT_filestream_write_text_failedMalloc(fileStream, buf, nbytes, rc);
 			return OMRPORT_ERROR_FILE_OPFAILED;
@@ -298,9 +305,11 @@ transliterate_write_text(struct OMRPortLibrary *portLibrary, OMRFileStream *file
 	convertedSize = rc;
 
 	/* Fill the buffer with the new string */
-	rc = portLibrary->str_convert(portLibrary, fromEncoding, toEncoding, buf, nbytes, expandedBuffer, convertedSize);
+	rc = portLibrary->str_convert(
+	        portLibrary, fromEncoding, toEncoding, buf, nbytes, expandedBuffer, convertedSize);
 	if (rc < 0) {
-		Trc_PRT_filestream_write_text_failedStringTransliteration(fileStream, buf, nbytes, toEncoding, (int32_t) rc);
+		Trc_PRT_filestream_write_text_failedStringTransliteration(
+		        fileStream, buf, nbytes, toEncoding, (int32_t)rc);
 		rc = OMRPORT_ERROR_FILE_OPFAILED;
 	} else {
 		/* Write the converted bytes to the file, we will return whatever error/bytecount */

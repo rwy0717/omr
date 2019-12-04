@@ -49,28 +49,17 @@ static int32_t
 findError(int32_t errorCode)
 {
 	switch (errorCode) {
-	case EACCES:
-		return OMRPORT_ERROR_FILE_NOPERMISSION;
-	case EEXIST:
-		return OMRPORT_ERROR_FILE_EXIST;
-	case EINTR:
-		return OMRPORT_ERROR_FILE_INTERRUPTED;
-	case EISDIR:
-		return OMRPORT_ERROR_FILE_ISDIR;
-	case EMFILE:
-		return OMRPORT_ERROR_FILE_PROCESS_MAX_OPEN;
-	case ENFILE:
-		return OMRPORT_ERROR_FILE_SYSTEMFULL;
-	case ENOENT:
-		return OMRPORT_ERROR_FILE_NOENT;
-	case ENOSPC:
-		return OMRPORT_ERROR_FILE_DISKFULL;
-	case ENXIO:
-		return OMRPORT_ERROR_FILE_XIO;
-	case EROFS:
-		return OMRPORT_ERROR_FILE_ROFS;
-	default:
-		return OMRPORT_ERROR_FILE_OPFAILED;
+	case EACCES: return OMRPORT_ERROR_FILE_NOPERMISSION;
+	case EEXIST: return OMRPORT_ERROR_FILE_EXIST;
+	case EINTR: return OMRPORT_ERROR_FILE_INTERRUPTED;
+	case EISDIR: return OMRPORT_ERROR_FILE_ISDIR;
+	case EMFILE: return OMRPORT_ERROR_FILE_PROCESS_MAX_OPEN;
+	case ENFILE: return OMRPORT_ERROR_FILE_SYSTEMFULL;
+	case ENOENT: return OMRPORT_ERROR_FILE_NOENT;
+	case ENOSPC: return OMRPORT_ERROR_FILE_DISKFULL;
+	case ENXIO: return OMRPORT_ERROR_FILE_XIO;
+	case EROFS: return OMRPORT_ERROR_FILE_ROFS;
+	default: return OMRPORT_ERROR_FILE_OPFAILED;
 	}
 }
 
@@ -84,7 +73,8 @@ findError(int32_t errorCode)
  *
  * @return EsIsFile if a file, EsIsDir if a directory, negative portable error code on failure.
  *
- * @note If a multi-threaded application passes in a relative path the caller must synchronize on the current working directory, otherwise the behaviour is undefined
+ * @note If a multi-threaded application passes in a relative path the caller must synchronize on the current working
+ * directory, otherwise the behaviour is undefined
  */
 int32_t
 omrfile_attr(struct OMRPortLibrary *portLibrary, const char *path)
@@ -98,17 +88,18 @@ omrfile_attr(struct OMRPortLibrary *portLibrary, const char *path)
  * @param[in] portLibrary The port library
  * @param[in] path Name of the file to be modified.
  * @param[in] mode file permissions, set per the Posix convention, see man chmod (http://linux.die.net/man/2/chmod).
- * 			Windows only: - File access permissions are implemented via the Windows file system READONLY bit.
- * 						The only supported permissions are read-only (for everyone) or read/write (for everyone).
- * 						The sticky, setgid, and setuid bits are ignored, as are the read and execute bits.
- *                      If the mode argument requests write access for all of owner, group, and world, the READONLY attribute is cleared.
- *                      Otherwise READONLY is set.
+ * 			Windows only: - File access permissions are implemented via the Windows file system READONLY
+ * bit. The only supported permissions are read-only (for everyone) or read/write (for everyone). The sticky, setgid,
+ * and setuid bits are ignored, as are the read and execute bits. If the mode argument requests write access for all of
+ * owner, group, and world, the READONLY attribute is cleared. Otherwise READONLY is set.
  *
  * @return The new permissions of the  file or -1 on failure.
  * 			Windows only: The return value is (octal) 0444 (owner, group, and world readable)
- * 					if the Windows READONLY bit is set and 0666 (owner, group, and world readable and writable)if READONLY is not set.
+ * 					if the Windows READONLY bit is set and 0666 (owner, group, and world readable
+ * and writable)if READONLY is not set.
  *
- * @note If a multi-threaded application passes in a relative path the caller must synchronize on the current working directory, otherwise the behaviour is undefined
+ * @note If a multi-threaded application passes in a relative path the caller must synchronize on the current working
+ * directory, otherwise the behaviour is undefined
  *
  */
 
@@ -207,7 +198,8 @@ omrfile_findclose(struct OMRPortLibrary *portLibrary, uintptr_t findhandle)
  *
  * @return valid handle on success, -1 on failure.
  *
- * @note If a multi-threaded application passes in a relative path the caller must synchronize on the current working directory, otherwise the behaviour is undefined
+ * @note If a multi-threaded application passes in a relative path the caller must synchronize on the current working
+ * directory, otherwise the behaviour is undefined
  *
  */
 uintptr_t
@@ -239,7 +231,8 @@ omrfile_findnext(struct OMRPortLibrary *portLibrary, uintptr_t findhandle, char 
  *
  * @return last modification time on success, -1 on failure.
  *
- * @note If a multi-threaded application passes in a relative path the caller must synchronize on the current working directory, otherwise the behaviour is undefined
+ * @note If a multi-threaded application passes in a relative path the caller must synchronize on the current working
+ * directory, otherwise the behaviour is undefined
  *
  */
 int64_t
@@ -255,7 +248,8 @@ omrfile_lastmod(struct OMRPortLibrary *portLibrary, const char *path)
  *
  * @return Length in bytes of the file on success, negative portable error code on failure
  *
- * @note If a multi-threaded application passes in a relative path the caller must synchronize on the current working directory, otherwise the behaviour is undefined
+ * @note If a multi-threaded application passes in a relative path the caller must synchronize on the current working
+ * directory, otherwise the behaviour is undefined
  */
 int64_t
 omrfile_length(struct OMRPortLibrary *portLibrary, const char *path)
@@ -270,7 +264,7 @@ omrfile_length(struct OMRPortLibrary *portLibrary, const char *path)
 		Trc_PRT_file_length_Exit(-1);
 		return -1;
 	}
-	length =  portLibrary->file_seek(portLibrary, fd, 0, EsSeekEnd);
+	length = portLibrary->file_seek(portLibrary, fd, 0, EsSeekEnd);
 	portLibrary->file_close(portLibrary, fd);
 	Trc_PRT_file_length_Exit(length);
 	return length;
@@ -312,7 +306,8 @@ omrfile_flength(struct OMRPortLibrary *portLibrary, intptr_t fd)
  *
  * @note Assumes all components of path up to the last directory already exist.
  *
- * @note If a multi-threaded application passes in a relative path the caller must synchronize on the current working directory, otherwise the behaviour is undefined
+ * @note If a multi-threaded application passes in a relative path the caller must synchronize on the current working
+ * directory, otherwise the behaviour is undefined
  *
  * @internal @todo return negative portable return code on failure.
  */
@@ -331,7 +326,8 @@ omrfile_mkdir(struct OMRPortLibrary *portLibrary, const char *path)
  *
  * @return 0 on success, -1 on failure.
  *
- * @note If a multi-threaded application passes in a relative path the caller must synchronize on the current working directory, otherwise the behaviour is undefined
+ * @note If a multi-threaded application passes in a relative path the caller must synchronize on the current working
+ * directory, otherwise the behaviour is undefined
  *
  * @internal @todo return negative portable return code on failure.
  */
@@ -351,7 +347,8 @@ omrfile_move(struct OMRPortLibrary *portLibrary, const char *pathExist, const ch
  *
  * @return The file descriptor of the newly opened file, -1 on failure.
  *
- * @note If a multi-threaded application passes in a relative path the caller must synchronize on the current working directory, otherwise the behaviour is undefined
+ * @note If a multi-threaded application passes in a relative path the caller must synchronize on the current working
+ * directory, otherwise the behaviour is undefined
  */
 intptr_t
 omrfile_open(struct OMRPortLibrary *portLibrary, const char *path, int32_t flags, int32_t mode)
@@ -437,7 +434,7 @@ omrfile_seek(struct OMRPortLibrary *portLibrary, intptr_t fd, int64_t offset, in
 	/* If file offsets are 32 bit, truncate the seek to that range */
 	if (sizeof(off_t) < sizeof(int64_t)) {
 		if (offset > 0x7FFFFFFF) {
-			localOffset =  0x7FFFFFFF;
+			localOffset = 0x7FFFFFFF;
 		} else if (offset < -0x7FFFFFFF) {
 			localOffset = -0x7FFFFFFF;
 		}
@@ -460,8 +457,7 @@ omrfile_seek(struct OMRPortLibrary *portLibrary, intptr_t fd, int64_t offset, in
  */
 void
 omrfile_shutdown(struct OMRPortLibrary *portLibrary)
-{
-}
+{}
 /**
  * PortLibrary startup.
  *
@@ -504,7 +500,8 @@ omrfile_sync(struct OMRPortLibrary *portLibrary, intptr_t fd)
  *
  * @return 0 on success, -1 on failure.
  *
- * @note If a multi-threaded application passes in a relative path the caller must synchronize on the current working directory, otherwise the behaviour is undefined
+ * @note If a multi-threaded application passes in a relative path the caller must synchronize on the current working
+ * directory, otherwise the behaviour is undefined
  *
  * @internal @todo return negative portable return code on failure.
  */
@@ -523,7 +520,8 @@ omrfile_unlink(struct OMRPortLibrary *portLibrary, const char *path)
  *
  * @return 0 on success, -1 on failure.
  *
- * @note If a multi-threaded application passes in a relative path the caller must synchronize on the current working directory, otherwise the behaviour is undefined
+ * @note If a multi-threaded application passes in a relative path the caller must synchronize on the current working
+ * directory, otherwise the behaviour is undefined
  *
  * @internal @todo return negative portable return code on failure..
  */
@@ -532,7 +530,6 @@ omrfile_unlinkdir(struct OMRPortLibrary *portLibrary, const char *path)
 {
 	return -1;
 }
-
 
 /**
  * Write to a file.
@@ -593,8 +590,6 @@ EsTranslateOpenFlags(int32_t flags)
 	return -1;
 }
 
-
-
 /**
  * Write to a file.
  *
@@ -623,7 +618,8 @@ omrfile_vprintf(struct OMRPortLibrary *portLibrary, intptr_t fd, const char *for
 	if (sizeof(localBuffer) >= bufferSize) {
 		writeBuffer = localBuffer;
 	} else {
-		writeBuffer = portLibrary->mem_allocate_memory(portLibrary, bufferSize, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
+		writeBuffer = portLibrary->mem_allocate_memory(
+		        portLibrary, bufferSize, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 	}
 
 	/* format and write out the buffer (truncate into local buffer as last resort) without null terminator */
@@ -678,7 +674,7 @@ omrfile_printf(struct OMRPortLibrary *portLibrary, intptr_t fd, const char *form
 int32_t
 omrfile_set_length(struct OMRPortLibrary *portLibrary, intptr_t fd, int64_t newLength)
 {
-	off_t length  = (off_t)newLength;
+	off_t length = (off_t)newLength;
 	int32_t result = 0;
 
 	Trc_PRT_file_setlength_Entry(fd, newLength);
@@ -686,13 +682,13 @@ omrfile_set_length(struct OMRPortLibrary *portLibrary, intptr_t fd, int64_t newL
 	/* If file offsets are 32 bit, truncate the newLength to that range */
 	if (sizeof(off_t) < sizeof(int64_t)) {
 		if (newLength > 0x7FFFFFFF) {
-			length =  0x7FFFFFFF;
+			length = 0x7FFFFFFF;
 		} else if (newLength < -0x7FFFFFFF) {
 			length = -0x7FFFFFFF;
 		}
 	}
 
-	result =  ftruncate(fd, length);
+	result = ftruncate(fd, length);
 	Trc_PRT_file_setlength_Exit(result);
 	return result;
 }
@@ -760,7 +756,8 @@ omrfile_fstat(struct OMRPortLibrary *portLibrary, intptr_t fd, struct J9FileStat
  *
  * @return 0 on success, negative portable error code on failure.
  *
- * @note If a multi-threaded application passes in a relative path the caller must synchronize on the current working directory, otherwise the behavior is undefined
+ * @note If a multi-threaded application passes in a relative path the caller must synchronize on the current working
+ * directory, otherwise the behavior is undefined
  */
 int32_t
 omrfile_stat(struct OMRPortLibrary *portLibrary, const char *path, uint32_t flags, struct J9FileStat *buf)
@@ -778,10 +775,12 @@ omrfile_stat(struct OMRPortLibrary *portLibrary, const char *path, uint32_t flag
  *
  * @return 0 on success, negative portable error code on failure.
  *
- * @note If a multi-threaded application passes in a relative path the caller must synchronize on the current working directory, otherwise the behavior is undefined
+ * @note If a multi-threaded application passes in a relative path the caller must synchronize on the current working
+ * directory, otherwise the behavior is undefined
  */
 int32_t
-omrfile_stat_filesystem(struct OMRPortLibrary *portLibrary, const char *path, uint32_t flags, struct J9FileStatFilesystem *buf)
+omrfile_stat_filesystem(
+        struct OMRPortLibrary *portLibrary, const char *path, uint32_t flags, struct J9FileStatFilesystem *buf)
 {
 	return -1;
 }

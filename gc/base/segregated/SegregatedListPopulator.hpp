@@ -30,18 +30,17 @@
 struct GC_ObjectHeapBufferedIteratorState;
 class MM_HeapRegionDescriptor;
 
-class MM_SegregatedListPopulator : public MM_ObjectHeapBufferedIteratorPopulator 
-{
+class MM_SegregatedListPopulator : public MM_ObjectHeapBufferedIteratorPopulator {
 public:
-	MM_SegregatedListPopulator() : MM_ObjectHeapBufferedIteratorPopulator() 
-	{
-		_typeId = __FUNCTION__;
-	}
-	
-	virtual void initializeObjectHeapBufferedIteratorState(MM_HeapRegionDescriptor* region, GC_ObjectHeapBufferedIteratorState* state) const;
-	virtual uintptr_t populateObjectHeapBufferedIteratorCache(omrobjectptr_t* cache, uintptr_t count, GC_ObjectHeapBufferedIteratorState* state) const;
-	virtual void advance(uintptr_t size, GC_ObjectHeapBufferedIteratorState* state) const;
-	virtual void reset(MM_HeapRegionDescriptor* region, GC_ObjectHeapBufferedIteratorState* state, void* base, void* top) const;
+	MM_SegregatedListPopulator() : MM_ObjectHeapBufferedIteratorPopulator() { _typeId = __FUNCTION__; }
+
+	virtual void initializeObjectHeapBufferedIteratorState(
+	        MM_HeapRegionDescriptor *region, GC_ObjectHeapBufferedIteratorState *state) const;
+	virtual uintptr_t populateObjectHeapBufferedIteratorCache(
+	        omrobjectptr_t *cache, uintptr_t count, GC_ObjectHeapBufferedIteratorState *state) const;
+	virtual void advance(uintptr_t size, GC_ObjectHeapBufferedIteratorState *state) const;
+	virtual void reset(MM_HeapRegionDescriptor *region, GC_ObjectHeapBufferedIteratorState *state, void *base,
+	        void *top) const;
 };
 
 #endif /* OMR_GC_SEGREGATED_HEAP */

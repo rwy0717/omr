@@ -20,11 +20,10 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
-#include "omr.h"
-
 #include "WorkPacketsStandard.hpp"
+
 #include "OverflowStandard.hpp"
+#include "omr.h"
 
 /**
  * Instantiate a MM_WorkPacketsStandard
@@ -35,16 +34,17 @@ MM_WorkPacketsStandard *
 MM_WorkPacketsStandard::newInstance(MM_EnvironmentBase *env)
 {
 	MM_WorkPacketsStandard *workPackets;
-	
-	workPackets = (MM_WorkPacketsStandard *)env->getForge()->allocate(sizeof(MM_WorkPacketsStandard), OMR::GC::AllocationCategory::WORK_PACKETS, OMR_GET_CALLSITE());
+
+	workPackets = (MM_WorkPacketsStandard *)env->getForge()->allocate(
+	        sizeof(MM_WorkPacketsStandard), OMR::GC::AllocationCategory::WORK_PACKETS, OMR_GET_CALLSITE());
 	if (NULL != workPackets) {
-		new(workPackets) MM_WorkPacketsStandard(env);
+		new (workPackets) MM_WorkPacketsStandard(env);
 		if (!workPackets->initialize(env)) {
 			workPackets->kill(env);
-			workPackets = NULL;	
+			workPackets = NULL;
 		}
 	}
-	
+
 	return workPackets;
 }
 
@@ -53,4 +53,3 @@ MM_WorkPacketsStandard::createOverflowHandler(MM_EnvironmentBase *env, MM_WorkPa
 {
 	return MM_OverflowStandard::newInstance(env, this);
 }
-

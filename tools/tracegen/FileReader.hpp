@@ -27,8 +27,7 @@
 
 #include "Port.hpp"
 
-class FileReader
-{
+class FileReader {
 	/*
 	 * Data members
 	 */
@@ -53,13 +52,10 @@ private:
 	 * @return Line size, RC_FAILED on failure or EOF
 	 */
 	RCType readline(FILE *fd, char *buf, unsigned int buffSize, int *byteRead);
+
 protected:
 public:
-	FileReader()
-		: _fd(NULL)
-		, _buffer(NULL)
-		, _strLen(-1) {
-	}
+	FileReader() : _fd(NULL), _buffer(NULL), _strLen(-1) {}
 
 	/**
 	 * Initialize file reader

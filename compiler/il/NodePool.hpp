@@ -26,38 +26,41 @@
 #include "il/Node.hpp"
 #include "il/NodeUtils.hpp"
 
-namespace TR { class SymbolReference; }
-namespace TR { class Compilation; }
-template <class T> class TR_Array;
+namespace TR {
+class SymbolReference;
+}
+namespace TR {
+class Compilation;
+}
+template <class T>
+class TR_Array;
 
 namespace TR {
 
-class NodePool
-   {
-   public:
+class NodePool {
+public:
+	TR_ALLOC(TR_Memory::Compilation)
+	NodePool(TR::Compilation *comp, const TR::Allocator &allocator);
 
-   TR_ALLOC(TR_Memory::Compilation)
-   NodePool(TR::Compilation * comp, const TR::Allocator &allocator);
+	TR::Node *allocate();
+	bool deallocate(TR::Node *node);
+	bool removeDeadNodes();
+	void enableNodeGC() { _disableGC = false; }
+	void disableNodeGC() { _disableGC = true; }
+	ncount_t getLastGlobalIndex() { return _globalIndex; }
+	ncount_t getMaxIndex() { return _globalIndex; }
+	TR::Compilation *comp() { return _comp; }
 
-   TR::Node * allocate();
-   bool      deallocate(TR::Node * node);
-   bool      removeDeadNodes();
-   void      enableNodeGC()  { _disableGC = false; }
-   void      disableNodeGC() { _disableGC = true; }
-   ncount_t  getLastGlobalIndex()     { return _globalIndex; }
-   ncount_t  getMaxIndex()           { return _globalIndex; }
-   TR::Compilation * comp() { return _comp; }
+	void cleanUp();
 
-   void cleanUp();
+private:
+	TR::Compilation *_comp;
+	bool _disableGC;
+	ncount_t _globalIndex;
 
-   private:
-   TR::Compilation *     _comp;
-   bool                  _disableGC;
-   ncount_t              _globalIndex;
+	TR::Region _nodeRegion;
+};
 
-   TR::Region            _nodeRegion;
-   };
-
-}
+} // namespace TR
 
 #endif

@@ -27,20 +27,11 @@
 #include "OMR_Agent.hpp"
 #include "rasTestHelpers.hpp"
 
-class RASAgentTest: public ::testing::TestWithParam<const char *>
-{
+class RASAgentTest : public ::testing::TestWithParam<const char *> {
 protected:
-	virtual void
-	SetUp()
-	{
-		OMRTEST_ASSERT_ERROR_NONE(omrTestVMInit(&testVM, rasTestEnv->getPortLibrary()));
-	}
+	virtual void SetUp() { OMRTEST_ASSERT_ERROR_NONE(omrTestVMInit(&testVM, rasTestEnv->getPortLibrary())); }
 
-	virtual void
-	TearDown()
-	{
-		OMRTEST_ASSERT_ERROR_NONE(omrTestVMFini(&testVM));
-	}
+	virtual void TearDown() { OMRTEST_ASSERT_ERROR_NONE(omrTestVMFini(&testVM)); }
 
 	OMRTestVM testVM;
 };
@@ -73,7 +64,8 @@ TEST_P(RASAgentTest, AgentC)
 	omr_agent_destroy(agent);
 }
 
-INSTANTIATE_TEST_CASE_P(TraceNotStartedAgentOpts, RASAgentTest, ::testing::Values("traceNotStartedAgent", "traceNotStartedAgent=", "traceNotStartedAgent=abc"));
+INSTANTIATE_TEST_CASE_P(TraceNotStartedAgentOpts, RASAgentTest,
+        ::testing::Values("traceNotStartedAgent", "traceNotStartedAgent=", "traceNotStartedAgent=abc"));
 INSTANTIATE_TEST_CASE_P(CpuLoadAgentOpts, RASAgentTest, ::testing::Values("cpuLoadAgent"));
 INSTANTIATE_TEST_CASE_P(BindThreadAgentOpts, RASAgentTest, ::testing::Values("bindthreadagent"));
 

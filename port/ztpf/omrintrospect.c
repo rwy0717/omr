@@ -50,7 +50,8 @@
 
 /* z/TPF doesn't have a fdatasync(), it takes   */
 /*    one argument and returns void. Nullify it.*/
-#define fdatasync(x)    {}
+#define fdatasync(x) \
+	{}
 #include "omrintrospect.h"
 #include "omrport.h"
 #include "omrportpriv.h"
@@ -166,10 +167,10 @@ barrier_init_r(barrier_r *barrier, int value)
 	} while (compareAndSwapUDATA((uintptr_t *)&barrier->initial_value, old_value, value) != old_value);
 	do {
 		old_value = barrier->in_count;
-	} while (compareAndSwapUDATA((uintptr_t*)&barrier->in_count, old_value, value) != old_value);
+	} while (compareAndSwapUDATA((uintptr_t *)&barrier->in_count, old_value, value) != old_value);
 	do {
 		old_value = barrier->released;
-	} while (compareAndSwapUDATA((uintptr_t*)&barrier->released, old_value, 0) != old_value);
+	} while (compareAndSwapUDATA((uintptr_t *)&barrier->released, old_value, 0) != old_value);
 
 	return 0;
 }
@@ -192,7 +193,7 @@ barrier_block_until_poked(barrier_r *barrier, uintptr_t deadline)
 	struct timespec spec;
 
 	fds[0].fd = barrier->descriptor_pair[0];
-	fds[0].events = POLLHUP|POLLERR|POLLNVAL|POLLIN;
+	fds[0].events = POLLHUP | POLLERR | POLLNVAL | POLLIN;
 	fds[0].revents = 0;
 
 	if (deadline == 0) {
@@ -217,7 +218,7 @@ barrier_block_until_poked(barrier_r *barrier, uintptr_t deadline)
 
 	/* wait for something to change */
 	ret = poll(fds, 1, interval);
-	if ((ret == -1 && errno != EINTR) || fds[0].revents & (POLLHUP|POLLERR|POLLNVAL)) {
+	if ((ret == -1 && errno != EINTR) || fds[0].revents & (POLLHUP | POLLERR | POLLNVAL)) {
 		return -2;
 	}
 
@@ -260,7 +261,7 @@ barrier_release_r(barrier_r *barrier, uintptr_t seconds)
 		deadline = spec.tv_sec + seconds;
 	}
 
-	if ((compareAndSwapUDATA((uintptr_t*)&barrier->released, 0, 1)) != 0) {
+	if ((compareAndSwapUDATA((uintptr_t *)&barrier->released, 0, 1)) != 0) {
 		/* barrier->released should have been 0, write something into the pipe so that poll doesn't block,
 		 * converts this to a busy wait
 		 */
@@ -269,7 +270,7 @@ barrier_release_r(barrier_r *barrier, uintptr_t seconds)
 	}
 
 	/* wait until all entrants have arrived */
-	while ((compareAndSwapUDATA((uintptr_t*)&barrier->in_count, -1, -1)) > 0) {
+	while ((compareAndSwapUDATA((uintptr_t *)&barrier->in_count, -1, -1)) > 0) {
 		if ((result = barrier_block_until_poked(barrier, deadline)) == -1) {
 			/* timeout or error */
 			break;
@@ -300,9 +301,9 @@ barrier_enter_r(barrier_r *barrier, uintptr_t deadline)
 	/* decrement the wait count */
 	do {
 		old_value = barrier->in_count;
-	} while (compareAndSwapUDATA((uintptr_t*)&barrier->in_count, old_value, old_value - 1) != old_value);
+	} while (compareAndSwapUDATA((uintptr_t *)&barrier->in_count, old_value, old_value - 1) != old_value);
 
-	if (old_value == 1 && (compareAndSwapUDATA((uintptr_t*)&barrier->released, 0, 0))) {
+	if (old_value == 1 && (compareAndSwapUDATA((uintptr_t *)&barrier->released, 0, 0))) {
 		/* we're the last through the barrier so wake everyone up */
 		write(barrier->descriptor_pair[1], &byte, 1);
 	}
@@ -310,7 +311,7 @@ barrier_enter_r(barrier_r *barrier, uintptr_t deadline)
 	/* if we're entering a barrier with a negative count then count us out but we don't need to do anything */
 
 	/* wait until we are formally released */
-	while (compareAndSwapUDATA((uintptr_t*)&barrier->in_count, -1, -1) > 0 || !barrier->released) {
+	while (compareAndSwapUDATA((uintptr_t *)&barrier->in_count, -1, -1) > 0 || !barrier->released) {
 		if ((result = barrier_block_until_poked(barrier, deadline)) < 0) {
 			/* timeout or error */
 			break;
@@ -320,13 +321,13 @@ barrier_enter_r(barrier_r *barrier, uintptr_t deadline)
 	/* increment the out count */
 	do {
 		old_value = barrier->out_count;
-	} while (compareAndSwapUDATA((uintptr_t*)&barrier->out_count, old_value, old_value + 1) != old_value);
+	} while (compareAndSwapUDATA((uintptr_t *)&barrier->out_count, old_value, old_value + 1) != old_value);
 	return result;
 }
 
 /*
- * This function updates the expected number of clients the barrier is waiting for. If all clients have already entered the barrier
- * the the update will fail.
+ * This function updates the expected number of clients the barrier is waiting for. If all clients have already entered
+ * the barrier the the update will fail.
  *
  * @param barrier the barrier to update
  * @param new_value the new number of entrants expected
@@ -346,7 +347,7 @@ barrier_update_r(barrier_r *barrier, int new_value)
 
 	do {
 		old_value = barrier->in_count;
-	} while (compareAndSwapUDATA((uintptr_t*)&barrier->in_count, old_value, old_value + difference) != old_value);
+	} while (compareAndSwapUDATA((uintptr_t *)&barrier->in_count, old_value, old_value + difference) != old_value);
 
 	if (old_value < 0 || (old_value == 0 && barrier->initial_value != 0)) {
 		int restore_value = old_value;
@@ -354,14 +355,14 @@ barrier_update_r(barrier_r *barrier, int new_value)
 		/* barrier was already exited, so undo update and return error */
 		do {
 			old_value = barrier->in_count;
-		} while (compareAndSwapUDATA((uintptr_t*)&barrier->in_count, old_value, restore_value) != old_value);
+		} while (compareAndSwapUDATA((uintptr_t *)&barrier->in_count, old_value, restore_value) != old_value);
 
 		return -1;
 	} else {
 		/* we've updated the in_count so update the initial_value */
 		do {
 			old_value = barrier->initial_value;
-		} while (compareAndSwapUDATA((uintptr_t*)&barrier->initial_value, old_value, new_value) != old_value);
+		} while (compareAndSwapUDATA((uintptr_t *)&barrier->initial_value, old_value, new_value) != old_value);
 
 		/* don't need to notify anyone if updated_value is <= 0 as release will do it when called */
 
@@ -391,8 +392,8 @@ barrier_destroy_r(barrier_r *barrier, int block)
 	/* decrement the wait count */
 	if (block) {
 		do {
-			current = compareAndSwapUDATA((uintptr_t*)&barrier->out_count, -1, -1);
-			in = compareAndSwapUDATA((uintptr_t*)&barrier->in_count, -1, -1);
+			current = compareAndSwapUDATA((uintptr_t *)&barrier->out_count, -1, -1);
+			in = compareAndSwapUDATA((uintptr_t *)&barrier->in_count, -1, -1);
 		} while (current + in < barrier->initial_value);
 	}
 }
@@ -441,7 +442,7 @@ sem_timedwait_r(sem_t_r *sem, uintptr_t seconds)
 	int deadline = 0;
 	int interval = seconds;
 	fds[0].fd = sem->descriptor_pair[0];
-	fds[0].events = POLLHUP|POLLERR|POLLNVAL|POLLIN;
+	fds[0].events = POLLHUP | POLLERR | POLLNVAL | POLLIN;
 	fds[0].revents = 0;
 
 	if (seconds == 0) {
@@ -465,9 +466,9 @@ sem_timedwait_r(sem_t_r *sem, uintptr_t seconds)
 	}
 
 	while (1) {
-		old_value = compareAndSwapUDATA((uintptr_t*)&sem->sem_value, -1, -1);
+		old_value = compareAndSwapUDATA((uintptr_t *)&sem->sem_value, -1, -1);
 		while (old_value > 0) {
-			if (compareAndSwapUDATA((uintptr_t*)&sem->sem_value, old_value, old_value - 1) == old_value) {
+			if (compareAndSwapUDATA((uintptr_t *)&sem->sem_value, old_value, old_value - 1) == old_value) {
 				/* successfully acquired lock */
 				return 0;
 			}
@@ -477,7 +478,7 @@ sem_timedwait_r(sem_t_r *sem, uintptr_t seconds)
 
 		/* wait for something to change */
 		ret = poll(fds, 1, interval);
-		if ((ret == -1 && errno != EINTR) || fds[0].revents & (POLLHUP|POLLERR|POLLNVAL)) {
+		if ((ret == -1 && errno != EINTR) || fds[0].revents & (POLLHUP | POLLERR | POLLNVAL)) {
 			return -2;
 		}
 
@@ -516,9 +517,9 @@ sem_trywait_r(sem_t_r *sem)
 	uintptr_t old_value = 0;
 
 	/* try to get the lock */
-	old_value = compareAndSwapUDATA((uintptr_t*)&sem->sem_value, -1, -1);
+	old_value = compareAndSwapUDATA((uintptr_t *)&sem->sem_value, -1, -1);
 	while (old_value > 0) {
-		int value = compareAndSwapUDATA((uintptr_t*)&sem->sem_value, old_value, old_value - 1);
+		int value = compareAndSwapUDATA((uintptr_t *)&sem->sem_value, old_value, old_value - 1);
 		if (value == old_value) {
 			/* successfully acquired lock */
 			return 0;
@@ -549,7 +550,7 @@ sem_post_r(sem_t_r *sem)
 	/* release the lock */
 	do {
 		old_value = sem->sem_value;
-	} while (compareAndSwapUDATA((uintptr_t*)&sem->sem_value, old_value, old_value + 1) != old_value);
+	} while (compareAndSwapUDATA((uintptr_t *)&sem->sem_value, old_value, old_value + 1) != old_value);
 
 	/* wake up a waiter */
 	if (write(sem->descriptor_pair[1], &byte, 1) != 1) {
@@ -576,13 +577,15 @@ sem_destroy_r(sem_t_r *sem)
 	/* prevent the semaphore from being acquired by subtracting initial value*/
 	do {
 		old_value = sem->sem_value;
-	} while (compareAndSwapUDATA((uintptr_t*)&sem->sem_value, old_value, old_value - sem->initial_value) != old_value);
+	} while (compareAndSwapUDATA((uintptr_t *)&sem->sem_value, old_value, old_value - sem->initial_value)
+	        != old_value);
 
 	if (old_value != sem->initial_value) {
 		/* undo the block and return error */
 		do {
 			old_value = sem->sem_value;
-		} while (compareAndSwapUDATA((uintptr_t*)&sem->sem_value, old_value, old_value + sem->initial_value) != old_value);
+		} while (compareAndSwapUDATA((uintptr_t *)&sem->sem_value, old_value, old_value + sem->initial_value)
+		        != old_value);
 
 		/* semaphore is still in use */
 		return -1;
@@ -594,7 +597,6 @@ sem_destroy_r(sem_t_r *sem)
 
 	return 0;
 }
-
 
 /*
  * Utility function to check if we've timed out.
@@ -661,7 +663,7 @@ timeout(uintptr_t deadline)
 static void
 upcall_handler(int signal, siginfo_t *siginfo, void *context_arg)
 {
-	thread_context *context = (thread_context*)context_arg;
+	thread_context *context = (thread_context *)context_arg;
 	J9ThreadWalkState *state;
 	struct PlatformWalkData *data = NULL;
 	int ret = 0;
@@ -674,7 +676,7 @@ upcall_handler(int signal, siginfo_t *siginfo, void *context_arg)
 		return;
 	}
 
-	data = (struct PlatformWalkData*)siginfo->si_value.sival_ptr;
+	data = (struct PlatformWalkData *)siginfo->si_value.sival_ptr;
 	state = data->state;
 
 	/* ignore the signal if we are the controller thread, or if an error/timeout has already occurred */
@@ -692,7 +694,8 @@ upcall_handler(int signal, siginfo_t *siginfo, void *context_arg)
 		/* error set by another thread while we were in sem_timedwait_r(), don't do the backtrace */
 	} else {
 		/* construct the thread to pass back */
-		data->thread = state->portLibrary->heap_allocate(state->portLibrary, state->heap, sizeof(J9PlatformThread));
+		data->thread =
+		        state->portLibrary->heap_allocate(state->portLibrary, state->heap, sizeof(J9PlatformThread));
 		if (data->thread == NULL) {
 			data->error = ALLOCATION_FAILURE;
 		} else {
@@ -700,7 +703,8 @@ upcall_handler(int signal, siginfo_t *siginfo, void *context_arg)
 			data->thread->thread_id = tid;
 			data->platformAllocatedContext = 1;
 			data->thread->context = context;
-			state->portLibrary->introspect_backtrace_thread(state->portLibrary, data->thread, state->heap, NULL);
+			state->portLibrary->introspect_backtrace_thread(
+			        state->portLibrary, data->thread, state->heap, NULL);
 			state->portLibrary->introspect_backtrace_symbols(state->portLibrary, data->thread, state->heap);
 		}
 	}
@@ -729,17 +733,17 @@ upcall_handler(int signal, siginfo_t *siginfo, void *context_arg)
  * @return number of threads in the process
  */
 static int
-count_threads( struct PlatformWalkData *data ) {
-	struct iproc		*pProc;
-	struct ithgl		*pThgl;
-	if( is_threaded_ecb() ) {
+count_threads(struct PlatformWalkData *data)
+{
+	struct iproc *pProc;
+	struct ithgl *pThgl;
+	if (is_threaded_ecb()) {
 		pProc = iproc_process;
 		pThgl = pProc->iproc_thread_global_data;
 		return pThgl->active_cnt;
 	}
 	return 0;
 }
-
 
 /* This function installs a signal handler then generates signals until all threads in the process bar the calling
  * thread are suspended. The signals have to be real-time signals (ie. >= SIGRTMIN) or it's not possible to pass
@@ -757,7 +761,6 @@ suspend_all_preemptive(struct PlatformWalkData *data)
 	return -1;
 }
 
-
 /*
  * Frees anything and everything to do with the scope of the specified thread.
  */
@@ -765,7 +768,7 @@ static void
 freeThread(J9ThreadWalkState *state, J9PlatformThread *thread)
 {
 	J9PlatformStackFrame *frame;
-	struct PlatformWalkData *data = (struct PlatformWalkData*)state->platform_data;
+	struct PlatformWalkData *data = (struct PlatformWalkData *)state->platform_data;
 
 	if (thread == NULL) {
 		return;
@@ -795,7 +798,6 @@ freeThread(J9ThreadWalkState *state, J9PlatformThread *thread)
 	}
 }
 
-
 /*
  * This functions resumes all threads suspended by suspend_all_preemptive. The general behaviour
  * is to swallow any spurious signals from the queue so they are not delivered after we remove our
@@ -811,11 +813,11 @@ static void
 resume_all_preempted(struct PlatformWalkData *data)
 {
 	sigset_t set;
-	int	clean_release = 0;
-	struct timespec	time_out;
+	int clean_release = 0;
+	struct timespec time_out;
 	J9ThreadWalkState *state = data->state;
 	struct OMRPortLibrary *portLibrary = state->portLibrary;
-	int	test_sig = SUSPEND_SIG;
+	int test_sig = SUSPEND_SIG;
 
 	/*
 	 * We skip everything but the semaphores and the process mask if we didn't
@@ -835,10 +837,11 @@ resume_all_preempted(struct PlatformWalkData *data)
 		struct OMRPortLibrary *portLibrary = data->state->portLibrary;
 		/* clear out the signal queue so that any undispatched suspend signals are not left lying around */
 		while (sigpending(&set) == 0 && sigismember(&set, SUSPEND_SIG)) {
-			/* there is a suspend signal pending so swallow it. It is worth noting that sigwait isn't in the initial
-			 * set of posix signal safe functions, however the fact that it bypasses the installed signal handler is
-			 * too useful it ignore, so we risk it. It could be replaced with sigsuspend and some handler juggling if
-			 * need be but the added complexity isn't worth it until it's shown to be necessary
+			/* there is a suspend signal pending so swallow it. It is worth noting that sigwait isn't in the
+			 * initial set of posix signal safe functions, however the fact that it bypasses the installed
+			 * signal handler is too useful it ignore, so we risk it. It could be replaced with sigsuspend
+			 * and some handler juggling if need be but the added complexity isn't worth it until it's shown
+			 * to be necessary
 			 */
 			sigemptyset(&set);
 			sigaddset(&set, SUSPEND_SIG);
@@ -846,9 +849,9 @@ resume_all_preempted(struct PlatformWalkData *data)
 		}
 
 		/* restore the old signal handler */
-		if ((data->oldHandler.sa_flags & SA_SIGINFO) == 0 && data->oldHandler.sa_handler == SIG_DFL ) {
-			/* if there wasn't an old signal handler the set this to ignore. There shouldn't be any suspend signals
-			 * left but better safe than sorry
+		if ((data->oldHandler.sa_flags & SA_SIGINFO) == 0 && data->oldHandler.sa_handler == SIG_DFL) {
+			/* if there wasn't an old signal handler the set this to ignore. There shouldn't be any suspend
+			 * signals left but better safe than sorry
 			 */
 			data->oldHandler.sa_handler = SIG_IGN;
 		}
@@ -857,7 +860,8 @@ resume_all_preempted(struct PlatformWalkData *data)
 
 		/* release the threads from the upcall handler */
 		clean_release = barrier_release_r(&data->release_barrier, timeout(data->state->deadline2));
-		/* make sure they've all exited. 1 means we block until all threads that have entered the barrier leave */
+		/* make sure they've all exited. 1 means we block until all threads that have entered the barrier leave
+		 */
 		barrier_destroy_r(&data->release_barrier, 1);
 	}
 
@@ -881,78 +885,74 @@ resume_all_preempted(struct PlatformWalkData *data)
 	state->platform_data = NULL;
 }
 
-
-int  __attribute__((optimize(0)))
-J9ZTPF_getcontext( void *region )
+int __attribute__((optimize(0))) J9ZTPF_getcontext(void *region)
 {
-        register char *rgn asm("r2") = (char *)region;
-        /*
-         *      Because of the way the prologue works, registers 1, 11, and 15 are
-         *      clobbered; only 11 and 15 are recoverable ... 1 is lost forever.
-         *      (( SEE NOTE ABOVE, please. -O3 also clobbers R4 permanently. ))
-         *      This block needs to point at the *caller's* NSI, so R14's contents need
-         *      to replace bytes 8-15 of the PSW, we'll do that too.
-         */
-        asm volatile (
-                /*
-                 *              This section writes the primary ucontext_t block fields the
-                 *              user called for, using all 512 bytes of storage we were passed.
-                 *              First we set uc_flags & uc_link to zero, as well as the entire
-                 *              region occupied by uc_stack.
-                 */
-                "xc  0(40,%0),0(%0)\n\t"           /* Zeroize uc_flags & uc_link                        */
-                /*
-                 *              Next portion is the _sigregs (field: uc_mcontext) block
-                 *              It starts at offset 0x0028, where the PSW goes. But we need to
-                 *              save the caller's registers first thing, so do that first.
-                 */
-                "stmg %%r0,%%r10,56(%0)\n\t"   /* store grandes 0-10 at  +0x0038 for 0x58 bytes */
-                "mvc 144(48,%0),544(%%r11)\n\t" /*              grandes 11-15 at +0x0090 for 0x28 bytes */
-                "epsw %%r0,%%r1\n\t"               /* Get PSW into registers 0 & 1                                      */
-                "stg  %%r0,40(%0)\n\t"             /* Store PSW hi word at +0x0030 for 0x08 bytes       */
-                "lg   %%r0,168(%0)\n\t"            /* Pick up original R14, and                                         */
-                "stg  %%r0,48(%r0)\n\t"            /*  replace IC part of PSW with it.                          */
-                "stam %%a0,%%a15,184(%0)\n\t"  /* Store A0-15 at +0x00B8 for 0x40 bytes                 */
-                "stfpc 248(%0)\n\t"                        /* Store FPC register at +0x00F8 for 4 bytes         */
-                "xc  252(4,%0),252(%0)\n\t"    /* Zeroize 4 bytes' alignment padding (+0x0FC for 4)     */
-                "std %%f0,256(%0)\n\t"             /* Store FPR0 at +0x0100 for 8 bytes                         */
-                "std %%f1,264(%0)\n\t"             /* Store FPR1 at +0x0108 for 8 bytes                         */
-                "std %%f2,272(%0)\n\t"             /* Store FPR2 at +0x0110                                                     */
-                "std %%f3,280(%0)\n\t"             /* Store FPR3 at +0x0118                                                     */
-                "std %%f4,288(%0)\n\t"             /*           FPR4 at +0x0120                                                 */
-                "std %%f5,296(%0)\n\t"             /*           FPR5 at +0x0128                                                 */
-                "std %%f6,304(%0)\n\t"             /*           FPR6 at +0x0130                                                 */
-                "std %%f7,312(%0)\n\t"             /*           FPR7 at +0x0138                                                 */
-                "std %%f8,320(%0)\n\t"             /*           FPR8 at +0x0140                                                 */
-                "std %%f9,328(%0)\n\t"             /*           FPR9 at +0x0148                                                 */
-                "std %%f10,336(%0)\n\t"            /*      FPR10 at +0x0150                                                     */
-                "std %%f11,344(%0)\n\t"            /*      FPR11 at +0x0158                                                     */
-                "std %%f12,352(%0)\n\t"            /*      FPR12 at +0x0160                                                     */
-                "std %%f13,360(%0)\n\t"            /*      FPR13 at +0x0168                                                     */
-                "std %%f14,368(%0)\n\t"            /*      FPR14 at +0x0170                                                     */
-                "std %%f15,376(%0)\n\t"            /*      FPR15 at +0x0178                                                     */
-                /*
-                 *       Type sigset_t is next, field uc_sigmask at +0x0180 for 80,
-                 *       which will come from sigprocmask(), following.
-                 */
-                : /* no outputs */                        /* output constraints would go here                           */
-                : "a"(rgn)                                        /* input constraints go here                                          */
-                : "%r0", "%r1", "%r4", "memory");         /* clobber list goes here                                                     */
-        sigprocmask( SIG_BLOCK, NULL, &((ucontext_t *)region)->uc_sigmask );    /* Get sig masks        */
-        /*
-         *       Total lth = 0x200 (512) bytes. Send it back to the caller
-         *       in the address we were passed. We only need to return an
-         *       int for success (0) or non-zero for failure. The way this
-         *       routine is written, failure is not possible.
-         */
-        return 0;
+	register char *rgn asm("r2") = (char *)region;
+	/*
+	 *      Because of the way the prologue works, registers 1, 11, and 15 are
+	 *      clobbered; only 11 and 15 are recoverable ... 1 is lost forever.
+	 *      (( SEE NOTE ABOVE, please. -O3 also clobbers R4 permanently. ))
+	 *      This block needs to point at the *caller's* NSI, so R14's contents need
+	 *      to replace bytes 8-15 of the PSW, we'll do that too.
+	 */
+	asm volatile(
+	        /*
+	         *              This section writes the primary ucontext_t block fields the
+	         *              user called for, using all 512 bytes of storage we were passed.
+	         *              First we set uc_flags & uc_link to zero, as well as the entire
+	         *              region occupied by uc_stack.
+	         */
+	        "xc  0(40,%0),0(%0)\n\t" /* Zeroize uc_flags & uc_link                        */
+	        /*
+	         *              Next portion is the _sigregs (field: uc_mcontext) block
+	         *              It starts at offset 0x0028, where the PSW goes. But we need to
+	         *              save the caller's registers first thing, so do that first.
+	         */
+	        "stmg %%r0,%%r10,56(%0)\n\t" /* store grandes 0-10 at  +0x0038 for 0x58 bytes */
+	        "mvc 144(48,%0),544(%%r11)\n\t" /*              grandes 11-15 at +0x0090 for 0x28 bytes */
+	        "epsw %%r0,%%r1\n\t" /* Get PSW into registers 0 & 1                                      */
+	        "stg  %%r0,40(%0)\n\t" /* Store PSW hi word at +0x0030 for 0x08 bytes       */
+	        "lg   %%r0,168(%0)\n\t" /* Pick up original R14, and                                         */
+	        "stg  %%r0,48(%r0)\n\t" /*  replace IC part of PSW with it.                          */
+	        "stam %%a0,%%a15,184(%0)\n\t" /* Store A0-15 at +0x00B8 for 0x40 bytes                 */
+	        "stfpc 248(%0)\n\t" /* Store FPC register at +0x00F8 for 4 bytes         */
+	        "xc  252(4,%0),252(%0)\n\t" /* Zeroize 4 bytes' alignment padding (+0x0FC for 4)     */
+	        "std %%f0,256(%0)\n\t" /* Store FPR0 at +0x0100 for 8 bytes                         */
+	        "std %%f1,264(%0)\n\t" /* Store FPR1 at +0x0108 for 8 bytes                         */
+	        "std %%f2,272(%0)\n\t" /* Store FPR2 at +0x0110                                                     */
+	        "std %%f3,280(%0)\n\t" /* Store FPR3 at +0x0118                                                     */
+	        "std %%f4,288(%0)\n\t" /*           FPR4 at +0x0120                                                 */
+	        "std %%f5,296(%0)\n\t" /*           FPR5 at +0x0128                                                 */
+	        "std %%f6,304(%0)\n\t" /*           FPR6 at +0x0130                                                 */
+	        "std %%f7,312(%0)\n\t" /*           FPR7 at +0x0138                                                 */
+	        "std %%f8,320(%0)\n\t" /*           FPR8 at +0x0140                                                 */
+	        "std %%f9,328(%0)\n\t" /*           FPR9 at +0x0148                                                 */
+	        "std %%f10,336(%0)\n\t" /*      FPR10 at +0x0150                                                     */
+	        "std %%f11,344(%0)\n\t" /*      FPR11 at +0x0158                                                     */
+	        "std %%f12,352(%0)\n\t" /*      FPR12 at +0x0160                                                     */
+	        "std %%f13,360(%0)\n\t" /*      FPR13 at +0x0168                                                     */
+	        "std %%f14,368(%0)\n\t" /*      FPR14 at +0x0170                                                     */
+	        "std %%f15,376(%0)\n\t" /*      FPR15 at +0x0178                                                     */
+	        /*
+	         *       Type sigset_t is next, field uc_sigmask at +0x0180 for 80,
+	         *       which will come from sigprocmask(), following.
+	         */
+	        : /* no outputs */ /* output constraints would go here                           */
+	        : "a"(rgn) /* input constraints go here                                          */
+	        : "%r0", "%r1", "%r4", "memory"); /* clobber list goes here */
+	sigprocmask(SIG_BLOCK, NULL, &((ucontext_t *)region)->uc_sigmask); /* Get sig masks        */
+	/*
+	 *       Total lth = 0x200 (512) bytes. Send it back to the caller
+	 *       in the address we were passed. We only need to return an
+	 *       int for success (0) or non-zero for failure. The way this
+	 *       routine is written, failure is not possible.
+	 */
+	return 0;
 }
 
-
-
 /*
- * Sets up the native thread structures including the backtrace. If a context is specified it is used instead of grabbing
- * the context for the thread pointed to by state->current_thread.
+ * Sets up the native thread structures including the backtrace. If a context is specified it is used instead of
+ * grabbing the context for the thread pointed to by state->current_thread.
  *
  * @param state - state variable for controlling the thread walk
  * @param sigContext - context to use in place of live thread context
@@ -962,7 +962,7 @@ J9ZTPF_getcontext( void *region )
 static int
 setup_native_thread(J9ThreadWalkState *state, thread_context *sigContext, int heapAllocate)
 {
-	struct PlatformWalkData *data = (struct PlatformWalkData*)state->platform_data;
+	struct PlatformWalkData *data = (struct PlatformWalkData *)state->platform_data;
 	int size = sizeof(thread_context);
 
 	if (size < sizeof(ucontext_t)) {
@@ -971,14 +971,16 @@ setup_native_thread(J9ThreadWalkState *state, thread_context *sigContext, int he
 
 	if (heapAllocate || sigContext) {
 		/* allocate the thread container*/
-		state->current_thread = (J9PlatformThread*)state->portLibrary->heap_allocate(state->portLibrary, state->heap, sizeof(J9PlatformThread));
+		state->current_thread = (J9PlatformThread *)state->portLibrary->heap_allocate(
+		        state->portLibrary, state->heap, sizeof(J9PlatformThread));
 		if (state->current_thread == NULL) {
 			return -1;
 		}
 		memset(state->current_thread, 0, sizeof(J9PlatformThread));
 
 		/* allocate space for the copy of the context */
-		state->current_thread->context = (thread_context*)state->portLibrary->heap_allocate(state->portLibrary, state->heap, size);
+		state->current_thread->context =
+		        (thread_context *)state->portLibrary->heap_allocate(state->portLibrary, state->heap, size);
 		if (state->current_thread->context == NULL) {
 			return -2;
 		}
@@ -992,32 +994,34 @@ setup_native_thread(J9ThreadWalkState *state, thread_context *sigContext, int he
 		/* copy the context */
 		if (sigContext) {
 			/* we're using the provided context instead of generating it */
-			memcpy(state->current_thread->context, ((OMRUnixSignalInfo*)sigContext)->platformSignalInfo.context, size);
+			memcpy(state->current_thread->context,
+			        ((OMRUnixSignalInfo *)sigContext)->platformSignalInfo.context, size);
 		} else if (state->current_thread->thread_id == omrthread_get_ras_tid()) {
 			/* return context for current thread */
-			J9ZTPF_getcontext((ucontext_t*)state->current_thread->context);
+			J9ZTPF_getcontext((ucontext_t *)state->current_thread->context);
 		} else {
-			memcpy(state->current_thread->context, (void*)data->thread->context, size);
+			memcpy(state->current_thread->context, (void *)data->thread->context, size);
 		}
 	} else {
 		/* the data->thread object can be returned */
 		state->current_thread = data->thread;
 	}
 
-
 	/* populate backtraces if not present */
 	if (state->current_thread->callstack == NULL) {
-		/* don't pass sigContext in here as we should have fixed up the thread already. It confuses heap/not heap allocations if we
-		 * pass it here.
+		/* don't pass sigContext in here as we should have fixed up the thread already. It confuses heap/not
+		 * heap allocations if we pass it here.
 		 */
 		SPECULATE_ERROR(state, FAULT_DURING_BACKTRACE, 2);
-		state->portLibrary->introspect_backtrace_thread(state->portLibrary, state->current_thread, state->heap, NULL);
+		state->portLibrary->introspect_backtrace_thread(
+		        state->portLibrary, state->current_thread, state->heap, NULL);
 		CLEAR_ERROR(state);
 	}
 
 	if (state->current_thread->callstack && state->current_thread->callstack->symbol == NULL) {
 		SPECULATE_ERROR(state, FAULT_DURING_BACKTRACE, 3);
-		state->portLibrary->introspect_backtrace_symbols(state->portLibrary, state->current_thread, state->heap);
+		state->portLibrary->introspect_backtrace_symbols(
+		        state->portLibrary, state->current_thread, state->heap);
 		CLEAR_ERROR(state);
 	}
 
@@ -1064,8 +1068,9 @@ sigqueue_is_reliable(void)
  * is too small to contain even the context without stack trace. Errors are reported in the error,
  * and error_detail fields of the state structure. A brief textual description is in error_string.
  */
-J9PlatformThread*
-omrintrospect_threads_startDo_with_signal(struct OMRPortLibrary *portLibrary, J9Heap *heap, J9ThreadWalkState *state, void *signal_info)
+J9PlatformThread *
+omrintrospect_threads_startDo_with_signal(
+        struct OMRPortLibrary *portLibrary, J9Heap *heap, J9ThreadWalkState *state, void *signal_info)
 {
 	int result = 0;
 	struct PlatformWalkData *data;
@@ -1074,22 +1079,21 @@ omrintrospect_threads_startDo_with_signal(struct OMRPortLibrary *portLibrary, J9
 	int suspend_result = 0;
 	int flag;
 
-/*
- *	The following preprocessor guard will stop all attempts at attempting to walk the
- *	native thread stacks, thus avoiding some pretty sticky code which may or may not
- *	work on z/TPF. We'll leave this gate open for now, with a pending decision to close
- *	it or not.
- */
+	/*
+	 *	The following preprocessor guard will stop all attempts at attempting to walk the
+	 *	native thread stacks, thus avoiding some pretty sticky code which may or may not
+	 *	work on z/TPF. We'll leave this gate open for now, with a pending decision to close
+	 *	it or not.
+	 */
 
 	RECORD_ERROR(state, UNSUPPORTED_PLATFORM, 0);
 	return NULL;
-
 }
 
 /* This function is identical to omrintrospect_threads_startDo_with_signal but omits the signal argument
  * and instead uses a live context for the calling thread.
  */
-J9PlatformThread*
+J9PlatformThread *
 omrintrospect_threads_startDo(struct OMRPortLibrary *portLibrary, J9Heap *heap, J9ThreadWalkState *state)
 {
 	return omrintrospect_threads_startDo_with_signal(portLibrary, heap, state, NULL);
@@ -1103,10 +1107,10 @@ omrintrospect_threads_startDo(struct OMRPortLibrary *portLibrary, J9Heap *heap, 
  * @return NULL if there is an error or if no more threads are available. Sets the error fields as
  * listed detailed for omrintrospect_threads_startDo_with_signal.
  */
-J9PlatformThread*
+J9PlatformThread *
 omrintrospect_threads_nextDo(J9ThreadWalkState *state)
 {
-	struct PlatformWalkData *data = (struct PlatformWalkData*)state->platform_data;
+	struct PlatformWalkData *data = (struct PlatformWalkData *)state->platform_data;
 	struct OMRPortLibrary *portLibrary = state->portLibrary;
 	J9PlatformThread *thread = NULL;
 	int result = 0;
@@ -1153,7 +1157,7 @@ omrintrospect_threads_nextDo(J9ThreadWalkState *state)
 
 	if (result == -1 || data->error) {
 		/* failed to solicit thread context */
-		RECORD_ERROR(state, COLLECTION_FAILURE, result==-1 ? -1:data->error);
+		RECORD_ERROR(state, COLLECTION_FAILURE, result == -1 ? -1 : data->error);
 		goto cleanup;
 	}
 
@@ -1212,11 +1216,10 @@ omrintrospect_set_suspend_signal_offset(struct OMRPortLibrary *portLibrary, int3
 {
 	int32_t result = OMRPORT_ERROR_NOT_SUPPORTED_ON_THIS_PLATFORM;
 #if defined(J9_CONFIGURABLE_SUSPEND_SIGNAL)
-	if ((signalOffset < 0)
-		|| (signalOffset > (SIGRTMAX - SIGRTMIN))
+	if ((signalOffset < 0) || (signalOffset > (SIGRTMAX - SIGRTMIN))
 #if defined(SIG_RI_INTERRUPT_INDEX)
-		|| (SIG_RI_INTERRUPT_INDEX == signalOffset)
-#endif  /* defined(SIG_RI_INTERRUPT_INDEX) */
+	        || (SIG_RI_INTERRUPT_INDEX == signalOffset)
+#endif /* defined(SIG_RI_INTERRUPT_INDEX) */
 	) {
 		result = OMRPORT_ERROR_INVALID;
 	} else {
@@ -1225,13 +1228,12 @@ omrintrospect_set_suspend_signal_offset(struct OMRPortLibrary *portLibrary, int3
 	}
 #endif /* defined(J9_CONFIGURABLE_SUSPEND_SIGNAL) */
 	return result;
-
 }
 
 int32_t
 omrintrospect_startup(struct OMRPortLibrary *portLibrary)
 {
-        loadfpc();
+	loadfpc();
 
 #if defined(J9_CONFIGURABLE_SUSPEND_SIGNAL)
 	PPG_introspect_threadSuspendSignal = SIGRTMIN;

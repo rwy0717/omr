@@ -76,8 +76,8 @@ TEST_F(CudaDeviceTest, memory)
 
 		ASSERT_EQ(0, rc) << "omrcuda_memcpyDeviceToHost failed";
 
-		ASSERT_TRUE(patternVerify(hostBuf2, BufferBytes, deviceId))
-				<< "data transferred does not match expected pattern";
+		ASSERT_TRUE(patternVerify(hostBuf2, BufferBytes, deviceId)) << "data transferred does not match "
+		                                                               "expected pattern";
 
 		fillValue = 0x23232323;
 		rc = omrcuda_memset8(deviceId, deviceBuf1, 0x23, BufferBytes);
@@ -88,8 +88,8 @@ TEST_F(CudaDeviceTest, memory)
 
 		ASSERT_EQ(0, rc) << "omrcuda_memcpyDeviceToHost failed";
 
-		ASSERT_TRUE(fillVerify(hostBuf1, BufferBytes, &fillValue, 1))
-				<< "data transferred does not match expected byte pattern";
+		ASSERT_TRUE(fillVerify(hostBuf1, BufferBytes, &fillValue, 1)) << "data transferred does not match "
+		                                                                 "expected byte pattern";
 
 		fillValue = 0x45674567;
 		rc = omrcuda_memset16(deviceId, deviceBuf1, 0x4567, BufferBytes / 2);
@@ -100,8 +100,8 @@ TEST_F(CudaDeviceTest, memory)
 
 		ASSERT_EQ(0, rc) << "omrcuda_memcpyDeviceToHost failed";
 
-		ASSERT_TRUE(fillVerify(hostBuf1, BufferBytes, &fillValue, 2))
-				<< "data transferred does not match expected byte pattern";
+		ASSERT_TRUE(fillVerify(hostBuf1, BufferBytes, &fillValue, 2)) << "data transferred does not match "
+		                                                                 "expected byte pattern";
 
 		fillValue = 0xabcddcba;
 		rc = omrcuda_memset32(deviceId, deviceBuf1, fillValue, BufferBytes / 4);
@@ -112,8 +112,8 @@ TEST_F(CudaDeviceTest, memory)
 
 		ASSERT_EQ(0, rc) << "omrcuda_memcpyDeviceToHost failed";
 
-		ASSERT_TRUE(fillVerify(hostBuf1, BufferBytes, &fillValue, 4))
-				<< "data transferred does not match expected byte pattern";
+		ASSERT_TRUE(fillVerify(hostBuf1, BufferBytes, &fillValue, 4)) << "data transferred does not match "
+		                                                                 "expected byte pattern";
 
 		if (NULL != deviceBuf1) {
 			rc = omrcuda_deviceFree(deviceId, deviceBuf1);

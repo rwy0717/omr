@@ -31,7 +31,7 @@
 /* windows.h defined uintptr_t.  Ignore its definition */
 #define UDATA UDATA_win_
 #include "dia2.h"
-#undef UDATA	/* this is safe because our UDATA is a typedef, not a macro */
+#undef UDATA /* this is safe because our UDATA is a typedef, not a macro */
 #endif /* defined(OMR_OS_WINDOWS) */
 
 #include "ddr/ir/ClassUDT.hpp"
@@ -46,17 +46,15 @@ using std::set;
 using std::string;
 using std::vector;
 
-typedef struct PostponedType
-{
+typedef struct PostponedType {
 	Type **type;
 	string name;
 } PostponedType;
 
-class PdbScanner : public Scanner
-{
+class PdbScanner : public Scanner {
 public:
-	virtual DDR_RC startScan(OMRPortLibrary *portLibrary, Symbol_IR *ir,
-			vector<string> *debugFiles, const char *blacklistPath);
+	virtual DDR_RC startScan(
+	        OMRPortLibrary *portLibrary, Symbol_IR *ir, vector<string> *debugFiles, const char *blacklistPath);
 
 private:
 	Symbol_IR *_ir;
@@ -82,7 +80,8 @@ private:
 	DDR_RC createClassUDT(IDiaSymbol *symbol, ClassUDT **newClass, NamespaceUDT *outerUDT);
 	DDR_RC createEnumUDT(IDiaSymbol *symbol, NamespaceUDT *outerUDT);
 	DDR_RC createTypedef(IDiaSymbol *symbol, NamespaceUDT *outerUDT);
-	DDR_RC loadDataFromBinary(const wchar_t *filename, IDiaDataSource **diaDataSource, IDiaSession **diaSession, IDiaSymbol **diaSymbol);
+	DDR_RC loadDataFromBinary(const wchar_t *filename, IDiaDataSource **diaDataSource, IDiaSession **diaSession,
+	        IDiaSymbol **diaSymbol);
 	DDR_RC setSuperClassName(IDiaSymbol *symbol, ClassUDT *newUDT);
 	void getNamespaceFromName(const string &name, NamespaceUDT **outerUDT);
 	static DDR_RC getName(IDiaSymbol *symbol, string *name);

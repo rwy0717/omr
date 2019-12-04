@@ -80,7 +80,8 @@ omrthread_numa_get_max_node(void)
 }
 
 intptr_t
-omrthread_numa_set_node_affinity_nolock(omrthread_t thread, const uintptr_t *nodeList, uintptr_t nodeCount, uint32_t flags)
+omrthread_numa_set_node_affinity_nolock(
+        omrthread_t thread, const uintptr_t *nodeList, uintptr_t nodeCount, uint32_t flags)
 {
 	intptr_t result = J9THREAD_NUMA_OK;
 	HANDLE processHandle = GetCurrentProcess();
@@ -88,7 +89,8 @@ omrthread_numa_set_node_affinity_nolock(omrthread_t thread, const uintptr_t *nod
 	DWORD_PTR systemAffinityMask = 0;
 
 	if (isNumaAvailable && GetProcessAffinityMask(processHandle, &processAffinityMask, &systemAffinityMask)) {
-		/* go through the nodes and build a mask corresponding to the processors (or groups) on the user-provided nodes and take the intersection of these sets */
+		/* go through the nodes and build a mask corresponding to the processors (or groups) on the
+		 * user-provided nodes and take the intersection of these sets */
 		uintptr_t i = 0;
 		ULONGLONG mask = 0;
 		ULONGLONG comparableProcessAffinityMask = (ULONGLONG)processAffinityMask;
@@ -124,8 +126,8 @@ omrthread_numa_set_node_affinity(omrthread_t thread, const uintptr_t *numaNodes,
 			THREAD_UNLOCK(thread);
 		}
 	} else {
-		result = J9THREAD_NUMA_OK;	
-	} 
+		result = J9THREAD_NUMA_OK;
+	}
 	return result;
 }
 
@@ -134,7 +136,9 @@ omrthread_numa_set_node_affinity(omrthread_t thread, const uintptr_t *numaNodes,
  *
  * @param[in] thread - the thread to be queried. Can be any arbitrary omrthread_t
  * @param[out] numaNodes The array of node indexes with which the given thread is associated, where 1 is the first node.
- * @param[in/out] nodeCount The number of nodes in the numaNodes array, on input, and the number of nodes with which this thread is associated, on output.  The minimum of these two values will be the number of entries populated in the numaNodes array (other entries will be untouched).
+ * @param[in/out] nodeCount The number of nodes in the numaNodes array, on input, and the number of nodes with which
+ * this thread is associated, on output.  The minimum of these two values will be the number of entries populated in the
+ * numaNodes array (other entries will be untouched).
  *
  * @return 0 on success, non-zero if affinity cannot be determined. Note that this function will return 0 even if
  * NUMA is not available. Use omrthread_numa_get_max_node() to test for the availability of NUMA.
@@ -142,8 +146,8 @@ omrthread_numa_set_node_affinity(omrthread_t thread, const uintptr_t *numaNodes,
 intptr_t
 omrthread_numa_get_node_affinity(omrthread_t thread, uintptr_t *numaNodes, uintptr_t *nodeCount)
 {
-	/* Win32 does not allow us to get the affinity of a thread in terms of NUMA nodes (it can only return the "ideal processor" which is a
-	 * completely different level of granularity than this so just return an error.
+	/* Win32 does not allow us to get the affinity of a thread in terms of NUMA nodes (it can only return the "ideal
+	 * processor" which is a completely different level of granularity than this so just return an error.
 	 */
 	*nodeCount = 0;
 	return J9THREAD_NUMA_ERR_AFFINITY_NOT_SUPPORTED;

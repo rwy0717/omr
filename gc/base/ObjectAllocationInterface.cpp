@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 /**
  * @file
  * @ingroup GC_Base_Core
@@ -35,14 +34,16 @@
 #if defined(OMR_GC_THREAD_LOCAL_HEAP)
 /**
  * Replenish the allocation interface TLH cache with new storage.
- * This is a placeholder function for all non-TLH implementing configurations until a further revision of the code finally pushes TLH
- * functionality down to the appropriate level, and not so high that all configurations must recognize it.
+ * This is a placeholder function for all non-TLH implementing configurations until a further revision of the code
+ * finally pushes TLH functionality down to the appropriate level, and not so high that all configurations must
+ * recognize it.
  * @return true on successful TLH replenishment, false otherwise.
  */
 void *
-MM_ObjectAllocationInterface::allocateTLH(MM_EnvironmentBase *env, MM_AllocateDescription *allocDescription, MM_MemorySubSpace *memorySubSpace, MM_MemoryPool *memoryPool)
+MM_ObjectAllocationInterface::allocateTLH(MM_EnvironmentBase *env, MM_AllocateDescription *allocDescription,
+        MM_MemorySubSpace *memorySubSpace, MM_MemoryPool *memoryPool)
 {
-	assume0(0);  /* Temporary routine */
+	assume0(0); /* Temporary routine */
 	return NULL;
 }
 #endif /* OMR_GC_THREAD_LOCAL_HEAP */
@@ -53,7 +54,7 @@ MM_ObjectAllocationInterface::allocateTLH(MM_EnvironmentBase *env, MM_AllocateDe
  * the memory back to the heap.  This does not imply that the memory returned will be available for immediate
  * allocation (i.e., added back to any free lists).  It does imply that the memory will be properly formed
  * within the heap and suitable for a full heap walk (not all allocation schemes require this).
- * 
+ *
  * @note The calling environment may not be the owning environment of the receiver.
  */
 void
@@ -66,9 +67,9 @@ MM_ObjectAllocationInterface::flushCache(MM_EnvironmentBase *env)
  * Restart the cache from its current start to an appropriate base state.
  * Reset the cache details back to a starting state that is appropriate for where it currently is.
  * This is typically used following a collection.
- * 
+ *
  * @note The calling environment may not be the owning environment of the receiver.
- * @note The previous cache state is expected to have been flushed back to the heap. 
+ * @note The previous cache state is expected to have been flushed back to the heap.
  */
 void
 MM_ObjectAllocationInterface::restartCache(MM_EnvironmentBase *env)

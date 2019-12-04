@@ -43,9 +43,8 @@ TEST(PortHypervisorTest, DISABLED_HypervisorPresent)
 		switch (rc) {
 		case J9HYPERVISOR_NOT_PRESENT: {
 			/* Pass case, since -hypervisor was NOT specified; neither was it detected. */
-			portTestEnv->log(
-						  "Test Passed: No Hypervisor present and j9hypervisor_hypervisor_present()"
-						  "returned false\n");
+			portTestEnv->log("Test Passed: No Hypervisor present and j9hypervisor_hypervisor_present()"
+			                 "returned false\n");
 
 			break;
 		}
@@ -61,16 +60,23 @@ TEST(PortHypervisorTest, DISABLED_HypervisorPresent)
 			 */
 			rc = j9hypervisor_get_hypervisor_info(&vendDetails);
 			if (0 == rc) {
-				OMRTEST_EXPECT_FAILURE("Expecting bare metal machine but is running on hypervisor: \n" << vendDetails.hypervisorName <<
-									   "[Info]: Please verify the machine capabilities.\n");
+				OMRTEST_EXPECT_FAILURE("Expecting bare metal machine but is running on hypervisor: \n"
+				        << vendDetails.hypervisorName
+				        << "[Info]: Please verify the machine capabilities.\n");
 			} else {
-				OMRTEST_EXPECT_FAILURE("Expecting bare metal machine but is running on hypervisor: <unknown>\n"
-									   "[Info]: Failed to obtain hypervisor information:" << rc);
+				OMRTEST_EXPECT_FAILURE("Expecting bare metal machine but is running on hypervisor: "
+				                       "<unknown>\n"
+				                       "[Info]: Failed to obtain hypervisor information:"
+				        << rc);
 			}
 			break;
 		}
 		default: { /* Capture any possible error codes reported (other than hypdetect unsupported). */
-			OMRTEST_EXPECT_FAILURE("j9hypervisor_hypervisor_present() returned: " << rc << " when 0 (J9HYPERVISOR_NOT_PRESENT) was expected\n");
+			OMRTEST_EXPECT_FAILURE("j9hypervisor_hypervisor_present() returned: " << rc
+			                                                                      << " when 0 "
+			                                                                         "(J9HYPERVISOR_NOT_"
+			                                                                         "PRESENT) was "
+			                                                                         "expected\n");
 		}
 		};
 	} else {
@@ -79,7 +85,7 @@ TEST(PortHypervisorTest, DISABLED_HypervisorPresent)
 		case J9HYPERVISOR_PRESENT: {
 			/* Pass case, since we detected a hypervisor as also found -hypervisor specified. */
 			portTestEnv->log("Test Passed: Expected a hypervisor and"
-						  " j9hypervisor_hypervisor_present() returned true\n");
+			                 " j9hypervisor_hypervisor_present() returned true\n");
 			break;
 		}
 		case J9PORT_ERROR_HYPERVISOR_UNSUPPORTED: {
@@ -88,14 +94,15 @@ TEST(PortHypervisorTest, DISABLED_HypervisorPresent)
 				 * error code: J9PORT_ERROR_HYPERVISOR_UNSUPPORTED, when -hypervisor is specified.
 				 */
 				portTestEnv->log("Test (negative case) passed: Expected an "
-							  "unsupported hypervisor.\n\tj9hypervisor_hypervisor_present() returned "
-							  "-856 (J9PORT_ERROR_HYPERVISOR_UNSUPPORTED).\n");
+				                 "unsupported hypervisor.\n\tj9hypervisor_hypervisor_present() "
+				                 "returned "
+				                 "-856 (J9PORT_ERROR_HYPERVISOR_UNSUPPORTED).\n");
 			} else {
 				/* Failed test if this is /not/ a negative test, since it looks like it indeed
 				 * detected an unsupported hypervisor (other the ones passed for negative tests).
 				 */
 				OMRTEST_EXPECT_FAILURE("j9hypervisor_hypervisor_present() "
-									   "returned: -856 (J9PORT_ERROR_HYPERVISOR_UNSUPPORTED).\n");
+				                       "returned: -856 (J9PORT_ERROR_HYPERVISOR_UNSUPPORTED).\n");
 			}
 			break;
 		}
@@ -104,7 +111,9 @@ TEST(PortHypervisorTest, DISABLED_HypervisorPresent)
 			break;
 		}
 		default: {
-			OMRTEST_EXPECT_FAILURE("j9hypervisor_hypervisor_present() returned: " << rc << " when 1 (true) was expected\n");
+			OMRTEST_EXPECT_FAILURE("j9hypervisor_hypervisor_present() returned: " << rc
+			                                                                      << " when 1 (true) was "
+			                                                                         "expected\n");
 		}
 		};
 	}

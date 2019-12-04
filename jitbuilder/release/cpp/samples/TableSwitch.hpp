@@ -20,24 +20,22 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 #ifndef TABLESWITCH_INCL
 #define TABLESWITCH_INCL
 
 #include "JitBuilder.hpp"
 
-typedef void (TableSwitchFunctionType)(int32_t);
+typedef void(TableSwitchFunctionType)(int32_t);
 
-class TableSwitchMethod : public OMR::JitBuilder::MethodBuilder
-   {
-   private:
-   void PrintString(OMR::JitBuilder::IlBuilder *bldr, const char *s);
+class TableSwitchMethod : public OMR::JitBuilder::MethodBuilder {
+private:
+	void PrintString(OMR::JitBuilder::IlBuilder *bldr, const char *s);
 
-   public:
-   TableSwitchMethod(OMR::JitBuilder::TypeDictionary *);
-   virtual bool buildIL();
+public:
+	TableSwitchMethod(OMR::JitBuilder::TypeDictionary *);
+	virtual bool buildIL();
 
-   virtual bool RequestFunction(const char *name);
-   };
+	virtual bool RequestFunction(const char *name);
+};
 
 #endif // !defined(TABLESWITCH_INCL)

@@ -23,13 +23,12 @@
 #ifndef COLLECTORLANGUAGEINTERFACE_HPP_
 #define COLLECTORLANGUAGEINTERFACE_HPP_
 
-#include "modronbase.h"
-#include "objectdescription.h"
-
 #include "BaseVirtual.hpp"
 #include "EnvironmentBase.hpp"
 #include "GCExtensionsBase.hpp"
 #include "SlotObject.hpp"
+#include "modronbase.h"
+#include "objectdescription.h"
 
 class GC_ObjectScanner;
 class MM_CompactScheme;
@@ -45,24 +44,14 @@ class MM_MemorySubSpaceSemiSpace;
 class MM_CollectorLanguageInterface : public MM_BaseVirtual {
 
 private:
-
 protected:
-
 public:
-
 private:
-
 protected:
-
 public:
-
 	virtual void kill(MM_EnvironmentBase *env) = 0;
 
-	MM_CollectorLanguageInterface()
-		: MM_BaseVirtual()
-	{
-		_typeId = __FUNCTION__;
-	}
+	MM_CollectorLanguageInterface() : MM_BaseVirtual() { _typeId = __FUNCTION__; }
 };
 
 #endif /* COLLECTORLANGUAGEINTERFACE_HPP_ */

@@ -29,74 +29,74 @@
 #include "codegen/RegisterPair.hpp"
 #include "infra/List.hpp"
 
-void OMR::RegisterPair::block()
-   {
-   _lowOrder->block();
-   _highOrder->block();
-   }
+void
+OMR::RegisterPair::block()
+{
+	_lowOrder->block();
+	_highOrder->block();
+}
 
-void OMR::RegisterPair::unblock()
-   {
-   _lowOrder->unblock();
-   _highOrder->unblock();
-   }
+void
+OMR::RegisterPair::unblock()
+{
+	_lowOrder->unblock();
+	_highOrder->unblock();
+}
 
-bool OMR::RegisterPair::usesRegister(TR::Register* reg)
-   {
-   if (self() == reg || _lowOrder == reg || _highOrder == reg )
-      {
-      return true;
-      }
-   else
-      {
-      return false;
-      }
-   }
+bool
+OMR::RegisterPair::usesRegister(TR::Register *reg)
+{
+	if (self() == reg || _lowOrder == reg || _highOrder == reg) {
+		return true;
+	} else {
+		return false;
+	}
+}
 
 TR::Register *
 OMR::RegisterPair::getLowOrder()
-   {
-   return _lowOrder;
-   }
+{
+	return _lowOrder;
+}
 
 TR::Register *
 OMR::RegisterPair::setLowOrder(TR::Register *lo, TR::CodeGenerator *codeGen)
-   {
-   if (!lo->isLive() && codeGen->getLiveRegisters(lo->getKind())!=NULL)
-      codeGen->getLiveRegisters(lo->getKind())->addRegister(lo);
+{
+	if (!lo->isLive() && codeGen->getLiveRegisters(lo->getKind()) != NULL)
+		codeGen->getLiveRegisters(lo->getKind())->addRegister(lo);
 
-   return (_lowOrder = lo);
-   }
+	return (_lowOrder = lo);
+}
 
 TR::Register *
 OMR::RegisterPair::getHighOrder()
-   {
-   return _highOrder;
-   }
+{
+	return _highOrder;
+}
 
 TR::Register *
 OMR::RegisterPair::setHighOrder(TR::Register *ho, TR::CodeGenerator *codeGen)
-   {
-   if (!ho->isLive() && codeGen->getLiveRegisters(ho->getKind())!=NULL)
-      codeGen->getLiveRegisters(ho->getKind())->addRegister(ho);
+{
+	if (!ho->isLive() && codeGen->getLiveRegisters(ho->getKind()) != NULL)
+		codeGen->getLiveRegisters(ho->getKind())->addRegister(ho);
 
-   return (_highOrder = ho);
-   }
+	return (_highOrder = ho);
+}
 
 TR::Register *
 OMR::RegisterPair::getRegister()
-   {
-   return NULL;
-   }
+{
+	return NULL;
+}
 
 TR::RegisterPair *
 OMR::RegisterPair::getRegisterPair()
-   {
-   return self();
-   }
+{
+	return self();
+}
 
 TR::RegisterPair *
 OMR::RegisterPair::self()
-   {
-   return static_cast<TR::RegisterPair*>(this);
-   }
+{
+	return static_cast<TR::RegisterPair *>(this);
+}

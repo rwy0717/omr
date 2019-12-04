@@ -34,28 +34,20 @@ struct CudaTestArray {
 	Element *data;
 };
 
-class CudaTest : public ::testing::Test
-{
+class CudaTest : public ::testing::Test {
 private:
 	/* Parameters of our linear congruential generator. */
 	static const uint64_t MULTIPLIER = 25214903917;
 	static const uint64_t INCREMENT = 11;
 
 protected:
-	static OMRPortLibrary *
-	getPortLibrary()
-	{
-		return portTestEnv->getPortLibrary();
-	}
+	static OMRPortLibrary *getPortLibrary() { return portTestEnv->getPortLibrary(); }
 
-	static bool
-	fillVerify(const void *buffer, uintptr_t size, const void *fill, uintptr_t fillSize);
+	static bool fillVerify(const void *buffer, uintptr_t size, const void *fill, uintptr_t fillSize);
 
-	static void
-	patternFill(void *buffer, uintptr_t size, uint32_t seed);
+	static void patternFill(void *buffer, uintptr_t size, uint32_t seed);
 
-	static bool
-	patternVerify(const void *buffer, uintptr_t size, uint32_t seed);
+	static bool patternVerify(const void *buffer, uintptr_t size, uint32_t seed);
 
 	/**
 	 * Normalize an API version number encoded as (1000 * major + 10 * minor)
@@ -65,18 +57,16 @@ protected:
 	 * @param[in] apiVersion  the API version number
 	 * @return a normalized version number
 	 */
-	static uint32_t
-	normalizeVersion(uint32_t apiVersion)
+	static uint32_t normalizeVersion(uint32_t apiVersion)
 	{
 		uint32_t major = (apiVersion / 1000);
-		uint32_t minor = (apiVersion /   10) % 10;
+		uint32_t minor = (apiVersion / 10) % 10;
 
 		return (major * 10) + minor;
 	}
 };
 
-class CudaDeviceTest : public CudaTest
-{
+class CudaDeviceTest : public CudaTest {
 protected:
 	static const CudaTestArray<const J9CudaCacheConfig> allCacheConfigs;
 	static const CudaTestArray<const J9CudaSharedMemConfig> allSharedMemConfigs;
@@ -88,8 +78,7 @@ protected:
 
 	uint32_t deviceCount;
 
-	virtual void
-	SetUp();
+	virtual void SetUp();
 
 	/**
 	 * Is a message for the given error code required when
@@ -97,8 +86,7 @@ protected:
 	 *
 	 * @param[in] error the error code
 	 */
-	bool
-	isErrorStringRequired(int32_t error)
+	bool isErrorStringRequired(int32_t error)
 	{
 		if (0 != deviceCount) {
 			return true;
@@ -111,17 +99,12 @@ protected:
 		return false;
 	}
 
-	static void
-	testFunction(OMRPortLibrary *portLibrary, uint32_t deviceId, J9CudaFunction function);
+	static void testFunction(OMRPortLibrary *portLibrary, uint32_t deviceId, J9CudaFunction function);
 
-	static void
-	testPeerTransfer(OMRPortLibrary *portLibrary, uint32_t deviceId, uint32_t peerDeviceId);
+	static void testPeerTransfer(OMRPortLibrary *portLibrary, uint32_t deviceId, uint32_t peerDeviceId);
 
 public:
-	CudaDeviceTest()
-		: deviceCount(0)
-	{
-	}
+	CudaDeviceTest() : deviceCount(0) {}
 };
 
 #endif /* CUDA_TESTS_HPP_INCLUDED */

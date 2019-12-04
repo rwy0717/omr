@@ -42,10 +42,8 @@ typedef uintptr_t ObjectSize;
  * A header containing basic information about an object. Contains the object's size and an 8 bit object flag.
  * The size and flags are masked together into a single fomrobjectptr_t.
  */
-class ObjectHeader
-{
+class ObjectHeader {
 public:
-
 	ObjectHeader() {}
 
 	explicit ObjectHeader(RawObjectHeader value) : _value(value) {}
@@ -67,15 +65,15 @@ public:
 	void raw(RawObjectHeader raw) { _value = raw; }
 
 private:
-	static const size_t SIZE_SHIFT = sizeof(ObjectFlags)*8;
+	static const size_t SIZE_SHIFT = sizeof(ObjectFlags) * 8;
 
 	RawObjectHeader _value;
 };
 
-class Object
-{
+class Object {
 public:
-	static ObjectSize allocSize(ObjectSize nslots) {
+	static ObjectSize allocSize(ObjectSize nslots)
+	{
 		return ObjectSize(sizeof(ObjectHeader) + sizeof(fomrobject_t) * nslots);
 	}
 
@@ -85,21 +83,21 @@ public:
 
 	size_t slotCount() const { return sizeOfSlotsInBytes() / sizeof(Slot); }
 
-	Slot* slots() { return (Slot*)(this + 1); }
+	Slot *slots() { return (Slot *)(this + 1); }
 
-	const Slot* slots() const { return (Slot*)(this + 1); }
+	const Slot *slots() const { return (Slot *)(this + 1); }
 
-	Slot* begin() { return slots(); }
+	Slot *begin() { return slots(); }
 
-	const Slot* begin() const { return slots(); }
+	const Slot *begin() const { return slots(); }
 
-	Slot* end() { return begin() + slotCount(); }
+	Slot *end() { return begin() + slotCount(); }
 
-	const Slot* end() const { return begin() + slotCount(); }
+	const Slot *end() const { return begin() + slotCount(); }
 
-	const Slot* cbegin() const { return begin(); }
+	const Slot *cbegin() const { return begin(); }
 
-	const Slot* cend() const { return end(); }
+	const Slot *cend() const { return end(); }
 
 	ObjectHeader header;
 };

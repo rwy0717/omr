@@ -20,28 +20,28 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
+#include "EmptyListPopulator.hpp"
+
 #include "HeapRegionDescriptor.hpp"
 #include "ObjectHeapBufferedIterator.hpp"
 
-#include "EmptyListPopulator.hpp"
-
-void 
-MM_EmptyListPopulator::initializeObjectHeapBufferedIteratorState(MM_HeapRegionDescriptor* region, GC_ObjectHeapBufferedIteratorState* state) const
-{
-}
+void
+MM_EmptyListPopulator::initializeObjectHeapBufferedIteratorState(
+        MM_HeapRegionDescriptor *region, GC_ObjectHeapBufferedIteratorState *state) const
+{}
 
 void
-MM_EmptyListPopulator::reset(MM_HeapRegionDescriptor* region, GC_ObjectHeapBufferedIteratorState* state, void* base, void* top) const
-{
-}
+MM_EmptyListPopulator::reset(
+        MM_HeapRegionDescriptor *region, GC_ObjectHeapBufferedIteratorState *state, void *base, void *top) const
+{}
 
-uintptr_t 
-MM_EmptyListPopulator::populateObjectHeapBufferedIteratorCache(omrobjectptr_t* cache, uintptr_t count, GC_ObjectHeapBufferedIteratorState* state) const
+uintptr_t
+MM_EmptyListPopulator::populateObjectHeapBufferedIteratorCache(
+        omrobjectptr_t *cache, uintptr_t count, GC_ObjectHeapBufferedIteratorState *state) const
 {
 	return 0;
 }
 
 void
-MM_EmptyListPopulator::advance(uintptr_t size, GC_ObjectHeapBufferedIteratorState* state) const
-{
-}
+MM_EmptyListPopulator::advance(uintptr_t size, GC_ObjectHeapBufferedIteratorState *state) const
+{}

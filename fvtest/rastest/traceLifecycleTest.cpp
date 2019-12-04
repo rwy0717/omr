@@ -39,7 +39,6 @@
  * relative to starting up and shutting down the trace engine.
  */
 
-
 /* Test data */
 typedef struct ChildThreadData {
 	OMRTestVM *testVM;
@@ -59,7 +58,8 @@ typedef struct TracePointCountsMT {
 	omrthread_monitor_t lock;
 } TracePointCountsMT;
 
-static void startChildThread(OMRTestVM *testVM, omrthread_t *childThread, omrthread_entrypoint_t entryProc, ChildThreadData **childData);
+static void startChildThread(
+        OMRTestVM *testVM, omrthread_t *childThread, omrthread_entrypoint_t entryProc, ChildThreadData **childData);
 static omr_error_t waitForChildThread(OMRTestVM *testVM, omrthread_t childThread, ChildThreadData *childData);
 
 static int J9THREAD_PROC attachDetachHelper(void *entryArg);
@@ -68,9 +68,9 @@ static int J9THREAD_PROC shutdownTraceHelper(void *entryArg);
 static omr_error_t subscribeFunc(UtSubscription *subscriptionID);
 static omr_error_t countTracepoints(UtSubscription *subscriptionID);
 static omr_error_t countTracepointsMT(UtSubscription *subscriptionID);
-static omr_error_t countTracepointsIter(void *userData, const char *tpMod, const uint32_t tpModLength, const uint32_t tpId,
-										const UtTraceRecord *record, uint32_t firstParameterOffset, uint32_t parameterDataLength,
-										int32_t isBigEndian);
+static omr_error_t countTracepointsIter(void *userData, const char *tpMod, const uint32_t tpModLength,
+        const uint32_t tpId, const UtTraceRecord *record, uint32_t firstParameterOffset, uint32_t parameterDataLength,
+        int32_t isBigEndian);
 
 /*
  * This test just starts up and shuts down the trace engine.
@@ -114,7 +114,8 @@ TEST(TraceLifecycleTest, moduleLoadBeforeThreadAttach)
 
 	OMRTEST_ASSERT_ERROR_NONE(omrTestVMInit(&testVM, OMRPORTLIB));
 	/* use small buffers to exercise buffer wrapping */
-	OMRTEST_ASSERT_ERROR_NONE(omr_ras_initTraceEngine(&testVM.omrVM, "buffers=1k:maximal=all:print=omr_test", datDir));
+	OMRTEST_ASSERT_ERROR_NONE(
+	        omr_ras_initTraceEngine(&testVM.omrVM, "buffers=1k:maximal=all:print=omr_test", datDir));
 
 	/* Attempt to load a module before attaching the thread. This should fail silently without crashing */
 	UT_OMR_TEST_MODULE_LOADED(testVM.omrVM._trcEngine->utIntf);
@@ -122,11 +123,12 @@ TEST(TraceLifecycleTest, moduleLoadBeforeThreadAttach)
 	/* Attach the thread to the trace engine */
 	OMRTEST_ASSERT_ERROR_NONE(OMR_Thread_Init(&testVM.omrVM, NULL, &vmthread, "moduleLoadBeforeThreadAttach"));
 
-	OMRTEST_ASSERT_ERROR_NONE(
-		ti->RegisterRecordSubscriber(vmthread, "moduleLoadBeforeThreadAttach", countTracepoints, NULL, (void *)&tpCounts, &subscriptionID));
+	OMRTEST_ASSERT_ERROR_NONE(ti->RegisterRecordSubscriber(
+	        vmthread, "moduleLoadBeforeThreadAttach", countTracepoints, NULL, (void *)&tpCounts, &subscriptionID));
 
 	/* Attempt to log a tracepoint. Nothing should happen. */
-	Trc_OMR_Test_UnloggedTracepoint(vmthread, "The trace module was loaded before the current thread was attached.");
+	Trc_OMR_Test_UnloggedTracepoint(
+	        vmthread, "The trace module was loaded before the current thread was attached.");
 
 #if ENABLE_BUGS
 	/* This can't be done because there is no check for whether the module was actually loaded. */
@@ -173,10 +175,12 @@ TEST(TraceLifecycleTest, moduleUnloadAfterThreadDetach)
 
 	OMRTEST_ASSERT_ERROR_NONE(omrTestVMInit(&testVM, OMRPORTLIB));
 	/* use small buffers to exercise buffer wrapping */
-	OMRTEST_ASSERT_ERROR_NONE(omr_ras_initTraceEngine(&testVM.omrVM, "buffers=1k:maximal=all:print=omr_test", datDir));
+	OMRTEST_ASSERT_ERROR_NONE(
+	        omr_ras_initTraceEngine(&testVM.omrVM, "buffers=1k:maximal=all:print=omr_test", datDir));
 	OMRTEST_ASSERT_ERROR_NONE(OMR_Thread_Init(&testVM.omrVM, NULL, &vmthread, "moduleLoadBeforeThreadAttach"));
 
-	ASSERT_NO_FATAL_FAILURE(startChildThread(&testVM, &childThread, moduleUnloadAfterThreadDetachHelper, &childData));
+	ASSERT_NO_FATAL_FAILURE(
+	        startChildThread(&testVM, &childThread, moduleUnloadAfterThreadDetachHelper, &childData));
 	ASSERT_EQ(1, omrthread_resume(childThread));
 	OMRTEST_ASSERT_ERROR_NONE(waitForChildThread(&testVM, childThread, childData));
 
@@ -205,7 +209,8 @@ TEST(TraceLifecycleTest, DISABLE_moduleLoadAfterTraceShutdown)
 
 	OMRTEST_ASSERT_ERROR_NONE(omrTestVMInit(&testVM, OMRPORTLIB));
 	/* use small buffers to exercise buffer wrapping */
-	OMRTEST_ASSERT_ERROR_NONE(omr_ras_initTraceEngine(&testVM.omrVM, "buffers=1k:maximal=all:print=omr_test", datDir));
+	OMRTEST_ASSERT_ERROR_NONE(
+	        omr_ras_initTraceEngine(&testVM.omrVM, "buffers=1k:maximal=all:print=omr_test", datDir));
 
 	/* Attach the thread to the trace engine */
 	OMRTEST_ASSERT_ERROR_NONE(OMR_Thread_Init(&testVM.omrVM, NULL, &vmthread, "moduleLoadAfterTraceShutdown"));
@@ -222,7 +227,8 @@ TEST(TraceLifecycleTest, DISABLE_moduleLoadAfterTraceShutdown)
 	ASSERT_TRUE(NULL == (void *)testVM.omrVM._trcEngine);
 
 #if ENABLE_BUGS
-	/* Attempt to load a module. Note this requires bogus caching of UtInterface*, and using it after it was freed. */
+	/* Attempt to load a module. Note this requires bogus caching of UtInterface*, and using it after it was freed.
+	 */
 
 	/* moduleLoaded() crashes on attempt to use omrTraceGlobal */
 	UT_OMR_TEST_MODULE_LOADED(utIntf);
@@ -274,12 +280,13 @@ TEST(TraceLifecycleTest, traceAndModuleUnloadAfterTraceShutdown)
 
 	OMRTEST_ASSERT_ERROR_NONE(omrTestVMInit(&testVM, OMRPORTLIB));
 	/* use small buffers to exercise buffer wrapping */
-	OMRTEST_ASSERT_ERROR_NONE(omr_ras_initTraceEngine(&testVM.omrVM, "buffers=1k:maximal=all:print=omr_test", datDir));
+	OMRTEST_ASSERT_ERROR_NONE(
+	        omr_ras_initTraceEngine(&testVM.omrVM, "buffers=1k:maximal=all:print=omr_test", datDir));
 	OMRTEST_ASSERT_ERROR_NONE(OMR_Thread_Init(&testVM.omrVM, NULL, &vmthread, "traceTest"));
 
 	/* start counting tracepoints */
-	OMRTEST_ASSERT_ERROR_NONE(
-		ti->RegisterRecordSubscriber(vmthread, "traceAndModuleUnloadAfterTraceShutdown", countTracepointsMT, NULL, (void *)&tpCountsMT, &subscriptionID));
+	OMRTEST_ASSERT_ERROR_NONE(ti->RegisterRecordSubscriber(vmthread, "traceAndModuleUnloadAfterTraceShutdown",
+	        countTracepointsMT, NULL, (void *)&tpCountsMT, &subscriptionID));
 
 	/* Initialize the omr_test module for tracing */
 	UT_OMR_TEST_MODULE_LOADED(testVM.omrVM._trcEngine->utIntf);
@@ -297,7 +304,7 @@ TEST(TraceLifecycleTest, traceAndModuleUnloadAfterTraceShutdown)
 	/* Now clear up the VM we started for this test case. */
 
 	/* Stop counting tracepoints */
-	omr_trc_stopThreadTrace(vmthread);  /* flush the thread's trace buffer and delete all subscribers */
+	omr_trc_stopThreadTrace(vmthread); /* flush the thread's trace buffer and delete all subscribers */
 	OMRTEST_ASSERT_ERROR_NONE(ti->DeregisterRecordSubscriber(vmthread, subscriptionID)); /* do nothing */
 
 	OMRTEST_ASSERT_ERROR_NONE(OMR_Thread_Free(vmthread));
@@ -316,7 +323,6 @@ TEST(TraceLifecycleTest, traceAndModuleUnloadAfterTraceShutdown)
 	ASSERT_TRUE(NULL == (void *)omr_test_UtModuleInfo.intf);
 }
 
-
 TEST(TraceLifecycleTest, registerSubscriberAfterShutdown)
 {
 	/* OMR VM data structures */
@@ -330,7 +336,8 @@ TEST(TraceLifecycleTest, registerSubscriberAfterShutdown)
 
 	OMRTEST_ASSERT_ERROR_NONE(omrTestVMInit(&testVM, OMRPORTLIB));
 	/* use small buffers to exercise buffer wrapping */
-	OMRTEST_ASSERT_ERROR_NONE(omr_ras_initTraceEngine(&testVM.omrVM, "buffers=1k:maximal=all:print=omr_test", datDir));
+	OMRTEST_ASSERT_ERROR_NONE(
+	        omr_ras_initTraceEngine(&testVM.omrVM, "buffers=1k:maximal=all:print=omr_test", datDir));
 
 	/* Attach the thread to the trace engine */
 	OMRTEST_ASSERT_ERROR_NONE(OMR_Thread_Init(&testVM.omrVM, NULL, &vmthread, "registerSubscriberAfterShutdown"));
@@ -340,8 +347,8 @@ TEST(TraceLifecycleTest, registerSubscriberAfterShutdown)
 
 	/* Attempt to register using external agent API */
 	OMRTEST_ASSERT_ERROR(OMR_ERROR_NOT_AVAILABLE,
-						 ti->RegisterRecordSubscriber(vmthread, "registerSubscriberAfterShutdown",
-						 							  subscribeFunc, NULL, NULL, &subscriptionID));
+	        ti->RegisterRecordSubscriber(
+	                vmthread, "registerSubscriberAfterShutdown", subscribeFunc, NULL, NULL, &subscriptionID));
 
 	/* Now clear up the VM we started for this test case. */
 	OMRTEST_ASSERT_ERROR_NONE(OMR_Thread_Free(vmthread));
@@ -363,19 +370,21 @@ TEST(TraceLifecycleTest, deregisterSubscriberAfterShutdown)
 
 	OMRTEST_ASSERT_ERROR_NONE(omrTestVMInit(&testVM, OMRPORTLIB));
 	/* use small buffers to exercise buffer wrapping */
-	OMRTEST_ASSERT_ERROR_NONE(omr_ras_initTraceEngine(&testVM.omrVM, "buffers=1k:maximal=all:print=omr_test", datDir));
+	OMRTEST_ASSERT_ERROR_NONE(
+	        omr_ras_initTraceEngine(&testVM.omrVM, "buffers=1k:maximal=all:print=omr_test", datDir));
 
 	/* Attach the thread to the trace engine */
 	OMRTEST_ASSERT_ERROR_NONE(OMR_Thread_Init(&testVM.omrVM, NULL, &vmthread, "registerSubscriberAfterShutdown"));
 
 	/* Register the subscriber */
-	OMRTEST_ASSERT_ERROR_NONE(
-		ti->RegisterRecordSubscriber(vmthread, "registerSubscriberAfterShutdown", subscribeFunc, NULL, NULL, &subscriptionID));
+	OMRTEST_ASSERT_ERROR_NONE(ti->RegisterRecordSubscriber(
+	        vmthread, "registerSubscriberAfterShutdown", subscribeFunc, NULL, NULL, &subscriptionID));
 
 	/* Shut down the trace engine */
 	OMRTEST_ASSERT_ERROR_NONE(omr_ras_cleanupTraceEngine(vmthread));
 
-	/* Attempt to deregister using external agent API. This succeeds because this thread is still attached to the trace engine. */
+	/* Attempt to deregister using external agent API. This succeeds because this thread is still attached to the
+	 * trace engine. */
 	OMRTEST_ASSERT_ERROR_NONE(ti->DeregisterRecordSubscriber(vmthread, subscriptionID));
 
 	/* Now clear up the VM we started for this test case. */
@@ -398,14 +407,16 @@ TEST(TraceLifecycleTest, rebindAndDeregisterSubscriberAfterShutdown)
 
 	OMRTEST_ASSERT_ERROR_NONE(omrTestVMInit(&testVM, OMRPORTLIB));
 	/* use small buffers to exercise buffer wrapping */
-	OMRTEST_ASSERT_ERROR_NONE(omr_ras_initTraceEngine(&testVM.omrVM, "buffers=1k:maximal=all:print=omr_test", datDir));
+	OMRTEST_ASSERT_ERROR_NONE(
+	        omr_ras_initTraceEngine(&testVM.omrVM, "buffers=1k:maximal=all:print=omr_test", datDir));
 
 	/* Attach the thread to the trace engine */
-	OMRTEST_ASSERT_ERROR_NONE(OMR_Thread_Init(&testVM.omrVM, NULL, &vmthread, "rebindAndDeregisterSubscriberAfterShutdown"));
+	OMRTEST_ASSERT_ERROR_NONE(
+	        OMR_Thread_Init(&testVM.omrVM, NULL, &vmthread, "rebindAndDeregisterSubscriberAfterShutdown"));
 
 	/* Register the subscriber */
-	OMRTEST_ASSERT_ERROR_NONE(
-		ti->RegisterRecordSubscriber(vmthread, "rebindAndDeregisterSubscriberAfterShutdown", subscribeFunc, NULL, NULL, &subscriptionID));
+	OMRTEST_ASSERT_ERROR_NONE(ti->RegisterRecordSubscriber(
+	        vmthread, "rebindAndDeregisterSubscriberAfterShutdown", subscribeFunc, NULL, NULL, &subscriptionID));
 
 	/* Shut down the trace engine */
 	OMRTEST_ASSERT_ERROR_NONE(omr_ras_cleanupTraceEngine(vmthread));
@@ -416,7 +427,8 @@ TEST(TraceLifecycleTest, rebindAndDeregisterSubscriberAfterShutdown)
 	ASSERT_TRUE(NULL == (void *)testVM.omrVM._trcEngine);
 
 	/* Re-bind this thread */
-	OMRTEST_ASSERT_ERROR_NONE(OMR_Thread_Init(&testVM.omrVM, NULL, &vmthread, "rebindAndDeregisterSubscriberAfterShutdown#2"));
+	OMRTEST_ASSERT_ERROR_NONE(
+	        OMR_Thread_Init(&testVM.omrVM, NULL, &vmthread, "rebindAndDeregisterSubscriberAfterShutdown#2"));
 	/* Attempt to deregister using external agent API. This should return OMR_ERROR_NOT_AVAILABLE */
 	OMRTEST_ASSERT_ERROR_NONE(ti->DeregisterRecordSubscriber(vmthread, subscriptionID));
 	OMRTEST_ASSERT_ERROR_NONE(OMR_Thread_Free(vmthread));
@@ -451,7 +463,8 @@ TEST(TraceLifecycleTest, threadAttachDetachStress)
 	/* module is not unloaded before trace engine shutdown */
 
 	for (int i = 0; i < attachDetachHelpersCount; i++) {
-		ASSERT_NO_FATAL_FAILURE(startChildThread(&testVM, &attachDetachHelpers[i], attachDetachHelper, &attachDetachData[i]));
+		ASSERT_NO_FATAL_FAILURE(
+		        startChildThread(&testVM, &attachDetachHelpers[i], attachDetachHelper, &attachDetachData[i]));
 	}
 	ASSERT_NO_FATAL_FAILURE(startChildThread(&testVM, &shutdownHelper, shutdownTraceHelper, &shutdownData));
 
@@ -474,11 +487,13 @@ TEST(TraceLifecycleTest, threadAttachDetachStress)
 }
 
 static void
-startChildThread(OMRTestVM *testVM, omrthread_t *childThread, omrthread_entrypoint_t entryProc, ChildThreadData **childData)
+startChildThread(
+        OMRTestVM *testVM, omrthread_t *childThread, omrthread_entrypoint_t entryProc, ChildThreadData **childData)
 {
 	OMRPORT_ACCESS_FROM_OMRPORT(testVM->portLibrary);
 
-	ChildThreadData *newChildData = (ChildThreadData *)omrmem_allocate_memory(sizeof(*newChildData), OMRMEM_CATEGORY_VM);
+	ChildThreadData *newChildData =
+	        (ChildThreadData *)omrmem_allocate_memory(sizeof(*newChildData), OMRMEM_CATEGORY_VM);
 	ASSERT_FALSE(NULL == newChildData) << "Failed to alloc newChildData\n";
 	memset(newChildData, 0, sizeof(*newChildData));
 	newChildData->testVM = testVM;
@@ -511,7 +526,8 @@ moduleUnloadAfterThreadDetachHelper(void *entryArg)
 	OMR_VMThread *vmthread = NULL;
 	OMRPORT_ACCESS_FROM_OMRPORT(testVM->portLibrary);
 
-	rc = OMRTEST_PRINT_ERROR(OMR_Thread_Init(&testVM->omrVM, NULL, &vmthread, "moduleUnloadAfterThreadDetachHelper"));
+	rc = OMRTEST_PRINT_ERROR(
+	        OMR_Thread_Init(&testVM->omrVM, NULL, &vmthread, "moduleUnloadAfterThreadDetachHelper"));
 	if (OMR_ERROR_NONE != rc) {
 		childData->childRc = rc;
 		return -1;
@@ -611,8 +627,7 @@ subscribeFunc(UtSubscription *subscriptionID)
  */
 static omr_error_t
 countTracepointsIter(void *userData, const char *tpMod, const uint32_t tpModLength, const uint32_t tpId,
-					 const UtTraceRecord *record, uint32_t firstParameterOffset, uint32_t parameterDataLength,
-					 int32_t isBigEndian)
+        const UtTraceRecord *record, uint32_t firstParameterOffset, uint32_t parameterDataLength, int32_t isBigEndian)
 {
 	TracePointCounts *tpCounts = (TracePointCounts *)userData;
 	const uint32_t omr_test_len = sizeof("omr_test") - 1;

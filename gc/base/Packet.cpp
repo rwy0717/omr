@@ -20,36 +20,36 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
-#include "omr.h"
-
 #include "Packet.hpp"
+
 #include "EnvironmentBase.hpp"
+#include "omr.h"
 
 /*
  * Get top of current packet.
- * 
+ *
  * @return element at top of current packet
- */ 
+ */
 void *
 MM_Packet::peek(MM_EnvironmentBase *env)
 {
-	
-	if(_currentPtr > _basePtr) {
+
+	if (_currentPtr > _basePtr) {
 		void *result = (void *)*(_currentPtr - 1);
 		return result;
 	}
-	
+
 	return NULL;
 }
 
 /*
- * Initialize a packet. 
- * 
+ * Initialize a packet.
+ *
  * @return TRUE is packet initialized OK; FALSE otheriwse
- */ 
+ */
 bool
-MM_Packet::initialize(MM_EnvironmentBase *env, MM_Packet *next, MM_Packet *previous, uintptr_t *baseAddress,  uintptr_t size)
+MM_Packet::initialize(
+        MM_EnvironmentBase *env, MM_Packet *next, MM_Packet *previous, uintptr_t *baseAddress, uintptr_t size)
 {
 
 	_next = next;
@@ -60,7 +60,7 @@ MM_Packet::initialize(MM_EnvironmentBase *env, MM_Packet *next, MM_Packet *previ
 	_basePtr = _baseAddress;
 	_topPtr = _baseAddress + size;
 	_currentPtr = _baseAddress;
-	
+
 	_owner = NULL;
 
 	return true;

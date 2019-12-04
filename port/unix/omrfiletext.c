@@ -52,20 +52,23 @@
 /* a2e overrides nl_langinfo to return ASCII strings. We need the native EBCDIC string */
 #if defined(J9ZOS390)
 #include "atoe.h"
-#if defined (nl_langinfo)
+#if defined(nl_langinfo)
 #undef nl_langinfo
 #endif
 #endif
 
 #if defined(J9VM_USE_ICONV)
-static int growBuffer(struct OMRPortLibrary *portLibrary, char *stackBuf, char **bufStart, char **cursor, size_t *bytesLeft, uintptr_t *bufLen);
-static intptr_t file_write_using_iconv(struct OMRPortLibrary *portLibrary, intptr_t fd, const char *buf, intptr_t nbytes);
+static int growBuffer(struct OMRPortLibrary *portLibrary, char *stackBuf, char **bufStart, char **cursor,
+        size_t *bytesLeft, uintptr_t *bufLen);
+static intptr_t file_write_using_iconv(
+        struct OMRPortLibrary *portLibrary, intptr_t fd, const char *buf, intptr_t nbytes);
 #endif
 
 #if defined(J9VM_USE_WCTOMB)
 static intptr_t walkUTF8String(const uint8_t *buf, intptr_t nbytes);
 static void translateUTF8String(const uint8_t *in, uint8_t *out, intptr_t nbytes);
-static intptr_t file_write_using_wctomb(struct OMRPortLibrary *portLibrary, intptr_t fd, const char *buf, intptr_t nbytes);
+static intptr_t file_write_using_wctomb(
+        struct OMRPortLibrary *portLibrary, intptr_t fd, const char *buf, intptr_t nbytes);
 #endif
 
 intptr_t
@@ -85,7 +88,8 @@ omrfile_write_text(struct OMRPortLibrary *portLibrary, intptr_t fd, const char *
 
 #if defined(J9ZOS390) || defined(OMRZTPF)
 #if !defined(OMR_EBCDIC)
-	/* z/OS and z/TPF always needs to translate to EBCDIC, unless we are already using EBCDIC as the native encoding, */
+	/* z/OS and z/TPF always needs to translate to EBCDIC, unless we are already using EBCDIC as the native
+	 * encoding, */
 	/* in which case no translation is required. */
 	requiresTranslation = 1;
 #endif /* !defined(OMR_EBCDIC) */
@@ -127,7 +131,7 @@ static intptr_t
 walkUTF8String(const uint8_t *buf, intptr_t nbytes)
 {
 	const uint8_t *cursor = buf;
-	const uint8_t * const end = cursor + nbytes;
+	const uint8_t *const end = cursor + nbytes;
 	intptr_t newLength = 0;
 	int hasHighChars = 0;
 
@@ -210,7 +214,8 @@ file_write_using_wctomb(struct OMRPortLibrary *portLibrary, intptr_t fd, const c
 
 	if (0 != newLength) {
 		if (newLength > sizeof(stackBuf)) {
-			newBuf = portLibrary->mem_allocate_memory(portLibrary, newLength, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
+			newBuf = portLibrary->mem_allocate_memory(
+			        portLibrary, newLength, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 		}
 		if (NULL != newBuf) {
 			translateUTF8String((uint8_t *)buf, (uint8_t *)newBuf, nbytes);
@@ -230,7 +235,6 @@ file_write_using_wctomb(struct OMRPortLibrary *portLibrary, intptr_t fd, const c
 
 #endif /* J9VM_USE_WCTOMB */
 
-
 #if defined(J9VM_USE_ICONV)
 
 /* @internal
@@ -243,22 +247,25 @@ file_write_using_wctomb(struct OMRPortLibrary *portLibrary, intptr_t fd, const c
  * @param[in] portLibrary The port library.
  * @param[in] stackBuf Pointer to the stack buffer.
  * @param[in,out] bufStart Pointer to the beginning of the original buffer.
- * @param[in,out] cursor Contents of the original buffer up to, but not including cursor will be copied to the new buffer.
- * 							cursor is updated to have the same offset in the new buffer.
- * @param[in,out] bytesLeft Remaining bytes of the original buffer. Updated to be the remaining bytes of the newly allocated buffer
+ * @param[in,out] cursor Contents of the original buffer up to, but not including cursor will be copied to the new
+ * buffer. cursor is updated to have the same offset in the new buffer.
+ * @param[in,out] bytesLeft Remaining bytes of the original buffer. Updated to be the remaining bytes of the newly
+ * allocated buffer
  * @param[in,out] outBufLen Size of the original buffer.
  *
  * @return 0 on success, -1 on failure (out of memory).
  */
 static int
-growBuffer(struct OMRPortLibrary *portLibrary, char *stackBuf, char **bufStart, char **cursor, size_t *bytesLeft, uintptr_t *bufLen)
+growBuffer(struct OMRPortLibrary *portLibrary, char *stackBuf, char **bufStart, char **cursor, size_t *bytesLeft,
+        uintptr_t *bufLen)
 {
 #define SIZE_OF_INCREMENT 512
 
 	char *newBuf = NULL;
 
 	*bufLen = *bufLen + SIZE_OF_INCREMENT;
-	newBuf = portLibrary->mem_allocate_memory(portLibrary, *bufLen, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
+	newBuf = portLibrary->mem_allocate_memory(
+	        portLibrary, *bufLen, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 
 	if (newBuf == NULL) {
 		return -1;
@@ -297,7 +304,8 @@ file_write_using_iconv(struct OMRPortLibrary *portLibrary, intptr_t fd, const ch
 	intptr_t bytesToWrite = 0;
 
 #ifdef J9ZOS390
-	/* LIR 1280 (z/OS only) - every failed call to iconv_open() is recorded on the operator console, so don't retry */
+	/* LIR 1280 (z/OS only) - every failed call to iconv_open() is recorded on the operator console, so don't retry
+	 */
 	if (FALSE == PPG_file_text_iconv_open_failed) {
 		/* iconv_get is not an a2e function, so we need to pass it honest-to-goodness EBCDIC strings */
 #pragma convlit(suspend)
@@ -306,7 +314,7 @@ file_write_using_iconv(struct OMRPortLibrary *portLibrary, intptr_t fd, const ch
 #ifndef OMRZTPF
 		converter = iconv_get(portLibrary, J9FILETEXT_ICONV_DESCRIPTOR, nl_langinfo(CODESET), "UTF-8");
 #else
-		converter = iconv_get(portLibrary, J9FILETEXT_ICONV_DESCRIPTOR, "IBM1047", "ISO8859-1" );
+	converter = iconv_get(portLibrary, J9FILETEXT_ICONV_DESCRIPTOR, "IBM1047", "ISO8859-1");
 #endif
 
 #ifdef J9ZOS390
@@ -361,7 +369,8 @@ file_write_using_iconv(struct OMRPortLibrary *portLibrary, intptr_t fd, const ch
 				escapedLength = 1;
 				escapedStr[0] = '?';
 			} else {
-				escapedLength = portLibrary->str_printf(portLibrary, escapedStr, J9FILETEXT_ESCAPE_STR_SIZE, unicodeFormat, (uintptr_t)unicodeC);
+				escapedLength = portLibrary->str_printf(portLibrary, escapedStr,
+				        J9FILETEXT_ESCAPE_STR_SIZE, unicodeFormat, (uintptr_t)unicodeC);
 			}
 
 			inbytesleft -= utf8Length;
@@ -370,21 +379,26 @@ file_write_using_iconv(struct OMRPortLibrary *portLibrary, intptr_t fd, const ch
 			if ((size_t)-1 == iconv(converter, &escapedStrStart, &escapedLength, &outbuf, &outbytesleft)) {
 				/* not handling EILSEQ here because:
 				 *  1. we can't do much if iconv() fails to convert ascii.
-				 *  2. inbuf and inbytesleft have been explicitly updated so the while loop will get terminated after converting the rest of the characters.
+				 *  2. inbuf and inbytesleft have been explicitly updated so the while loop will get
+				 * terminated after converting the rest of the characters.
 				 */
 
 				tmp_errno = errno;
 
-				/* if the remaining outbuf is too small, then grow it before storing Unicode string representation */
+				/* if the remaining outbuf is too small, then grow it before storing Unicode string
+				 * representation */
 				if (tmp_errno == E2BIG) {
-					if (growBuffer(portLibrary, stackBuf, &bufStart, &outbuf, &outbytesleft, &outBufLen) < 0) {
+					if (growBuffer(portLibrary, stackBuf, &bufStart, &outbuf, &outbytesleft,
+					            &outBufLen)
+					        < 0) {
 						/* failed to grow buffer, just output what we've got so far */
 						break;
 					}
 				}
 			}
 		} else {
-			/* input conversion stopped due to an incomplete character or shift sequence at the end of the input buffer */
+			/* input conversion stopped due to an incomplete character or shift sequence at the end of the
+			 * input buffer */
 			break;
 		}
 	}

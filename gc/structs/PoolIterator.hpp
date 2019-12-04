@@ -28,9 +28,9 @@
 #if !defined(POOLITERATOR_HPP_)
 #define POOLITERATOR_HPP_
 
+#include "modronbase.h"
 #include "omrcfg.h"
 #include "omrcomp.h"
-#include "modronbase.h"
 #include "omrpool.h"
 #include "pool_api.h"
 
@@ -38,21 +38,19 @@
  * Iterate over the contents of a J9Pool.
  * @ingroup GC_Structs
  */
-class GC_PoolIterator
-{
+class GC_PoolIterator {
 	J9Pool *_pool;
 	pool_state _state;
-	void **_nextValue;	
+	void **_nextValue;
 
 public:
-
 	/**
 	 * Initialize an existing iterator with a new pool.
 	 */
 	MMINLINE void init(J9Pool *aPool)
 	{
 		_pool = aPool;
-		if(NULL != _pool) {
+		if (NULL != _pool) {
 			_nextValue = (void **)pool_startDo(_pool, &_state);
 		} else {
 			_nextValue = NULL;
@@ -60,14 +58,13 @@ public:
 	}
 
 	/**
-	 * @note This constructor will accept NULL (needed by GC_VMThreadJNISlotIterator) but behaviour of nextSlot() is undefined after that. 
+	 * @note This constructor will accept NULL (needed by GC_VMThreadJNISlotIterator) but behaviour of nextSlot() is
+	 * undefined after that.
 	 */
-	GC_PoolIterator(J9Pool *aPool) :
-		_pool(aPool),
-		_nextValue(NULL)
+	GC_PoolIterator(J9Pool *aPool) : _pool(aPool), _nextValue(NULL)
 	{
 		if (_pool) {
-			_nextValue = (void**)pool_startDo(_pool, &_state);
+			_nextValue = (void **)pool_startDo(_pool, &_state);
 		}
 	};
 
@@ -75,4 +72,3 @@ public:
 };
 
 #endif /* POOLITERATOR_HPP_ */
-

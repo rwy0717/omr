@@ -26,7 +26,6 @@
  * @brief Memory Utilities
  */
 
-
 /*
  * This file contains code for the portability library memory management.
  */
@@ -39,7 +38,7 @@
 void *
 omrmem_allocate_memory_basic(struct OMRPortLibrary *portLibrary, uintptr_t byteAmount)
 {
-	return (void *) malloc(byteAmount);
+	return (void *)malloc(byteAmount);
 }
 
 void
@@ -57,7 +56,7 @@ omrmem_advise_and_free_memory_basic(struct OMRPortLibrary *portLibrary, void *me
 void *
 omrmem_reallocate_memory_basic(struct OMRPortLibrary *portLibrary, void *memoryPointer, uintptr_t byteAmount)
 {
-	return (void *) realloc(memoryPointer, byteAmount);
+	return (void *)realloc(memoryPointer, byteAmount);
 }
 
 void
@@ -69,7 +68,8 @@ omrmem_shutdown_basic(struct OMRPortLibrary *portLibrary)
 void
 omrmem_startup_basic(struct OMRPortLibrary *portLibrary, uintptr_t portGlobalSize)
 {
-	portLibrary->portGlobals = portLibrary->mem_allocate_memory(portLibrary, portGlobalSize, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
+	portLibrary->portGlobals = portLibrary->mem_allocate_memory(
+	        portLibrary, portGlobalSize, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 	if (!portLibrary->portGlobals) {
 		return;
 	}
@@ -79,7 +79,7 @@ omrmem_startup_basic(struct OMRPortLibrary *portLibrary, uintptr_t portGlobalSiz
 void *
 omrmem_allocate_portLibrary_basic(uintptr_t byteAmount)
 {
-	return (void *) malloc(byteAmount);
+	return (void *)malloc(byteAmount);
 }
 
 void

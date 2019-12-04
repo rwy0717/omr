@@ -36,9 +36,9 @@
 #if defined(J9ZOS390)
 #include "edcwccwi.h"
 /* Convert function pointer to XPLINK calling convention */
-#define OMR_COMPATIBLE_FUNCTION_POINTER(fp) ((void*)__bldxfd(fp))
+#define OMR_COMPATIBLE_FUNCTION_POINTER(fp) ((void *)__bldxfd(fp))
 #else /* J9ZOS390 */
-#define OMR_COMPATIBLE_FUNCTION_POINTER(fp) ((void*)(fp))
+#define OMR_COMPATIBLE_FUNCTION_POINTER(fp) ((void *)(fp))
 #endif /* J9ZOS390 */
 
 #if !defined(OMR_GC_COMPRESSED_POINTERS)
@@ -49,7 +49,7 @@
 extern "C" {
 #endif
 
-#define OMR_OS_STACK_SIZE	256 * 1024 /* Corresponds to desktopBigStack in builder */
+#define OMR_OS_STACK_SIZE 256 * 1024 /* Corresponds to desktopBigStack in builder */
 
 typedef enum {
 	OMR_ERROR_NONE = 0,
@@ -82,7 +82,7 @@ struct UtThreadData;
 struct OMR_TraceThread;
 
 typedef struct OMR_RuntimeConfiguration {
-	uintptr_t _maximum_vm_count;		/* 0 for unlimited */
+	uintptr_t _maximum_vm_count; /* 0 for unlimited */
 } OMR_RuntimeConfiguration;
 
 typedef struct OMR_Runtime {
@@ -96,7 +96,7 @@ typedef struct OMR_Runtime {
 } OMR_Runtime;
 
 typedef struct OMR_VMConfiguration {
-	uintptr_t _maximum_thread_count;		/* 0 for unlimited */
+	uintptr_t _maximum_thread_count; /* 0 for unlimited */
 } OMR_VMConfiguration;
 
 typedef struct movedObjectHashCode {
@@ -212,8 +212,10 @@ typedef struct OMR_VMThread {
 
 	int32_t _attachCount;
 
-	void *_savedObject1; /**< holds new object allocation until object can be attached to reference graph (see MM_AllocationDescription::save/restoreObjects()) */
-	void *_savedObject2; /**< holds new object allocation until object can be attached to reference graph (see MM_AllocationDescription::save/restoreObjects()) */
+	void *_savedObject1; /**< holds new object allocation until object can be attached to reference graph (see
+	                        MM_AllocationDescription::save/restoreObjects()) */
+	void *_savedObject2; /**< holds new object allocation until object can be attached to reference graph (see
+	                        MM_AllocationDescription::save/restoreObjects()) */
 } OMR_VMThread;
 
 #if defined(OMR_GC_COMPRESSED_POINTERS)
@@ -345,7 +347,8 @@ omr_error_t omr_vmthread_firstAttach(OMR_VM *vm, OMR_VMThread **vmThread);
  *
  * Not currently used by JVM.
  *
- * @param[in,out] vmThread The thread to detach. If the thread is already dead, it won't be the current thread. It will be freed.
+ * @param[in,out] vmThread The thread to detach. If the thread is already dead, it won't be the current thread. It will
+ * be freed.
  * @return an OMR error code
  */
 omr_error_t omr_vmthread_lastDetach(OMR_VMThread *vmThread);
@@ -370,7 +373,6 @@ void omr_vmthread_reattach(OMR_VMThread *currentThread, const char *threadName);
  * @param[in,out] omrVMThread An OMR_VMThread. It must have been re-attached at least once.
  */
 void omr_vmthread_redetach(OMR_VMThread *omrVMThread);
-
 
 /**
  * Get the current OMR_VMThread, if the current thread is attached.
@@ -445,9 +447,6 @@ void omr_vm_postForkParent(OMR_VM *vm);
 void omr_vm_preFork(OMR_VM *vm);
 
 #endif /* defined(OMR_THR_FORK_SUPPORT) */
-
-
-
 
 /*
  * LANGUAGE VM GLUE
@@ -558,7 +557,7 @@ int OMR_Glue_GetMethodDictionaryPropertyNum(void);
  *
  * @return Method property names
  */
-const char * const *OMR_Glue_GetMethodDictionaryPropertyNames(void);
+const char *const *OMR_Glue_GetMethodDictionaryPropertyNames(void);
 
 #ifdef __cplusplus
 }

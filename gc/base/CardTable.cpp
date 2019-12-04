@@ -20,39 +20,39 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-#include "omrcfg.h"
-
 #include "CardTable.hpp"
 
 #include "AtomicOperations.hpp"
 #include "CardCleaner.hpp"
-#include "GCExtensionsBase.hpp"
+#include "Dispatcher.hpp"
 #include "EnvironmentBase.hpp"
+#include "GCExtensionsBase.hpp"
 #include "Heap.hpp"
+#include "HeapRegionDescriptor.hpp"
 #include "HeapRegionManager.hpp"
 #include "MemoryManager.hpp"
-#include "HeapRegionDescriptor.hpp"
-#include "Dispatcher.hpp"
-#include "Task.hpp"
-
 #include "ModronAssertions.h"
+#include "Task.hpp"
+#include "omrcfg.h"
 
 bool
 MM_CardTable::initialize(MM_EnvironmentBase *env, MM_Heap *heap)
 {
 	MM_GCExtensionsBase *extensions = env->getExtensions();
 	bool initialized = false;
-	
+
 	uintptr_t cardTableSizeRequired = calculateCardTableSize(env, heap->getMaximumPhysicalRange());
-	
+
 	/* Instantiate the Virtual Memory object for the card table */
 	MM_MemoryManager *memoryManager = extensions->memoryManager;
-	if (memoryManager->createVirtualMemoryForMetadata(env, &_cardTableMemoryHandle, extensions->heapAlignment, cardTableSizeRequired)) {
+	if (memoryManager->createVirtualMemoryForMetadata(
+	            env, &_cardTableMemoryHandle, extensions->heapAlignment, cardTableSizeRequired)) {
 		_cardTableStart = (Card *)(memoryManager->getHeapBase(&_cardTableMemoryHandle));
 		/* Initialize _heapbase; we will reset _heapAlloc in heapAddRange()/heapRemoveRange() as heap changes */
 		_heapBase = (void *)heap->getHeapBase();
 		_heapAlloc = (void *)heap->getHeapTop();
-		_cardTableVirtualStart = (Card *) ((uintptr_t)_cardTableStart - (((uintptr_t)getHeapBase()) >> CARD_SIZE_SHIFT));
+		_cardTableVirtualStart =
+		        (Card *)((uintptr_t)_cardTableStart - (((uintptr_t)getHeapBase()) >> CARD_SIZE_SHIFT));
 		initialized = true;
 	}
 
@@ -76,7 +76,8 @@ MM_CardTable::tearDown(MM_EnvironmentBase *env)
 uintptr_t
 MM_CardTable::calculateCardTableSize(MM_EnvironmentBase *env, uintptr_t heapSize)
 {
-	return MM_Math::roundToCeiling(sizeof(uint32_t), (MM_Math::roundToCeiling(CARD_SIZE, heapSize) / CARD_SIZE) * sizeof(Card));
+	return MM_Math::roundToCeiling(
+	        sizeof(uint32_t), (MM_Math::roundToCeiling(CARD_SIZE, heapSize) / CARD_SIZE) * sizeof(Card));
 }
 
 bool
@@ -85,23 +86,26 @@ MM_CardTable::commitCardTableMemory(MM_EnvironmentBase *env, Card *lowCard, Card
 	bool commited = true;
 	MM_GCExtensionsBase *extensions = env->getExtensions();
 
-	if(extensions->isFvtestForceCardTableCommitFailure()) {
+	if (extensions->isFvtestForceCardTableCommitFailure()) {
 		commited = false;
 		Trc_MM_CardTable_cardTableCommitFailureForced(env->getLanguageVMThread());
 	} else {
 		MM_MemoryManager *memoryManager = extensions->memoryManager;
-		commited = memoryManager->commitMemory(&_cardTableMemoryHandle, (void *)lowCard, (uintptr_t)highCard - (uintptr_t)lowCard);
+		commited = memoryManager->commitMemory(
+		        &_cardTableMemoryHandle, (void *)lowCard, (uintptr_t)highCard - (uintptr_t)lowCard);
 		if (!commited) {
-			Trc_MM_CardTable_cardTableCommitFailed(env->getLanguageVMThread(), (void *)lowCard, (uintptr_t)highCard - (uintptr_t)lowCard);
+			Trc_MM_CardTable_cardTableCommitFailed(
+			        env->getLanguageVMThread(), (void *)lowCard, (uintptr_t)highCard - (uintptr_t)lowCard);
 		}
 	}
 	return commited;
 }
 
 bool
-MM_CardTable::decommitCardTableMemory(MM_EnvironmentBase *env, Card *lowCard, Card *highCard, Card *lowValidCard, Card *highValidCard)
+MM_CardTable::decommitCardTableMemory(
+        MM_EnvironmentBase *env, Card *lowCard, Card *highCard, Card *lowValidCard, Card *highValidCard)
 {
-	Assert_MM_true((lowCard >= lowValidCard) || (lowCard < highValidCard)); 
+	Assert_MM_true((lowCard >= lowValidCard) || (lowCard < highValidCard));
 	Assert_MM_true((highCard > lowValidCard) || (highCard <= highValidCard));
 
 	bool decommited = true;
@@ -120,9 +124,11 @@ MM_CardTable::decommitCardTableMemory(MM_EnvironmentBase *env, Card *lowCard, Ca
 
 		if (lowAddress < highAddress) {
 			MM_MemoryManager *memoryManager = extensions->memoryManager;
-			decommited = memoryManager->decommitMemory(&_cardTableMemoryHandle, lowAddress, ((uintptr_t)highAddress) - ((uintptr_t)lowAddress), lowAddress, highAddress);
+			decommited = memoryManager->decommitMemory(&_cardTableMemoryHandle, lowAddress,
+			        ((uintptr_t)highAddress) - ((uintptr_t)lowAddress), lowAddress, highAddress);
 			if (!decommited) {
-				Trc_MM_CardTable_cardTableDecommitFailed(env->getLanguageVMThread(), lowAddress, ((uintptr_t)highAddress) - ((uintptr_t)lowAddress), lowAddress, highAddress);
+				Trc_MM_CardTable_cardTableDecommitFailed(env->getLanguageVMThread(), lowAddress,
+				        ((uintptr_t)highAddress) - ((uintptr_t)lowAddress), lowAddress, highAddress);
 			}
 		}
 	}
@@ -141,10 +147,10 @@ MM_CardTable::getLowAddressToRelease(MM_EnvironmentBase *env, void *low)
 	void *result = low;
 	uintptr_t pageSize = memoryManager->getPageSize(&_cardTableMemoryHandle);
 
-	Assert_MM_true (0 != pageSize);
-	
+	Assert_MM_true(0 != pageSize);
+
 	/* rounded down address to virtual memory page */
-	void *lowAddressPageAligned = (void *)MM_Math::roundToFloor(pageSize,(uintptr_t)low);
+	void *lowAddressPageAligned = (void *)MM_Math::roundToFloor(pageSize, (uintptr_t)low);
 
 	if (lowAddressPageAligned < low) {
 		/* Low address is not aligned */
@@ -159,7 +165,7 @@ MM_CardTable::getLowAddressToRelease(MM_EnvironmentBase *env, void *low)
 			result = lowAddressPageAligned;
 		} else {
 			/* we can not release memory - so round address up*/
-			result = (void *)MM_Math::roundToCeiling(pageSize,(uintptr_t)low);
+			result = (void *)MM_Math::roundToCeiling(pageSize, (uintptr_t)low);
 		}
 	}
 
@@ -180,11 +186,11 @@ MM_CardTable::getHighAddressToRelease(MM_EnvironmentBase *env, void *high)
 
 	void *result = high;
 	uintptr_t pageSize = memoryManager->getPageSize(&_cardTableMemoryHandle);
-	
+
 	Assert_MM_true(0 != pageSize);
-	
+
 	/* rounded up address to virtual memory page */
-	void *highAddressPageAligned = (void *)MM_Math::roundToCeiling(pageSize,(uintptr_t)high);
+	void *highAddressPageAligned = (void *)MM_Math::roundToCeiling(pageSize, (uintptr_t)high);
 
 	if (high < highAddressPageAligned) {
 		/* High address is not aligned */
@@ -198,7 +204,7 @@ MM_CardTable::getHighAddressToRelease(MM_EnvironmentBase *env, void *high)
 			result = highAddressPageAligned;
 		} else {
 			/* we can not release memory - use next aligned address */
-			result = (void *)MM_Math::roundToFloor(pageSize,(uintptr_t)high);
+			result = (void *)MM_Math::roundToFloor(pageSize, (uintptr_t)high);
 		}
 	}
 
@@ -215,17 +221,17 @@ MM_CardTable::canMemoryBeReleased(MM_EnvironmentBase *env, void *low, void *high
 	MM_HeapRegionManager *regionManager = extensions->heapRegionManager;
 
 	void *regionAligned = (void *)MM_Math::roundToFloor(regionSizeCardSize, (uintptr_t)low);
-	
+
 	do {
 		void *heapAddress = (void *)cardAddrToHeapAddr(env, (Card *)regionAligned);
 		MM_HeapRegionDescriptor *region = regionManager->regionDescriptorForAddress(heapAddress);
-		if((NULL != region) && (NULL != region->getSubSpace())) {
+		if ((NULL != region) && (NULL != region->getSubSpace())) {
 			result = false;
 			break;
 		}
 		regionAligned = (void *)((uintptr_t)regionAligned + regionSizeCardSize);
 	} while (regionAligned < high);
-	
+
 	return result;
 }
 
@@ -248,7 +254,8 @@ MM_CardTable::dirtyCardWithValue(MM_EnvironmentBase *env, omrobjectptr_t objectR
 	Assert_MM_true(CARD_CLEAN != newValue);
 	Assert_MM_true(CARD_INVALID != newValue);
 	/* Check passed reference within the heap */
-	if(((uintptr_t *)objectRef >= (uintptr_t *)getHeapBase()) && ((uintptr_t *)objectRef < (uintptr_t *)_heapAlloc)) {
+	if (((uintptr_t *)objectRef >= (uintptr_t *)getHeapBase())
+	        && ((uintptr_t *)objectRef < (uintptr_t *)_heapAlloc)) {
 		Card *card = heapAddrToCardAddr(env, objectRef);
 
 		/* If card not already set to this value, update it */
@@ -265,8 +272,8 @@ MM_CardTable::dirtyCardRange(MM_EnvironmentBase *env, void *heapAddrFrom, void *
 {
 	Card *card = heapAddrToCardAddr(env, heapAddrFrom);
 	Card *toCard = heapAddrToCardAddr(env, heapAddrTo);
-		
-	for ( ; card < toCard; card++) {
+
+	for (; card < toCard; card++) {
 		/* If card not already dirty then dirty it */
 		if ((Card)CARD_DIRTY != *card) {
 			*card = (Card)CARD_DIRTY;
@@ -295,7 +302,8 @@ MM_CardTable::cardAddrToHeapAddr(MM_EnvironmentBase *env, Card *cardAddr)
 	Assert_MM_true((void *)cardAddr >= getCardTableStart());
 	Assert_MM_true((void *)cardAddr <= memoryManager->getHeapTop(&_cardTableMemoryHandle));
 
-	return (void *)((uintptr_t)getHeapBase() + (((uintptr_t)cardAddr - (uintptr_t)getCardTableStart()) << CARD_SIZE_SHIFT));
+	return (void *)((uintptr_t)getHeapBase()
+	        + (((uintptr_t)cardAddr - (uintptr_t)getCardTableStart()) << CARD_SIZE_SHIFT));
 }
 
 MMINLINE void
@@ -308,7 +316,7 @@ MM_CardTable::cleanRange(MM_EnvironmentBase *env, MM_CardCleaner *cardCleaner, C
 		if (CARD_CLEAN != *thisCard) {
 			void *lowAddress = (void *)cardAddrToHeapAddr(env, thisCard);
 			void *highAddress = (void *)((uintptr_t)lowAddress + CARD_SIZE);
-			
+
 			cardCleaner->clean(env, lowAddress, highAddress, thisCard);
 			cardsCleaned += 1;
 		}
@@ -325,7 +333,8 @@ MM_CardTable::cleanCardTable(MM_EnvironmentBase *env, MM_CardCleaner *cardCleane
 }
 
 void
-MM_CardTable::cleanCardTableForRange(MM_EnvironmentBase *env, MM_CardCleaner *cardCleaner, void *lowAddress, void *highAddress)
+MM_CardTable::cleanCardTableForRange(
+        MM_EnvironmentBase *env, MM_CardCleaner *cardCleaner, void *lowAddress, void *highAddress)
 {
 	uintptr_t oldVMState = env->pushVMstate(cardCleaner->getVMStateID());
 	OMRPORT_ACCESS_FROM_OMRPORT(env->getPortLibrary());
@@ -333,21 +342,21 @@ MM_CardTable::cleanCardTableForRange(MM_EnvironmentBase *env, MM_CardCleaner *ca
 
 	Card *lowCard = heapAddrToCardAddr(env, lowAddress);
 	Card *finalCard = heapAddrToCardAddr(env, highAddress);
-	uintptr_t cardsInCleaningRange = (2*1024*1024) / CARD_SIZE;
+	uintptr_t cardsInCleaningRange = (2 * 1024 * 1024) / CARD_SIZE;
 	uintptr_t compleCleaningRanges = ((uintptr_t)finalCard - (uintptr_t)lowCard) / cardsInCleaningRange;
 	Card *highCard = lowCard + (compleCleaningRanges * cardsInCleaningRange);
 
 	Assert_MM_true(((uintptr_t)finalCard - (uintptr_t)highCard) < cardsInCleaningRange);
 
-	while(lowCard < highCard) {
-		if(J9MODRON_HANDLE_NEXT_WORK_UNIT(env)) {
+	while (lowCard < highCard) {
+		if (J9MODRON_HANDLE_NEXT_WORK_UNIT(env)) {
 			cleanRange(env, cardCleaner, lowCard, lowCard + cardsInCleaningRange);
 		}
 		lowCard += cardsInCleaningRange;
 	}
 
 	if (highCard < finalCard) {
-		if(J9MODRON_HANDLE_NEXT_WORK_UNIT(env)) {
+		if (J9MODRON_HANDLE_NEXT_WORK_UNIT(env)) {
 			cleanRange(env, cardCleaner, highCard, finalCard);
 		}
 	}
@@ -364,18 +373,18 @@ MM_CardTable::cleanCardsInRegion(MM_EnvironmentBase *env, MM_CardCleaner *cardCl
 	/* look up the card range for this region and walk it */
 	Card *lowCard = heapAddrToCardAddr(env, region->getLowAddress());
 	Card *highCard = heapAddrToCardAddr(env, region->getHighAddress());
-	
+
 	cleanRange(env, cardCleaner, lowCard, highCard);
 	env->popVMstate(oldVMState);
 }
 
 uintptr_t
-MM_CardTable::clearCardsInRange(MM_EnvironmentBase *env, void* heapBase, void* heapTop)
+MM_CardTable::clearCardsInRange(MM_EnvironmentBase *env, void *heapBase, void *heapTop)
 {
 	Assert_MM_true(heapTop >= heapBase);
 
-	Card *firstCard = heapAddrToCardAddr(env,heapBase);
-	Card *lastCard = heapAddrToCardAddr(env,heapTop);
+	Card *firstCard = heapAddrToCardAddr(env, heapBase);
+	Card *lastCard = heapAddrToCardAddr(env, heapTop);
 	uintptr_t sizeToClear = (uint8_t *)lastCard - (uint8_t *)firstCard;
 
 	/* We can't use OMRZeroMemory() here as that requires the  area to
@@ -405,13 +414,16 @@ MM_CardTable::commitCardsForRegion(MM_EnvironmentBase *env, MM_HeapRegionDescrip
 }
 
 bool
-MM_CardTable::setNumaAffinityCorrespondingToHeapRange(MM_EnvironmentBase *env, uintptr_t numaNode, void *baseOfHeapRange, void *topOfHeapRange)
+MM_CardTable::setNumaAffinityCorrespondingToHeapRange(
+        MM_EnvironmentBase *env, uintptr_t numaNode, void *baseOfHeapRange, void *topOfHeapRange)
 {
 	MM_GCExtensionsBase *extensions = env->getExtensions();
 	MM_MemoryManager *memoryManager = extensions->memoryManager;
 	Assert_MM_true(0 != numaNode);
-	bool hasPhysicalNUMASupport = (0 != MM_GCExtensionsBase::getExtensions(env->getOmrVM())->_numaManager.isPhysicalNUMASupported());
-	/* it only makes sense to call this if NUMA support is enabled - this is not made to be called from highly generic code */
+	bool hasPhysicalNUMASupport =
+	        (0 != MM_GCExtensionsBase::getExtensions(env->getOmrVM())->_numaManager.isPhysicalNUMASupported());
+	/* it only makes sense to call this if NUMA support is enabled - this is not made to be called from highly
+	 * generic code */
 	Assert_MM_true(hasPhysicalNUMASupport);
 	Card *lowCard = heapAddrToCardAddr(env, baseOfHeapRange);
 	Card *highCard = heapAddrToCardAddr(env, topOfHeapRange);
@@ -423,7 +435,7 @@ MM_CardTable::setNumaAffinityCorrespondingToHeapRange(MM_EnvironmentBase *env, u
 	 * it will be aligned to page size inside vmem->setNumaAffinity()
 	 */
 	uintptr_t highAddress = (uintptr_t)highCard;
-	return memoryManager->setNumaAffinity(&_cardTableMemoryHandle, numaNode, (void*)lowAddress, highAddress - lowAddress);
+	return memoryManager->setNumaAffinity(
+	        &_cardTableMemoryHandle, numaNode, (void *)lowAddress, highAddress - lowAddress);
 }
 #endif /* defined(OMR_GC_VLHGC) */
-

@@ -22,7 +22,6 @@
 
 #include "omrfilehelpers.h"
 
-
 /**
  * @internal
  * Determines the proper portable error code to return given a native error code
@@ -35,43 +34,25 @@ int32_t
 findError(int32_t errorCode)
 {
 	switch (errorCode) {
-	case ERROR_FILENAME_EXCED_RANGE:
-		return OMRPORT_ERROR_FILE_NAMETOOLONG;
-	case ERROR_ACCESS_DENIED:
-		return OMRPORT_ERROR_FILE_NOPERMISSION;
-	case ERROR_FILE_NOT_FOUND:
-		return OMRPORT_ERROR_FILE_NOENT;
-	case ERROR_DISK_FULL:
-		return OMRPORT_ERROR_FILE_DISKFULL;
+	case ERROR_FILENAME_EXCED_RANGE: return OMRPORT_ERROR_FILE_NAMETOOLONG;
+	case ERROR_ACCESS_DENIED: return OMRPORT_ERROR_FILE_NOPERMISSION;
+	case ERROR_FILE_NOT_FOUND: return OMRPORT_ERROR_FILE_NOENT;
+	case ERROR_DISK_FULL: return OMRPORT_ERROR_FILE_DISKFULL;
 	case ERROR_FILE_EXISTS:
-	case ERROR_ALREADY_EXISTS:
-		return OMRPORT_ERROR_FILE_EXIST;
-	case ERROR_NOT_ENOUGH_MEMORY:
-		return OMRPORT_ERROR_FILE_SYSTEMFULL;
-	case ERROR_LOCK_VIOLATION:
-		return OMRPORT_ERROR_FILE_LOCK_NOREADWRITE;
-	case ERROR_NOT_READY:
-		return OMRPORT_ERROR_FILE_IO;
-	case ERROR_OPERATION_ABORTED:
-		return OMRPORT_ERROR_FILE_OPERATION_ABORTED;
-	case ERROR_NOT_ENOUGH_QUOTA:
-		return OMRPORT_ERROR_FILE_NOT_ENOUGH_QUOTA;
-	case ERROR_INSUFFICIENT_BUFFER:
-		return OMRPORT_ERROR_FILE_INSUFFICIENT_BUFFER;
-	case ERROR_HANDLE_EOF:
-		return OMRPORT_ERROR_FILE_HANDLE_EOF;
-	case ERROR_BROKEN_PIPE:
-		return OMRPORT_ERROR_FILE_BROKEN_PIPE;
-	case ERROR_MORE_DATA:
-		return OMRPORT_ERROR_FILE_MORE_DATA;
-	case ERROR_INVALID_PARAMETER:
-		return OMRPORT_ERROR_FILE_INVALID_PARAMETER;
-	case ERROR_IO_PENDING:
-		return OMRPORT_ERROR_FILE_IO_PENDING;
-	case ERROR_INVALID_HANDLE:
-		return OMRPORT_ERROR_FILE_BADF;
-	default:
-		return OMRPORT_ERROR_FILE_OPFAILED;
+	case ERROR_ALREADY_EXISTS: return OMRPORT_ERROR_FILE_EXIST;
+	case ERROR_NOT_ENOUGH_MEMORY: return OMRPORT_ERROR_FILE_SYSTEMFULL;
+	case ERROR_LOCK_VIOLATION: return OMRPORT_ERROR_FILE_LOCK_NOREADWRITE;
+	case ERROR_NOT_READY: return OMRPORT_ERROR_FILE_IO;
+	case ERROR_OPERATION_ABORTED: return OMRPORT_ERROR_FILE_OPERATION_ABORTED;
+	case ERROR_NOT_ENOUGH_QUOTA: return OMRPORT_ERROR_FILE_NOT_ENOUGH_QUOTA;
+	case ERROR_INSUFFICIENT_BUFFER: return OMRPORT_ERROR_FILE_INSUFFICIENT_BUFFER;
+	case ERROR_HANDLE_EOF: return OMRPORT_ERROR_FILE_HANDLE_EOF;
+	case ERROR_BROKEN_PIPE: return OMRPORT_ERROR_FILE_BROKEN_PIPE;
+	case ERROR_MORE_DATA: return OMRPORT_ERROR_FILE_MORE_DATA;
+	case ERROR_INVALID_PARAMETER: return OMRPORT_ERROR_FILE_INVALID_PARAMETER;
+	case ERROR_IO_PENDING: return OMRPORT_ERROR_FILE_IO_PENDING;
+	case ERROR_INVALID_HANDLE: return OMRPORT_ERROR_FILE_BADF;
+	default: return OMRPORT_ERROR_FILE_OPFAILED;
 	}
 }
 
@@ -97,7 +78,6 @@ omrfile_get_overlapped_handle_helper(struct OMRPortLibrary *portLibrary)
 	return overlappedHandle;
 }
 
-
 /**
  * This function will acquire a lock of the requested type on the given file, starting at offset bytes
  * from the start of the file and continuing for length bytes
@@ -116,7 +96,8 @@ omrfile_get_overlapped_handle_helper(struct OMRPortLibrary *portLibrary)
  * @return                                              0 on success, -1 on failure
  */
 int32_t
-omrfile_lock_bytes_helper(struct OMRPortLibrary *portLibrary, intptr_t fd, int32_t lockFlags, uint64_t offset, uint64_t length, BOOLEAN async)
+omrfile_lock_bytes_helper(struct OMRPortLibrary *portLibrary, intptr_t fd, int32_t lockFlags, uint64_t offset,
+        uint64_t length, BOOLEAN async)
 {
 	HANDLE hFile = (HANDLE)fd;
 	DWORD dwFlags = 0;
@@ -133,23 +114,21 @@ omrfile_lock_bytes_helper(struct OMRPortLibrary *portLibrary, intptr_t fd, int32
 
 	if (!(lockFlags & OMRPORT_FILE_READ_LOCK) && !(lockFlags & OMRPORT_FILE_WRITE_LOCK)) {
 		Trc_PRT_file_lock_bytes_win32_failed_noReadWrite();
-		errMsg = portLibrary->nls_lookup_message(portLibrary,
-				 J9NLS_ERROR | J9NLS_DO_NOT_APPEND_NEWLINE,
-				 J9NLS_PORT_FILE_LOCK_INVALID_FLAG,
-				 NULL);
+		errMsg = portLibrary->nls_lookup_message(portLibrary, J9NLS_ERROR | J9NLS_DO_NOT_APPEND_NEWLINE,
+		        J9NLS_PORT_FILE_LOCK_INVALID_FLAG, NULL);
 		portLibrary->str_printf(portLibrary, errBuf, sizeof(errBuf), errMsg, lockFlags);
-		lastError = portLibrary->error_set_last_error_with_message(portLibrary, OMRPORT_ERROR_FILE_LOCK_NOREADWRITE, errBuf);
+		lastError = portLibrary->error_set_last_error_with_message(
+		        portLibrary, OMRPORT_ERROR_FILE_LOCK_NOREADWRITE, errBuf);
 		Trc_PRT_file_lock_bytes_win32_exiting_with_error(lastError);
 		return -1;
 	}
 	if (!(lockFlags & OMRPORT_FILE_WAIT_FOR_LOCK) && !(lockFlags & OMRPORT_FILE_NOWAIT_FOR_LOCK)) {
 		Trc_PRT_file_lock_bytes_win32_failed_noWaitNoWait();
-		errMsg = portLibrary->nls_lookup_message(portLibrary,
-				 J9NLS_ERROR | J9NLS_DO_NOT_APPEND_NEWLINE,
-				 J9NLS_PORT_FILE_LOCK_INVALID_FLAG,
-				 NULL);
+		errMsg = portLibrary->nls_lookup_message(portLibrary, J9NLS_ERROR | J9NLS_DO_NOT_APPEND_NEWLINE,
+		        J9NLS_PORT_FILE_LOCK_INVALID_FLAG, NULL);
 		portLibrary->str_printf(portLibrary, errBuf, sizeof(errBuf), errMsg, lockFlags);
-		lastError = portLibrary->error_set_last_error_with_message(portLibrary, OMRPORT_ERROR_FILE_LOCK_NOWAITNOWAIT, errBuf);
+		lastError = portLibrary->error_set_last_error_with_message(
+		        portLibrary, OMRPORT_ERROR_FILE_LOCK_NOWAITNOWAIT, errBuf);
 		Trc_PRT_file_lock_bytes_win32_exiting_with_error(lastError);
 		return -1;
 	}
@@ -171,11 +150,13 @@ omrfile_lock_bytes_helper(struct OMRPortLibrary *portLibrary, intptr_t fd, int32
 	overlapped.Offset = (DWORD)(offset & 0xFFFFFFFF);
 	overlapped.OffsetHigh = (DWORD)(offset >> 32);
 
-	Trc_PRT_file_lock_bytes_win32_callingLockFileEx(dwFlags, overlapped.Offset, overlapped.OffsetHigh, nNumberOfBytesToLockLow, nNumberOfBytesToLockHigh);
+	Trc_PRT_file_lock_bytes_win32_callingLockFileEx(
+	        dwFlags, overlapped.Offset, overlapped.OffsetHigh, nNumberOfBytesToLockLow, nNumberOfBytesToLockHigh);
 
 	/*
 	 * Regarding to asychronous files, this function returns right away without waiting its execution to finish.
-	 * If the returned result is FALSE and error is ERROR_IO_PENDING, use GetOverlappedResult to wait the execution finishes.
+	 * If the returned result is FALSE and error is ERROR_IO_PENDING, use GetOverlappedResult to wait the execution
+	 * finishes.
 	 *
 	 */
 	success = LockFileEx(hFile, dwFlags, 0, nNumberOfBytesToLockLow, nNumberOfBytesToLockHigh, &overlapped);
@@ -193,9 +174,7 @@ error:
 	lastError = portLibrary->error_set_last_error(portLibrary, GetLastError(), OMRPORT_ERROR_FILE_LOCK_BADLOCK);
 	Trc_PRT_file_lock_bytes_win32_exiting_with_error(lastError);
 	return -1;
-
 }
-
 
 /**
  * This function will release the lock on the given file, starting at offset bytes
@@ -210,7 +189,8 @@ error:
  * @return                                              0 on success, -1 on failure
  */
 int32_t
-omrfile_unlock_bytes_helper(struct OMRPortLibrary *portLibrary, intptr_t fd, uint64_t offset, uint64_t length, BOOLEAN async)
+omrfile_unlock_bytes_helper(
+        struct OMRPortLibrary *portLibrary, intptr_t fd, uint64_t offset, uint64_t length, BOOLEAN async)
 {
 	HANDLE hFile = (HANDLE)fd;
 	DWORD nNumberOfBytesToLockLow = (DWORD)(length & 0xFFFFFFFF);
@@ -233,11 +213,13 @@ omrfile_unlock_bytes_helper(struct OMRPortLibrary *portLibrary, intptr_t fd, uin
 	overlapped.Offset = (DWORD)(offset & 0xFFFFFFFF);
 	overlapped.OffsetHigh = (DWORD)(offset >> 32);
 
-	Trc_PRT_file_unlock_bytes_win32_callingUnlockFileEx(overlapped.Offset, overlapped.OffsetHigh, nNumberOfBytesToLockLow, nNumberOfBytesToLockHigh);
+	Trc_PRT_file_unlock_bytes_win32_callingUnlockFileEx(
+	        overlapped.Offset, overlapped.OffsetHigh, nNumberOfBytesToLockLow, nNumberOfBytesToLockHigh);
 
 	/*
 	 * Regarding to asychronous files, this function returns right away without waiting its execution to finish.
-	 * If the returned result is FALSE and error is ERROR_IO_PENDING, use GetOverlappedResult to wait the execution finishes.
+	 * If the returned result is FALSE and error is ERROR_IO_PENDING, use GetOverlappedResult to wait the execution
+	 * finishes.
 	 *
 	 */
 	success = UnlockFileEx(hFile, 0, nNumberOfBytesToLockLow, nNumberOfBytesToLockHigh, &overlapped);

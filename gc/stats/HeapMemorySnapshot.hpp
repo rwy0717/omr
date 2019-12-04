@@ -19,20 +19,18 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
- 
+
 #if !defined(HEAPMEMORYSNAPSHOT_HPP_)
 #define HEAPMEMORYSNAPSHOT_HPP_
 
-#include "omrcomp.h"
-
 #include "Base.hpp"
+#include "omrcomp.h"
 
 /**
  * A collection of interesting statistics for the HeapMemory used by MemoryManagement.
  * @ingroup GC_Stats
  */
-class MM_HeapMemorySnapshot : public MM_Base
-{
+class MM_HeapMemorySnapshot : public MM_Base {
 public:
 	uintptr_t _totalHeapSize;
 	uintptr_t _freeHeapSize;
@@ -60,29 +58,28 @@ public:
 	/**
 	 * Create a HeapMemorySnapshot object.
 	 */
-	MM_HeapMemorySnapshot() :
-		MM_Base(),
-		_totalHeapSize(0),
-		_freeHeapSize(0),
-		_totalTenuredSize(0),
-		_freeTenuredSize(0),
-		_totalTenuredSOASize(0),
-		_freeTenuredSOASize(0),
-		_totalTenuredLOASize(0),
-		_freeTenuredLOASize(0),
-		_totalNurseryAllocateSize(0),
-		_freeNurseryAllocateSize(0),
-		_totalNurserySurvivorSize(0),
-		_freeNurserySurvivorSize(0),
-		_totalRegionOldSize(0),
-		_freeRegionOldSize(0),
-		_totalRegionEdenSize(0),
-		_freeRegionEdenSize(0),
-		_totalRegionSurvivorSize(0),
-		_freeRegionSurvivorSize(0),
-		_totalRegionReservedSize(0),
-		_freeRegionReservedSize(0)
-	{};
+	MM_HeapMemorySnapshot()
+	        : MM_Base()
+	        , _totalHeapSize(0)
+	        , _freeHeapSize(0)
+	        , _totalTenuredSize(0)
+	        , _freeTenuredSize(0)
+	        , _totalTenuredSOASize(0)
+	        , _freeTenuredSOASize(0)
+	        , _totalTenuredLOASize(0)
+	        , _freeTenuredLOASize(0)
+	        , _totalNurseryAllocateSize(0)
+	        , _freeNurseryAllocateSize(0)
+	        , _totalNurserySurvivorSize(0)
+	        , _freeNurserySurvivorSize(0)
+	        , _totalRegionOldSize(0)
+	        , _freeRegionOldSize(0)
+	        , _totalRegionEdenSize(0)
+	        , _freeRegionEdenSize(0)
+	        , _totalRegionSurvivorSize(0)
+	        , _freeRegionSurvivorSize(0)
+	        , _totalRegionReservedSize(0)
+	        , _freeRegionReservedSize(0){};
 };
 
 #endif /* HEAPMEMORYSNAPSHOT_HPP_ */

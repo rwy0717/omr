@@ -20,24 +20,26 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-#include "omrport.h"
-#include "ModronAssertions.h"
+#include "GlobalAllocationManagerSegregated.hpp"
 
 #include "AllocationContextSegregated.hpp"
 #include "EnvironmentBase.hpp"
+#include "ModronAssertions.h"
 #include "RegionPoolSegregated.hpp"
 #include "SweepSchemeSegregated.hpp"
-
-#include "GlobalAllocationManagerSegregated.hpp"
+#include "omrport.h"
 
 #if defined(OMR_GC_SEGREGATED_HEAP)
 
-MM_GlobalAllocationManagerSegregated*
+MM_GlobalAllocationManagerSegregated *
 MM_GlobalAllocationManagerSegregated::newInstance(MM_EnvironmentBase *env, MM_RegionPoolSegregated *regionPool)
 {
-	MM_GlobalAllocationManagerSegregated *allocationManager = (MM_GlobalAllocationManagerSegregated *)env->getForge()->allocate(sizeof(MM_GlobalAllocationManagerSegregated), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+	MM_GlobalAllocationManagerSegregated *allocationManager =
+	        (MM_GlobalAllocationManagerSegregated *)env->getForge()->allocate(
+	                sizeof(MM_GlobalAllocationManagerSegregated), OMR::GC::AllocationCategory::FIXED,
+	                OMR_GET_CALLSITE());
 	if (allocationManager) {
-		allocationManager = new(allocationManager) MM_GlobalAllocationManagerSegregated(env);
+		allocationManager = new (allocationManager) MM_GlobalAllocationManagerSegregated(env);
 		if (!allocationManager->initialize(env, regionPool)) {
 			allocationManager->kill(env);
 			allocationManager = NULL;
@@ -62,11 +64,14 @@ MM_GlobalAllocationManagerSegregated::initialize(MM_EnvironmentBase *env, MM_Reg
 		_managedAllocationContextCount = _extensions->managedAllocationContextCount;
 		if (0 == _managedAllocationContextCount) {
 			OMRPORT_ACCESS_FROM_OMRPORT(env->getPortLibrary());
-			uintptr_t desiredAllocationContextCount = 2 * omrsysinfo_get_number_CPUs_by_type(OMRPORT_CPU_ONLINE);
+			uintptr_t desiredAllocationContextCount = 2
+			        * omrsysinfo_get_number_CPUs_by_type(OMRPORT_CPU_ONLINE);
 			uintptr_t regionCount = _extensions->memoryMax / _extensions->regionSize;
-			/* heuristic -- ACs are permitted to waste up to 1/8th of the heap in slack regions. This number may need to be adjusted */ 
+			/* heuristic -- ACs are permitted to waste up to 1/8th of the heap in slack regions. This number
+			 * may need to be adjusted */
 			uintptr_t maxAllocationContextCount = regionCount / 8;
-			_managedAllocationContextCount = OMR_MAX(1, OMR_MIN(desiredAllocationContextCount, maxAllocationContextCount));
+			_managedAllocationContextCount =
+			        OMR_MAX(1, OMR_MIN(desiredAllocationContextCount, maxAllocationContextCount));
 		}
 
 		result = initializeAllocationContexts(env, regionPool);
@@ -93,7 +98,8 @@ MM_GlobalAllocationManagerSegregated::tearDown(MM_EnvironmentBase *env)
 }
 
 MM_AllocationContextSegregated *
-MM_GlobalAllocationManagerSegregated::createAllocationContext(MM_EnvironmentBase * env, MM_RegionPoolSegregated *regionPool)
+MM_GlobalAllocationManagerSegregated::createAllocationContext(
+        MM_EnvironmentBase *env, MM_RegionPoolSegregated *regionPool)
 {
 	return MM_AllocationContextSegregated::newInstance(env, this, regionPool);
 }
@@ -108,20 +114,23 @@ void
 MM_GlobalAllocationManagerSegregated::setMarkingScheme(MM_SegregatedMarkingScheme *markingScheme)
 {
 	for (uintptr_t i = 0; i < _managedAllocationContextCount; i++) {
-		((MM_AllocationContextSegregated *) _managedAllocationContexts[i])->setMarkingScheme(markingScheme);
+		((MM_AllocationContextSegregated *)_managedAllocationContexts[i])->setMarkingScheme(markingScheme);
 	}
 }
 
 bool
-MM_GlobalAllocationManagerSegregated::initializeAllocationContexts(MM_EnvironmentBase * env, MM_RegionPoolSegregated *regionPool)
+MM_GlobalAllocationManagerSegregated::initializeAllocationContexts(
+        MM_EnvironmentBase *env, MM_RegionPoolSegregated *regionPool)
 {
 	Assert_MM_true(0 != _managedAllocationContextCount);
 
-	MM_AllocationContextSegregated **contexts = (MM_AllocationContextSegregated **)env->getForge()->allocate(sizeof(MM_AllocationContextSegregated*) * _managedAllocationContextCount, OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+	MM_AllocationContextSegregated **contexts = (MM_AllocationContextSegregated **)env->getForge()->allocate(
+	        sizeof(MM_AllocationContextSegregated *) * _managedAllocationContextCount,
+	        OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
 	if (NULL == contexts) {
 		return false;
 	}
-	_managedAllocationContexts = (MM_AllocationContext **) contexts;
+	_managedAllocationContexts = (MM_AllocationContext **)contexts;
 	memset(contexts, 0, sizeof(MM_AllocationContextSegregated *) * _managedAllocationContextCount);
 
 	for (uintptr_t i = 0; i < _managedAllocationContextCount; i++) {
@@ -138,7 +147,8 @@ MM_GlobalAllocationManagerSegregated::acquireAllocationContext(MM_EnvironmentBas
 	if (env->getAllocationContext() == NULL) {
 		uintptr_t allocationContextIndex = _nextAllocationContext++;
 		allocationContextIndex %= _managedAllocationContextCount;
-		MM_AllocationContextSegregated *ac = (MM_AllocationContextSegregated *)_managedAllocationContexts[allocationContextIndex];
+		MM_AllocationContextSegregated *ac =
+		        (MM_AllocationContextSegregated *)_managedAllocationContexts[allocationContextIndex];
 		if (NULL != ac) {
 			ac->enter(env);
 			env->setAllocationContext(ac);
@@ -151,7 +161,7 @@ MM_GlobalAllocationManagerSegregated::acquireAllocationContext(MM_EnvironmentBas
 void
 MM_GlobalAllocationManagerSegregated::releaseAllocationContext(MM_EnvironmentBase *env)
 {
-	MM_AllocationContextSegregated *ac = (MM_AllocationContextSegregated *) env->getAllocationContext();
+	MM_AllocationContextSegregated *ac = (MM_AllocationContextSegregated *)env->getAllocationContext();
 	if (ac != NULL) {
 		ac->exit(env);
 		env->setAllocationContext(NULL);

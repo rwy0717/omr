@@ -58,11 +58,8 @@ DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
 		lib = GLOBAL_DATA(default_library);
 		omrthread_init(lib);
 		return lib->initStatus == 1;
-	case DLL_PROCESS_DETACH:
-		omrthread_shutdown_library();
-		break;
-	default:
-		break;
+	case DLL_PROCESS_DETACH: omrthread_shutdown_library(); break;
+	default: break;
 	}
 
 	return TRUE;

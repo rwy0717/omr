@@ -23,15 +23,13 @@
 #if !defined(VERBOSEWRITERFILELOGGINGBUFFERED_HPP_)
 #define VERBOSEWRITERFILELOGGINGBUFFERED_HPP_
 
-#include "omrcfg.h"
-
 #include "VerboseWriterFileLogging.hpp"
+#include "omrcfg.h"
 
 /**
  * Ouptut agent which directs verbosegc output to file.
  */
-class MM_VerboseWriterFileLoggingBuffered : public MM_VerboseWriterFileLogging
-{
+class MM_VerboseWriterFileLoggingBuffered : public MM_VerboseWriterFileLogging {
 	/*
 	 * Data members
 	 */
@@ -44,9 +42,10 @@ private:
 	 * Function members
 	 */
 public:
-	static MM_VerboseWriterFileLoggingBuffered *newInstance(MM_EnvironmentBase *env, MM_VerboseManager *manager, char* filename, uintptr_t fileCount, uintptr_t iterations);
+	static MM_VerboseWriterFileLoggingBuffered *newInstance(MM_EnvironmentBase *env, MM_VerboseManager *manager,
+	        char *filename, uintptr_t fileCount, uintptr_t iterations);
 
-	virtual void outputString(MM_EnvironmentBase *env, const char* string);
+	virtual void outputString(MM_EnvironmentBase *env, const char *string);
 
 protected:
 	MM_VerboseWriterFileLoggingBuffered(MM_EnvironmentBase *env, MM_VerboseManager *manager);

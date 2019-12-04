@@ -57,159 +57,142 @@ namespace TR {
  * These defaults can be overridden using the TR_CompileTimeProfiler env var.
  *
  * The current implementation only supports perf, but other profiling
- * utilities could be introduced. 
+ * utilities could be introduced.
  *
  * In testing, the initial portion of the compile was lost, due to perf's
  * start up. A delay has been added to manage this.
  */
-class CompileTimeProfiler
-   {
+class CompileTimeProfiler {
 public:
-   CompileTimeProfiler(TR::Compilation *comp, const char *identifier)
-      {
-      _pid = 0;
-      if (comp->getOption(TR_CompileTimeProfiler))
-         {
-         static char *cacheOptions[_optionsLength];
-         static size_t filenamePos;
-         static size_t threadIDPos;
+	CompileTimeProfiler(TR::Compilation *comp, const char *identifier)
+	{
+		_pid = 0;
+		if (comp->getOption(TR_CompileTimeProfiler)) {
+			static char *cacheOptions[_optionsLength];
+			static size_t filenamePos;
+			static size_t threadIDPos;
 
-         char timestr[_timeLength];
-         time_t timer = time(NULL);
-         snprintf(timestr, sizeof(timestr), "%i", (int32_t)timer % 100000);
-         
-         char tidstr[_threadIDLength];
-         snprintf(tidstr, sizeof(tidstr), "%ld", syscall(SYS_gettid));
+			char timestr[_timeLength];
+			time_t timer = time(NULL);
+			snprintf(timestr, sizeof(timestr), "%i", (int32_t)timer % 100000);
 
-         // Construct the output filename, with the thread id and time in seconds
-         char filename[_fileLength];
-         snprintf(filename, sizeof(filename), "%s.%s.%s.data", identifier ? identifier : "perf", tidstr, timestr);
+			char tidstr[_threadIDLength];
+			snprintf(tidstr, sizeof(tidstr), "%ld", syscall(SYS_gettid));
 
-         // Build up the constant options, with env var override
-         if (filenamePos == 0) 
-            parseOptions(cacheOptions, filenamePos, threadIDPos); 
+			// Construct the output filename, with the thread id and time in seconds
+			char filename[_fileLength];
+			snprintf(filename, sizeof(filename), "%s.%s.%s.data", identifier ? identifier : "perf", tidstr,
+			        timestr);
 
-         // Copy and specialize options
-         char *options[_optionsLength];
-         memcpy(options, cacheOptions, sizeof(options));
-         options[filenamePos] = filename;
-         options[threadIDPos] = tidstr;
+			// Build up the constant options, with env var override
+			if (filenamePos == 0)
+				parseOptions(cacheOptions, filenamePos, threadIDPos);
 
-         // Dump the options
-         if (TR::Options::getVerboseOption(TR_VerbosePerformance))
-            {
-            TR_VerboseLog::vlogAcquire();
-            TR_VerboseLog::write("\nProfiling %s compile time with:", comp->signature());
-            char **iter = options;
-            while (*iter)
-               {
-               TR_VerboseLog::write(" %s", *iter);
-               iter++;
-               }
-            TR_VerboseLog::write("\n");
-            TR_VerboseLog::vlogRelease();
-            }
+			// Copy and specialize options
+			char *options[_optionsLength];
+			memcpy(options, cacheOptions, sizeof(options));
+			options[filenamePos] = filename;
+			options[threadIDPos] = tidstr;
 
-         _pid = fork();
-         if (_pid == 0)
-            {
-            execv("/usr/bin/perf", options);
-            exit(0);
-            }
+			// Dump the options
+			if (TR::Options::getVerboseOption(TR_VerbosePerformance)) {
+				TR_VerboseLog::vlogAcquire();
+				TR_VerboseLog::write("\nProfiling %s compile time with:", comp->signature());
+				char **iter = options;
+				while (*iter) {
+					TR_VerboseLog::write(" %s", *iter);
+					iter++;
+				}
+				TR_VerboseLog::write("\n");
+				TR_VerboseLog::vlogRelease();
+			}
 
-         // Give perf some time to start
-         usleep(_initMicroSecDelay);
-         }
-      } 
+			_pid = fork();
+			if (_pid == 0) {
+				execv("/usr/bin/perf", options);
+				exit(0);
+			}
 
-   ~CompileTimeProfiler()
-      {
-      if (_pid != 0)
-         {
-         // Kill perf at the end of the compile
-         kill(_pid, SIGINT);
-         waitpid(_pid, NULL, 0);
-         }
-      }
+			// Give perf some time to start
+			usleep(_initMicroSecDelay);
+		}
+	}
+
+	~CompileTimeProfiler()
+	{
+		if (_pid != 0) {
+			// Kill perf at the end of the compile
+			kill(_pid, SIGINT);
+			waitpid(_pid, NULL, 0);
+		}
+	}
 
 private:
-    void parseOptions(char *options[], size_t &filenamePos, size_t &threadIDPos)
-      {
-      size_t pos = 0;
-      options[pos++] = "perf";
-      options[pos++] = "record";
-      options[pos++] = "-o";
-      filenamePos = pos;
-      options[pos++] = NULL;
-      options[pos++] = "-t";
-      threadIDPos = pos;
-      options[pos++] = NULL;
+	void parseOptions(char *options[], size_t &filenamePos, size_t &threadIDPos)
+	{
+		size_t pos = 0;
+		options[pos++] = "perf";
+		options[pos++] = "record";
+		options[pos++] = "-o";
+		filenamePos = pos;
+		options[pos++] = NULL;
+		options[pos++] = "-t";
+		threadIDPos = pos;
+		options[pos++] = NULL;
 
-      static char *envOptions = feGetEnv("TR_CompileTimeProfiler");
-      if (envOptions)
-         {
-         // A string of length optionsLength cannot specify enough
-         // space separated arguments to overflow the options array
-         static char buffer[_optionsLength];
-         snprintf(buffer, sizeof(buffer), "%s", envOptions);
+		static char *envOptions = feGetEnv("TR_CompileTimeProfiler");
+		if (envOptions) {
+			// A string of length optionsLength cannot specify enough
+			// space separated arguments to overflow the options array
+			static char buffer[_optionsLength];
+			snprintf(buffer, sizeof(buffer), "%s", envOptions);
 
-         // Replace spaces with null terminators and
-         // add words to options list
-         bool newArg = true;
-         char *iter = buffer;
-         while (*iter)
-            {
-            if (*iter == ' ')
-               {
-               *iter = '\0';
-               newArg = true; 
-               }
-            else if (newArg)
-               {
-               options[pos++] = iter;
-               newArg = false;
-               }
-            iter++;
-            }
-         }
-      else
-         {
-         options[pos++] = "--call-graph";
+			// Replace spaces with null terminators and
+			// add words to options list
+			bool newArg = true;
+			char *iter = buffer;
+			while (*iter) {
+				if (*iter == ' ') {
+					*iter = '\0';
+					newArg = true;
+				} else if (newArg) {
+					options[pos++] = iter;
+					newArg = false;
+				}
+				iter++;
+			}
+		} else {
+			options[pos++] = "--call-graph";
 #if defined(TR_TARGET_X86) && defined(TR_TARGET_64BIT)
-         options[pos++] = "dwarf";
+			options[pos++] = "dwarf";
 #endif
-         options[pos++] = "-F9999";
-         }
-      options[pos] = NULL;
-      }
+			options[pos++] = "-F9999";
+		}
+		options[pos] = NULL;
+	}
 
-   static const uint32_t _timeLength        = 16;
-   static const uint32_t _threadIDLength    = 16;
-   static const uint32_t _fileLength        = 1024;
-   static const uint32_t _optionsLength     = 1024;
-   static const uint32_t _initMicroSecDelay = 250000;
-   pid_t _pid;
-   };
-
+	static const uint32_t _timeLength = 16;
+	static const uint32_t _threadIDLength = 16;
+	static const uint32_t _fileLength = 1024;
+	static const uint32_t _optionsLength = 1024;
+	static const uint32_t _initMicroSecDelay = 250000;
+	pid_t _pid;
 };
+
+}; // namespace TR
 
 #else
 
 namespace TR {
 
-class CompileTimeProfiler
-   {
+class CompileTimeProfiler {
 public:
-   CompileTimeProfiler(TR::Compilation *comp, const char *identifier)
-      {
-      }
+	CompileTimeProfiler(TR::Compilation *comp, const char *identifier) {}
 
-   ~CompileTimeProfiler()
-      {
-      }
-   };
-
+	~CompileTimeProfiler() {}
 };
+
+}; // namespace TR
 
 #endif
 

@@ -121,7 +121,8 @@ CudaDeviceTest::testPeerTransfer(OMRPortLibrary *portLibrary, uint32_t deviceId,
 
 	ASSERT_EQ(0, rc) << "omrcuda_memcpyDeviceToHost failed";
 
-	ASSERT_TRUE(patternVerify(hostBuf, BufferBytes, deviceId)) << "data transferred does not match expected pattern";
+	ASSERT_TRUE(patternVerify(hostBuf, BufferBytes, deviceId)) << "data transferred does not match expected "
+	                                                              "pattern";
 
 	if (NULL != hostBuf) {
 		rc = omrcuda_hostFree(hostBuf);

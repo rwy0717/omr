@@ -27,8 +27,6 @@
  */
 #include "omrport.h"
 
-
-
 /**
  * Read a line of text from the file into buf.
  * Character conversion is only done on z/OS (from platform encoding to UTF-8)
@@ -102,7 +100,6 @@ omrfile_write_text(struct OMRPortLibrary *portLibrary, intptr_t fd, const char *
 	intptr_t result = portLibrary->file_write(portLibrary, fd, (void *)buf, nbytes);
 	return (result == nbytes) ? 0 : result;
 }
-
 
 /**
  * Retrieve the character set name that file_write_text will encode strings into

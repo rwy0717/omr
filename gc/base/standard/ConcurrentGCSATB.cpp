@@ -31,16 +31,14 @@
 
 #define J9_EXTERNAL_TO_VM
 
+#include "AllocateDescription.hpp"
+#include "ConcurrentGCSATB.hpp"
+#include "ModronAssertions.h"
 #include "mmprivatehook.h"
 #include "modronbase.h"
 #include "modronopt.h"
-#include "ModronAssertions.h"
 #include "omr.h"
-
 #include <string.h>
-
-#include "ConcurrentGCSATB.hpp"
-#include "AllocateDescription.hpp"
 
 /**
  * Create new instance of ConcurrentGCIncrementalUpdate object.
@@ -50,11 +48,10 @@
 MM_ConcurrentGCSATB *
 MM_ConcurrentGCSATB::newInstance(MM_EnvironmentBase *env)
 {
-	MM_ConcurrentGCSATB *concurrentGC =
-			(MM_ConcurrentGCSATB *)env->getForge()->allocate(sizeof(MM_ConcurrentGCSATB),
-					OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+	MM_ConcurrentGCSATB *concurrentGC = (MM_ConcurrentGCSATB *)env->getForge()->allocate(
+	        sizeof(MM_ConcurrentGCSATB), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
 	if (NULL != concurrentGC) {
-		new(concurrentGC) MM_ConcurrentGCSATB(env);
+		new (concurrentGC) MM_ConcurrentGCSATB(env);
 		if (!concurrentGC->initialize(env)) {
 			concurrentGC->kill(env);
 			concurrentGC = NULL;
@@ -74,7 +71,6 @@ MM_ConcurrentGCSATB::kill(MM_EnvironmentBase *env)
 	tearDown(env);
 	env->getForge()->free(this);
 }
-
 
 /**
  * Teardown a MM_ConcurrentGCSATB object
@@ -105,31 +101,33 @@ MM_ConcurrentGCSATB::localMark(MM_EnvironmentBase *env, uintptr_t sizeToTrace)
 	env->_cycleState = &_concurrentCycleState;
 
 	uintptr_t sizeTraced = 0;
-	while(NULL != (objectPtr = (omrobjectptr_t)env->_workStack.popNoWait(env))) {
+	while (NULL != (objectPtr = (omrobjectptr_t)env->_workStack.popNoWait(env))) {
 		/* Check for array scanPtr..if we find one ignore it*/
-		if ((uintptr_t)objectPtr & PACKET_ARRAY_SPLIT_TAG){
+		if ((uintptr_t)objectPtr & PACKET_ARRAY_SPLIT_TAG) {
 			continue;
 		} else {
 			/* Else trace the object */
-			sizeTraced += _markingScheme->scanObject(env, objectPtr, SCAN_REASON_PACKET, (sizeToTrace - sizeTraced));
+			sizeTraced += _markingScheme->scanObject(
+			        env, objectPtr, SCAN_REASON_PACKET, (sizeToTrace - sizeTraced));
 		}
 
 		/* Have we done enough tracing ? */
-		if(sizeTraced >= sizeToTrace) {
+		if (sizeTraced >= sizeToTrace) {
 			break;
 		}
 
 		/* Before we do any more tracing check to see if GC is waiting */
 		if (env->isExclusiveAccessRequestWaiting()) {
 			/* suspend con helper thread for pending GC */
-			uintptr_t conHelperRequest = switchConHelperRequest(CONCURRENT_HELPER_MARK, CONCURRENT_HELPER_WAIT);
+			uintptr_t conHelperRequest =
+			        switchConHelperRequest(CONCURRENT_HELPER_MARK, CONCURRENT_HELPER_WAIT);
 			Assert_MM_true(CONCURRENT_HELPER_MARK != conHelperRequest);
 			break;
 		}
 	}
 
 	/* Pop the top of the work packet if its a partially processed array tag */
-	if ( ((uintptr_t)((omrobjectptr_t)env->_workStack.peek(env))) & PACKET_ARRAY_SPLIT_TAG) {
+	if (((uintptr_t)((omrobjectptr_t)env->_workStack.peek(env))) & PACKET_ARRAY_SPLIT_TAG) {
 		env->_workStack.popNoWait(env);
 	}
 

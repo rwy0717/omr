@@ -20,8 +20,9 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-#include "AllocateDescription.hpp"
 #include "AllocationInterfaceGeneric.hpp"
+
+#include "AllocateDescription.hpp"
 #include "GCExtensionsBase.hpp"
 #include "MemorySpace.hpp"
 #include "MemorySubSpace.hpp"
@@ -32,13 +33,14 @@
  *
  * @return the new instance, or NULL on failure.
  */
-MM_AllocationInterfaceGeneric*
+MM_AllocationInterfaceGeneric *
 MM_AllocationInterfaceGeneric::newInstance(MM_EnvironmentBase *env)
 {
-	MM_AllocationInterfaceGeneric *allocationInterface = (MM_AllocationInterfaceGeneric *)env->getForge()->allocate(sizeof(MM_AllocationInterfaceGeneric), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
-	if(NULL != allocationInterface) {
-		new(allocationInterface) MM_AllocationInterfaceGeneric(env);
-		if(!allocationInterface->initialize(env)) {
+	MM_AllocationInterfaceGeneric *allocationInterface = (MM_AllocationInterfaceGeneric *)env->getForge()->allocate(
+	        sizeof(MM_AllocationInterfaceGeneric), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+	if (NULL != allocationInterface) {
+		new (allocationInterface) MM_AllocationInterfaceGeneric(env);
+		if (!allocationInterface->initialize(env)) {
 			allocationInterface->kill(env);
 			return NULL;
 		}
@@ -71,21 +73,21 @@ MM_AllocationInterfaceGeneric::initialize(MM_EnvironmentBase *env)
  */
 void
 MM_AllocationInterfaceGeneric::tearDown(MM_EnvironmentBase *env)
-{
+{}
 
-}
-
-void*
-MM_AllocationInterfaceGeneric::allocateObject(MM_EnvironmentBase *env, MM_AllocateDescription *allocateDescription, MM_MemorySpace *memorySpace, bool shouldCollectOnFailure)
+void *
+MM_AllocationInterfaceGeneric::allocateObject(MM_EnvironmentBase *env, MM_AllocateDescription *allocateDescription,
+        MM_MemorySpace *memorySpace, bool shouldCollectOnFailure)
 {
 	allocateDescription->setMemorySpace(memorySpace);
 
-	return memorySpace->getDefaultMemorySubSpace()->allocateObject(env, allocateDescription, NULL, NULL, shouldCollectOnFailure);
-
+	return memorySpace->getDefaultMemorySubSpace()->allocateObject(
+	        env, allocateDescription, NULL, NULL, shouldCollectOnFailure);
 }
 
-void*
-MM_AllocationInterfaceGeneric::allocateArray(MM_EnvironmentBase *env, MM_AllocateDescription *allocateDescription, MM_MemorySpace *memorySpace, bool shouldCollectOnFailure)
+void *
+MM_AllocationInterfaceGeneric::allocateArray(MM_EnvironmentBase *env, MM_AllocateDescription *allocateDescription,
+        MM_MemorySpace *memorySpace, bool shouldCollectOnFailure)
 {
 	return allocateObject(env, allocateDescription, memorySpace, shouldCollectOnFailure);
 }
@@ -94,7 +96,8 @@ MM_AllocationInterfaceGeneric::allocateArray(MM_EnvironmentBase *env, MM_Allocat
  * Allocate the arraylet spine.
  */
 void *
-MM_AllocationInterfaceGeneric::allocateArrayletSpine(MM_EnvironmentBase *env, MM_AllocateDescription *allocateDescription, MM_MemorySpace *memorySpace, bool shouldCollectOnFailure)
+MM_AllocationInterfaceGeneric::allocateArrayletSpine(MM_EnvironmentBase *env,
+        MM_AllocateDescription *allocateDescription, MM_MemorySpace *memorySpace, bool shouldCollectOnFailure)
 {
 	Assert_MM_unreachable();
 	return NULL;
@@ -104,7 +107,8 @@ MM_AllocationInterfaceGeneric::allocateArrayletSpine(MM_EnvironmentBase *env, MM
  * Allocate an arraylet leaf.
  */
 void *
-MM_AllocationInterfaceGeneric::allocateArrayletLeaf(MM_EnvironmentBase *env, MM_AllocateDescription *allocateDescription, MM_MemorySpace *memorySpace, bool shouldCollectOnFailure)
+MM_AllocationInterfaceGeneric::allocateArrayletLeaf(MM_EnvironmentBase *env,
+        MM_AllocateDescription *allocateDescription, MM_MemorySpace *memorySpace, bool shouldCollectOnFailure)
 {
 	Assert_MM_unreachable();
 	return NULL;
@@ -115,11 +119,10 @@ MM_AllocationInterfaceGeneric::allocateArrayletLeaf(MM_EnvironmentBase *env, MM_
  */
 void
 MM_AllocationInterfaceGeneric::flushCache(MM_EnvironmentBase *env)
-{
-}
+{}
 
 void
-MM_AllocationInterfaceGeneric::enableCachedAllocations(MM_EnvironmentBase* env)
+MM_AllocationInterfaceGeneric::enableCachedAllocations(MM_EnvironmentBase *env)
 {
 	if (!_cachedAllocationsEnabled) {
 		_cachedAllocationsEnabled = true;
@@ -127,7 +130,7 @@ MM_AllocationInterfaceGeneric::enableCachedAllocations(MM_EnvironmentBase* env)
 }
 
 void
-MM_AllocationInterfaceGeneric::disableCachedAllocations(MM_EnvironmentBase* env)
+MM_AllocationInterfaceGeneric::disableCachedAllocations(MM_EnvironmentBase *env)
 {
 	if (_cachedAllocationsEnabled) {
 		_cachedAllocationsEnabled = false;

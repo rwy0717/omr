@@ -79,13 +79,9 @@ Scanner::checkBlacklistedType(const string &name) const
 	if (!name.empty()) {
 		char start = name[0];
 
-		if (('_' == start)
-				|| (('A' <= start) && (start <= 'I'))
-				|| (('J' <= start) && (start <= 'R'))
-				|| (('S' <= start) && (start <= 'Z'))
-				|| (('a' <= start) && (start <= 'i'))
-				|| (('j' <= start) && (start <= 'r'))
-				|| (('s' <= start) && (start <= 'z'))) {
+		if (('_' == start) || (('A' <= start) && (start <= 'I')) || (('J' <= start) && (start <= 'R'))
+		        || (('S' <= start) && (start <= 'Z')) || (('a' <= start) && (start <= 'i'))
+		        || (('j' <= start) && (start <= 'r')) || (('s' <= start) && (start <= 'z'))) {
 			blacklisted = stringMatchesAny(name, _blacklistedTypes);
 		} else {
 			blacklisted = true;

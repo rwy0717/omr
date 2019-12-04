@@ -29,8 +29,7 @@
 
 #include "OMR_Base.hpp"
 
-class OMR_BaseNonVirtual : public OMR_Base
-{
+class OMR_BaseNonVirtual : public OMR_Base {
 private:
 protected:
 	/* Used by DDR to figure out runtime types, this is opt-in
@@ -40,7 +39,6 @@ protected:
 	const char *_typeId;
 
 public:
-
 	/**
 	 * Create OMR_BaseNonVirtual object.
 	 */

@@ -24,12 +24,10 @@
 
 #if defined(OMR_GC_CONCURRENT_SCAVENGER)
 
-#include "ModronAssertions.h"
-
-#include "EnvironmentStandard.hpp"
-#include "Scavenger.hpp"
-
 #include "ConcurrentScavengeTask.hpp"
+#include "EnvironmentStandard.hpp"
+#include "ModronAssertions.h"
+#include "Scavenger.hpp"
 
 void
 MM_ConcurrentScavengeTask::run(MM_EnvironmentBase *envBase)
@@ -42,17 +40,10 @@ MM_ConcurrentScavengeTask::run(MM_EnvironmentBase *envBase)
 		_collector->workThreadScan(env);
 		_collector->workThreadComplete(env);
 		break;
-	case SCAVENGE_ROOTS:
-		_collector->workThreadProcessRoots(env);
-		break;
-	case SCAVENGE_SCAN:
-		_collector->workThreadScan(env);
-		break;
-	case SCAVENGE_COMPLETE:
-		_collector->workThreadComplete(env);
-		break;
-	default:
-		Assert_MM_unreachable();
+	case SCAVENGE_ROOTS: _collector->workThreadProcessRoots(env); break;
+	case SCAVENGE_SCAN: _collector->workThreadScan(env); break;
+	case SCAVENGE_COMPLETE: _collector->workThreadComplete(env); break;
+	default: Assert_MM_unreachable();
 	}
 }
 

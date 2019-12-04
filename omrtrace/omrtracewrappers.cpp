@@ -50,7 +50,7 @@ OMR_TraceThread *
 twThreadSelf(void)
 {
 	omrthread_t self = omrthread_self();
-	return (OMR_TraceThread *)(self? omrthread_tls_get(self, j9uteTLSKey) : NULL);
+	return (OMR_TraceThread *)(self ? omrthread_tls_get(self, j9uteTLSKey) : NULL);
 }
 
 omr_error_t

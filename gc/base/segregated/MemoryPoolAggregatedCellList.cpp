@@ -20,9 +20,8 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-#include "omrcfg.h"
-
 #include "GCExtensionsBase.hpp"
+#include "omrcfg.h"
 
 #if defined(OMR_GC_SEGREGATED_HEAP)
 #include "HeapRegionDescriptorSegregated.hpp"
@@ -39,9 +38,9 @@ MM_MemoryPoolAggregatedCellList::initialize(MM_EnvironmentBase *env, MM_HeapRegi
 	if (!_lock.initialize(env, &env->getExtensions()->lnrlOptions, "MM_MemoryPoolAggregatedCellList:_lock")) {
 		return false;
 	}
-	
+
 	_region = region;
-	
+
 	return true;
 }
 
@@ -51,13 +50,14 @@ MM_MemoryPoolAggregatedCellList::initialize(MM_EnvironmentBase *env, MM_HeapRegi
  * @param preAllocatedBytes a pointer to where the actual amount of pre-allocated bytes will be written to
  * @return the head of the pre-allocated list of cells
  */
-uintptr_t*
-MM_MemoryPoolAggregatedCellList::preAllocateCells(MM_EnvironmentBase* env, uintptr_t cellSize, uintptr_t desiredBytes, uintptr_t* preAllocatedBytes)
+uintptr_t *
+MM_MemoryPoolAggregatedCellList::preAllocateCells(
+        MM_EnvironmentBase *env, uintptr_t cellSize, uintptr_t desiredBytes, uintptr_t *preAllocatedBytes)
 {
 	uintptr_t desiredCellCount = desiredBytes / cellSize;
 	uintptr_t adjustedDesiredBytes = desiredBytes;
 	bool const compressed = compressObjectReferences();
-	
+
 	/* It's possible that the desiredBytes is less than the cellSize because the desiredBytes grows
 	 * irrespective of the size class.
 	 */
@@ -65,28 +65,29 @@ MM_MemoryPoolAggregatedCellList::preAllocateCells(MM_EnvironmentBase* env, uintp
 		desiredCellCount = 1;
 		adjustedDesiredBytes = cellSize;
 	}
-	
+
 	_lock.acquire();
 
 	if (_heapCurrent == _heapTop) {
 		/* The current chunk is empty, get the next one */
 		refreshCurrentEntry();
 	}
-	
-	uintptr_t* allocatedCellList = _heapCurrent;
-	
+
+	uintptr_t *allocatedCellList = _heapCurrent;
+
 	if ((uintptr_t)_heapTop - (uintptr_t)_heapCurrent > adjustedDesiredBytes) {
 		/* Carve off the desired part */
 		*preAllocatedBytes = desiredCellCount * cellSize;
 		_heapCurrent = (uintptr_t *)((uintptr_t)_heapCurrent + desiredCellCount * cellSize);
 		/* Make the remainder walkable */
-		MM_HeapLinkedFreeHeader::fillWithHoles(_heapCurrent, (uintptr_t)_heapTop - (uintptr_t)_heapCurrent, compressed);
+		MM_HeapLinkedFreeHeader::fillWithHoles(
+		        _heapCurrent, (uintptr_t)_heapTop - (uintptr_t)_heapCurrent, compressed);
 	} else {
 		/* Take the whole free chunk */
 		*preAllocatedBytes = (uintptr_t)_heapTop - (uintptr_t)_heapCurrent;
 		refreshCurrentEntry();
 	}
-	
+
 	addBytesAllocated(env, *preAllocatedBytes);
 	_lock.release();
 
@@ -104,7 +105,8 @@ MM_MemoryPoolAggregatedCellList::reset(MM_EnvironmentBase *env, uintptr_t sizeCl
 	bool const compressed = compressObjectReferences();
 
 	_freeListHead = NULL;
-	MM_HeapLinkedFreeHeader *freeListEntry = MM_HeapLinkedFreeHeader::fillWithHoles((uintptr_t*)lowAddress, cellSize * numCells, compressed);
+	MM_HeapLinkedFreeHeader *freeListEntry =
+	        MM_HeapLinkedFreeHeader::fillWithHoles((uintptr_t *)lowAddress, cellSize * numCells, compressed);
 	MM_HeapLinkedFreeHeader::linkInAsHead((volatile uintptr_t *)(&_freeListHead), freeListEntry, compressed);
 	resetCurrentEntry();
 
@@ -112,7 +114,7 @@ MM_MemoryPoolAggregatedCellList::reset(MM_EnvironmentBase *env, uintptr_t sizeCl
 }
 
 void
-MM_MemoryPoolAggregatedCellList::addBytesAllocated(MM_EnvironmentBase* env, uintptr_t bytesAllocated)
+MM_MemoryPoolAggregatedCellList::addBytesAllocated(MM_EnvironmentBase *env, uintptr_t bytesAllocated)
 {
 	/* Bytes allocated by large regions are counted when the regions are taken off the free region list,
 	 * see emptyRegionAllocated
@@ -144,7 +146,6 @@ MM_MemoryPoolAggregatedCellList::debugCountFreeBytes()
 	return freeBytes + (_heapTop - _heapCurrent);
 }
 
-
 void
 MM_MemoryPoolAggregatedCellList::updateCounts(MM_EnvironmentBase *env, bool fromFlush)
 {
@@ -152,7 +153,7 @@ MM_MemoryPoolAggregatedCellList::updateCounts(MM_EnvironmentBase *env, bool from
 
 	/* reserve the region so that nobody allocates while we flush */
 	_lock.acquire();
-	
+
 	if (fromFlush && (_freeListHead == NULL && _heapCurrent == _heapTop)) {
 		setFreeCount(0);
 		_lock.release();
@@ -160,7 +161,7 @@ MM_MemoryPoolAggregatedCellList::updateCounts(MM_EnvironmentBase *env, bool from
 	}
 
 	uintptr_t cellSize = _region->getCellSize();
-	
+
 	/* make the region walkable:
 	 * 1) set the size of the current chunk
 	 * 2) put the chunk back to the list
@@ -172,7 +173,7 @@ MM_MemoryPoolAggregatedCellList::updateCounts(MM_EnvironmentBase *env, bool from
 		MM_HeapLinkedFreeHeader::linkInAsHead((volatile uintptr_t *)(&_freeListHead), chunk, compressed);
 		_heapCurrent = _heapTop = (uintptr_t *)_freeListHead;
 	}
-	
+
 	/* Update only free cell count :( */
 	/* To be able to update mark/unmark count we would have to walk the whole region,
 	 * which is not safe if this is called concurrently with allocation. */
@@ -185,7 +186,7 @@ MM_MemoryPoolAggregatedCellList::updateCounts(MM_EnvironmentBase *env, bool from
 	_lock.release();
 }
 
-void 
+void
 MM_MemoryPoolAggregatedCellList::returnCell(MM_EnvironmentBase *env, uintptr_t *cell)
 {
 	bool const compressed = compressObjectReferences();
@@ -196,7 +197,7 @@ MM_MemoryPoolAggregatedCellList::returnCell(MM_EnvironmentBase *env, uintptr_t *
 	MM_HeapLinkedFreeHeader *cellHeader = MM_HeapLinkedFreeHeader::getHeapLinkedFreeHeader(cell);
 	cellHeader->setSize(_region->getCellSize());
 	MM_HeapLinkedFreeHeader::linkInAsHead((volatile uintptr_t *)(&_freeListHead), cellHeader, compressed);
-	
+
 	_lock.release();
 }
 

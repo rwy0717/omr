@@ -29,8 +29,10 @@
 #include "omrintrospect_common.h"
 
 /* The actual backtrace implementations that the protection wrappers call. These are platform specific */
-extern uintptr_t omrintrospect_backtrace_symbols_raw(struct OMRPortLibrary *portLibrary, J9PlatformThread *threadInfo, J9Heap *heap);
-extern uintptr_t omrintrospect_backtrace_thread_raw(struct OMRPortLibrary *portLibrary, J9PlatformThread *threadInfo, J9Heap *heap, void *signalInfo);
+extern uintptr_t omrintrospect_backtrace_symbols_raw(
+        struct OMRPortLibrary *portLibrary, J9PlatformThread *threadInfo, J9Heap *heap);
+extern uintptr_t omrintrospect_backtrace_thread_raw(
+        struct OMRPortLibrary *portLibrary, J9PlatformThread *threadInfo, J9Heap *heap, void *signalInfo);
 
 /* Packaging struct to pass aguments through the signal protection */
 struct threadData {
@@ -71,7 +73,8 @@ protectedIntrospectBacktraceThread(struct OMRPortLibrary *port, void *arg)
  * @return the number of frames in the backtrace.
  */
 uintptr_t
-omrintrospect_backtrace_thread(struct OMRPortLibrary *portLibrary, J9PlatformThread *threadInfo, J9Heap *heap, void *signalInfo)
+omrintrospect_backtrace_thread(
+        struct OMRPortLibrary *portLibrary, J9PlatformThread *threadInfo, J9Heap *heap, void *signalInfo)
 {
 	uintptr_t ret;
 	struct threadData args;
@@ -80,14 +83,17 @@ omrintrospect_backtrace_thread(struct OMRPortLibrary *portLibrary, J9PlatformThr
 	args.signalInfo = signalInfo;
 
 	if (omrthread_self()) {
-		if (portLibrary->sig_protect(portLibrary, protectedIntrospectBacktraceThread, &args, handler, NULL, OMRPORT_SIG_FLAG_SIGALLSYNC | OMRPORT_SIG_FLAG_MAY_RETURN, &ret) == 0) {
+		if (portLibrary->sig_protect(portLibrary, protectedIntrospectBacktraceThread, &args, handler, NULL,
+		            OMRPORT_SIG_FLAG_SIGALLSYNC | OMRPORT_SIG_FLAG_MAY_RETURN, &ret)
+		        == 0) {
 			return ret;
 		} else {
 			J9PlatformStackFrame *frame;
 			int frames = 0;
 
 			/* see if there is a partial backtrace we can return */
-			for (frame = threadInfo->callstack; frame != NULL; frame = frame->parent_frame, frames++);
+			for (frame = threadInfo->callstack; frame != NULL; frame = frame->parent_frame, frames++)
+				;
 
 			threadInfo->error = FAULT_DURING_BACKTRACE;
 			return frames;
@@ -109,7 +115,8 @@ protectedIntrospectBacktraceSymbols(struct OMRPortLibrary *port, void *arg)
  * and looks up the symbols for the frames. The format of the string generated is:
  * 		symbol_name (statement_id instruction_pointer [module+offset])
  * If it isn't possible to determine any of the items in the string then they are omitted. If no heap is specified
- * then this function will use malloc to allocate the memory necessary for the symbols which must be freed by the caller.
+ * then this function will use malloc to allocate the memory necessary for the symbols which must be freed by the
+ * caller.
  *
  * @param portLbirary a pointer to an initialized port library
  * @param threadInfo a thread structure populated with a backtrace
@@ -126,7 +133,9 @@ omrintrospect_backtrace_symbols(struct OMRPortLibrary *portLibrary, J9PlatformTh
 	args.heap = heap;
 
 	if (omrthread_self()) {
-		if (portLibrary->sig_protect(portLibrary, protectedIntrospectBacktraceSymbols, &args, handler, NULL, OMRPORT_SIG_FLAG_SIGALLSYNC | OMRPORT_SIG_FLAG_MAY_RETURN, &ret) == 0) {
+		if (portLibrary->sig_protect(portLibrary, protectedIntrospectBacktraceSymbols, &args, handler, NULL,
+		            OMRPORT_SIG_FLAG_SIGALLSYNC | OMRPORT_SIG_FLAG_MAY_RETURN, &ret)
+		        == 0) {
 			return ret;
 		} else {
 			threadInfo->error = FAULT_DURING_BACKTRACE;
@@ -136,6 +145,3 @@ omrintrospect_backtrace_symbols(struct OMRPortLibrary *portLibrary, J9PlatformTh
 		return omrintrospect_backtrace_symbols_raw(portLibrary, threadInfo, heap);
 	}
 }
-
-
-

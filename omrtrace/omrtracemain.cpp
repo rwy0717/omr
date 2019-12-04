@@ -80,11 +80,16 @@ moduleLoaded(OMR_TraceThread *thr, UtModuleInfo *modInfo)
 	UT_DBGOUT(1, ("<UT> ModuleLoaded: %s\n", modInfo->name));
 
 	if (modInfo->traceVersionInfo == NULL) {
-		/* this is a pre 142 module - not compatible with this trace engine fail silently to register this module */
-		UT_DBGOUT(1, ("<UT> ModuleLoaded refusing registration to %s because it's version is less than the supported UT version %d\n", modInfo->name, UT_VERSION));
+		/* this is a pre 142 module - not compatible with this trace engine fail silently to register this
+		 * module */
+		UT_DBGOUT(1,
+		        ("<UT> ModuleLoaded refusing registration to %s because it's version is less than the "
+		         "supported UT version %d\n",
+		                modInfo->name, UT_VERSION));
 		return OMR_ERROR_NONE;
 	} /* else {
-		this field contains the version number and can be used to modify behaviour based on level of module loaded
+	        this field contains the version number and can be used to modify behaviour based on level of module
+	loaded
 	} */
 
 	checkGetTraceLock(thr);
@@ -113,8 +118,7 @@ moduleLoaded(OMR_TraceThread *thr, UtModuleInfo *modInfo)
 
 	checkFreeTraceLock(thr);
 
-	UT_DBGOUT(1, ("<UT> ModuleLoaded: %s, interface: "
-				  UT_POINTER_SPEC "\n", modInfo->name, modInfo->intf));
+	UT_DBGOUT(1, ("<UT> ModuleLoaded: %s, interface: " UT_POINTER_SPEC "\n", modInfo->name, modInfo->intf));
 	return OMR_ERROR_NONE;
 }
 
@@ -154,23 +158,29 @@ moduleUnLoading(OMR_TraceThread *thr, UtModuleInfo *modInfo)
 	UT_DBGOUT(1, ("<UT> ModuleUnloading: %s\n", modInfo->name));
 
 	if (NULL == modInfo->traceVersionInfo) {
-		/* this is a pre 142 module - not compatible with this trace engine fail silently to register this module */
-		UT_DBGOUT(1, ("<UT> ModuleLoaded refusing deregistration to %s because it's version is less than the supported UT version %d\n", modInfo->name, UT_VERSION));
+		/* this is a pre 142 module - not compatible with this trace engine fail silently to register this
+		 * module */
+		UT_DBGOUT(1,
+		        ("<UT> ModuleLoaded refusing deregistration to %s because it's version is less than the "
+		         "supported UT version %d\n",
+		                modInfo->name, UT_VERSION));
 		return OMR_ERROR_NONE;
 	} /* else {
-		this field contains the version number and can be used to modify behaviour based on level of module loaded
+	        this field contains the version number and can be used to modify behaviour based on level of module
+	loaded
 	} */
-
 
 	getTraceLock(thr);
 
 	if (modInfo->referenceCount > 0) {
 		modInfo->referenceCount -= 1;
 	} else {
-		rc = setTracePointsTo(modInfo->name, OMR_TRACEGLOBAL(componentList), TRUE, 0, 0, 0, -1, NULL, FALSE, TRUE);
+		rc = setTracePointsTo(
+		        modInfo->name, OMR_TRACEGLOBAL(componentList), TRUE, 0, 0, 0, -1, NULL, FALSE, TRUE);
 		if (OMR_ERROR_NONE != rc) {
 			UT_DBGOUT(1, ("<UT> problem turning off trace in %s as it unloads\n", modInfo->name));
-			/* proceed to remove it from list in case it has gone and we try and manipulate it's control array */
+			/* proceed to remove it from list in case it has gone and we try and manipulate it's control
+			 * array */
 		}
 		rc = removeModuleFromList(modInfo, OMR_TRACEGLOBAL(componentList));
 
@@ -180,7 +190,7 @@ moduleUnLoading(OMR_TraceThread *thr, UtModuleInfo *modInfo)
 
 	freeTraceLock(thr);
 
-	return  rc;
+	return rc;
 }
 
 /*******************************************************************************
@@ -192,7 +202,7 @@ moduleUnLoading(OMR_TraceThread *thr, UtModuleInfo *modInfo)
 omr_error_t
 threadStop(OMR_TraceThread **thrSlot)
 {
-	if (NULL == omrTraceGlobal) {			/* very fatal! */
+	if (NULL == omrTraceGlobal) { /* very fatal! */
 		if (NULL != thrSlot) {
 			*thrSlot = NULL;
 		}
@@ -224,7 +234,9 @@ threadStop(OMR_TraceThread **thrSlot)
 			 */
 			internalTrace(thr, NULL, (UT_TRC_PURGE_ID << 8) | UT_MINIMAL, NULL);
 
-			UT_DBGOUT(3, ("<UT> Purging buffer " UT_POINTER_SPEC " for thread " UT_POINTER_SPEC "\n", trcBuf, thr));
+			UT_DBGOUT(3,
+			        ("<UT> Purging buffer " UT_POINTER_SPEC " for thread " UT_POINTER_SPEC "\n", trcBuf,
+			                thr));
 			publishTraceBuffer(thr, trcBuf);
 		} else {
 			releaseTraceBuffer(thr, trcBuf);
@@ -263,26 +275,25 @@ threadStop(OMR_TraceThread **thrSlot)
 		 * e.g.
 		 * (this thread)						(other thread)
 		 * read initState, MT_ENABLED
-		 * 										set initState to SHUTDOWN_STARTED (from utTerminateTrace())
-		 * 										atomic decr threadCount,
-		 * 											new threadCount is 1
-		 * 										skip freeTrace() because threadCount > 0
-		 * 	atomic decr threadCount,
-		 * 		new threadCount is 0
-		 * 	skip freeTrace() because initState
-		 * 		is not SHUTDOWN_STARTED
+		 * 										set initState to
+		 * SHUTDOWN_STARTED (from utTerminateTrace()) atomic decr threadCount, new threadCount is 1 skip
+		 * freeTrace() because threadCount > 0 atomic decr threadCount, new threadCount is 0 skip freeTrace()
+		 * because initState is not SHUTDOWN_STARTED
 		 */
 		VM_AtomicSupport::readBarrier();
 		if (OMR_TRACE_ENGINE_SHUTDOWN_STARTED == OMR_TRACEGLOBAL(initState)) {
 			if (OMR_TRACEGLOBAL(traceDebug) >= 2) {
-				omrtty_err_printf("<UT> threadStop entered for final thread " UT_POINTER_SPEC ", freeing buffers\n", thr);
+				omrtty_err_printf("<UT> threadStop entered for final thread " UT_POINTER_SPEC ", "
+				                  "freeing "
+				                  "buffers"
+				                  "\n",
+				        thr);
 			}
 			freeTrace();
 		}
 	}
 	return OMR_ERROR_NONE;
 }
-
 
 /*
  * Assumes current thread is attached to trace.
@@ -292,7 +303,7 @@ utTerminateTrace(void)
 {
 	omr_error_t result = OMR_ERROR_NONE;
 
-	if (NULL == omrTraceGlobal) {			/* very fatal! */
+	if (NULL == omrTraceGlobal) { /* very fatal! */
 		return OMR_ERROR_INTERNAL;
 	}
 
@@ -436,7 +447,8 @@ freeTrace(void)
  * @pre Attached to omrthread.
  */
 omr_error_t
-threadStart(OMR_TraceThread **thr, const void *threadId, const char *threadName, const void *threadSynonym1, const void *threadSynonym2)
+threadStart(OMR_TraceThread **thr, const void *threadId, const char *threadName, const void *threadSynonym1,
+        const void *threadSynonym2)
 {
 	omr_error_t rc = OMR_ERROR_NONE;
 	OMRPORT_ACCESS_FROM_OMRPORT(OMR_TRACEGLOBAL(portLibrary));
@@ -474,7 +486,10 @@ threadStart(OMR_TraceThread **thr, const void *threadId, const char *threadName,
 
 	*thr = newThr;
 	UT_DBGOUT(2, ("<UT> Thread started , thread anchor " UT_POINTER_SPEC "\n", *thr));
-	UT_DBGOUT(2, ("<UT> thread Id " UT_POINTER_SPEC ", thread name \"%s\", syn1 " UT_POINTER_SPEC ", syn2 " UT_POINTER_SPEC " \n", threadId, threadName, threadSynonym1, threadSynonym2));
+	UT_DBGOUT(2,
+	        ("<UT> thread Id " UT_POINTER_SPEC ", thread name \"%s\", syn1 " UT_POINTER_SPEC
+	         ", syn2 " UT_POINTER_SPEC " \n",
+	                threadId, threadName, threadSynonym1, threadSynonym2));
 
 	omrthread_tls_set(OS_THREAD_FROM_TRACE_THREAD(newThr), j9uteTLSKey, newThr);
 
@@ -513,9 +528,7 @@ initializeTrace(OMR_VM *vm, const char *datDir, const OMR_TraceLanguageInterface
 	{
 		char *envString = getenv(UT_DEBUG);
 		if (envString != NULL) {
-			if (hexStringLength(envString) == 1 &&
-				*envString >= '0' &&
-				*envString <= '9') {
+			if (hexStringLength(envString) == 1 && *envString >= '0' && *envString <= '9') {
 				OMR_TRACEGLOBAL(traceDebug) = atoi(envString);
 			} else {
 				OMR_TRACEGLOBAL(traceDebug) = 9;
@@ -579,8 +592,8 @@ initializeTrace(OMR_VM *vm, const char *datDir, const OMR_TraceLanguageInterface
 	omrTraceGlobal = newGbl;
 
 	/*
-	* Get TLS keys
-	*/
+	 * Get TLS keys
+	 */
 	if (omrthread_tls_alloc(&j9uteTLSKey)) {
 		/* Unable to allocate UTE thread local storage key */
 		rc = OMR_ERROR_OUT_OF_NATIVE_MEMORY;
@@ -594,15 +607,15 @@ initializeTrace(OMR_VM *vm, const char *datDir, const OMR_TraceLanguageInterface
 	}
 
 	/* Initialize locks and pools for buffers and thread data. */
-	OMR_TRACEGLOBAL(bufferPool) = pool_new(OMR_TRACEGLOBAL(bufferSize) + offsetof(OMR_TraceBuffer, record),
-										   0, 0, 0, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_TRACE, POOL_FOR_PORT(OMRPORTLIB));
+	OMR_TRACEGLOBAL(bufferPool) = pool_new(OMR_TRACEGLOBAL(bufferSize) + offsetof(OMR_TraceBuffer, record), 0, 0, 0,
+	        OMR_GET_CALLSITE(), OMRMEM_CATEGORY_TRACE, POOL_FOR_PORT(OMRPORTLIB));
 	if (NULL == OMR_TRACEGLOBAL(bufferPool)) {
 		UT_DBGOUT(1, ("<UT> Unable to obtain storage for trace buffer pool\n"));
 		rc = OMR_ERROR_OUT_OF_NATIVE_MEMORY;
 		goto fail;
 	}
-	OMR_TRACEGLOBAL(threadPool) = pool_new(sizeof(OMR_TraceThread),
-										   0, 0, 0, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_TRACE, POOL_FOR_PORT(OMRPORTLIB));
+	OMR_TRACEGLOBAL(threadPool) = pool_new(
+	        sizeof(OMR_TraceThread), 0, 0, 0, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_TRACE, POOL_FOR_PORT(OMRPORTLIB));
 	if (NULL == OMR_TRACEGLOBAL(threadPool)) {
 		UT_DBGOUT(1, ("<UT> Unable to obtain storage for trace thread pool\n"));
 		rc = OMR_ERROR_OUT_OF_NATIVE_MEMORY;
@@ -643,7 +656,7 @@ fail:
  ******************************************************************************/
 omr_error_t
 trcRegisterRecordSubscriber(OMR_TraceThread *thr, const char *description, utsSubscriberCallback subscriber,
-							utsSubscriberAlarmCallback alarm, void *userData, UtSubscription **subscriptionReference)
+        utsSubscriberAlarmCallback alarm, void *userData, UtSubscription **subscriptionReference)
 {
 	omr_error_t result = OMR_ERROR_NONE;
 	size_t descriptionLen = 0;
@@ -656,7 +669,8 @@ trcRegisterRecordSubscriber(OMR_TraceThread *thr, const char *description, utsSu
 	}
 
 	OMRPORT_ACCESS_FROM_OMRPORT(OMR_TRACEGLOBAL(portLibrary));
-	UtSubscription *subscription = (UtSubscription *)omrmem_allocate_memory(sizeof(UtSubscription), OMRMEM_CATEGORY_TRACE);
+	UtSubscription *subscription =
+	        (UtSubscription *)omrmem_allocate_memory(sizeof(UtSubscription), OMRMEM_CATEGORY_TRACE);
 	if (subscription == NULL) {
 		UT_DBGOUT(1, ("<UT thr=" UT_POINTER_SPEC "> Out of memory allocating subscription\n", thr));
 		return OMR_ERROR_OUT_OF_NATIVE_MEMORY;
@@ -681,7 +695,8 @@ trcRegisterRecordSubscriber(OMR_TraceThread *thr, const char *description, utsSu
 		description = "Trace Subscriber [unnamed]";
 	}
 	descriptionLen = strlen(description);
-	subscription->description = (char *)omrmem_allocate_memory(sizeof(char) * (descriptionLen + 1), OMRMEM_CATEGORY_TRACE);
+	subscription->description =
+	        (char *)omrmem_allocate_memory(sizeof(char) * (descriptionLen + 1), OMRMEM_CATEGORY_TRACE);
 	if (subscription->description == NULL) {
 		UT_DBGOUT(1, ("<UT thr=" UT_POINTER_SPEC "> Out of memory allocating description\n", thr));
 		result = OMR_ERROR_OUT_OF_NATIVE_MEMORY;
@@ -708,7 +723,6 @@ out:
 	decrementRecursionCounter(thr);
 	return result;
 }
-
 
 /*******************************************************************************
  * name        - trcDeregisterRecordSubscriber
@@ -748,7 +762,6 @@ trcDeregisterRecordSubscriber(OMR_TraceThread *thr, UtSubscription *subscription
 	decrementRecursionCounter(thr);
 	return result;
 }
-
 
 /*******************************************************************************
  * name        - trcFlushTraceData
@@ -836,11 +849,11 @@ fillInUTInterfaces(UtInterface **utIntf, OMR_TraceInterface *omrTraceIntf, UtMod
 		 * Initialize the server interface...
 		 */
 		memset(omrTraceIntf, 0, sizeof(*omrTraceIntf));
-		omrTraceIntf->RegisterRecordSubscriber		= trcRegisterRecordSubscriber;
-		omrTraceIntf->DeregisterRecordSubscriber	= trcDeregisterRecordSubscriber;
-		omrTraceIntf->FlushTraceData				= trcFlushTraceData;
-		omrTraceIntf->GetTraceMetadata				= trcGetTraceMetadata;
-		omrTraceIntf->SetOptions					= trcSetOptions;
+		omrTraceIntf->RegisterRecordSubscriber = trcRegisterRecordSubscriber;
+		omrTraceIntf->DeregisterRecordSubscriber = trcDeregisterRecordSubscriber;
+		omrTraceIntf->FlushTraceData = trcFlushTraceData;
+		omrTraceIntf->GetTraceMetadata = trcGetTraceMetadata;
+		omrTraceIntf->SetOptions = trcSetOptions;
 
 		/*
 		 * Initialize the direct module interface, these are
@@ -848,9 +861,9 @@ fillInUTInterfaces(UtInterface **utIntf, OMR_TraceInterface *omrTraceIntf, UtMod
 		 * before calling the real function.
 		 */
 		memset(utModuleIntf, 0, sizeof(*utModuleIntf));
-		utModuleIntf->Trace           = omrTrace;
-		utModuleIntf->TraceInit       = omrTraceInit;
-		utModuleIntf->TraceTerm       = omrTraceTerm;
+		utModuleIntf->Trace = omrTrace;
+		utModuleIntf->TraceInit = omrTraceInit;
+		utModuleIntf->TraceTerm = omrTraceTerm;
 
 		/*
 		 * Make the interfaces available.

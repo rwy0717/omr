@@ -20,10 +20,10 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-#include <stdarg.h>
+#include "ModronAssertions.h"
 
 #include "omr.h"
-#include "ModronAssertions.h"
+#include <stdarg.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,7 +31,7 @@ extern "C" {
 
 #if defined(OMR_GC_DEBUG_ASSERTS)
 
-#define ASSERTION_MESSAGE_BUFFER_SIZE	((uintptr_t)256)
+#define ASSERTION_MESSAGE_BUFFER_SIZE ((uintptr_t)256)
 
 /*
  * The purpose of moving of the body of macros GC Assertions with message to separate function is to prevent inlining

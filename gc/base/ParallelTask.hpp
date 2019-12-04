@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 /**
  * @file
  * @ingroup GC_Base
@@ -29,11 +28,10 @@
 #if !defined(PARALLEL_TASK_HPP_)
 #define PARALLEL_TASK_HPP_
 
-#include "omr.h"
-#include "omrthread.h"
-
 #include "AtomicOperations.hpp"
 #include "Task.hpp"
+#include "omr.h"
+#include "omrthread.h"
 
 class MM_EnvironmentBase;
 
@@ -41,8 +39,7 @@ class MM_EnvironmentBase;
  * @todo Provide class documentation
  * @ingroup GC_Base
  */
-class MM_ParallelTask : public MM_Task
-{
+class MM_ParallelTask : public MM_Task {
 	/*
 	 * Data members
 	 */
@@ -50,17 +47,18 @@ private:
 protected:
 	bool _synchronized;
 	const char *_syncPointUniqueId;
-	uintptr_t _syncPointWorkUnitIndex; /**< The _workUnitIndex of the first thread to sync. All threads should have the same index once sync'ed. */
+	uintptr_t _syncPointWorkUnitIndex; /**< The _workUnitIndex of the first thread to sync. All threads should have
+	                                      the same index once sync'ed. */
 
 	uintptr_t _totalThreadCount;
 	volatile uintptr_t _threadCount;
-	
+
 	volatile uintptr_t _workUnitIndex;
 	volatile uintptr_t _synchronizeIndex;
 	volatile uintptr_t _synchronizeCount;
 	omrthread_monitor_t _synchronizeMutex;
+
 public:
-	
 	/*
 	 * Function members
 	 */
@@ -72,35 +70,39 @@ public:
 	virtual void releaseSynchronizedGCThreads(MM_EnvironmentBase *env);
 	virtual void synchronizeGCThreads(MM_EnvironmentBase *env, const char *id, uint64_t *stallTime);
 	virtual bool synchronizeGCThreadsAndReleaseMaster(MM_EnvironmentBase *env, const char *id, uint64_t *stallTime);
-	
-	MMINLINE virtual void setSynchronizeMutex(omrthread_monitor_t synchronizeMutex) { _synchronizeMutex = synchronizeMutex; }
+
+	MMINLINE virtual void setSynchronizeMutex(omrthread_monitor_t synchronizeMutex)
+	{
+		_synchronizeMutex = synchronizeMutex;
+	}
 	virtual void complete(MM_EnvironmentBase *env);
 
 	/**
-	 * @note This should not be called by anyone but Dispatcher or ParallelDispatcher 
+	 * @note This should not be called by anyone but Dispatcher or ParallelDispatcher
 	 **/
-	MMINLINE virtual void setThreadCount(uintptr_t threadCount) {
+	MMINLINE virtual void setThreadCount(uintptr_t threadCount)
+	{
 		_threadCount = threadCount;
 		_totalThreadCount = threadCount;
 	}
 	MMINLINE virtual uintptr_t getThreadCount() { return _totalThreadCount; }
-	
+
 	virtual bool isSynchronized();
 
 	/**
 	 * Create a ParallelTask object.
 	 */
-	MM_ParallelTask(MM_EnvironmentBase *env, MM_Dispatcher *dispatcher) :
-		MM_Task(env, dispatcher)
-		,_synchronized(false)
-		,_syncPointUniqueId(NULL)
-		,_syncPointWorkUnitIndex(0)
-		,_totalThreadCount(0)
-		,_threadCount(0)
-		,_workUnitIndex(0)
-		,_synchronizeIndex(0)
-		,_synchronizeCount(0)
-		,_synchronizeMutex(NULL)
+	MM_ParallelTask(MM_EnvironmentBase *env, MM_Dispatcher *dispatcher)
+	        : MM_Task(env, dispatcher)
+	        , _synchronized(false)
+	        , _syncPointUniqueId(NULL)
+	        , _syncPointWorkUnitIndex(0)
+	        , _totalThreadCount(0)
+	        , _threadCount(0)
+	        , _workUnitIndex(0)
+	        , _synchronizeIndex(0)
+	        , _synchronizeCount(0)
+	        , _synchronizeMutex(NULL)
 	{
 		_typeId = __FUNCTION__;
 	}

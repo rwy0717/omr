@@ -21,15 +21,13 @@
  *******************************************************************************/
 
 /**
-  * @file
-  * @ingroup Port
-  * @brief TTY output
-  *
-  * All VM output goes to stderr by default.  These routines provide the helpers for such output.
-  */
+ * @file
+ * @ingroup Port
+ * @brief TTY output
+ *
+ * All VM output goes to stderr by default.  These routines provide the helpers for such output.
+ */
 #include "omrport.h"
-
-
 
 /**
  * Determine the number of characters remaining to be read from stdin.
@@ -66,8 +64,6 @@ omrtty_err_printf(struct OMRPortLibrary *portLibrary, const char *format, ...)
 	va_end(args);
 }
 
-
-
 /**
  * Output message to stderr.
  *
@@ -86,8 +82,6 @@ omrtty_err_vprintf(struct OMRPortLibrary *portLibrary, const char *format, va_li
 	portLibrary->file_vprintf(portLibrary, OMRPORT_TTY_ERR, format, args);
 }
 
-
-
 /**
  * Read characters from stdin into buffer.
  *
@@ -102,8 +96,6 @@ omrtty_get_chars(struct OMRPortLibrary *portLibrary, char *s, uintptr_t length)
 {
 	return -1;
 }
-
-
 
 /**
  * Write characters to stderr.
@@ -127,8 +119,6 @@ omrtty_printf(struct OMRPortLibrary *portLibrary, const char *format, ...)
 	va_end(args);
 }
 
-
-
 /**
  * PortLibrary shutdown.
  *
@@ -141,8 +131,7 @@ omrtty_printf(struct OMRPortLibrary *portLibrary, const char *format, ...)
  */
 void
 omrtty_shutdown(struct OMRPortLibrary *portLibrary)
-{
-}
+{}
 /**
  * PortLibrary startup.
  *
@@ -191,7 +180,4 @@ omrtty_vprintf(struct OMRPortLibrary *portLibrary, const char *format, va_list a
  */
 void
 omrtty_daemonize(struct OMRPortLibrary *portLibrary)
-{
-}
-
-
+{}

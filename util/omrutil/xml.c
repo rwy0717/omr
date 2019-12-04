@@ -44,21 +44,11 @@ escapeXMLString(OMRPortLibrary *portLibrary, char *outBuf, uintptr_t outBufLen, 
 		char tmpBuf[8];
 
 		switch (string[stringPos]) {
-		case '<':
-			strcpy(tmpBuf, "&lt;");
-			break;
-		case '>':
-			strcpy(tmpBuf, "&gt;");
-			break;
-		case '&':
-			strcpy(tmpBuf, "&amp;");
-			break;
-		case '\'':
-			strcpy(tmpBuf, "&apos;");
-			break;
-		case '\"':
-			strcpy(tmpBuf, "&quot;");
-			break;
+		case '<': strcpy(tmpBuf, "&lt;"); break;
+		case '>': strcpy(tmpBuf, "&gt;"); break;
+		case '&': strcpy(tmpBuf, "&amp;"); break;
+		case '\'': strcpy(tmpBuf, "&apos;"); break;
+		case '\"': strcpy(tmpBuf, "&quot;"); break;
 		default:
 			if (((uint8_t)(string[stringPos])) < 0x20) {
 				/* use XML escape sequence for characters below 0x20 */

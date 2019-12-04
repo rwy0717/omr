@@ -40,16 +40,18 @@ intptr_t ReleaseLaunchSemaphore(OMRPortLibrary *portLibrary, intptr_t semaphore,
 intptr_t WaitForLaunchSemaphore(OMRPortLibrary *portLibrary, intptr_t semaphore);
 intptr_t CloseLaunchSemaphore(OMRPortLibrary *portLibrary, intptr_t semaphore);
 
-OMRProcessHandle launchChildProcess(OMRPortLibrary *portLibrary, const char *testname, const char *argv0, const char *options);
+OMRProcessHandle launchChildProcess(
+        OMRPortLibrary *portLibrary, const char *testname, const char *argv0, const char *options);
 intptr_t waitForTestProcess(OMRPortLibrary *portLibrary, OMRProcessHandle processHandle);
 void SleepFor(intptr_t second);
 
-#define OMRPROCESS_INVALID_FD	-1
+#define OMRPROCESS_INVALID_FD -1
 #define OMRPROCESS_DEBUG 1
 #define OMRPROCESS_ERROR -1
 intptr_t j9process_close(OMRPortLibrary *portLibrary, OMRProcessHandle *processHandle, uint32_t options);
 intptr_t j9process_waitfor(OMRPortLibrary *portLibrary, OMRProcessHandle processHandle);
 intptr_t j9process_get_exitCode(OMRPortLibrary *portLibrary, OMRProcessHandle processHandle);
-intptr_t j9process_create(OMRPortLibrary *portLibrary, const char *command[], uintptr_t commandLength, const char *dir, uint32_t options, OMRProcessHandle *processHandle);
+intptr_t j9process_create(OMRPortLibrary *portLibrary, const char *command[], uintptr_t commandLength, const char *dir,
+        uint32_t options, OMRProcessHandle *processHandle);
 
 #endif /* !defined(TESTPROCESSHELPER_HPP_INCLUDED) */

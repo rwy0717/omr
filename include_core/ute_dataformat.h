@@ -38,57 +38,57 @@ extern "C" {
  *  Constants
  * =============================================================================
  */
-#define UT_DEFAULT_BUFFERSIZE         8192
-#define UT_MINIMUM_BUFFERSIZE         1000
-#define UT_MAX_THREAD_NAME_LENGTH     512
-#define UT_FASTPATH                   17
-#define UT_TRACE_INTERNAL             0
-#define UT_TRACE_EXTERNAL             1
-#define UT_STRUCT_ALIGN               4
-#define UT_TRACE_BUFFER_NAME          "UTTB"
-#define UT_TRACE_HEADER_NAME          "UTTH"
-#define UT_TRACE_SECTION_NAME         "UTTS"
-#define UT_STARTUP_SECTION_NAME       "UTSO"
-#define UT_SERVICE_SECTION_NAME       "UTSS"
-#define UT_ACTIVE_SECTION_NAME        "UTTA"
-#define UT_PROC_SECTION_NAME          "UTPR"
-#define UT_NULL_POINTER               "[Null Pointer]"
+#define UT_DEFAULT_BUFFERSIZE 8192
+#define UT_MINIMUM_BUFFERSIZE 1000
+#define UT_MAX_THREAD_NAME_LENGTH 512
+#define UT_FASTPATH 17
+#define UT_TRACE_INTERNAL 0
+#define UT_TRACE_EXTERNAL 1
+#define UT_STRUCT_ALIGN 4
+#define UT_TRACE_BUFFER_NAME "UTTB"
+#define UT_TRACE_HEADER_NAME "UTTH"
+#define UT_TRACE_SECTION_NAME "UTTS"
+#define UT_STARTUP_SECTION_NAME "UTSO"
+#define UT_SERVICE_SECTION_NAME "UTSS"
+#define UT_ACTIVE_SECTION_NAME "UTTA"
+#define UT_PROC_SECTION_NAME "UTPR"
+#define UT_NULL_POINTER "[Null Pointer]"
 
-#define UT_ENDIAN_SIGNATURE           0x12345678
+#define UT_ENDIAN_SIGNATURE 0x12345678
 
-#define UT_TRC_SPECIAL_MASK           0x3ff
-#define UT_TRC_ID_MASK                0x3fff
-#define UT_TRC_EXTENDED_LENGTH        4
-#define UT_TRC_SEQ_WRAP_LENGTH        8
-#define UT_MAX_TRC_LENGTH             255
-#define UT_MAX_EXTENDED_LENGTH        ((64 * 1024) - 9)
-#define UT_TRC_SEQ_WRAP_ID            "\x0\x0\x0"
-#define UT_TRC_LOST_COUNT_ID          "\x0\x1\x0"
+#define UT_TRC_SPECIAL_MASK 0x3ff
+#define UT_TRC_ID_MASK 0x3fff
+#define UT_TRC_EXTENDED_LENGTH 4
+#define UT_TRC_SEQ_WRAP_LENGTH 8
+#define UT_MAX_TRC_LENGTH 255
+#define UT_MAX_EXTENDED_LENGTH ((64 * 1024) - 9)
+#define UT_TRC_SEQ_WRAP_ID "\x0\x0\x0"
+#define UT_TRC_LOST_COUNT_ID "\x0\x1\x0"
 /* dg.259 */
-#define UT_TRC_CONTEXT_ID             0x103
+#define UT_TRC_CONTEXT_ID 0x103
 /* dg.260 */
-#define UT_TRC_RESET_ID               0x104
+#define UT_TRC_RESET_ID 0x104
 /* dg.262 */
-#define UT_TRC_PURGE_ID               0x106
+#define UT_TRC_PURGE_ID 0x106
 /* dg.327 */
-#define UT_TRC_LAST_SPECIAL_ID        0x147
+#define UT_TRC_LAST_SPECIAL_ID 0x147
 
 /*
  *  Trace data type identifiers
  */
-#define UT_TRACE_DATA_TYPE_END          0
-#define UT_TRACE_DATA_TYPE_CHAR         1
-#define UT_TRACE_DATA_TYPE_SHORT        2
-#define UT_TRACE_DATA_TYPE_INT32        4
-#define UT_TRACE_DATA_TYPE_INT64        8
-#define UT_TRACE_DATA_TYPE_STRING      -1
+#define UT_TRACE_DATA_TYPE_END 0
+#define UT_TRACE_DATA_TYPE_CHAR 1
+#define UT_TRACE_DATA_TYPE_SHORT 2
+#define UT_TRACE_DATA_TYPE_INT32 4
+#define UT_TRACE_DATA_TYPE_INT64 8
+#define UT_TRACE_DATA_TYPE_STRING -1
 /* The above are for compatibility */
 
-#define UT_TRACE_DATA_TYPE_FLOAT        5
-#define UT_TRACE_DATA_TYPE_POINTER      6
-#define UT_TRACE_DATA_TYPE_DOUBLE       7
-#define UT_TRACE_DATA_TYPE_LONG_DOUBLE  9
-#define UT_TRACE_DATA_TYPE_PRECISION    10
+#define UT_TRACE_DATA_TYPE_FLOAT 5
+#define UT_TRACE_DATA_TYPE_POINTER 6
+#define UT_TRACE_DATA_TYPE_DOUBLE 7
+#define UT_TRACE_DATA_TYPE_LONG_DOUBLE 9
+#define UT_TRACE_DATA_TYPE_PRECISION 10
 
 /* In a UtTraceRecord, offsets from the previous tracepoint's length byte */
 #define TRACEPOINT_RAW_DATA_TP_ID_OFFSET 1

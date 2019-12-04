@@ -25,7 +25,7 @@
 #include "omrutilbase.h"
 #include "thread_internal.h" /* must be after thrdsup.h */
 
-#include <sched.h>	/* must be after <pthread.h> or DECUNIX kaks */
+#include <sched.h> /* must be after <pthread.h> or DECUNIX kaks */
 
 #include <stdio.h>
 #include <string.h>
@@ -91,7 +91,8 @@ Here are the constraints:
 All of these values are calculated for both hard and soft.
 
 Regular ordering:
-minRegularPrio <= lowerBoundRegular <= lowerBoundRegularMapped <= higherBoundRegularMapped <= higherBoundRegular <= maxRegularPrio
+minRegularPrio <= lowerBoundRegular <= lowerBoundRegularMapped <= higherBoundRegularMapped <= higherBoundRegular <=
+maxRegularPrio
 
 Real-time ordering:
 minRealtimePrio <= lowerBoundRealtime <= higherBoundRealtime <= maxRealtimePrio
@@ -108,18 +109,18 @@ printMap(void)
 	int k;
 	for (k = 0; k <= J9THREAD_PRIORITY_MAX; k++) {
 		int pol = omrthread_get_scheduling_policy(k);
-		printf("j9 thread prio mapping: %d -> %d %s\n", k,
-			   omrthread_get_mapped_priority(k), (pol == SCHED_OTHER) ? "SCHED_OTHER" : ((pol == SCHED_RR) ? "SCHED_RR" : "SCHED_FIFO"));
+		printf("j9 thread prio mapping: %d -> %d %s\n", k, omrthread_get_mapped_priority(k),
+		        (pol == SCHED_OTHER) ? "SCHED_OTHER" : ((pol == SCHED_RR) ? "SCHED_RR" : "SCHED_FIFO"));
 	}
 
 	fprintf(stderr, "min rt %d, max rt %d\n", minRealtimePrio, maxRealtimePrio);
 	fprintf(stderr, "min reg %d, max reg %d\n", minRegularPrio, maxRegularPrio);
 	fprintf(stderr, "min bound rt %d, max bound rt %d\n", lowerBoundRealtime, higherBoundRealtime);
 	fprintf(stderr, "min  bound reg %d, max bound reg %d\n", lowerBoundRegular, higherBoundRegular);
-	fprintf(stderr, "min  bound reg mapped %d, max bound reg mapped %d\n", lowerBoundRegularMapped, higherBoundRegularMapped);
+	fprintf(stderr, "min  bound reg mapped %d, max bound reg mapped %d\n", lowerBoundRegularMapped,
+	        higherBoundRegularMapped);
 }
 #endif
-
 
 static intptr_t
 initialize_realtime_priority_map(void)
@@ -161,7 +162,8 @@ initialize_realtime_priority_map(void)
 	range = higherBoundRealtime - lowerBoundRealtime;
 
 	if (range < 0) {
-		/* this line should be unreachable: the POSIX.4 standard chose larger numbers to represent stronger priorities */
+		/* this line should be unreachable: the POSIX.4 standard chose larger numbers to represent stronger
+		 * priorities */
 		return -1;
 	}
 
@@ -238,9 +240,9 @@ initialize_realtime_priority_map(void)
 	/* map all regular threads to the same priority. */
 	lowerBoundRegularMapped = higherBoundRegularMapped = defaultPrio;
 
-	initializeRange(J9THREAD_PRIORITY_USER_MIN, J9THREAD_PRIORITY_USER_MAX, lowerBoundRegularMapped, higherBoundRegularMapped, priority_map);
+	initializeRange(J9THREAD_PRIORITY_USER_MIN, J9THREAD_PRIORITY_USER_MAX, lowerBoundRegularMapped,
+	        higherBoundRegularMapped, priority_map);
 	initializePolicy(J9THREAD_PRIORITY_USER_MIN, J9THREAD_PRIORITY_USER_MAX, policy_regular_thread, priority_map);
-
 
 	/* assign the lowest priority, which is outside the range of java thread priorities */
 
@@ -260,7 +262,6 @@ initialize_realtime_priority_map(void)
 
 	initializeRange(J9THREAD_PRIORITY_MAX, J9THREAD_PRIORITY_MAX, highestPrio, highestPrio, priority_map);
 	initializePolicy(J9THREAD_PRIORITY_MAX, J9THREAD_PRIORITY_MAX, policy_regular_thread, priority_map);
-
 
 	/*
 	 * Note that it is not just when using fixed policies and prios that the current thread needs adjusting.
@@ -312,8 +313,10 @@ initialize_thread_priority(omrthread_t thread)
 	}
 
 #if !defined(OMRZTPF)
-	/* on some platforms (i.e. Solaris) we get out of range values (e.g. 0) for threads with no explicitly set priority */
-	if (sched_param.sched_priority < sched_get_priority_min(policy) || sched_param.sched_priority > sched_get_priority_max(policy)) {
+	/* on some platforms (i.e. Solaris) we get out of range values (e.g. 0) for threads with no explicitly set
+	 * priority */
+	if (sched_param.sched_priority < sched_get_priority_min(policy)
+	        || sched_param.sched_priority > sched_get_priority_max(policy)) {
 		return;
 	}
 #endif
@@ -321,14 +324,13 @@ initialize_thread_priority(omrthread_t thread)
 	thread->priority = omrthread_map_native_priority(sched_param.sched_priority);
 }
 
-
 /**
  * Initialize the thread policies.
  */
 static void
 initialize_thread_policies(int *policy_regular_thread, int *policy_realtime_thread)
 {
-	*policy_regular_thread  = SCHED_OTHER;
+	*policy_regular_thread = SCHED_OTHER;
 	*policy_realtime_thread = SCHED_FIFO;
 }
 

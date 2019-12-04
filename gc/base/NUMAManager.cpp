@@ -20,20 +20,18 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 /**
  * @file
  * @ingroup GC_Base_Core
  */
 
-#include <string.h>
-
-#include "omrport.h"
+#include "NUMAManager.hpp"
 
 #include "EnvironmentBase.hpp"
 #include "Forge.hpp"
 #include "ModronAssertions.h"
-#include "NUMAManager.hpp"
+#include "omrport.h"
+#include <string.h>
 
 void
 MM_NUMAManager::shouldEnablePhysicalNUMA(bool numaEnabled)
@@ -51,9 +49,9 @@ compareNodeNumberFunc(const void *element1, const void *element2)
 	J9MemoryNodeDetail *node1 = (J9MemoryNodeDetail *)element1;
 	J9MemoryNodeDetail *node2 = (J9MemoryNodeDetail *)element2;
 
-	if(node1->j9NodeNumber == node2->j9NodeNumber) {
+	if (node1->j9NodeNumber == node2->j9NodeNumber) {
 		return 0;
-	} else if(node1->j9NodeNumber > node2->j9NodeNumber) {
+	} else if (node1->j9NodeNumber > node2->j9NodeNumber) {
 		return 1;
 	} else {
 		return -1;
@@ -86,16 +84,19 @@ MM_NUMAManager::recacheNUMASupport(MM_EnvironmentBase *env)
 	if (_physicalNumaEnabled) {
 		intptr_t detailResult = omrvmem_numa_get_node_details(NULL, &nodeCount);
 		if (0 != detailResult) {
-			/* something went wrong in the underlying call so ignore any NUMA count data we might have received */
+			/* something went wrong in the underlying call so ignore any NUMA count data we might have
+			 * received */
 			nodeCount = 0;
 		}
 	} else {
 		nodeCount = _simulatedNodeCount;
 	}
 	if (0 != nodeCount) {
-		/* we want to support NUMA either via the machine's physical NUMA or our simulated (aka "purely logical") NUMA */ 
+		/* we want to support NUMA either via the machine's physical NUMA or our simulated (aka "purely
+		 * logical") NUMA */
 		uintptr_t nodeArraySize = sizeof(J9MemoryNodeDetail) * nodeCount;
-		_activeNodes = (J9MemoryNodeDetail *)env->getForge()->allocate(nodeArraySize, OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+		_activeNodes = (J9MemoryNodeDetail *)env->getForge()->allocate(
+		        nodeArraySize, OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
 		if (NULL == _activeNodes) {
 			result = false;
 		} else {
@@ -111,20 +112,23 @@ MM_NUMAManager::recacheNUMASupport(MM_EnvironmentBase *env)
 				for (uintptr_t i = 0; i < nodeCount; i++) {
 					_activeNodes[i].j9NodeNumber = i + 1;
 					_activeNodes[i].memoryPolicy = J9NUMA_PREFERRED;
-					/* NOTE:  if we ever start counting these resources to determine GC thread counts, this will have to be something other than "1" */
+					/* NOTE:  if we ever start counting these resources to determine GC thread
+					 * counts, this will have to be something other than "1" */
 					_activeNodes[i].computationalResourcesAvailable = 1;
 				}
 			}
-			
+
 			/* Sorting the array in j9NodeNumber ascending order.
-			 * This sorting is not really required, but gives us ability to make some stronger assertions later in the code 
+			 * This sorting is not really required, but gives us ability to make some stronger assertions
+			 * later in the code
 			 */
 			J9_SORT(_activeNodes, _activeNodeCount, sizeof(J9MemoryNodeDetail), compareNodeNumberFunc);
 
 			/* now that we have the total list of active nodes, identify the affinity leaders */
 			uintptr_t preferredWithCPU = 0;
 			uintptr_t allowedWithCPU = 0;
-			/* if "preferred" nodes exist, we will use them as the leaders and fall back to "allowed" if there aren't any so count both and choose them after the loop */
+			/* if "preferred" nodes exist, we will use them as the leaders and fall back to "allowed" if
+			 * there aren't any so count both and choose them after the loop */
 			for (uintptr_t activeNodeIndex = 0; activeNodeIndex < _activeNodeCount; activeNodeIndex++) {
 				uintptr_t cpu = _activeNodes[activeNodeIndex].computationalResourcesAvailable;
 				if (0 != cpu) {
@@ -134,12 +138,15 @@ MM_NUMAManager::recacheNUMASupport(MM_EnvironmentBase *env)
 					} else if (J9NUMA_ALLOWED == policy) {
 						allowedWithCPU += 1;
 					} else {
-						/* nodes with CPUs but DENIED bindings go into the free processor pool */
+						/* nodes with CPUs but DENIED bindings go into the free processor pool
+						 */
 						_freeProcessorPoolNodeCount += 1;
 					}
 				}
-				/* since we are walking all the nodes, this is also the time to update the maximum node number */
-				_maximumNodeNumber = OMR_MAX(_maximumNodeNumber, _activeNodes[activeNodeIndex].j9NodeNumber);
+				/* since we are walking all the nodes, this is also the time to update the maximum node
+				 * number */
+				_maximumNodeNumber =
+				        OMR_MAX(_maximumNodeNumber, _activeNodes[activeNodeIndex].j9NodeNumber);
 			}
 			J9MemoryState policyType = J9NUMA_PREFERRED;
 			_affinityLeaderCount = preferredWithCPU;
@@ -147,18 +154,22 @@ MM_NUMAManager::recacheNUMASupport(MM_EnvironmentBase *env)
 				_affinityLeaderCount = allowedWithCPU;
 				policyType = J9NUMA_ALLOWED;
 			}
-			
+
 			/* Affinity Leader array allocation and construction */
 			if (0 != _affinityLeaderCount) {
 				uintptr_t affinityLeaderArraySize = sizeof(J9MemoryNodeDetail) * _affinityLeaderCount;
-				_affinityLeaders = (J9MemoryNodeDetail *)env->getForge()->allocate(affinityLeaderArraySize, OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+				_affinityLeaders =
+				        (J9MemoryNodeDetail *)env->getForge()->allocate(affinityLeaderArraySize,
+				                OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
 				if (NULL == _affinityLeaders) {
 					result = false;
 				} else {
 					memset(_affinityLeaders, 0x0, affinityLeaderArraySize);
 					uintptr_t nextIndex = 0;
-					for (uintptr_t activeNodeIndex = 0; activeNodeIndex < _activeNodeCount; activeNodeIndex++) {
-						if ((0 != _activeNodes[activeNodeIndex].computationalResourcesAvailable) && (policyType == _activeNodes[activeNodeIndex].memoryPolicy)) {
+					for (uintptr_t activeNodeIndex = 0; activeNodeIndex < _activeNodeCount;
+					        activeNodeIndex++) {
+						if ((0 != _activeNodes[activeNodeIndex].computationalResourcesAvailable)
+						        && (policyType == _activeNodes[activeNodeIndex].memoryPolicy)) {
 							Assert_MM_true(nextIndex < _affinityLeaderCount);
 							_affinityLeaders[nextIndex] = _activeNodes[activeNodeIndex];
 							nextIndex += 1;
@@ -167,21 +178,27 @@ MM_NUMAManager::recacheNUMASupport(MM_EnvironmentBase *env)
 					Assert_MM_true(nextIndex == _affinityLeaderCount);
 				}
 			}
-			
+
 			/* Free Processor Pool array allocation and construction */
 			if (0 != _freeProcessorPoolNodeCount) {
 				/* allocate a free processor pool */
-				uintptr_t processorPoolArraySize = sizeof(J9MemoryNodeDetail) * _freeProcessorPoolNodeCount;
-				_freeProcessorPoolNodes = (J9MemoryNodeDetail *)env->getForge()->allocate(processorPoolArraySize, OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+				uintptr_t processorPoolArraySize = sizeof(J9MemoryNodeDetail)
+				        * _freeProcessorPoolNodeCount;
+				_freeProcessorPoolNodes = (J9MemoryNodeDetail *)env->getForge()->allocate(
+				        processorPoolArraySize, OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
 				if (NULL == _freeProcessorPoolNodes) {
 					result = false;
 				} else {
 					memset(_freeProcessorPoolNodes, 0x0, processorPoolArraySize);
 					uintptr_t nextIndex = 0;
-					for (uintptr_t activeNodeIndex = 0; activeNodeIndex < _activeNodeCount; activeNodeIndex++) {
-						if ((0 != _activeNodes[activeNodeIndex].computationalResourcesAvailable) && (J9NUMA_DENIED == _activeNodes[activeNodeIndex].memoryPolicy)) {
+					for (uintptr_t activeNodeIndex = 0; activeNodeIndex < _activeNodeCount;
+					        activeNodeIndex++) {
+						if ((0 != _activeNodes[activeNodeIndex].computationalResourcesAvailable)
+						        && (J9NUMA_DENIED
+						                == _activeNodes[activeNodeIndex].memoryPolicy)) {
 							Assert_MM_true(nextIndex < _freeProcessorPoolNodeCount);
-							_freeProcessorPoolNodes[nextIndex] = _activeNodes[activeNodeIndex];
+							_freeProcessorPoolNodes[nextIndex] =
+							        _activeNodes[activeNodeIndex];
 							nextIndex += 1;
 						}
 					}
@@ -213,14 +230,14 @@ MM_NUMAManager::getMaximumNodeNumber() const
 	return _maximumNodeNumber;
 }
 
-J9MemoryNodeDetail const*
+J9MemoryNodeDetail const *
 MM_NUMAManager::getAffinityLeaders(uintptr_t *arrayLength) const
 {
 	*arrayLength = _affinityLeaderCount;
 	return _affinityLeaders;
 }
 
-J9MemoryNodeDetail const*
+J9MemoryNodeDetail const *
 MM_NUMAManager::getFreeProcessorPool(uintptr_t *arrayLength) const
 {
 	*arrayLength = _freeProcessorPoolNodeCount;

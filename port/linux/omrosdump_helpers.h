@@ -39,7 +39,3 @@ typedef struct MarkAllPagesWritableHeader {
 
 uintptr_t renameDump(struct OMRPortLibrary *portLibrary, char *filename, pid_t pid, int signalNumber);
 char *markAllPagesWritable(struct OMRPortLibrary *portLibrary);
-
-
-
-

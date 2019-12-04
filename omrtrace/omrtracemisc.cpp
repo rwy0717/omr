@@ -134,23 +134,23 @@ expandString(char *returnBuffer, const char *original, BOOLEAN atRuntime)
 			originalCursor += 1;
 			originalChar = *originalCursor;
 			if ('p' == originalChar) {
-				const char * const pidTokenString = "%pid";
+				const char *const pidTokenString = "%pid";
 				replacement = pidTokenString;
 				replacementLength = strlen(pidTokenString);
 			} else if ('d' == originalChar) {
-				const char * const dateTokenString = "%Y%m%d";
+				const char *const dateTokenString = "%Y%m%d";
 				replacement = dateTokenString;
 				replacementLength = strlen(dateTokenString);
 			} else if ('t' == originalChar) {
-				const char * const timeTokenString = "%H%M%S";
+				const char *const timeTokenString = "%H%M%S";
 				replacement = timeTokenString;
 				replacementLength = strlen(timeTokenString);
 			} else {
 				/* character following % was not 'p', 'd' or 't' */
-				reportCommandLineError(
-						atRuntime,
-						"Invalid special character '%%%c' in a trace filename. Only %%p, %%d and %%t are allowed.",
-						originalChar);
+				reportCommandLineError(atRuntime,
+				        "Invalid special character '%%%c' in a trace filename. Only %%p, %%d and %%t "
+				        "are allowed.",
+				        originalChar);
 				returnBuffer[0] = '\0';
 				return OMR_ERROR_ILLEGAL_ARGUMENT;
 			}
@@ -173,7 +173,8 @@ expandString(char *returnBuffer, const char *original, BOOLEAN atRuntime)
 			return OMR_ERROR_ILLEGAL_ARGUMENT;
 		}
 
-		if (omrstr_subst_tokens(resultString, MAX_IMAGE_PATH_LENGTH, formatString, stringTokens) > MAX_IMAGE_PATH_LENGTH) {
+		if (omrstr_subst_tokens(resultString, MAX_IMAGE_PATH_LENGTH, formatString, stringTokens)
+		        > MAX_IMAGE_PATH_LENGTH) {
 			returnBuffer[0] = '\0';
 			omrstr_free_tokens(stringTokens);
 			return OMR_ERROR_ILLEGAL_ARGUMENT;
@@ -195,17 +196,19 @@ expandString(char *returnBuffer, const char *original, BOOLEAN atRuntime)
 void
 listCounters(void)
 {
-	int           i;
+	int i;
 #define TEMPBUFLEN 150
-	char          tempBuf[TEMPBUFLEN];
-	intptr_t         f;
+	char tempBuf[TEMPBUFLEN];
+	intptr_t f;
 	UtComponentData *compData = OMR_TRACEGLOBAL(componentList)->head;
 	OMRPORT_ACCESS_FROM_OMRPORT(OMR_TRACEGLOBAL(portLibrary));
 
 	UT_DBGOUT(1, ("<UT> Listing trace counters\n"));
 
 	if ((f = omrfile_open("utTrcCounters", EsOpenText | EsOpenWrite | EsOpenTruncate | EsOpenCreateNoTag, 0)) < 0) {
-		if ((f = omrfile_open("utTrcCounters", EsOpenText | EsOpenWrite | EsOpenCreate | EsOpenCreateNoTag, 0666)) < 0) {
+		if ((f = omrfile_open(
+		             "utTrcCounters", EsOpenText | EsOpenWrite | EsOpenCreate | EsOpenCreateNoTag, 0666))
+		        < 0) {
 			/* Unable to open tracepoint counter file %s, counters redirected to stderr. */
 		}
 	}
@@ -217,9 +220,12 @@ listCounters(void)
 			for (i = 0; i < compData->tracepointCount; i++) {
 				if (compData->tracepointcounters[i] > 0) {
 					if (f < 0) {
-						omrtty_err_printf("%s.%d %ld \n", compData->qualifiedComponentName, i, compData->tracepointcounters[i]);
+						omrtty_err_printf("%s.%d %ld \n", compData->qualifiedComponentName, i,
+						        compData->tracepointcounters[i]);
 					} else {
-						omrstr_printf(tempBuf, TEMPBUFLEN, "%s.%d %lld \n", compData->qualifiedComponentName, i, compData->tracepointcounters[i]);
+						omrstr_printf(tempBuf, TEMPBUFLEN, "%s.%d %lld \n",
+						        compData->qualifiedComponentName, i,
+						        compData->tracepointcounters[i]);
 						/* convert to ebcdic if on zos */
 						omrfile_write_text(f, tempBuf, strlen(tempBuf));
 					}
@@ -236,9 +242,12 @@ listCounters(void)
 			for (i = 0; i < compData->tracepointCount; i++) {
 				if (compData->tracepointcounters[i] > 0) {
 					if (f < 0) {
-						omrtty_err_printf("%s.%d %ld \n", compData->qualifiedComponentName, i, compData->tracepointcounters[i]);
+						omrtty_err_printf("%s.%d %ld \n", compData->qualifiedComponentName, i,
+						        compData->tracepointcounters[i]);
 					} else {
-						omrstr_printf(tempBuf, TEMPBUFLEN, "%s.%d %lld \n", compData->qualifiedComponentName, i, compData->tracepointcounters[i]);
+						omrstr_printf(tempBuf, TEMPBUFLEN, "%s.%d %lld \n",
+						        compData->qualifiedComponentName, i,
+						        compData->tracepointcounters[i]);
 						/* convert to ebcdic if on zos */
 						omrfile_write_text(f, tempBuf, strlen(tempBuf));
 					}
@@ -311,10 +320,10 @@ addTraceConfig(OMR_TraceThread *thr, const char *cmd)
 	/*
 	 *  Obtain and initialize a config buffer
 	 */
-	UtTraceCfg *cfg = (UtTraceCfg *)omrmem_allocate_memory(sizeof(UtTraceCfg) + strlen(cmd) + 1, OMRMEM_CATEGORY_TRACE);
+	UtTraceCfg *cfg =
+	        (UtTraceCfg *)omrmem_allocate_memory(sizeof(UtTraceCfg) + strlen(cmd) + 1, OMRMEM_CATEGORY_TRACE);
 	if (NULL != cfg) {
-		initHeader(&cfg->header, UT_TRACE_CONFIG_NAME, sizeof(UtTraceCfg) +
-				   strlen(cmd) + 1);
+		initHeader(&cfg->header, UT_TRACE_CONFIG_NAME, sizeof(UtTraceCfg) + strlen(cmd) + 1);
 		cfg->next = NULL;
 		strcpy(cfg->command, cmd);
 		/*
@@ -412,8 +421,6 @@ addTraceConfigKeyValuePair(OMR_TraceThread *thr, const char *cmdKey, const char 
 	return rc;
 }
 
-
-
 /*******************************************************************************
  * name        - initHeader
  * description - Header initialization routine
@@ -439,14 +446,9 @@ int
 hexStringLength(const char *str)
 {
 	int i;
-	for (i = 0;
-		 ((str[i] >= '0' &&
-		   str[i] <= '9') ||
-		  (str[i] >= 'A' &&
-		   str[i] <= 'F') ||
-		  (str[i] >= 'a' &&
-		   str[i] <= 'f'));
-		 i++) {
+	for (i = 0; ((str[i] >= '0' && str[i] <= '9') || (str[i] >= 'A' && str[i] <= 'F')
+	             || (str[i] >= 'a' && str[i] <= 'f'));
+	        i++) {
 	}
 	return i;
 }

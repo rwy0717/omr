@@ -130,9 +130,10 @@ dumpTestFailuresToConsole(struct OMRPortLibrary *portLibrary)
 	portTestEnv->log(LEVEL_ERROR, "-------------------------------------------------------------------------\n\n");
 	portTestEnv->log(LEVEL_ERROR, "FAILURES DETECTED. Number of failed tests: %u\n\n", numTestFailures);
 
-	for (i = 0; i < numTestFailures ; i++) {
+	for (i = 0; i < numTestFailures; i++) {
 		portTestEnv->log(LEVEL_ERROR, "%i: %s\n", i + 1, testFailures[i].testName);
-		portTestEnv->log(LEVEL_ERROR, "\t%s line %4zi: %s\n", testFailures[i].fileName, testFailures[i].lineNumber, testFailures[i].errorMessage);
+		portTestEnv->log(LEVEL_ERROR, "\t%s line %4zi: %s\n", testFailures[i].fileName,
+		        testFailures[i].lineNumber, testFailures[i].errorMessage);
 		portTestEnv->log(LEVEL_ERROR, "\t\tLastErrorNumber: %i\n", testFailures[i].portErrorNumber);
 		portTestEnv->log(LEVEL_ERROR, "\t\tLastErrorMessage: %s\n\n", testFailures[i].portErrorMessage);
 
@@ -159,7 +160,7 @@ allocateMemoryForAndCopyInto(struct OMRPortLibrary *portLibrary, char **dest, co
 
 	strLenPlusTerminator = strlen(source) + 1 /*null terminator */;
 	*dest = (char *)omrmem_allocate_memory(strLenPlusTerminator, OMRMEM_CATEGORY_PORT_LIBRARY);
-	if (*dest == NULL)  {
+	if (*dest == NULL) {
 		return;
 	} else {
 		strncpy(*dest, source, strLenPlusTerminator);
@@ -178,7 +179,8 @@ allocateMemoryForAndCopyInto(struct OMRPortLibrary *portLibrary, char **dest, co
  *
  * This uses the global numTestFailures */
 static void
-logTestFailure(struct OMRPortLibrary *portLibrary, const char *fileName, int32_t lineNumber, const char *testName, int32_t portErrorNumber, const char *portErrorMessage, const char *testErrorMessage)
+logTestFailure(struct OMRPortLibrary *portLibrary, const char *fileName, int32_t lineNumber, const char *testName,
+        int32_t portErrorNumber, const char *portErrorMessage, const char *testErrorMessage)
 {
 	if (MAX_NUM_TEST_FAILURES <= numTestFailures) {
 		return;
@@ -209,7 +211,8 @@ logTestFailure(struct OMRPortLibrary *portLibrary, const char *fileName, int32_t
  * @param[in] ... argument list for format string
  */
 void
-outputErrorMessage(struct OMRPortLibrary *portLibrary, const char *fileName, int32_t lineNumber, const char *testName, const char *format, ...)
+outputErrorMessage(struct OMRPortLibrary *portLibrary, const char *fileName, int32_t lineNumber, const char *testName,
+        const char *format, ...)
 {
 	char *buf = NULL;
 	char *portErrorBuf = NULL;
@@ -233,7 +236,9 @@ outputErrorMessage(struct OMRPortLibrary *portLibrary, const char *fileName, int
 	if (NULL != portErrorBuf) {
 		strncpy(portErrorBuf, lastErrorMessage, sizePortErrorBuf);
 	} else {
-		portTestEnv->log(LEVEL_ERROR, "\n\n******* omrmem_allocate_memory failed to allocate %i bytes, exiting.\n\n", sizePortErrorBuf);
+		portTestEnv->log(LEVEL_ERROR,
+		        "\n\n******* omrmem_allocate_memory failed to allocate %i bytes, exiting.\n\n",
+		        sizePortErrorBuf);
 		exit(EXIT_OUT_OF_MEMORY);
 	}
 
@@ -245,9 +250,9 @@ outputErrorMessage(struct OMRPortLibrary *portLibrary, const char *fileName, int
 	if (NULL != buf) {
 		omrstr_vprintf(buf, sizeBuf, format, args);
 	} else {
-		portTestEnv->log(LEVEL_ERROR, "\n\n******* omrmem_allocate_memory failed to allocate %i bytes, exiting.\n\n", sizeBuf);
+		portTestEnv->log(LEVEL_ERROR,
+		        "\n\n******* omrmem_allocate_memory failed to allocate %i bytes, exiting.\n\n", sizeBuf);
 		exit(EXIT_OUT_OF_MEMORY);
-
 	}
 	va_end(args);
 
@@ -289,7 +294,8 @@ HEADING(struct OMRPortLibrary *portLibrary, const char *string)
  * @return 0 if the file exists, non-zero otherwise.
  */
 uintptr_t
-verifyFileExists(struct OMRPortLibrary *portLibrary, const char *pltestFileName, int32_t lineNumber, const char *testName, const char *fileName)
+verifyFileExists(struct OMRPortLibrary *portLibrary, const char *pltestFileName, int32_t lineNumber,
+        const char *testName, const char *fileName)
 {
 	uintptr_t rc = 1;
 	OMRPORT_ACCESS_FROM_OMRPORT(portLibrary);
@@ -309,7 +315,8 @@ verifyFileExists(struct OMRPortLibrary *portLibrary, const char *pltestFileName,
 	portTestEnv->log("checking for data set: %s\n", dumpName);
 	FILE *file = fopen(dumpName, "r");
 	if (NULL == file) {
-		outputErrorMessage(OMRPORTLIB, pltestFileName, lineNumber, testName, "\tdata set: %s does not exist!\n", -1, fileName);
+		outputErrorMessage(OMRPORTLIB, pltestFileName, lineNumber, testName, "\tdata set: %s does not exist!\n",
+		        -1, fileName);
 	} else {
 		portTestEnv->log("data set: %s exists\n", dumpName);
 		fclose(file);
@@ -327,11 +334,14 @@ verifyFileExists(struct OMRPortLibrary *portLibrary, const char *pltestFileName,
 			portTestEnv->log("file: %s exists\n", fileName);
 			rc = 0;
 		} else {
-			outputErrorMessage(OMRPORTLIB, pltestFileName, lineNumber, testName, "\tfile: %s does not exist!\n", -1, fileName);
+			outputErrorMessage(OMRPORTLIB, pltestFileName, lineNumber, testName,
+			        "\tfile: %s does not exist!\n", -1, fileName);
 		}
 	} else {
 		/* error in file_stat */
-		outputErrorMessage(OMRPORTLIB, pltestFileName, lineNumber, testName, "\nomrfile_stat call in verifyFileExists() returned %i: %s\n", fileStatRC, omrerror_last_error_message());
+		outputErrorMessage(OMRPORTLIB, pltestFileName, lineNumber, testName,
+		        "\nomrfile_stat call in verifyFileExists() returned %i: %s\n", fileStatRC,
+		        omrerror_last_error_message());
 	}
 #endif /* defined(J9ZOS390) */
 
@@ -386,7 +396,8 @@ deleteControlDirectory(struct OMRPortLibrary *portLibrary, char *baseDir)
  * Memory category walk function used by getPortLibraryMemoryCategoryData
  */
 static uintptr_t
-categoryWalkFunction(uint32_t categoryCode, const char *categoryName, uintptr_t liveBytes, uintptr_t liveAllocations, BOOLEAN isRoot, uint32_t parentCategoryCode, OMRMemCategoryWalkState *walkState)
+categoryWalkFunction(uint32_t categoryCode, const char *categoryName, uintptr_t liveBytes, uintptr_t liveAllocations,
+        BOOLEAN isRoot, uint32_t parentCategoryCode, OMRMemCategoryWalkState *walkState)
 {
 	uintptr_t *blocks = (uintptr_t *)walkState->userData1;
 	uintptr_t *bytes = (uintptr_t *)walkState->userData2;
@@ -449,7 +460,7 @@ raiseSEGV(OMRPortLibrary *portLibrary, void *arg)
 	OMRPORT_ACCESS_FROM_OMRPORT(portLibrary);
 	const char *testName = (const char *)arg;
 
-#if defined(OMR_OS_WINDOWS) || defined (J9ZOS390)
+#if defined(OMR_OS_WINDOWS) || defined(J9ZOS390)
 	/*
 	 * - Windows structured exception handling doesn't interact with raise().
 	 * - z/OS doesn't provide a value for the psw1 (PC) register when you use raise()
@@ -468,7 +479,7 @@ raiseSEGV(OMRPortLibrary *portLibrary, void *arg)
 
 /* Clean up the test output when test case passes */
 void
-testFileCleanUp(const char* filePrefix)
+testFileCleanUp(const char *filePrefix)
 {
 	if (::testing::UnitTest::GetInstance()->current_test_case()->Passed()) {
 		OMRPORT_ACCESS_FROM_OMRPORT(portTestEnv->getPortLibrary());

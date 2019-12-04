@@ -22,12 +22,14 @@
 #ifndef DEFAULT_COMPILER_HPP
 #define DEFAULT_COMPILER_HPP
 
-/* If you want to support more backends that are 
+/* If you want to support more backends that are
  * incompatible with the SimpleCompiler interface,
- * use #ifdefs to select them in this file. 
+ * use #ifdefs to select them in this file.
  */
 
 #include "simple_compiler.hpp"
-namespace Tril { typedef Tril::SimpleCompiler DefaultCompiler; } 
+namespace Tril {
+typedef Tril::SimpleCompiler DefaultCompiler;
+}
 
 #endif

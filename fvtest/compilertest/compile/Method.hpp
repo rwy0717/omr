@@ -29,31 +29,28 @@
 //
 #include "compiler/compile/Method.hpp"
 
-
 // quick and dirty implementation to get up and running
 // needs major overhaul
 
-namespace TestCompiler
-{
+namespace TestCompiler {
 
-class Method : public TR::Method
-   {
-   public:
-   TR_ALLOC(TR_Memory::Method);
+class Method : public TR::Method {
+public:
+	TR_ALLOC(TR_Memory::Method);
 
-   Method() : TR::Method(TR::Method::Test) {}
+	Method() : TR::Method(TR::Method::Test) {}
 
-   // FIXME: need to provide real code for this group
-   virtual uint16_t              classNameLength() { return strlen(classNameChars()); }
-   virtual uint16_t              nameLength()      { return strlen(nameChars()); }
-   virtual uint16_t              signatureLength() { return strlen(signatureChars()); }
-   virtual char                * nameChars()       { return "Method"; }
-   virtual char                * classNameChars()  { return ""; }
-   virtual char                * signatureChars()  { return "()V"; }
+	// FIXME: need to provide real code for this group
+	virtual uint16_t classNameLength() { return strlen(classNameChars()); }
+	virtual uint16_t nameLength() { return strlen(nameChars()); }
+	virtual uint16_t signatureLength() { return strlen(signatureChars()); }
+	virtual char *nameChars() { return "Method"; }
+	virtual char *classNameChars() { return ""; }
+	virtual char *signatureChars() { return "()V"; }
 
-   virtual bool                  isConstructor()   { return false; }
-   virtual bool                  isFinalInObject() { return false; }
-   };
+	virtual bool isConstructor() { return false; }
+	virtual bool isFinalInObject() { return false; }
+};
 
 } // namespace TestCompiler
 

@@ -47,40 +47,40 @@ typedef struct ASTNode ASTNode;
  * The following functions are wrappers for the AST struct constructors.
  */
 
-ASTNode* createNode(const char* name, ASTNodeArg* args, ASTNode* children,  ASTNode* next);
+ASTNode *createNode(const char *name, ASTNodeArg *args, ASTNode *children, ASTNode *next);
 
-ASTNodeArg* createNodeArg(const char* name, ASTValue * value,  ASTNodeArg* next);
+ASTNodeArg *createNodeArg(const char *name, ASTValue *value, ASTNodeArg *next);
 
-ASTValue* createIntegerValue(uint64_t val);
-ASTValue* createFloatingPointValue(double val);
-ASTValue* createStrValue(const char* val);
+ASTValue *createIntegerValue(uint64_t val);
+ASTValue *createFloatingPointValue(double val);
+ASTValue *createStrValue(const char *val);
 
 /**
  * @brief Adds an instance of ASTNode to the end of a (linked-) list
  * @param list is the linked-list that will be added to
  * @param newNode is the object that will be added to the list
  */
-void appendSiblingNode(ASTNode* list, ASTNode* newNode);
+void appendSiblingNode(ASTNode *list, ASTNode *newNode);
 
 /**
  * @brief Adds an instance of ASTNodeArg to the end of a (linked-) list
  * @param list is the linked-list that will be added to
  * @param newArg is the object that will be added to the list
  */
-void appendSiblingArg(ASTNodeArg* list, ASTNodeArg* newArg);
+void appendSiblingArg(ASTNodeArg *list, ASTNodeArg *newArg);
 
 /**
  * @brief Adds an instance of ASTValue to the end of a (linked-) list
  * @param list is the linked-list that will be added to
  * @param newValue is the object that will be added to the list
  */
-void appendSiblingValue(ASTValue* list, ASTValue* newValue);
+void appendSiblingValue(ASTValue *list, ASTValue *newValue);
 
 /**
  * @brief Returns the number of ASTNode instances in a (linked-) list
  * @param n is the start of the linked-list
  */
-uint16_t countNodes(const ASTNode* n);
+uint16_t countNodes(const ASTNode *n);
 
 /**
  * @brief Searches a (linked-) list for an instance of ASTNode with a given name
@@ -88,7 +88,7 @@ uint16_t countNodes(const ASTNode* n);
  * @param name is the name of the ASTNode instance being searched for
  * @return the instance of ASTNode if found, NULL otherwise
  */
-const ASTNode* findNodeByNameInList(const ASTNode* list, const char* name);
+const ASTNode *findNodeByNameInList(const ASTNode *list, const char *name);
 
 /**
  * @brief Searches an AST sub-tree for an instance of ASTNode with a given name
@@ -96,37 +96,37 @@ const ASTNode* findNodeByNameInList(const ASTNode* list, const char* name);
  * @param name is the name of the ASTNode instance being searched for
  * @return the instance for ASTNode if found, NULL otherwise
  */
-const ASTNode* findNodeByNameInTree(const ASTNode* tree, const char* name);
+const ASTNode *findNodeByNameInTree(const ASTNode *tree, const char *name);
 
 /*
  * Convenience functions for printing an AST sub-tree to a file handle.
  */
 
-void printASTValueUnion(FILE* file, const ASTValue* value);
-void printASTValue(FILE* file, const ASTValue* value);
-void printASTArgs(FILE* file, const ASTNodeArg* args);
-void printTrees(FILE* file, const ASTNode* trees, int indent);
+void printASTValueUnion(FILE *file, const ASTValue *value);
+void printASTValue(FILE *file, const ASTValue *value);
+void printASTArgs(FILE *file, const ASTNodeArg *args);
+void printTrees(FILE *file, const ASTNode *trees, int indent);
 
-/** 
- * Dump trees to stderr by default. 
+/**
+ * Dump trees to stderr by default.
  *
  * Useful for calling in a debugger
  */
-void printTreesToStdErr(const ASTNode* trees);
+void printTreesToStdErr(const ASTNode *trees);
 
 /**
  * @brief Parse an input file containing Tril code
  * @param in is a handle pointing to the input file
  * @return a Tril AST representing the parsed code, or NULL if parsing failed
  */
-ASTNode* parseFile(FILE* in);
+ASTNode *parseFile(FILE *in);
 
 /**
  * @brief Parse Tril code from an input string
  * @param in is the string to be parsed
  * @return a Tril AST representing the parsed code, or NULL if parsing failed
  */
-ASTNode* parseString(const char* in);
+ASTNode *parseString(const char *in);
 
 #ifdef __cplusplus
 }

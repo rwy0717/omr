@@ -22,10 +22,9 @@
 
 #include "VerboseWriterChain.hpp"
 
+#include "GCExtensionsBase.hpp"
 #include "VerboseBuffer.hpp"
 #include "VerboseWriter.hpp"
-
-#include "GCExtensionsBase.hpp"
 
 #undef _UTE_MODULE_HEADER_
 #undef UT_MODULE_LOADED
@@ -34,21 +33,18 @@
 
 #define INDENT_SPACER "  "
 
-MM_VerboseWriterChain::MM_VerboseWriterChain()
-	: MM_Base()
-	,_buffer(NULL)
-	,_writers(NULL)
-{}
+MM_VerboseWriterChain::MM_VerboseWriterChain() : MM_Base(), _buffer(NULL), _writers(NULL) {}
 
 MM_VerboseWriterChain *
 MM_VerboseWriterChain::newInstance(MM_EnvironmentBase *env)
 {
 	MM_GCExtensionsBase *extensions = env->getExtensions();
-	
-	MM_VerboseWriterChain *chain = (MM_VerboseWriterChain *)extensions->getForge()->allocate(sizeof(MM_VerboseWriterChain), OMR::GC::AllocationCategory::DIAGNOSTIC, OMR_GET_CALLSITE());
-	if(NULL != chain) {
-		new(chain) MM_VerboseWriterChain();
-		if(!chain->initialize(env)) {
+
+	MM_VerboseWriterChain *chain = (MM_VerboseWriterChain *)extensions->getForge()->allocate(
+	        sizeof(MM_VerboseWriterChain), OMR::GC::AllocationCategory::DIAGNOSTIC, OMR_GET_CALLSITE());
+	if (NULL != chain) {
+		new (chain) MM_VerboseWriterChain();
+		if (!chain->initialize(env)) {
 			chain->kill(env);
 			chain = NULL;
 		}
@@ -65,7 +61,7 @@ MM_VerboseWriterChain::formatAndOutputV(MM_EnvironmentBase *env, uintptr_t inden
 	for (uintptr_t i = 0; i < indent; ++i) {
 		_buffer->add(env, INDENT_SPACER);
 	}
-	
+
 	_buffer->vprintf(env, format, args);
 	_buffer->add(env, "\n");
 }
@@ -83,7 +79,7 @@ MM_VerboseWriterChain::formatAndOutput(MM_EnvironmentBase *env, uintptr_t indent
 void
 MM_VerboseWriterChain::flush(MM_EnvironmentBase *env)
 {
-	MM_VerboseWriter* writer = _writers;
+	MM_VerboseWriter *writer = _writers;
 	while (NULL != writer) {
 		writer->outputString(env, _buffer->contents());
 		writer = writer->getNextWriter();
@@ -92,15 +88,15 @@ MM_VerboseWriterChain::flush(MM_EnvironmentBase *env)
 }
 
 void
-MM_VerboseWriterChain::tearDown(MM_EnvironmentBase* env)
+MM_VerboseWriterChain::tearDown(MM_EnvironmentBase *env)
 {
 	if (NULL != _buffer) {
 		_buffer->kill(env);
 		_buffer = NULL;
 	}
-	MM_VerboseWriter* writer = _writers;
+	MM_VerboseWriter *writer = _writers;
 	while (NULL != writer) {
-		MM_VerboseWriter* nextWriter = writer->getNextWriter();
+		MM_VerboseWriter *nextWriter = writer->getNextWriter();
 		writer->kill(env);
 		writer = nextWriter;
 	}
@@ -108,26 +104,27 @@ MM_VerboseWriterChain::tearDown(MM_EnvironmentBase* env)
 }
 
 void
-MM_VerboseWriterChain::kill(MM_EnvironmentBase* env) {
+MM_VerboseWriterChain::kill(MM_EnvironmentBase *env)
+{
 	tearDown(env);
 	env->getExtensions()->getForge()->free(this);
 }
 
 bool
-MM_VerboseWriterChain::initialize(MM_EnvironmentBase* env)
+MM_VerboseWriterChain::initialize(MM_EnvironmentBase *env)
 {
 	bool result = true;
 
 	_buffer = MM_VerboseBuffer::newInstance(env, INITIAL_BUFFER_SIZE);
-	if(NULL == _buffer) {
+	if (NULL == _buffer) {
 		result = false;
 	}
-	
+
 	return result;
 }
 
 void
-MM_VerboseWriterChain::addWriter(MM_VerboseWriter* writer)
+MM_VerboseWriterChain::addWriter(MM_VerboseWriter *writer)
 {
 	writer->setNextWriter(_writers);
 	_writers = writer;
@@ -136,11 +133,9 @@ MM_VerboseWriterChain::addWriter(MM_VerboseWriter* writer)
 void
 MM_VerboseWriterChain::endOfCycle(MM_EnvironmentBase *env)
 {
-	MM_VerboseWriter* writer = _writers;
+	MM_VerboseWriter *writer = _writers;
 	while (NULL != writer) {
 		writer->endOfCycle(env);
 		writer = writer->getNextWriter();
 	}
 }
-
-

@@ -21,6 +21,7 @@
  *******************************************************************************/
 
 #include "AllocationStats.hpp"
+
 #include "AtomicOperations.hpp"
 
 void
@@ -58,12 +59,10 @@ MM_AllocationStats::merge(MM_AllocationStats *stats)
 	MM_AtomicOperations::add(&_tlhDiscardedBytes, stats->_tlhDiscardedBytes);
 	MM_AtomicOperations::add(&_tlhAllocatedReused, stats->_tlhAllocatedReused);
 	/* looping to set a maximum value in _tlhMaxAbandonedListSize */
-	for (
-			uintptr_t prevMax = _tlhMaxAbandonedListSize;
-			prevMax < stats->_tlhMaxAbandonedListSize;
-			prevMax = _tlhMaxAbandonedListSize) {
+	for (uintptr_t prevMax = _tlhMaxAbandonedListSize; prevMax < stats->_tlhMaxAbandonedListSize;
+	        prevMax = _tlhMaxAbandonedListSize) {
 		MM_AtomicOperations::lockCompareExchange(
-			&_tlhMaxAbandonedListSize, prevMax, stats->_tlhMaxAbandonedListSize);
+		        &_tlhMaxAbandonedListSize, prevMax, stats->_tlhMaxAbandonedListSize);
 	}
 #endif /* defined (OMR_GC_THREAD_LOCAL_HEAP) */
 
@@ -76,11 +75,9 @@ MM_AllocationStats::merge(MM_AllocationStats *stats)
 	MM_AtomicOperations::add(&_discardedBytes, stats->_discardedBytes);
 	MM_AtomicOperations::add(&_allocationSearchCount, stats->_allocationSearchCount);
 	/* looping to set a maximum value in _tlhMaxAbandonedListSize */
-	for (
-			uintptr_t prevMax = _allocationSearchCountMax;
-			prevMax < stats->_allocationSearchCountMax;
-			prevMax = _allocationSearchCountMax) {
+	for (uintptr_t prevMax = _allocationSearchCountMax; prevMax < stats->_allocationSearchCountMax;
+	        prevMax = _allocationSearchCountMax) {
 		MM_AtomicOperations::lockCompareExchange(
-			&_allocationSearchCountMax, prevMax, stats->_allocationSearchCountMax);
+		        &_allocationSearchCountMax, prevMax, stats->_allocationSearchCountMax);
 	}
 }

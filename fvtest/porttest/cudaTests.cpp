@@ -102,23 +102,13 @@ CudaTest::patternVerify(const void *buffer, uintptr_t size, uint32_t seed)
 	return true;
 }
 
-static const J9CudaCacheConfig
-cacheConfigs[] = {
-	J9CUDA_CACHE_CONFIG_PREFER_EQUAL,
-	J9CUDA_CACHE_CONFIG_PREFER_L1,
-	J9CUDA_CACHE_CONFIG_PREFER_NONE,
-	J9CUDA_CACHE_CONFIG_PREFER_SHARED
-};
+static const J9CudaCacheConfig cacheConfigs[] = {J9CUDA_CACHE_CONFIG_PREFER_EQUAL, J9CUDA_CACHE_CONFIG_PREFER_L1,
+        J9CUDA_CACHE_CONFIG_PREFER_NONE, J9CUDA_CACHE_CONFIG_PREFER_SHARED};
 
-const CudaTestArray<const J9CudaCacheConfig>
-CudaDeviceTest::allCacheConfigs = { LENGTH_OF(cacheConfigs), cacheConfigs };
+const CudaTestArray<const J9CudaCacheConfig> CudaDeviceTest::allCacheConfigs = {LENGTH_OF(cacheConfigs), cacheConfigs};
 
-static const J9CudaSharedMemConfig
-sharedMemConfigs[] = {
-	J9CUDA_SHARED_MEM_CONFIG_DEFAULT_BANK_SIZE,
-	J9CUDA_SHARED_MEM_CONFIG_4_BYTE_BANK_SIZE,
-	J9CUDA_SHARED_MEM_CONFIG_8_BYTE_BANK_SIZE
-};
+static const J9CudaSharedMemConfig sharedMemConfigs[] = {J9CUDA_SHARED_MEM_CONFIG_DEFAULT_BANK_SIZE,
+        J9CUDA_SHARED_MEM_CONFIG_4_BYTE_BANK_SIZE, J9CUDA_SHARED_MEM_CONFIG_8_BYTE_BANK_SIZE};
 
-const CudaTestArray<const J9CudaSharedMemConfig>
-CudaDeviceTest::allSharedMemConfigs = { LENGTH_OF(sharedMemConfigs), sharedMemConfigs };
+const CudaTestArray<const J9CudaSharedMemConfig> CudaDeviceTest::allSharedMemConfigs = {
+        LENGTH_OF(sharedMemConfigs), sharedMemConfigs};

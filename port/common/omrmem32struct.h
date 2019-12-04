@@ -43,4 +43,4 @@ typedef struct J9SubAllocateHeapMem32 {
 	uintptr_t suballocator_commitSize;
 } J9SubAllocateHeapMem32;
 
-#endif	/* omrmem32struct_h */
+#endif /* omrmem32struct_h */

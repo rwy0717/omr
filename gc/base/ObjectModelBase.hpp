@@ -30,14 +30,13 @@
 #if defined(OBJECT_MODEL_MODRON_ASSERTIONS)
 #include "ModronAssertions.h"
 #endif /* defined(OBJECT_MODEL_MODRON_ASSERTIONS) */
-#include "modronbase.h"
-#include "objectdescription.h"
-#include "omrgcconsts.h"
-
 #include "BaseVirtual.hpp"
 #include "ForwardedHeader.hpp"
 #include "HeapLinkedFreeHeader.hpp"
 #include "ObjectModelDelegate.hpp"
+#include "modronbase.h"
+#include "objectdescription.h"
+#include "omrgcconsts.h"
 
 class MM_AllocateInitialization;
 class MM_EnvironmentBase;
@@ -47,9 +46,9 @@ struct OMR_VMThread;
 /**
  * Basic object geometry in heap
  */
-#define OMR_MINIMUM_OBJECT_ALIGNMENT 		8		/* heap alignment, in bytes */
-#define OMR_MINIMUM_OBJECT_ALIGNMENT_SHIFT	3		/* base 2 log of heap alignment */
-#define OMR_MINIMUM_OBJECT_SIZE 			16		/* size of smallest possible object allocation, in bytes */
+#define OMR_MINIMUM_OBJECT_ALIGNMENT 8 /* heap alignment, in bytes */
+#define OMR_MINIMUM_OBJECT_ALIGNMENT_SHIFT 3 /* base 2 log of heap alignment */
+#define OMR_MINIMUM_OBJECT_SIZE 16 /* size of smallest possible object allocation, in bytes */
 
 /**
  * Bit geometry within header flags byte.
@@ -58,10 +57,10 @@ struct OMR_VMThread;
  * byte (see GC_ObjectModelBase::getObjectHeaderSlotFlagsShift()) before applying these masks/shifts and
  * subsets of these masks must be left-shifted to align with object header flags.
  */
-#define OMR_OBJECT_METADATA_FLAGS_BIT_COUNT	8
-#define OMR_OBJECT_METADATA_FLAGS_MASK		0xFF
-#define OMR_OBJECT_METADATA_AGE_MASK		0xF0
-#define OMR_OBJECT_METADATA_AGE_SHIFT		4
+#define OMR_OBJECT_METADATA_FLAGS_BIT_COUNT 8
+#define OMR_OBJECT_METADATA_FLAGS_MASK 0xFF
+#define OMR_OBJECT_METADATA_AGE_MASK 0xF0
+#define OMR_OBJECT_METADATA_AGE_SHIFT 4
 
 #if (0 != (OMR_OBJECT_METADATA_FLAGS_MASK & COPY_PROGRESS_INFO_MASK))
 #error "mask overlap: OMR_OBJECT_METADATA_FLAGS_MASK, COPY_PROGRESS_INFO_MASK"
@@ -70,47 +69,41 @@ struct OMR_VMThread;
 /**
  * Remembered bit states overlay tenured header age flags. These are normalized to low-order byte, as above.
  */
-#define OMR_OBJECT_METADATA_REMEMBERED_BITS				OMR_OBJECT_METADATA_AGE_MASK
-#define STATE_NOT_REMEMBERED  							0x00
-#define STATE_REMEMBERED								0x10
-#define OMR_TENURED_STACK_OBJECT_RECENTLY_REFERENCED	(STATE_REMEMBERED + (1 << OMR_OBJECT_METADATA_AGE_SHIFT))
-#define OMR_TENURED_STACK_OBJECT_CURRENTLY_REFERENCED	(STATE_REMEMBERED + (2 << OMR_OBJECT_METADATA_AGE_SHIFT))
+#define OMR_OBJECT_METADATA_REMEMBERED_BITS OMR_OBJECT_METADATA_AGE_MASK
+#define STATE_NOT_REMEMBERED 0x00
+#define STATE_REMEMBERED 0x10
+#define OMR_TENURED_STACK_OBJECT_RECENTLY_REFERENCED (STATE_REMEMBERED + (1 << OMR_OBJECT_METADATA_AGE_SHIFT))
+#define OMR_TENURED_STACK_OBJECT_CURRENTLY_REFERENCED (STATE_REMEMBERED + (2 << OMR_OBJECT_METADATA_AGE_SHIFT))
 
 /**
  * Provides information for a given object.
  * @ingroup GC_Base
  */
-class GC_ObjectModelBase : public MM_BaseVirtual
-{
-/*
- * Member data and types
- */
+class GC_ObjectModelBase : public MM_BaseVirtual {
+	/*
+	 * Member data and types
+	 */
 private:
 #if defined(OMR_GC_COMPRESSED_POINTERS) && defined(OMR_GC_FULL_POINTERS)
 	bool _compressObjectReferences;
 #endif /* defined(OMR_GC_COMPRESSED_POINTERS) && defined(OMR_GC_FULL_POINTERS) */
-	GC_ObjectModelDelegate _delegate;	/**< instance of object model delegate class */
+	GC_ObjectModelDelegate _delegate; /**< instance of object model delegate class */
 
 protected:
-	uintptr_t _objectAlignmentInBytes; 	/**< cached copy of heap object alignment factor, in bytes */
-	uintptr_t _objectAlignmentShift; 	/**< cached copy of heap object alignment shift, must be log2(_objectAlignmentInBytes)  */
+	uintptr_t _objectAlignmentInBytes; /**< cached copy of heap object alignment factor, in bytes */
+	uintptr_t _objectAlignmentShift; /**< cached copy of heap object alignment shift, must be
+	                                    log2(_objectAlignmentInBytes)  */
 
 public:
-
-/*
- * Member functions
- */
+	/*
+	 * Member functions
+	 */
 private:
-
 protected:
 	/**
 	 * Get a pointer to the object model delegate associated with this object model
 	 */
-	MMINLINE GC_ObjectModelDelegate *
-	getObjectModelDelegate()
-	{
-		return &_delegate;
-	}
+	MMINLINE GC_ObjectModelDelegate *getObjectModelDelegate() { return &_delegate; }
 
 	/**
 	 * Get the address of the slot containing the object header.
@@ -118,10 +111,9 @@ protected:
 	 * @param objectPtr the object to obtain the header slot address for
 	 * @return the address of the slot containing the object header
 	 */
-	MMINLINE void*
-	getObjectHeaderSlotAddress(omrobjectptr_t objectPtr)
+	MMINLINE void *getObjectHeaderSlotAddress(omrobjectptr_t objectPtr)
 	{
-		return (void*)(((uintptr_t)(objectPtr)) + _delegate.getObjectHeaderSlotOffset());
+		return (void *)(((uintptr_t)(objectPtr)) + _delegate.getObjectHeaderSlotOffset());
 	}
 
 public:
@@ -129,8 +121,7 @@ public:
 	 * Return back true if object references are compressed
 	 * @return true, if object references are compressed
 	 */
-	MMINLINE bool
-	compressObjectReferences()
+	MMINLINE bool compressObjectReferences()
 	{
 #if defined(OMR_GC_COMPRESSED_POINTERS)
 #if defined(OMR_GC_FULL_POINTERS)
@@ -164,8 +155,7 @@ public:
 	 * @param objectPtr the object to botain indirct reference from
 	 * @return a pointer to the indirect object, or NULL if none
 	 */
-	MMINLINE omrobjectptr_t
-	getIndirectObject(omrobjectptr_t objectPtr)
+	MMINLINE omrobjectptr_t getIndirectObject(omrobjectptr_t objectPtr)
 	{
 		return _delegate.getIndirectObject(objectPtr);
 	}
@@ -173,11 +163,7 @@ public:
 	/**
 	 * Get the bit offset to the flags byte in object headers.
 	 */
-	MMINLINE uintptr_t
-	getObjectHeaderSlotFlagsShift()
-	{
-		return _delegate.getObjectHeaderSlotFlagsShift();
-	}
+	MMINLINE uintptr_t getObjectHeaderSlotFlagsShift() { return _delegate.getObjectHeaderSlotFlagsShift(); }
 
 	/**
 	 * Get the value of the flags byte from the header of an object. The flags value is
@@ -186,15 +172,14 @@ public:
 	 * @param objectPtr the object to extract the flags byte from
 	 * @return the value of the flags byte from the object header
 	 */
-	MMINLINE uintptr_t
-	getObjectFlags(omrobjectptr_t objectPtr)
+	MMINLINE uintptr_t getObjectFlags(omrobjectptr_t objectPtr)
 	{
 		uintptr_t flags = 0;
 		void *headerSlotPtr = getObjectHeaderSlotAddress(objectPtr);
 		if (compressObjectReferences()) {
-			flags = *(uint32_t*)headerSlotPtr;
+			flags = *(uint32_t *)headerSlotPtr;
 		} else {
-			flags = *(uintptr_t*)headerSlotPtr;
+			flags = *(uintptr_t *)headerSlotPtr;
 		}
 		return (flags >> getObjectHeaderSlotFlagsShift()) & (uintptr_t)OMR_OBJECT_METADATA_FLAGS_MASK;
 	}
@@ -205,8 +190,7 @@ public:
 	 *
 	 * @param objectPtr the object to extract the age from
 	 */
-	MMINLINE uintptr_t
-	getObjectAge(omrobjectptr_t objectPtr)
+	MMINLINE uintptr_t getObjectAge(omrobjectptr_t objectPtr)
 	{
 		return getObjectFlags(objectPtr) >> OMR_OBJECT_METADATA_AGE_SHIFT;
 	}
@@ -216,8 +200,7 @@ public:
 	 * @param objectPtr Pointer to an object
 	 * @return The size of an object header, in bytes.
 	 */
-	MMINLINE UDATA
-	getHeaderSize(omrobjectptr_t objectPtr)
+	MMINLINE UDATA getHeaderSize(omrobjectptr_t objectPtr)
 	{
 		return _delegate.getObjectHeaderSizeInBytes(objectPtr);
 	}
@@ -227,8 +210,7 @@ public:
 	 * @param objectPtr Pointer to an object
 	 * @return The size of an object, in bytes, excluding the header
 	 */
-	MMINLINE UDATA
-	getSizeInBytesWithoutHeader(omrobjectptr_t objectPtr)
+	MMINLINE UDATA getSizeInBytesWithoutHeader(omrobjectptr_t objectPtr)
 	{
 		return _delegate.getObjectSizeInBytesWithoutHeader(objectPtr);
 	}
@@ -238,8 +220,7 @@ public:
 	 * @param objectPtr Pointer to an object
 	 * @return The size of an object, in bytes, including the header
 	 */
-	MMINLINE UDATA
-	getSizeInBytesWithHeader(omrobjectptr_t objectPtr)
+	MMINLINE UDATA getSizeInBytesWithHeader(omrobjectptr_t objectPtr)
 	{
 		return _delegate.getObjectSizeInBytesWithHeader(objectPtr);
 	}
@@ -256,8 +237,7 @@ public:
 	 * @param[in] objectPtr points to the object to determine size for
 	 * @return the total size of an object, in bytes, including padding bytes
 	 */
-	MMINLINE uintptr_t
-	getConsumedSizeInBytesWithHeader(omrobjectptr_t objectPtr)
+	MMINLINE uintptr_t getConsumedSizeInBytesWithHeader(omrobjectptr_t objectPtr)
 	{
 		return adjustSizeInBytes(getSizeInBytesWithHeader(objectPtr));
 	}
@@ -273,8 +253,7 @@ public:
 	 * @param[in] objectPtr points to the object to determine size for
 	 * @return the total size of an object, in bytes, including padding bytes and discontiguous parts
 	 */
-	MMINLINE uintptr_t
-	getTotalFootprintInBytes(omrobjectptr_t objectPtr)
+	MMINLINE uintptr_t getTotalFootprintInBytes(omrobjectptr_t objectPtr)
 	{
 		return adjustSizeInBytes(_delegate.getTotalFootprintInBytes(objectPtr));
 	}
@@ -284,10 +263,10 @@ public:
 	 * @param sizeInBytes Unadjusted size of an object
 	 * @return Adjusted size
 	 */
-	MMINLINE uintptr_t
-	adjustSizeInBytes(uintptr_t sizeInBytes)
+	MMINLINE uintptr_t adjustSizeInBytes(uintptr_t sizeInBytes)
 	{
-		sizeInBytes =  (sizeInBytes + (_objectAlignmentInBytes - 1)) & (uintptr_t)~(_objectAlignmentInBytes - 1);
+		sizeInBytes = (sizeInBytes + (_objectAlignmentInBytes - 1))
+		        & (uintptr_t) ~(_objectAlignmentInBytes - 1);
 
 #if defined(OMR_GC_MINIMUM_OBJECT_SIZE)
 		if (sizeInBytes < OMR_MINIMUM_OBJECT_SIZE) {
@@ -313,11 +292,12 @@ public:
 	 *
 	 * @param[in] env points to the environment for the calling thread
 	 * @param[in] allocatedBytes points to the heap memory allocated for the object
-	 * @param[in] allocateInitialization points to the MM_AllocateInitialization instance used to allocate the heap memory
+	 * @param[in] allocateInitialization points to the MM_AllocateInitialization instance used to allocate the heap
+	 * memory
 	 * @return pointer to the initialized object, or NULL if initialization fails
 	 */
-	MMINLINE omrobjectptr_t
-	initializeAllocation(MM_EnvironmentBase *env, void *allocatedBytes, MM_AllocateInitialization *allocateInitialization)
+	MMINLINE omrobjectptr_t initializeAllocation(
+	        MM_EnvironmentBase *env, void *allocatedBytes, MM_AllocateInitialization *allocateInitialization)
 	{
 		return _delegate.initializeAllocation(env, allocatedBytes, allocateInitialization);
 	}
@@ -332,10 +312,12 @@ public:
 	 * @param[out] objectReserveSizeInBytes size adjusted to object alignment
 	 * @param[out] hotFieldAlignmentDescriptor pointer to hot field alignment descriptor for class (or NULL)
 	 */
-	MMINLINE void
-	calculateObjectDetailsForCopy(MM_EnvironmentBase *env, MM_ForwardedHeader *forwardedHeader, uintptr_t *objectCopySizeInBytes, uintptr_t *objectReserveSizeInBytes, uintptr_t *hotFieldAlignmentDescriptor)
+	MMINLINE void calculateObjectDetailsForCopy(MM_EnvironmentBase *env, MM_ForwardedHeader *forwardedHeader,
+	        uintptr_t *objectCopySizeInBytes, uintptr_t *objectReserveSizeInBytes,
+	        uintptr_t *hotFieldAlignmentDescriptor)
 	{
-		_delegate.calculateObjectDetailsForCopy(env, forwardedHeader, objectCopySizeInBytes, objectReserveSizeInBytes, hotFieldAlignmentDescriptor);
+		_delegate.calculateObjectDetailsForCopy(env, forwardedHeader, objectCopySizeInBytes,
+		        objectReserveSizeInBytes, hotFieldAlignmentDescriptor);
 	}
 #endif /* defined(OMR_GC_MODRON_SCAVENGER) */
 
@@ -348,36 +330,28 @@ public:
 	 *
 	 * @param omrVM pointer to the OMR VM struct, with final value for OMR_VM::_compressedPointersShift
 	 */
-	MMINLINE void
-	setObjectAlignment(OMR_VM *omrVM)
+	MMINLINE void setObjectAlignment(OMR_VM *omrVM)
 	{
 #if defined(OMR_GC_COMPRESSED_POINTERS) && defined(OMR_GC_FULL_POINTERS)
 		_compressObjectReferences = OMRVM_COMPRESS_OBJECT_REFERENCES(omrVM);
 #endif /* defined(OMR_GC_COMPRESSED_POINTERS) && defined(OMR_GC_FULL_POINTERS) */
-		_objectAlignmentInBytes = OMR_MAX((uintptr_t)1 << omrVM->_compressedPointersShift, OMR_MINIMUM_OBJECT_ALIGNMENT);
+		_objectAlignmentInBytes =
+		        OMR_MAX((uintptr_t)1 << omrVM->_compressedPointersShift, OMR_MINIMUM_OBJECT_ALIGNMENT);
 		_objectAlignmentShift = OMR_MAX(omrVM->_compressedPointersShift, OMR_MINIMUM_OBJECT_ALIGNMENT_SHIFT);
 
 		omrVM->_objectAlignmentInBytes = _objectAlignmentInBytes;
 		omrVM->_objectAlignmentShift = _objectAlignmentShift;
 	}
 
- 	/**
+	/**
 	 * Get run-time Object Alignment value
 	 */
-	MMINLINE uintptr_t
-	getObjectAlignmentInBytes()
-	{
-		return _objectAlignmentInBytes;
-	}
+	MMINLINE uintptr_t getObjectAlignmentInBytes() { return _objectAlignmentInBytes; }
 
- 	/**
+	/**
 	 * Get run-time Object Alignment Shift value
 	 */
-	MMINLINE uintptr_t
-	getObjectAlignmentShift()
-	{
-		return _objectAlignmentShift;
-	}
+	MMINLINE uintptr_t getObjectAlignmentShift() { return _objectAlignmentShift; }
 
 	/**
 	 * Returns TRUE if an object is indexable, FALSE otherwise. Languages that support indexable objects
@@ -386,35 +360,35 @@ public:
 	 * @param objectPtr pointer to the object
 	 * @return TRUE if object is indexable, FALSE otherwise
 	 */
-	MMINLINE bool
-	isIndexable(omrobjectptr_t objectPtr)
-	{
-		return _delegate.isIndexable(objectPtr);
-	}
+	MMINLINE bool isIndexable(omrobjectptr_t objectPtr) { return _delegate.isIndexable(objectPtr); }
 
 	/**
 	 * Returns TRUE if an object is dead, FALSE otherwise.
 	 * @param objectPtr Pointer to an object
 	 * @return TRUE if an object is dead, FALSE otherwise
 	 */
-	MMINLINE bool
-	isDeadObject(void *objectPtr)
+	MMINLINE bool isDeadObject(void *objectPtr)
 	{
 		bool result = false;
 		void *headerSlotPtr = getObjectHeaderSlotAddress((omrobjectptr_t)objectPtr);
 		if (compressObjectReferences()) {
 #if defined(OMR_GC_CONCURRENT_SCAVENGER)
 			/* for ConcurrentScavenger, forwarded bit must be 0, otherwise it's a self-forwarded object */
-			result = ((uint32_t)J9_GC_OBJ_HEAP_HOLE == (*(uint32_t*)headerSlotPtr & (uint32_t)(J9_GC_OBJ_HEAP_HOLE | OMR_FORWARDED_TAG)));
+			result = ((uint32_t)J9_GC_OBJ_HEAP_HOLE
+			        == (*(uint32_t *)headerSlotPtr & (uint32_t)(J9_GC_OBJ_HEAP_HOLE | OMR_FORWARDED_TAG)));
 #else
-			result = ((uint32_t)J9_GC_OBJ_HEAP_HOLE == (*(uint32_t*)headerSlotPtr & (uint32_t)J9_GC_OBJ_HEAP_HOLE));
+			result = ((uint32_t)J9_GC_OBJ_HEAP_HOLE
+			        == (*(uint32_t *)headerSlotPtr & (uint32_t)J9_GC_OBJ_HEAP_HOLE));
 #endif /* OMR_GC_CONCURRENT_SCAVENGER */
 		} else {
 #if defined(OMR_GC_CONCURRENT_SCAVENGER)
 			/* for ConcurrentScavenger, forwarded bit must be 0, otherwise it's a self-forwarded object */
-			result = ((uintptr_t)J9_GC_OBJ_HEAP_HOLE == (*(uintptr_t*)headerSlotPtr & (uintptr_t)(J9_GC_OBJ_HEAP_HOLE | OMR_FORWARDED_TAG)));
+			result = ((uintptr_t)J9_GC_OBJ_HEAP_HOLE
+			        == (*(uintptr_t *)headerSlotPtr
+			                & (uintptr_t)(J9_GC_OBJ_HEAP_HOLE | OMR_FORWARDED_TAG)));
 #else
-			result = ((uintptr_t)J9_GC_OBJ_HEAP_HOLE == (*(uintptr_t*)headerSlotPtr & (uintptr_t)J9_GC_OBJ_HEAP_HOLE));
+			result = ((uintptr_t)J9_GC_OBJ_HEAP_HOLE
+			        == (*(uintptr_t *)headerSlotPtr & (uintptr_t)J9_GC_OBJ_HEAP_HOLE));
 #endif /* OMR_GC_CONCURRENT_SCAVENGER */
 		}
 		return result;
@@ -425,16 +399,17 @@ public:
 	 * @param objectPtr Pointer to an object
 	 * @return TRUE if an object is a dead single slot object, FALSE otherwise
 	 */
-	MMINLINE bool
-	isSingleSlotDeadObject(omrobjectptr_t objectPtr)
+	MMINLINE bool isSingleSlotDeadObject(omrobjectptr_t objectPtr)
 	{
 		bool result = false;
 		void *headerSlotPtr = getObjectHeaderSlotAddress((omrobjectptr_t)objectPtr);
 		if (compressObjectReferences()) {
-			result = ((uint32_t)J9_GC_SINGLE_SLOT_HOLE == (*(uint32_t*)headerSlotPtr & (uint32_t)J9_GC_OBJ_HEAP_HOLE_MASK));
+			result = ((uint32_t)J9_GC_SINGLE_SLOT_HOLE
+			        == (*(uint32_t *)headerSlotPtr & (uint32_t)J9_GC_OBJ_HEAP_HOLE_MASK));
 		} else {
-			result = ((uintptr_t)J9_GC_SINGLE_SLOT_HOLE == (*(uintptr_t*)headerSlotPtr & (uintptr_t)J9_GC_OBJ_HEAP_HOLE_MASK));
-		}	
+			result = ((uintptr_t)J9_GC_SINGLE_SLOT_HOLE
+			        == (*(uintptr_t *)headerSlotPtr & (uintptr_t)J9_GC_OBJ_HEAP_HOLE_MASK));
+		}
 		return result;
 	}
 
@@ -443,19 +418,14 @@ public:
 	 * @param objectPtr Pointer to an object
 	 * @return The size, in bytes, of a single slot dead object
 	 */
-	MMINLINE uintptr_t
-	getSizeInBytesSingleSlotDeadObject(omrobjectptr_t objectPtr)
-	{
-		return sizeof(uintptr_t);
-	}
+	MMINLINE uintptr_t getSizeInBytesSingleSlotDeadObject(omrobjectptr_t objectPtr) { return sizeof(uintptr_t); }
 
 	/**
 	 * Returns the size, in bytes, of a multi-slot dead object.
 	 * @param objectPtr Pointer to an object
 	 * @return The size, in bytes, of a multi-slot dead object
 	 */
-	MMINLINE uintptr_t
-	getSizeInBytesMultiSlotDeadObject(omrobjectptr_t objectPtr)
+	MMINLINE uintptr_t getSizeInBytesMultiSlotDeadObject(omrobjectptr_t objectPtr)
 	{
 		return MM_HeapLinkedFreeHeader::getHeapLinkedFreeHeader(objectPtr)->getSize();
 	}
@@ -465,10 +435,9 @@ public:
 	 * @param objectPtr Pointer to an object
 	 * @return The size in byts of a dead object
 	 */
-	MMINLINE uintptr_t
-	getSizeInBytesDeadObject(omrobjectptr_t objectPtr)
+	MMINLINE uintptr_t getSizeInBytesDeadObject(omrobjectptr_t objectPtr)
 	{
-		if(isSingleSlotDeadObject(objectPtr)) {
+		if (isSingleSlotDeadObject(objectPtr)) {
 			return getSizeInBytesSingleSlotDeadObject(objectPtr);
 		} else {
 			return getSizeInBytesMultiSlotDeadObject(objectPtr);
@@ -483,8 +452,7 @@ public:
 	 * @param bitsToClear unshifted mask to clear bits
 	 * @param bitsToSet unshifted mask to set bits
 	 */
-	MMINLINE void
-	setObjectFlags(omrobjectptr_t objectPtr, uintptr_t bitsToClear, uintptr_t bitsToSet)
+	MMINLINE void setObjectFlags(omrobjectptr_t objectPtr, uintptr_t bitsToClear, uintptr_t bitsToSet)
 	{
 		void *headerSlotPtr = getObjectHeaderSlotAddress(objectPtr);
 		if (compressObjectReferences()) {
@@ -493,7 +461,7 @@ public:
 			Assert_MM_true(0 == (~(uint32_t)OMR_OBJECT_METADATA_FLAGS_MASK & (uint32_t)bitsToSet));
 #endif /* defined(OBJECT_MODEL_MODRON_ASSERTIONS) */
 
-			uint32_t* flagsPtr = (uint32_t*)headerSlotPtr;
+			uint32_t *flagsPtr = (uint32_t *)headerSlotPtr;
 			uint32_t clear = (uint32_t)bitsToClear << getObjectHeaderSlotFlagsShift();
 			uint32_t set = (uint32_t)bitsToSet << getObjectHeaderSlotFlagsShift();
 
@@ -504,7 +472,7 @@ public:
 			Assert_MM_true(0 == (~(uintptr_t)OMR_OBJECT_METADATA_FLAGS_MASK & (uintptr_t)bitsToSet));
 #endif /* defined(OBJECT_MODEL_MODRON_ASSERTIONS) */
 
-			uintptr_t* flagsPtr = (uintptr_t*)headerSlotPtr;
+			uintptr_t *flagsPtr = (uintptr_t *)headerSlotPtr;
 			uintptr_t clear = (uintptr_t)bitsToClear << getObjectHeaderSlotFlagsShift();
 			uintptr_t set = (uintptr_t)bitsToSet << getObjectHeaderSlotFlagsShift();
 
@@ -523,8 +491,7 @@ public:
 	 * @param bitsToSet unshifted mask of flags to set
 	 * @return true if flags have been been changed in this call
 	 */
-	MMINLINE bool
-	atomicSetObjectFlags(omrobjectptr_t objectPtr, uintptr_t bitsToClear, uintptr_t bitsToSet)
+	MMINLINE bool atomicSetObjectFlags(omrobjectptr_t objectPtr, uintptr_t bitsToClear, uintptr_t bitsToSet)
 	{
 		bool result = true;
 
@@ -535,7 +502,7 @@ public:
 
 		void *headerSlotPtr = getObjectHeaderSlotAddress(objectPtr);
 		if (compressObjectReferences()) {
-			volatile uint32_t* flagsPtr = (uint32_t*)headerSlotPtr;
+			volatile uint32_t *flagsPtr = (uint32_t *)headerSlotPtr;
 			uint32_t clear = (uint32_t)(bitsToClear << getObjectHeaderSlotFlagsShift());
 			uint32_t set = (uint32_t)(bitsToSet << getObjectHeaderSlotFlagsShift());
 			uint32_t oldFlags;
@@ -551,7 +518,7 @@ public:
 				}
 			} while (oldFlags != MM_AtomicOperations::lockCompareExchangeU32(flagsPtr, oldFlags, newFlags));
 		} else {
-			volatile uintptr_t* flagsPtr = (uintptr_t*)headerSlotPtr;
+			volatile uintptr_t *flagsPtr = (uintptr_t *)headerSlotPtr;
 			uintptr_t clear = (uintptr_t)(bitsToClear << getObjectHeaderSlotFlagsShift());
 			uintptr_t set = (uintptr_t)(bitsToSet << getObjectHeaderSlotFlagsShift());
 			uintptr_t oldFlags;
@@ -581,8 +548,7 @@ public:
 	 * @param objectPtr Pointer to an object
 	 * @param bits unshifted bits to set
 	 */
-	MMINLINE void
-	setRememberedBits(omrobjectptr_t objectPtr, uintptr_t bits)
+	MMINLINE void setRememberedBits(omrobjectptr_t objectPtr, uintptr_t bits)
 	{
 		setObjectFlags(objectPtr, OMR_OBJECT_METADATA_REMEMBERED_BITS, bits);
 	}
@@ -594,8 +560,7 @@ public:
 	 * @param objectPtr Pointer to an object
 	 * @return collector bits
 	 */
-	MMINLINE uintptr_t
-	getRememberedBits(omrobjectptr_t objectPtr)
+	MMINLINE uintptr_t getRememberedBits(omrobjectptr_t objectPtr)
 	{
 		return getObjectFlags(objectPtr) & OMR_OBJECT_METADATA_REMEMBERED_BITS;
 	}
@@ -606,8 +571,7 @@ public:
 	 * @param objectPtr Pointer to an object
 	 * @return TRUE if an object is remembered, FALSE otherwise
 	 */
-	MMINLINE bool
-	isRemembered(omrobjectptr_t objectPtr)
+	MMINLINE bool isRemembered(omrobjectptr_t objectPtr)
 	{
 		return (getRememberedBits(objectPtr) >= STATE_REMEMBERED);
 	}
@@ -620,11 +584,7 @@ public:
 	 *
 	 * @param objectPtr Pointer to an object
 	 */
-	MMINLINE void
-	clearRemembered(omrobjectptr_t objectPtr)
-	{
-		setRememberedBits(objectPtr, STATE_NOT_REMEMBERED);
-	}
+	MMINLINE void clearRemembered(omrobjectptr_t objectPtr) { setRememberedBits(objectPtr, STATE_NOT_REMEMBERED); }
 
 	/**
 	 * Conditionally and atomically switch the referenced state of an object. The fromState and toState
@@ -638,8 +598,7 @@ public:
 	 * @param toState unshifted desired new remembered state of object
 	 * @return true if referenced state has been set (to toState) this call
 	 */
-	MMINLINE bool
-	atomicSwitchReferencedState(omrobjectptr_t objectPtr, uintptr_t fromState, uintptr_t toState)
+	MMINLINE bool atomicSwitchReferencedState(omrobjectptr_t objectPtr, uintptr_t fromState, uintptr_t toState)
 	{
 		bool result = true;
 
@@ -650,10 +609,11 @@ public:
 
 		void *headerSlotPtr = getObjectHeaderSlotAddress(objectPtr);
 		if (compressObjectReferences()) {
-			volatile uint32_t* flagsPtr = (uint32_t*)headerSlotPtr;
+			volatile uint32_t *flagsPtr = (uint32_t *)headerSlotPtr;
 			uint32_t from = (uint32_t)(fromState << getObjectHeaderSlotFlagsShift());
 			uint32_t to = (uint32_t)(toState << getObjectHeaderSlotFlagsShift());
-			uint32_t rememberedMask = (uint32_t)(OMR_OBJECT_METADATA_REMEMBERED_BITS  << getObjectHeaderSlotFlagsShift());
+			uint32_t rememberedMask =
+			        (uint32_t)(OMR_OBJECT_METADATA_REMEMBERED_BITS << getObjectHeaderSlotFlagsShift());
 			uint32_t oldFlags;
 			uint32_t newFlags;
 
@@ -667,10 +627,11 @@ public:
 				}
 			} while (oldFlags != MM_AtomicOperations::lockCompareExchangeU32(flagsPtr, oldFlags, newFlags));
 		} else {
-			volatile uintptr_t* flagsPtr = (uintptr_t*)headerSlotPtr;
+			volatile uintptr_t *flagsPtr = (uintptr_t *)headerSlotPtr;
 			uintptr_t from = (uintptr_t)(fromState << getObjectHeaderSlotFlagsShift());
 			uintptr_t to = (uintptr_t)(toState << getObjectHeaderSlotFlagsShift());
-			uintptr_t rememberedMask = (uintptr_t)(OMR_OBJECT_METADATA_REMEMBERED_BITS  << getObjectHeaderSlotFlagsShift());
+			uintptr_t rememberedMask =
+			        (uintptr_t)(OMR_OBJECT_METADATA_REMEMBERED_BITS << getObjectHeaderSlotFlagsShift());
 			uintptr_t oldFlags;
 			uintptr_t newFlags;
 
@@ -698,8 +659,7 @@ public:
 	 * @param toState unshifted desired new remembered state of object
 	 * @return true if referenced state has been set (to toState) this call
 	 */
-	MMINLINE bool
-	atomicSwitchReferencedState(omrobjectptr_t objectPtr, uintptr_t toState)
+	MMINLINE bool atomicSwitchReferencedState(omrobjectptr_t objectPtr, uintptr_t toState)
 	{
 		bool result = true;
 
@@ -710,16 +670,17 @@ public:
 
 		void *headerSlotPtr = getObjectHeaderSlotAddress(objectPtr);
 		if (compressObjectReferences()) {
-			volatile uint32_t* flagsPtr = (uint32_t*)headerSlotPtr;
+			volatile uint32_t *flagsPtr = (uint32_t *)headerSlotPtr;
 			uint32_t to = (uint32_t)(toState << getObjectHeaderSlotFlagsShift());
-			uint32_t rememberedMask = (uint32_t)(OMR_OBJECT_METADATA_REMEMBERED_BITS << getObjectHeaderSlotFlagsShift());
+			uint32_t rememberedMask =
+			        (uint32_t)(OMR_OBJECT_METADATA_REMEMBERED_BITS << getObjectHeaderSlotFlagsShift());
 			uint32_t oldFlags;
 			uint32_t newFlags;
 
 			do {
 				oldFlags = *flagsPtr;
 				newFlags = (oldFlags & ~rememberedMask) | to;
-	
+
 				if (newFlags == oldFlags) {
 					result = false;
 					break;
@@ -728,21 +689,24 @@ public:
 			/* check to verify that this thread and no other thread atomically set flags -> toState */
 			result = result && (0 == (oldFlags & rememberedMask));
 		} else {
-			volatile uintptr_t* flagsPtr = (uintptr_t*)headerSlotPtr;
+			volatile uintptr_t *flagsPtr = (uintptr_t *)headerSlotPtr;
 			uintptr_t to = (uintptr_t)(toState << getObjectHeaderSlotFlagsShift());
-			uintptr_t rememberedMask = (uintptr_t)(OMR_OBJECT_METADATA_REMEMBERED_BITS << getObjectHeaderSlotFlagsShift());
+			uintptr_t rememberedMask =
+			        (uintptr_t)(OMR_OBJECT_METADATA_REMEMBERED_BITS << getObjectHeaderSlotFlagsShift());
 			uintptr_t oldFlags;
 			uintptr_t newFlags;
 
 			do {
 				oldFlags = *flagsPtr;
 				newFlags = (oldFlags & ~rememberedMask) | to;
-	
+
 				if (newFlags == oldFlags) {
 					result = false;
 					break;
 				}
-			} while (oldFlags != MM_AtomicOperations::lockCompareExchange(flagsPtr, (uintptr_t)oldFlags, (uintptr_t)newFlags));
+			} while (oldFlags
+			        != MM_AtomicOperations::lockCompareExchange(
+			                flagsPtr, (uintptr_t)oldFlags, (uintptr_t)newFlags));
 			/* check to verify that this thread and no other thread atomically set flags -> toState */
 			result = result && (0 == (oldFlags & rememberedMask));
 		}
@@ -761,8 +725,7 @@ public:
 	 * @param toState unshifted desired new remembered state of object
 	 * @return true if remembered state has been set (to toState) this call
 	 */
-	MMINLINE bool
-	atomicSetRememberedState(omrobjectptr_t objectPtr, uintptr_t toState)
+	MMINLINE bool atomicSetRememberedState(omrobjectptr_t objectPtr, uintptr_t toState)
 	{
 		bool result = true;
 
@@ -772,9 +735,10 @@ public:
 
 		void *headerSlotPtr = getObjectHeaderSlotAddress(objectPtr);
 		if (compressObjectReferences()) {
-			volatile uint32_t* flagsPtr = (uint32_t*)headerSlotPtr;
+			volatile uint32_t *flagsPtr = (uint32_t *)headerSlotPtr;
 			uint32_t to = (uint32_t)(toState << getObjectHeaderSlotFlagsShift());
-			uint32_t rememberedMask = (uint32_t)(OMR_OBJECT_METADATA_REMEMBERED_BITS << getObjectHeaderSlotFlagsShift());
+			uint32_t rememberedMask =
+			        (uint32_t)(OMR_OBJECT_METADATA_REMEMBERED_BITS << getObjectHeaderSlotFlagsShift());
 			uint32_t oldFlags;
 			uint32_t newFlags;
 
@@ -787,9 +751,10 @@ public:
 				newFlags = (oldFlags & ~rememberedMask) | to;
 			} while (oldFlags != MM_AtomicOperations::lockCompareExchangeU32(flagsPtr, oldFlags, newFlags));
 		} else {
-			volatile uintptr_t* flagsPtr = (uintptr_t*)headerSlotPtr;
+			volatile uintptr_t *flagsPtr = (uintptr_t *)headerSlotPtr;
 			uintptr_t to = (uintptr_t)(toState << getObjectHeaderSlotFlagsShift());
-			uintptr_t rememberedMask = (uintptr_t)(OMR_OBJECT_METADATA_REMEMBERED_BITS << getObjectHeaderSlotFlagsShift());
+			uintptr_t rememberedMask =
+			        (uintptr_t)(OMR_OBJECT_METADATA_REMEMBERED_BITS << getObjectHeaderSlotFlagsShift());
 			uintptr_t oldFlags;
 			uintptr_t newFlags;
 
@@ -813,8 +778,7 @@ public:
 	 * @param forwardedHeader pointer to the MM_ForwardedHeader instance encapsulating the object
 	 * @return TRUE if object is indexable, FALSE otherwise
 	 */
-	MMINLINE bool
-	isIndexable(MM_ForwardedHeader *forwardedHeader)
+	MMINLINE bool isIndexable(MM_ForwardedHeader *forwardedHeader)
 	{
 		return _delegate.isIndexable(forwardedHeader);
 	}
@@ -829,8 +793,7 @@ public:
 	 * @param objectPtr points to an object
 	 * @return true if object holds indirect references to heap objects
 	 */
-	MMINLINE bool
-	hasIndirectObjectReferents(CLI_THREAD_TYPE *thread, omrobjectptr_t objectPtr)
+	MMINLINE bool hasIndirectObjectReferents(CLI_THREAD_TYPE *thread, omrobjectptr_t objectPtr)
 	{
 		return _delegate.hasIndirectObjectReferents(thread, objectPtr);
 	}
@@ -841,14 +804,14 @@ public:
 	 * @param[in] forwardedHeader pointer to the MM_ForwardedHeader instance encapsulating the object
 	 * @return the total instance size of the forwarded object
 	 */
-	MMINLINE uintptr_t
-	getForwardedObjectSizeInBytes(MM_ForwardedHeader *forwardedHeader)
+	MMINLINE uintptr_t getForwardedObjectSizeInBytes(MM_ForwardedHeader *forwardedHeader)
 	{
 		return _delegate.getForwardedObjectSizeInBytes(forwardedHeader);
 	}
 
 	/**
-	 * Extract the flag bits from an unforwarded object. Flag bits are returned in the low-order byte of the returned value.
+	 * Extract the flag bits from an unforwarded object. Flag bits are returned in the low-order byte of the
+	 * returned value.
 	 *
 	 * This method will assert if the object has been marked as forwarded.
 	 *
@@ -856,10 +819,10 @@ public:
 	 * @return the flag bits from the object encapsulated by forwardedHeader
 	 * @see MM_ForwardingHeader::isForwardedObject()
 	 */
-	MMINLINE uintptr_t
-	getPreservedFlags(MM_ForwardedHeader *forwardedHeader)
+	MMINLINE uintptr_t getPreservedFlags(MM_ForwardedHeader *forwardedHeader)
 	{
-		return ((uintptr_t)(forwardedHeader->getPreservedSlot()) >> getObjectHeaderSlotFlagsShift()) & (fomrobject_t)OMR_OBJECT_METADATA_FLAGS_MASK;
+		return ((uintptr_t)(forwardedHeader->getPreservedSlot()) >> getObjectHeaderSlotFlagsShift())
+		        & (fomrobject_t)OMR_OBJECT_METADATA_FLAGS_MASK;
 	}
 
 	/**
@@ -871,10 +834,10 @@ public:
 	 * @return the age bits from the object encapsulated by forwardedHeader
 	 * @see MM_ForwardingHeader::isForwardedObject()
 	 */
-	MMINLINE uintptr_t
-	getPreservedAge(MM_ForwardedHeader *forwardedHeader)
+	MMINLINE uintptr_t getPreservedAge(MM_ForwardedHeader *forwardedHeader)
 	{
-		return (getPreservedFlags(forwardedHeader) & OMR_OBJECT_METADATA_AGE_MASK) >> OMR_OBJECT_METADATA_AGE_SHIFT;
+		return (getPreservedFlags(forwardedHeader) & OMR_OBJECT_METADATA_AGE_MASK)
+		        >> OMR_OBJECT_METADATA_AGE_SHIFT;
 	}
 
 	/**
@@ -886,8 +849,8 @@ public:
 	 * @param[in] destinationObjectPtr pointer to the copied object to be fixed up
 	 * @param[in] objectAge the age to set in the copied object
 	 */
-	MMINLINE void
-	fixupForwardedObject(MM_ForwardedHeader *forwardedHeader, omrobjectptr_t destinationObjectPtr, uintptr_t objectAge)
+	MMINLINE void fixupForwardedObject(
+	        MM_ForwardedHeader *forwardedHeader, omrobjectptr_t destinationObjectPtr, uintptr_t objectAge)
 	{
 		uintptr_t age = objectAge << OMR_OBJECT_METADATA_AGE_SHIFT;
 		setObjectFlags(destinationObjectPtr, OMR_OBJECT_METADATA_AGE_MASK, age);
@@ -897,8 +860,7 @@ public:
 	/**
 	 * Constructor.
 	 */
-	GC_ObjectModelBase()
-		: _delegate((fomrobject_t)OMR_OBJECT_METADATA_FLAGS_MASK)
+	GC_ObjectModelBase() : _delegate((fomrobject_t)OMR_OBJECT_METADATA_FLAGS_MASK)
 	{
 		_typeId = __FUNCTION__;
 #if defined(OBJECT_MODEL_MODRON_ASSERTIONS)

@@ -20,13 +20,12 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-#include "omrcfg.h"
-#include "ModronAssertions.h"
-#include "modronopt.h"
-
 #include "Task.hpp"
 
 #include "EnvironmentBase.hpp"
+#include "ModronAssertions.h"
+#include "modronopt.h"
+#include "omrcfg.h"
 
 void
 MM_Task::accept(MM_EnvironmentBase *env)
@@ -38,32 +37,28 @@ MM_Task::accept(MM_EnvironmentBase *env)
 	} else {
 		Assert_MM_true(OMRVMSTATE_GC_DISPATCHER_IDLE == oldVMstate);
 	}
-	
+
 	/* do task-specific setup */
 	setup(env);
 }
 
 void
 MM_Task::masterSetup(MM_EnvironmentBase *env)
-{
-}
+{}
 
 void
 MM_Task::masterCleanup(MM_EnvironmentBase *env)
-{
-}
+{}
 
-void 
+void
 MM_Task::setup(MM_EnvironmentBase *env)
-{
-}
+{}
 
-void 
+void
 MM_Task::cleanup(MM_EnvironmentBase *env)
-{
-}
+{}
 
-void 
+void
 MM_Task::complete(MM_EnvironmentBase *env)
 {
 	Assert_MM_true(getVMStateID() == env->getOmrVMThread()->vmState);
@@ -75,23 +70,22 @@ MM_Task::complete(MM_EnvironmentBase *env)
 	}
 
 	env->popVMstate(oldVMstate);
-	
+
 	/* do task-specific cleanup */
 	cleanup(env);
 }
 
-bool 
+bool
 MM_Task::handleNextWorkUnit(MM_EnvironmentBase *env)
 {
 	return true;
 }
 
-void 
+void
 MM_Task::synchronizeGCThreads(MM_EnvironmentBase *env, const char *id)
-{
-}
+{}
 
-bool 
+bool
 MM_Task::synchronizeGCThreadsAndReleaseMaster(MM_EnvironmentBase *env, const char *id)
 {
 	return true;
@@ -103,12 +97,11 @@ MM_Task::synchronizeGCThreadsAndReleaseSingleThread(MM_EnvironmentBase *env, con
 	return true;
 }
 
-void 
+void
 MM_Task::releaseSynchronizedGCThreads(MM_EnvironmentBase *env)
-{
-}
+{}
 
-bool 
+bool
 MM_Task::isSynchronized()
 {
 	return false;

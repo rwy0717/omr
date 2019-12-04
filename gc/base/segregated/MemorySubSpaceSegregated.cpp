@@ -20,10 +20,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-#include "omrcfg.h"
-#include "ModronAssertions.h"
-#include "objectdescription.h"
-#include "sizeclasses.h"
+#include "MemorySubSpaceSegregated.hpp"
 
 #include "AllocateDescription.hpp"
 #include "Collector.hpp"
@@ -32,9 +29,11 @@
 #include "MemoryPoolSegregated.hpp"
 #include "MemorySpace.hpp"
 #include "MemorySubSpace.hpp"
+#include "ModronAssertions.h"
 #include "RegionPoolSegregated.hpp"
-
-#include "MemorySubSpaceSegregated.hpp"
+#include "objectdescription.h"
+#include "omrcfg.h"
+#include "sizeclasses.h"
 
 #if defined(OMR_GC_SEGREGATED_HEAP)
 
@@ -43,14 +42,16 @@
  */
 
 void *
-MM_MemorySubSpaceSegregated::allocateObject(MM_EnvironmentBase *env, MM_AllocateDescription *allocDescription, MM_MemorySubSpace *baseSubSpace, MM_MemorySubSpace *previousSubSpace, bool shouldCollectOnFailure)
+MM_MemorySubSpaceSegregated::allocateObject(MM_EnvironmentBase *env, MM_AllocateDescription *allocDescription,
+        MM_MemorySubSpace *baseSubSpace, MM_MemorySubSpace *previousSubSpace, bool shouldCollectOnFailure)
 {
 	void *result = NULL;
 
 	if (shouldCollectOnFailure) {
 		result = allocateMixedObjectOrArraylet(env, allocDescription, mixedObject);
 	} else {
-		/* not setting these object flags causes a failure working with empty arrays but where this is set should probably be hoisted into the caller */
+		/* not setting these object flags causes a failure working with empty arrays but where this is set
+		 * should probably be hoisted into the caller */
 		allocDescription->setObjectFlags(getObjectFlags());
 		result = _memoryPoolSegregated->allocateObject(env, allocDescription);
 	}
@@ -61,13 +62,15 @@ MM_MemorySubSpaceSegregated::allocateObject(MM_EnvironmentBase *env, MM_Allocate
  * Allocate an arraylet leaf.
  */
 void *
-MM_MemorySubSpaceSegregated::allocateArrayletLeaf(MM_EnvironmentBase *env, MM_AllocateDescription *allocDescription, MM_MemorySubSpace *baseSubSpace, MM_MemorySubSpace *previousSubSpace, bool shouldCollectOnFailure)
+MM_MemorySubSpaceSegregated::allocateArrayletLeaf(MM_EnvironmentBase *env, MM_AllocateDescription *allocDescription,
+        MM_MemorySubSpace *baseSubSpace, MM_MemorySubSpace *previousSubSpace, bool shouldCollectOnFailure)
 {
 	omrarrayptr_t spine = allocDescription->getSpine();
-	/* spine object refers to the barrier-safe "object" reference, as opposed to the internal "heap address" represented by the spine variable */
-	omrobjectptr_t spineObject = (omrobjectptr_t) spine;
+	/* spine object refers to the barrier-safe "object" reference, as opposed to the internal "heap address"
+	 * represented by the spine variable */
+	omrobjectptr_t spineObject = (omrobjectptr_t)spine;
 	void *leaf = NULL;
-	if(env->saveObjects(spineObject)) {
+	if (env->saveObjects(spineObject)) {
 		leaf = allocateMixedObjectOrArraylet(env, allocDescription, arrayletLeaf);
 		env->restoreObjects(&spineObject);
 		spine = (omrarrayptr_t)spineObject;
@@ -77,25 +80,22 @@ MM_MemorySubSpaceSegregated::allocateArrayletLeaf(MM_EnvironmentBase *env, MM_Al
 }
 
 void *
-MM_MemorySubSpaceSegregated::allocate(MM_EnvironmentBase *env, MM_AllocateDescription *allocDescription, AllocateType allocType)
+MM_MemorySubSpaceSegregated::allocate(
+        MM_EnvironmentBase *env, MM_AllocateDescription *allocDescription, AllocateType allocType)
 {
 	void *result = NULL;
 	switch (allocType) {
 	case mixedObject:
-	case arrayletSpine:
-		result = _memoryPoolSegregated->allocateObject(env, allocDescription);
-		break;
-	case arrayletLeaf:
-		result = _memoryPoolSegregated->allocateArrayletLeaf(env, allocDescription);
-		break;
-	default:
-		Assert_MM_unreachable();
+	case arrayletSpine: result = _memoryPoolSegregated->allocateObject(env, allocDescription); break;
+	case arrayletLeaf: result = _memoryPoolSegregated->allocateArrayletLeaf(env, allocDescription); break;
+	default: Assert_MM_unreachable();
 	}
 	return result;
 }
 
 void *
-MM_MemorySubSpaceSegregated::allocateMixedObjectOrArraylet(MM_EnvironmentBase *env, MM_AllocateDescription *allocDescription, AllocateType allocType)
+MM_MemorySubSpaceSegregated::allocateMixedObjectOrArraylet(
+        MM_EnvironmentBase *env, MM_AllocateDescription *allocDescription, AllocateType allocType)
 {
 	void *result = NULL;
 
@@ -109,12 +109,14 @@ MM_MemorySubSpaceSegregated::allocateMixedObjectOrArraylet(MM_EnvironmentBase *e
 	if (NULL != _collector) {
 		allocDescription->saveObjects(env);
 		if (!env->acquireExclusiveVMAccessForGC(_collector)) {
-			/* we have exclusive access but another thread beat us to the GC so see if they collected enough to satisfy our request */
+			/* we have exclusive access but another thread beat us to the GC so see if they collected enough
+			 * to satisfy our request */
 			allocDescription->restoreObjects(env);
-			result =  allocate(env, allocDescription, allocType);
+			result = allocate(env, allocDescription, allocType);
 			if (NULL != result) {
-				/* Satisfied the allocate after having grabbed exclusive access to perform a GC (without actually performing the GC).  Raise
-				 * an event for tracing / verbose to report the occurrence.
+				/* Satisfied the allocate after having grabbed exclusive access to perform a GC (without
+				 * actually performing the GC).  Raise an event for tracing / verbose to report the
+				 * occurrence.
 				 */
 				reportAcquiredExclusiveToSatisfyAllocate(env, allocDescription);
 				return result;
@@ -122,14 +124,17 @@ MM_MemorySubSpaceSegregated::allocateMixedObjectOrArraylet(MM_EnvironmentBase *e
 
 			/* Failed to satisfy allocate - now really go for a GC */
 			allocDescription->saveObjects(env);
-			/* acquire exclusive access and, after we get it, see if we need to perform a collect or if someone else beat us to it */
+			/* acquire exclusive access and, after we get it, see if we need to perform a collect or if
+			 * someone else beat us to it */
 			if (!env->acquireExclusiveVMAccessForGC(_collector)) {
-				/* we have exclusive access but another thread beat us to the GC so see if they collected enough to satisfy our request */
+				/* we have exclusive access but another thread beat us to the GC so see if they
+				 * collected enough to satisfy our request */
 				allocDescription->restoreObjects(env);
 				result = allocate(env, allocDescription, allocType);
 				if (NULL != result) {
-					/* Satisfied the allocate after having grabbed exclusive access to perform a GC (without actually performing the GC).  Raise
-					 * an event for tracing / verbose to report the occurrence.
+					/* Satisfied the allocate after having grabbed exclusive access to perform a GC
+					 * (without actually performing the GC).  Raise an event for tracing / verbose
+					 * to report the occurrence.
 					 */
 					reportAcquiredExclusiveToSatisfyAllocate(env, allocDescription);
 					return result;
@@ -144,8 +149,9 @@ MM_MemorySubSpaceSegregated::allocateMixedObjectOrArraylet(MM_EnvironmentBase *e
 				result = allocate(env, allocDescription, allocType);
 
 				if (NULL != result) {
-					/* Satisfied the allocate after having grabbed exclusive access to perform a GC (without actually performing the GC).  Raise
-					 * an event for tracing / verbose to report the occurrence.
+					/* Satisfied the allocate after having grabbed exclusive access to perform a GC
+					 * (without actually performing the GC).  Raise an event for tracing / verbose
+					 * to report the occurrence.
 					 */
 					reportAcquiredExclusiveToSatisfyAllocate(env, allocDescription);
 					reportAllocationFailureEnd(env);
@@ -167,7 +173,8 @@ MM_MemorySubSpaceSegregated::allocateMixedObjectOrArraylet(MM_EnvironmentBase *e
 		Assert_MM_mustHaveExclusiveVMAccess(env->getOmrVMThread());
 
 		/* run the collector in the default mode (ie:  not explicitly aggressive) */
-		result = _collector->garbageCollect(env, this, allocDescription, J9MMCONSTANT_IMPLICIT_GC_DEFAULT, NULL, NULL, NULL);
+		result = _collector->garbageCollect(
+		        env, this, allocDescription, J9MMCONSTANT_IMPLICIT_GC_DEFAULT, NULL, NULL, NULL);
 		allocDescription->restoreObjects(env);
 		result = allocate(env, allocDescription, allocType);
 
@@ -178,7 +185,8 @@ MM_MemorySubSpaceSegregated::allocateMixedObjectOrArraylet(MM_EnvironmentBase *e
 
 		allocDescription->saveObjects(env);
 		/* The collect wasn't good enough to satisfy the allocate so attempt an aggressive collection */
-		result = _collector->garbageCollect(env, this, allocDescription, J9MMCONSTANT_IMPLICIT_GC_AGGRESSIVE, NULL, NULL, NULL);
+		result = _collector->garbageCollect(
+		        env, this, allocDescription, J9MMCONSTANT_IMPLICIT_GC_AGGRESSIVE, NULL, NULL, NULL);
 		allocDescription->restoreObjects(env);
 		result = allocate(env, allocDescription, allocType);
 
@@ -187,14 +195,18 @@ MM_MemorySubSpaceSegregated::allocateMixedObjectOrArraylet(MM_EnvironmentBase *e
 		if (result) {
 			return result;
 		}
-		/* there was nothing we could do to satisfy the allocate at this level (we will either OOM or attempt a collect at the higher level in our parent) */
+		/* there was nothing we could do to satisfy the allocate at this level (we will either OOM or attempt a
+		 * collect at the higher level in our parent) */
 	}
 
 	return result;
 }
 
 void *
-MM_MemorySubSpaceSegregated::allocationRequestFailed(MM_EnvironmentBase *env, MM_AllocateDescription *allocateDescription, AllocationType allocationType, MM_ObjectAllocationInterface *objectAllocationInterface, MM_MemorySubSpace *baseSubSpace, MM_MemorySubSpace *previousSubSpace)
+MM_MemorySubSpaceSegregated::allocationRequestFailed(MM_EnvironmentBase *env,
+        MM_AllocateDescription *allocateDescription, AllocationType allocationType,
+        MM_ObjectAllocationInterface *objectAllocationInterface, MM_MemorySubSpace *baseSubSpace,
+        MM_MemorySubSpace *previousSubSpace)
 {
 	return allocateGeneric(env, allocateDescription, allocationType, objectAllocationInterface, baseSubSpace);
 }
@@ -207,8 +219,7 @@ MM_MemorySubSpaceSegregated::largestDesirableArraySpine()
 
 void
 MM_MemorySubSpaceSegregated::abandonHeapChunk(void *addrBase, void *addrTop)
-{
-}
+{}
 
 MM_MemorySubSpace *
 MM_MemorySubSpaceSegregated::getDefaultMemorySubSpace()
@@ -223,15 +234,17 @@ MM_MemorySubSpaceSegregated::getTenureMemorySubSpace()
 }
 
 MM_MemorySubSpaceSegregated *
-MM_MemorySubSpaceSegregated::newInstance(
-	MM_EnvironmentBase *env, MM_PhysicalSubArena *physicalSubArena, MM_MemoryPool *memoryPool,
-	bool usesGlobalCollector, uintptr_t minimumSize, uintptr_t initialSize, uintptr_t maximumSize)
+MM_MemorySubSpaceSegregated::newInstance(MM_EnvironmentBase *env, MM_PhysicalSubArena *physicalSubArena,
+        MM_MemoryPool *memoryPool, bool usesGlobalCollector, uintptr_t minimumSize, uintptr_t initialSize,
+        uintptr_t maximumSize)
 {
 	MM_MemorySubSpaceSegregated *memorySubSpace;
 
-	memorySubSpace = (MM_MemorySubSpaceSegregated *)env->getForge()->allocate(sizeof(MM_MemorySubSpaceSegregated), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+	memorySubSpace = (MM_MemorySubSpaceSegregated *)env->getForge()->allocate(
+	        sizeof(MM_MemorySubSpaceSegregated), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
 	if (NULL != memorySubSpace) {
-		new(memorySubSpace) MM_MemorySubSpaceSegregated(env, physicalSubArena, memoryPool, usesGlobalCollector, minimumSize, initialSize, maximumSize);
+		new (memorySubSpace) MM_MemorySubSpaceSegregated(
+		        env, physicalSubArena, memoryPool, usesGlobalCollector, minimumSize, initialSize, maximumSize);
 		if (!memorySubSpace->initialize(env)) {
 			memorySubSpace->kill(env);
 			memorySubSpace = NULL;
@@ -243,7 +256,7 @@ MM_MemorySubSpaceSegregated::newInstance(
 bool
 MM_MemorySubSpaceSegregated::initialize(MM_EnvironmentBase *env)
 {
-	if(!MM_MemorySubSpaceUniSpace::initialize(env)) {
+	if (!MM_MemorySubSpaceUniSpace::initialize(env)) {
 		return false;
 	}
 	_memoryPoolSegregated->setSubSpace(this);
@@ -254,7 +267,7 @@ MM_MemorySubSpaceSegregated::initialize(MM_EnvironmentBase *env)
 void
 MM_MemorySubSpaceSegregated::tearDown(MM_EnvironmentBase *env)
 {
-	if(NULL != _memoryPoolSegregated) {
+	if (NULL != _memoryPoolSegregated) {
 		_memoryPoolSegregated->kill(env);
 		_memoryPoolSegregated = NULL;
 	}
@@ -264,27 +277,26 @@ MM_MemorySubSpaceSegregated::tearDown(MM_EnvironmentBase *env)
 
 bool
 MM_MemorySubSpaceSegregated::expanded(
-	MM_EnvironmentBase *env,
-	MM_PhysicalSubArena *subArena,
-	MM_HeapRegionDescriptor *region,
-	bool canCoalesce)
+        MM_EnvironmentBase *env, MM_PhysicalSubArena *subArena, MM_HeapRegionDescriptor *region, bool canCoalesce)
 {
-	void* regionLowAddress = region->getLowAddress();
-	void* regionHighAddress = region->getHighAddress();
+	void *regionLowAddress = region->getLowAddress();
+	void *regionHighAddress = region->getHighAddress();
 
 	/* Inform the sub space hierarchy of the size change */
 	bool result = heapAddRange(env, this, region->getSize(), regionLowAddress, regionHighAddress);
 
 	/* Expand the valid range for arraylets. */
 	if (result) {
-		_extensions->indexableObjectModel.expandArrayletSubSpaceRange(this, regionLowAddress, regionHighAddress, largestDesirableArraySpine());
+		_extensions->indexableObjectModel.expandArrayletSubSpaceRange(
+		        this, regionLowAddress, regionHighAddress, largestDesirableArraySpine());
 	}
 
 	return result;
 }
 
 bool
-MM_MemorySubSpaceSegregated::heapAddRange(MM_EnvironmentBase *env, MM_MemorySubSpace *subspace, uintptr_t size, void *lowAddress, void *highAddress)
+MM_MemorySubSpaceSegregated::heapAddRange(
+        MM_EnvironmentBase *env, MM_MemorySubSpace *subspace, uintptr_t size, void *lowAddress, void *highAddress)
 {
 	bool result = MM_MemorySubSpaceUniSpace::heapAddRange(env, subspace, size, lowAddress, highAddress);
 	if (result) {
@@ -303,10 +315,12 @@ MM_MemorySubSpaceSegregated::heapAddRange(MM_EnvironmentBase *env, MM_MemorySubS
 }
 
 bool
-MM_MemorySubSpaceSegregated::heapRemoveRange(MM_EnvironmentBase *env, MM_MemorySubSpace *subspace, uintptr_t size, void *lowAddress, void *highAddress, void *lowValidAddress, void *highValidAddress)
+MM_MemorySubSpaceSegregated::heapRemoveRange(MM_EnvironmentBase *env, MM_MemorySubSpace *subspace, uintptr_t size,
+        void *lowAddress, void *highAddress, void *lowValidAddress, void *highValidAddress)
 {
 	Assert_MM_unreachable();
-	return MM_MemorySubSpaceUniSpace::heapRemoveRange(env, subspace, size, lowAddress, highAddress, lowValidAddress, highValidAddress);
+	return MM_MemorySubSpaceUniSpace::heapRemoveRange(
+	        env, subspace, size, lowAddress, highAddress, lowValidAddress, highValidAddress);
 }
 
 void
@@ -333,7 +347,7 @@ MM_MemorySubSpaceSegregated::getApproximateFreeMemorySize()
 uintptr_t
 MM_MemorySubSpaceSegregated::getActiveMemorySize()
 {
-	return getActiveMemorySize(MEMORY_TYPE_OLD|MEMORY_TYPE_NEW);
+	return getActiveMemorySize(MEMORY_TYPE_OLD | MEMORY_TYPE_NEW);
 }
 
 uintptr_t
@@ -348,7 +362,7 @@ MM_MemorySubSpaceSegregated::getActiveMemorySize(uintptr_t includeMemoryType)
 uintptr_t
 MM_MemorySubSpaceSegregated::getActualActiveFreeMemorySize()
 {
-	return getActualActiveFreeMemorySize(MEMORY_TYPE_OLD|MEMORY_TYPE_NEW);
+	return getActualActiveFreeMemorySize(MEMORY_TYPE_OLD | MEMORY_TYPE_NEW);
 }
 
 uintptr_t
@@ -363,7 +377,7 @@ MM_MemorySubSpaceSegregated::getActualActiveFreeMemorySize(uintptr_t includeMemo
 uintptr_t
 MM_MemorySubSpaceSegregated::getApproximateActiveFreeMemorySize()
 {
-	return getApproximateActiveFreeMemorySize(MEMORY_TYPE_OLD|MEMORY_TYPE_NEW);
+	return getApproximateActiveFreeMemorySize(MEMORY_TYPE_OLD | MEMORY_TYPE_NEW);
 }
 
 uintptr_t

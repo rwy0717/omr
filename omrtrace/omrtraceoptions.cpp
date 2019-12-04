@@ -73,33 +73,33 @@ static const char *getPositionalParm(int pos, const char *string, int *size);
 static int getParmNumber(const char *string);
 static int decimalString2Int(const char *decString, int32_t signedAllowed, omr_error_t *rc, BOOLEAN atRuntime);
 
-
 const OMR_TraceOption UTE_OPTIONS[] = {
-	/* { Keyword, Can be configured at runtime, Configuration function } */
+        /* { Keyword, Can be configured at runtime, Configuration function } */
 
-	/* These four don't have any action */
-	{UT_DEBUG_KEYWORD, FALSE, NULL},
-	{UT_SUFFIX_KEYWORD, FALSE, NULL},
-	{UT_LIBPATH_KEYWORD, FALSE, NULL},
-	{UT_FORMAT_KEYWORD, FALSE, NULL},
+        /* These four don't have any action */
+        {UT_DEBUG_KEYWORD, FALSE, NULL},
+        {UT_SUFFIX_KEYWORD, FALSE, NULL},
+        {UT_LIBPATH_KEYWORD, FALSE, NULL},
+        {UT_FORMAT_KEYWORD, FALSE, NULL},
 
-	{UT_MINIMAL_KEYWORD, TRUE, setMinimal},
-	{UT_MAXIMAL_KEYWORD, TRUE, setMaximal},
-	{UT_EXCEPTION_KEYWORD, TRUE, setException},
-	{UT_COUNT_KEYWORD, TRUE, setCount},
-	{UT_PRINT_KEYWORD, TRUE, setPrint},
-	{UT_NONE_KEYWORD, TRUE, setNone},
-	{UT_IPRINT_KEYWORD, TRUE, setIprint},
+        {UT_MINIMAL_KEYWORD, TRUE, setMinimal},
+        {UT_MAXIMAL_KEYWORD, TRUE, setMaximal},
+        {UT_EXCEPTION_KEYWORD, TRUE, setException},
+        {UT_COUNT_KEYWORD, TRUE, setCount},
+        {UT_PRINT_KEYWORD, TRUE, setPrint},
+        {UT_NONE_KEYWORD, TRUE, setNone},
+        {UT_IPRINT_KEYWORD, TRUE, setIprint},
 #if OMR_ALLOW_OUTPUT_OPTION
-	{UT_OUTPUT_KEYWORD, FALSE, setOutput},
+        {UT_OUTPUT_KEYWORD, FALSE, setOutput},
 #endif /* OMR_ALLOW_OUTPUT_OPTION */
-	{UT_BUFFERS_KEYWORD, TRUE, setBuffers}, /* Not all buffers functions are exposed - but are controlled in the set function*/
-	{UT_SUSPEND_KEYWORD, TRUE, processSuspendOption},
-	{UT_RESUME_KEYWORD, TRUE, processResumeOption},
-	{UT_RESUME_COUNT_KEYWORD, TRUE, processResumeOption},
-	{UT_SUSPEND_COUNT_KEYWORD, TRUE, processSuspendCountOption},
-	{UT_FATAL_ASSERT_KEYWORD, TRUE, setFatalAssert},
-	{UT_NO_FATAL_ASSERT_KEYWORD, TRUE, clearFatalAssert},
+        {UT_BUFFERS_KEYWORD, TRUE, setBuffers}, /* Not all buffers functions are exposed - but are controlled in the set
+                                                   function*/
+        {UT_SUSPEND_KEYWORD, TRUE, processSuspendOption},
+        {UT_RESUME_KEYWORD, TRUE, processResumeOption},
+        {UT_RESUME_COUNT_KEYWORD, TRUE, processResumeOption},
+        {UT_SUSPEND_COUNT_KEYWORD, TRUE, processSuspendCountOption},
+        {UT_FATAL_ASSERT_KEYWORD, TRUE, setFatalAssert},
+        {UT_NO_FATAL_ASSERT_KEYWORD, TRUE, clearFatalAssert},
 };
 
 #define NUMBER_OF_UTE_OPTIONS (sizeof(UTE_OPTIONS) / sizeof(UTE_OPTIONS[0]))
@@ -118,8 +118,8 @@ addTraceCmd(OMR_TraceThread *thr, const char *cmd, const char *value, BOOLEAN at
 
 	OMRPORT_ACCESS_FROM_OMRPORT(OMR_TRACEGLOBAL(portLibrary));
 
-	str = (char *)omrmem_allocate_memory(strlen(cmd) + (value == NULL ? 1 :
-										 strlen(value) + 2), OMRMEM_CATEGORY_TRACE);
+	str = (char *)omrmem_allocate_memory(
+	        strlen(cmd) + (value == NULL ? 1 : strlen(value) + 2), OMRMEM_CATEGORY_TRACE);
 	if (str != NULL) {
 		strcpy(str, cmd);
 		if (value != NULL && strlen(value) > 0) {
@@ -170,14 +170,11 @@ parseBufferSize(const char *const str, const int argSize, BOOLEAN atRuntime)
 		if (firstNonDigit == (argSize - 1) && firstDigit != -1) {
 			int multiplier = 1;
 			switch (j9_cmdla_toupper(str[argSize - 1])) {
-			case 'K':
-				multiplier = 1024;
-				break;
-			case 'M':
-				multiplier = 1024 * 1024;
-				break;
+			case 'K': multiplier = 1024; break;
+			case 'M': multiplier = 1024 * 1024; break;
 			default:
-				reportCommandLineError(atRuntime, "Unrecognised suffix %c specified for buffer size", str[argSize - 1]);
+				reportCommandLineError(atRuntime, "Unrecognised suffix %c specified for buffer size",
+				        str[argSize - 1]);
 				return OMR_ERROR_ILLEGAL_ARGUMENT;
 			}
 
@@ -193,7 +190,8 @@ parseBufferSize(const char *const str, const int argSize, BOOLEAN atRuntime)
 	}
 
 	if (newBufferSize < UT_MINIMUM_BUFFERSIZE) {
-		reportCommandLineError(atRuntime, "Specified buffer size %d bytes is too small. Minimum is %d bytes.", newBufferSize, UT_MINIMUM_BUFFERSIZE);
+		reportCommandLineError(atRuntime, "Specified buffer size %d bytes is too small. Minimum is %d bytes.",
+		        newBufferSize, UT_MINIMUM_BUFFERSIZE);
 		return OMR_ERROR_ILLEGAL_ARGUMENT;
 	} else {
 		OMR_TRACEGLOBAL(bufferSize) = newBufferSize;
@@ -419,13 +417,13 @@ setSuspendResumeCount(OMR_TraceThread *thr, const char *value, int32_t resume, B
 	 */
 	p = getPositionalParm(1, value, &length);
 
-	if (getParmNumber(value) != 1) {  /* problem if not just the one parm */
+	if (getParmNumber(value) != 1) { /* problem if not just the one parm */
 		rc = OMR_ERROR_INTERNAL;
-	} else if (length == 0) {         /* first (only) parm must be non null */
+	} else if (length == 0) { /* first (only) parm must be non null */
 		rc = OMR_ERROR_INTERNAL;
 	}
 
-	if (OMR_ERROR_NONE == rc) {               /* max 5 chars long            */
+	if (OMR_ERROR_NONE == rc) { /* max 5 chars long            */
 		if (*p == '+' || *p == '-') { /* but must allow 6 if signed  */
 			maxLength++;
 		}
@@ -439,9 +437,11 @@ setSuspendResumeCount(OMR_TraceThread *thr, const char *value, int32_t resume, B
 	 */
 	if (OMR_ERROR_NONE != rc) {
 		if (resume) {
-			reportCommandLineError(atRuntime, "resumecount takes a single integer value from -99999 to +99999");
+			reportCommandLineError(
+			        atRuntime, "resumecount takes a single integer value from -99999 to +99999");
 		} else {
-			reportCommandLineError(atRuntime, "suspendcount takes a single integer value from -99999 to +99999");
+			reportCommandLineError(
+			        atRuntime, "suspendcount takes a single integer value from -99999 to +99999");
 		}
 	}
 
@@ -490,7 +490,6 @@ processEarlyOptions(const char **opts)
 	/*
 	 *  Process the options passed
 	 */
-
 
 	/*
 	 *  Options are in name / value pairs, and termainate with a NULL
@@ -568,11 +567,8 @@ processOptions(OMR_TraceThread *thr, const char **opts, BOOLEAN atRuntime)
 	if (!atRuntime) {
 		for (i = 0; opts[i] != NULL; i += 2) {
 			if (j9_cmdla_stricmp((char *)opts[i], UT_DEBUG_KEYWORD) == 0) {
-				if (opts[i + 1] != NULL &&
-					strlen(opts[i + 1]) == 1 &&
-					*opts[i + 1] >= '0' &&
-					*opts[i + 1] <= '9'
-				) {
+				if (opts[i + 1] != NULL && strlen(opts[i + 1]) == 1 && *opts[i + 1] >= '0'
+				        && *opts[i + 1] <= '9') {
 					OMR_TRACEGLOBAL(traceDebug) = atoi(opts[i + 1]);
 				} else {
 					OMR_TRACEGLOBAL(traceDebug) = 9;
@@ -600,7 +596,7 @@ processOptions(OMR_TraceThread *thr, const char **opts, BOOLEAN atRuntime)
 		const char *optName = opts[i];
 		char *optValue = (char *)opts[i + 1];
 		size_t optNameLen = strlen(optName);
-		UT_DBGOUT(1, ("<UT> Processing option %s=%s\n", optName, (optValue == NULL)? "NULL" : optValue));
+		UT_DBGOUT(1, ("<UT> Processing option %s=%s\n", optName, (optValue == NULL) ? "NULL" : optValue));
 
 		if (NULL != optValue) {
 			size_t optValueLen = strlen(optValue);
@@ -617,11 +613,15 @@ processOptions(OMR_TraceThread *thr, const char **opts, BOOLEAN atRuntime)
 		}
 
 		for (size_t j = 0; j < NUMBER_OF_UTE_OPTIONS; j++) {
-			if (optNameLen == strlen(UTE_OPTIONS[j].name) && 0 == j9_cmdla_stricmp((char *)optName, (char *)UTE_OPTIONS[j].name)) {
+			if (optNameLen == strlen(UTE_OPTIONS[j].name)
+			        && 0 == j9_cmdla_stricmp((char *)optName, (char *)UTE_OPTIONS[j].name)) {
 				found = 1;
 
-				if (atRuntime && ! UTE_OPTIONS[j].runtimeModifiable) {
-					reportCommandLineError(atRuntime, "Option \"%s\" cannot be set at run-time. Set it on the command line at start-up.", optName);
+				if (atRuntime && !UTE_OPTIONS[j].runtimeModifiable) {
+					reportCommandLineError(atRuntime,
+					        "Option \"%s\" cannot be set at run-time. Set it on the command line "
+					        "at start-up.",
+					        optName);
 
 					rc = OMR_ERROR_ILLEGAL_ARGUMENT;
 				} else {
@@ -634,10 +634,9 @@ processOptions(OMR_TraceThread *thr, const char **opts, BOOLEAN atRuntime)
 			}
 		}
 
-		if (! found) {
+		if (!found) {
 			rc = OMR_ERROR_ILLEGAL_ARGUMENT;
 		}
-
 
 		if (OMR_ERROR_NONE != rc) {
 			break;
@@ -695,10 +694,8 @@ selectSpecial(const char *string)
 	if (*p == '\0') {
 		return (0);
 	}
-	if ((0 == j9_cmdla_strnicmp(p, UT_BACKTRACE, strlen(UT_BACKTRACE))) &&
-		((p[strlen(UT_BACKTRACE)] == ',') ||
-		 (p[strlen(UT_BACKTRACE)] == '\0'))
-	) {
+	if ((0 == j9_cmdla_strnicmp(p, UT_BACKTRACE, strlen(UT_BACKTRACE)))
+	        && ((p[strlen(UT_BACKTRACE)] == ',') || (p[strlen(UT_BACKTRACE)] == '\0'))) {
 		UT_DBGOUT(3, ("<UT> Backtrace specifier found\n"));
 		p += strlen(UT_BACKTRACE);
 		if ((*p == ',') && ((*(p + 1) >= '0') && (*(p + 1) <= '9'))) {
@@ -718,12 +715,11 @@ selectSpecial(const char *string)
 	return ((int)(p - string));
 }
 
-
 /*******************************************************************************
  * name        - selectComponent
  * description - Selects a component name
  * parameters  - Component name, component array, first time
-  *              through flag
+ *              through flag
  * returns     - size of the match
  ******************************************************************************/
 static int
@@ -743,7 +739,8 @@ selectComponent(const char *cmd, int32_t *first, char traceType, int32_t setActi
 			/*
 			 *  Set all components and applications, but ignore groups
 			 */
-			rc = setTracePointsTo((const char *) UT_ALL, OMR_TRACEGLOBAL(componentList), TRUE, 0, 0, traceType, -1, NULL, atRuntime, setActive);
+			rc = setTracePointsTo((const char *)UT_ALL, OMR_TRACEGLOBAL(componentList), TRUE, 0, 0,
+			        traceType, -1, NULL, atRuntime, setActive);
 			if (OMR_ERROR_NONE != rc) {
 				UT_DBGOUT(1, ("<UT> Can't turn on all tracepoints\n"));
 				return -1;
@@ -756,13 +753,14 @@ selectComponent(const char *cmd, int32_t *first, char traceType, int32_t setActi
 		*first = FALSE;
 
 		UT_DBGOUT(2, ("<UT> Component %s selected\n", cmd));
-		rc = setTracePointsTo(cmd, OMR_TRACEGLOBAL(componentList), TRUE, 0, 0, traceType, -1, NULL, atRuntime, setActive);
+		rc = setTracePointsTo(
+		        cmd, OMR_TRACEGLOBAL(componentList), TRUE, 0, 0, traceType, -1, NULL, atRuntime, setActive);
 		if (OMR_ERROR_NONE != rc) {
 			UT_DBGOUT(1, ("<UT> Can't turn on all tracepoints\n"));
 			return -1;
 		}
 
-		length = (int) strlen(cmd);
+		length = (int)strlen(cmd);
 
 		if (length == 0) {
 			length = -1;
@@ -780,21 +778,20 @@ selectComponent(const char *cmd, int32_t *first, char traceType, int32_t setActi
 omr_error_t
 setTraceState(const char *cmd, BOOLEAN atRuntime)
 {
-	omr_error_t	rc = OMR_ERROR_NONE;
-	int32_t	first = TRUE;
-	int	context = UT_CONTEXT_INITIAL;
-	char	traceType = UT_NONE;
-	int	length;
-	const char  *p;
-	int32_t	explicitClass;
-	int32_t	setActive = TRUE;
+	omr_error_t rc = OMR_ERROR_NONE;
+	int32_t first = TRUE;
+	int context = UT_CONTEXT_INITIAL;
+	char traceType = UT_NONE;
+	int length;
+	const char *p;
+	int32_t explicitClass;
+	int32_t setActive = TRUE;
 
 	/*
 	 *  Initialize temporary boolean arrays to reflect whether a particular
 	 *  component or class is the target of this command
 	 */
 	UT_DBGOUT(1, ("<UT> setTraceState %s\n", cmd));
-
 
 	/*
 	 * Parse the command using a finite state machine
@@ -896,8 +893,7 @@ setTraceState(const char *cmd, BOOLEAN atRuntime)
 				 * Check for component specification
 				 */
 
-				length = selectComponent(p, &first,
-										 traceType, setActive, atRuntime);
+				length = selectComponent(p, &first, traceType, setActive, atRuntime);
 				if (length < 0) {
 					rc = OMR_ERROR_ILLEGAL_ARGUMENT;
 				} else {
@@ -934,14 +930,12 @@ setTraceState(const char *cmd, BOOLEAN atRuntime)
 			break;
 		}
 
-
 		/*
 		 *  Check for more input
 		 */
 		if (OMR_ERROR_ILLEGAL_ARGUMENT != rc) {
 			if (*p == '\0') {
-				if (context == UT_CONTEXT_COMPONENT &&
-					!first) {
+				if (context == UT_CONTEXT_COMPONENT && !first) {
 					context = UT_CONTEXT_FINAL;
 				}
 			}
@@ -982,7 +976,7 @@ setTraceState(const char *cmd, BOOLEAN atRuntime)
 omr_error_t
 setOptions(OMR_TraceThread *thr, const char **opts, BOOLEAN atRuntime)
 {
-	omr_error_t	rc = OMR_ERROR_NONE;
+	omr_error_t rc = OMR_ERROR_NONE;
 
 	UT_DBGOUT(1, ("<UT> Initializing options \n"));
 
@@ -1113,7 +1107,8 @@ decimalString2Int(const char *decString, int32_t signedAllowed, omr_error_t *rc,
 		 * then there's garbage in the string
 		 */
 		if ((*p != ',') && (*p != '}') && (*p != '\0') && (*p != ' ')) {
-			reportCommandLineError(atRuntime, "Invalid character(s) encountered in decimal number \"%s\".", decString);
+			reportCommandLineError(
+			        atRuntime, "Invalid character(s) encountered in decimal number \"%s\".", decString);
 			*rc = OMR_ERROR_INTERNAL;
 		}
 	}

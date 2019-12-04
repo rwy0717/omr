@@ -23,38 +23,34 @@
 #if !defined(MEMORYSUBSPACEITERATORSTANDARD_HPP_)
 #define MEMORYSUBSPACEITERATORSTANDARD_HPP_
 
-#include "omrcfg.h"
-
 #include "HeapRegionDescriptorStandard.hpp"
 #include "MemorySubSpaceRegionIterator.hpp"
+#include "omrcfg.h"
 
 class GC_MemorySubSpaceRegionIteratorStandard : public GC_MemorySubSpaceRegionIterator {
 
 public:
 protected:
 private:
-	
 public:
-
 	/**
 	 * Construct a MemorySubSpaceRegionIterator for the regions which belong to the specified subspace.
-	 * 
+	 *
 	 * @param subspace the memory subspace whose regions should be walked
 	 */
-	GC_MemorySubSpaceRegionIteratorStandard(MM_MemorySubSpace* subspace)
-		: GC_MemorySubSpaceRegionIterator(subspace)
-		{ }
-	
+	GC_MemorySubSpaceRegionIteratorStandard(MM_MemorySubSpace *subspace) : GC_MemorySubSpaceRegionIterator(subspace)
+	{}
+
 	/**
 	 * @return the next region in the heap, or NULL if there are no more regions
 	 */
-	MM_HeapRegionDescriptorStandard *nextRegion() 
+	MM_HeapRegionDescriptorStandard *nextRegion()
 	{
-		return (MM_HeapRegionDescriptorStandard*)GC_MemorySubSpaceRegionIterator::nextRegion();
+		return (MM_HeapRegionDescriptorStandard *)GC_MemorySubSpaceRegionIterator::nextRegion();
 	}
+
 protected:
 private:
 };
-
 
 #endif /* MEMORYSUBSPACEITERATORSTANDARD_HPP_ */

@@ -25,11 +25,9 @@
 
 #include "ObjectScanner.hpp"
 
-class GC_IndexableObjectScanner : public GC_ObjectScanner
-{
+class GC_IndexableObjectScanner : public GC_ObjectScanner {
 	/* Data Members */
 private:
-
 protected:
 	omrobjectptr_t _arrayPtr; /**< pointer to array */
 	fomrobject_t *_endPtr; /**< pointer to end of last array element in scan segment */
@@ -38,10 +36,8 @@ protected:
 	const uintptr_t _elementSize; /**> an array element size in bytes */
 
 public:
-
 	/* Member Functions */
 private:
-
 protected:
 	/**
 	 * @param env The scanning thread environment
@@ -54,23 +50,15 @@ protected:
 	 * @param[in] elementSize array element size must be aligned to sizeof(fomrobject_t)
 	 * @param[in] flags scanning context flags
 	 */
-	GC_IndexableObjectScanner(
-		MM_EnvironmentBase *env
-		, omrobjectptr_t arrayPtr
-		, fomrobject_t *basePtr
-		, fomrobject_t *limitPtr
-		, fomrobject_t *scanPtr
-		, fomrobject_t *endPtr
-		, uintptr_t scanMap
-		, uintptr_t elementSize
-		, uintptr_t flags
-	)
-		: GC_ObjectScanner(env, scanPtr, scanMap, flags | GC_ObjectScanner::indexableObject)
-		, _arrayPtr(arrayPtr)
-		, _endPtr(endPtr)
-		, _basePtr(basePtr)
-		, _limitPtr(limitPtr)
-		, _elementSize(elementSize)
+	GC_IndexableObjectScanner(MM_EnvironmentBase *env, omrobjectptr_t arrayPtr, fomrobject_t *basePtr,
+	        fomrobject_t *limitPtr, fomrobject_t *scanPtr, fomrobject_t *endPtr, uintptr_t scanMap,
+	        uintptr_t elementSize, uintptr_t flags)
+	        : GC_ObjectScanner(env, scanPtr, scanMap, flags | GC_ObjectScanner::indexableObject)
+	        , _arrayPtr(arrayPtr)
+	        , _endPtr(endPtr)
+	        , _basePtr(basePtr)
+	        , _limitPtr(limitPtr)
+	        , _elementSize(elementSize)
 	{
 		_typeId = __FUNCTION__;
 		if ((endPtr - scanPtr) <= _bitsPerScanMap) {
@@ -82,8 +70,7 @@ protected:
 	 * Set up the scanner.
 	 * @param[in] env current environment (per thread)
 	 */
-	MMINLINE void
-	initialize(MM_EnvironmentBase *env)
+	MMINLINE void initialize(MM_EnvironmentBase *env)
 	{
 		Assert_MM_true(_basePtr <= _scanPtr);
 		Assert_MM_true(_scanPtr <= _endPtr);
@@ -104,8 +91,8 @@ public:
 	MMINLINE void scanToLimit() { _endPtr = _limitPtr; }
 
 	/**
-	* Return pointer to array object
-	*/
+	 * Return pointer to array object
+	 */
 	MMINLINE omrobjectptr_t const getArrayObject() { return _arrayPtr; }
 
 	/**
@@ -116,7 +103,8 @@ public:
 	 * @param splitAmount The maximum number of array elements to include
 	 * @return Pointer to split scanner in allocSpace
 	 */
-	virtual GC_IndexableObjectScanner *splitTo(MM_EnvironmentBase *env, void *allocSpace, uintptr_t splitAmount) = 0;
+	virtual GC_IndexableObjectScanner *splitTo(
+	        MM_EnvironmentBase *env, void *allocSpace, uintptr_t splitAmount) = 0;
 };
 
 #endif /* INDEXABLEOBJECTSCANNER_HPP_ */

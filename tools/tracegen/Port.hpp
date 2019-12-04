@@ -49,27 +49,27 @@
 #define snprintf _snprintf
 #define PATH_SEP "\\"
 #define dirstat struct _stat
-#define PORT_INVALID_FIND_FILE_HANDLE ((intptr_t) INVALID_HANDLE_VALUE)
-#define EsMaxPath 	MAX_PATH
+#define PORT_INVALID_FIND_FILE_HANDLE ((intptr_t)INVALID_HANDLE_VALUE)
+#define EsMaxPath MAX_PATH
 #define OS_ENCODING_CODE_PAGE CP_UTF8
 #define OS_ENCODING_MB_FLAGS 0
 #define OS_ENCODING_WC_FLAGS 0
 #define UNICODE_BUFFER_SIZE EsMaxPath
 #else /* defined(OMR_OS_WINDOWS) */
-#define PATH_SEP  "/"
+#define PATH_SEP "/"
 #define dirstat struct stat
-#define PORT_INVALID_FIND_FILE_HANDLE ((intptr_t) 0)
+#define PORT_INVALID_FIND_FILE_HANDLE ((intptr_t)0)
 #if defined(PATH_MAX)
-#define EsMaxPath 	PATH_MAX
+#define EsMaxPath PATH_MAX
 #else /* defined(PATH_MAX) */
 /* EsMaxPath was chosen from unix MAXPATHLEN. */
-#define EsMaxPath 	1024
+#define EsMaxPath 1024
 #endif /* defined(PATH_MAX) */
 #endif /* defined(OMR_OS_WINDOWS) */
 
 typedef enum RCType {
-	RC_OK 		= 0,
-	RC_FAILED	= -1,
+	RC_OK = 0,
+	RC_FAILED = -1,
 	RCType_EnsureWideEnum = 0x1000000 /* force 4-byte enum */
 } RCType;
 
@@ -100,22 +100,19 @@ typedef struct J9FileStat {
 	int ownerGid;
 } J9FileStat;
 
-class Port
-{
+class Port {
 	/*
 	 * Data members
 	 */
 private:
 protected:
 public:
-
 	/*
 	 * Function members
 	 */
 private:
 protected:
 public:
-
 #if defined(OMR_OS_WINDOWS)
 	/**
 	 * Uses convertFromUTF8 and if the resulting unicode path is longer than the Windows defined MAX_PATH,
@@ -129,10 +126,13 @@ public:
 	 *
 	 * @return 		NULL on failure
 	 * 			 	otherwise the converted string.
-	 * 					If the return value is not the same as @ref unicodeBuffer, file_get_unicode_path had to allocate memory to hold the
-	 * 					unicode path - the caller is responsible for freeing this memory by calling @ref omrmem_free on the returned value.
+	 * 					If the return value is not the same as @ref unicodeBuffer,
+	 * file_get_unicode_path had to allocate memory to hold the unicode path - the caller is responsible for freeing
+	 * this memory by calling
+	 * @ref omrmem_free on the returned value.
 	 */
-	static wchar_t *file_get_unicode_path(const char *utf8Path, wchar_t *unicodeBuffer, unsigned int unicodeBufferSize);
+	static wchar_t *file_get_unicode_path(
+	        const char *utf8Path, wchar_t *unicodeBuffer, unsigned int unicodeBufferSize);
 
 	/**
 	 * @internal
@@ -214,15 +214,9 @@ public:
 	 */
 	static int strncasecmp(const char *s1, const char *s2, size_t n);
 
-	static inline void *omrmem_malloc(size_t size)
-	{
-		return malloc(size);
-	}
+	static inline void *omrmem_malloc(size_t size) { return malloc(size); }
 
-	static inline void *omrmem_calloc(size_t nmemb, size_t size)
-	{
-		return calloc(nmemb, size);
-	}
+	static inline void *omrmem_calloc(size_t nmemb, size_t size) { return calloc(nmemb, size); }
 
 	static inline void omrmem_free(void **ptr)
 	{

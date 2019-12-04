@@ -29,8 +29,7 @@
 
 #include "OMR_Base.hpp"
 
-class OMR_BaseVirtual : public OMR_Base
-{
+class OMR_BaseVirtual : public OMR_Base {
 private:
 protected:
 	/* Used by DDR to figure out runtime types, this is opt-in
@@ -55,7 +54,7 @@ public:
 	 * issues because we never use -lstdc++ (outside tests) and the
 	 * delete implementation will be missing (e.g. needed by stack allocation)
 	 */
-	virtual void emptyMethod() { /* No implementation */ };
+	virtual void emptyMethod(){/* No implementation */};
 };
 
 #endif /* OMR_BASEVIRTUAL_HPP_ */

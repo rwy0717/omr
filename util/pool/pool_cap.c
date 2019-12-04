@@ -24,7 +24,7 @@
  * @file
  * @ingroup Pool
  * @brief Pool-capacity functions
-*/
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -105,7 +105,6 @@ pool_ensureCapacity(J9Pool *aPool, uintptr_t newCapacity)
 	return result;
 }
 
-
 /**
  * Returns the total capacity of a pool
  *
@@ -136,5 +135,3 @@ pool_capacity(J9Pool *aPool)
 
 	return numElements;
 }
-
-

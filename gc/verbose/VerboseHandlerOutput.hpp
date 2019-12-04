@@ -23,33 +23,28 @@
 #if !defined(VERBOSEHANDLEROUTPUT_HPP_)
 #define VERBOSEHANDLEROUTPUT_HPP_
 
-#include "omrcfg.h"
-#include "omr.h"
-
 #include "Base.hpp"
-
-#include "modronbase.h"
-
 #include "LightweightNonReentrantLock.hpp"
+#include "modronbase.h"
+#include "omr.h"
+#include "omrcfg.h"
 
 class MM_CollectionStatistics;
 class MM_EnvironmentBase;
 class MM_GCExtensionsBase;
 class MM_VerboseManager;
 
-class MM_VerboseHandlerOutput : public MM_Base
-{
+class MM_VerboseHandlerOutput : public MM_Base {
 private:
 	MM_LightweightNonReentrantLock _reportingLock;
 
 protected:
 	MM_GCExtensionsBase *_extensions;
 	OMR_VM *_omrVM;
-	J9HookInterface** _mmPrivateHooks;  /**< Pointers to the internal Hook interface */
-	J9HookInterface** _mmOmrHooks;  /**< Pointers to the internal Hook interface */
+	J9HookInterface **_mmPrivateHooks; /**< Pointers to the internal Hook interface */
+	J9HookInterface **_mmOmrHooks; /**< Pointers to the internal Hook interface */
 	MM_VerboseManager *_manager; /* VerboseManager used to format and print output */
 public:
-
 private:
 protected:
 	MM_VerboseHandlerOutput(MM_GCExtensionsBase *extensions);
@@ -58,11 +53,11 @@ protected:
 	virtual void tearDown(MM_EnvironmentBase *env);
 
 	virtual bool getThreadName(char *buf, uintptr_t bufLen, OMR_VMThread *vmThread);
-	virtual void writeVmArgs(MM_EnvironmentBase* env);
+	virtual void writeVmArgs(MM_EnvironmentBase *env);
 
 	bool getTimeDeltaInMicroSeconds(uint64_t *timeInMicroSeconds, uint64_t startTime, uint64_t endTime)
 	{
-		if(endTime < startTime) {
+		if (endTime < startTime) {
 			*timeInMicroSeconds = 0;
 			return false;
 		}
@@ -79,10 +74,10 @@ protected:
 	 * @param [in] endTimeInMicroseconds end time
 	 * @return true if the calculation was successfull. false, otherwise - timeInMicroSeconds is set to 0.
 	 */
-	bool
-	getTimeDelta(uint64_t *timeInMicroSeconds, uint64_t startTimeInMicroseconds, uint64_t endTimeInMicroseconds)
+	bool getTimeDelta(
+	        uint64_t *timeInMicroSeconds, uint64_t startTimeInMicroseconds, uint64_t endTimeInMicroseconds)
 	{
-		if(endTimeInMicroseconds < startTimeInMicroseconds) {
+		if (endTimeInMicroseconds < startTimeInMicroseconds) {
 			*timeInMicroSeconds = 0;
 			return false;
 		}
@@ -101,9 +96,8 @@ protected:
 	 * Answer a string representation of a given cycle type.
 	 * @param[IN] cycle type
 	 * @return string representing the human readable "type" of the cycle.
-	 */	
+	 */
 	virtual const char *getCycleType(uintptr_t type);
-
 
 	/**
 	 * Handle any output or data tracking for the initialized phase of verbose GC.
@@ -112,7 +106,7 @@ protected:
 	 * @param eventNum The hook event number.
 	 * @param eventData hook specific event data.
 	 */
-	virtual void handleInitializedInnerStanzas(J9HookInterface** hook, uintptr_t eventNum, void* eventData);
+	virtual void handleInitializedInnerStanzas(J9HookInterface **hook, uintptr_t eventNum, void *eventData);
 
 	/**
 	 * Handle any output or data tracking for the initialized phase of verbose GC.
@@ -121,7 +115,7 @@ protected:
 	 * @param eventNum The hook event number.
 	 * @param eventData hook specific event data.
 	 */
-	void handleInitializedRegion(J9HookInterface** hook, uintptr_t eventNum, void* eventData);
+	void handleInitializedRegion(J9HookInterface **hook, uintptr_t eventNum, void *eventData);
 
 	/**
 	 * Determine if the receive has inner stanza details for cycle start events.
@@ -137,7 +131,8 @@ protected:
 	 * @param eventData hook specific event data.
 	 * @param indentDepth base indent count for all inner stanza lines.
 	 */
-	virtual void handleCycleStartInnerStanzas(J9HookInterface** hook, uintptr_t eventNum, void* eventData, uintptr_t indentDepth);
+	virtual void handleCycleStartInnerStanzas(
+	        J9HookInterface **hook, uintptr_t eventNum, void *eventData, uintptr_t indentDepth);
 
 	/**
 	 * Determine if the receive has inner stanza details for cycle end events.
@@ -153,7 +148,8 @@ protected:
 	 * @param eventData hook specific event data.
 	 * @param indentDepth base indent count for all inner stanza lines.
 	 */
-	virtual void handleCycleEndInnerStanzas(J9HookInterface** hook, uintptr_t eventNum, void* eventData, uintptr_t indentDepth);
+	virtual void handleCycleEndInnerStanzas(
+	        J9HookInterface **hook, uintptr_t eventNum, void *eventData, uintptr_t indentDepth);
 
 	/**
 	 * Determine if the receive has inner stanza details for cycle end events.
@@ -169,22 +165,23 @@ protected:
 	 * @param eventData hook specific event data.
 	 * @param indentDepth base indent count for all inner stanza lines.
 	 */
-	virtual void handleAllocationFailureStartInnerStanzas(J9HookInterface** hook, uintptr_t eventNum, void* eventData, uintptr_t indentDepth);
+	virtual void handleAllocationFailureStartInnerStanzas(
+	        J9HookInterface **hook, uintptr_t eventNum, void *eventData, uintptr_t indentDepth);
 
 	/* Print out allocations statistics
 	 * @param current Env
 	 */
-	virtual void printAllocationStats(MM_EnvironmentBase* env);
+	virtual void printAllocationStats(MM_EnvironmentBase *env);
 
 	/**
-	 * Called before outputting verbose data which is intended to be logically atomic.  Most implementations do nothing with this
-	 * call but some might need to lock if they permit concurrent event reporting.
+	 * Called before outputting verbose data which is intended to be logically atomic.  Most implementations do
+	 * nothing with this call but some might need to lock if they permit concurrent event reporting.
 	 */
 	virtual void enterAtomicReportingBlock();
 
 	/**
-	 * Called after outputting verbose data which is intended to be logically atomic.  Most implementations do nothing with this
-	 * call but some might need to unlock if they permit concurrent event reporting.
+	 * Called after outputting verbose data which is intended to be logically atomic.  Most implementations do
+	 * nothing with this call but some might need to unlock if they permit concurrent event reporting.
 	 */
 	virtual void exitAtomicReportingBlock();
 
@@ -198,7 +195,8 @@ protected:
 
 	virtual bool hasOutputMemoryInfoInnerStanza();
 
-	virtual void outputMemoryInfoInnerStanza(MM_EnvironmentBase *env, uintptr_t indent, MM_CollectionStatistics *stats);
+	virtual void outputMemoryInfoInnerStanza(
+	        MM_EnvironmentBase *env, uintptr_t indent, MM_CollectionStatistics *stats);
 
 	/**
 	 * Output a stand-alone stanza heap resize events.
@@ -211,7 +209,9 @@ protected:
 	 * @param reason the reason for the resize
 	 * @param timeInMicroSeconds the total time that all of the resizes took
 	 */
-	void outputHeapResizeInfo(MM_EnvironmentBase *env, uintptr_t indent, HeapResizeType resizeType, uintptr_t resizeAmount, uintptr_t resizeCount, uintptr_t subSpaceType, uintptr_t reason, uint64_t timeInMicroSeconds);
+	void outputHeapResizeInfo(MM_EnvironmentBase *env, uintptr_t indent, HeapResizeType resizeType,
+	        uintptr_t resizeAmount, uintptr_t resizeCount, uintptr_t subSpaceType, uintptr_t reason,
+	        uint64_t timeInMicroSeconds);
 
 	/**
 	 * Output an embedded stanza for collector heap resize events.
@@ -224,7 +224,9 @@ protected:
 	 * @param reason the reason for the resize
 	 * @param timeInMicroSeconds the total time that all of the resizes took
 	 */
-	void outputCollectorHeapResizeInfo(MM_EnvironmentBase *env, uintptr_t indent, HeapResizeType resizeType, uintptr_t resizeAmount, uintptr_t resizeCount, uintptr_t subSpaceType, uintptr_t reason, uint64_t timeInMicroSeconds);
+	void outputCollectorHeapResizeInfo(MM_EnvironmentBase *env, uintptr_t indent, HeapResizeType resizeType,
+	        uintptr_t resizeAmount, uintptr_t resizeCount, uintptr_t subSpaceType, uintptr_t reason,
+	        uint64_t timeInMicroSeconds);
 
 	/**
 	 * Get the string representation of the subspace type
@@ -240,7 +242,8 @@ protected:
 	 * @param candidates total count candidate strings considered
 	 * @param cleared total count of cleared strings
 	 */
-	void outputStringConstantInfo(MM_EnvironmentBase *env, uintptr_t indent, uintptr_t candidates, uintptr_t cleared);
+	void outputStringConstantInfo(
+	        MM_EnvironmentBase *env, uintptr_t indent, uintptr_t candidates, uintptr_t cleared);
 
 public:
 	static MM_VerboseHandlerOutput *newInstance(MM_EnvironmentBase *env, MM_VerboseManager *manager);
@@ -259,10 +262,10 @@ public:
 
 	/**
 	 *  Get the VerboseManager used to format and print output
-	 *  
+	 *
 	 *  @return _manger the VerboseManager used to format and print output
 	 */
-	MM_VerboseManager *getManager() {return _manager;}
+	MM_VerboseManager *getManager() { return _manager; }
 
 	/**
 	 * Build the standard top level tag template.
@@ -293,13 +296,15 @@ public:
 	 * @param bufsize maximum size allowed in the character buffer.
 	 * @param id unique id of the tag being built.
 	 * @param type Human readable name for the type of the tag.
-	 * @param contextId unique identifier of the associated event this is associated with (parent/sibling relationship).
+	 * @param contextId unique identifier of the associated event this is associated with (parent/sibling
+	 * relationship).
 	 * @param wallTimeMs wall clock time to be used as the timestamp for the tag.
 	 * @return number of bytes consumed in the buffer.
 	 *
 	 * @note should be moved to protected once all standard usage is converted.
 	 */
-	uintptr_t getTagTemplate(char *buf, uintptr_t bufsize, uintptr_t id, const char *type, uintptr_t contextId, uint64_t wallTimeMs);
+	uintptr_t getTagTemplate(
+	        char *buf, uintptr_t bufsize, uintptr_t id, const char *type, uintptr_t contextId, uint64_t wallTimeMs);
 
 	/**
 	 * Build the standard top level tag template.
@@ -308,13 +313,15 @@ public:
 	 * @param id unique id of the tag being built.
 	 * @param type Human readable name for the type of the tag - old cycle that has finished.
 	 * @param type Human readable name for the type of the tag - new cycle that is starting.
-	 * @param contextId unique identifier of the associated event this is associated with (parent/sibling relationship).
+	 * @param contextId unique identifier of the associated event this is associated with (parent/sibling
+	 * relationship).
 	 * @param wallTimeMs wall clock time to be used as the timestamp for the tag.
 	 * @return number of bytes consumed in the buffer.
 	 *
 	 * @note should be moved to protected once all standard usage is converted.
 	 */
-	uintptr_t getTagTemplateWithOldType(char *buf, uintptr_t bufsize, uintptr_t id, const char *oldType, const char *newType, uintptr_t contextId, uint64_t wallTimeMs);
+	uintptr_t getTagTemplateWithOldType(char *buf, uintptr_t bufsize, uintptr_t id, const char *oldType,
+	        const char *newType, uintptr_t contextId, uint64_t wallTimeMs);
 
 	/**
 	 * Build the standard top level tag template.
@@ -322,14 +329,16 @@ public:
 	 * @param bufsize maximum size allowed in the character buffer.
 	 * @param id unique id of the tag being built.
 	 * @param type Human readable name for the type of the tag.
-	 * @param contextId unique identifier of the associated event this is associated with (parent/sibling relationship).
+	 * @param contextId unique identifier of the associated event this is associated with (parent/sibling
+	 * relationship).
 	 * @param timeus the time in microseconds taken for this piece of work
 	 * @param wallTimeMs wall clock time to be used as the timestamp for the tag.
 	 * @return number of bytes consumed in the buffer.
 	 *
 	 * @note should be moved to protected once all standard usage is converted.
 	 */
-	uintptr_t getTagTemplate(char *buf, uintptr_t bufsize, uintptr_t id, const char *type, uintptr_t contextId, uint64_t timeus, uint64_t wallTimeMs);
+	uintptr_t getTagTemplate(char *buf, uintptr_t bufsize, uintptr_t id, const char *type, uintptr_t contextId,
+	        uint64_t timeus, uint64_t wallTimeMs);
 
 	/**
 	 * Build the standard top level tag template.
@@ -337,8 +346,10 @@ public:
 	 * @param bufsize maximum size allowed in the character buffer.
 	 * @param id unique id of the tag being built.
 	 * @param type Human readable name for the type of the tag.
-	 * @param contextId unique identifier of the associated event this is associated with (parent/sibling relationship).
-	 * @param durationus the time difference in microseconds between this stanza and another sibling stanza in past (for example from <gc-start to <gc-end)
+	 * @param contextId unique identifier of the associated event this is associated with (parent/sibling
+	 * relationship).
+	 * @param durationus the time difference in microseconds between this stanza and another sibling stanza in past
+	 * (for example from <gc-start to <gc-end)
 	 * @param usertimeus the time difference in microseconds taken in user space for this process
 	 * @param cputimeus the time difference in microseconds taken in kernel space for this process
 	 * @param wallTimeMs wall clock time to be used as the timestamp for the tag.
@@ -346,7 +357,8 @@ public:
 	 *
 	 * @note should be moved to protected once all standard usage is converted.
 	 */
-	uintptr_t getTagTemplateWithDuration(char *buf, uintptr_t bufsize, uintptr_t id, const char *type, uintptr_t contextId, uint64_t durationus, uint64_t usertimeus, uint64_t cputimeus, uint64_t wallTimeMs);
+	uintptr_t getTagTemplateWithDuration(char *buf, uintptr_t bufsize, uintptr_t id, const char *type,
+	        uintptr_t contextId, uint64_t durationus, uint64_t usertimeus, uint64_t cputimeus, uint64_t wallTimeMs);
 
 	/**
 	 * Handle any output or data tracking for the initialized phase of verbose GC.
@@ -354,7 +366,7 @@ public:
 	 * @param eventNum The hook event number.
 	 * @param eventData hook specific event data.
 	 */
-	virtual void handleInitialized(J9HookInterface** hook, uintptr_t eventNum, void* eventData);
+	virtual void handleInitialized(J9HookInterface **hook, uintptr_t eventNum, void *eventData);
 
 	/**
 	 * Write verbose stanza for a cycle start event.
@@ -362,9 +374,9 @@ public:
 	 * @param eventNum The hook event number.
 	 * @param eventData hook specific event data.
 	 */
-	void handleCycleStart(J9HookInterface** hook, uintptr_t eventNum, void* eventData);
+	void handleCycleStart(J9HookInterface **hook, uintptr_t eventNum, void *eventData);
 
-	void handleCycleContinue(J9HookInterface** hook, uintptr_t eventNum, void* eventData);
+	void handleCycleContinue(J9HookInterface **hook, uintptr_t eventNum, void *eventData);
 
 	/**
 	 * Write verbose stanza for a cycle end event.
@@ -372,7 +384,7 @@ public:
 	 * @param eventNum The hook event number.
 	 * @param eventData hook specific event data.
 	 */
-	void handleCycleEnd(J9HookInterface** hook, uintptr_t eventNum, void* eventData);
+	void handleCycleEnd(J9HookInterface **hook, uintptr_t eventNum, void *eventData);
 
 	/**
 	 * Write the verbose stanza for the exclusive access start event.
@@ -380,7 +392,7 @@ public:
 	 * @param eventNum The hook event number.
 	 * @param eventData hook specific event data.
 	 */
-	void handleExclusiveStart(J9HookInterface** hook, uintptr_t eventNum, void* eventData);
+	void handleExclusiveStart(J9HookInterface **hook, uintptr_t eventNum, void *eventData);
 
 	/**
 	 * Write the verbose stanza for the exclusive access end event.
@@ -388,7 +400,7 @@ public:
 	 * @param eventNum The hook event number.
 	 * @param eventData hook specific event data.
 	 */
-	void handleExclusiveEnd(J9HookInterface** hook, uintptr_t eventNum, void* eventData);
+	void handleExclusiveEnd(J9HookInterface **hook, uintptr_t eventNum, void *eventData);
 
 	/**
 	 * Write the verbose stanza for the system gc start event.
@@ -396,7 +408,7 @@ public:
 	 * @param eventNum The hook event number.
 	 * @param eventData hook specific event data.
 	 */
-	void handleSystemGCStart(J9HookInterface** hook, uintptr_t eventNum, void* eventData);
+	void handleSystemGCStart(J9HookInterface **hook, uintptr_t eventNum, void *eventData);
 
 	/**
 	 * Write the verbose stanza for the system gc end event.
@@ -404,7 +416,7 @@ public:
 	 * @param eventNum The hook event number.
 	 * @param eventData hook specific event data.
 	 */
-	void handleSystemGCEnd(J9HookInterface** hook, uintptr_t eventNum, void* eventData);
+	void handleSystemGCEnd(J9HookInterface **hook, uintptr_t eventNum, void *eventData);
 
 	/**
 	 * Write the verbose stanza for the allocation failure start event.
@@ -412,7 +424,7 @@ public:
 	 * @param eventNum The hook event number.
 	 * @param eventData hook specific event data.
 	 */
-	void handleAllocationFailureStart(J9HookInterface** hook, uintptr_t eventNum, void* eventData);
+	void handleAllocationFailureStart(J9HookInterface **hook, uintptr_t eventNum, void *eventData);
 
 	/**
 	 * Write the verbose stanza for the allocation causing AF completed event.
@@ -420,7 +432,7 @@ public:
 	 * @param eventNum The hook event number.
 	 * @param eventData hook specific event data.
 	 */
-	void handleFailedAllocationCompleted(J9HookInterface** hook, uintptr_t eventNum, void* eventData);
+	void handleFailedAllocationCompleted(J9HookInterface **hook, uintptr_t eventNum, void *eventData);
 
 	/**
 	 * Write the verbose stanza for the allocation failure end event.
@@ -428,7 +440,7 @@ public:
 	 * @param eventNum The hook event number.
 	 * @param eventData hook specific event data.
 	 */
-	void handleAllocationFailureEnd(J9HookInterface** hook, uintptr_t eventNum, void* eventData);
+	void handleAllocationFailureEnd(J9HookInterface **hook, uintptr_t eventNum, void *eventData);
 
 	/**
 	 * Write the verbose stanza for exclusive access acquisition that satisfies an allocation.
@@ -436,7 +448,7 @@ public:
 	 * @param eventNum The hook event number.
 	 * @param eventData hook specific event data.
 	 */
-	void handleAcquiredExclusiveToSatisfyAllocation(J9HookInterface** hook, uintptr_t eventNum, void* eventData);
+	void handleAcquiredExclusiveToSatisfyAllocation(J9HookInterface **hook, uintptr_t eventNum, void *eventData);
 
 	/**
 	 * Write verbose stanza for a global GC start event.
@@ -444,7 +456,7 @@ public:
 	 * @param eventNum The hook event number.
 	 * @param eventData hook specific event data.
 	 */
-	void handleGCStart(J9HookInterface** hook, uintptr_t eventNum, void* eventData);
+	void handleGCStart(J9HookInterface **hook, uintptr_t eventNum, void *eventData);
 
 	/**
 	 * Write verbose stanza for a global GC end event.
@@ -452,19 +464,19 @@ public:
 	 * @param eventNum The hook event number.
 	 * @param eventData hook specific event data.
 	 */
-	void handleGCEnd(J9HookInterface** hook, uintptr_t eventNum, void* eventData);
-	
-	void handleConcurrentStart(J9HookInterface** hook, UDATA eventNum, void* eventData);
-	void handleConcurrentEnd(J9HookInterface** hook, UDATA eventNum, void* eventData);
-	
-	virtual	void handleConcurrentStartInternal(J9HookInterface** hook, UDATA eventNum, void* eventData) {}
-	virtual void handleConcurrentEndInternal(J9HookInterface** hook, UDATA eventNum, void* eventData);
-	virtual const char *getConcurrentTypeString() { return NULL; }
-	
-	virtual void handleConcurrentGCOpStart(J9HookInterface** hook, uintptr_t eventNum, void* eventData) {}
-	virtual void handleConcurrentGCOpEnd(J9HookInterface** hook, uintptr_t eventNum, void* eventData) {}
+	void handleGCEnd(J9HookInterface **hook, uintptr_t eventNum, void *eventData);
 
-	void handleHeapResize(J9HookInterface** hook, uintptr_t eventNum, void* eventData);
+	void handleConcurrentStart(J9HookInterface **hook, UDATA eventNum, void *eventData);
+	void handleConcurrentEnd(J9HookInterface **hook, UDATA eventNum, void *eventData);
+
+	virtual void handleConcurrentStartInternal(J9HookInterface **hook, UDATA eventNum, void *eventData) {}
+	virtual void handleConcurrentEndInternal(J9HookInterface **hook, UDATA eventNum, void *eventData);
+	virtual const char *getConcurrentTypeString() { return NULL; }
+
+	virtual void handleConcurrentGCOpStart(J9HookInterface **hook, uintptr_t eventNum, void *eventData) {}
+	virtual void handleConcurrentGCOpEnd(J9HookInterface **hook, uintptr_t eventNum, void *eventData) {}
+
+	void handleHeapResize(J9HookInterface **hook, uintptr_t eventNum, void *eventData);
 
 	/**
 	 * Write the verbose stanza for the excessive gc raised event.
@@ -472,8 +484,7 @@ public:
 	 * @param eventNum The hook event number.
 	 * @param eventData hook specific event data.
 	 */
-	void handleExcessiveGCRaised(J9HookInterface** hook, uintptr_t eventNum, void* eventData);
-
+	void handleExcessiveGCRaised(J9HookInterface **hook, uintptr_t eventNum, void *eventData);
 };
 
 #endif /* VERBOSEHANDLEROUTPUT_HPP_ */

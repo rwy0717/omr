@@ -22,27 +22,33 @@
 #ifndef X86_EVALUATOR_INCL
 #define X86_EVALUATOR_INCL
 
-
-
 #include <stddef.h>
 #include <stdint.h>
 #include "x/codegen/X86Ops.hpp"
 #include "codegen/TreeEvaluator.hpp"
 
-namespace TR { class CodeGenerator; }
-namespace TR { class LabelSymbol; }
-namespace TR { class MemoryReference; }
-namespace TR { class Node; }
-namespace TR { class Register; }
-namespace TR { class RegisterDependencyConditions; }
+namespace TR {
+class CodeGenerator;
+}
+namespace TR {
+class LabelSymbol;
+}
+namespace TR {
+class MemoryReference;
+}
+namespace TR {
+class Node;
+}
+namespace TR {
+class Register;
+}
+namespace TR {
+class RegisterDependencyConditions;
+}
 
-
-class TR_X86ComputeCC : public TR::TreeEvaluator
-   {
-   public:
-
-   static bool setCarryBorrow(TR::Node *flagNode, bool invertValue, TR::CodeGenerator *cg);
-
-   };
+class TR_X86ComputeCC : public TR::TreeEvaluator {
+public:
+	static bool setCarryBorrow(TR::Node *flagNode, bool invertValue, TR::CodeGenerator *cg);
+};
 
 #endif

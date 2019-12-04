@@ -23,6 +23,6 @@
 
 TR::PersistentInfo *
 OMR::PersistentInfo::self()
-   {
-   return static_cast<TR::PersistentInfo*>(this);
-   }
+{
+	return static_cast<TR::PersistentInfo *>(this);
+}

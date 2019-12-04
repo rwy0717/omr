@@ -45,11 +45,13 @@
 
 #if defined(J9ZTPF)
 #define CPU_SETSIZE 4
-#define CPU_ISSET(x,y) 0
-#define CPU_SET(x,y) {}
-#define CPU_CLR(x,y) {}
+#define CPU_ISSET(x, y) 0
+#define CPU_SET(x, y) \
+	{}
+#define CPU_CLR(x, y) \
+	{}
 typedef struct {
-        char __junkbits;
+	char __junkbits;
 } cpu_set_t[CPU_SETSIZE];
 #endif
 
@@ -62,7 +64,7 @@ static uintptr_t cpuset_subset_or_equal(cpu_set_t *subset, cpu_set_t *superset);
 static void cpuset_logical_or(cpu_set_t *destination, const cpu_set_t *source);
 #undef OMR_VERBOSE_NUMA_NODE_DATA
 #ifdef OMR_VERBOSE_NUMA_NODE_DATA
- void dumpNumaInfo();
+void dumpNumaInfo();
 #endif
 
 static cpu_set_t defaultAffinityMask = {{0}};
@@ -71,7 +73,7 @@ static cpu_set_t defaultAffinityMask = {{0}};
 static struct {
 	cpu_set_t cpu_set;
 	uintptr_t cpu_count;
-} *numaNodeData;
+} * numaNodeData;
 
 /**
  * Tests whether a given bitfield is a subset or equal to another bitfield.
@@ -156,7 +158,8 @@ initializeNumaNodeData(omrthread_library_t threadLibrary, uintptr_t numNodes)
 {
 	uintptr_t result = 0;
 
-	numaNodeData = omrthread_allocate_memory(threadLibrary, sizeof(numaNodeData[0]) * (numNodes + 1), OMRMEM_CATEGORY_THREADS);
+	numaNodeData = omrthread_allocate_memory(
+	        threadLibrary, sizeof(numaNodeData[0]) * (numNodes + 1), OMRMEM_CATEGORY_THREADS);
 	if (NULL == numaNodeData) {
 		result = -1;
 	} else {
@@ -175,9 +178,11 @@ initializeNumaNodeData(omrthread_library_t threadLibrary, uintptr_t numNodes)
 			struct dirent *node = readdir(nodes);
 			if (NULL != node) {
 				const char CPUMAP[] = "/cpumap";
-				char pathBuffer[sizeof(NODE_PATH) + sizeof(CPUMAP) + 16]; /* extra space for "node<n>" & terminating null */
+				char pathBuffer[sizeof(NODE_PATH) + sizeof(CPUMAP) + 16]; /* extra space for "node<n>" &
+				                                                             terminating null */
 				strcpy(pathBuffer, NODE_PATH);
-				char *nodeRoot = pathBuffer + sizeof(NODE_PATH) - 1; /* shortcut to the end of the string */
+				char *nodeRoot = pathBuffer + sizeof(NODE_PATH) - 1; /* shortcut to the end of the
+				                                                        string */
 				do {
 					if (1 == sscanf(node->d_name, "node%lu", &nodeIndex)) {
 						if (nodeIndex < numNodes) {
@@ -187,10 +192,12 @@ initializeNumaNodeData(omrthread_library_t threadLibrary, uintptr_t numNodes)
 							BOOLEAN cpumapOkay = FALSE;
 							if (-1 != cpumapFile) {
 								char defaultMapBuffer[128];
-								char * mapBuffer = defaultMapBuffer;
+								char *mapBuffer = defaultMapBuffer;
 								size_t bufferSize = sizeof(defaultMapBuffer);
-								size_t bytesRead = read(cpumapFile, mapBuffer, bufferSize);
-								if (bytesRead == bufferSize) { /* buffer possibly not big enough */
+								size_t bytesRead =
+								        read(cpumapFile, mapBuffer, bufferSize);
+								if (bytesRead == bufferSize) { /* buffer possibly not
+									                          big enough */
 									bufferSize = 4096;
 									mapBuffer = malloc(bufferSize);
 									if (NULL == mapBuffer) {
@@ -198,32 +205,75 @@ initializeNumaNodeData(omrthread_library_t threadLibrary, uintptr_t numNodes)
 										close(cpumapFile);
 										break;
 									}
-									size_t bytesRead = read(cpumapFile, mapBuffer, bufferSize-1);
+									size_t bytesRead = read(
+									        cpumapFile, mapBuffer, bufferSize - 1);
 									mapBuffer[bytesRead] = '\0';
 								}
-								if ((0 != bytesRead) && (bytesRead < bufferSize-1)) { /* the buffer was too small */
-									/* scan from the end of the line (lowest numbered CPU) toward the front */
-									char *cursor = mapBuffer+strlen(mapBuffer);
+								if ((0 != bytesRead)
+								        && (bytesRead < bufferSize - 1)) { /* the buffer
+									                                      was too
+									                                      small */
+									/* scan from the end of the line (lowest
+									 * numbered CPU) toward the front */
+									char *cursor = mapBuffer + strlen(mapBuffer);
 									uint32_t charCount = 0;
 									do {
-										while ((cursor > mapBuffer) && !isxdigit(*cursor)) { /* find the start of the hex string */
+										while ((cursor > mapBuffer)
+										        && !isxdigit(
+										                *cursor)) { /* find
+											                       the
+											                       start
+											                       of
+											                       the
+											                       hex
+											                       string
+											                     */
 											cursor -= 1;
 										}
-										uint32_t cpuIndex = 4 * charCount; /* each hex digit represents 4 CPUs.  Use the count from the last iteration */
-										while ((cursor > mapBuffer) && isxdigit(*cursor)) {
+										uint32_t cpuIndex = 4
+										        * charCount; /* each
+										                        hex
+										                        digit
+										                        represents
+										                        4
+										                        CPUs.
+										                        Use
+										                        the
+										                        count
+										                        from
+										                        the
+										                        last
+										                        iteration
+										                      */
+										while ((cursor > mapBuffer)
+										        && isxdigit(*cursor)) {
 											charCount += 1;
 											cursor -= 1;
 										}
-										uintmax_t cpuMap = strtoumax((cursor == mapBuffer)? cursor: cursor + 1, NULL, 16);
-										/* cursor points to a non-hex char if not at the front of the buffer */
+										uintmax_t cpuMap =
+										        strtoumax((cursor == mapBuffer)
+										                        ? cursor
+										                        : cursor + 1,
+										                NULL, 16);
+										/* cursor points to a non-hex char if
+										 * not at the front of the buffer */
 										while ((0 != cpuMap)) {
-											if (0 != (cpuMap  & 1)) {
-												CPU_SET(cpuIndex, &numaNodeData[nodeIndex + 1].cpu_set);
-												numaNodeData[nodeIndex + 1].cpu_count += 1;
+											if (0 != (cpuMap & 1)) {
+												CPU_SET(cpuIndex,
+												        &numaNodeData[nodeIndex
+												                + 1]
+												                 .cpu_set);
+												numaNodeData[nodeIndex
+												        + 1]
+												        .cpu_count += 1;
 
-												/* add all cpus to the synthetic 0 node */
-												CPU_SET(cpuIndex, &numaNodeData[0].cpu_set);
-												numaNodeData[0].cpu_count += 1;
+												/* add all cpus to the
+												 * synthetic 0 node */
+												CPU_SET(cpuIndex,
+												        &numaNodeData[0]
+												                 .cpu_set);
+												numaNodeData[0]
+												        .cpu_count += 1;
 											}
 											cpuMap >>= 1;
 											cpuIndex += 1;
@@ -237,18 +287,29 @@ initializeNumaNodeData(omrthread_library_t threadLibrary, uintptr_t numNodes)
 								cpumapOkay = TRUE;
 							}
 							if (!cpumapOkay) { /* read the directory entries */
-								strcpy(nodeRoot, node->d_name); /* strip off "/cpulist".  Updates pathBuffer  */
-								DIR *cpus =  opendir(pathBuffer);
+								strcpy(nodeRoot,
+								        node->d_name); /* strip off "/cpulist".  Updates
+								                          pathBuffer  */
+								DIR *cpus = opendir(pathBuffer);
 								if (NULL != cpus) {
 									struct dirent *cpu = readdir(cpus);
 									while (NULL != cpu) {
 										unsigned long cpuIndex = 0;
-										if (1 == sscanf(cpu->d_name, "cpu%lu", &cpuIndex)) {
-											CPU_SET(cpuIndex, &numaNodeData[nodeIndex + 1].cpu_set);
-											numaNodeData[nodeIndex + 1].cpu_count += 1;
+										if (1
+										        == sscanf(cpu->d_name, "cpu%lu",
+										                &cpuIndex)) {
+											CPU_SET(cpuIndex,
+											        &numaNodeData[nodeIndex
+											                + 1]
+											                 .cpu_set);
+											numaNodeData[nodeIndex + 1]
+											        .cpu_count += 1;
 
-											/* add all cpus to the synthetic 0 node */
-											CPU_SET(cpuIndex, &numaNodeData[0].cpu_set);
+											/* add all cpus to the synthetic
+											 * 0 node */
+											CPU_SET(cpuIndex,
+											        &numaNodeData[0]
+											                 .cpu_set);
 											numaNodeData[0].cpu_count += 1;
 										}
 										cpu = readdir(cpus);
@@ -290,9 +351,10 @@ omrthread_numa_init(omrthread_library_t threadLibrary)
 		dumpNumaInfo();
 #endif
 	}
-	/* find our current affinity mask since we will need it when removing any affinity binding from threads, later (since we still want to honour restrictions we inherited from the environment) */
+	/* find our current affinity mask since we will need it when removing any affinity binding from threads, later
+	 * (since we still want to honour restrictions we inherited from the environment) */
 	CPU_ZERO(&defaultAffinityMask);
-#if __GLIBC_PREREQ(2,4) || defined(LINUXPPC)
+#if __GLIBC_PREREQ(2, 4) || defined(LINUXPPC)
 	/*
 	 * LIR 902 : On Linux PPC, rolling up tool chain level to VAC 8 on RHEL 4.
 	 * The libc version on RHEL 4 requires 3 arg to sched_setaffinity.
@@ -351,7 +413,8 @@ omrthread_numa_get_max_node(void)
 }
 
 intptr_t
-omrthread_numa_set_node_affinity_nolock(omrthread_t thread, const uintptr_t *nodeList, uintptr_t nodeCount, uint32_t flags)
+omrthread_numa_set_node_affinity_nolock(
+        omrthread_t thread, const uintptr_t *nodeList, uintptr_t nodeCount, uint32_t flags)
 {
 	intptr_t result = 0;
 #if defined(OMR_PORT_NUMA_SUPPORT)
@@ -387,11 +450,12 @@ omrthread_numa_set_node_affinity_nolock(omrthread_t thread, const uintptr_t *nod
 				cpuset_logical_and(&affinityCPUs, &defaultAffinityMask);
 			}
 		} else {
-			/* remove all affinity bindings from the thread so replace it with the affinity with which we started */
+			/* remove all affinity bindings from the thread so replace it with the affinity with which we
+			 * started */
 			memcpy(&affinityCPUs, &defaultAffinityMask, sizeof(cpu_set_t));
 		}
 		if ((threadIsStarted) && (0 == result)) {
-#if __GLIBC_PREREQ(2,4) || defined(LINUXPPC)
+#if __GLIBC_PREREQ(2, 4) || defined(LINUXPPC)
 			/*
 			 * LIR 902 : On Linux PPC, rolling up tool chain level to VAC 8 on RHEL 4.
 			 * The libc version on RHEL 4 requires 3 arg to sched_setaffinity.
@@ -421,7 +485,6 @@ omrthread_numa_set_node_affinity_nolock(omrthread_t thread, const uintptr_t *nod
 #endif /* OMR_PORT_NUMA_SUPPORT */
 	return result;
 }
-
 
 intptr_t
 omrthread_numa_set_node_affinity(omrthread_t thread, const uintptr_t *numaNodes, uintptr_t nodeCount, uint32_t flags)
@@ -460,7 +523,7 @@ omrthread_numa_get_node_affinity(omrthread_t thread, uintptr_t *numaNodes, uintp
 			 * by an external program (see: http://www.linuxjournal.com/article/6799)
 			 */
 
-#if __GLIBC_PREREQ(2,4) || defined(LINUXPPC)
+#if __GLIBC_PREREQ(2, 4) || defined(LINUXPPC)
 			/*
 			 * LIR 902 : On Linux PPC, rolling up tool chain level to VAC 8 on RHEL 4.
 			 * The libc version on RHEL 4 requires 3 arg to sched_getaffinity.
@@ -494,7 +557,8 @@ omrthread_numa_get_node_affinity(omrthread_t thread, uintptr_t *numaNodes, uintp
 						}
 					}
 				}
-				/* handle the case where we aren't on any node - which implies the special node 0 (the global node) */
+				/* handle the case where we aren't on any node - which implies the special node 0 (the
+				 * global node) */
 				if (0 == nodesSoFar) {
 					numaNodes[nodesSoFar] = 0;
 					nodesSoFar += 1;
@@ -516,7 +580,8 @@ omrthread_numa_get_node_affinity(omrthread_t thread, uintptr_t *numaNodes, uintp
 					nodesSoFar += 1;
 				}
 			}
-			/* handle the case where we aren't on any node - which implies the special node 0 (the global node) */
+			/* handle the case where we aren't on any node - which implies the special node 0 (the global
+			 * node) */
 			if (0 == nodesSoFar) {
 				numaNodes[nodesSoFar] = 0;
 				nodesSoFar += 1;
@@ -530,8 +595,9 @@ omrthread_numa_get_node_affinity(omrthread_t thread, uintptr_t *numaNodes, uintp
 }
 
 #ifdef OMR_VERBOSE_NUMA_NODE_DATA
- void
-dumpNumaInfo() {
+void
+dumpNumaInfo()
+{
 	uintptr_t numaMaxNode = omrthread_numa_get_max_node();
 	uint32_t node = 0;
 
@@ -546,25 +612,24 @@ dumpNumaInfo() {
 		}
 		printf("\n");
 	}
-
 }
 #endif
 
 uintptr_t
 omrthread_numa_get_current_node()
 {
-    unsigned node = 0;
+	unsigned node = 0;
 #if defined(OMR_PORT_NUMA_SUPPORT)
 	/* On some older kernels the syscall appears to be SYS_get_cpu rather than SYS_getcpu */
 #if !defined(SYS_getcpu)
 #define SYS_getcpu SYS_get_cpu
 #endif
 
-    if (0 == syscall(SYS_getcpu, NULL, &node, NULL)) {
-        ++node;
-    } else {
-        node = 0;
-    }
+	if (0 == syscall(SYS_getcpu, NULL, &node, NULL)) {
+		++node;
+	} else {
+		node = 0;
+	}
 #endif
-    return node;
+	return node;
 }

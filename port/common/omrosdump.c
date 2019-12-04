@@ -27,8 +27,6 @@
  */
 #include "omrport.h"
 
-
-
 /**
  * Create a dump file of the OS state.
  *
@@ -79,5 +77,3 @@ omrdump_shutdown(struct OMRPortLibrary *portLibrary)
 {
 	/* noop */
 }
-
-

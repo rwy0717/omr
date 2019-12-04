@@ -20,46 +20,49 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-#include "ModronAssertions.h"
+#include "MarkedObjectPopulator.hpp"
 
 #include "GCExtensionsBase.hpp"
 #include "HeapMapIterator.hpp"
 #include "HeapRegionDescriptor.hpp"
+#include "ModronAssertions.h"
 #include "ObjectHeapBufferedIterator.hpp"
 
-#include "MarkedObjectPopulator.hpp"
-
 void
-MM_MarkedObjectPopulator::initializeObjectHeapBufferedIteratorState(MM_HeapRegionDescriptor* region, GC_ObjectHeapBufferedIteratorState* state) const
+MM_MarkedObjectPopulator::initializeObjectHeapBufferedIteratorState(
+        MM_HeapRegionDescriptor *region, GC_ObjectHeapBufferedIteratorState *state) const
 {
 	reset(region, state, region->getLowAddress(), region->getHighAddress());
 }
 
 void
-MM_MarkedObjectPopulator::reset(MM_HeapRegionDescriptor* region, GC_ObjectHeapBufferedIteratorState* state, void* base, void* top) const
+MM_MarkedObjectPopulator::reset(
+        MM_HeapRegionDescriptor *region, GC_ObjectHeapBufferedIteratorState *state, void *base, void *top) const
 {
 	state->skipFirstObject = false;
-	state->data1 = (uintptr_t) base;
-	state->data2 = (uintptr_t) top;
+	state->data1 = (uintptr_t)base;
+	state->data2 = (uintptr_t)top;
 }
 
 uintptr_t
-MM_MarkedObjectPopulator::populateObjectHeapBufferedIteratorCache(omrobjectptr_t* cache, uintptr_t count, GC_ObjectHeapBufferedIteratorState* state) const
+MM_MarkedObjectPopulator::populateObjectHeapBufferedIteratorCache(
+        omrobjectptr_t *cache, uintptr_t count, GC_ObjectHeapBufferedIteratorState *state) const
 {
 	uintptr_t size = 0;
-	uintptr_t *startPtr = (uintptr_t*) state->data1;
-	uintptr_t *endPtr = (uintptr_t*) state->data2;
+	uintptr_t *startPtr = (uintptr_t *)state->data1;
+	uintptr_t *endPtr = (uintptr_t *)state->data2;
 	Assert_MM_true(false == state->skipFirstObject);
-	
+
 	if (NULL != startPtr) {
 		MM_HeapMap *markMap = state->extensions->previousMarkMap;
 		Assert_MM_true(NULL != markMap);
-		
-		/* TODO: what to do if we've been asked to include dead objects? There's no obvious way to include them. Perhaps it doesn't matter? Or we can infer them? */
+
+		/* TODO: what to do if we've been asked to include dead objects? There's no obvious way to include them.
+		 * Perhaps it doesn't matter? Or we can infer them? */
 		MM_HeapMapIterator iterator(state->extensions, markMap, startPtr, endPtr, false);
 
 		omrobjectptr_t object = NULL;
-		
+
 		for (uintptr_t i = 0; i < count; i++) {
 			object = iterator.nextObject();
 			if (NULL == object) {
@@ -87,7 +90,7 @@ MM_MarkedObjectPopulator::populateObjectHeapBufferedIteratorCache(omrobjectptr_t
 }
 
 void
-MM_MarkedObjectPopulator::advance(uintptr_t size, GC_ObjectHeapBufferedIteratorState* state) const
+MM_MarkedObjectPopulator::advance(uintptr_t size, GC_ObjectHeapBufferedIteratorState *state) const
 {
 	state->data1 = state->data1 + size;
 }

@@ -104,7 +104,8 @@ omrthread_attr_init(omrthread_attr_t *attr)
 		goto destroy_attr;
 	}
 
-	if (failedToSetAttr(omrthread_attr_set_schedpolicy((omrthread_attr_t *)&newAttr, J9THREAD_SCHEDPOLICY_INHERIT))) {
+	if (failedToSetAttr(
+	            omrthread_attr_set_schedpolicy((omrthread_attr_t *)&newAttr, J9THREAD_SCHEDPOLICY_INHERIT))) {
 		goto destroy_attr;
 	}
 
@@ -116,7 +117,8 @@ omrthread_attr_init(omrthread_attr_t *attr)
 		goto destroy_attr;
 	}
 
-	if (failedToSetAttr(omrthread_attr_set_category((omrthread_attr_t *)&newAttr, J9THREAD_CATEGORY_SYSTEM_THREAD))) {
+	if (failedToSetAttr(
+	            omrthread_attr_set_category((omrthread_attr_t *)&newAttr, J9THREAD_CATEGORY_SYSTEM_THREAD))) {
 		goto destroy_attr;
 	}
 
@@ -275,7 +277,7 @@ omrthread_attr_set_detachstate(omrthread_attr_t *attr, omrthread_detachstate_t d
 {
 	intptr_t rc = J9THREAD_SUCCESS;
 	unixthread_attr_t ux = NULL;
-	int pthreadDetachstate = ((J9THREAD_CREATE_DETACHED == detachstate)? 1: 0);
+	int pthreadDetachstate = ((J9THREAD_CREATE_DETACHED == detachstate) ? 1 : 0);
 
 	if (!J9THREAD_ATTR_IS_VALID(attr)) {
 		return J9THREAD_ERR_INVALID_ATTR;
@@ -312,13 +314,9 @@ omrthread_attr_set_category(omrthread_attr_t *attr, uint32_t category)
 	case J9THREAD_USER_DEFINED_THREAD_CATEGORY_2:
 	case J9THREAD_USER_DEFINED_THREAD_CATEGORY_3:
 	case J9THREAD_USER_DEFINED_THREAD_CATEGORY_4:
-	case J9THREAD_USER_DEFINED_THREAD_CATEGORY_5:
-		(*attr)->category = category;
-		break;
+	case J9THREAD_USER_DEFINED_THREAD_CATEGORY_5: (*attr)->category = category; break;
 
-	default:
-		rc = J9THREAD_ERR_INVALID_VALUE;
-		break;
+	default: rc = J9THREAD_ERR_INVALID_VALUE; break;
 	}
 
 	return rc;

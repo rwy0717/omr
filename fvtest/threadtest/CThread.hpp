@@ -24,8 +24,7 @@
 
 #include "threadTestLib.hpp"
 
-class CThread
-{
+class CThread {
 public:
 	CThread(omrthread_t self);
 	CThread(void);
@@ -33,7 +32,7 @@ public:
 	virtual void Start(void);
 
 	/* disable assignment */
-	CThread& operator=(const CThread&);
+	CThread &operator=(const CThread &);
 
 	bool Terminated(void);
 	omrthread_t GetId(void) const;

@@ -51,7 +51,8 @@
 
 #define allocNameSize 64 /**< @internal buffer size for name function */
 
-static uintptr_t simpleHandlerFunction(struct OMRPortLibrary *portLibrary, uint32_t gpType, void *gpInfo, void *handler_arg);
+static uintptr_t simpleHandlerFunction(
+        struct OMRPortLibrary *portLibrary, uint32_t gpType, void *gpInfo, void *handler_arg);
 static void removeDump(OMRPortLibrary *portLib, const char *filename, const char *testName);
 
 typedef struct simpleHandlerInfo {
@@ -103,7 +104,6 @@ TEST(PortDumpTest, dump_verify_functiontable_slots)
 
 	reportTestEntry(OMRPORTLIB, testName);
 
-
 	/* omrmem_test2 */
 	if (NULL == OMRPORTLIB->dump_create) {
 		outputErrorMessage(PORTTEST_ERROR_ARGS, "portLibrary->vmem_reserve_memory is NULL\n");
@@ -112,7 +112,8 @@ TEST(PortDumpTest, dump_verify_functiontable_slots)
 }
 
 /**
- * Call omrdump_create() without passing in core file name. This does not actually test that a core file was actually created.
+ * Call omrdump_create() without passing in core file name. This does not actually test that a core file was actually
+ * created.
  */
 TEST(PortDumpTest, dump_test_create_dump_with_NO_name)
 {
@@ -149,7 +150,6 @@ TEST(PortDumpTest, dump_test_create_dump_with_NO_name)
 
 		portTestEnv->log("omrdump_create claims to have written a core file to: %s\n", coreFileName);
 
-
 #if defined(AIXPPC)
 		/* We defer to fork abort on AIX machines that don't have "Enable full CORE dump" enabled in smit,
 		 * in which case omrdump_create will not return the filename.
@@ -170,11 +170,11 @@ TEST(PortDumpTest, dump_test_create_dump_with_NO_name)
 			}
 		}
 	} else {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrdump_create returned: %u, with filename: %s", rc, coreFileName);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrdump_create returned: %u, with filename: %s", rc, coreFileName);
 	}
 	reportTestExit(OMRPORTLIB, testName);
 }
-
 
 /**
  * Test omrdump_create(), this time passing in core file name
@@ -198,7 +198,7 @@ TEST(PortDumpTest, dump_test_create_dump_with_name)
 	coreFileName = getcwd(buff, EsMaxPath);
 #endif /* defined(J9ZOS390) && !defined(OMR_EBCDIC) */
 
-	strncat(coreFileName, "/", EsMaxPath);	/* make sure the directory ends with a slash */
+	strncat(coreFileName, "/", EsMaxPath); /* make sure the directory ends with a slash */
 	strncat(coreFileName, testName, EsMaxPath);
 
 	portTestEnv->log("calling omrdump_create with filename: %s\n", coreFileName);
@@ -217,12 +217,11 @@ TEST(PortDumpTest, dump_test_create_dump_with_name)
 			removeDump(OMRPORTLIB, coreFileName, testName);
 		}
 	} else {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrdump_create returned: %u, with filename: %s\n", rc, coreFileName);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrdump_create returned: %u, with filename: %s\n", rc, coreFileName);
 	}
 	reportTestExit(OMRPORTLIB, testName);
 }
-
-
 
 /**
  * Test calling omrdump_create() from a signal handler.
@@ -246,7 +245,7 @@ TEST(PortDumpTest, dump_test_create_dump_from_signal_handler)
 	coreFileName = getcwd(buff, EsMaxPath);
 #endif /* defined(J9ZOS390) && !defined(OMR_EBCDIC) */
 
-	strncat(coreFileName, "/", EsMaxPath);	/* make sure the directory ends with a slash */
+	strncat(coreFileName, "/", EsMaxPath); /* make sure the directory ends with a slash */
 	strncat(coreFileName, testName, EsMaxPath);
 
 	sig_protectFlags = OMRPORT_SIG_FLAG_SIGSEGV | OMRPORT_SIG_FLAG_MAY_RETURN;
@@ -254,23 +253,21 @@ TEST(PortDumpTest, dump_test_create_dump_from_signal_handler)
 	reportTestEntry(OMRPORTLIB, testName);
 
 	if (!omrsig_can_protect(sig_protectFlags)) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "portLibrary->sig_protect does not offer adequate protection for test\n");
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "portLibrary->sig_protect does not offer adequate protection for test\n");
 	} else {
 		handlerInfo.coreFileName = coreFileName;
 		handlerInfo.testName = testName;
-		protectResult = omrsig_protect(
-							raiseSEGV, NULL,
-							simpleHandlerFunction, &handlerInfo,
-							sig_protectFlags,
-							&result);
+		protectResult =
+		        omrsig_protect(raiseSEGV, NULL, simpleHandlerFunction, &handlerInfo, sig_protectFlags, &result);
 
 		if (protectResult != OMRPORT_SIG_EXCEPTION_OCCURRED) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "portLibrary->sig_protect -- expected 0 return value\n");
+			outputErrorMessage(
+			        PORTTEST_ERROR_ARGS, "portLibrary->sig_protect -- expected 0 return value\n");
 		}
 	}
 	reportTestExit(OMRPORTLIB, testName);
 }
-
 
 static uintptr_t
 simpleHandlerFunction(struct OMRPortLibrary *portLibrary, uint32_t gpType, void *gpInfo, void *handler_arg)
@@ -297,7 +294,8 @@ simpleHandlerFunction(struct OMRPortLibrary *portLibrary, uint32_t gpType, void 
 			removeDump(OMRPORTLIB, info->coreFileName, testName);
 		}
 	} else {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrdump_create returned: %u, with filename: %s", rc, info->coreFileName);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrdump_create returned: %u, with filename: %s", rc, info->coreFileName);
 	}
 
 	return OMRPORT_SIG_EXCEPTION_RETURN;

@@ -22,10 +22,10 @@
 
 #define J9_EXTERNAL_TO_VM
 
-#include "omrcfg.h"
-
 #include "EnvironmentStandard.hpp"
+
 #include "GCExtensionsBase.hpp"
+#include "omrcfg.h"
 #if defined(OMR_GC_CONCURRENT_SCAVENGER)
 #include "Scavenger.hpp"
 #endif
@@ -35,15 +35,15 @@ MM_EnvironmentStandard::newInstance(MM_GCExtensionsBase *extensions, OMR_VMThrea
 {
 	void *envPtr;
 	MM_EnvironmentStandard *env = NULL;
-	
+
 	envPtr = (void *)pool_newElement(extensions->environments);
 	if (envPtr) {
-		env = new(envPtr) MM_EnvironmentStandard(omrVMThread);
+		env = new (envPtr) MM_EnvironmentStandard(omrVMThread);
 		if (!env->initialize(extensions)) {
 			env->kill();
-			env = NULL;	
+			env = NULL;
 		}
-	}	
+	}
 
 	return env;
 }

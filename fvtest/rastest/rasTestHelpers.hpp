@@ -35,7 +35,7 @@ char *getTraceDatDir(intptr_t argc, const char **argv);
 void reportOMRCommandLineError(OMRPortLibrary *portLibrary, const char *detailStr, va_list args);
 
 void createThread(omrthread_t *newThread, uintptr_t suspend, omrthread_detachstate_t detachstate,
-				  omrthread_entrypoint_t entryProc, void *entryArg);
+        omrthread_entrypoint_t entryProc, void *entryArg);
 intptr_t joinThread(omrthread_t threadToJoin);
 
 /* traceRecordHelpers */
@@ -46,16 +46,17 @@ typedef struct PerThreadWrapBuffer {
 	size_t lastRecordPos; /* position in lastRecord after end of existing contents */
 } PerThreadWrapBuffer;
 
-typedef omr_error_t (*TracePointCallback)(void *userData, const char *tpMod, const uint32_t tpModLength, const uint32_t tpId,
-		const UtTraceRecord *record, uint32_t firstParameterOffset, uint32_t parameterDataLength, int32_t isBigEndian);
+typedef omr_error_t (*TracePointCallback)(void *userData, const char *tpMod, const uint32_t tpModLength,
+        const uint32_t tpId, const UtTraceRecord *record, uint32_t firstParameterOffset, uint32_t parameterDataLength,
+        int32_t isBigEndian);
 
 void initWrapBuffer(PerThreadWrapBuffer *wrapBuffer);
 void freeWrapBuffer(PerThreadWrapBuffer *wrapBuffer);
 
-omr_error_t processTraceRecord(PerThreadWrapBuffer *wrapBuffer, UtSubscription *subscriptionID, TracePointCallback userCallback, void *userData);
+omr_error_t processTraceRecord(PerThreadWrapBuffer *wrapBuffer, UtSubscription *subscriptionID,
+        TracePointCallback userCallback, void *userData);
 uint8_t getU8FromTraceRecord(const UtTraceRecord *record, uint32_t offset);
 uint32_t getU32FromTraceRecord(const UtTraceRecord *record, uint32_t offset, int32_t isBigEndian);
 uint64_t getU64FromTraceRecord(const UtTraceRecord *record, uint32_t offset, int32_t isBigEndian);
-
 
 #endif /* RASTESTHELPERS_H_INCLUDED */

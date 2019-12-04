@@ -27,8 +27,14 @@
  */
 #ifndef OMR_INSTOPCODE_CONNECTOR
 #define OMR_INSTOPCODE_CONNECTOR
-namespace OMR { namespace Power { class InstOpCode; } }
-namespace OMR { typedef OMR::Power::InstOpCode InstOpCodeConnector; }
+namespace OMR {
+namespace Power {
+class InstOpCode;
+}
+} // namespace OMR
+namespace OMR {
+typedef OMR::Power::InstOpCode InstOpCodeConnector;
+}
 #else
 #error OMR::Power::InstOpCode expected to be a primary connector, but a OMR connector is already defined
 #endif
@@ -38,163 +44,156 @@ namespace OMR { typedef OMR::Power::InstOpCode InstOpCodeConnector; }
 #include "codegen/PPCOpsDefines.hpp"
 #include "env/Processors.hpp"
 
-namespace OMR
-{
+namespace OMR {
 
-namespace Power
-{
+namespace Power {
 
-class InstOpCode: public OMR::InstOpCode
-   {
-   protected:
+class InstOpCode : public OMR::InstOpCode {
+protected:
+	InstOpCode() : OMR::InstOpCode(bad) {}
+	InstOpCode(Mnemonic m) : OMR::InstOpCode(m) {}
 
-   InstOpCode():  OMR::InstOpCode(bad)  {}
-   InstOpCode(Mnemonic m): OMR::InstOpCode(m)  {}
+public:
+	/** \brief
+	 *     Defines various metadata of an instruction including the name, opcodes, format, the minimum architecture
+	 *     level set (ALS) which introduced the instruction, and the various properties which model the instruction
+	 *     in a way that the code generator understands.
+	 */
+	struct OpCodeMetaData {
+		/** \brief
+		 *     The instruction mnemonic.
+		 */
+		OMR::InstOpCode::Mnemonic mnemonic;
 
-   public:
+		/** \brief
+		 *     The instruction mnemonic as defined by the Power ISA.
+		 */
+		const char *name;
 
-   /** \brief
-    *     Defines various metadata of an instruction including the name, opcodes, format, the minimum architecture
-    *     level set (ALS) which introduced the instruction, and the various properties which model the instruction
-    *     in a way that the code generator understands.
-    */
-   struct OpCodeMetaData
-      {
-      /** \brief
-       *     The instruction mnemonic.
-       */
-      OMR::InstOpCode::Mnemonic mnemonic;
+		/** \brief
+		 *     The instruction opcode with fields masked out by zeros.
+		 */
+		uint32_t opcode;
 
-      /** \brief
-       *     The instruction mnemonic as defined by the Power ISA.
-       */
-      const char* name;
+		/** \brief
+		 *     The instruction format as defined by the Power ISA (Section 1.6).
+		 */
+		uint8_t format;
 
-      /** \brief
-       *     The instruction opcode with fields masked out by zeros.
-       */
-      uint32_t opcode;
+		/** \brief
+		 *     The minimum architecture level set (ALS) which introduced this instruction.
+		 */
+		TR_Processor minimumALS;
 
-      /** \brief
-       *     The instruction format as defined by the Power ISA (Section 1.6).
-       */
-      uint8_t format;
+		/** \brief
+		 *     The properties describing the behavior of this instruction to the codegen.
+		 */
+		uint32_t properties;
+	};
 
-      /** \brief
-       *     The minimum architecture level set (ALS) which introduced this instruction.
-       */
-      TR_Processor minimumALS;
+	static const OpCodeMetaData metadata[NumOpCodes];
 
-      /** \brief
-       *     The properties describing the behavior of this instruction to the codegen.
-       */
-      uint32_t properties;
-      };
+	bool isRecordForm() { return (metadata[_mnemonic].properties & PPCOpProp_IsRecordForm) != 0; }
 
-   static const OpCodeMetaData metadata[NumOpCodes];
+	bool hasRecordForm() { return (metadata[_mnemonic].properties & PPCOpProp_HasRecordForm) != 0; }
 
-   bool isRecordForm() {return (metadata[_mnemonic].properties & PPCOpProp_IsRecordForm)!=0;}
+	bool singleFPOp() { return (metadata[_mnemonic].properties & PPCOpProp_SingleFP) != 0; }
 
-        bool hasRecordForm() {return (metadata[_mnemonic].properties & PPCOpProp_HasRecordForm)!=0;}
+	bool doubleFPOp() { return (metadata[_mnemonic].properties & PPCOpProp_DoubleFP) != 0; }
 
-        bool singleFPOp() {return (metadata[_mnemonic].properties & PPCOpProp_SingleFP)!=0;}
+	bool gprOp() { return (metadata[_mnemonic].properties & (PPCOpProp_DoubleFP | PPCOpProp_SingleFP)) == 0; }
 
-        bool doubleFPOp() {return (metadata[_mnemonic].properties & PPCOpProp_DoubleFP)!=0;}
+	bool fprOp() { return (metadata[_mnemonic].properties & (PPCOpProp_DoubleFP | PPCOpProp_SingleFP)) != 0; }
 
-        bool gprOp() {return (metadata[_mnemonic].properties & (PPCOpProp_DoubleFP | PPCOpProp_SingleFP))==0;}
+	bool useAlternateFormat() { return (metadata[_mnemonic].properties & PPCOpProp_AltFormat) != 0; }
 
-        bool fprOp() {return (metadata[_mnemonic].properties & (PPCOpProp_DoubleFP | PPCOpProp_SingleFP))!=0;}
+	bool useAlternateFormatx() { return (metadata[_mnemonic].properties & PPCOpProp_AltFormatx) != 0; }
 
-        bool useAlternateFormat() {return (metadata[_mnemonic].properties & PPCOpProp_AltFormat)!=0;}
+	bool readsCarryFlag() { return (metadata[_mnemonic].properties & PPCOpProp_ReadsCarryFlag) != 0; }
 
-        bool useAlternateFormatx() {return (metadata[_mnemonic].properties & PPCOpProp_AltFormatx)!=0;}
+	bool setsCarryFlag() { return (metadata[_mnemonic].properties & PPCOpProp_SetsCarryFlag) != 0; }
 
-        bool readsCarryFlag() {return (metadata[_mnemonic].properties & PPCOpProp_ReadsCarryFlag)!=0;}
+	bool setsOverflowFlag() { return (metadata[_mnemonic].properties & PPCOpProp_SetsOverflowFlag) != 0; }
 
-        bool setsCarryFlag() {return (metadata[_mnemonic].properties & PPCOpProp_SetsCarryFlag)!=0;}
+	bool usesCountRegister() { return (metadata[_mnemonic].properties & PPCOpProp_UsesCtr) != 0; }
 
-        bool setsOverflowFlag() {return (metadata[_mnemonic].properties & PPCOpProp_SetsOverflowFlag)!=0;}
+	bool setsCountRegister() { return (metadata[_mnemonic].properties & PPCOpProp_SetsCtr) != 0; }
 
-        bool usesCountRegister() {return (metadata[_mnemonic].properties & PPCOpProp_UsesCtr)!=0;}
+	bool isBranchOp() { return (metadata[_mnemonic].properties & PPCOpProp_BranchOp) != 0; }
 
-        bool setsCountRegister() {return (metadata[_mnemonic].properties & PPCOpProp_SetsCtr)!=0;}
+	bool isLoad() { return (metadata[_mnemonic].properties & PPCOpProp_IsLoad) != 0; }
 
-        bool isBranchOp() {return (metadata[_mnemonic].properties & PPCOpProp_BranchOp)!=0;}
+	bool isStore() { return (metadata[_mnemonic].properties & PPCOpProp_IsStore) != 0; }
 
-        bool isLoad() {return (metadata[_mnemonic].properties & PPCOpProp_IsLoad)!=0;}
+	bool isRegCopy() { return (metadata[_mnemonic].properties & PPCOpProp_IsRegCopy) != 0; }
 
-        bool isStore() {return (metadata[_mnemonic].properties & PPCOpProp_IsStore)!=0;}
+	bool isUpdate() { return (metadata[_mnemonic].properties & PPCOpProp_UpdateForm) != 0; }
 
-        bool isRegCopy() {return (metadata[_mnemonic].properties & PPCOpProp_IsRegCopy)!=0;}
+	bool isDoubleWord() { return (metadata[_mnemonic].properties & PPCOpProp_DWord) != 0; }
 
-        bool isUpdate() {return (metadata[_mnemonic].properties & PPCOpProp_UpdateForm)!=0;}
+	bool isCall() { return _mnemonic == bl; }
 
-        bool isDoubleWord() {return (metadata[_mnemonic].properties & PPCOpProp_DWord)!=0;}
+	bool isTrap() { return (metadata[_mnemonic].properties & PPCOpProp_Trap) != 0; }
 
-        bool isCall() {return _mnemonic==bl;}
+	bool isTMAbort() { return (metadata[_mnemonic].properties & PPCOpProp_TMAbort) != 0; }
 
-        bool isTrap() {return (metadata[_mnemonic].properties & PPCOpProp_Trap)!=0;}
+	bool isFloat() { return (metadata[_mnemonic].properties & (PPCOpProp_SingleFP | PPCOpProp_DoubleFP)) != 0; }
 
-        bool isTMAbort() {return (metadata[_mnemonic].properties & PPCOpProp_TMAbort)!=0;}
+	bool isVMX() { return (metadata[_mnemonic].properties & PPCOpProp_IsVMX) != 0; }
 
-        bool isFloat() {return (metadata[_mnemonic].properties & (PPCOpProp_SingleFP|PPCOpProp_DoubleFP))!=0;}
+	bool isVSX() { return (metadata[_mnemonic].properties & PPCOpProp_IsVSX) != 0; }
 
-        bool isVMX() {return (metadata[_mnemonic].properties & PPCOpProp_IsVMX)!=0;}
+	bool usesTarget() { return (metadata[_mnemonic].properties & PPCOpProp_UsesTarget) != 0; }
 
-        bool isVSX() {return (metadata[_mnemonic].properties & PPCOpProp_IsVSX)!=0;}
+	bool useMaskEnd() { return (metadata[_mnemonic].properties & PPCOpProp_UseMaskEnd) != 0; }
 
-        bool usesTarget() {return (metadata[_mnemonic].properties & PPCOpProp_UsesTarget)!=0;}
+	bool isRotateOrShift() { return (metadata[_mnemonic].properties & PPCOpProp_IsRotateOrShift) != 0; }
 
-        bool useMaskEnd() {return (metadata[_mnemonic].properties & PPCOpProp_UseMaskEnd)!=0;}
+	bool isCompare() { return (metadata[_mnemonic].properties & PPCOpProp_CompareOp) != 0; }
 
-        bool isRotateOrShift() {return (metadata[_mnemonic].properties & PPCOpProp_IsRotateOrShift)!=0;}
+	bool readsFPSCR() { return (metadata[_mnemonic].properties & PPCOpProp_ReadsFPSCR) != 0; }
 
-        bool isCompare() {return (metadata[_mnemonic].properties & PPCOpProp_CompareOp)!=0;}
+	bool setsFPSCR() { return (metadata[_mnemonic].properties & PPCOpProp_SetsFPSCR) != 0; }
 
-        bool readsFPSCR() {return (metadata[_mnemonic].properties & PPCOpProp_ReadsFPSCR)!=0;}
+	bool isSyncSideEffectFree() { return (metadata[_mnemonic].properties & PPCOpProp_SyncSideEffectFree) != 0; }
 
-        bool setsFPSCR() {return (metadata[_mnemonic].properties & PPCOpProp_SetsFPSCR)!=0;}
+	bool offsetRequiresWordAlignment()
+	{
+		return (metadata[_mnemonic].properties & PPCOpProp_OffsetRequiresWordAlignment) != 0;
+	}
 
-        bool isSyncSideEffectFree() {return (metadata[_mnemonic].properties & PPCOpProp_SyncSideEffectFree)!=0;}
+	bool setsCTR() { return (metadata[_mnemonic].properties & PPCOpProp_SetsCtr) != 0; }
 
-        bool offsetRequiresWordAlignment() { return (metadata[_mnemonic].properties & PPCOpProp_OffsetRequiresWordAlignment)!=0;}
+	bool usesCTR() { return (metadata[_mnemonic].properties & PPCOpProp_UsesCtr) != 0; }
 
-        bool setsCTR() {return (metadata[_mnemonic].properties & PPCOpProp_SetsCtr)!=0;}
+	bool isCRLogical() { return (metadata[_mnemonic].properties & PPCOpProp_CRLogical) != 0; }
 
-        bool usesCTR() {return (metadata[_mnemonic].properties & PPCOpProp_UsesCtr)!=0;}
+	bool isLongRunningFPOp()
+	{
+		return _mnemonic == fdiv || _mnemonic == fdivs || _mnemonic == fsqrt || _mnemonic == fsqrts;
+	}
 
-        bool isCRLogical() {return (metadata[_mnemonic].properties & PPCOpProp_CRLogical)!=0;}
+	bool isFXMult()
+	{
+		return _mnemonic == mullw || _mnemonic == mulli || _mnemonic == mulhw || _mnemonic == mulhd
+		        || _mnemonic == mulhwu || _mnemonic == mulhdu;
+	}
 
-        bool isLongRunningFPOp() {return _mnemonic==fdiv  ||
-                                         _mnemonic==fdivs ||
-                                         _mnemonic==fsqrt ||
-                                         _mnemonic==fsqrts;}
+	bool isAdmin()
+	{
+		return _mnemonic == ret || _mnemonic == fence || _mnemonic == depend || _mnemonic == proc
+		        || _mnemonic == assocreg || _mnemonic == dd;
+	}
 
-        bool isFXMult() {return _mnemonic==mullw  ||
-                                _mnemonic==mulli  ||
-                                _mnemonic==mulhw  ||
-                                _mnemonic==mulhd  ||
-                                _mnemonic==mulhwu ||
-                                _mnemonic==mulhdu;}
+	static const uint32_t getOpCodeBinaryEncoding(Mnemonic opCode) { return metadata[opCode].opcode; }
+	const uint32_t getOpCodeBinaryEncoding() { return getOpCodeBinaryEncoding(_mnemonic); }
 
-        bool isAdmin() {return _mnemonic==ret      ||
-                               _mnemonic==fence    ||
-                               _mnemonic==depend   ||
-                               _mnemonic==proc     ||
-                               _mnemonic==assocreg ||
-                               _mnemonic==dd;}
-
-        static const uint32_t getOpCodeBinaryEncoding(Mnemonic opCode)
-           {return metadata[opCode].opcode;}
-        const uint32_t getOpCodeBinaryEncoding()
-           {return getOpCodeBinaryEncoding(_mnemonic);}
-
-        uint8_t *copyBinaryToBuffer(uint8_t *cursor)
-           {
-           *reinterpret_cast<uint32_t*>(cursor) = metadata[_mnemonic].opcode;
-           return cursor;
-           }
-   };
-}
-}
+	uint8_t *copyBinaryToBuffer(uint8_t *cursor)
+	{
+		*reinterpret_cast<uint32_t *>(cursor) = metadata[_mnemonic].opcode;
+		return cursor;
+	}
+};
+} // namespace Power
+} // namespace OMR
 #endif

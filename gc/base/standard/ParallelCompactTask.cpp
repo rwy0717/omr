@@ -20,9 +20,9 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
+#include "modronopt.h"
 #include "omrcfg.h"
 #include "omrmodroncore.h"
-#include "modronopt.h"
 
 #if defined(OMR_GC_MODRON_COMPACTION)
 
@@ -30,7 +30,6 @@
 #include "EnvironmentBase.hpp"
 #include "GCExtensionsBase.hpp"
 #include "GlobalGCStats.hpp"
-
 #include "ParallelCompactTask.hpp"
 
 uintptr_t
@@ -61,5 +60,3 @@ MM_ParallelCompactTask::cleanup(MM_EnvironmentBase *env)
 }
 
 #endif /* OMR_GC_MODRON_COMPACTION */
-
-

@@ -23,14 +23,13 @@
 #if !defined(OBJECTSCANNER_HPP_)
 #define OBJECTSCANNER_HPP_
 
-#include "omrcfg.h"
-#include "ModronAssertions.h"
-#include "objectdescription.h"
-
 #include "BaseVirtual.hpp"
 #include "EnvironmentBase.hpp"
 #include "GCExtensionsBase.hpp"
+#include "ModronAssertions.h"
 #include "SlotObject.hpp"
+#include "objectdescription.h"
+#include "omrcfg.h"
 
 /**
  * This object scanning model allows an inline getNextSlot() implementation and works best
@@ -47,39 +46,43 @@
  * requiring a virtual method call (getNextSlotMap()). Otherwise at least one such call
  * is required before getNextSlot() will return NULL.
  */
-class GC_ObjectScanner : public MM_BaseVirtual
-{
+class GC_ObjectScanner : public MM_BaseVirtual {
 	/* Data Members */
 private:
-
 protected:
 	static const intptr_t _bitsPerScanMap = sizeof(uintptr_t) << 3;
 
-	uintptr_t _scanMap;						/**< Bit map of reference slots in object being scanned (32/64-bit window) */
+	uintptr_t _scanMap; /**< Bit map of reference slots in object being scanned (32/64-bit window) */
 #if defined(OMR_GC_LEAF_BITS)
-	uintptr_t _leafMap;						/**< Bit map of reference slots in object that refernce leaf objects */
+	uintptr_t _leafMap; /**< Bit map of reference slots in object that refernce leaf objects */
 #endif /* defined(OMR_GC_LEAF_BITS) */
-	fomrobject_t *_scanPtr;					/**< Pointer to base of object slots mapped by current _scanMap */
-	GC_SlotObject _slotObject;				/**< Create own SlotObject class to provide output */
-	uintptr_t _flags;						/**< Scavenger context flags (scanRoots, scanHeap, ...) */
-	
+	fomrobject_t *_scanPtr; /**< Pointer to base of object slots mapped by current _scanMap */
+	GC_SlotObject _slotObject; /**< Create own SlotObject class to provide output */
+	uintptr_t _flags; /**< Scavenger context flags (scanRoots, scanHeap, ...) */
+
 public:
 	/**
 	 *  Instantiation flags used to specialize scanner for specific scavenger operations
 	 */
-	enum InstanceFlags
-	{
-		scanRoots = 1					/* scavenge roots phase -- scan & copy/forward root objects */
-		, scanHeap = 2					/* scavenge heap phase -- scan  & copy/forward objects reachable from scanned roots */
-		, indexableObject = 4			/* this is set for array object scanners where the array elements can be partitioned for multithreaded scanning */
-		, indexableObjectNoSplit = 8	/* this is set for array object scanners where the array elements cannot be partitioned for multithreaded scanning */
-		, headObjectScanner = 16		/* this is set for array object scanners containing the elements from the first split segment, and for all non-indexable objects */
-		, noMoreSlots = 128				/* this is set when object has more no slots to scan past current bitmap */
+	enum InstanceFlags {
+		scanRoots = 1 /* scavenge roots phase -- scan & copy/forward root objects */
+		,
+		scanHeap = 2 /* scavenge heap phase -- scan  & copy/forward objects reachable from scanned roots */
+		,
+		indexableObject = 4 /* this is set for array object scanners where the array elements can be partitioned
+		                       for multithreaded scanning */
+		,
+		indexableObjectNoSplit = 8 /* this is set for array object scanners where the array elements cannot be
+		                              partitioned for multithreaded scanning */
+		,
+		headObjectScanner = 16 /* this is set for array object scanners containing the elements from the first
+		                          split segment, and for all non-indexable objects */
+		,
+		noMoreSlots = 128 /* this is set when object has more no slots to scan past current bitmap */
 	};
 
 	/* Member Functions */
 private:
-
 protected:
 	/**
 	 * Constructor. Without leaf optimization. Context generational nursery collection.
@@ -88,23 +91,25 @@ protected:
 	 *
 	 * @param[in] env The environment for the scanning thread
 	 * @param[in] scanPtr The first slot contained in the object to be scanned
-	 * @param[in] scanMap Bit map marking object reference slots, with least significant bit mapped to slot at scanPtr
+	 * @param[in] scanMap Bit map marking object reference slots, with least significant bit mapped to slot at
+	 * scanPtr
 	 * @param[in] flags A bit mask comprised of InstanceFlags
-	 * @param[in] hotFieldsDescriptor Hot fields descriptor for languages that support hot field tracking (0 if no hot fields support)
+	 * @param[in] hotFieldsDescriptor Hot fields descriptor for languages that support hot field tracking (0 if no
+	 * hot fields support)
 	 */
 	GC_ObjectScanner(MM_EnvironmentBase *env, fomrobject_t *scanPtr, uintptr_t scanMap, uintptr_t flags)
-		: MM_BaseVirtual()
-		, _scanMap(scanMap)
+	        : MM_BaseVirtual()
+	        , _scanMap(scanMap)
 #if defined(OMR_GC_LEAF_BITS)
-		, _leafMap(0)
+	        , _leafMap(0)
 #endif /* defined(OMR_GC_LEAF_BITS) */
-		, _scanPtr(scanPtr)
-		, _slotObject(env->getOmrVM(), NULL)
-		, _flags(flags | headObjectScanner)
+	        , _scanPtr(scanPtr)
+	        , _slotObject(env->getOmrVM(), NULL)
+	        , _flags(flags | headObjectScanner)
 	{
 		_typeId = __FUNCTION__;
 	}
-	
+
 	/**
 	 * Set up the scanner. Subclasses should provide a non-virtual implementation
 	 * to build next slot map and call it from their constructor or just after
@@ -125,10 +130,7 @@ protected:
 	 * @see getNextSlotMap()
 	 * @see putNextSlotMapBit()
 	 */
-	MMINLINE void
-	initialize(MM_EnvironmentBase *env)
-	{
-	}
+	MMINLINE void initialize(MM_EnvironmentBase *env) {}
 
 	/**
 	 * Helper function can be used to rebuild bit map of reference fields in
@@ -141,8 +143,7 @@ protected:
 	 * be included in the slot map and must be presented first in the next
 	 * call to getNextSlotMap().
 	 */
-	MMINLINE bool
-	putNextSlotMapBit(fomrobject_t *nextSlotAddress)
+	MMINLINE bool putNextSlotMapBit(fomrobject_t *nextSlotAddress)
 	{
 		if (0 != _scanMap) {
 			intptr_t bitOffset = nextSlotAddress - _scanPtr;
@@ -173,7 +174,8 @@ public:
 	 * base pointer.
 	 *
 	 * @param[out] scanMap the bit map for the slots contiguous with the returned base pointer
-	 * @param[out] hasNextSlotMap set this to true if this method should be called again, false if this map is known to be last
+	 * @param[out] hasNextSlotMap set this to true if this method should be called again, false if this map is known
+	 * to be last
 	 * @return a pointer to the first slot mapped by the least significant bit of the map, or NULL if no more slots
 	 */
 	virtual fomrobject_t *getNextSlotMap(uintptr_t *scanMap, bool *hasNextSlotMap) = 0;
@@ -183,11 +185,11 @@ public:
 	 *
 	 * @return a pointer to a slot object encapsulating the next object slot, or NULL if no next object slot
 	 */
-	MMINLINE GC_SlotObject *
-	getNextSlot()
+	MMINLINE GC_SlotObject *getNextSlot()
 	{
 		while (NULL != _scanPtr) {
-			/* while there is at least one bit-mapped slot, advance scan ptr to a non-NULL slot or end of map */
+			/* while there is at least one bit-mapped slot, advance scan ptr to a non-NULL slot or end of
+			 * map */
 			while ((0 != _scanMap) && ((0 == (1 & _scanMap)) || (0 == *_scanPtr))) {
 				_scanPtr += 1;
 				_scanMap >>= 1;
@@ -243,7 +245,8 @@ public:
 	 *
 	 * @param[out] scanMap the bit map for the slots contiguous with the returned base pointer
 	 * @param[out] leafMap the leaf bit map for the slots contiguous with the returned base pointer
-	 * @param[out] hasNextSlotMap set this to true if this method should be called again, false if this map is known to be last
+	 * @param[out] hasNextSlotMap set this to true if this method should be called again, false if this map is known
+	 * to be last
 	 * @return a pointer to the first slot mapped by the least significant bit of the map, or NULL if no more slots
 	 */
 	virtual fomrobject_t *getNextSlotMap(uintptr_t *scanMap, uintptr_t *leafMap, bool *hasNextSlotMap) = 0;
@@ -254,11 +257,11 @@ public:
 	 * @param[out] *isLeafSlot will be true if the slot refers to a leaf object
 	 * @return a pointer to a slot object encapsulating the next object slot, or NULL if no next object slot
 	 */
-	MMINLINE GC_SlotObject *
-	getNextSlot(bool* isLeafSlot)
+	MMINLINE GC_SlotObject *getNextSlot(bool *isLeafSlot)
 	{
 		while (NULL != _scanPtr) {
-			/* while there is at least one bit-mapped slot, advance scan ptr to a non-NULL slot or end of map */
+			/* while there is at least one bit-mapped slot, advance scan ptr to a non-NULL slot or end of
+			 * map */
 			while ((0 != _scanMap) && ((0 == (1 & _scanMap)) || (0 == *_scanPtr))) {
 				_scanPtr += 1;
 				_scanMap >>= 1;
@@ -311,7 +314,10 @@ public:
 
 	MMINLINE bool isIndexableObject() { return (0 != (indexableObject & _flags)); }
 
-	MMINLINE static bool isIndexableObjectNoSplit(uintptr_t flags) { return (0 != (indexableObjectNoSplit & flags)); }
+	MMINLINE static bool isIndexableObjectNoSplit(uintptr_t flags)
+	{
+		return (0 != (indexableObjectNoSplit & flags));
+	}
 
 	MMINLINE bool isIndexableObjectNoSplit() { return (0 != (indexableObjectNoSplit & _flags)); }
 

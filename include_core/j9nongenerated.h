@@ -35,10 +35,12 @@ typedef struct J9AVLTreeNode {
 } J9AVLTreeNode;
 
 typedef struct J9AVLTree {
-	intptr_t (*insertionComparator)(struct J9AVLTree *tree, struct J9AVLTreeNode *insertNode, struct J9AVLTreeNode *walkNode) ;
-	intptr_t (*searchComparator)(struct J9AVLTree *tree, uintptr_t searchValue, struct J9AVLTreeNode *node) ;
-	void (*genericActionHook)(struct J9AVLTree *tree, struct J9AVLTreeNode *node, uintptr_t action) ;
-	uintptr_t (*performNodeAction)(struct J9AVLTree *tree, struct J9AVLTreeNode *node, uintptr_t action, void *userData) ;
+	intptr_t (*insertionComparator)(
+	        struct J9AVLTree *tree, struct J9AVLTreeNode *insertNode, struct J9AVLTreeNode *walkNode);
+	intptr_t (*searchComparator)(struct J9AVLTree *tree, uintptr_t searchValue, struct J9AVLTreeNode *node);
+	void (*genericActionHook)(struct J9AVLTree *tree, struct J9AVLTreeNode *node, uintptr_t action);
+	uintptr_t (*performNodeAction)(
+	        struct J9AVLTree *tree, struct J9AVLTreeNode *node, uintptr_t action, void *userData);
 	uintptr_t flags;
 	struct J9AVLTreeNode *rootNode;
 	struct OMRPortLibrary *portLibrary;
@@ -64,7 +66,7 @@ typedef struct J9JITHashTable {
 	uintptr_t *currentAllocate;
 } J9JITHashTable;
 
-#define JIT_HASH_IN_DATA_CACHE  1
+#define JIT_HASH_IN_DATA_CACHE 1
 
 #define J9JITHASHTABLE_LEFTCHILD(base) AVL_SRP_GETNODE((base)->parentAVLTreeNode.leftChild)
 #define J9JITHASHTABLE_RIGHTCHILD(base) AVL_SRP_GETNODE((base)->parentAVLTreeNode.rightChild)
@@ -115,19 +117,18 @@ typedef struct J9VMGC_SublistFragment {
 
 #define J9SIZEOF_J9VMGC_SublistFragment 48
 
-
-#define J9MMCONSTANT_IMPLICIT_GC_DEFAULT  0
-#define J9MMCONSTANT_EXPLICIT_GC_NOT_AGGRESSIVE  1
-#define J9MMCONSTANT_EXPLICIT_GC_RASDUMP_COMPACT  2
-#define J9MMCONSTANT_EXPLICIT_GC_EXCLUSIVE_VMACCESS_ALREADY_ACQUIRED  2
-#define J9MMCONSTANT_EXPLICIT_GC_SYSTEM_GC  3
-#define J9MMCONSTANT_EXPLICIT_GC_NATIVE_OUT_OF_MEMORY  4
-#define J9MMCONSTANT_IMPLICIT_GC_AGGRESSIVE  5
-#define J9MMCONSTANT_IMPLICIT_GC_PERCOLATE  6
-#define J9MMCONSTANT_IMPLICIT_GC_PERCOLATE_AGGRESSIVE  7
-#define J9MMCONSTANT_IMPLICIT_GC_EXCESSIVE  8
-#define J9MMCONSTANT_IMPLICIT_GC_PERCOLATE_UNLOADING_CLASSES  9
-#define J9MMCONSTANT_IMPLICIT_GC_PERCOLATE_CRITICAL_REGIONS  10
+#define J9MMCONSTANT_IMPLICIT_GC_DEFAULT 0
+#define J9MMCONSTANT_EXPLICIT_GC_NOT_AGGRESSIVE 1
+#define J9MMCONSTANT_EXPLICIT_GC_RASDUMP_COMPACT 2
+#define J9MMCONSTANT_EXPLICIT_GC_EXCLUSIVE_VMACCESS_ALREADY_ACQUIRED 2
+#define J9MMCONSTANT_EXPLICIT_GC_SYSTEM_GC 3
+#define J9MMCONSTANT_EXPLICIT_GC_NATIVE_OUT_OF_MEMORY 4
+#define J9MMCONSTANT_IMPLICIT_GC_AGGRESSIVE 5
+#define J9MMCONSTANT_IMPLICIT_GC_PERCOLATE 6
+#define J9MMCONSTANT_IMPLICIT_GC_PERCOLATE_AGGRESSIVE 7
+#define J9MMCONSTANT_IMPLICIT_GC_EXCESSIVE 8
+#define J9MMCONSTANT_IMPLICIT_GC_PERCOLATE_UNLOADING_CLASSES 9
+#define J9MMCONSTANT_IMPLICIT_GC_PERCOLATE_CRITICAL_REGIONS 10
 #if defined(OMR_GC_CONCURRENT_SCAVENGER)
 #define J9MMCONSTANT_IMPLICIT_GC_PERCOLATE_ABORTED_SCAVENGE 11
 #endif
@@ -163,43 +164,43 @@ typedef struct J9MemorySegment {
 	struct J9PortVmemIdentifier vmemIdentifier;
 } J9MemorySegment;
 
-#define MEMORY_TYPE_OLD  1
-#define MEMORY_TYPE_NEW_RAM  10
-#define MEMORY_TYPE_SCOPED  0x2000
-#define MEMORY_TYPE_ALLOCATED  64
-#define MEMORY_TYPE_IMMORTAL  0x1000
-#define MEMORY_TYPE_DEBUG_INFO  0x200
-#define MEMORY_TYPE_BASETYPE_ROM_CLASS  0x200000
-#define MEMORY_TYPE_DYNAMIC_LOADED_CLASSES  0x20040
-#define MEMORY_TYPE_NEW  2
-#define MEMORY_TYPE_DISCARDABLE  0x80
-#define MEMORY_TYPE_NUMA  0x4000
-#define MEMORY_TYPE_ROM_CLASS  0x20000
-#define MEMORY_TYPE_UNCOMMITTED  0x800
-#define MEMORY_TYPE_FROM_JXE  0x4000000
-#define MEMORY_TYPE_OLD_ROM  5
-#define MEMORY_TYPE_SHARED_META  0x8000000
+#define MEMORY_TYPE_OLD 1
+#define MEMORY_TYPE_NEW_RAM 10
+#define MEMORY_TYPE_SCOPED 0x2000
+#define MEMORY_TYPE_ALLOCATED 64
+#define MEMORY_TYPE_IMMORTAL 0x1000
+#define MEMORY_TYPE_DEBUG_INFO 0x200
+#define MEMORY_TYPE_BASETYPE_ROM_CLASS 0x200000
+#define MEMORY_TYPE_DYNAMIC_LOADED_CLASSES 0x20040
+#define MEMORY_TYPE_NEW 2
+#define MEMORY_TYPE_DISCARDABLE 0x80
+#define MEMORY_TYPE_NUMA 0x4000
+#define MEMORY_TYPE_ROM_CLASS 0x20000
+#define MEMORY_TYPE_UNCOMMITTED 0x800
+#define MEMORY_TYPE_FROM_JXE 0x4000000
+#define MEMORY_TYPE_OLD_ROM 5
+#define MEMORY_TYPE_SHARED_META 0x8000000
 /* MEMORY_TYPE_VIRTUAL is expected to be used along with other types like MEMORY_TYPE_JIT_SCRATCH_SPACE
  * or MEMORY_TYPE_JIT_PERSISTENT to allocate virtual memory instead of malloc'ed memory.
  */
-#define MEMORY_TYPE_VIRTUAL  0x400
+#define MEMORY_TYPE_VIRTUAL 0x400
 /* MEMORY_TYPE_FIXED_RAM_CLASS is virtually allocated, setting MEMORY_TYPE_VIRTUAL is not required. */
-#define MEMORY_TYPE_FIXED_RAM_CLASS  0x8000
-#define MEMORY_TYPE_RAM_CLASS  0x10000
-#define MEMORY_TYPE_IGC_SCAN_QUEUE  0x400000
-#define MEMORY_TYPE_RAM  8
-#define MEMORY_TYPE_FIXED  16
-#define MEMORY_TYPE_JIT_SCRATCH_SPACE  0x1000000
-#define MEMORY_TYPE_FIXED_RAM  24
-#define MEMORY_TYPE_OLD_RAM  9
+#define MEMORY_TYPE_FIXED_RAM_CLASS 0x8000
+#define MEMORY_TYPE_RAM_CLASS 0x10000
+#define MEMORY_TYPE_IGC_SCAN_QUEUE 0x400000
+#define MEMORY_TYPE_RAM 8
+#define MEMORY_TYPE_FIXED 16
+#define MEMORY_TYPE_JIT_SCRATCH_SPACE 0x1000000
+#define MEMORY_TYPE_FIXED_RAM 24
+#define MEMORY_TYPE_OLD_RAM 9
 /* MEMORY_TYPE_CODE is used for virtually allocated JIT code segments, setting MEMORY_TYPE_VIRTUAL is not required. */
-#define MEMORY_TYPE_CODE  32
-#define MEMORY_TYPE_ROM  4
-#define MEMORY_TYPE_CLASS_FILE_BYTES  0x40000
-#define MEMORY_TYPE_UNDEAD_CLASS  0x80000
-#define MEMORY_TYPE_JIT_PERSISTENT  0x800000
-#define MEMORY_TYPE_FIXEDSIZE  0x100
-#define MEMORY_TYPE_DEFAULT  0x2000000
+#define MEMORY_TYPE_CODE 32
+#define MEMORY_TYPE_ROM 4
+#define MEMORY_TYPE_CLASS_FILE_BYTES 0x40000
+#define MEMORY_TYPE_UNDEAD_CLASS 0x80000
+#define MEMORY_TYPE_JIT_PERSISTENT 0x800000
+#define MEMORY_TYPE_FIXEDSIZE 0x100
+#define MEMORY_TYPE_DEFAULT 0x2000000
 
 #define J9MEMORYSEGMENT_LEFTCHILD(base) AVL_SRP_GETNODE((base)->parentAVLTreeNode.leftChild)
 #define J9MEMORYSEGMENT_RIGHTCHILD(base) AVL_SRP_GETNODE((base)->parentAVLTreeNode.rightChild)
@@ -221,12 +222,12 @@ typedef struct MM_GCRememberedSet {
 } MM_GCRememberedSet;
 
 typedef struct MM_GCRememberedSetFragment {
-	uintptr_t** fragmentAlloc;
-	uintptr_t** fragmentTop;
-	void* fragmentStorage;
+	uintptr_t **fragmentAlloc;
+	uintptr_t **fragmentTop;
+	void *fragmentStorage;
 	uintptr_t localFragmentIndex;
 	uintptr_t preservedLocalFragmentIndex;
-	struct MM_GCRememberedSet* fragmentParent;
+	struct MM_GCRememberedSet *fragmentParent;
 } MM_GCRememberedSetFragment;
 
 #endif /* defined(OMR_GC_REALTIME) */

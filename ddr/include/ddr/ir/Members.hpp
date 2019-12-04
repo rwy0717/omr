@@ -25,8 +25,7 @@
 #include "ddr/config.hpp"
 #include "ddr/std/string.hpp"
 
-class Members
-{
+class Members {
 public:
 	std::string _name;
 

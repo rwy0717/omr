@@ -31,7 +31,6 @@
 #if defined(OMR_GC_MODRON_SCAVENGER)
 
 #include "ConfigurationGenerational.hpp"
-
 #include "EnvironmentStandard.hpp"
 #include "GCExtensionsBase.hpp"
 #include "HeapSplit.hpp"
@@ -51,11 +50,12 @@ MM_Configuration *
 MM_ConfigurationGenerational::newInstance(MM_EnvironmentBase *env)
 {
 	MM_ConfigurationGenerational *configuration;
-	
-	configuration = (MM_ConfigurationGenerational *) env->getForge()->allocate(sizeof(MM_ConfigurationGenerational), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
-	if(NULL != configuration) {
-		new(configuration) MM_ConfigurationGenerational(env);
-		if(!configuration->initialize(env)) {
+
+	configuration = (MM_ConfigurationGenerational *)env->getForge()->allocate(
+	        sizeof(MM_ConfigurationGenerational), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+	if (NULL != configuration) {
+		new (configuration) MM_ConfigurationGenerational(env);
+		if (!configuration->initialize(env)) {
 			configuration->kill(env);
 			configuration = NULL;
 		}
@@ -64,9 +64,9 @@ MM_ConfigurationGenerational::newInstance(MM_EnvironmentBase *env)
 }
 
 void
-MM_ConfigurationGenerational::tearDown(MM_EnvironmentBase* env)
+MM_ConfigurationGenerational::tearDown(MM_EnvironmentBase *env)
 {
-	MM_GCExtensionsBase* extensions = env->getExtensions();
+	MM_GCExtensionsBase *extensions = env->getExtensions();
 
 	/* Set pointer to scavenger in extensions to NULL
 	 * before Scavenger is teared down as part of clean up of defaultMemorySpace
@@ -77,7 +77,8 @@ MM_ConfigurationGenerational::tearDown(MM_EnvironmentBase* env)
 }
 
 MM_MemorySubSpaceSemiSpace *
-MM_ConfigurationGenerational::createSemiSpace(MM_EnvironmentBase *envBase, MM_Heap *heap, MM_Scavenger *scavenger, MM_InitializationParameters *parameters, UDATA numaNode)
+MM_ConfigurationGenerational::createSemiSpace(MM_EnvironmentBase *envBase, MM_Heap *heap, MM_Scavenger *scavenger,
+        MM_InitializationParameters *parameters, UDATA numaNode)
 {
 	MM_EnvironmentStandard *env = MM_EnvironmentStandard::getEnvironment(envBase);
 	MM_GCExtensionsBase *ext = env->getExtensions();
@@ -93,32 +94,48 @@ MM_ConfigurationGenerational::createSemiSpace(MM_EnvironmentBase *envBase, MM_He
 	}
 
 	/* allocate space */
-	if(NULL == (memoryPoolAllocate = MM_MemoryPoolAddressOrderedList::newInstance(env, minimumFreeEntrySize, "Allocate/Survivor1"))) {
+	if (NULL
+	        == (memoryPoolAllocate = MM_MemoryPoolAddressOrderedList::newInstance(
+	                    env, minimumFreeEntrySize, "Allocate/Survivor1"))) {
 		return NULL;
 	}
-	if(NULL == (memorySubSpaceGenericAllocate = MM_MemorySubSpaceGeneric::newInstance(env, memoryPoolAllocate, NULL, false, parameters->_minimumNewSpaceSize / 2, parameters->_initialNewSpaceSize / 2, parameters->_maximumNewSpaceSize, MEMORY_TYPE_NEW, 0))) {
+	if (NULL
+	        == (memorySubSpaceGenericAllocate = MM_MemorySubSpaceGeneric::newInstance(env, memoryPoolAllocate, NULL,
+	                    false, parameters->_minimumNewSpaceSize / 2, parameters->_initialNewSpaceSize / 2,
+	                    parameters->_maximumNewSpaceSize, MEMORY_TYPE_NEW, 0))) {
 		memoryPoolAllocate->kill(env);
 		return NULL;
 	}
 
 	/* survivor space */
-	if(NULL == (memoryPoolSurvivor = MM_MemoryPoolAddressOrderedList::newInstance(env, minimumFreeEntrySize, "Allocate/Survivor2"))) {
+	if (NULL
+	        == (memoryPoolSurvivor = MM_MemoryPoolAddressOrderedList::newInstance(
+	                    env, minimumFreeEntrySize, "Allocate/Survivor2"))) {
 		memorySubSpaceGenericAllocate->kill(env);
 		return NULL;
 	}
-	if(NULL == (memorySubSpaceGenericSurvivor = MM_MemorySubSpaceGeneric::newInstance(env, memoryPoolSurvivor, NULL, false, parameters->_minimumNewSpaceSize / 2, parameters->_initialNewSpaceSize / 2, parameters->_maximumNewSpaceSize, MEMORY_TYPE_NEW, 0))) {
+	if (NULL
+	        == (memorySubSpaceGenericSurvivor = MM_MemorySubSpaceGeneric::newInstance(env, memoryPoolSurvivor, NULL,
+	                    false, parameters->_minimumNewSpaceSize / 2, parameters->_initialNewSpaceSize / 2,
+	                    parameters->_maximumNewSpaceSize, MEMORY_TYPE_NEW, 0))) {
 		memoryPoolSurvivor->kill(env);
 		memorySubSpaceGenericAllocate->kill(env);
 		return NULL;
 	}
 
-	if(NULL == (physicalSubArenaSemiSpace = MM_PhysicalSubArenaVirtualMemorySemiSpace::newInstance(envBase, heap))) {
+	if (NULL
+	        == (physicalSubArenaSemiSpace =
+	                        MM_PhysicalSubArenaVirtualMemorySemiSpace::newInstance(envBase, heap))) {
 		memorySubSpaceGenericAllocate->kill(env);
 		memorySubSpaceGenericSurvivor->kill(env);
 		return NULL;
 	}
 	physicalSubArenaSemiSpace->setNumaNode(numaNode);
-	if(NULL == (memorySubSpaceSemiSpace = MM_MemorySubSpaceSemiSpace::newInstance(env, scavenger, physicalSubArenaSemiSpace, memorySubSpaceGenericAllocate, memorySubSpaceGenericSurvivor, false, parameters->_minimumNewSpaceSize, parameters->_initialNewSpaceSize, parameters->_maximumNewSpaceSize))) {
+	if (NULL
+	        == (memorySubSpaceSemiSpace = MM_MemorySubSpaceSemiSpace::newInstance(env, scavenger,
+	                    physicalSubArenaSemiSpace, memorySubSpaceGenericAllocate, memorySubSpaceGenericSurvivor,
+	                    false, parameters->_minimumNewSpaceSize, parameters->_initialNewSpaceSize,
+	                    parameters->_maximumNewSpaceSize))) {
 		memorySubSpaceGenericAllocate->kill(env);
 		memorySubSpaceGenericSurvivor->kill(env);
 		physicalSubArenaSemiSpace->kill(env);
@@ -128,9 +145,9 @@ MM_ConfigurationGenerational::createSemiSpace(MM_EnvironmentBase *envBase, MM_He
 	return memorySubSpaceSemiSpace;
 }
 
-
 MM_MemorySpace *
-MM_ConfigurationGenerational::createDefaultMemorySpace(MM_EnvironmentBase *envBase, MM_Heap *heap, MM_InitializationParameters *parameters)
+MM_ConfigurationGenerational::createDefaultMemorySpace(
+        MM_EnvironmentBase *envBase, MM_Heap *heap, MM_InitializationParameters *parameters)
 {
 	MM_MemoryPool *memoryPoolOld = NULL;
 	MM_MemorySubSpaceGeneric *memorySubSpaceGenericOld = NULL;
@@ -142,61 +159,76 @@ MM_ConfigurationGenerational::createDefaultMemorySpace(MM_EnvironmentBase *envBa
 	MM_PhysicalArenaVirtualMemory *physicalArena = NULL;
 	MM_EnvironmentStandard *env = MM_EnvironmentStandard::getEnvironment(envBase);
 	MM_GCExtensionsBase *ext = env->getExtensions();
-	
+
 	/* first we do the structures that correspond to the "old area" */
-	if(NULL == (memoryPoolOld = createMemoryPool(env, true))) {
+	if (NULL == (memoryPoolOld = createMemoryPool(env, true))) {
 		return NULL;
 	}
-	if(NULL == (memorySubSpaceGenericOld = MM_MemorySubSpaceGeneric::newInstance(env, memoryPoolOld, NULL, false, parameters->_minimumOldSpaceSize, parameters->_initialOldSpaceSize, parameters->_maximumOldSpaceSize, MEMORY_TYPE_OLD, 0))) {
+	if (NULL
+	        == (memorySubSpaceGenericOld = MM_MemorySubSpaceGeneric::newInstance(env, memoryPoolOld, NULL, false,
+	                    parameters->_minimumOldSpaceSize, parameters->_initialOldSpaceSize,
+	                    parameters->_maximumOldSpaceSize, MEMORY_TYPE_OLD, 0))) {
 		memoryPoolOld->kill(env);
 		return NULL;
 	}
-	if(NULL == (physicalSubArenaFlat = MM_PhysicalSubArenaVirtualMemoryFlat::newInstance(env, heap))) {
+	if (NULL == (physicalSubArenaFlat = MM_PhysicalSubArenaVirtualMemoryFlat::newInstance(env, heap))) {
 		memorySubSpaceGenericOld->kill(env);
 		return NULL;
 	}
 
-	if(NULL == (memorySubSpaceOld = MM_MemorySubSpaceFlat::newInstance(env, physicalSubArenaFlat, memorySubSpaceGenericOld, false, parameters->_minimumOldSpaceSize, parameters->_initialOldSpaceSize, parameters->_maximumOldSpaceSize, MEMORY_TYPE_OLD, 0))) {
+	if (NULL
+	        == (memorySubSpaceOld = MM_MemorySubSpaceFlat::newInstance(env, physicalSubArenaFlat,
+	                    memorySubSpaceGenericOld, false, parameters->_minimumOldSpaceSize,
+	                    parameters->_initialOldSpaceSize, parameters->_maximumOldSpaceSize, MEMORY_TYPE_OLD, 0))) {
 		physicalSubArenaFlat->kill(env);
 		memorySubSpaceGenericOld->kill(env);
 		return NULL;
 	}
 
-	/* then we build "new-space" - note that if we fail during this we must remember to kill() the oldspace we created */
+	/* then we build "new-space" - note that if we fail during this we must remember to kill() the oldspace we
+	 * created */
 
 	/* join them with a semispace */
-	if(NULL == (scavenger = MM_Scavenger::newInstance(env, ext->heapRegionManager))) {
+	if (NULL == (scavenger = MM_Scavenger::newInstance(env, ext->heapRegionManager))) {
 		memorySubSpaceOld->kill(env);
 		return NULL;
 	}
 
-	if(NULL == (memorySubSpaceNew = createSemiSpace(env, heap, scavenger, parameters))) {
+	if (NULL == (memorySubSpaceNew = createSemiSpace(env, heap, scavenger, parameters))) {
 		memorySubSpaceOld->kill(env);
 	}
-	
+
 	/* then we join newspace and oldspace together */;
-	if(NULL == (memorySubSpaceGenerational = MM_MemorySubSpaceGenerational::newInstance(envBase, memorySubSpaceNew, memorySubSpaceOld, true, parameters->_minimumSpaceSize, parameters->_minimumNewSpaceSize, parameters->_initialNewSpaceSize, parameters->_maximumNewSpaceSize, parameters->_minimumOldSpaceSize, parameters->_initialOldSpaceSize, parameters->_maximumOldSpaceSize, parameters->_maximumSpaceSize))) {
+	if (NULL
+	        == (memorySubSpaceGenerational = MM_MemorySubSpaceGenerational::newInstance(envBase, memorySubSpaceNew,
+	                    memorySubSpaceOld, true, parameters->_minimumSpaceSize, parameters->_minimumNewSpaceSize,
+	                    parameters->_initialNewSpaceSize, parameters->_maximumNewSpaceSize,
+	                    parameters->_minimumOldSpaceSize, parameters->_initialOldSpaceSize,
+	                    parameters->_maximumOldSpaceSize, parameters->_maximumSpaceSize))) {
 		memorySubSpaceNew->kill(env);
 		memorySubSpaceOld->kill(env);
 		return NULL;
 	}
-	
-	if(NULL == (physicalArena = MM_PhysicalArenaVirtualMemory::newInstance(env, heap))) {
+
+	if (NULL == (physicalArena = MM_PhysicalArenaVirtualMemory::newInstance(env, heap))) {
 		memorySubSpaceGenerational->kill(env);
 		return NULL;
 	}
-	
+
 	/* register the scavenger in GCExtensionsBase */
 	ext->scavenger = scavenger;
 
-	return MM_MemorySpace::newInstance(env, heap, physicalArena, memorySubSpaceGenerational, parameters, MEMORY_SPACE_NAME_GENERATIONAL, MEMORY_SPACE_DESCRIPTION_GENERATIONAL);
+	return MM_MemorySpace::newInstance(env, heap, physicalArena, memorySubSpaceGenerational, parameters,
+	        MEMORY_SPACE_NAME_GENERATIONAL, MEMORY_SPACE_DESCRIPTION_GENERATIONAL);
 }
 
 /**
- * Gencon can run in a split-heap virtual memory heap so see if the options for that have been set here or defer to our super
+ * Gencon can run in a split-heap virtual memory heap so see if the options for that have been set here or defer to our
+ * super
  */
 MM_Heap *
-MM_ConfigurationGenerational::createHeapWithManager(MM_EnvironmentBase *env, UDATA heapBytesRequested, MM_HeapRegionManager *regionManager)
+MM_ConfigurationGenerational::createHeapWithManager(
+        MM_EnvironmentBase *env, UDATA heapBytesRequested, MM_HeapRegionManager *regionManager)
 {
 	MM_GCExtensionsBase *extensions = env->getExtensions();
 	MM_Heap *heap = NULL;
@@ -208,9 +240,9 @@ MM_ConfigurationGenerational::createHeapWithManager(MM_EnvironmentBase *env, UDA
 		UDATA highSize = extensions->newSpaceSize;
 		Assert_MM_true((lowSize + highSize) == heapBytesRequested);
 		heap = MM_HeapSplit::newInstance(env, extensions->heapAlignment, lowSize, highSize, regionManager);
-		/* FUTURE:  if this heap is NULL, we could try again with the arguments in the other order but that would require that we
-		 * set and "inverted" flag in the extensions and check that in the PSA attach code when determining attachment policy.
-		 * May allow more versatile use cases of the split heaps, though.
+		/* FUTURE:  if this heap is NULL, we could try again with the arguments in the other order but that
+		 * would require that we set and "inverted" flag in the extensions and check that in the PSA attach code
+		 * when determining attachment policy. May allow more versatile use cases of the split heaps, though.
 		 */
 	} else
 #endif /* OMR_GC_MODRON_SCAVENGER */
@@ -220,20 +252,20 @@ MM_ConfigurationGenerational::createHeapWithManager(MM_EnvironmentBase *env, UDA
 	return heap;
 }
 
-void 
-MM_ConfigurationGenerational::defaultMemorySpaceAllocated(MM_GCExtensionsBase *extensions, void* defaultMemorySpace)
-{	
+void
+MM_ConfigurationGenerational::defaultMemorySpaceAllocated(MM_GCExtensionsBase *extensions, void *defaultMemorySpace)
+{
 	MM_Configuration::defaultMemorySpaceAllocated(extensions, defaultMemorySpace);
 
-	/* 
+	/*
 	 * Assume that the nursery is always at the top of the heap.
 	 * Assume that the nursery was allocated with the expected minNewSpaceSize
 	 */
-	U_8* nurseryTop = (U_8*)extensions->getHeap()->getHeapTop();
-	U_8* nurseryStart = nurseryTop - extensions->minNewSpaceSize;
-	
+	U_8 *nurseryTop = (U_8 *)extensions->getHeap()->getHeapTop();
+	U_8 *nurseryStart = nurseryTop - extensions->minNewSpaceSize;
+
 	/* we can guarantee that the nursery is the topmost object space */
-	extensions->setGuaranteedNurseryRange(nurseryStart, (void*)UDATA_MAX);
+	extensions->setGuaranteedNurseryRange(nurseryStart, (void *)UDATA_MAX);
 }
 
 uintptr_t

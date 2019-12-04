@@ -42,7 +42,7 @@ MM_MarkingDelegate::scanRoots(MM_EnvironmentBase *env)
 	}
 	OMR_VMThread *walkThread;
 	GC_OMRVMThreadListIterator threadListIterator(env->getOmrVM());
-	while((walkThread = threadListIterator.nextOMRVMThread()) != NULL) {
+	while ((walkThread = threadListIterator.nextOMRVMThread()) != NULL) {
 		if (NULL != walkThread->_savedObject1) {
 			_markingScheme->markObject(env, (omrobjectptr_t)walkThread->_savedObject1);
 		}

@@ -32,7 +32,7 @@
 			Assert_PRT_true(FALSE && (arg)); \
 			assert(FALSE && (arg)); \
 		} \
-	} while(0)
+	} while (0)
 
 #define Assert_PRT_ShouldNeverHappen_wrapper() \
 	do { \

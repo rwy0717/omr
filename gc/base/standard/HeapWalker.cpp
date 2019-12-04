@@ -22,9 +22,6 @@
 
 #include "HeapWalker.hpp"
 
-#include "omrcfg.h"
-#include "omrgcconsts.h"
-
 #include "CollectorLanguageInterface.hpp"
 #include "Dispatcher.hpp"
 #include "GCExtensionsBase.hpp"
@@ -32,14 +29,16 @@
 #include "HeapRegionIterator.hpp"
 #include "HeapRegionManager.hpp"
 #include "MemorySubSpace.hpp"
+#include "OMRVMInterface.hpp"
 #include "ObjectHeapIteratorAddressOrderedList.hpp"
 #include "ObjectIterator.hpp"
 #include "ObjectModel.hpp"
-#include "OMRVMInterface.hpp"
 #include "SlotObject.hpp"
 #include "SublistIterator.hpp"
 #include "SublistSlotIterator.hpp"
 #include "Task.hpp"
+#include "omrcfg.h"
+#include "omrgcconsts.h"
 
 /**
  * Auxilary structure too pass both function and userData as one param to heap walker
@@ -54,7 +53,8 @@ struct SlotObjectDoUserData {
  * apply the user function to object field
  */
 static void
-heapWalkerObjectFieldSlotDo(OMR_VM *omrVM, omrobjectptr_t object, GC_SlotObject *slotObject, MM_HeapWalkerSlotFunc oSlotIterator, void *localUserData)
+heapWalkerObjectFieldSlotDo(OMR_VM *omrVM, omrobjectptr_t object, GC_SlotObject *slotObject,
+        MM_HeapWalkerSlotFunc oSlotIterator, void *localUserData)
 {
 	/* decode the field value into an object pointer */
 	omrobjectptr_t fieldValue = slotObject->readReferenceFromSlot();
@@ -64,7 +64,6 @@ heapWalkerObjectFieldSlotDo(OMR_VM *omrVM, omrobjectptr_t object, GC_SlotObject 
 	/* write the value back into the field in case the callback changed it */
 	slotObject->writeReferenceToSlot(fieldValue);
 }
-
 
 /**
  * walk through slots of mixed object and apply the user function.
@@ -84,13 +83,13 @@ heapWalkerObjectSlotDo(OMR_VM *omrVM, omrobjectptr_t object, MM_HeapWalkerSlotFu
  * walk through slots of an object and apply the user function.
  */
 static void
-heapWalkerObjectSlotDo(OMR_VMThread *omrVMThread, MM_HeapRegionDescriptor *region, omrobjectptr_t object, void *userData)
+heapWalkerObjectSlotDo(
+        OMR_VMThread *omrVMThread, MM_HeapRegionDescriptor *region, omrobjectptr_t object, void *userData)
 {
 	OMR_VM *omrVM = omrVMThread->_vm;
 	MM_GCExtensionsBase *extensions = MM_GCExtensionsBase::getExtensions(omrVM);
 	MM_HeapWalkerSlotFunc oSlotIterator = (MM_HeapWalkerSlotFunc)((SlotObjectDoUserData *)userData)->function;
 	void *localUserData = ((SlotObjectDoUserData *)userData)->userData;
-
 
 	omrobjectptr_t indirectObject = extensions->objectModel.getIndirectObject(object);
 	if (NULL != indirectObject) {
@@ -105,9 +104,10 @@ MM_HeapWalker::newInstance(MM_EnvironmentBase *env)
 {
 	MM_HeapWalker *heapWalker;
 
-	heapWalker = (MM_HeapWalker *)env->getForge()->allocate(sizeof(MM_HeapWalker), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+	heapWalker = (MM_HeapWalker *)env->getForge()->allocate(
+	        sizeof(MM_HeapWalker), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
 	if (heapWalker) {
-		new(heapWalker) MM_HeapWalker();
+		new (heapWalker) MM_HeapWalker();
 	}
 
 	return heapWalker;
@@ -133,10 +133,11 @@ MM_HeapWalker::kill(MM_EnvironmentBase *env)
  */
 #if defined(OMR_GC_MODRON_SCAVENGER)
 void
-MM_HeapWalker::rememberedObjectSlotsDo(MM_EnvironmentBase *env, MM_HeapWalkerSlotFunc function, void *userData, uintptr_t walkFlags, bool parallel)
+MM_HeapWalker::rememberedObjectSlotsDo(
+        MM_EnvironmentBase *env, MM_HeapWalkerSlotFunc function, void *userData, uintptr_t walkFlags, bool parallel)
 {
-	SlotObjectDoUserData slotObjectDoUserData = { function, userData, walkFlags };
-	omrobjectptr_t* slotPtr = NULL;
+	SlotObjectDoUserData slotObjectDoUserData = {function, userData, walkFlags};
+	omrobjectptr_t *slotPtr = NULL;
 	MM_SublistPuddle *puddle = NULL;
 	OMR_VMThread *omrVMThread = env->getOmrVMThread();
 
@@ -144,7 +145,7 @@ MM_HeapWalker::rememberedObjectSlotsDo(MM_EnvironmentBase *env, MM_HeapWalkerSlo
 	while ((puddle = remSetIterator.nextList()) != NULL) {
 		if (!parallel || J9MODRON_HANDLE_NEXT_WORK_UNIT(env)) {
 			GC_SublistSlotIterator remSetSlotIterator(puddle);
-			while ((slotPtr = (omrobjectptr_t*)remSetSlotIterator.nextSlot()) != NULL) {
+			while ((slotPtr = (omrobjectptr_t *)remSetSlotIterator.nextSlot()) != NULL) {
 				if (*slotPtr != NULL) {
 					heapWalkerObjectSlotDo(omrVMThread, NULL, *slotPtr, &slotObjectDoUserData);
 				}
@@ -159,9 +160,10 @@ MM_HeapWalker::rememberedObjectSlotsDo(MM_EnvironmentBase *env, MM_HeapWalkerSlo
  * Object walker is virtual and specific to the Global Collector
  */
 void
-MM_HeapWalker::allObjectSlotsDo(MM_EnvironmentBase *env, MM_HeapWalkerSlotFunc function, void *userData, uintptr_t walkFlags, bool parallel, bool prepareHeapForWalk)
+MM_HeapWalker::allObjectSlotsDo(MM_EnvironmentBase *env, MM_HeapWalkerSlotFunc function, void *userData,
+        uintptr_t walkFlags, bool parallel, bool prepareHeapForWalk)
 {
-	SlotObjectDoUserData slotObjectDoUserData = { function, userData, walkFlags };
+	SlotObjectDoUserData slotObjectDoUserData = {function, userData, walkFlags};
 	uintptr_t modifiedWalkFlags = walkFlags;
 
 #if defined(OMR_GC_MODRON_SCAVENGER)
@@ -173,7 +175,8 @@ MM_HeapWalker::allObjectSlotsDo(MM_EnvironmentBase *env, MM_HeapWalkerSlotFunc f
 	}
 #endif /* OMR_GC_MODRON_SCAVENGER */
 
-	allObjectsDo(env, heapWalkerObjectSlotDo, (void *)&slotObjectDoUserData, modifiedWalkFlags, parallel, prepareHeapForWalk);
+	allObjectsDo(env, heapWalkerObjectSlotDo, (void *)&slotObjectDoUserData, modifiedWalkFlags, parallel,
+	        prepareHeapForWalk);
 
 #if defined(OMR_GC_MODRON_SCAVENGER)
 	/* If J9_MU_WALK_NEW_AND_REMEMBERED_ONLY is specified, allObjectsDo will only walk
@@ -189,7 +192,8 @@ MM_HeapWalker::allObjectSlotsDo(MM_EnvironmentBase *env, MM_HeapWalkerSlotFunc f
  * Walk all objects in the heap in a single threaded linear fashion.
  */
 void
-MM_HeapWalker::allObjectsDo(MM_EnvironmentBase *env, MM_HeapWalkerObjectFunc function, void *userData, uintptr_t walkFlags, bool parallel, bool prepareHeapForWalk)
+MM_HeapWalker::allObjectsDo(MM_EnvironmentBase *env, MM_HeapWalkerObjectFunc function, void *userData,
+        uintptr_t walkFlags, bool parallel, bool prepareHeapForWalk)
 {
 	uintptr_t typeFlags = 0;
 
@@ -204,7 +208,7 @@ MM_HeapWalker::allObjectsDo(MM_EnvironmentBase *env, MM_HeapWalkerObjectFunc fun
 	GC_HeapRegionIterator regionIterator(regionManager);
 	MM_HeapRegionDescriptor *region = NULL;
 	OMR_VMThread *omrVMThread = env->getOmrVMThread();
-	
+
 	while (NULL != (region = regionIterator.nextRegion())) {
 		if (typeFlags == (region->getTypeFlags() & typeFlags)) {
 			/* Optimization to avoid virtual dispatch for every slot in the system */

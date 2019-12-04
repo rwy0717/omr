@@ -107,7 +107,6 @@ SimpleSanity(void)
 	looper2.ResetLoopCount();
 	mon6.Exit();
 	unsigned long countAfter = looper1.LoopCount() + looper2.LoopCount();
-	
 
 	if (countAfter >= countBefore) {
 		omrTestEnv->log(LEVEL_ERROR, "Something's wrong!\n");
@@ -122,8 +121,7 @@ SimpleSanity(void)
 }
 
 bool
-TestNThreadsLooping(unsigned int numThreads, unsigned int sleepInterval,
-					unsigned int runTime, bool keepCount)
+TestNThreadsLooping(unsigned int numThreads, unsigned int sleepInterval, unsigned int runTime, bool keepCount)
 {
 	CMonitor mon(0, "monitor");
 	unsigned int i;
@@ -142,7 +140,7 @@ TestNThreadsLooping(unsigned int numThreads, unsigned int sleepInterval,
 	for (i = 0; i < numThreads; i++) {
 		threads[i]->Start();
 	}
-	
+
 	omrTestEnv->log("");
 	for (i = runTime; i > 0; i--) {
 		omrTestEnv->logRaw("{");
@@ -220,7 +218,7 @@ QuickNDirtyPerformanceTest(unsigned int runTime)
  * Tests queuing and dequeuing from blocking queue
  */
 bool
-TestBlockingQueue(CThread& self, const unsigned int numThreads)
+TestBlockingQueue(CThread &self, const unsigned int numThreads)
 {
 #if !defined(OMR_THR_THREE_TIER_LOCKING)
 	return true;
@@ -230,7 +228,7 @@ TestBlockingQueue(CThread& self, const unsigned int numThreads)
 	CMonitor mon(0, "TestBlockingQueue");
 	mon.Enter();
 
-	CEnterExit **pThreads = new CEnterExit*[numThreads];
+	CEnterExit **pThreads = new CEnterExit *[numThreads];
 	for (i = 0; i < numThreads; i++) {
 		pThreads[i] = new CEnterExit(mon, i * 1000);
 		pThreads[i]->Start();
@@ -316,10 +314,8 @@ TestLoopingWaitNotify(int runTime)
 
 	volatile unsigned int doneRunningCount = 0;
 	volatile unsigned int notifyCount = 0;
-	CWaitNotifyLooper thread1(mon, (unsigned int *)&notifyCount,
-							  (unsigned int *)&doneRunningCount);
-	CWaitNotifyLooper thread2(mon, (unsigned int *)&notifyCount,
-							  (unsigned int *)&doneRunningCount);
+	CWaitNotifyLooper thread1(mon, (unsigned int *)&notifyCount, (unsigned int *)&doneRunningCount);
+	CWaitNotifyLooper thread2(mon, (unsigned int *)&notifyCount, (unsigned int *)&doneRunningCount);
 
 	thread1.Start();
 	thread2.Start();
@@ -356,7 +352,7 @@ TestLoopingWaitNotify(int runTime)
 	}
 	assert(doneRunningCount == 2);
 	omrTestEnv->log("ok\n");
-	
+
 	return true;
 }
 
@@ -371,6 +367,6 @@ TestWaitNotify(unsigned int runTime)
 	TestLoopingWaitNotify(runTime);
 
 	omrTestEnv->changeIndent(-1);
-	
+
 	return true;
 }

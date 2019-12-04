@@ -39,8 +39,7 @@ typedef enum RCType {
 
 RCType startHookGen(int argc, char *argv[]);
 
-class HookGen
-{
+class HookGen {
 	/*
 	 * Data members
 	 */
@@ -54,10 +53,8 @@ private:
 	bool _verbose; /**< If we want to print verbose information to stderr */
 protected:
 public:
-
 private:
-	static char
-	convertChar(char value)
+	static char convertChar(char value)
 	{
 		if (('a' <= value) && (value <= 'z')) {
 			return 'A' + value - 'a';
@@ -73,8 +70,10 @@ private:
 	RCType completePublicHeader();
 	RCType startPrivateHeader();
 	RCType completePrivateHeader(const char *structName);
-	void writeEventToPublicHeader(const char *name, const char *description, const char *condition, const char *structName, const char *reverse, pugi::xml_node event);
-	void writeEventToPrivateHeader(const char *name, const char *condition, const char *once, int sampling, const char *structName, pugi::xml_node event);
+	void writeEventToPublicHeader(const char *name, const char *description, const char *condition,
+	        const char *structName, const char *reverse, pugi::xml_node event);
+	void writeEventToPrivateHeader(const char *name, const char *condition, const char *once, int sampling,
+	        const char *structName, pugi::xml_node event);
 	void writeEvent(pugi::xml_node event);
 
 	static void displayUsage();
@@ -87,28 +86,25 @@ private:
 protected:
 public:
 	HookGen()
-		: _eventNum(1)
-		, _fileName(NULL)
-		, _publicFileName(NULL)
-		, _publicFile(NULL)
-		, _privateFileName(NULL)
-		, _privateFile(NULL)
-		, _verbose(false)
-	{
-	}
+	        : _eventNum(1)
+	        , _fileName(NULL)
+	        , _publicFileName(NULL)
+	        , _publicFile(NULL)
+	        , _privateFileName(NULL)
+	        , _privateFile(NULL)
+	        , _verbose(false)
+	{}
 
-	~HookGen()
-	{
-	}
+	~HookGen() {}
 
 	RCType parseOptions(int argc, char *argv[]);
 	RCType processFile();
 	void tearDown();
 
-	const char *getFileName() const {return _fileName;}
-	const char *getPublicFileName() const {return _publicFileName;}
-	const char *getPrivateFileName() const {return _privateFileName;}
-	bool isVerbose() const {return _verbose;}
+	const char *getFileName() const { return _fileName; }
+	const char *getPublicFileName() const { return _publicFileName; }
+	const char *getPrivateFileName() const { return _privateFileName; }
+	bool isVerbose() const { return _verbose; }
 };
 
 #endif /* HOOKGEN_HPP_ */

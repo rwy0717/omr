@@ -27,8 +27,7 @@
 
 class EnumMember;
 
-class EnumUDT : public UDT
-{
+class EnumUDT : public UDT {
 public:
 	std::vector<EnumMember *> _enumMembers;
 
@@ -39,7 +38,7 @@ public:
 
 	virtual DDR_RC acceptVisitor(const TypeVisitor &visitor);
 
-	bool operator==(const Type & rhs) const;
+	bool operator==(const Type &rhs) const;
 	virtual bool compareToEnum(const EnumUDT &) const;
 };
 

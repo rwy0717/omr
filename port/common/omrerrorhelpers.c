@@ -53,7 +53,7 @@
  * @note Buffer is managed by the port library, do not free
  */
 const char *
-errorMessage(struct OMRPortLibrary *portLibrary,  int32_t errorCode)
+errorMessage(struct OMRPortLibrary *portLibrary, int32_t errorCode)
 {
 	PortlibPTBuffers_t ptBuffers;
 	uint32_t requiredSize;
@@ -63,15 +63,14 @@ errorMessage(struct OMRPortLibrary *portLibrary,  int32_t errorCode)
 	ptBuffers = omrport_tls_peek(portLibrary);
 
 	/* Get the message from NLS */
-	format = portLibrary->nls_lookup_message(portLibrary,
-			 J9NLS_ERROR | J9NLS_DO_NOT_APPEND_NEWLINE,
-			 J9NLS_PORT_ERROR_OPERATION_FAILED,
-			 "Operation Failed: %d");
+	format = portLibrary->nls_lookup_message(portLibrary, J9NLS_ERROR | J9NLS_DO_NOT_APPEND_NEWLINE,
+	        J9NLS_PORT_ERROR_OPERATION_FAILED, "Operation Failed: %d");
 
 	requiredSize = strlen(format) + 20; /* Giving 20 digits for a number, seems sufficient */
 	requiredSize < J9ERROR_DEFAULT_BUFFER_SIZE ? J9ERROR_DEFAULT_BUFFER_SIZE : requiredSize;
 	if (requiredSize > ptBuffers->errorMessageBufferSize) {
-		char *newBuffer = portLibrary->mem_allocate_memory(portLibrary, requiredSize, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
+		char *newBuffer = portLibrary->mem_allocate_memory(
+		        portLibrary, requiredSize, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 		if (NULL != newBuffer) {
 			portLibrary->mem_free_memory(portLibrary, ptBuffers->errorMessageBuffer);
 			ptBuffers->errorMessageBuffer = newBuffer;
@@ -81,11 +80,11 @@ errorMessage(struct OMRPortLibrary *portLibrary,  int32_t errorCode)
 
 	/* Save the message */
 	if (ptBuffers->errorMessageBufferSize > 0) {
-		portLibrary->str_printf(portLibrary, ptBuffers->errorMessageBuffer, ptBuffers->errorMessageBufferSize, format, errorCode);
+		portLibrary->str_printf(portLibrary, ptBuffers->errorMessageBuffer, ptBuffers->errorMessageBufferSize,
+		        format, errorCode);
 		ptBuffers->errorMessageBuffer[ptBuffers->errorMessageBufferSize - 1] = '\0';
 		return ptBuffers->errorMessageBuffer;
 	}
 
 	return "";
 }
-

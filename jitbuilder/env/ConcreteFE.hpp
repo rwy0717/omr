@@ -24,8 +24,6 @@
 
 // translate JitBuilder::FrontEnd into the OMR namespace as the frontend so that everyone
 // can use that
-namespace OMR
-{
+namespace OMR {
 typedef JitBuilder::FrontEnd FrontEnd;
 }
-

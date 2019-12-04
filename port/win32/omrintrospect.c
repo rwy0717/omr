@@ -31,7 +31,7 @@
 #include <tlhelp32.h>
 #include <Psapi.h>
 #include <DbgHelp.h>
-#undef UDATA	/* this is safe because our UDATA is a typedef, not a macro */
+#undef UDATA /* this is safe because our UDATA is a typedef, not a macro */
 #include <stdio.h>
 #include "omrport.h"
 #include "omrportpriv.h"
@@ -40,17 +40,16 @@
 #include "omrintrospect.h"
 #include "omrintrospect_common.h"
 
-
 struct PlatformWalkData {
 	/* system iterator */
 	THREADENTRY32 thread32;
 	HANDLE snapshot;
-	/* if set this will filter the specified thread out of the system iterator, for use when signal context is specified */
+	/* if set this will filter the specified thread out of the system iterator, for use when signal context is
+	 * specified */
 	DWORD filterThread;
 	/* records whether the system iterator has been invoked yet */
 	BOOL walkStarted;
 };
-
 
 /*
  * Conceptually this function resumes all the threads we suspend with suspend_all_preemtive.
@@ -93,7 +92,8 @@ resume_all_preempted(struct PlatformWalkData *data)
 			continue;
 		}
 
-		while ((result = ResumeThread(thread_handle)) > 1);
+		while ((result = ResumeThread(thread_handle)) > 1)
+			;
 		if (result == -1) {
 			result = GetLastError();
 		} else {
@@ -122,7 +122,6 @@ suspend_all_preemptive(struct PlatformWalkData *data)
 	DWORD result;
 	DWORD current_thread_id = GetCurrentThreadId();
 	DWORD current_pid = GetCurrentProcessId();
-
 
 	/* required or the thread iterator functions fail */
 	data->thread32.dwSize = sizeof(THREADENTRY32);
@@ -220,7 +219,6 @@ freeThread(J9ThreadWalkState *state, J9PlatformThread *thread)
 	}
 }
 
-
 /*
  * Cleans up all state that we've created as part of the walk, including freeing up
  * the last returned thread, the debug library symbols, etc.
@@ -262,10 +260,9 @@ cleanup(J9ThreadWalkState *state)
 	return;
 }
 
-
 /*
- * Sets up the native thread structures including the backtrace. If a context is specified it is used instead of grabbing
- * the context for the thread pointed to by state->current_thread.
+ * Sets up the native thread structures including the backtrace. If a context is specified it is used instead of
+ * grabbing the context for the thread pointed to by state->current_thread.
  *
  * @param state - state variable for controlling the thread walk
  * @param sigContext - context to use in place of live thread context
@@ -279,20 +276,23 @@ setup_native_thread(J9ThreadWalkState *state, CONTEXT *sigContext)
 	int result = 0;
 
 	/* allocate our various data structures */
-	state->current_thread = (J9PlatformThread *)state->portLibrary->heap_allocate(state->portLibrary, state->heap, sizeof(J9PlatformThread));
+	state->current_thread = (J9PlatformThread *)state->portLibrary->heap_allocate(
+	        state->portLibrary, state->heap, sizeof(J9PlatformThread));
 	if (state->current_thread == NULL) {
 		return -1;
 	}
 	memset(state->current_thread, 0, sizeof(J9PlatformThread));
 
-	state->current_thread->context = (PCONTEXT)state->portLibrary->heap_allocate(state->portLibrary, state->heap, sizeof(CONTEXT));
+	state->current_thread->context =
+	        (PCONTEXT)state->portLibrary->heap_allocate(state->portLibrary, state->heap, sizeof(CONTEXT));
 	if (state->current_thread->context == NULL) {
 		return -2;
 	}
 	memset(state->current_thread->context, 0, sizeof(CONTEXT));
 
 	state->current_thread->thread_id = ((struct PlatformWalkData *)state->platform_data)->thread32.th32ThreadID;
-	state->current_thread->process_id = ((struct PlatformWalkData *)state->platform_data)->thread32.th32OwnerProcessID;
+	state->current_thread->process_id =
+	        ((struct PlatformWalkData *)state->platform_data)->thread32.th32OwnerProcessID;
 
 	tmpContext.ContextFlags = CONTEXT_FULL;
 
@@ -304,7 +304,8 @@ setup_native_thread(J9ThreadWalkState *state, CONTEXT *sigContext)
 		RtlCaptureContext(&tmpContext);
 	} else {
 		/* generate context for target thread */
-		HANDLE thread_handle = OpenThread(THREAD_GET_CONTEXT|THREAD_QUERY_INFORMATION, FALSE, (DWORD)state->current_thread->thread_id);
+		HANDLE thread_handle = OpenThread(
+		        THREAD_GET_CONTEXT | THREAD_QUERY_INFORMATION, FALSE, (DWORD)state->current_thread->thread_id);
 		if (thread_handle == NULL) {
 			return -4;
 		}
@@ -331,7 +332,6 @@ setup_native_thread(J9ThreadWalkState *state, CONTEXT *sigContext)
 	return 0;
 }
 
-
 /*
  * Creates an iterator for the native threads present within the process, either all native threads
  * or a subset depending on platform (see platform specific documentation for detail).
@@ -355,7 +355,8 @@ setup_native_thread(J9ThreadWalkState *state, CONTEXT *sigContext)
  * and error_detail fields of the state structure. A brief textual description is in error_string.
  */
 J9PlatformThread *
-omrintrospect_threads_startDo_with_signal(struct OMRPortLibrary *portLibrary, J9Heap *heap, J9ThreadWalkState *state, void *signal_info)
+omrintrospect_threads_startDo_with_signal(
+        struct OMRPortLibrary *portLibrary, J9Heap *heap, J9ThreadWalkState *state, void *signal_info)
 {
 	struct OMRWin32SignalInfo *sigFaultInfo = signal_info;
 	DWORD processId = GetCurrentProcessId();
@@ -368,14 +369,16 @@ omrintrospect_threads_startDo_with_signal(struct OMRPortLibrary *portLibrary, J9
 
 	/* likely can't operate in stack overflow conditions so inhibit construction of the backtrace */
 	if (sigFaultInfo != NULL) {
-		if (sigFaultInfo->ExceptionRecord != NULL && sigFaultInfo->ExceptionRecord->ExceptionCode == EXCEPTION_STACK_OVERFLOW) {
+		if (sigFaultInfo->ExceptionRecord != NULL
+		        && sigFaultInfo->ExceptionRecord->ExceptionCode == EXCEPTION_STACK_OVERFLOW) {
 			RECORD_ERROR(state, INVALID_STATE, -1);
 			return NULL;
 		}
 		signalContext = sigFaultInfo->ContextRecord;
 	}
 
-	data = (struct PlatformWalkData *)portLibrary->heap_allocate(portLibrary, heap, sizeof(struct PlatformWalkData));
+	data = (struct PlatformWalkData *)portLibrary->heap_allocate(
+	        portLibrary, heap, sizeof(struct PlatformWalkData));
 	state->platform_data = data;
 
 	if (!data) {

@@ -35,7 +35,6 @@ extern void omrsig_chain_at_shutdown_and_exit(struct OMRPortLibrary *portLibrary
 #endif /* defined(OMRPORT_OMRSIG_SUPPORT) */
 #endif /* !defined(OMR_OS_WINDOWS) */
 
-
 /**
  * Block until the portlibary has been exited and return the error code.
  *
@@ -93,8 +92,7 @@ omrexit_shutdown_and_exit(struct OMRPortLibrary *portLibrary, int32_t exitCode)
  */
 void
 omrexit_shutdown(struct OMRPortLibrary *portLibrary)
-{
-}
+{}
 
 /**
  * PortLibrary startup.
@@ -115,5 +113,3 @@ omrexit_startup(struct OMRPortLibrary *portLibrary)
 {
 	return 0;
 }
-
-

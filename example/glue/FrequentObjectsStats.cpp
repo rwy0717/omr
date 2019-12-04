@@ -36,7 +36,6 @@ MM_FrequentObjectsStats::newInstance(MM_EnvironmentBase *env)
 	return NULL;
 }
 
-
 bool
 MM_FrequentObjectsStats::initialize(MM_EnvironmentBase *env)
 {
@@ -50,7 +49,6 @@ MM_FrequentObjectsStats::tearDown(MM_EnvironmentBase *env)
 	/* DO NOTHING */
 	return;
 }
-
 
 void
 MM_FrequentObjectsStats::kill(MM_EnvironmentBase *env)
@@ -67,7 +65,7 @@ MM_FrequentObjectsStats::traceStats(MM_EnvironmentBase *env)
 }
 
 void
-MM_FrequentObjectsStats::merge(MM_FrequentObjectsStats* frequentObjectsStats)
+MM_FrequentObjectsStats::merge(MM_FrequentObjectsStats *frequentObjectsStats)
 {
 	/* DO NOTHING */
 	return;

@@ -27,7 +27,6 @@
 #if defined(OMR_GC_MODRON_SCAVENGER)
 
 #include "ConcurrentGC.hpp"
-
 #include "ConcurrentScanRememberedSetTask.hpp"
 
 void
@@ -57,9 +56,9 @@ MM_ConcurrentScanRememberedSetTask::cleanup(MM_EnvironmentBase *env)
 	} else {
 		env->_cycleState = NULL;
 	}
-	/* take a snapshot of WorkPacket stats, since it will be overwritten with subsequent phases. The stats will be needed later (TGC parallel for example) */
+	/* take a snapshot of WorkPacket stats, since it will be overwritten with subsequent phases. The stats will be
+	 * needed later (TGC parallel for example) */
 	env->_workPacketStatsRSScan = env->_workPacketStats;
 }
 #endif /* OMR_GC_MODRON_SCAVENGER */
 #endif /* OMR_GC_MODRON_CONCURRENT_MARK */
- 

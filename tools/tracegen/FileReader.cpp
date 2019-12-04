@@ -97,7 +97,6 @@ failed:
 	return NULL;
 }
 
-
 /*
  * Simple function to read the next line of a file into a
  * _buffer, if there's no data or the line doesn't fit it returns
@@ -144,4 +143,3 @@ FileReader::readline(FILE *_fd, char *buf, unsigned int buffSize, int *byteRead)
 failed:
 	return RC_FAILED;
 }
-

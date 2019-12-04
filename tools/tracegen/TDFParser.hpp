@@ -27,8 +27,7 @@
 #include "Port.hpp"
 #include "TDFTypes.hpp"
 
-class TDFParser
-{
+class TDFParser {
 private:
 	/*
 	 * Data members
@@ -36,9 +35,9 @@ private:
 private:
 	FileReader *_fileReader;
 	bool _treatWarningAsError;
+
 protected:
 public:
-
 	/*
 	 * Function members
 	 */
@@ -57,7 +56,8 @@ private:
 	 * @param id
 	 * @return RC_OK on success, RC_FAILED on failure
 	 */
-	RCType processTracePointDetail(const char *line, J9TDFTracepoint *tp, const char *module, unsigned int id, const char *fileName, unsigned int lineNumber);
+	RCType processTracePointDetail(const char *line, J9TDFTracepoint *tp, const char *module, unsigned int id,
+	        const char *fileName, unsigned int lineNumber);
 
 	/**
 	 * @param line
@@ -98,15 +98,17 @@ private:
 	 * @param count
 	 * @return RC_OK on success, RC_FAILED on failure
 	 */
-	RCType processTemplate(const char *formatTemplate, char *str, unsigned int *count, const char *fileName, unsigned int lineNumber);
-
+	RCType processTemplate(const char *formatTemplate, char *str, unsigned int *count, const char *fileName,
+	        unsigned int lineNumber);
 
 	/**
 	 * @param message
 	 * @param parmCount
 	 * @param formatTemplate
 	 */
-	void flagTdfSyntaxError(const char *message, unsigned int parmCount, const char *formatTemplate, const char *fileName, unsigned int lineNumber);
+	void flagTdfSyntaxError(const char *message, unsigned int parmCount, const char *formatTemplate,
+	        const char *fileName, unsigned int lineNumber);
+
 protected:
 public:
 	/*

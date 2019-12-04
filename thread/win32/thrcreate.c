@@ -25,8 +25,8 @@
 #include "omrthreadattr.h"
 
 intptr_t
-osthread_create(struct J9Thread *self, OSTHREAD *handle, const omrthread_attr_t attr,
-				WRAPPER_FUNC entrypoint, WRAPPER_ARG entryarg)
+osthread_create(struct J9Thread *self, OSTHREAD *handle, const omrthread_attr_t attr, WRAPPER_FUNC entrypoint,
+        WRAPPER_ARG entryarg)
 {
 	omrthread_prio_t priority;
 	OSTHREAD osHandle;

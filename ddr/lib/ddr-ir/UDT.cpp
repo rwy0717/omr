@@ -24,23 +24,14 @@
 #include "ddr/ir/NamespaceUDT.hpp"
 #include "ddr/ir/Symbol_IR.hpp"
 
-UDT::UDT(size_t size, unsigned int lineNumber)
-	: Type(size)
-	, _outerNamespace(NULL)
-	, _lineNumber(lineNumber)
-{
-}
+UDT::UDT(size_t size, unsigned int lineNumber) : Type(size), _outerNamespace(NULL), _lineNumber(lineNumber) {}
 
-UDT::~UDT()
-{
-}
+UDT::~UDT() {}
 
 string
 UDT::getFullName() const
 {
-	return (NULL == _outerNamespace)
-			? _name
-			: (_outerNamespace->getFullName() + "::" + _name);
+	return (NULL == _outerNamespace) ? _name : (_outerNamespace->getFullName() + "::" + _name);
 }
 
 bool
@@ -64,7 +55,7 @@ UDT::getNamespace()
 }
 
 bool
-UDT::operator==(const Type & rhs) const
+UDT::operator==(const Type &rhs) const
 {
 	return rhs.compareToUDT(*this);
 }

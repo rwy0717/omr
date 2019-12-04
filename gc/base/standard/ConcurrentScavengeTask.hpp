@@ -27,24 +27,16 @@
 
 #if defined(OMR_GC_CONCURRENT_SCAVENGER)
 
+#include "ParallelScavengeTask.hpp"
 #include "modronopt.h"
 
-#include "ParallelScavengeTask.hpp"
-
-class MM_ConcurrentScavengeTask : public MM_ParallelScavengeTask
-{
+class MM_ConcurrentScavengeTask : public MM_ParallelScavengeTask {
 	/* Data Members */
 private:
-	volatile uintptr_t _bytesScanned;	/**< The number of bytes scanned by this */
+	volatile uintptr_t _bytesScanned; /**< The number of bytes scanned by this */
 protected:
 public:
-
-	enum ConcurrentAction {
-		SCAVENGE_ALL = 1,
-		SCAVENGE_ROOTS,
-		SCAVENGE_SCAN,
-		SCAVENGE_COMPLETE
-	};
+	enum ConcurrentAction { SCAVENGE_ALL = 1, SCAVENGE_ROOTS, SCAVENGE_SCAN, SCAVENGE_COMPLETE };
 
 	/* _action should be private */
 	ConcurrentAction _action;
@@ -53,25 +45,14 @@ public:
 private:
 protected:
 public:
-	virtual uintptr_t getVMStateID()
-	{
-		return OMRVMSTATE_GC_CONCURRENT_SCAVENGER;
-	}
+	virtual uintptr_t getVMStateID() { return OMRVMSTATE_GC_CONCURRENT_SCAVENGER; }
 
-	uintptr_t getBytesScanned()
-	{
-		return _bytesScanned;
-	}
+	uintptr_t getBytesScanned() { return _bytesScanned; }
 	virtual void run(MM_EnvironmentBase *env);
 
-	MM_ConcurrentScavengeTask(MM_EnvironmentBase *env,
-			MM_Dispatcher *dispatcher,
-			MM_Scavenger *scavenger,
-			ConcurrentAction action,
-			MM_CycleState *cycleState) :
-		MM_ParallelScavengeTask(env, dispatcher, scavenger, cycleState)
-		, _bytesScanned(0)
-		, _action(action)
+	MM_ConcurrentScavengeTask(MM_EnvironmentBase *env, MM_Dispatcher *dispatcher, MM_Scavenger *scavenger,
+	        ConcurrentAction action, MM_CycleState *cycleState)
+	        : MM_ParallelScavengeTask(env, dispatcher, scavenger, cycleState), _bytesScanned(0), _action(action)
 	{
 		_typeId = __FUNCTION__;
 	};

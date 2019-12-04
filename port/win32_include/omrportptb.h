@@ -73,9 +73,9 @@ typedef struct PortlibPTBuffers_struct *PortlibPTBuffers_t;
 
 void omrport_free_ptBuffer(struct OMRPortLibrary *portLibrary, PortlibPTBuffers_t ptBuffer);
 int32_t port_convertToUTF8(OMRPortLibrary *portLibrary, const wchar_t *unicodeString, char *utf8Buffer, uintptr_t size);
-wchar_t *port_convertFromUTF8(OMRPortLibrary *portLibrary, const char *string, wchar_t *unicodeBuffer, uintptr_t unicodeBufferSize);
-wchar_t *port_file_get_unicode_path(OMRPortLibrary *portLibrary, const char *utf8Path, wchar_t *unicodeBuffer, uintptr_t unicodeBufferSize);
+wchar_t *port_convertFromUTF8(
+        OMRPortLibrary *portLibrary, const char *string, wchar_t *unicodeBuffer, uintptr_t unicodeBufferSize);
+wchar_t *port_file_get_unicode_path(
+        OMRPortLibrary *portLibrary, const char *utf8Path, wchar_t *unicodeBuffer, uintptr_t unicodeBufferSize);
 
-#endif     /* omrportptb_h */
-
-
+#endif /* omrportptb_h */

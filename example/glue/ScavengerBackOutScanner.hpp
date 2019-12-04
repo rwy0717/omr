@@ -33,8 +33,7 @@
 
 #if defined(OMR_GC_MODRON_SCAVENGER)
 
-class MM_ScavengerBackOutScanner : public MM_Base
-{
+class MM_ScavengerBackOutScanner : public MM_Base {
 	/*
 	 * Member data and types
 	 */
@@ -43,7 +42,6 @@ private:
 
 protected:
 public:
-
 	/*
 	 * Member functions
 	 */
@@ -51,36 +49,35 @@ private:
 protected:
 public:
 	MM_ScavengerBackOutScanner(MM_EnvironmentBase *env, bool singleThread, MM_Scavenger *scavenger)
-		: MM_Base()
-		, _scavenger(scavenger)
-	{
-	};
+	        : MM_Base(), _scavenger(scavenger){};
 
-	void
-	scanAllSlots(MM_EnvironmentBase *env)
+	void scanAllSlots(MM_EnvironmentBase *env)
 	{
 		J9HashTableState state;
 		OMR_VM_Example *omrVM = (OMR_VM_Example *)env->getOmrVM()->_language_vm;
 		RootEntry *rootEntry = (RootEntry *)hashTableStartDo(omrVM->rootTable, &state);
 		while (rootEntry != NULL) {
-			_scavenger->backOutFixSlotWithoutCompression((volatile omrobjectptr_t *) &rootEntry->rootPtr);
+			_scavenger->backOutFixSlotWithoutCompression((volatile omrobjectptr_t *)&rootEntry->rootPtr);
 			rootEntry = (RootEntry *)hashTableNextDo(&state);
 		}
 		ObjectEntry *objectEntry = (ObjectEntry *)hashTableStartDo(omrVM->objectTable, &state);
 		while (NULL != objectEntry) {
 			if (NULL != objectEntry->objPtr) {
-				_scavenger->backOutFixSlotWithoutCompression((volatile omrobjectptr_t *) &objectEntry->objPtr);
+				_scavenger->backOutFixSlotWithoutCompression(
+				        (volatile omrobjectptr_t *)&objectEntry->objPtr);
 			}
 			objectEntry = (ObjectEntry *)hashTableNextDo(&state);
 		}
 		OMR_VMThread *walkThread;
 		GC_OMRVMThreadListIterator threadListIterator(env->getOmrVM());
-		while((walkThread = threadListIterator.nextOMRVMThread()) != NULL) {
+		while ((walkThread = threadListIterator.nextOMRVMThread()) != NULL) {
 			if (NULL != walkThread->_savedObject1) {
-				_scavenger->backOutFixSlotWithoutCompression((volatile omrobjectptr_t *) &walkThread->_savedObject1);
+				_scavenger->backOutFixSlotWithoutCompression(
+				        (volatile omrobjectptr_t *)&walkThread->_savedObject1);
 			}
 			if (NULL != walkThread->_savedObject2) {
-				_scavenger->backOutFixSlotWithoutCompression((volatile omrobjectptr_t *) &walkThread->_savedObject2);
+				_scavenger->backOutFixSlotWithoutCompression(
+				        (volatile omrobjectptr_t *)&walkThread->_savedObject2);
 			}
 		}
 	}

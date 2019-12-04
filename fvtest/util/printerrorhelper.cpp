@@ -23,7 +23,8 @@
 #include "omrTestHelpers.h"
 
 omr_error_t
-omrTestPrintError(const char *funcCall, const omr_error_t rc, OMRPortLibrary *portLibrary, const char *callFile, intptr_t callLine)
+omrTestPrintError(const char *funcCall, const omr_error_t rc, OMRPortLibrary *portLibrary, const char *callFile,
+        intptr_t callLine)
 {
 	if (OMR_ERROR_NONE != rc) {
 		OMRPORT_ACCESS_FROM_OMRPORT(portLibrary);
@@ -34,13 +35,13 @@ omrTestPrintError(const char *funcCall, const omr_error_t rc, OMRPortLibrary *po
 
 omr_error_t
 omrTestPrintUnexpectedIntRC(const char *funcCall, const intptr_t rc, const intptr_t expectedRC,
-							OMRPortLibrary *portLibrary, const char *callFile, intptr_t callLine)
+        OMRPortLibrary *portLibrary, const char *callFile, intptr_t callLine)
 {
 	omr_error_t omrRC = OMR_ERROR_NONE;
 	if (expectedRC != rc) {
 		OMRPORT_ACCESS_FROM_OMRPORT(portLibrary);
-		omrtty_printf("%s:%d %s failed, got rc=%d, expected rc=%d\n",
-					  callFile, callLine, funcCall, rc, expectedRC);
+		omrtty_printf(
+		        "%s:%d %s failed, got rc=%d, expected rc=%d\n", callFile, callLine, funcCall, rc, expectedRC);
 		omrRC = OMR_ERROR_INTERNAL;
 	}
 	return omrRC;
@@ -48,16 +49,15 @@ omrTestPrintUnexpectedIntRC(const char *funcCall, const intptr_t rc, const intpt
 
 omr_error_t
 omrTestPrintUnexpectedRC(const char *funcCall, const omr_error_t rc, const omr_error_t expectedRC,
-						 OMRPortLibrary *portLibrary, const char *callFile, intptr_t callLine)
+        OMRPortLibrary *portLibrary, const char *callFile, intptr_t callLine)
 {
 	if (expectedRC != rc) {
 		OMRPORT_ACCESS_FROM_OMRPORT(portLibrary);
-		omrtty_printf("%s:%d %s failed, got rc=%d (%s), expected rc=%d (%s)\n",
-					  callFile, callLine, funcCall, rc, omrErrorToString(rc), expectedRC, omrErrorToString(expectedRC));
+		omrtty_printf("%s:%d %s failed, got rc=%d (%s), expected rc=%d (%s)\n", callFile, callLine, funcCall,
+		        rc, omrErrorToString(rc), expectedRC, omrErrorToString(expectedRC));
 	}
 	return rc;
 }
-
 
 #define RCSTRING(err) \
 	case (err): rcstring = #err; break
@@ -67,22 +67,21 @@ omrErrorToString(omr_error_t rc)
 {
 	const char *rcstring = "";
 	switch (rc) {
-	RCSTRING(OMR_ERROR_NONE);
-	RCSTRING(OMR_ERROR_OUT_OF_NATIVE_MEMORY);
-	RCSTRING(OMR_ERROR_FAILED_TO_ATTACH_NATIVE_THREAD);
-	RCSTRING(OMR_ERROR_MAXIMUM_VM_COUNT_EXCEEDED);
-	RCSTRING(OMR_ERROR_MAXIMUM_THREAD_COUNT_EXCEEDED);
-	RCSTRING(OMR_THREAD_STILL_ATTACHED);
-	RCSTRING(OMR_VM_STILL_ATTACHED);
-	RCSTRING(OMR_ERROR_FAILED_TO_ALLOCATE_MONITOR);
-	RCSTRING(OMR_ERROR_INTERNAL);
-	RCSTRING(OMR_ERROR_ILLEGAL_ARGUMENT);
-	RCSTRING(OMR_ERROR_NOT_AVAILABLE);
-	RCSTRING(OMR_THREAD_NOT_ATTACHED);
-	RCSTRING(OMR_ERROR_FILE_UNAVAILABLE);
-	RCSTRING(OMR_ERROR_RETRY);
-	default:
-		break;
+		RCSTRING(OMR_ERROR_NONE);
+		RCSTRING(OMR_ERROR_OUT_OF_NATIVE_MEMORY);
+		RCSTRING(OMR_ERROR_FAILED_TO_ATTACH_NATIVE_THREAD);
+		RCSTRING(OMR_ERROR_MAXIMUM_VM_COUNT_EXCEEDED);
+		RCSTRING(OMR_ERROR_MAXIMUM_THREAD_COUNT_EXCEEDED);
+		RCSTRING(OMR_THREAD_STILL_ATTACHED);
+		RCSTRING(OMR_VM_STILL_ATTACHED);
+		RCSTRING(OMR_ERROR_FAILED_TO_ALLOCATE_MONITOR);
+		RCSTRING(OMR_ERROR_INTERNAL);
+		RCSTRING(OMR_ERROR_ILLEGAL_ARGUMENT);
+		RCSTRING(OMR_ERROR_NOT_AVAILABLE);
+		RCSTRING(OMR_THREAD_NOT_ATTACHED);
+		RCSTRING(OMR_ERROR_FILE_UNAVAILABLE);
+		RCSTRING(OMR_ERROR_RETRY);
+	default: break;
 	}
 	return rcstring;
 }

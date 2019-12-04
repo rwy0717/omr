@@ -24,16 +24,14 @@
 #include "env/CPU.hpp"
 #include "env/defines.h"
 
-
 void
 OMR::ARM::CompilerEnv::initializeTargetEnvironment()
-   {
-   OMR::CompilerEnv::initializeTargetEnvironment();
+{
+	OMR::CompilerEnv::initializeTargetEnvironment();
 
 #if defined(ARMGNUEABI)
-    target.setEABI(true);
+	target.setEABI(true);
 #else
-    target.setEABI(false);
+	target.setEABI(false);
 #endif
-
-   }
+}

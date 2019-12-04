@@ -25,10 +25,10 @@
  * @ingroup GC_Structs
  */
 
+#include "PoolIterator.hpp"
+
 #include "omrcfg.h"
 #include "omrcomp.h"
-
-#include "PoolIterator.hpp"
 
 /**
  * Return the next slot in the pool.
@@ -39,6 +39,6 @@ GC_PoolIterator::nextSlot()
 	void **value = _nextValue;
 	if (value) {
 		_nextValue = (void **)pool_nextDo(&_state);
-	} 
+	}
 	return value;
 }

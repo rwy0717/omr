@@ -27,15 +27,13 @@
 
 RCType startTraceMerge(int argc, char *argv[]);
 
-class DATMerge
-{
+class DATMerge {
 	/*
 	 * Data members
 	 */
 private:
 protected:
 public:
-
 	/*
 	 * Function members
 	 */
@@ -47,6 +45,7 @@ private:
 	 * @return RC_OK on success.
 	 */
 	RCType merge(J9TDFOptions *options, const char *fromFileName);
+
 protected:
 public:
 	/**

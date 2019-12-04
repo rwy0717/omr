@@ -23,26 +23,23 @@
 #if !defined(MARKINGSCHEME_HPP_)
 #define MARKINGSCHEME_HPP_
 
-#include "omrcfg.h"
-#include "omr.h"
-#include "omrgcconsts.h"
-
 #include "BaseVirtual.hpp"
-
 #include "EnvironmentBase.hpp"
 #include "GCExtensionsBase.hpp"
-#include "MarkingDelegate.hpp"
 #include "MarkMap.hpp"
+#include "MarkingDelegate.hpp"
 #include "ModronAssertions.h"
 #include "ObjectModel.hpp"
 #include "ObjectScannerState.hpp"
 #include "WorkStack.hpp"
+#include "omr.h"
+#include "omrcfg.h"
+#include "omrgcconsts.h"
 
 /**
  * @todo Provide class documentation
  */
-class MM_MarkingScheme : public MM_BaseVirtual
-{
+class MM_MarkingScheme : public MM_BaseVirtual {
 	/*
 	 * Data members
 	 */
@@ -58,19 +55,19 @@ protected:
 	void *_heapTop;
 
 public:
-
 	/*
 	 * Function members
 	 */
 private:
-	MMINLINE void
-	assertSaneObjectPtr(MM_EnvironmentBase *env, omrobjectptr_t objectPtr)
+	MMINLINE void assertSaneObjectPtr(MM_EnvironmentBase *env, omrobjectptr_t objectPtr)
 	{
-		Assert_GC_true_with_message(env, objectPtr != J9_INVALID_OBJECT, "Invalid object pointer %p\n", objectPtr);
+		Assert_GC_true_with_message(
+		        env, objectPtr != J9_INVALID_OBJECT, "Invalid object pointer %p\n", objectPtr);
 		Assert_MM_objectAligned(env, objectPtr);
-		Assert_GC_true_with_message3(env, isHeapObject(objectPtr), "Object %p not in heap range [%p,%p)\n", objectPtr, _heapBase, _heapTop);
+		Assert_GC_true_with_message3(env, isHeapObject(objectPtr), "Object %p not in heap range [%p,%p)\n",
+		        objectPtr, _heapBase, _heapTop);
 	}
-	
+
 	/**
 	 * Private internal. Called exclusively from completeScan();
 	 */
@@ -85,7 +82,7 @@ protected:
 public:
 	static MM_MarkingScheme *newInstance(MM_EnvironmentBase *env);
 	virtual void kill(MM_EnvironmentBase *env);
-	
+
 	void masterSetupForGC(MM_EnvironmentBase *env);
 	void masterSetupForWalk(MM_EnvironmentBase *env);
 	void masterCleanupAfterGC(MM_EnvironmentBase *env);
@@ -96,33 +93,33 @@ public:
 	/**
 	 *  Initialization for Mark
 	 *  Actual startup for Mark procedure
-	 *  @param[in] env - passed Environment 
+	 *  @param[in] env - passed Environment
 	 *  @param[in] initMarkMap instruct should mark map be initialized too
 	 */
 	void markLiveObjectsInit(MM_EnvironmentBase *env, bool initMarkMap);
 
 	/**
 	 *  Mark Roots
-	 *  Create Root Scanner and Mark all roots including classes and classloaders if dynamic class unloading is enabled
-	 *  @param[in] env - passed Environment 
+	 *  Create Root Scanner and Mark all roots including classes and classloaders if dynamic class unloading is
+	 * enabled
+	 *  @param[in] env - passed Environment
 	 */
 	void markLiveObjectsRoots(MM_EnvironmentBase *env);
 
 	/**
 	 *  Scan (complete)
 	 *  Process all work packets from queue, including classes and work generated during this phase.
-	 *  On return, all live objects will be marked, although some unreachable objects (such as finalizable 
-	 *  objects) may still be revived by by subsequent stages.   
-	 *  @param[in] env - passed Environment 
+	 *  On return, all live objects will be marked, although some unreachable objects (such as finalizable
+	 *  objects) may still be revived by by subsequent stages.
+	 *  @param[in] env - passed Environment
 	 */
 	void markLiveObjectsScan(MM_EnvironmentBase *env);
-	
+
 	/**
 	 *  Final Mark services including scanning of Clearables
-	 *  @param[in] env - passed Environment 
+	 *  @param[in] env - passed Environment
 	 */
 	void markLiveObjectsComplete(MM_EnvironmentBase *env);
-
 
 	/**
 	 * Fast marking method requires caller to verify that the object pointer is not NULL.
@@ -133,8 +130,7 @@ public:
 	 * @return true if the object was marked in this call, false if previously marked by other thread
 	 * @see inlineMarkObject()
 	 */
-	MMINLINE bool
-	inlineMarkObjectNoCheck(MM_EnvironmentBase *env, omrobjectptr_t objectPtr, bool leafType = false)
+	MMINLINE bool inlineMarkObjectNoCheck(MM_EnvironmentBase *env, omrobjectptr_t objectPtr, bool leafType = false)
 	{
 		assertSaneObjectPtr(env, objectPtr);
 
@@ -162,8 +158,7 @@ public:
 	 * @return true if the object was marked in this call, false if previously marked by other thread
 	 * @see inlineMarkObjectNoCheck()
 	 */
-	MMINLINE bool
-	inlineMarkObject(MM_EnvironmentBase *env, omrobjectptr_t objectPtr, bool leafType=false)
+	MMINLINE bool inlineMarkObject(MM_EnvironmentBase *env, omrobjectptr_t objectPtr, bool leafType = false)
 	{
 		bool objectMarked = false;
 
@@ -180,7 +175,6 @@ public:
 	 */
 	bool markObject(MM_EnvironmentBase *env, omrobjectptr_t objectPtr, bool leafType = false);
 
-
 	/**
 	 * Out-of-line wrapper for inlineMarkObjectNoCheck()
 	 * @see inlineMarkObjectNoCheck()
@@ -192,11 +186,10 @@ public:
 	 * @param[in] obejctPtr object to test
 	 * @return true if object is marked (or off heap)
 	 */
-	MMINLINE bool
-	isMarked(omrobjectptr_t objectPtr)
+	MMINLINE bool isMarked(omrobjectptr_t objectPtr)
 	{
 		bool marked = true;
-		
+
 		/* Everything off-heap is considered marked, everything on-heap must be checked */
 		if (isHeapObject(objectPtr)) {
 			marked = _markMap->isBitSet(objectPtr);
@@ -211,11 +204,11 @@ public:
 
 	/**
 	 * This is the marking workhorse, which burns down the backlog of work packets that have accumulated
-	 * on the global work stack during marking. It calls scanObject() for every object in the work stack 
+	 * on the global work stack during marking. It calls scanObject() for every object in the work stack
 	 * until the work stack is empty.
 	 */
 	void completeScan(MM_EnvironmentBase *env);
-	
+
 	/**
 	 * Public object scanning method. Called from external context, eg concurrent GC. Scans object slots
 	 * and marks objects referenfced from specified object.
@@ -228,11 +221,12 @@ public:
 	 * @param[in] reason enumerator identifying scanning context
 	 * @param sizeToDo maximum number of bytes to scan, for pointer arrays
 	 */
-	MMINLINE uintptr_t
-	scanObject(MM_EnvironmentBase *env, omrobjectptr_t objectPtr, MM_MarkingSchemeScanReason reason, uintptr_t sizeToDo = UDATA_MAX)
+	MMINLINE uintptr_t scanObject(MM_EnvironmentBase *env, omrobjectptr_t objectPtr,
+	        MM_MarkingSchemeScanReason reason, uintptr_t sizeToDo = UDATA_MAX)
 	{
 		GC_ObjectScannerState objectScannerState;
-		GC_ObjectScanner *objectScanner = _delegate.getObjectScanner(env, objectPtr, &objectScannerState, reason, &sizeToDo);
+		GC_ObjectScanner *objectScanner =
+		        _delegate.getObjectScanner(env, objectPtr, &objectScannerState, reason, &sizeToDo);
 		if (NULL != objectScanner) {
 			bool isLeafSlot = false;
 			GC_SlotObject *slotObject;
@@ -248,8 +242,8 @@ public:
 			}
 		}
 
-		/* Due to concurrent marking and packet overflow _bytesScanned may be much larger than the total live set
-		 * because objects may be scanned multiple times.
+		/* Due to concurrent marking and packet overflow _bytesScanned may be much larger than the total live
+		 * set because objects may be scanned multiple times.
 		 */
 		env->_markStats._bytesScanned += sizeToDo;
 		if (SCAN_REASON_PACKET == reason) {
@@ -263,12 +257,14 @@ public:
 
 	MM_MarkMap *getMarkMap() { return _markMap; }
 	void setMarkMap(MM_MarkMap *markMap) { _markMap = markMap; }
-	
+
 	bool isMarkedOutline(omrobjectptr_t objectPtr);
 	MM_WorkPackets *getWorkPackets() { return _workPackets; }
-	
-	bool heapAddRange(MM_EnvironmentBase *env, MM_MemorySubSpace *subspace, uintptr_t size, void *lowAddress, void *highAddress);
-	bool heapRemoveRange(MM_EnvironmentBase *env, MM_MemorySubSpace *subspace, uintptr_t size, void *lowAddress, void *highAddress, void *lowValidAddress, void *highValidAddress);
+
+	bool heapAddRange(MM_EnvironmentBase *env, MM_MemorySubSpace *subspace, uintptr_t size, void *lowAddress,
+	        void *highAddress);
+	bool heapRemoveRange(MM_EnvironmentBase *env, MM_MemorySubSpace *subspace, uintptr_t size, void *lowAddress,
+	        void *highAddress, void *lowValidAddress, void *highValidAddress);
 
 	MMINLINE bool isHeapObject(omrobjectptr_t objectPtr)
 	{
@@ -277,41 +273,41 @@ public:
 
 	/**
 	 * Update the slot value to point to (Scavenger) forwarded object. If self-forwarded,
-	 * the slot is unchanged, but the class slot of the self-forwarded object is restored (self-forwarded bits are reset).
-	 * This is currently used only in presence of Concurrent Scavenger. When abort is detected CS does not fix up 
-	 * heap references within Scavenger abort handling, but relies on marking in percolate Global to do it.
-	 * The updates are non-atomic, but even though multiple threads could be doing it, they set it to the same value.
-	 * During Concurrent Marking, ignore forwarded objects (especially true for self-forwarded objects which are very important
-	 * during Scavenger aborted cycle to prevent duplicate copies). The fixup will be done after Scavenger Cycle is done, 
-	 * in the final phase of Concurrent GC when we scan Nursery. 
+	 * the slot is unchanged, but the class slot of the self-forwarded object is restored (self-forwarded bits are
+	 * reset). This is currently used only in presence of Concurrent Scavenger. When abort is detected CS does not
+	 * fix up heap references within Scavenger abort handling, but relies on marking in percolate Global to do it.
+	 * The updates are non-atomic, but even though multiple threads could be doing it, they set it to the same
+	 * value. During Concurrent Marking, ignore forwarded objects (especially true for self-forwarded objects which
+	 * are very important during Scavenger aborted cycle to prevent duplicate copies). The fixup will be done after
+	 * Scavenger Cycle is done, in the final phase of Concurrent GC when we scan Nursery.
 	 */
 
-	void fixupForwardedSlot(GC_SlotObject *slotObject) {
+	void fixupForwardedSlot(GC_SlotObject *slotObject)
+	{
 #if defined(OMR_GC_CONCURRENT_SCAVENGER)
 		if (_extensions->isConcurrentScavengerEnabled() && _extensions->isScavengerBackOutFlagRaised()) {
 			fixupForwardedSlotOutline(slotObject);
 		}
 #endif /* OMR_GC_CONCURRENT_SCAVENGER */
 	}
-	
+
 	void fixupForwardedSlotOutline(GC_SlotObject *slotObject);
 
 	/**
 	 * Create a MarkingScheme object.
 	 */
 	MM_MarkingScheme(MM_EnvironmentBase *env)
-		: MM_BaseVirtual()
-		, _omrVM(env->getOmrVM())
-		, _extensions(env->getExtensions())
-		, _delegate()
-		, _markMap(NULL)
-		, _workPackets(NULL)
-		, _heapBase(NULL)
-		, _heapTop(NULL)
+	        : MM_BaseVirtual()
+	        , _omrVM(env->getOmrVM())
+	        , _extensions(env->getExtensions())
+	        , _delegate()
+	        , _markMap(NULL)
+	        , _workPackets(NULL)
+	        , _heapBase(NULL)
+	        , _heapTop(NULL)
 	{
 		_typeId = __FUNCTION__;
 	}
 };
 
 #endif /* MARKINGSCHEME_HPP_ */
-

@@ -26,8 +26,7 @@
  * verifies that omrthread_t->lockedmonitorcount is maintained correctly
  */
 
-class LockedMonitorCountTest: public ::testing::Test
-{
+class LockedMonitorCountTest : public ::testing::Test {
 	/*
 	 * Data members
 	 */
@@ -40,8 +39,7 @@ protected:
 	 * Function members
 	 */
 protected:
-	virtual void
-	SetUp()
+	virtual void SetUp()
 	{
 		cthr = CThread::Attach();
 		ASSERT_TRUE(NULL != cthr);
@@ -50,8 +48,7 @@ protected:
 		ASSERT_TRUE(NULL != self);
 	}
 
-	virtual void
-	TearDown()
+	virtual void TearDown()
 	{
 		cthr->Detach();
 		delete cthr;
@@ -60,10 +57,7 @@ protected:
 	}
 
 public:
-	LockedMonitorCountTest() :
-		::testing::Test(), cthr(NULL), self(NULL), mon(0, "mon")
-	{
-	}
+	LockedMonitorCountTest() : ::testing::Test(), cthr(NULL), self(NULL), mon(0, "mon") {}
 };
 
 TEST_F(LockedMonitorCountTest, TestEnterExit)

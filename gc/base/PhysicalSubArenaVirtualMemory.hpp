@@ -23,10 +23,9 @@
 #if !defined(PHYSICALSUBARENAVIRTUALMEMORY_HPP_)
 #define PHYSICALSUBARENAVIRTUALMEMORY_HPP_
 
-#include "omrcomp.h"
-#include "modronbase.h"
-
 #include "PhysicalSubArena.hpp"
+#include "modronbase.h"
+#include "omrcomp.h"
 
 class MM_EnvironmentBase;
 class MM_Heap;
@@ -38,37 +37,37 @@ class MM_Heap;
 class MM_PhysicalSubArenaVirtualMemory : public MM_PhysicalSubArena {
 private:
 protected:
-	MM_PhysicalSubArenaVirtualMemory* _lowArena, *_highArena;
-	void* _lowAddress, *_highAddress;
+	MM_PhysicalSubArenaVirtualMemory *_lowArena, *_highArena;
+	void *_lowAddress, *_highAddress;
 
 	bool _hasVirtualLowAddress, _hasVirtualHighAddress;
-	void* _virtualLowAddress, *_virtualHighAddress;
+	void *_virtualLowAddress, *_virtualHighAddress;
 
 	bool _expandFromHighRange, _expandFromLowRange;
 
-	uintptr_t _numaNode;  /**< NUMA node binding, starting from 0. if UDATA_MAX, no explicit binding */
+	uintptr_t _numaNode; /**< NUMA node binding, starting from 0. if UDATA_MAX, no explicit binding */
 
-	virtual bool initialize(MM_EnvironmentBase* env);
+	virtual bool initialize(MM_EnvironmentBase *env);
 
 public:
-	MMINLINE MM_PhysicalSubArenaVirtualMemory* getNextSubArena() { return _highArena; }
-	MMINLINE void setNextSubArena(MM_PhysicalSubArenaVirtualMemory* subArena) { _highArena = subArena; }
-	MMINLINE MM_PhysicalSubArenaVirtualMemory* getPreviousSubArena() { return _lowArena; }
-	MMINLINE void setPreviousSubArena(MM_PhysicalSubArenaVirtualMemory* subArena) { _lowArena = subArena; }
+	MMINLINE MM_PhysicalSubArenaVirtualMemory *getNextSubArena() { return _highArena; }
+	MMINLINE void setNextSubArena(MM_PhysicalSubArenaVirtualMemory *subArena) { _highArena = subArena; }
+	MMINLINE MM_PhysicalSubArenaVirtualMemory *getPreviousSubArena() { return _lowArena; }
+	MMINLINE void setPreviousSubArena(MM_PhysicalSubArenaVirtualMemory *subArena) { _lowArena = subArena; }
 
-	MMINLINE void* getLowAddress() { return _lowAddress; }
-	MMINLINE void setLowAddress(void* addr) { _lowAddress = addr; }
-	MMINLINE void* getHighAddress() { return _highAddress; }
-	MMINLINE void setHighAddress(void* addr) { _highAddress = addr; }
+	MMINLINE void *getLowAddress() { return _lowAddress; }
+	MMINLINE void setLowAddress(void *addr) { _lowAddress = addr; }
+	MMINLINE void *getHighAddress() { return _highAddress; }
+	MMINLINE void setHighAddress(void *addr) { _highAddress = addr; }
 
-	MMINLINE void* getVirtualLowAddress() { return _hasVirtualLowAddress ? _virtualLowAddress : _lowAddress; }
-	MMINLINE void setVirtualLowAddress(void* virtualLowAddress)
+	MMINLINE void *getVirtualLowAddress() { return _hasVirtualLowAddress ? _virtualLowAddress : _lowAddress; }
+	MMINLINE void setVirtualLowAddress(void *virtualLowAddress)
 	{
 		_hasVirtualLowAddress = true;
 		_virtualLowAddress = virtualLowAddress;
 	}
-	MMINLINE void* getVirtualHighAddress() { return _hasVirtualHighAddress ? _virtualHighAddress : _highAddress; }
-	MMINLINE void setVirtualHighAddress(void* virtualHighAddress)
+	MMINLINE void *getVirtualHighAddress() { return _hasVirtualHighAddress ? _virtualHighAddress : _highAddress; }
+	MMINLINE void setVirtualHighAddress(void *virtualHighAddress)
 	{
 		_hasVirtualHighAddress = true;
 		_virtualHighAddress = virtualHighAddress;
@@ -81,8 +80,8 @@ public:
 		_virtualHighAddress = NULL;
 	}
 
-	void* findAdjacentHighValidAddress(MM_EnvironmentBase* env);
-	
+	void *findAdjacentHighValidAddress(MM_EnvironmentBase *env);
+
 	MMINLINE uintptr_t getNumaNode() { return _numaNode; }
 	MMINLINE void setNumaNode(uintptr_t numaNode) { _numaNode = numaNode; }
 
@@ -91,21 +90,24 @@ public:
 	 * @param address The base address of the range.
 	 * @return The size of the range.
 	 */
-	MMINLINE uintptr_t calculateOffsetToHighAddress(void* address) { return (uintptr_t)(((uintptr_t)_highAddress - (uintptr_t)address)); }
+	MMINLINE uintptr_t calculateOffsetToHighAddress(void *address)
+	{
+		return (uintptr_t)(((uintptr_t)_highAddress - (uintptr_t)address));
+	}
 
-	MM_PhysicalSubArenaVirtualMemory(MM_Heap* heap)
-		: MM_PhysicalSubArena(heap)
-		, _lowArena(NULL)
-		, _highArena(NULL)
-		, _lowAddress(NULL)
-		, _highAddress(NULL)
-		, _hasVirtualLowAddress(false)
-		, _hasVirtualHighAddress(false)
-		, _virtualLowAddress(NULL)
-		, _virtualHighAddress(NULL)
-		, _expandFromHighRange(false)
-		, _expandFromLowRange(false)
-		, _numaNode(0)
+	MM_PhysicalSubArenaVirtualMemory(MM_Heap *heap)
+	        : MM_PhysicalSubArena(heap)
+	        , _lowArena(NULL)
+	        , _highArena(NULL)
+	        , _lowAddress(NULL)
+	        , _highAddress(NULL)
+	        , _hasVirtualLowAddress(false)
+	        , _hasVirtualHighAddress(false)
+	        , _virtualLowAddress(NULL)
+	        , _virtualHighAddress(NULL)
+	        , _expandFromHighRange(false)
+	        , _expandFromLowRange(false)
+	        , _numaNode(0)
 	{
 		_typeId = __FUNCTION__;
 	};

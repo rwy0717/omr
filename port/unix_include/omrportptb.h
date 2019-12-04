@@ -66,7 +66,8 @@ typedef struct PortlibPTBuffers_struct {
 	uintptr_t reportedMessageBufferSize; /**< reported message buffer size */
 
 #if defined(J9VM_PROVIDE_ICONV)
-	iconv_t converterCache[UNCACHED_ICONV_DESCRIPTOR]; /**< Everything in J9IconvName before UNCACHED_ICONV_DESCRIPTOR is cached */
+	iconv_t converterCache[UNCACHED_ICONV_DESCRIPTOR]; /**< Everything in J9IconvName before
+	                                                      UNCACHED_ICONV_DESCRIPTOR is cached */
 #endif /* J9VM_PROVIDE_ICONV */
 } PortlibPTBuffers_struct;
 
@@ -79,7 +80,4 @@ typedef struct PortlibPTBuffers_struct *PortlibPTBuffers_t;
 
 void omrport_free_ptBuffer(struct OMRPortLibrary *portLibrary, PortlibPTBuffers_t ptBuffer);
 
-
-#endif     /* omrportptb_h */
-
-
+#endif /* omrportptb_h */

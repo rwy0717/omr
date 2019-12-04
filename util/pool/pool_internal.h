@@ -24,13 +24,13 @@
 #define pool_internal_h
 
 /**
-* @file pool_internal.h
-* @brief Internal prototypes used within the POOL module.
-*
-* This file contains implementation-private function prototypes and
-* type definitions for the POOL module.
-*
-*/
+ * @file pool_internal.h
+ * @brief Internal prototypes used within the POOL module.
+ *
+ * This file contains implementation-private function prototypes and
+ * type definitions for the POOL module.
+ *
+ */
 
 #include "omrcomp.h"
 #include "pool_api.h"
@@ -39,10 +39,8 @@
 extern "C" {
 #endif
 
-
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* pool_internal_h */
-

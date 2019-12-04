@@ -23,28 +23,27 @@
 #if !defined(RSOVERFLOW_HPP_)
 #define RSOVERFLOW_HPP_
 
-#include "omrcfg.h"
 #include "ModronAssertions.h"
+#include "omrcfg.h"
 
 #if defined(OMR_GC_MODRON_SCAVENGER)
 
 #include "EnvironmentBase.hpp"
 #include "GCExtensionsBase.hpp"
-#include "MarkMap.hpp"
 #include "HeapMapIterator.hpp"
+#include "MarkMap.hpp"
 
-class MM_RSOverflow
-{
+class MM_RSOverflow {
 public:
 protected:
 private:
-	MM_GCExtensionsBase *_extensions;			/**< GC Extensions */
-	MM_MarkMap *_markMap;						/**< Pointer to the mark map used by ParallelGlobalGC */
-	bool _searchMode;							/**< mode switch: initialized in Modify mode, after first nextObject call is switched to Search mode */
-	MM_HeapMapIterator _markedObjectIterator;	/**< Iterator to walk marked objects */
+	MM_GCExtensionsBase *_extensions; /**< GC Extensions */
+	MM_MarkMap *_markMap; /**< Pointer to the mark map used by ParallelGlobalGC */
+	bool _searchMode; /**< mode switch: initialized in Modify mode, after first nextObject call is switched to
+	                     Search mode */
+	MM_HeapMapIterator _markedObjectIterator; /**< Iterator to walk marked objects */
 
 public:
-
 	/*
 	 * Mark object as Remembered
 	 * All Mark work should be completed before first nextObject call.
@@ -71,7 +70,9 @@ public:
 	{
 		if (!_searchMode) {
 			/* First call in Search mode - reinitialize iterator with actual values */
-			_markedObjectIterator.reset(_markMap, (uintptr_t *)_extensions->heapBaseForBarrierRange0, (uintptr_t *)((uintptr_t)_extensions->heapBaseForBarrierRange0 + _extensions->heapSizeForBarrierRange0));
+			_markedObjectIterator.reset(_markMap, (uintptr_t *)_extensions->heapBaseForBarrierRange0,
+			        (uintptr_t *)((uintptr_t)_extensions->heapBaseForBarrierRange0
+			                + _extensions->heapSizeForBarrierRange0));
 			_searchMode = true;
 		}
 		return _markedObjectIterator.nextObject();
@@ -81,23 +82,21 @@ public:
 	 * Construct a new RSOverflow
 	 */
 	MMINLINE MM_RSOverflow(MM_EnvironmentBase *env)
-		: _extensions(env->getExtensions())
-		, _markMap(NULL)
-		, _searchMode(false)
-		, _markedObjectIterator(env->getExtensions())
+	        : _extensions(env->getExtensions())
+	        , _markMap(NULL)
+	        , _searchMode(false)
+	        , _markedObjectIterator(env->getExtensions())
 	{
 		initialize(env);
 	}
 
 protected:
 private:
-
 	/*
 	 * Do initial settings
 	 * @param env - Environment
 	 */
 	void initialize(MM_EnvironmentBase *env);
-
 };
 
 #endif /* defined(OMR_GC_MODRON_SCAVENGER) */

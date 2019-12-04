@@ -1,11 +1,11 @@
 /*******************************************************************************
  * Copyright (c) 1991, 2014 IBM Corp. and others
  *
- * This program and the accompanying materials are made available 
- *  under the terms of the Eclipse Public License 2.0 which 
- * accompanies this distribution and is available at 
- * https://www.eclipse.org/legal/epl-2.0/ or the 
- * Apache License, Version 2.0 which accompanies this distribution 
+ * This program and the accompanying materials are made available
+ *  under the terms of the Eclipse Public License 2.0 which
+ * accompanies this distribution and is available at
+ * https://www.eclipse.org/legal/epl-2.0/ or the
+ * Apache License, Version 2.0 which accompanies this distribution
  *  and is available at https://www.apache.org/licenses/LICENSE-2.0.
  *
  * This Source Code may also be made available under the following
@@ -14,7 +14,7 @@
  * General Public License, version 2 with the GNU Classpath
  * Exception [1] and GNU General Public License, version 2 with the
  * OpenJDK Assembly Exception [2].
- *   
+ *
  * [1] https://www.gnu.org/software/classpath/license.html
  * [2] http://openjdk.java.net/legal/assembly-exception.html
  *
@@ -71,14 +71,14 @@ omrgetdbghelp_loadDLL(void)
 	printf("\nloadDbgHelpDLL returning %p\n", dbghelpDLL);
 #endif
 
-	return (uintptr_t) dbghelpDLL;
-
+	return (uintptr_t)dbghelpDLL;
 }
 
 /**
  * Get a previously loaded version of dbghelp.dll that shipped with the JRE.
  *
- * @return A handle to dbghelp.dll that shipped with the JRE if we were able to find a previously loaded version, NULL otherwise.
+ * @return A handle to dbghelp.dll that shipped with the JRE if we were able to find a previously loaded version, NULL
+ * otherwise.
  *
  */
 uintptr_t
@@ -98,8 +98,7 @@ omrgetdbghelp_getDLL(void)
 	printf("\ngetDbgHelpDLL returning %p\n", dbghelpDLL);
 #endif
 
-	return (uintptr_t) dbghelpDLL;
-
+	return (uintptr_t)dbghelpDLL;
 }
 
 /**
@@ -112,7 +111,7 @@ void
 omrgetdbghelp_freeDLL(uintptr_t dbgHelpDLL)
 {
 	if (NULL != (HMODULE)dbgHelpDLL) {
-		FreeLibrary((HMODULE) dbgHelpDLL);
+		FreeLibrary((HMODULE)dbgHelpDLL);
 	}
 	return;
 }
@@ -120,7 +119,8 @@ omrgetdbghelp_freeDLL(uintptr_t dbgHelpDLL)
 /**
  *  Tell us where the shipped version of dbghelp.dll is located
  *
- * @param [in/out] dbghelpPath buffer to populate with the location of dbghelp.dll. Assumed to be character length of EsMaxPath.
+ * @param [in/out] dbghelpPath buffer to populate with the location of dbghelp.dll. Assumed to be character length of
+ * EsMaxPath.
  *
  * @return 0 on success, non-zero otherwise.
  *

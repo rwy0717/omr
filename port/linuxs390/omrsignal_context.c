@@ -23,7 +23,6 @@
 #include "omrport.h"
 #include "omrsignal_context.h"
 
-
 #define NUM_REGS 16
 
 void
@@ -34,7 +33,8 @@ fillInUnixSignalInfo(struct OMRPortLibrary *portLibrary, void *contextInfo, stru
 }
 
 uint32_t
-infoForSignal(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *info, int32_t index, const char **name, void **value)
+infoForSignal(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *info, int32_t index, const char **name,
+        void **value)
 {
 	*name = "";
 
@@ -87,32 +87,16 @@ infoForSignal(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *info
 		}
 		return OMRPORT_SIG_VALUE_UNDEFINED;
 
-	default:
-		return OMRPORT_SIG_VALUE_UNDEFINED;
+	default: return OMRPORT_SIG_VALUE_UNDEFINED;
 	}
 }
 
 uint32_t
-infoForFPR(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *info, int32_t index, const char **name, void **value)
+infoForFPR(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *info, int32_t index, const char **name,
+        void **value)
 {
-	const char *n_fpr[NUM_REGS] = {
-		"fpr0",
-		"fpr1",
-		"fpr2",
-		"fpr3",
-		"fpr4",
-		"fpr5",
-		"fpr6",
-		"fpr7",
-		"fpr8",
-		"fpr9",
-		"fpr10",
-		"fpr11",
-		"fpr12",
-		"fpr13",
-		"fpr14",
-		"fpr15"
-	};
+	const char *n_fpr[NUM_REGS] = {"fpr0", "fpr1", "fpr2", "fpr3", "fpr4", "fpr5", "fpr6", "fpr7", "fpr8", "fpr9",
+	        "fpr10", "fpr11", "fpr12", "fpr13", "fpr14", "fpr15"};
 
 	*name = "";
 
@@ -126,7 +110,8 @@ infoForFPR(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *info, i
 }
 
 uint32_t
-infoForGPR(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *info, int32_t index, const char **name, void **value)
+infoForGPR(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *info, int32_t index, const char **name,
+        void **value)
 {
 
 	const char *n_gpr[NUM_REGS * 2] = {
@@ -177,7 +162,8 @@ infoForGPR(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *info, i
 #if !defined(OMR_ENV_DATA64)
 	else if ((index >= NUM_REGS) && (index < NUM_REGS * 2)) {
 		if (UC_EXTENDED == info->platformSignalInfo.context->uc_flags) {
-			struct ucontext_extended *extendedContext = (ucontext_extended *)info->platformSignalInfo.context;
+			struct ucontext_extended *extendedContext =
+			        (ucontext_extended *)info->platformSignalInfo.context;
 			*name = n_gpr[index];
 			*value = &(extendedContext->uc_gprs_high[index - NUM_REGS]);
 			return OMRPORT_SIG_VALUE_ADDRESS;
@@ -188,7 +174,8 @@ infoForGPR(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *info, i
 }
 
 uint32_t
-infoForControl(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *info, int32_t index, const char **name, void **value)
+infoForControl(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *info, int32_t index, const char **name,
+        void **value)
 {
 	mcontext_t *mcontext = (mcontext_t *)&info->platformSignalInfo.context->uc_mcontext;
 	*name = "";
@@ -213,13 +200,13 @@ infoForControl(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *inf
 		*name = "bea";
 		*value = &(info->platformSignalInfo.breakingEventAddr);
 		return OMRPORT_SIG_VALUE_ADDRESS;
-	default:
-		return OMRPORT_SIG_VALUE_UNDEFINED;
+	default: return OMRPORT_SIG_VALUE_UNDEFINED;
 	}
 }
 
 uint32_t
-infoForModule(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *info, int32_t index, const char **name, void **value)
+infoForModule(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *info, int32_t index, const char **name,
+        void **value)
 {
 	Dl_info *dl_info = &(info->platformSignalInfo.dl_info);
 	void *address;
@@ -268,8 +255,6 @@ infoForModule(struct OMRPortLibrary *portLibrary, struct OMRUnixSignalInfo *info
 			return OMRPORT_SIG_VALUE_ADDRESS;
 		}
 		return OMRPORT_SIG_VALUE_UNDEFINED;
-	default:
-		return OMRPORT_SIG_VALUE_UNDEFINED;
+	default: return OMRPORT_SIG_VALUE_UNDEFINED;
 	}
 }
-

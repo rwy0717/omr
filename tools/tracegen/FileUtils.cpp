@@ -60,7 +60,8 @@ FileUtils::getFileExt(const char *fileName)
 }
 
 const char *
-FileUtils::getTargetFileName(J9TDFOptions *options, const char *tdfFileName, const char *filePrefix, const char *fileName, const char *extension)
+FileUtils::getTargetFileName(J9TDFOptions *options, const char *tdfFileName, const char *filePrefix,
+        const char *fileName, const char *extension)
 {
 	char *baseName = NULL;
 	char *filePath = NULL;
@@ -121,7 +122,8 @@ FileUtils::getMtime(const char *filePath)
 }
 
 RCType
-FileUtils::visitDirectory(J9TDFOptions *options, const char *dirName, const char *fileExtFilter, void *targetObject, VisitFileCallBack callback)
+FileUtils::visitDirectory(J9TDFOptions *options, const char *dirName, const char *fileExtFilter, void *targetObject,
+        VisitFileCallBack callback)
 {
 	char *resultBuffer = NULL;
 	RCType rc = RC_OK;

@@ -42,11 +42,10 @@ using std::set;
 using std::string;
 using std::vector;
 
-class Scanner
-{
+class Scanner {
 public:
-	virtual DDR_RC startScan(OMRPortLibrary *portLibrary, Symbol_IR *ir,
-			vector<string> *debugFiles, const char *blacklistPath) = 0;
+	virtual DDR_RC startScan(
+	        OMRPortLibrary *portLibrary, Symbol_IR *ir, vector<string> *debugFiles, const char *blacklistPath) = 0;
 
 protected:
 	set<string> _blacklistedFiles;

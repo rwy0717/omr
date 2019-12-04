@@ -75,7 +75,8 @@ static omr_error_t setupTestData(TestData *testData, OMRTestVM *testVM, int32_t 
 static omr_error_t waitForThreadsReady(TestData *testData);
 static omr_error_t waitForThreadsDone(TestData *testData);
 static omr_error_t notifyThreadReadyAndWait(TestSiblingThreadData *threadData);
-static void recordChildErrorStatus(OMRTraceSubscriberForkTestResult *result, omr_error_t rc, const char *filename, int lineno);
+static void recordChildErrorStatus(
+        OMRTraceSubscriberForkTestResult *result, omr_error_t rc, const char *filename, int lineno);
 
 TEST(RASSubscriberForkTest, SubscriberAgentForkTest)
 {
@@ -123,7 +124,8 @@ runTest(omrthread_entrypoint_t entrypoint)
 		for (int32_t i = 0; i < NUM_THREADS; i += 1) {
 			threadData[i].testData = &newTestData;
 			threadData[i].threadRc = &newTestData.siblingRc[i];
-			ASSERT_NO_FATAL_FAILURE(createThread(&newTestData.threads[i], FALSE, J9THREAD_CREATE_JOINABLE, entrypoint, &threadData[i]));
+			ASSERT_NO_FATAL_FAILURE(createThread(
+			        &newTestData.threads[i], FALSE, J9THREAD_CREATE_JOINABLE, entrypoint, &threadData[i]));
 		}
 
 		/* Wait for all test threads to be ready before forking. */
@@ -174,7 +176,7 @@ preforkSetup(OMR_VMThread **vmthread, struct OMR_Agent **agent, OMRTestVM *testV
 
 	/* Initialize pipe before fork. */
 	int pipeRC = pipe(pipedata);
-	EXPECT_TRUE(0 == pipeRC)  << "Failure occurred calling pipe";
+	EXPECT_TRUE(0 == pipeRC) << "Failure occurred calling pipe";
 }
 
 /* Test unloading an agent, loading an agent, and trace points in the
@@ -288,7 +290,8 @@ postForkParent(OMR_VMThread *vmthread, struct OMR_Agent *agent, OMRTestVM *testV
 	if (0 != rc) {
 		ssize_t readBytes = read(pipedata[0], (int *)&result, sizeof(result));
 		EXPECT_TRUE(readBytes == sizeof(result)) << "Didn't read back enough from pipe";
-		EXPECT_TRUE(0 == result.rc) << "Failure occurred in child process at " << result.failureFile << ":" << result.failureLine;
+		EXPECT_TRUE(0 == result.rc)
+		        << "Failure occurred in child process at " << result.failureFile << ":" << result.failureLine;
 	}
 	close(pipedata[0]);
 	close(pipedata[1]);
@@ -347,7 +350,8 @@ duringForkThreadTest(void *entryArg)
 		for (int32_t i = 0; i < STRESS_ITERATIONS_THREAD; i += 1) {
 			testThreadData[i].testData = &newTestData;
 			testThreadData[i].threadRc = &newTestData.siblingRc[i];
-			createThread(&newTestData.threads[i], FALSE, J9THREAD_CREATE_JOINABLE, doNothing, &testThreadData[i]);
+			createThread(&newTestData.threads[i], FALSE, J9THREAD_CREATE_JOINABLE, doNothing,
+			        &testThreadData[i]);
 			if (::testing::Test::HasFatalFailure()) {
 				siblingRc = OMR_ERROR_INTERNAL;
 				break;
@@ -399,9 +403,12 @@ setupTestData(TestData *testData, OMRTestVM *testVM, int32_t threadCount)
 	testData->threadCount = threadCount;
 	testData->waitingThreadCount = threadCount;
 	testData->forkReady = FALSE;
-	testData->siblingRc = (omr_error_t *)omrmem_allocate_memory(sizeof(omr_error_t) * threadCount, OMRMEM_CATEGORY_VM);
-	testData->threads = (omrthread_t *)omrmem_allocate_memory(sizeof(omrthread_t) * threadCount, OMRMEM_CATEGORY_VM);
-	rc = OMRTEST_PRINT_UNEXPECTED_INT_RC(omrthread_monitor_init_with_name(&testData->readyCond, 0, "traceTestShutdown"), J9THREAD_SUCCESS);
+	testData->siblingRc =
+	        (omr_error_t *)omrmem_allocate_memory(sizeof(omr_error_t) * threadCount, OMRMEM_CATEGORY_VM);
+	testData->threads =
+	        (omrthread_t *)omrmem_allocate_memory(sizeof(omrthread_t) * threadCount, OMRMEM_CATEGORY_VM);
+	rc = OMRTEST_PRINT_UNEXPECTED_INT_RC(
+	        omrthread_monitor_init_with_name(&testData->readyCond, 0, "traceTestShutdown"), J9THREAD_SUCCESS);
 	for (int32_t i = 0; i < threadCount; i += 1) {
 		testData->siblingRc[i] = OMR_ERROR_NONE;
 	}
@@ -421,7 +428,8 @@ waitForThreadsReady(TestData *testData)
 	/* Wait for all test threads to be ready to begin testing. */
 	omrthread_monitor_enter(testData->readyCond);
 	while ((0 < testData->waitingThreadCount) && (OMR_ERROR_NONE == rc)) {
-		rc = OMRTEST_PRINT_UNEXPECTED_INT_RC(omrthread_monitor_wait_timed(testData->readyCond, TIMEOUT * 1000, 0), 0);
+		rc = OMRTEST_PRINT_UNEXPECTED_INT_RC(
+		        omrthread_monitor_wait_timed(testData->readyCond, TIMEOUT * 1000, 0), 0);
 	}
 	/* It will not get here until all test threads are ready and waiting to fork. */
 	testData->forkReady = TRUE;
@@ -471,7 +479,8 @@ notifyThreadReadyAndWait(TestSiblingThreadData *threadData)
 	 * thread indicates that it is ready to fork.
 	 */
 	do {
-		rc = OMRTEST_PRINT_UNEXPECTED_INT_RC(omrthread_monitor_wait_timed(testData->readyCond, TIMEOUT * 1000, 0), 0);
+		rc = OMRTEST_PRINT_UNEXPECTED_INT_RC(
+		        omrthread_monitor_wait_timed(testData->readyCond, TIMEOUT * 1000, 0), 0);
 	} while ((!testData->forkReady) && (OMR_ERROR_NONE == rc));
 	omrthread_monitor_exit(testData->readyCond);
 	return rc;

@@ -26,7 +26,6 @@
  * @brief Memory Utilities
  */
 
-
 /*
  * This file contains code for the portability library memory management.
  */
@@ -48,19 +47,19 @@
 #if defined(AIXPPC)
 #include <sys/shm.h>
 #include <sys/vminfo.h>
-#endif/*AIXPPC*/
+#endif /*AIXPPC*/
 
 #if defined(J9ZOS390)
 
 #include "omrvmem.h"
 #include <sys/types.h>
 
-#pragma linkage (PGSERRM,OS)
-#pragma map(Pgser_Release,"PGSERRM")
+#pragma linkage(PGSERRM, OS)
+#pragma map(Pgser_Release, "PGSERRM")
 intptr_t Pgser_Release(void *address, int byteAmount);
 
 #if defined(OMR_ENV_DATA64)
-#pragma linkage(omrdiscard_data,OS_NOSTACK)
+#pragma linkage(omrdiscard_data, OS_NOSTACK)
 int omrdiscard_data(void *address, int numFrames);
 #endif /*OMR_ENV_DATA64 */
 
@@ -74,14 +73,14 @@ void *
 omrmem_allocate_memory_basic(struct OMRPortLibrary *portLibrary, uintptr_t byteAmount)
 {
 #if (defined(S390) || defined(J9ZOS390)) && !defined(OMR_ENV_DATA64)
-	return (void *)(((uintptr_t) malloc(byteAmount)) & 0x7FFFFFFF);
+	return (void *)(((uintptr_t)malloc(byteAmount)) & 0x7FFFFFFF);
 #elif defined(J9ZOS390) && defined(OMR_GC_COMPRESSED_POINTERS)
 	void *retval = NULL;
 	retval = malloc(byteAmount);
 	Assert_AddressAbove4GBBar((NULL == retval) || (0x100000000 <= ((uintptr_t)retval)));
 	return retval;
 #elif defined(OMRZTPF)
-    return malloc64(byteAmount);
+	return malloc64(byteAmount);
 #else
 	return malloc(byteAmount);
 #endif
@@ -102,7 +101,7 @@ omrmem_advise_and_free_memory_basic(struct OMRPortLibrary *portLibrary, void *me
 	pageSize = sysconf(_SC_PAGESIZE);
 #elif defined(AIXPPC)
 	struct vm_page_info pageInfo;
-	pageInfo.addr = (uint64_t) portLibrary->portGlobals;
+	pageInfo.addr = (uint64_t)portLibrary->portGlobals;
 	/*  retrieve size of the page backing portLibrary->portGlobals which is allocated
 	 *  using omrmem_allocate_memory() in port/unix/omrmem.c
 	 */
@@ -137,23 +136,29 @@ omrmem_advise_and_free_memory_basic(struct OMRPortLibrary *portLibrary, void *me
 
 #if (defined(LINUX) && !defined(OMRZTPF)) || defined(OSX)
 			if (-1 == madvise((void *)memPtrPageRounded, memPtrSizePageRounded, MADV_DONTNEED)) {
-				Trc_PRT_mem_advise_and_free_memory_basic_madvise_failed((void *)memPtrPageRounded, memPtrSizePageRounded, errno);
+				Trc_PRT_mem_advise_and_free_memory_basic_madvise_failed(
+				        (void *)memPtrPageRounded, memPtrSizePageRounded, errno);
 			}
 #elif defined(AIXPPC)
 			if (-1 == disclaim64((void *)memPtrPageRounded, memPtrSizePageRounded, DISCLAIM_ZEROMEM)) {
-				Trc_PRT_mem_advise_and_free_memory_basic_disclaim64_failed((void *)memPtrPageRounded, memPtrSizePageRounded, errno);
+				Trc_PRT_mem_advise_and_free_memory_basic_disclaim64_failed(
+				        (void *)memPtrPageRounded, memPtrSizePageRounded, errno);
 				Assert_PRT_ShouldNeverHappen_wrapper();
 			}
 #elif defined(J9ZOS390)
 
 #if defined(OMR_ENV_DATA64)
-			if (omrdiscard_data((void *)memPtrPageRounded, memPtrSizePageRounded >> ZOS_REAL_FRAME_SIZE_SHIFT) != 0) {
-				Trc_PRT_mem_advise_and_free_memory_basic_j9discard_data_failed((void *)memPtrPageRounded, memPtrSizePageRounded);
+			if (omrdiscard_data(
+			            (void *)memPtrPageRounded, memPtrSizePageRounded >> ZOS_REAL_FRAME_SIZE_SHIFT)
+			        != 0) {
+				Trc_PRT_mem_advise_and_free_memory_basic_j9discard_data_failed(
+				        (void *)memPtrPageRounded, memPtrSizePageRounded);
 				Assert_PRT_ShouldNeverHappen_wrapper();
 			}
 #else
 			if (Pgser_Release((void *)memPtrPageRounded, memPtrSizePageRounded) != 0) {
-				Trc_PRT_mem_advise_and_free_memory_basic_Pgser_Release_failed((void *)memPtrPageRounded, memPtrSizePageRounded);
+				Trc_PRT_mem_advise_and_free_memory_basic_Pgser_Release_failed(
+				        (void *)memPtrPageRounded, memPtrSizePageRounded);
 				Assert_PRT_ShouldNeverHappen_wrapper();
 			}
 #endif /* defined(OMR_ENV_DATA64) */
@@ -169,9 +174,9 @@ void *
 omrmem_reallocate_memory_basic(struct OMRPortLibrary *portLibrary, void *memoryPointer, uintptr_t byteAmount)
 {
 #if (defined(S390) || defined(J9ZOS390)) && !defined(OMR_ENV_DATA64)
-	return (void *)(((uintptr_t) realloc(memoryPointer, byteAmount)) & 0x7FFFFFFF);
+	return (void *)(((uintptr_t)realloc(memoryPointer, byteAmount)) & 0x7FFFFFFF);
 #elif defined(OMRZTPF)
-    return realloc64(memoryPointer, byteAmount);
+	return realloc64(memoryPointer, byteAmount);
 #else
 	return realloc(memoryPointer, byteAmount);
 #endif
@@ -216,13 +221,12 @@ omrmem_startup_basic(struct OMRPortLibrary *portLibrary, uintptr_t portGlobalSiz
 		}
 	}
 #endif
-
 }
 
 void *
 omrmem_allocate_portLibrary_basic(uintptr_t byteAmount)
 {
-	return (void *) malloc(byteAmount);
+	return (void *)malloc(byteAmount);
 }
 
 void

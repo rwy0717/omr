@@ -36,7 +36,8 @@
  *
  * @internal
  * @note TTY operations are mainly helper functions for @ref omrfile.c::omrfile_vprintf "omrfile_vprintf" and
- * @ref omrfileText.c::omrfile_write_file "omrfile_write_file()".  Verify that the TTY operations call the appropriate functions.
+ * @ref omrfileText.c::omrfile_write_file "omrfile_write_file()".  Verify that the TTY operations call the appropriate
+ * functions.
  *
  */
 #include <string.h>
@@ -45,7 +46,8 @@
 #include "testHelpers.hpp"
 #include "omrport.h"
 
-#define J9TTY_STARTUP_PRIVATE_RETURN_VALUE ((int32_t) 0xDEADBEEF) /** <@internal A known return for @ref fake_omrtty_startup */
+#define J9TTY_STARTUP_PRIVATE_RETURN_VALUE \
+	((int32_t)0xDEADBEEF) /** <@internal A known return for @ref fake_omrtty_startup */
 
 /**
  * @internal
@@ -59,7 +61,8 @@ typedef void (*J9FILE_VPRINTF_FUNC)(struct OMRPortLibrary *portLibrary, intptr_t
  * @typdef
  * Function prototype for verifying helpers call @ref omrfileText.c::omrfile_write_text "omrfile_write_text()"
  */
-typedef intptr_t (*J9FILE_WRITE_TEXT_FUNC)(struct OMRPortLibrary *portLibrary, intptr_t fd, const char *buf, intptr_t nbytes);
+typedef intptr_t (*J9FILE_WRITE_TEXT_FUNC)(
+        struct OMRPortLibrary *portLibrary, intptr_t fd, const char *buf, intptr_t nbytes);
 
 /**
  * @internal
@@ -105,10 +108,10 @@ fake_omrtty_startup(struct OMRPortLibrary *portLibrary)
  * Override @ref omrfile.c::omrfile_vprintf  "omrfile_vprintf()" and return a known value to verify any helper
  * functions that  should be calling this function.
  *
- * @ref omrfile.c::omrfile_vprintf  "omrfile_vprintf()" does not return a value, the caller needs a way to know this overriding
- * function has been called.  As a result this function simply replaces the port library function table slot tty_startup with
- * a second overriding function.  The caller then calls @ref omrtty.c::omrtty_startup "omrtty_startup()" to verify they have
- * indeed overridden @ref omrfile.c::omrfile_vprintf  "omrfile_vprintf()" .
+ * @ref omrfile.c::omrfile_vprintf  "omrfile_vprintf()" does not return a value, the caller needs a way to know this
+ * overriding function has been called.  As a result this function simply replaces the port library function table slot
+ * tty_startup with a second overriding function.  The caller then calls @ref omrtty.c::omrtty_startup
+ * "omrtty_startup()" to verify they have indeed overridden @ref omrfile.c::omrfile_vprintf  "omrfile_vprintf()" .
  *
  * @param[in] portLibrary The port library
  * @param[in] fd File descriptor to write.
@@ -131,10 +134,10 @@ fake_omrfile_vprintf(struct OMRPortLibrary *portLibrary, intptr_t fd, const char
  * Override @ref omrtty.c::omrtty_vprintf  "omrtty_vprintf()" and return a known value to verify any helper
  * functions that  should be calling this function.
  *
- * @ref omrtty.c::omrtty_vprintf  "omrtty_vprintf()" does not return a value, the caller needs a way to know this overriding
- * function has been called.  As a result this function simply replaces the port library function table slot tty_startup with
- * a second overriding function.  The caller then calls @ref omrtty.c::omrtty_startup "omrtty_startup()" to verify they have
- * indeed overridden @ref omrtty.c::omrtty_vprintf  "omrtty_vprintf()" .
+ * @ref omrtty.c::omrtty_vprintf  "omrtty_vprintf()" does not return a value, the caller needs a way to know this
+ * overriding function has been called.  As a result this function simply replaces the port library function table slot
+ * tty_startup with a second overriding function.  The caller then calls @ref omrtty.c::omrtty_startup
+ * "omrtty_startup()" to verify they have indeed overridden @ref omrtty.c::omrtty_vprintf  "omrtty_vprintf()" .
  *
  * @param[in] portLibrary The port library.
  * @param[in] format The format String.
@@ -156,10 +159,10 @@ fake_omrtty_vprintf(struct OMRPortLibrary *portLibrary, const char *format, va_l
  * Override @ref omrtty.c::omrtty_err_vprintf  "omrtty_err_vprintf()" and return a known value to verify any helper
  * functions that  should be calling this function.
  *
- * @ref omrtty.c::omrtty_err_vprintf  "omrtty_err_vprintf()" does not return a value, the caller needs a way to know this overriding
- * function has been called.  As a result this function simply replaces the port library function table slot tty_startup with
- * a second overriding function.  The caller then calls @ref omrtty.c::omrtty_startup "omrtty_startup()" to verify they have
- * indeed overridden @ref omrtty.c::omrtty_err_vprintf  "omrtty_err_vprintf()" .
+ * @ref omrtty.c::omrtty_err_vprintf  "omrtty_err_vprintf()" does not return a value, the caller needs a way to know
+ * this overriding function has been called.  As a result this function simply replaces the port library function table
+ * slot tty_startup with a second overriding function.  The caller then calls @ref omrtty.c::omrtty_startup
+ * "omrtty_startup()" to verify they have indeed overridden @ref omrtty.c::omrtty_err_vprintf  "omrtty_err_vprintf()" .
  *
  * @param[in] portLibrary The port library.
  * @param[in] format The format String.
@@ -258,7 +261,7 @@ TEST(PortTTyTest, tty_test1)
 
 	J9TTY_STARTUP_FUNC real_tty_startup;
 	J9TTY_VPRINTF_FUNC real_tty_vprintf;
-	int32_t  rc;
+	int32_t rc;
 
 	reportTestEntry(OMRPORTLIB, testName);
 
@@ -277,7 +280,7 @@ TEST(PortTTyTest, tty_test1)
 
 	/* Restore the function pointers */
 	OMRPORTLIB->tty_vprintf = real_tty_vprintf;
-	OMRPORTLIB->tty_startup = real_tty_startup ;
+	OMRPORTLIB->tty_startup = real_tty_startup;
 
 	if (J9TTY_STARTUP_PRIVATE_RETURN_VALUE != rc) {
 		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrtty_printf() does not call omrtty_vprintf()\n");
@@ -334,7 +337,7 @@ TEST(PortTTyTest, tty_test2)
 
 	/* Restore the function pointers */
 	OMRPORTLIB->file_vprintf = real_file_vprintf;
-	OMRPORTLIB->tty_startup = real_tty_startup ;
+	OMRPORTLIB->tty_startup = real_tty_startup;
 
 	if (J9TTY_STARTUP_PRIVATE_RETURN_VALUE != rc) {
 		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrtty_vprintf() does not call omrfile_vprintf()\n");
@@ -358,7 +361,6 @@ TEST(PortTTyTest, tty_test3)
 
 	reportTestExit(OMRPORTLIB, testName);
 }
-
 
 /**
  * Verify port library TTY operations.
@@ -393,7 +395,7 @@ TEST(PortTTyTest, tty_test4)
 
 	/* Restore the function pointers */
 	OMRPORTLIB->tty_vprintf = real_tty_vprintf;
-	OMRPORTLIB->tty_startup = real_tty_startup ;
+	OMRPORTLIB->tty_startup = real_tty_startup;
 
 	if (J9TTY_STARTUP_PRIVATE_RETURN_VALUE != rc) {
 		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrtty_err_printf() does not call omrtty_err_vprintf()\n");
@@ -434,7 +436,7 @@ TEST(PortTTyTest, tty_test5)
 
 	/* Restore the function pointers */
 	OMRPORTLIB->file_vprintf = real_file_vprintf;
-	OMRPORTLIB->tty_startup = real_tty_startup ;
+	OMRPORTLIB->tty_startup = real_tty_startup;
 
 	if (J9TTY_STARTUP_PRIVATE_RETURN_VALUE != rc) {
 		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrtty_err_printf() does not call omrfile_vprintf()\n");
@@ -442,7 +444,6 @@ TEST(PortTTyTest, tty_test5)
 
 	reportTestExit(OMRPORTLIB, testName);
 }
-
 
 /**
  * Verify port library TTY operations.

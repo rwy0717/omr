@@ -25,7 +25,7 @@
 #include "thrdsup.h"
 #include "thread_internal.h" /* Must be after thrdsup.h */
 
-#include <sched.h>	/* Must be after <pthread.h> */
+#include <sched.h> /* Must be after <pthread.h> */
 #include <stdio.h>
 #include <string.h>
 
@@ -59,8 +59,9 @@ initialize_priority_map(void)
 		mach_msg_type_number_t msgTypeNumber = HOST_PRIORITY_INFO_COUNT;
 		host_flavor_t flavor = HOST_PRIORITY_INFO;
 
-		if (KERN_SUCCESS == host_info(mach_host_self(), flavor, (host_info_t)&priorityInfoData, &msgTypeNumber)) {
-			for (i = 0; i <= J9THREAD_PRIORITY_MAX; i+=1) {
+		if (KERN_SUCCESS
+		        == host_info(mach_host_self(), flavor, (host_info_t)&priorityInfoData, &msgTypeNumber)) {
+			for (i = 0; i <= J9THREAD_PRIORITY_MAX; i += 1) {
 				priority_map[i] = priorityInfoData.user_priority;
 			}
 		} else {
@@ -99,7 +100,8 @@ Here are the constraints:
 All of these values are calculated for both hard and soft.
 
 Regular ordering:
-minRegularPrio <= lowerBoundRegular <= lowerBoundRegularMapped <= higherBoundRegularMapped <= higherBoundRegular <= maxRegularPrio
+minRegularPrio <= lowerBoundRegular <= lowerBoundRegularMapped <= higherBoundRegularMapped <= higherBoundRegular <=
+maxRegularPrio
 
 Real-time ordering:
 minRealtimePrio <= lowerBoundRealtime <= higherBoundRealtime <= maxRealtimePrio
@@ -114,20 +116,20 @@ void
 printMap(void)
 {
 	int k;
-	for (k = 0; k <= J9THREAD_PRIORITY_MAX; k+=1) {
+	for (k = 0; k <= J9THREAD_PRIORITY_MAX; k += 1) {
 		int pol = omrthread_get_scheduling_policy(k);
-		printf("j9 thread prio mapping: %d -> %d %s\n", k,
-			   omrthread_get_mapped_priority(k), (pol == SCHED_OTHER) ? "SCHED_OTHER" : ((pol == SCHED_RR) ? "SCHED_RR" : "SCHED_FIFO"));
+		printf("j9 thread prio mapping: %d -> %d %s\n", k, omrthread_get_mapped_priority(k),
+		        (pol == SCHED_OTHER) ? "SCHED_OTHER" : ((pol == SCHED_RR) ? "SCHED_RR" : "SCHED_FIFO"));
 	}
 
 	fprintf(stderr, "min rt %d, max rt %d\n", minRealtimePrio, maxRealtimePrio);
 	fprintf(stderr, "min reg %d, max reg %d\n", minRegularPrio, maxRegularPrio);
 	fprintf(stderr, "min bound rt %d, max bound rt %d\n", lowerBoundRealtime, higherBoundRealtime);
 	fprintf(stderr, "min  bound reg %d, max bound reg %d\n", lowerBoundRegular, higherBoundRegular);
-	fprintf(stderr, "min  bound reg mapped %d, max bound reg mapped %d\n", lowerBoundRegularMapped, higherBoundRegularMapped);
+	fprintf(stderr, "min  bound reg mapped %d, max bound reg mapped %d\n", lowerBoundRegularMapped,
+	        higherBoundRegularMapped);
 }
 #endif /* defined(DEBUG) */
-
 
 static intptr_t
 initialize_realtime_priority_map(void)
@@ -162,7 +164,8 @@ initialize_realtime_priority_map(void)
 	range = higherBoundRealtime - lowerBoundRealtime;
 
 	if (0 > range) {
-		/* This line should be unreachable: the POSIX.4 standard chose larger numbers to represent stronger priorities */
+		/* This line should be unreachable: the POSIX.4 standard chose larger numbers to represent stronger
+		 * priorities */
 		return -1;
 	}
 
@@ -239,9 +242,9 @@ initialize_realtime_priority_map(void)
 	/* Map all regular threads to the same priority. */
 	lowerBoundRegularMapped = higherBoundRegularMapped = defaultPrio;
 
-	initializeRange(J9THREAD_PRIORITY_USER_MIN, J9THREAD_PRIORITY_USER_MAX, lowerBoundRegularMapped, higherBoundRegularMapped, priority_map);
+	initializeRange(J9THREAD_PRIORITY_USER_MIN, J9THREAD_PRIORITY_USER_MAX, lowerBoundRegularMapped,
+	        higherBoundRegularMapped, priority_map);
 	initializePolicy(J9THREAD_PRIORITY_USER_MIN, J9THREAD_PRIORITY_USER_MAX, policy_regular_thread, priority_map);
-
 
 	/* assign the lowest priority, which is outside the range of java thread priorities */
 
@@ -260,7 +263,6 @@ initialize_realtime_priority_map(void)
 	highestPrio = higherBoundRegularMapped;
 	initializeRange(J9THREAD_PRIORITY_MAX, J9THREAD_PRIORITY_MAX, highestPrio, highestPrio, priority_map);
 	initializePolicy(J9THREAD_PRIORITY_MAX, J9THREAD_PRIORITY_MAX, policy_regular_thread, priority_map);
-
 
 	/*
 	 * Note that it is not just when using fixed policies and prios that the current thread needs adjusting.
@@ -341,7 +343,7 @@ initializePolicy(int range_start, int range_end, int policy, int map[])
 {
 	int i;
 
-	for (i = range_start; i <= range_end; i+=1) {
+	for (i = range_start; i <= range_end; i += 1) {
 		map[i] = omrthread_get_mapped_priority(i) + PRIORITY_MAP_ADJUSTED_POLICY(policy);
 	}
 }
@@ -372,13 +374,13 @@ initializeRange(int start_index, int end_index, int range_min, int range_max, in
 				int mid = (tmpmin + tmpmax) / 2;
 
 				delta = (mid - tmpmin) / midpoint;
-				for (i = 1; i < midpoint; i+=1) {
+				for (i = 1; i < midpoint; i += 1) {
 					values[start_index + midpoint - i] = (mid - delta * i) / 1024;
 				}
 
 				tailcount = interval - midpoint;
 				delta = (tmpmax - mid) / tailcount;
-				for (i = 1; i < tailcount; i+=1) {
+				for (i = 1; i < tailcount; i += 1) {
 					values[start_index + midpoint + i] = (mid + delta * i) / 1024;
 				}
 			}

@@ -33,11 +33,10 @@ class MM_EnvironmentBase;
 
 struct CLI_THREAD_TYPE;
 
-class GC_ObjectModelDelegate
-{
-/*
- * Member data and types
- */
+class GC_ObjectModelDelegate {
+	/*
+	 * Member data and types
+	 */
 private:
 	/**
 	 * OMR requires that the language reserve the least significant byte in the first fomrobject_t
@@ -61,10 +60,9 @@ private:
 
 protected:
 public:
-
-/*
- * Member functions
- */
+	/*
+	 * Member functions
+	 */
 
 private:
 protected:
@@ -78,38 +76,22 @@ public:
 	 * @param objectPtr the object to botain indirct reference from
 	 * @return a pointer to the indirect object, or NULL if none
 	 */
-	MMINLINE omrobjectptr_t
-	getIndirectObject(omrobjectptr_t objectPtr)
-	{
-		return NULL;
-	}
+	MMINLINE omrobjectptr_t getIndirectObject(omrobjectptr_t objectPtr) { return NULL; }
 
 	/**
 	 * Get the fomrobjectptr_t offset of the slot containing the object header.
 	 */
-	MMINLINE uintptr_t
-	getObjectHeaderSlotOffset()
-	{
-		return _objectHeaderSlotOffset;
-	}
+	MMINLINE uintptr_t getObjectHeaderSlotOffset() { return _objectHeaderSlotOffset; }
 
 	/**
 	 * Get the bit offset to the flags byte in object headers.
 	 */
-	MMINLINE uintptr_t
-	getObjectHeaderSlotFlagsShift()
-	{
-		return _objectHeaderSlotFlagsShift;
-	}
+	MMINLINE uintptr_t getObjectHeaderSlotFlagsShift() { return _objectHeaderSlotFlagsShift; }
 
 	/**
 	 * Get the exact size of the object header, in bytes. This includes the size of the metadata slot.
 	 */
-	MMINLINE uintptr_t
-	getObjectHeaderSizeInBytes(omrobjectptr_t objectPtr)
-	{
-		return sizeof(ObjectHeader);
-	}
+	MMINLINE uintptr_t getObjectHeaderSizeInBytes(omrobjectptr_t objectPtr) { return sizeof(ObjectHeader); }
 
 	/**
 	 * Get the exact size of the object data, in bytes. This excludes the size of the object header and
@@ -119,8 +101,7 @@ public:
 	 * @param[in] objectPtr points to the object to determine size for
 	 * @return the exact size of an object, in bytes, excluding padding bytes and header bytes
 	 */
-	MMINLINE uintptr_t
-	getObjectSizeInBytesWithoutHeader(omrobjectptr_t objectPtr)
+	MMINLINE uintptr_t getObjectSizeInBytesWithoutHeader(omrobjectptr_t objectPtr)
 	{
 		return getObjectSizeInBytesWithHeader(objectPtr) - getObjectHeaderSizeInBytes(objectPtr);
 	}
@@ -133,8 +114,7 @@ public:
 	 * @param[in] objectPtr points to the object to determine size for
 	 * @return the exact size of an object, in bytes, excluding padding bytes
 	 */
-	MMINLINE uintptr_t
-	getObjectSizeInBytesWithHeader(omrobjectptr_t objectPtr)
+	MMINLINE uintptr_t getObjectSizeInBytesWithHeader(omrobjectptr_t objectPtr)
 	{
 		return objectPtr->header.sizeInBytes();
 	}
@@ -150,8 +130,7 @@ public:
 	 * @param[in] objectPtr points to the object to determine size for
 	 * @return the total size of an object, in bytes, including discontiguous parts
 	 */
-	MMINLINE uintptr_t
-	getTotalFootprintInBytes(omrobjectptr_t objectPtr)
+	MMINLINE uintptr_t getTotalFootprintInBytes(omrobjectptr_t objectPtr)
 	{
 		Assert_MM_false(isIndexable(objectPtr));
 		return getObjectSizeInBytesWithHeader(objectPtr);
@@ -164,10 +143,12 @@ public:
 	 *
 	 * @param[in] env points to the environment for the calling thread
 	 * @param[in] allocatedBytes points to the heap memory allocated for the object
-	 * @param[in] allocateInitialization points to the MM_AllocateInitialization instance used to allocate the heap memory
+	 * @param[in] allocateInitialization points to the MM_AllocateInitialization instance used to allocate the heap
+	 * memory
 	 * @return pointer to the initialized object, or NULL if initialization fails
 	 */
-	omrobjectptr_t initializeAllocation(MM_EnvironmentBase *env, void *allocatedBytes, MM_AllocateInitialization *allocateInitialization);
+	omrobjectptr_t initializeAllocation(
+	        MM_EnvironmentBase *env, void *allocatedBytes, MM_AllocateInitialization *allocateInitialization);
 
 	/**
 	 * Returns TRUE if an object is indexable, FALSE otherwise. Languages that support indexable objects
@@ -176,17 +157,13 @@ public:
 	 * @param objectPtr pointer to the object
 	 * @return TRUE if object is indexable, FALSE otherwise
 	 */
-	MMINLINE bool
-	isIndexable(omrobjectptr_t objectPtr)
-	{
-		return false;
-	}
+	MMINLINE bool isIndexable(omrobjectptr_t objectPtr) { return false; }
 
 	/**
 	 * The following methods (defined(OMR_GC_MODRON_SCAVENGER)) are required if generational GC is
- 	 * configured for the build (--enable-OMR_GC_MODRON_SCAVENGER in configure_includes/configure_*.mk).
- 	 * They typically involve a MM_ForwardedHeader object, and allow information about the forwarded
- 	 * object to be obtained.
+	 * configured for the build (--enable-OMR_GC_MODRON_SCAVENGER in configure_includes/configure_*.mk).
+	 * They typically involve a MM_ForwardedHeader object, and allow information about the forwarded
+	 * object to be obtained.
 	 */
 #if defined(OMR_GC_MODRON_SCAVENGER)
 	/**
@@ -195,11 +172,7 @@ public:
 	 * @param forwardedHeader pointer to the MM_ForwardedHeader instance encapsulating the object
 	 * @return TRUE if object is indexable, FALSE otherwise
 	 */
-	MMINLINE bool
-	isIndexable(MM_ForwardedHeader *forwardedHeader)
-	{
-		return false;
-	}
+	MMINLINE bool isIndexable(MM_ForwardedHeader *forwardedHeader) { return false; }
 
 	/**
 	 * Get the instance size (total) of a forwarded object from the forwarding pointer. The  size must
@@ -208,8 +181,7 @@ public:
 	 * @param[in] forwardedHeader pointer to the MM_ForwardedHeader instance encapsulating the object
 	 * @return The instance size (total) of the forwarded object
 	 */
-	MMINLINE uintptr_t
-	getForwardedObjectSizeInBytes(MM_ForwardedHeader *forwardedHeader)
+	MMINLINE uintptr_t getForwardedObjectSizeInBytes(MM_ForwardedHeader *forwardedHeader)
 	{
 		ObjectHeader header(forwardedHeader->getPreservedSlot());
 		return header.sizeInBytes();
@@ -225,11 +197,7 @@ public:
 	 * @param objectPtr points to an object
 	 * @return true if object holds indirect references to heap objects
 	 */
-	MMINLINE bool
-	hasIndirectObjectReferents(CLI_THREAD_TYPE *thread, omrobjectptr_t objectPtr)
-	{
-		return false;
-	}
+	MMINLINE bool hasIndirectObjectReferents(CLI_THREAD_TYPE *thread, omrobjectptr_t objectPtr) { return false; }
 
 	/**
 	 * Calculate the actual object size and the size adjusted to object alignment. The calculated object size
@@ -241,7 +209,9 @@ public:
 	 * @param[out] objectReserveSizeInBytes size adjusted to object alignment
 	 * @param[out] hotFieldAlignmentDescriptor pointer to hot field alignment descriptor for class (or NULL)
 	 */
-	void calculateObjectDetailsForCopy(MM_EnvironmentBase *env, MM_ForwardedHeader *forwardedHeader, uintptr_t *objectCopySizeInBytes, uintptr_t *objectReserveSizeInBytes, uintptr_t *hotFieldAlignmentDescriptor);
+	void calculateObjectDetailsForCopy(MM_EnvironmentBase *env, MM_ForwardedHeader *forwardedHeader,
+	        uintptr_t *objectCopySizeInBytes, uintptr_t *objectReserveSizeInBytes,
+	        uintptr_t *hotFieldAlignmentDescriptor);
 #endif /* defined(OMR_GC_MODRON_SCAVENGER) */
 
 	/**

@@ -24,37 +24,35 @@
 #include "tests/FooBarTest.hpp"
 #include "tests/injectors/BarIlInjector.hpp"
 
-namespace TestCompiler
-{
+namespace TestCompiler {
 
 bool
 BarIlInjector::injectIL()
-   {
-   FooBarTest *test = static_cast<FooBarTest *>(_test);
-   createBlocks(4);
+{
+	FooBarTest *test = static_cast<FooBarTest *>(_test);
+	createBlocks(4);
 
+	// 4 blocks requested start at 2 (0 is entry, 1 is exit)
+	// by default, generate to block 2
 
-   // 4 blocks requested start at 2 (0 is entry, 1 is exit)
-   // by default, generate to block 2
+	// Block2: blocks(0)
+	// if (index < 0) goto Block5;
+	ifjump(TR::ificmplt, indexParameter(), iconst(0), 3);
 
-   // Block2: blocks(0)
-   // if (index < 0) goto Block5;
-   ifjump(TR::ificmplt, indexParameter(), iconst(0), 3);
+	// Block3: blocks(1)
+	// if (index >= 100) goto Block5;
+	ifjump(TR::ificmpge, indexParameter(), iconst(test->dataArraySize()), 3);
 
-   // Block3: blocks(1)
-   // if (index >= 100) goto Block5;
-   ifjump(TR::ificmpge, indexParameter(), iconst(test->dataArraySize()), 3);
+	// Block4: blocks(2)
+	// return dataArray[index];
+	returnValue(arrayLoad(staticAddress(test->dataArray()), indexParameter(), Int32));
 
-   // Block4: blocks(2)
-   // return dataArray[index];
-   returnValue(arrayLoad(staticAddress(test->dataArray()), indexParameter(), Int32));
+	// Block5: blocks(3)
+	// return -1;
+	generateToBlock(3);
+	returnValue(iconst(-1));
 
-   // Block5: blocks(3)
-   // return -1;
-   generateToBlock(3);
-   returnValue(iconst(-1));
-
-   return true;
-   }
+	return true;
+}
 
 } // namespace TestCompiler

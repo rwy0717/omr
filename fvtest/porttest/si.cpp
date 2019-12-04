@@ -108,9 +108,9 @@ validate_executable_name(const char *expected, const char *found)
 	/* Check whether argv0 ends with the extension ".exe".  If not, we need to reduce
 	 * the number of characters to compare (against the executable name found by API).
 	 */
-	if (strncmp(expected_base_path + (expected_length - J9FILE_EXTENSION_LENGTH),
-				J9FILE_EXTENSION,
-				J9FILE_EXTENSION_LENGTH) != 0) {
+	if (strncmp(expected_base_path + (expected_length - J9FILE_EXTENSION_LENGTH), J9FILE_EXTENSION,
+	            J9FILE_EXTENSION_LENGTH)
+	        != 0) {
 		length -= J9FILE_EXTENSION_LENGTH;
 	}
 #endif /* defined(OMR_OS_WINDOWS) */
@@ -145,19 +145,17 @@ TEST(PortSysinfoTest, sysinfo_test0)
 		goto done;
 	}
 
-	if (validate_executable_name(argv0, 		 /* expected */
-								 executable_name /* found through API */
-								)
-	) {
+	if (validate_executable_name(argv0, /* expected */
+	            executable_name /* found through API */
+	            )) {
 		portTestEnv->log("Executable name test passed.\n"
-					  "Expected (argv0=%s).\n  Found=%s.\n",
-					  argv0,
-					  executable_name);
+		                 "Expected (argv0=%s).\n  Found=%s.\n",
+		        argv0, executable_name);
 	} else {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Executable name test failed.\n"
-						   "  Expected (argv0=%s).\n  Found=%s.\n",
-						   argv0,
-						   executable_name);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Executable name test failed.\n"
+		        "  Expected (argv0=%s).\n  Found=%s.\n",
+		        argv0, executable_name);
 		goto done;
 	}
 
@@ -240,7 +238,8 @@ TEST(PortSysinfoTest, sysinfo_test1)
 	rc = omrsysinfo_get_username(username, length - 1);
 
 	if (length > rc) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Error if username buffer is too short: rc= %d, Expecting %d\n", rc, 1);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "Error if username buffer is too short: rc= %d, Expecting %d\n", rc, 1);
 	}
 
 	reportTestExit(OMRPORTLIB, testName);
@@ -298,7 +297,8 @@ TEST(PortSysinfoTest, sysinfo_test2)
 	rc = omrsysinfo_get_groupname(groupname, length - 1);
 
 	if (length > rc) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Error if groupname buffer is too short: rc= %d, Expecting %d\n", rc, 1);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "Error if groupname buffer is too short: rc= %d, Expecting %d\n", rc, 1);
 	}
 
 	reportTestExit(OMRPORTLIB, testName);
@@ -316,7 +316,8 @@ TEST(PortSysinfoTest, sysinfo_get_OS_type_test)
 
 	osName = omrsysinfo_get_OS_type();
 	if (osName == NULL) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_get_OS_type returned NULL - expected OS name.\n", 0, 1);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrsysinfo_get_OS_type returned NULL - expected OS name.\n", 0, 1);
 		reportTestExit(OMRPORTLIB, testName);
 		return;
 	} else {
@@ -327,7 +328,8 @@ TEST(PortSysinfoTest, sysinfo_get_OS_type_test)
 
 	osVersion = omrsysinfo_get_OS_version();
 	if (osVersion == NULL) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_get_OS_version returned NULL - expected OS name.\n", 0, 1);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrsysinfo_get_OS_version returned NULL - expected OS name.\n", 0, 1);
 		reportTestExit(OMRPORTLIB, testName);
 		return;
 	} else {
@@ -338,15 +340,17 @@ TEST(PortSysinfoTest, sysinfo_get_OS_type_test)
 
 #if defined(OMR_OS_WINDOWS)
 	if (NULL == strstr(osName, "Windows")) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_get_OS_version does not contain \"Windows\".\n", 0, 1);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrsysinfo_get_OS_version does not contain \"Windows\".\n", 0, 1);
 		reportTestExit(OMRPORTLIB, testName);
 		return;
 	} else if (0 == strcmp(osName, "Windows")) {
 		/*
-		 * This means we are running a new, unrecognized version of Windows.  We need to update  omrsysinfo_get_OS_type
-		 * to recognize the specific version.
+		 * This means we are running a new, unrecognized version of Windows.  We need to update
+		 * omrsysinfo_get_OS_type to recognize the specific version.
 		 */
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_get_OS_version returned the default Windows version.\n", 0, 1);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrsysinfo_get_OS_version returned the default Windows version.\n", 0, 1);
 		reportTestExit(OMRPORTLIB, testName);
 		return;
 	}
@@ -378,7 +382,6 @@ TEST(PortSysinfoTest, sysinfo_test3)
 
 	reportTestExit(OMRPORTLIB, testName);
 }
-
 
 TEST(PortSysinfoTest, sysinfo_test_sysinfo_ulimit_iterator)
 {
@@ -424,7 +427,8 @@ TEST(PortSysinfoTest, sysinfo_test_sysinfo_ulimit_iterator)
 			}
 
 		} else {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "\tomrsysinfo_limit_iterator_next returned: %i when 0 was expected\n", rc);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "\tomrsysinfo_limit_iterator_next returned: %i when 0 was expected\n", rc);
 		}
 	}
 
@@ -433,7 +437,6 @@ done:
 	portTestEnv->changeIndent(-1);
 	reportTestExit(OMRPORTLIB, testName);
 }
-
 
 /**
  *
@@ -462,7 +465,8 @@ TEST(PortSysinfoTest, sysinfo_test_sysinfo_env_iterator)
 	reportTestEntry(OMRPORTLIB, testName);
 	portTestEnv->changeIndent(1);
 
-	/* Test 1: NULL buffer - Pass in NULL for buffer, make sure we get back a positive integer describing the size, or a crash */
+	/* Test 1: NULL buffer - Pass in NULL for buffer, make sure we get back a positive integer describing the size,
+	 * or a crash */
 	buffer = NULL;
 	rc = omrsysinfo_env_iterator_init(&state, buffer, bufferSizeBytes);
 
@@ -470,7 +474,9 @@ TEST(PortSysinfoTest, sysinfo_test_sysinfo_env_iterator)
 		if (OMRPORT_ERROR_NOT_SUPPORTED_ON_THIS_PLATFORM == rc) {
 			portTestEnv->log(LEVEL_ERROR, "This platform does not support the env iterator\n");
 		} else if (OMRPORT_ERROR_SYSINFO_ENV_INIT_CRASHED_COPYING_BUFFER == rc) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "\tCrash passing in NULL buffer while running single-threaded. This is a failure because no-one else should have been able to modify it\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "\tCrash passing in NULL buffer while running single-threaded. This is a failure "
+			        "because no-one else should have been able to modify it\n");
 		} else {
 			outputErrorMessage(PORTTEST_ERROR_ARGS, "\tomrsysinfo_env_iterator_init returned: %i\n", rc);
 		}
@@ -488,7 +494,8 @@ TEST(PortSysinfoTest, sysinfo_test_sysinfo_env_iterator)
 
 	buffer = omrmem_allocate_memory(envSize, OMRMEM_CATEGORY_PORT_LIBRARY);
 	if (NULL == buffer) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "OutOfMemory allocating buffer for test - where's all the memory?");
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "OutOfMemory allocating buffer for test - where's all the memory?");
 		goto done;
 	}
 
@@ -510,7 +517,8 @@ TEST(PortSysinfoTest, sysinfo_test_sysinfo_env_iterator)
 			portTestEnv->log("%s\n", element.nameAndValue);
 			l++;
 		} else {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "\tomrsysinfo_env_iterator_next returned: %i when 0 was expected\n", rc);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "\tomrsysinfo_env_iterator_next returned: %i when 0 was expected\n", rc);
 			goto done;
 			break;
 		}
@@ -523,7 +531,8 @@ TEST(PortSysinfoTest, sysinfo_test_sysinfo_env_iterator)
 	buffer = omrmem_allocate_memory(bufferSizeBytes, OMRMEM_CATEGORY_PORT_LIBRARY);
 
 	if (NULL == buffer) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "OutOfMemory allocating buffer for test - where's all the memory?");
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "OutOfMemory allocating buffer for test - where's all the memory?");
 		goto done;
 	}
 
@@ -531,14 +540,18 @@ TEST(PortSysinfoTest, sysinfo_test_sysinfo_env_iterator)
 
 	if (rc < 0) {
 		if (OMRPORT_ERROR_SYSINFO_ENV_INIT_CRASHED_COPYING_BUFFER == rc) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "\tCrash passing in NULL buffer while running single-threaded. This is a failure because no-one else should have been able to modify it\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "\tCrash passing in NULL buffer while running single-threaded. This is a failure "
+			        "because no-one else should have been able to modify it\n");
 		}
 		outputErrorMessage(PORTTEST_ERROR_ARGS, "\tomrsysinfo_env_iterator_init returned: %i\n", rc);
 		goto done;
 	} else {
 		envSize = rc;
 #if defined(SI_DEBUG)
-		portTestEnv->log("Should have a buffer of size %x bytes, using one of size %x instead, which will result in a truncated environment\n", envSize, bufferSizeBytes);
+		portTestEnv->log("Should have a buffer of size %x bytes, using one of size %x instead, which will "
+		                 "result in a truncated environment\n",
+		        envSize, bufferSizeBytes);
 #endif
 	}
 
@@ -554,7 +567,8 @@ TEST(PortSysinfoTest, sysinfo_test_sysinfo_env_iterator)
 		if (0 == rc) {
 			l++;
 		} else {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "\tomrsysinfo_env_iterator_next returned: %i when 0 was expected\n", rc);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "\tomrsysinfo_env_iterator_next returned: %i when 0 was expected\n", rc);
 			goto done;
 			break;
 		}
@@ -566,7 +580,8 @@ TEST(PortSysinfoTest, sysinfo_test_sysinfo_env_iterator)
 	bufferSizeBytes = 1;
 	buffer = omrmem_allocate_memory(bufferSizeBytes, OMRMEM_CATEGORY_PORT_LIBRARY);
 	if (NULL == buffer) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "OutOfMemory allocating buffer for test - where's all the memory?");
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "OutOfMemory allocating buffer for test - where's all the memory?");
 		goto done;
 	}
 
@@ -574,14 +589,18 @@ TEST(PortSysinfoTest, sysinfo_test_sysinfo_env_iterator)
 
 	if (rc < 0) {
 		if (OMRPORT_ERROR_SYSINFO_ENV_INIT_CRASHED_COPYING_BUFFER == rc) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "\tCrash passing in NULL buffer while running single-threaded. This is a failure because no-one else should have been able to modify it\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "\tCrash passing in NULL buffer while running single-threaded. This is a failure "
+			        "because no-one else should have been able to modify it\n");
 		}
 		outputErrorMessage(PORTTEST_ERROR_ARGS, "\tomrsysinfo_env_iterator_init returned: %i\n", rc);
 		goto done;
 	} else {
 		envSize = rc;
 #if defined(SI_DEBUG)
-		portTestEnv->log("Should have a buffer of size %x bytes, using one of size %x instead, which will result in a truncated environment\n", envSize, bufferSizeBytes);
+		portTestEnv->log("Should have a buffer of size %x bytes, using one of size %x instead, which will "
+		                 "result in a truncated environment\n",
+		        envSize, bufferSizeBytes);
 #endif
 	}
 
@@ -597,7 +616,8 @@ TEST(PortSysinfoTest, sysinfo_test_sysinfo_env_iterator)
 		if (0 == rc) {
 			l++;
 		} else {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "\tomrsysinfo_env_iterator_next returned: %i when 0 was expected\n", rc);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "\tomrsysinfo_env_iterator_next returned: %i when 0 was expected\n", rc);
 			goto done;
 			break;
 		}
@@ -612,7 +632,6 @@ done:
 	portTestEnv->changeIndent(-1);
 	reportTestExit(OMRPORTLIB, testName);
 }
-
 
 /* sysinfo_set_limit and sysinfo_get_limit tests will not work on windows */
 #if !defined(OMR_OS_WINDOWS)
@@ -672,7 +691,8 @@ TEST(PortSysinfoTest, sysinfo_test_sysinfo_set_limit_ADDRESS_SPACE)
 		if (originalMaxLimit == currentLimit) {
 			portTestEnv->log("omrsysinfo_set_limit set ADDRESS_SPACE hard max successful\n");
 		} else {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_set_limit set ADDRESS_SPACE hard max FAILED\n");
+			outputErrorMessage(
+			        PORTTEST_ERROR_ARGS, "omrsysinfo_set_limit set ADDRESS_SPACE hard max FAILED\n");
 			reportTestExit(OMRPORTLIB, testName);
 			return;
 		}
@@ -691,16 +711,17 @@ TEST(PortSysinfoTest, sysinfo_test_sysinfo_set_limit_ADDRESS_SPACE)
 		if (as1 + 1 == currentLimit) {
 			portTestEnv->log("omrsysinfo_set_limit set ADDRESS_SPACE hard max successful\n");
 		} else {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_set_limit set ADDRESS_SPACE hard max FAILED\n");
+			outputErrorMessage(
+			        PORTTEST_ERROR_ARGS, "omrsysinfo_set_limit set ADDRESS_SPACE hard max FAILED\n");
 			reportTestExit(OMRPORTLIB, testName);
 			return;
 		}
 
-
 		/* restore original hard limit */
 		rc = omrsysinfo_set_limit(OMRPORT_RESOURCE_ADDRESS_SPACE | OMRPORT_LIMIT_HARD, originalMaxLimit);
 		if (rc == -1) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "restoring the original hard limit failed omrsysinfo_set_limit returns -1.\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "restoring the original hard limit failed omrsysinfo_set_limit returns -1.\n");
 			reportTestExit(OMRPORTLIB, testName);
 			return;
 		}
@@ -711,7 +732,8 @@ TEST(PortSysinfoTest, sysinfo_test_sysinfo_set_limit_ADDRESS_SPACE)
 	   then raised again the soft limit isn't automatically raised. */
 	rc = omrsysinfo_set_limit(OMRPORT_RESOURCE_ADDRESS_SPACE, originalCurLimit);
 	if (rc == -1) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "restoring the original soft limit failed omrsysinfo_set_limit returns -1.\n");
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "restoring the original soft limit failed omrsysinfo_set_limit returns -1.\n");
 		reportTestExit(OMRPORTLIB, testName);
 		return;
 	}
@@ -758,7 +780,6 @@ TEST(PortSysinfoTest, sysinfo_test_sysinfo_set_limit_CORE_FILE)
 		return;
 	}
 
-
 	/* save original hard limit */
 	rc = omrsysinfo_get_limit(OMRPORT_RESOURCE_CORE_FILE | OMRPORT_LIMIT_HARD, &originalMaxLimit);
 
@@ -803,7 +824,8 @@ TEST(PortSysinfoTest, sysinfo_test_sysinfo_set_limit_CORE_FILE)
 		/* restore original hard limit */
 		rc = omrsysinfo_set_limit(OMRPORT_RESOURCE_CORE_FILE | OMRPORT_LIMIT_HARD, originalMaxLimit);
 		if (rc == -1) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "restoring the original hard limit failed omrsysinfo_set_limit returns -1.\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "restoring the original hard limit failed omrsysinfo_set_limit returns -1.\n");
 			reportTestExit(OMRPORTLIB, testName);
 			return;
 		}
@@ -814,7 +836,8 @@ TEST(PortSysinfoTest, sysinfo_test_sysinfo_set_limit_CORE_FILE)
 	   then raised again the soft limit isn't automatically raised. */
 	rc = omrsysinfo_set_limit(OMRPORT_RESOURCE_CORE_FILE, originalCurLimit);
 	if (rc == -1) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "restoring the original soft limit failed omrsysinfo_set_limit returns -1.\n");
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "restoring the original soft limit failed omrsysinfo_set_limit returns -1.\n");
 		reportTestExit(OMRPORTLIB, testName);
 		return;
 	}
@@ -822,167 +845,172 @@ TEST(PortSysinfoTest, sysinfo_test_sysinfo_set_limit_CORE_FILE)
 	reportTestExit(OMRPORTLIB, testName);
 }
 
-	/**
-	 *
-	 * Test omrsysinfo_test_sysinfo_set_limit and omrsysinfo_test_sysinfo_get_limit
-	 * with resourceID OMRPORT_RESOURCE_FILE_DESCRIPTORS
-	 *
-	 */
-	TEST(PortSysinfoTest, sysinfo_test_sysinfo_set_limit_FILE_DESCRIPTORS)
-	{
-		OMRPORT_ACCESS_FROM_OMRPORT(portTestEnv->getPortLibrary());
-		const char *testName = "omrsysinfo_test_sysinfo_set_limit_FILE_DESCRIPTORS";
-		uint32_t rc = OMRPORT_LIMIT_UNKNOWN;
-		uint64_t originalSoftLimit = 0;
-		uint64_t finalSoftLimit = 0;
-		uint64_t softSetToHardLimit = 0;
-		uint64_t originalHardLimit = 0;
-		uint64_t currentLimit = 0;
-		const uint64_t descriptorLimit = 256;
+/**
+ *
+ * Test omrsysinfo_test_sysinfo_set_limit and omrsysinfo_test_sysinfo_get_limit
+ * with resourceID OMRPORT_RESOURCE_FILE_DESCRIPTORS
+ *
+ */
+TEST(PortSysinfoTest, sysinfo_test_sysinfo_set_limit_FILE_DESCRIPTORS)
+{
+	OMRPORT_ACCESS_FROM_OMRPORT(portTestEnv->getPortLibrary());
+	const char *testName = "omrsysinfo_test_sysinfo_set_limit_FILE_DESCRIPTORS";
+	uint32_t rc = OMRPORT_LIMIT_UNKNOWN;
+	uint64_t originalSoftLimit = 0;
+	uint64_t finalSoftLimit = 0;
+	uint64_t softSetToHardLimit = 0;
+	uint64_t originalHardLimit = 0;
+	uint64_t currentLimit = 0;
+	const uint64_t descriptorLimit = 256;
 
-		reportTestEntry(OMRPORTLIB, testName);
+	reportTestEntry(OMRPORTLIB, testName);
 
-		/* save original soft limit */
-		rc = omrsysinfo_get_limit(OMRPORT_RESOURCE_FILE_DESCRIPTORS, &originalSoftLimit);
+	/* save original soft limit */
+	rc = omrsysinfo_get_limit(OMRPORT_RESOURCE_FILE_DESCRIPTORS, &originalSoftLimit);
+	if (OMRPORT_LIMIT_UNKNOWN == rc) {
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_get_limit FAILED: OMRPORT_LIMIT_UNKNOWN\n");
+		reportTestExit(OMRPORTLIB, testName);
+		return;
+	}
+	portTestEnv->log(LEVEL_ERROR, "originalSoftLimit=%llu\n", originalSoftLimit);
+	finalSoftLimit = originalSoftLimit;
+
+	rc = omrsysinfo_set_limit(OMRPORT_RESOURCE_FILE_DESCRIPTORS, descriptorLimit);
+	if (0 != rc) {
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_set_limit FAILED rc=%d\n", rc);
+		reportTestExit(OMRPORTLIB, testName);
+		return;
+	}
+
+	rc = omrsysinfo_get_limit(OMRPORT_RESOURCE_FILE_DESCRIPTORS, &currentLimit);
+	if (OMRPORT_LIMIT_UNKNOWN == rc) {
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_get_limit FAILED: OMRPORT_LIMIT_UNKNOWN\n");
+		reportTestExit(OMRPORTLIB, testName);
+		return;
+	}
+	if (descriptorLimit == currentLimit) {
+		portTestEnv->log("omrsysinfo_set_limit set FILE_DESCRIPTORS soft limit successful\n");
+	} else {
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "omrsysinfo_set_limit set FILE_DESCRIPTORS soft limit FAILED originalSoftLimit=%lld "
+		        "Expected=%lld actual==%lld\n",
+		        originalSoftLimit, descriptorLimit, currentLimit);
+		reportTestExit(OMRPORTLIB, testName);
+		return;
+	}
+
+	/* save original hard limit */
+	rc = omrsysinfo_get_limit(OMRPORT_RESOURCE_FILE_DESCRIPTORS | OMRPORT_LIMIT_HARD, &originalHardLimit);
+	if (OMRPORT_LIMIT_UNKNOWN == rc) {
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_get_limit FAILED: OMRPORT_LIMIT_UNKNOWN\n");
+		reportTestExit(OMRPORTLIB, testName);
+		return;
+	}
+	portTestEnv->log(LEVEL_ERROR, "originalHardLimit=%llu\n", originalHardLimit);
+
+	/* set soft limit to hard limit */
+	rc = omrsysinfo_set_limit(OMRPORT_RESOURCE_FILE_DESCRIPTORS, originalHardLimit);
+	if (0 != rc) {
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_set_limit soft = hard FAILED rc=%d\n", rc);
+		reportTestExit(OMRPORTLIB, testName);
+		return;
+	}
+
+	/* get new soft limit */
+	rc = omrsysinfo_get_limit(OMRPORT_RESOURCE_FILE_DESCRIPTORS, &softSetToHardLimit);
+	if (OMRPORT_LIMIT_UNKNOWN == rc) {
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_get_limit FAILED: OMRPORT_LIMIT_UNKNOWN\n");
+		reportTestExit(OMRPORTLIB, testName);
+		return;
+	}
+	portTestEnv->log(LEVEL_ERROR, "soft set to hard limit=%llu\n", softSetToHardLimit);
+
+	/* set soft limit to old value */
+	rc = omrsysinfo_set_limit(OMRPORT_RESOURCE_FILE_DESCRIPTORS, originalSoftLimit);
+	if (0 != rc) {
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_set_limit reset soft FAILED rc=%d\n", rc);
+		reportTestExit(OMRPORTLIB, testName);
+		return;
+	}
+
+	rc = omrsysinfo_get_limit(OMRPORT_RESOURCE_FILE_DESCRIPTORS | OMRPORT_LIMIT_HARD, &currentLimit);
+	if (currentLimit != originalHardLimit) {
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_get_limit FAILED: hard limit changed\n");
+		reportTestExit(OMRPORTLIB, testName);
+		return;
+	}
+
+	/* lowering the hard limit is irreversible unless privileged */
+	if (0 != geteuid()) { /* normal user */
+		/* setting the hard limit from unlimited to a finite value has unpredictable results:
+		 * the actual value may be much smaller than requested.
+		 * In that case, just try setting it to its current value (softSetToHardLimit) or a value slightly
+		 * lower. Ensure that we don't try to set the hard limit to a value less than the current soft limit
+		 * (i.e. originalSoftLimit).
+		 */
+		uint64_t newHardLimit = ((OMRPORT_LIMIT_UNLIMITED == rc) || (originalSoftLimit == softSetToHardLimit))
+		        ? softSetToHardLimit
+		        : softSetToHardLimit - 1;
+
+		rc = omrsysinfo_set_limit(OMRPORT_RESOURCE_FILE_DESCRIPTORS | OMRPORT_LIMIT_HARD, newHardLimit);
+		if (0 != rc) {
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "omrsysinfo_set_limit set hard limit=%lld FAILED rc=%d\n", rc, newHardLimit);
+			reportTestExit(OMRPORTLIB, testName);
+			return;
+		}
+
+		rc = omrsysinfo_get_limit(OMRPORT_RESOURCE_FILE_DESCRIPTORS | OMRPORT_LIMIT_HARD, &currentLimit);
 		if (OMRPORT_LIMIT_UNKNOWN == rc) {
 			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_get_limit FAILED: OMRPORT_LIMIT_UNKNOWN\n");
 			reportTestExit(OMRPORTLIB, testName);
 			return;
 		}
-		portTestEnv->log(LEVEL_ERROR, "originalSoftLimit=%llu\n", originalSoftLimit);
-		finalSoftLimit = originalSoftLimit;
-
-		rc = omrsysinfo_set_limit(OMRPORT_RESOURCE_FILE_DESCRIPTORS, descriptorLimit);
+		if (newHardLimit == currentLimit) {
+			portTestEnv->log("omrsysinfo_set_limit set FILE_DESCRIPTORS hard limit successful\n");
+		} else {
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "omrsysinfo_set_limit set FILE_DESCRIPTORS hard limit FAILED originalHardLimit=%lld "
+			        "Expected=%lld actual==%lld\n",
+			        originalHardLimit, newHardLimit, currentLimit);
+			reportTestExit(OMRPORTLIB, testName);
+			return;
+		}
+		finalSoftLimit = (originalSoftLimit > newHardLimit) ? newHardLimit : originalSoftLimit;
+	} else { /* running as root */
+		const uint64_t newHardLimit = 257;
+		rc = omrsysinfo_set_limit(OMRPORT_RESOURCE_FILE_DESCRIPTORS | OMRPORT_LIMIT_HARD, newHardLimit);
 		if (0 != rc) {
 			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_set_limit FAILED rc=%d\n", rc);
 			reportTestExit(OMRPORTLIB, testName);
 			return;
 		}
 
-		rc = omrsysinfo_get_limit(OMRPORT_RESOURCE_FILE_DESCRIPTORS, &currentLimit);
+		rc = omrsysinfo_get_limit(OMRPORT_RESOURCE_FILE_DESCRIPTORS | OMRPORT_LIMIT_HARD, &currentLimit);
 		if (OMRPORT_LIMIT_UNKNOWN == rc) {
 			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_get_limit FAILED: OMRPORT_LIMIT_UNKNOWN\n");
 			reportTestExit(OMRPORTLIB, testName);
 			return;
 		}
-		if (descriptorLimit == currentLimit) {
-			portTestEnv->log("omrsysinfo_set_limit set FILE_DESCRIPTORS soft limit successful\n");
+		if (newHardLimit == currentLimit) {
+			portTestEnv->log("omrsysinfo_set_limit set FILE_DESCRIPTORS hard limit successful\n");
 		} else {
 			outputErrorMessage(PORTTEST_ERROR_ARGS,
-					"omrsysinfo_set_limit set FILE_DESCRIPTORS soft limit FAILED originalSoftLimit=%lld Expected=%lld actual==%lld\n",
-					originalSoftLimit, descriptorLimit, currentLimit);
+			        "omrsysinfo_set_limit set FILE_DESCRIPTORS hard max FAILED. Expected=%lld "
+			        "actual=%lld\n",
+			        (descriptorLimit + 1), currentLimit);
 			reportTestExit(OMRPORTLIB, testName);
 			return;
 		}
 
-		/* save original hard limit */
-		rc = omrsysinfo_get_limit(OMRPORT_RESOURCE_FILE_DESCRIPTORS | OMRPORT_LIMIT_HARD, &originalHardLimit);
-		if (OMRPORT_LIMIT_UNKNOWN == rc) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_get_limit FAILED: OMRPORT_LIMIT_UNKNOWN\n");
-			reportTestExit(OMRPORTLIB, testName);
-			return;
-		}
-		portTestEnv->log(LEVEL_ERROR, "originalHardLimit=%llu\n", originalHardLimit);
-
-		/* set soft limit to hard limit */
-		rc = omrsysinfo_set_limit(OMRPORT_RESOURCE_FILE_DESCRIPTORS, originalHardLimit);
+		/* restore original hard limit */
+		rc = omrsysinfo_set_limit(OMRPORT_RESOURCE_FILE_DESCRIPTORS | OMRPORT_LIMIT_HARD, originalHardLimit);
 		if (0 != rc) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_set_limit soft = hard FAILED rc=%d\n", rc);
+			outputErrorMessage(PORTTEST_ERROR_ARGS, "restoring the original hard limit FAILED rc=%d\n", rc);
 			reportTestExit(OMRPORTLIB, testName);
 			return;
 		}
-
-		/* get new soft limit */
-		rc = omrsysinfo_get_limit(OMRPORT_RESOURCE_FILE_DESCRIPTORS, &softSetToHardLimit);
-		if (OMRPORT_LIMIT_UNKNOWN == rc) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_get_limit FAILED: OMRPORT_LIMIT_UNKNOWN\n");
-			reportTestExit(OMRPORTLIB, testName);
-			return;
-		}
-		portTestEnv->log(LEVEL_ERROR, "soft set to hard limit=%llu\n", softSetToHardLimit);
-
-		/* set soft limit to old value */
-		rc = omrsysinfo_set_limit(OMRPORT_RESOURCE_FILE_DESCRIPTORS, originalSoftLimit);
-		if (0 != rc) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_set_limit reset soft FAILED rc=%d\n", rc);
-			reportTestExit(OMRPORTLIB, testName);
-			return;
-		}
-
-		rc = omrsysinfo_get_limit(OMRPORT_RESOURCE_FILE_DESCRIPTORS | OMRPORT_LIMIT_HARD, &currentLimit);
-		if (currentLimit != originalHardLimit) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_get_limit FAILED: hard limit changed\n");
-			reportTestExit(OMRPORTLIB, testName);
-			return;
-		}
-
-		/* lowering the hard limit is irreversible unless privileged */
-		if (0 != geteuid()) { /* normal user */
-			/* setting the hard limit from unlimited to a finite value has unpredictable results:
-			 * the actual value may be much smaller than requested.
-			 * In that case, just try setting it to its current value (softSetToHardLimit) or a value slightly lower.
-			 * Ensure that we don't try to set the hard limit to a value less than the current soft limit
-			 * (i.e. originalSoftLimit).
-			 */
-			uint64_t newHardLimit =  ((OMRPORT_LIMIT_UNLIMITED == rc) || (originalSoftLimit == softSetToHardLimit))
-					? softSetToHardLimit: softSetToHardLimit - 1;
-
-			rc = omrsysinfo_set_limit(OMRPORT_RESOURCE_FILE_DESCRIPTORS | OMRPORT_LIMIT_HARD, newHardLimit);
-			if (0 != rc) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_set_limit set hard limit=%lld FAILED rc=%d\n", rc, newHardLimit);
-				reportTestExit(OMRPORTLIB, testName);
-				return;
-			}
-
-			rc = omrsysinfo_get_limit(OMRPORT_RESOURCE_FILE_DESCRIPTORS | OMRPORT_LIMIT_HARD, &currentLimit);
-			if (OMRPORT_LIMIT_UNKNOWN == rc) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_get_limit FAILED: OMRPORT_LIMIT_UNKNOWN\n");
-				reportTestExit(OMRPORTLIB, testName);
-				return;
-			}
-			if (newHardLimit == currentLimit) {
-				portTestEnv->log("omrsysinfo_set_limit set FILE_DESCRIPTORS hard limit successful\n");
-			} else {
-				outputErrorMessage(PORTTEST_ERROR_ARGS,
-						"omrsysinfo_set_limit set FILE_DESCRIPTORS hard limit FAILED originalHardLimit=%lld Expected=%lld actual==%lld\n",
-						originalHardLimit, newHardLimit, currentLimit);
-				reportTestExit(OMRPORTLIB, testName);
-				return;
-			}
-			finalSoftLimit = (originalSoftLimit > newHardLimit)? newHardLimit: originalSoftLimit;
-		} else { /* running as root */
-			const uint64_t newHardLimit = 257;
-			rc = omrsysinfo_set_limit(OMRPORT_RESOURCE_FILE_DESCRIPTORS | OMRPORT_LIMIT_HARD, newHardLimit);
-			if (0 != rc) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_set_limit FAILED rc=%d\n", rc);
-				reportTestExit(OMRPORTLIB, testName);
-				return;
-			}
-
-			rc = omrsysinfo_get_limit(OMRPORT_RESOURCE_FILE_DESCRIPTORS | OMRPORT_LIMIT_HARD, &currentLimit);
-			if (OMRPORT_LIMIT_UNKNOWN == rc) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_get_limit FAILED: OMRPORT_LIMIT_UNKNOWN\n");
-				reportTestExit(OMRPORTLIB, testName);
-				return;
-			}
-			if (newHardLimit == currentLimit) {
-				portTestEnv->log("omrsysinfo_set_limit set FILE_DESCRIPTORS hard limit successful\n");
-			} else {
-				outputErrorMessage(PORTTEST_ERROR_ARGS,
-					"omrsysinfo_set_limit set FILE_DESCRIPTORS hard max FAILED. Expected=%lld actual=%lld\n",
-					(descriptorLimit + 1), currentLimit);
-				reportTestExit(OMRPORTLIB, testName);
-				return;
-			}
-
-			/* restore original hard limit */
-			rc = omrsysinfo_set_limit(OMRPORT_RESOURCE_FILE_DESCRIPTORS | OMRPORT_LIMIT_HARD, originalHardLimit);
-			if (0 != rc) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "restoring the original hard limit FAILED rc=%d\n", rc);
-				reportTestExit(OMRPORTLIB, testName);
-				return;
-			}
-		}
+	}
 
 	/* restore original soft limit
 	   The soft limit is always <= the hard limit. If the hard limit is lowered to below the soft limit and
@@ -1020,7 +1048,8 @@ TEST(PortSysinfoTest, sysinfo_test_sysinfo_set_limit_CORE_FLAGS)
 
 		rc = omrsysinfo_get_limit(OMRPORT_RESOURCE_CORE_FLAGS, &currentLimit);
 		if (-1 == rc) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_set_limit get AIX full core value failed\n");
+			outputErrorMessage(
+			        PORTTEST_ERROR_ARGS, "omrsysinfo_set_limit get AIX full core value failed\n");
 			reportTestExit(OMRPORTLIB, testName);
 			return;
 		}
@@ -1029,9 +1058,11 @@ TEST(PortSysinfoTest, sysinfo_test_sysinfo_set_limit_CORE_FLAGS)
 		lastErrorNumber = omrerror_last_error_number();
 
 		if (OMRPORT_ERROR_FILE_NOPERMISSION == lastErrorNumber) {
-			portTestEnv->log(LEVEL_ERROR, "omrsysinfo_set_limit CORE_FLAGS failed as expected because we aren't root.\n");
+			portTestEnv->log(LEVEL_ERROR,
+			        "omrsysinfo_set_limit CORE_FLAGS failed as expected because we aren't root.\n");
 		} else {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_set_limit CORE_FLAGS did not fail with the proper error.\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "omrsysinfo_set_limit CORE_FLAGS did not fail with the proper error.\n");
 			reportTestExit(OMRPORTLIB, testName);
 			return;
 		}
@@ -1050,8 +1081,7 @@ TEST(PortSysinfoTest, sysinfo_test_sysinfo_set_limit_CORE_FLAGS)
 		}
 
 		rc = omrsysinfo_get_limit(OMRPORT_RESOURCE_CORE_FLAGS, &currentLimit);
-		if ((rc == OMRPORT_LIMIT_LIMITED) &&
-			(0 == currentLimit)) {
+		if ((rc == OMRPORT_LIMIT_LIMITED) && (0 == currentLimit)) {
 			portTestEnv->log("omrsysinfo_set_limit set AIX full core value to 0 successful\n");
 		} else {
 			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_set_limit set CORE_FLAGS FAILED\n");
@@ -1068,8 +1098,7 @@ TEST(PortSysinfoTest, sysinfo_test_sysinfo_set_limit_CORE_FLAGS)
 		}
 
 		rc = omrsysinfo_get_limit(OMRPORT_RESOURCE_CORE_FLAGS, &currentLimit);
-		if ((OMRPORT_LIMIT_UNLIMITED == rc) &&
-			(U_64_MAX == currentLimit)) {
+		if ((OMRPORT_LIMIT_UNLIMITED == rc) && (U_64_MAX == currentLimit)) {
 			portTestEnv->log("omrsysinfo_set_limit set AIX full core value to 1 successful\n");
 		} else {
 			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_set_limit set CORE_FLAGS FAILED\n");
@@ -1077,11 +1106,11 @@ TEST(PortSysinfoTest, sysinfo_test_sysinfo_set_limit_CORE_FLAGS)
 			return;
 		}
 
-
 		/* restore original limit */
 		rc = omrsysinfo_set_limit(OMRPORT_RESOURCE_CORE_FILE, originalLimit);
 		if (rc == -1) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "restoring the original AIX full core value failed omrsysinfo_set_limit returns -1.\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "restoring the original AIX full core value failed omrsysinfo_set_limit returns -1.\n");
 			reportTestExit(OMRPORTLIB, testName);
 			return;
 		}
@@ -1111,29 +1140,26 @@ TEST(PortSysinfoTest, sysinfo_test_sysinfo_get_limit_FILE_DESCRIPTORS)
 		 * set to implementation-defined limit, RLIM_INFINITY.
 		 */
 		if (RLIM_INFINITY == curLimit) {
-			portTestEnv->log(
-				"omrsysinfo_get_limit(nofiles): soft limit=RLIM_INFINITY (unlimited).\n");
+			portTestEnv->log("omrsysinfo_get_limit(nofiles): soft limit=RLIM_INFINITY (unlimited).\n");
 		} else {
 			outputErrorMessage(PORTTEST_ERROR_ARGS,
-				"omrsysinfo_get_limit(nofiles): soft limit (unlimited), bad maximum reported %lld.\n",
-				((int64_t) curLimit));
+			        "omrsysinfo_get_limit(nofiles): soft limit (unlimited), bad maximum reported %lld.\n",
+			        ((int64_t)curLimit));
 			reportTestExit(OMRPORTLIB, testName);
 			return;
 		}
 	} else if (OMRPORT_LIMIT_LIMITED == rc) {
-		if ((((int64_t) curLimit) > 0) && (((int64_t) curLimit) <= INT64_MAX)) {
-			portTestEnv->log("omrsysinfo_get_limit(nofiles) soft limit: %lld.\n",
-				((int64_t) curLimit));
+		if ((((int64_t)curLimit) > 0) && (((int64_t)curLimit) <= INT64_MAX)) {
+			portTestEnv->log("omrsysinfo_get_limit(nofiles) soft limit: %lld.\n", ((int64_t)curLimit));
 		} else {
-			outputErrorMessage(PORTTEST_ERROR_ARGS,
-				"omrsysinfo_get_limit(nofiles) failed: bad limit received!\n");
+			outputErrorMessage(
+			        PORTTEST_ERROR_ARGS, "omrsysinfo_get_limit(nofiles) failed: bad limit received!\n");
 			reportTestExit(OMRPORTLIB, testName);
 			return;
 		}
 	} else { /* The port library failed! */
-		outputErrorMessage(PORTTEST_ERROR_ARGS, 
-			"omrsysinfo_get_limit(nofiles): failed with error code=%d.\n",
-			omrerror_last_error_number());
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_get_limit(nofiles): failed with error code=%d.\n",
+		        omrerror_last_error_number());
 		reportTestExit(OMRPORTLIB, testName);
 		return;
 	}
@@ -1143,37 +1169,34 @@ TEST(PortSysinfoTest, sysinfo_test_sysinfo_get_limit_FILE_DESCRIPTORS)
 	if (OMRPORT_LIMIT_UNLIMITED == rc) {
 		/* Not an error, just that it is not configured.  Ok to compare!. */
 		if (RLIM_INFINITY == maxLimit) {
-			portTestEnv->log(
-				"omrsysinfo_get_limit(nofiles): hard limit = RLIM_INFINITY (unlimited).\n");
+			portTestEnv->log("omrsysinfo_get_limit(nofiles): hard limit = RLIM_INFINITY (unlimited).\n");
 		} else {
 			outputErrorMessage(PORTTEST_ERROR_ARGS,
-				"omrsysinfo_get_limit(nofiles): hard limit (unlimited), bad maximum reported %lld.\n",
-				((int64_t) curLimit));
+			        "omrsysinfo_get_limit(nofiles): hard limit (unlimited), bad maximum reported %lld.\n",
+			        ((int64_t)curLimit));
 			reportTestExit(OMRPORTLIB, testName);
 			return;
 		}
 	} else if (OMRPORT_LIMIT_LIMITED == rc) {
-		if ((((int64_t) maxLimit) > 0) && (((int64_t) maxLimit) <= INT64_MAX)) {
-			portTestEnv->log("omrsysinfo_get_limit(nofiles) hard limit: %lld.\n",
-				((int64_t) maxLimit));
+		if ((((int64_t)maxLimit) > 0) && (((int64_t)maxLimit) <= INT64_MAX)) {
+			portTestEnv->log("omrsysinfo_get_limit(nofiles) hard limit: %lld.\n", ((int64_t)maxLimit));
 		} else {
-			outputErrorMessage(PORTTEST_ERROR_ARGS,
-				"omrsysinfo_get_limit(nofiles) failed: bad limit received!\n");
+			outputErrorMessage(
+			        PORTTEST_ERROR_ARGS, "omrsysinfo_get_limit(nofiles) failed: bad limit received!\n");
 			reportTestExit(OMRPORTLIB, testName);
 			return;
 		}
 	} else { /* The port library failed! */
-		outputErrorMessage(PORTTEST_ERROR_ARGS, 
-			"omrsysinfo_get_limit(nofiles): failed with error code=%d.\n",
-			omrerror_last_error_number());
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_get_limit(nofiles): failed with error code=%d.\n",
+		        omrerror_last_error_number());
 		reportTestExit(OMRPORTLIB, testName);
 		return;
 	}
 
 	/* Ensure that the resource's current (soft) limit does not exceed the hard limit. */
 	if (curLimit > maxLimit) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS,
-				"omrsysinfo_get_limit(nofiles): current limit exceeds the hard limit.\n");
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrsysinfo_get_limit(nofiles): current limit exceeds the hard limit.\n");
 		reportTestExit(OMRPORTLIB, testName);
 		return;
 	}
@@ -1210,33 +1233,33 @@ TEST(PortSysinfoTest, sysinfo_testMemoryInfo)
 		 * where they are supposed to be defined, flag an error to fail pltest.
 		 */
 		if ((OMRPORT_MEMINFO_NOT_AVAILABLE == memInfo.totalPhysical)
-			|| (OMRPORT_MEMINFO_NOT_AVAILABLE == memInfo.availPhysical)
-			|| (OMRPORT_MEMINFO_NOT_AVAILABLE == memInfo.totalSwap)
-			|| (OMRPORT_MEMINFO_NOT_AVAILABLE == memInfo.availSwap)
+		        || (OMRPORT_MEMINFO_NOT_AVAILABLE == memInfo.availPhysical)
+		        || (OMRPORT_MEMINFO_NOT_AVAILABLE == memInfo.totalSwap)
+		        || (OMRPORT_MEMINFO_NOT_AVAILABLE == memInfo.availSwap)
 #if defined(OMR_OS_WINDOWS) || defined(OSX)
-			|| (OMRPORT_MEMINFO_NOT_AVAILABLE == memInfo.totalVirtual)
-			|| (OMRPORT_MEMINFO_NOT_AVAILABLE == memInfo.availVirtual)
+		        || (OMRPORT_MEMINFO_NOT_AVAILABLE == memInfo.totalVirtual)
+		        || (OMRPORT_MEMINFO_NOT_AVAILABLE == memInfo.availVirtual)
 #else /* defined(OMR_OS_WINDOWS) || defined(OSX) */
-			/* We do not check totalVirtual since it may be set to some value or -1, depending
-			 * on whether there is a limit set for this or not on the box.
-			 */
-			|| (OMRPORT_MEMINFO_NOT_AVAILABLE != memInfo.availVirtual)
+		        /* We do not check totalVirtual since it may be set to some value or -1, depending
+		         * on whether there is a limit set for this or not on the box.
+		         */
+		        || (OMRPORT_MEMINFO_NOT_AVAILABLE != memInfo.availVirtual)
 #endif /* defined(OMR_OS_WINDOWS) || defined(OSX) */
 #if defined(AIXPPC) || defined(OMR_OS_WINDOWS) || defined(OSX)
-			/* Size of the file buffer area is not available on Windows, AIX and OSX. Therefore,
-			 * it must be set to OMRPORT_MEMINFO_NOT_AVAILABLE.
-			 */
-			|| (OMRPORT_MEMINFO_NOT_AVAILABLE != memInfo.buffered)
+		        /* Size of the file buffer area is not available on Windows, AIX and OSX. Therefore,
+		         * it must be set to OMRPORT_MEMINFO_NOT_AVAILABLE.
+		         */
+		        || (OMRPORT_MEMINFO_NOT_AVAILABLE != memInfo.buffered)
 #else /* defined(AIXPPC) || defined(OMR_OS_WINDOWS) || defined(OSX) */
-			/* On platforms where buffer area is defined, OMRPORT_MEMINFO_NOT_AVAILABLE is
-			 * surely a failure!
-			 */
-			|| (OMRPORT_MEMINFO_NOT_AVAILABLE == memInfo.buffered)
+		        /* On platforms where buffer area is defined, OMRPORT_MEMINFO_NOT_AVAILABLE is
+		         * surely a failure!
+		         */
+		        || (OMRPORT_MEMINFO_NOT_AVAILABLE == memInfo.buffered)
 #endif /* defined(AIXPPC) || defined(OMR_OS_WINDOWS) || defined(OSX) */
-#if defined (OSX)
-			|| (OMRPORT_MEMINFO_NOT_AVAILABLE != memInfo.cached)
+#if defined(OSX)
+		        || (OMRPORT_MEMINFO_NOT_AVAILABLE != memInfo.cached)
 #else /* defined (OSX) */
-			|| (OMRPORT_MEMINFO_NOT_AVAILABLE == memInfo.cached)
+		        || (OMRPORT_MEMINFO_NOT_AVAILABLE == memInfo.cached)
 #endif /* defined(OSX) */
 		) {
 
@@ -1247,17 +1270,14 @@ TEST(PortSysinfoTest, sysinfo_testMemoryInfo)
 		}
 
 		/* Validate the statistics that we obtained. */
-		if ((memInfo.totalPhysical > 0) &&
-			(memInfo.availPhysical <= memInfo.totalPhysical) &&
+		if ((memInfo.totalPhysical > 0) && (memInfo.availPhysical <= memInfo.totalPhysical) &&
 #if defined(OMR_OS_WINDOWS)
-			/* Again, it does not make sense to do checks and comparisons on Virtual Memory
-			 * on places other than Windows.
-			 */
-			(memInfo.totalVirtual > 0) &&
-			(memInfo.availVirtual <= memInfo.totalVirtual) &&
+		        /* Again, it does not make sense to do checks and comparisons on Virtual Memory
+		         * on places other than Windows.
+		         */
+		        (memInfo.totalVirtual > 0) && (memInfo.availVirtual <= memInfo.totalVirtual) &&
 #endif /* defined(OMR_OS_WINDOWS) */
-			(memInfo.availSwap <= memInfo.totalSwap) &&
-			(memInfo.timestamp > 0)) {
+		        (memInfo.availSwap <= memInfo.totalSwap) && (memInfo.timestamp > 0)) {
 
 			/* Print out the memory usage statistics. */
 			portTestEnv->log("Retrieved memory usage statistics.\n");
@@ -1285,7 +1305,7 @@ TEST(PortSysinfoTest, sysinfo_testMemoryInfo)
 #else /* defined(OSX) */
 			portTestEnv->log("Cache memory: %llu bytes.\n", memInfo.cached);
 #endif /* defined(OSX) */
-#if defined(AIXPPC) || defined(OMR_OS_WINDOWS) || defined (OSX)
+#if defined(AIXPPC) || defined(OMR_OS_WINDOWS) || defined(OSX)
 			portTestEnv->log("Buffers memory: <undefined>.\n");
 #else /* defined(AIXPPC) || defined(OMR_OS_WINDOWS) || defined (OSX) */
 			portTestEnv->log("Buffers memory: %llu bytes.\n", memInfo.buffered);
@@ -1336,7 +1356,9 @@ cpuBurner(OMRPortLibrary *portLibrary, const char *myText)
 	}
 	for (counter = 0; (strlen(buffer) + strlen(myText) + 1) < CPU_BURNER_BUFF_SIZE; ++counter) {
 		result = strcat(buffer, myText);
-		if (NULL != strstr(result, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab")) {
+		if (NULL
+		        != strstr(result,
+		                "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab")) {
 			return 0;
 		}
 	}
@@ -1400,11 +1422,8 @@ TEST(PortSysinfoTest, sysinfo_testProcessorInfo)
 	}
 
 	n_onln = onlineProcessorCount(&currInfo);
-	if ((currInfo.totalProcessorCount > 0) &&
-		(n_onln > 0) &&
-		(currInfo.totalProcessorCount >= n_onln) &&
-		(prevInfo.timestamp > 0) &&
-		(prevInfo.timestamp < currInfo.timestamp)) {
+	if ((currInfo.totalProcessorCount > 0) && (n_onln > 0) && (currInfo.totalProcessorCount >= n_onln)
+	        && (prevInfo.timestamp > 0) && (prevInfo.timestamp < currInfo.timestamp)) {
 
 		/* Print out some vital statistics of processor usage - use the current snapshot. */
 		portTestEnv->log("Available processors: %d.\n", currInfo.totalProcessorCount);
@@ -1436,19 +1455,19 @@ TEST(PortSysinfoTest, sysinfo_testProcessorInfo)
 		 * modes, or else, signal an error. Add platform-specific exceptions (undefined parameter).
 		 */
 		if (OMRPORT_PROCINFO_PROC_ONLINE == currInfo.procInfoArray[cntr].online) {
-			if ((OMRPORT_PROCINFO_NOT_AVAILABLE != currInfo.procInfoArray[cntr].userTime) &&
-				(OMRPORT_PROCINFO_NOT_AVAILABLE != currInfo.procInfoArray[cntr].systemTime) &&
-				(OMRPORT_PROCINFO_NOT_AVAILABLE != currInfo.procInfoArray[cntr].idleTime) &&
+			if ((OMRPORT_PROCINFO_NOT_AVAILABLE != currInfo.procInfoArray[cntr].userTime)
+			        && (OMRPORT_PROCINFO_NOT_AVAILABLE != currInfo.procInfoArray[cntr].systemTime)
+			        && (OMRPORT_PROCINFO_NOT_AVAILABLE != currInfo.procInfoArray[cntr].idleTime) &&
 #if defined(OMR_OS_WINDOWS) || defined(OSX)
-				/* Windows and OSX do not have the notion of Wait times. */
-				(OMRPORT_PROCINFO_NOT_AVAILABLE == currInfo.procInfoArray[cntr].waitTime) &&
+			        /* Windows and OSX do not have the notion of Wait times. */
+			        (OMRPORT_PROCINFO_NOT_AVAILABLE == currInfo.procInfoArray[cntr].waitTime) &&
 #else /* Non-windows/OSX platforms */
-				(OMRPORT_PROCINFO_NOT_AVAILABLE != currInfo.procInfoArray[cntr].waitTime) &&
+			        (OMRPORT_PROCINFO_NOT_AVAILABLE != currInfo.procInfoArray[cntr].waitTime) &&
 #endif /* defined(OMR_OS_WINDOWS) || defined(OSX) */
-				(OMRPORT_PROCINFO_NOT_AVAILABLE != currInfo.procInfoArray[cntr].busyTime)) {
+			        (OMRPORT_PROCINFO_NOT_AVAILABLE != currInfo.procInfoArray[cntr].busyTime)) {
 
 				/* Print out processor times in each mode for each CPU that is online. */
-				portTestEnv->log("CPUID: %d\n",  currInfo.procInfoArray[cntr].proc_id);
+				portTestEnv->log("CPUID: %d\n", currInfo.procInfoArray[cntr].proc_id);
 				portTestEnv->changeIndent(1);
 				portTestEnv->log("User time:   %lld.\n", currInfo.procInfoArray[cntr].userTime);
 				portTestEnv->log("System time: %lld.\n", currInfo.procInfoArray[cntr].systemTime);
@@ -1461,7 +1480,8 @@ TEST(PortSysinfoTest, sysinfo_testProcessorInfo)
 				portTestEnv->log("Busy time:   %lld.\n", currInfo.procInfoArray[cntr].busyTime);
 				portTestEnv->changeIndent(-1);
 			} else {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "Invalid processor usage statistics retrieved.\n");
+				outputErrorMessage(
+				        PORTTEST_ERROR_ARGS, "Invalid processor usage statistics retrieved.\n");
 				goto _cleanup;
 			}
 		}
@@ -1475,8 +1495,9 @@ TEST(PortSysinfoTest, sysinfo_testProcessorInfo)
 	if (0 < (deltaTotalBusyTime + deltaTotalIdleTime)) {
 		portTestEnv->log("Processor times in monotonically increasing order.\n");
 	} else {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "Unexpected change in processor time deltas\ndeltaTotalBusyTime=%lld deltaTotalIdleTime=%lld\n",
-						   deltaTotalBusyTime, deltaTotalIdleTime);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "Unexpected change in processor time deltas\ndeltaTotalBusyTime=%lld deltaTotalIdleTime=%lld\n",
+		        deltaTotalBusyTime, deltaTotalIdleTime);
 	}
 
 _cleanup:
@@ -1525,9 +1546,8 @@ TEST(PortSysinfoTest, sysinfo_testOnlineProcessorCount2)
 			goto _cleanup;
 		}
 
-		if ((n_cpus_online > 0) &&
-			(onlineProcessorCount(&procInfo) == n_cpus_online)) {
-			portTestEnv->log("Number of online processors: %d\n",  n_cpus_online);
+		if ((n_cpus_online > 0) && (onlineProcessorCount(&procInfo) == n_cpus_online)) {
+			portTestEnv->log("Number of online processors: %d\n", n_cpus_online);
 		} else {
 			outputErrorMessage(PORTTEST_ERROR_ARGS, "Invalid online processor count found.\n");
 		}
@@ -1576,9 +1596,8 @@ TEST(PortSysinfoTest, sysinfo_testTotalProcessorCount)
 			goto _cleanup;
 		}
 
-		if ((procInfo.totalProcessorCount > 0) &&
-			(procInfo.totalProcessorCount == n_cpus_total)) {
-			portTestEnv->log("Total number of processors: %d\n",  n_cpus_total);
+		if ((procInfo.totalProcessorCount > 0) && (procInfo.totalProcessorCount == n_cpus_total)) {
+			portTestEnv->log("Total number of processors: %d\n", n_cpus_total);
 		} else {
 			outputErrorMessage(PORTTEST_ERROR_ARGS, "Invalid processor count retrieved.\n");
 		}
@@ -1605,34 +1624,39 @@ TEST(PortSysinfoTest, sysinfo_test_get_CPU_utilization)
 	 */
 	portLibraryStatus = omrsysinfo_get_CPU_utilization(&OldUtil);
 	if (0 != portLibraryStatus) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_test_get_CPU_utilization() non-zero return code.\n");
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrsysinfo_test_get_CPU_utilization() non-zero return code.\n");
 		reportTestExit(OMRPORTLIB, testName);
 		return;
 	} else {
-		portTestEnv->log("Old utilization timestamp=%llu cpuTime=%lld numberOfCpus=%d.\n",
-					  OldUtil.timestamp, OldUtil.cpuTime, OldUtil.numberOfCpus);
+		portTestEnv->log("Old utilization timestamp=%llu cpuTime=%lld numberOfCpus=%d.\n", OldUtil.timestamp,
+		        OldUtil.cpuTime, OldUtil.numberOfCpus);
 		if ((OldUtil.cpuTime < 0) || (OldUtil.numberOfCpus <= 0)) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_test_get_CPU_utilization() invalid results.\n");
+			outputErrorMessage(
+			        PORTTEST_ERROR_ARGS, "omrsysinfo_test_get_CPU_utilization() invalid results.\n");
 		}
 	}
 	/* Sleep for 3 seconds before re-sampling processor usage stats.
 	 * This allows other processes and the operating system to use the CPU and drive up the
 	 * user and kernel utilization.
-	 * The call to cpuBurner probably won't be optimized out, but use the result to make absolutely sure that it isn't.
+	 * The call to cpuBurner probably won't be optimized out, but use the result to make absolutely sure that it
+	 * isn't.
 	 */
 	omrthread_sleep(3000 + cpuBurner(OMRPORTLIB, "a"));
 	portLibraryStatus = omrsysinfo_get_CPU_utilization(&NewUtil);
 	if (0 != portLibraryStatus) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_test_get_CPU_utilization() non-zero return code.\n");
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrsysinfo_test_get_CPU_utilization() non-zero return code.\n");
 		reportTestExit(OMRPORTLIB, testName);
 		return;
 	} else {
-		portTestEnv->log("New utilization timestamp=%llu cpuTime=%lld numberOfCpus=%d.\n",
-					  NewUtil.timestamp, NewUtil.cpuTime, NewUtil.numberOfCpus);
-		portTestEnv->log("timestamp delta=%llu cpuTime delta=%lld\n",
-					  NewUtil.timestamp - OldUtil.timestamp, NewUtil.cpuTime -  OldUtil.cpuTime);
+		portTestEnv->log("New utilization timestamp=%llu cpuTime=%lld numberOfCpus=%d.\n", NewUtil.timestamp,
+		        NewUtil.cpuTime, NewUtil.numberOfCpus);
+		portTestEnv->log("timestamp delta=%llu cpuTime delta=%lld\n", NewUtil.timestamp - OldUtil.timestamp,
+		        NewUtil.cpuTime - OldUtil.cpuTime);
 		if ((NewUtil.cpuTime < OldUtil.cpuTime) || (NewUtil.numberOfCpus != OldUtil.numberOfCpus)) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_test_get_CPU_utilization() invalid results.\n");
+			outputErrorMessage(
+			        PORTTEST_ERROR_ARGS, "omrsysinfo_test_get_CPU_utilization() invalid results.\n");
 		}
 	}
 
@@ -1640,7 +1664,6 @@ TEST(PortSysinfoTest, sysinfo_test_get_CPU_utilization)
 }
 
 #endif /* !defined(J9ZOS390) */
-
 
 /*
  * Test omrsysinfo_get_tmp when the buffer size == 0
@@ -1718,8 +1741,9 @@ TEST(PortSysinfoTest, sysinfo_test_get_tmp3)
 
 #if defined(OMR_OS_WINDOWS)
 	wchar_t *origEnv = NULL;
-	const unsigned char utf8[]       = {0x63, 0x3A, 0x5C, 0xD0, 0xB6, 0xD0, 0xB0, 0xD0, 0xB1, 0xD0, 0xB0, 0x5C, 0x00};
-	const unsigned char utf8_file[]  = {0x63, 0x3A, 0x5C, 0xD0, 0xB6, 0xD0, 0xB0, 0xD0, 0xB1, 0xD0, 0xB0, 0x5C, 0x74, 0x65, 0x73, 0x74, 0x2E, 0x74, 0x78, 0x74, 0x00};
+	const unsigned char utf8[] = {0x63, 0x3A, 0x5C, 0xD0, 0xB6, 0xD0, 0xB0, 0xD0, 0xB1, 0xD0, 0xB0, 0x5C, 0x00};
+	const unsigned char utf8_file[] = {0x63, 0x3A, 0x5C, 0xD0, 0xB6, 0xD0, 0xB0, 0xD0, 0xB1, 0xD0, 0xB0, 0x5C, 0x74,
+	        0x65, 0x73, 0x74, 0x2E, 0x74, 0x78, 0x74, 0x00};
 	const wchar_t unicode[] = {0x0063, 0x003A, 0x005C, 0x0436, 0x0430, 0x0431, 0x0430, 0x005C, 0x00};
 
 	reportTestEntry(OMRPORTLIB, testName);
@@ -1772,7 +1796,8 @@ TEST(PortSysinfoTest, sysinfo_test_get_tmp3)
 
 	rc = memcmp(utf8, buffer, strlen((const char *)utf8));
 	if (0 != rc) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "invalid directory rc: %d buffer %s, utf8 = %s\n", rc, buffer, utf8);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "invalid directory rc: %d buffer %s, utf8 = %s\n", rc, buffer, utf8);
 	}
 
 	rc = omrfile_mkdir((const char *)utf8);
@@ -1886,7 +1911,7 @@ TEST(PortSysinfoTest, sysinfo_test_get_tmp4)
 	if (rc <= 0) {
 		outputErrorMessage(PORTTEST_ERROR_ARGS, "unexpected return code rc: %zd\n", rc);
 	} else {
-		char *buffer = (char *) omrmem_allocate_memory(rc, OMRMEM_CATEGORY_PORT_LIBRARY);
+		char *buffer = (char *)omrmem_allocate_memory(rc, OMRMEM_CATEGORY_PORT_LIBRARY);
 		if (NULL == buffer) {
 			outputErrorMessage(PORTTEST_ERROR_ARGS, "failed to allocate memory for buffer\n");
 		} else {
@@ -1895,7 +1920,10 @@ TEST(PortSysinfoTest, sysinfo_test_get_tmp4)
 				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_get_tmp failed with rc: %zd\n", rc);
 			} else {
 				if (strcmp(modifiedTmpDir, buffer)) {
-					outputErrorMessage(PORTTEST_ERROR_ARGS, "expected omrsysinfo_get_tmp to return same value as TMPDIR. TMPDIR: %s, returned: %s\n", modifiedTmpDir, buffer);
+					outputErrorMessage(PORTTEST_ERROR_ARGS,
+					        "expected omrsysinfo_get_tmp to return same value as TMPDIR. TMPDIR: "
+					        "%s, returned: %s\n",
+					        modifiedTmpDir, buffer);
 				}
 			}
 			omrmem_free_memory(buffer);
@@ -1906,7 +1934,7 @@ TEST(PortSysinfoTest, sysinfo_test_get_tmp4)
 	if (rc <= 0) {
 		outputErrorMessage(PORTTEST_ERROR_ARGS, "unexpected return code rc: %d\n", rc);
 	} else {
-		char *buffer = (char *) omrmem_allocate_memory(rc, OMRMEM_CATEGORY_PORT_LIBRARY);
+		char *buffer = (char *)omrmem_allocate_memory(rc, OMRMEM_CATEGORY_PORT_LIBRARY);
 		if (NULL == buffer) {
 			outputErrorMessage(PORTTEST_ERROR_ARGS, "failed to allocate memory for buffer\n");
 		} else {
@@ -1915,7 +1943,10 @@ TEST(PortSysinfoTest, sysinfo_test_get_tmp4)
 				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_get_tmp failed with rc: %d\n", rc);
 			} else {
 				if (!strcmp(modifiedTmpDir, buffer)) {
-					outputErrorMessage(PORTTEST_ERROR_ARGS, "expected omrsysinfo_get_tmp to ignore TMPDIR. TMPDIR: %s, returned: %s\n", modifiedTmpDir, buffer);
+					outputErrorMessage(PORTTEST_ERROR_ARGS,
+					        "expected omrsysinfo_get_tmp to ignore TMPDIR. TMPDIR: %s, returned: "
+					        "%s\n",
+					        modifiedTmpDir, buffer);
 				}
 			}
 			omrmem_free_memory(buffer);
@@ -2012,7 +2043,8 @@ TEST(PortSysinfoTest, sysinfo_test_get_cwd2)
 
 /*
  * Test omrsysinfo_get_cwd in not ascii directory.
- * Expected result: Successfully create not ascii directory, change current current directory, verify that omrsysinfo_get_cwd returns valid value.
+ * Expected result: Successfully create not ascii directory, change current current directory, verify that
+ * omrsysinfo_get_cwd returns valid value.
  */
 TEST(PortSysinfoTest, sysinfo_test_get_cwd3)
 {
@@ -2024,8 +2056,11 @@ TEST(PortSysinfoTest, sysinfo_test_get_cwd3)
 
 #if defined(OMR_OS_WINDOWS)
 	/* c:\U+6211 U+7684 U+7236 U+4EB2 U+662F U+6536 U+68D2 U+5B50 U+7684 */
-	const wchar_t unicode[] = {0x0063, 0x003A, 0x005C, 0x6211, 0x7684, 0x7236, 0x4EB2, 0x662F, 0x6536, 0x68D2, 0x5B50, 0x7684, 0x005C, 0x00};
-	const unsigned char utf8[]       = {0x63, 0x3A, 0x5C, 0xE6, 0x88, 0x91, 0xE7, 0x9A, 0x84, 0xE7, 0x88, 0xB6, 0xE4, 0xBA, 0xB2, 0xE6, 0x98, 0xAF, 0xE6, 0x94, 0xB6, 0xE6, 0xA3, 0x92, 0xE5, 0xAD, 0x90, 0xE7, 0x9A, 0x84, 0x5C, 0x00};
+	const wchar_t unicode[] = {0x0063, 0x003A, 0x005C, 0x6211, 0x7684, 0x7236, 0x4EB2, 0x662F, 0x6536, 0x68D2,
+	        0x5B50, 0x7684, 0x005C, 0x00};
+	const unsigned char utf8[] = {0x63, 0x3A, 0x5C, 0xE6, 0x88, 0x91, 0xE7, 0x9A, 0x84, 0xE7, 0x88, 0xB6, 0xE4,
+	        0xBA, 0xB2, 0xE6, 0x98, 0xAF, 0xE6, 0x94, 0xB6, 0xE6, 0xA3, 0x92, 0xE5, 0xAD, 0x90, 0xE7, 0x9A, 0x84,
+	        0x5C, 0x00};
 
 	reportTestEntry(OMRPORTLIB, testName);
 
@@ -2092,13 +2127,15 @@ TEST(PortSysinfoTest, sysinfo_test_get_cwd3)
 #else /* defined(OMR_OS_WINDOWS) */
 	rc = chdir(orig_cwd);
 	if (-1 == rc) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "error: failed to change to directory %s, errno: %d\n", (const char *)orig_cwd, errno);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "error: failed to change to directory %s, errno: %d\n",
+		        (const char *)orig_cwd, errno);
 	}
 #endif /* defined(OMR_OS_WINDOWS) */
 
 	rc = omrfile_unlinkdir((const char *)utf8);
 	if (-1 == rc) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "error failed to delete directory %s rc: %d\n", (const char *)utf8, rc);
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "error failed to delete directory %s rc: %d\n", (const char *)utf8, rc);
 	}
 
 	omrmem_free_memory(orig_cwd);
@@ -2139,10 +2176,13 @@ TEST(PortSysinfoTest, sysinfo_test_get_groups)
 			if (NULL == grent) {
 				if (0 == error) {
 					portTestEnv->changeIndent(1);
-					portTestEnv->log("this group id is not found in group database (not an error as per getgrgid documentation)\n");
+					portTestEnv->log("this group id is not found in group database (not an error "
+					                 "as per getgrgid documentation)\n");
 					portTestEnv->changeIndent(-1);
 				} else {
-					outputErrorMessage(PORTTEST_ERROR_ARGS, "\ngetgrgid() returned NULL with errno=%d for group id=%u\n", error, gidList[i]);
+					outputErrorMessage(PORTTEST_ERROR_ARGS,
+					        "\ngetgrgid() returned NULL with errno=%d for group id=%u\n", error,
+					        gidList[i]);
 					break;
 				}
 			} else {
@@ -2152,7 +2192,9 @@ TEST(PortSysinfoTest, sysinfo_test_get_groups)
 					portTestEnv->log("group name=%s\n", group);
 					portTestEnv->changeIndent(-1);
 				} else {
-					outputErrorMessage(PORTTEST_ERROR_ARGS, "\ngetgrgid() returned NULL as the group name for group id=%u\n", gidList[i]);
+					outputErrorMessage(PORTTEST_ERROR_ARGS,
+					        "\ngetgrgid() returned NULL as the group name for group id=%u\n",
+					        gidList[i]);
 					break;
 				}
 			}
@@ -2161,8 +2203,10 @@ TEST(PortSysinfoTest, sysinfo_test_get_groups)
 		char *lastErrorMessage = (char *)omrerror_last_error_message();
 		int32_t lastErrorNumber = omrerror_last_error_number();
 
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_get_groups returned %zi\n"
-						   "\tlastErrorNumber=%d, lastErrorMessage=%s\n", rc, lastErrorNumber, lastErrorMessage);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "omrsysinfo_get_groups returned %zi\n"
+		        "\tlastErrorNumber=%d, lastErrorMessage=%s\n",
+		        rc, lastErrorNumber, lastErrorMessage);
 	}
 	reportTestExit(OMRPORTLIB, testName);
 }
@@ -2189,8 +2233,7 @@ TEST(PortSysinfoTest, sysinfo_test_get_open_file_count)
 		reportTestExit(OMRPORTLIB, testName);
 		return;
 	}
-	portTestEnv->log("omrsysinfo_get_open_file_count(): Files opened by this process=%lld\n", 
-		openCount);
+	portTestEnv->log("omrsysinfo_get_open_file_count(): Files opened by this process=%lld\n", openCount);
 
 	/* Now, get the current (soft) limit on the resource "nofiles".  We check the current
 	 * number of files opened, against this.
@@ -2199,37 +2242,34 @@ TEST(PortSysinfoTest, sysinfo_test_get_open_file_count)
 	if (OMRPORT_LIMIT_UNLIMITED == rc) {
 		/* Not really an error, just a sentinel.  Comparisons can still work! */
 		if (RLIM_INFINITY == curLimit) {
-			portTestEnv->log(
-				"omrsysinfo_get_limit(nofiles): soft limit=RLIM_INFINITY (unlimited).\n");
+			portTestEnv->log("omrsysinfo_get_limit(nofiles): soft limit=RLIM_INFINITY (unlimited).\n");
 		} else {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, 
-				"omrsysinfo_get_limit(nofiles): soft limit (unlimited), bad maximum reported=%lld.\n",
-				((int64_t) curLimit));
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "omrsysinfo_get_limit(nofiles): soft limit (unlimited), bad maximum reported=%lld.\n",
+			        ((int64_t)curLimit));
 			reportTestExit(OMRPORTLIB, testName);
 			return;
 		}
 	} else if (OMRPORT_LIMIT_LIMITED == rc) {
 		/* Check that the limits received are sane, before comparing against files opened. */
-		if ((((int64_t) curLimit) > 0) && (((int64_t) curLimit) <= INT64_MAX)) {
-			portTestEnv->log("omrsysinfo_get_limit(nofiles): soft limit=%lld.\n", 
-				((int64_t) curLimit));
+		if ((((int64_t)curLimit) > 0) && (((int64_t)curLimit) <= INT64_MAX)) {
+			portTestEnv->log("omrsysinfo_get_limit(nofiles): soft limit=%lld.\n", ((int64_t)curLimit));
 		} else {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, 
-				"omrsysinfo_get_limit(nofiles) failed: bad limits received!\n");
+			outputErrorMessage(
+			        PORTTEST_ERROR_ARGS, "omrsysinfo_get_limit(nofiles) failed: bad limits received!\n");
 			reportTestExit(OMRPORTLIB, testName);
 			return;
 		}
 	} else { /* The port library failed! */
-		outputErrorMessage(PORTTEST_ERROR_ARGS, 
-			"omrsysinfo_get_limit(nofiles): failed with error code=%d.\n",
-			omrerror_last_error_number());
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_get_limit(nofiles): failed with error code=%d.\n",
+		        omrerror_last_error_number());
 		reportTestExit(OMRPORTLIB, testName);
 		return;
 	}
 	/* Sanity check: are more files reported as opened than the limit? */
-	if (((int64_t) openCount) > ((int64_t) curLimit)) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, 
-			"omrsysinfo_get_open_file_count() failed: reports more files opened than allowed!\n");
+	if (((int64_t)openCount) > ((int64_t)curLimit)) {
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "omrsysinfo_get_open_file_count() failed: reports more files opened than allowed!\n");
 		reportTestExit(OMRPORTLIB, testName);
 		return;
 	}
@@ -2251,11 +2291,12 @@ TEST(PortSysinfoTest, sysinfo_test_get_os_description)
 	reportTestEntry(OMRPORTLIB, testName);
 
 	struct OMROSDesc desc;
-	rc =  omrsysinfo_get_os_description(&desc);
+	rc = omrsysinfo_get_os_description(&desc);
 
 	for (int i = 0; i < OMRPORT_SYSINFO_OS_FEATURES_SIZE * 32; i++) {
 		BOOLEAN feature = omrsysinfo_os_has_feature(&desc, i);
-		portTestEnv->log(LEVEL_VERBOSE, "omrsysinfo_test_get_os_description() feature %d: value=%d, rc=%zi\n", i, feature, rc);
+		portTestEnv->log(LEVEL_VERBOSE, "omrsysinfo_test_get_os_description() feature %d: value=%d, rc=%zi\n",
+		        i, feature, rc);
 	}
 
 	reportTestExit(OMRPORTLIB, testName);
@@ -2281,19 +2322,24 @@ TEST(PortSysinfoTest, sysinfo_test_os_kernel_info)
 	/* Throw an error if failure happens on Linux */
 	if (FALSE == rc) {
 		outputErrorMessage(PORTTEST_ERROR_ARGS,
-				"omrsysinfo_os_kernel_info failed on Linux: kernelVersion=%zu, majorRevision=%zu, minorRevision=%zu\n", kernelInfo.kernelVersion, kernelInfo.majorRevision, kernelInfo.minorRevision);
+		        "omrsysinfo_os_kernel_info failed on Linux: kernelVersion=%zu, majorRevision=%zu, "
+		        "minorRevision=%zu\n",
+		        kernelInfo.kernelVersion, kernelInfo.majorRevision, kernelInfo.minorRevision);
 		goto exit;
 	} else {
 		/* Throw an error if kernel version is 0 */
 		if (0 == kernelInfo.kernelVersion) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_os_kernel_info failed on Linux - kernel version can't be 0 (unsupported)\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "omrsysinfo_os_kernel_info failed on Linux - kernel version can't be 0 "
+			        "(unsupported)\n");
 			goto exit;
 		}
 	}
 #else /* defined(LINUX) */
 	if (TRUE == rc) {
 		/* Throw an error if omrsysinfo_os_kernel_info passes on an unsupported platform */
-		outputErrorMessage(PORTTEST_ERROR_ARGS,	"omrsysinfo_os_kernel_info passed on an unsupported platform\n");
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrsysinfo_os_kernel_info passed on an unsupported platform\n");
 		goto exit;
 	}
 #endif /* defined(LINUX) */
@@ -2313,14 +2359,17 @@ TEST(PortSysinfoTest, sysinfo_cgroup_get_memlimit)
 	uint64_t cgroupMemLimit = 0;
 	int32_t rc = 0;
 	uint64_t enabledSubsystems = 0;
-	
+
 	reportTestEntry(OMRPORTLIB, testName);
 
 	rc = omrsysinfo_cgroup_get_memlimit(&cgroupMemLimit);
 
 #if !defined(LINUX)
 	if (OMRPORT_ERROR_SYSINFO_CGROUP_UNSUPPORTED_PLATFORM != rc) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_cgroup_get_memlimit returned %d, expected %d on platform that does not support cgroups\n", rc, OMRPORT_ERROR_SYSINFO_CGROUP_UNSUPPORTED_PLATFORM);
+		outputErrorMessage(PORTTEST_ERROR_ARGS,
+		        "omrsysinfo_cgroup_get_memlimit returned %d, expected %d on platform that does not support "
+		        "cgroups\n",
+		        rc, OMRPORT_ERROR_SYSINFO_CGROUP_UNSUPPORTED_PLATFORM);
 	}
 #endif
 
@@ -2329,13 +2378,18 @@ TEST(PortSysinfoTest, sysinfo_cgroup_get_memlimit)
 	if (OMR_ARE_ALL_BITS_SET(enabledSubsystems, OMR_CGROUP_SUBSYSTEM_MEMORY)) {
 		rc = omrsysinfo_cgroup_get_memlimit(&cgroupMemLimit);
 		if ((0 != rc) && (OMRPORT_ERROR_SYSINFO_CGROUP_MEMLIMIT_NOT_SET != rc)) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrsysinfo_cgroup_get_memlimit failed with error code %d\n", rc);
+			outputErrorMessage(
+			        PORTTEST_ERROR_ARGS, "omrsysinfo_cgroup_get_memlimit failed with error code %d\n", rc);
 		} else if (0 == rc) {
 			uint64_t physicalMemLimit = 0;
 
 			physicalMemLimit = omrsysinfo_get_physical_memory();
 			if (cgroupMemLimit != physicalMemLimit) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "Expected omrsysinfo_cgroup_get_memlimit and omrsysinfo_get_physical_memory to return same value, but omrsysinfo_cgroup_get_memlimit returned %ld and omrsysinfo_get_physical_memory returned %ld\n", cgroupMemLimit, physicalMemLimit);
+				outputErrorMessage(PORTTEST_ERROR_ARGS,
+				        "Expected omrsysinfo_cgroup_get_memlimit and omrsysinfo_get_physical_memory to "
+				        "return same value, but omrsysinfo_cgroup_get_memlimit returned %ld and "
+				        "omrsysinfo_get_physical_memory returned %ld\n",
+				        cgroupMemLimit, physicalMemLimit);
 			}
 		}
 	}

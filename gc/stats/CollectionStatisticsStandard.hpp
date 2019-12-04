@@ -23,27 +23,24 @@
 #if !defined(COLLECTIONSTATISTICSSTANDARD_HPP_)
 #define COLLECTIONSTATISTICSSTANDARD_HPP_
 
-#include "omrcfg.h"
-#include "omrcomp.h"
-#include "omrgcconsts.h"
-
 #include "Base.hpp"
+#include "CollectionStatistics.hpp"
 #include "EnvironmentBase.hpp"
 #include "GCExtensionsBase.hpp"
 #include "Heap.hpp"
-#include "CollectionStatistics.hpp"
-
-#include "MemorySpace.hpp"
-#include "MemorySubSpace.hpp"
 #include "LargeObjectAllocateStats.hpp"
 #include "MemoryPool.hpp"
+#include "MemorySpace.hpp"
+#include "MemorySubSpace.hpp"
+#include "omrcfg.h"
+#include "omrcomp.h"
+#include "omrgcconsts.h"
 
 /**
  * A collection of interesting statistics for the Heap.
  * @ingroup GC_Stats
  */
-class MM_CollectionStatisticsStandard : public MM_CollectionStatistics
-{
+class MM_CollectionStatisticsStandard : public MM_CollectionStatistics {
 private:
 protected:
 public:
@@ -58,21 +55,20 @@ public:
 	uintptr_t _totalSurvivorHeapSize; /**< Total active survivor heap size */
 	uintptr_t _totalFreeSurvivorHeapSize; /**< Total active free survivor heap size */
 	uintptr_t _rememberedSetCount; /**< remembered set count */
-	uint32_t _tenureFragmentation; /**< fragmentation indicator, can be NO_FRAGMENTATION, MICRO_FRAGMENTATION, MACRO_FRAGMENTATION, indicate if fragmentation info are ready in _microFragmentedSize and _macroFragmentedSize */
+	uint32_t _tenureFragmentation; /**< fragmentation indicator, can be NO_FRAGMENTATION, MICRO_FRAGMENTATION,
+	                                  MACRO_FRAGMENTATION, indicate if fragmentation info are ready in
+	                                  _microFragmentedSize and _macroFragmentedSize */
 	uintptr_t _microFragmentedSize; /**< Micro Fragmentation in Byte */
 	uintptr_t _macroFragmentedSize; /**< Macro Fragmentation in Byte*/
 private:
 protected:
 public:
-
-	static MM_CollectionStatisticsStandard *
-	getCollectionStatistics(MM_CollectionStatistics *stats)
+	static MM_CollectionStatisticsStandard *getCollectionStatistics(MM_CollectionStatistics *stats)
 	{
 		return (MM_CollectionStatisticsStandard *)stats;
 	}
 
-	MMINLINE void
-	collectCollectionStatistics(MM_EnvironmentBase *env, MM_CollectionStatisticsStandard *stats)
+	MMINLINE void collectCollectionStatistics(MM_EnvironmentBase *env, MM_CollectionStatisticsStandard *stats)
 	{
 		MM_GCExtensionsBase *extensions = env->getExtensions();
 
@@ -89,7 +85,8 @@ public:
 #endif /* OMR_GC_LARGE_OBJECT_AREA */
 		if (stats->_loaEnabled) {
 			stats->_totalLOAHeapSize = extensions->heap->getActiveLOAMemorySize(MEMORY_TYPE_OLD);
-			stats->_totalFreeLOAHeapSize = extensions->heap->getApproximateActiveFreeLOAMemorySize(MEMORY_TYPE_OLD);
+			stats->_totalFreeLOAHeapSize =
+			        extensions->heap->getApproximateActiveFreeLOAMemorySize(MEMORY_TYPE_OLD);
 		} else {
 			stats->_totalLOAHeapSize = 0;
 			stats->_totalFreeLOAHeapSize = 0;
@@ -102,9 +99,11 @@ public:
 #endif /* OMR_GC_MODRON_SCAVENGER */
 		if (stats->_scavengerEnabled) {
 			stats->_totalNurseryHeapSize = extensions->heap->getActiveMemorySize(MEMORY_TYPE_NEW);
-			stats->_totalFreeNurseryHeapSize = extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_NEW);
+			stats->_totalFreeNurseryHeapSize =
+			        extensions->heap->getApproximateActiveFreeMemorySize(MEMORY_TYPE_NEW);
 			stats->_totalSurvivorHeapSize = extensions->heap->getActiveSurvivorMemorySize(MEMORY_TYPE_NEW);
-			stats->_totalFreeSurvivorHeapSize = extensions->heap->getApproximateActiveFreeSurvivorMemorySize(MEMORY_TYPE_NEW);
+			stats->_totalFreeSurvivorHeapSize =
+			        extensions->heap->getApproximateActiveFreeSurvivorMemorySize(MEMORY_TYPE_NEW);
 			stats->_rememberedSetCount = extensions->getRememberedCount();
 		} else {
 			stats->_totalNurseryHeapSize = 0;
@@ -118,10 +117,12 @@ public:
 			MM_MemorySpace *defaultMemorySpace = extensions->heap->getDefaultMemorySpace();
 			MM_MemorySubSpace *tenureMemorySubspace = defaultMemorySpace->getTenureMemorySubSpace();
 			if (MICRO_FRAGMENTATION == (MICRO_FRAGMENTATION & _tenureFragmentation)) {
-				stats->_microFragmentedSize = tenureMemorySubspace->getMemoryPool()->getDarkMatterBytes();
+				stats->_microFragmentedSize =
+				        tenureMemorySubspace->getMemoryPool()->getDarkMatterBytes();
 			}
 			if (MACRO_FRAGMENTATION == (MACRO_FRAGMENTATION & _tenureFragmentation)) {
-				MM_LargeObjectAllocateStats* allocateStats = tenureMemorySubspace->getLargeObjectAllocateStats();
+				MM_LargeObjectAllocateStats *allocateStats =
+				        tenureMemorySubspace->getLargeObjectAllocateStats();
 				stats->_macroFragmentedSize = allocateStats->getRemainingFreeMemoryAfterEstimate();
 			}
 		} else {
@@ -131,12 +132,12 @@ public:
 	}
 
 	/* Reset both Macro and Micro Fragmentation Stats after compact */
-	MMINLINE void
-	resetFragmentionStats(MM_EnvironmentBase *env) {
+	MMINLINE void resetFragmentionStats(MM_EnvironmentBase *env)
+	{
 		MM_GCExtensionsBase *extensions = env->getExtensions();
 		MM_MemorySpace *defaultMemorySpace = extensions->heap->getDefaultMemorySpace();
 		MM_MemorySubSpace *tenureMemorySubspace = defaultMemorySpace->getTenureMemorySubSpace();
-		MM_LargeObjectAllocateStats* allocateStats = tenureMemorySubspace->getLargeObjectAllocateStats();
+		MM_LargeObjectAllocateStats *allocateStats = tenureMemorySubspace->getLargeObjectAllocateStats();
 
 		tenureMemorySubspace->getMemoryPool()->resetDarkMatterBytes();
 		allocateStats->resetRemainingFreeMemoryAfterEstimate();
@@ -147,24 +148,22 @@ public:
 	/**
 	 * Create a HeapStats object.
 	 */
-	MM_CollectionStatisticsStandard() :
-		MM_CollectionStatistics()
-		,_totalTenureHeapSize(0)
-		,_totalFreeTenureHeapSize(0)
-		,_loaEnabled(false)
-		,_totalLOAHeapSize(0)
-		,_totalFreeLOAHeapSize(0)
-		,_scavengerEnabled(false)
-		,_totalNurseryHeapSize(0)
-		,_totalFreeNurseryHeapSize(0)
-		,_totalSurvivorHeapSize(0)
-		,_totalFreeSurvivorHeapSize(0)
-		,_rememberedSetCount(0)
-		, _tenureFragmentation(NO_FRAGMENTATION)
-		, _microFragmentedSize(0)
-		, _macroFragmentedSize(0)
-	{};
+	MM_CollectionStatisticsStandard()
+	        : MM_CollectionStatistics()
+	        , _totalTenureHeapSize(0)
+	        , _totalFreeTenureHeapSize(0)
+	        , _loaEnabled(false)
+	        , _totalLOAHeapSize(0)
+	        , _totalFreeLOAHeapSize(0)
+	        , _scavengerEnabled(false)
+	        , _totalNurseryHeapSize(0)
+	        , _totalFreeNurseryHeapSize(0)
+	        , _totalSurvivorHeapSize(0)
+	        , _totalFreeSurvivorHeapSize(0)
+	        , _rememberedSetCount(0)
+	        , _tenureFragmentation(NO_FRAGMENTATION)
+	        , _microFragmentedSize(0)
+	        , _macroFragmentedSize(0){};
 };
 
 #endif /* COLLECTIONSTATISTICSSTANDARD_HPP_ */
-

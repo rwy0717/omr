@@ -50,9 +50,11 @@ static omr_error_t initTestData(OMRAgentTestData *testData, OMR_VM *vm, char con
 static omr_error_t verifyTraceMetadata(char *traceMeta, OMR_VM *vm);
 
 static int J9THREAD_PROC childThreadMain(void *entryArg);
-static omr_error_t startTestChildThread(OMR_TI const *ti, OMR_VM *testVM, OMR_VMThread *curVMThread, omrthread_t *childThread, TestChildThreadData **childData);
+static omr_error_t startTestChildThread(OMR_TI const *ti, OMR_VM *testVM, OMR_VMThread *curVMThread,
+        omrthread_t *childThread, TestChildThreadData **childData);
 static omr_error_t testTraceAPIs(OMR_TI const *ti, OMR_VM *vm, const char *threadName);
-static omr_error_t waitForTestChildThread(OMR_TI const *ti, OMR_VM *testVM, omrthread_t childThread, TestChildThreadData *childData);
+static omr_error_t waitForTestChildThread(
+        OMR_TI const *ti, OMR_VM *testVM, omrthread_t childThread, TestChildThreadData *childData);
 
 static OMRAgentTestData testData1;
 static OMRAgentTestData testData2;
@@ -94,12 +96,14 @@ OMRAgent_OnUnload(OMR_TI const *ti, OMR_VM *vm)
 		}
 	}
 
-	/* OMR_ERROR_ILLEGAL_ARGUMENT is expected if alarmFunc1 is executed, otherwise expect OMR_ERROR_NONE to return */
+	/* OMR_ERROR_ILLEGAL_ARGUMENT is expected if alarmFunc1 is executed, otherwise expect OMR_ERROR_NONE to return
+	 */
 	if (OMR_ERROR_NONE == rc) {
 		omr_error_t testRc = ti->DeregisterRecordSubscriber(vmThread, testData1.subscriptionID);
 		if (OMR_ERROR_ILLEGAL_ARGUMENT != testRc && OMR_ERROR_NONE != testRc) {
 			rc = testRc;
-			omrtty_printf("%s:%d ERROR: DeregisterRecordSubscriber() returns unexpected rc: %d\n", __FILE__, __LINE__, rc);
+			omrtty_printf("%s:%d ERROR: DeregisterRecordSubscriber() returns unexpected rc: %d\n", __FILE__,
+			        __LINE__, rc);
 		}
 	}
 
@@ -113,7 +117,8 @@ OMRAgent_OnUnload(OMR_TI const *ti, OMR_VM *vm)
 
 	if (OMR_ERROR_NONE == rc) {
 		if (1 != testData1.completed && 1 != testData2.completed) {
-			omrtty_printf("%s:%d ERROR: Failed to call alarmFunc1() and alarmFunc2()\n", __FILE__, __LINE__);
+			omrtty_printf(
+			        "%s:%d ERROR: Failed to call alarmFunc1() and alarmFunc2()\n", __FILE__, __LINE__);
 			rc = OMR_ERROR_INTERNAL;
 		}
 	}
@@ -127,13 +132,14 @@ OMRAgent_OnUnload(OMR_TI const *ti, OMR_VM *vm)
 	return rc;
 }
 
-
 static omr_error_t
-startTestChildThread(OMR_TI const *ti, OMR_VM *testVM, OMR_VMThread *curVMThread, omrthread_t *childThread, TestChildThreadData **childData)
+startTestChildThread(OMR_TI const *ti, OMR_VM *testVM, OMR_VMThread *curVMThread, omrthread_t *childThread,
+        TestChildThreadData **childData)
 {
 	omr_error_t rc = OMR_ERROR_NONE;
 	OMRPORT_ACCESS_FROM_OMRVM(testVM);
-	TestChildThreadData *newChildData = (TestChildThreadData *)omrmem_allocate_memory(sizeof(*newChildData), OMRMEM_CATEGORY_VM);
+	TestChildThreadData *newChildData =
+	        (TestChildThreadData *)omrmem_allocate_memory(sizeof(*newChildData), OMRMEM_CATEGORY_VM);
 	OMR_ThreadAPI *threadAPI = (OMR_ThreadAPI *)ti->internalData;
 	omrthread_attr_t attr = NULL;
 
@@ -150,12 +156,13 @@ startTestChildThread(OMR_TI const *ti, OMR_VM *testVM, OMR_VMThread *curVMThread
 		rc = OMRTEST_PRINT_UNEXPECTED_INT_RC(threadAPI->omrthread_attr_init(&attr), J9THREAD_SUCCESS);
 	}
 	if (OMR_ERROR_NONE == rc) {
-		rc = OMRTEST_PRINT_UNEXPECTED_INT_RC(threadAPI->omrthread_attr_set_detachstate(&attr, J9THREAD_CREATE_JOINABLE), J9THREAD_SUCCESS);
+		rc = OMRTEST_PRINT_UNEXPECTED_INT_RC(
+		        threadAPI->omrthread_attr_set_detachstate(&attr, J9THREAD_CREATE_JOINABLE), J9THREAD_SUCCESS);
 
 		if (OMR_ERROR_NONE == rc) {
-			rc = OMRTEST_PRINT_UNEXPECTED_INT_RC(
-					threadAPI->omrthread_create_ex(childThread, &attr, FALSE, childThreadMain, newChildData),
-					J9THREAD_SUCCESS);
+			rc = OMRTEST_PRINT_UNEXPECTED_INT_RC(threadAPI->omrthread_create_ex(childThread, &attr, FALSE,
+			                                             childThreadMain, newChildData),
+			        J9THREAD_SUCCESS);
 		}
 		if (OMR_ERROR_NONE == rc) {
 			*childData = newChildData;
@@ -226,7 +233,7 @@ testTraceAPIs(OMR_TI const *ti, OMR_VM *vm, const char *threadName)
 	}
 
 	if (OMR_ERROR_NONE == rc) {
-		const char *setOpts[] = { "maximal", "omrport", NULL};
+		const char *setOpts[] = {"maximal", "omrport", NULL};
 		rc = OMRTEST_PRINT_ERROR(ti->SetTraceOptions(testData1.vmThread, setOpts));
 	}
 
@@ -242,11 +249,13 @@ testTraceAPIs(OMR_TI const *ti, OMR_VM *vm, const char *threadName)
 	}
 
 	if (OMR_ERROR_NONE == rc) {
-		rc = OMRTEST_PRINT_ERROR(ti->RegisterRecordSubscriber(testData1.vmThread, "sample1", subscribeFunc1, alarmFunc1, (void *)&testData1, &testData1.subscriptionID));
+		rc = OMRTEST_PRINT_ERROR(ti->RegisterRecordSubscriber(testData1.vmThread, "sample1", subscribeFunc1,
+		        alarmFunc1, (void *)&testData1, &testData1.subscriptionID));
 	}
 
 	if (OMR_ERROR_NONE == rc) {
-		rc = OMRTEST_PRINT_ERROR(ti->RegisterRecordSubscriber(testData2.vmThread, "sample2", subscribeFunc2, alarmFunc2, (void *)&testData2, &testData2.subscriptionID));
+		rc = OMRTEST_PRINT_ERROR(ti->RegisterRecordSubscriber(testData2.vmThread, "sample2", subscribeFunc2,
+		        alarmFunc2, (void *)&testData2, &testData2.subscriptionID));
 	}
 
 	if (OMR_ERROR_NONE == rc) {
@@ -330,7 +339,8 @@ verifyTraceMetadata(char *traceMeta, OMR_VM *vm)
 		char c = traceMeta[i];
 		if (eyecatcherASCII[i] != c && eyecatcherEBCDIC[i] != c) {
 			rc = OMR_ERROR_INTERNAL;
-			omrtty_printf("eyecatcher in trace metadata at index %d doesn't match expectation. Found: %c\n", i, c);
+			omrtty_printf("eyecatcher in trace metadata at index %d doesn't match expectation. Found: %c\n",
+			        i, c);
 			break;
 		}
 	}

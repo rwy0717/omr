@@ -23,14 +23,13 @@
 #if !defined(HEAP_HPP_)
 #define HEAP_HPP_
 
-#include "omrcomp.h"
-#include "modronbase.h"
-#include "omr.h"
-
 #include "EnvironmentBase.hpp"
 #include "GCExtensionsBase.hpp"
 #include "HeapResizeStats.hpp"
 #include "PercolateStats.hpp"
+#include "modronbase.h"
+#include "omr.h"
+#include "omrcomp.h"
 
 class MM_HeapRegionDescriptor;
 class MM_HeapRegionManager;
@@ -39,11 +38,10 @@ class MM_MemorySpace;
 class MM_MemorySubSpace;
 class MM_PhysicalArena;
 
-class MM_Heap : public MM_BaseVirtual
-{
-/*
-* Data members
-*/
+class MM_Heap : public MM_BaseVirtual {
+	/*
+	 * Data members
+	 */
 private:
 protected:
 	OMR_VM *_omrVM;
@@ -60,18 +58,18 @@ protected:
 	MM_HeapRegionManager *_heapRegionManager;
 
 public:
-
-/*
-* Function members
-*/
+	/*
+	 * Function members
+	 */
 private:
 protected:
 	bool initialize(MM_EnvironmentBase *env);
 	void tearDown(MM_EnvironmentBase *env);
+
 public:
 	virtual void kill(MM_EnvironmentBase *env);
 
-	virtual uintptr_t calculateOffsetFromHeapBase(void*) = 0;
+	virtual uintptr_t calculateOffsetFromHeapBase(void *) = 0;
 
 	MMINLINE MM_HeapResizeStats *getResizeStats() { return &_heapResizeStats; }
 
@@ -102,7 +100,7 @@ public:
 	uintptr_t getApproximateActiveFreeSurvivorMemorySize(uintptr_t includeMemoryType);
 
 	/**
-	 * Return the page size used for the heap memory.  This should only be used for 
+	 * Return the page size used for the heap memory.  This should only be used for
 	 * reporting purposes only!  (e.g. In MM_HeapSplit, the low extent and high extent
 	 * may have different size pages, in this case the minimum value is returned)
 	 */
@@ -112,11 +110,13 @@ public:
 	 * Return the page flags describing the pages used for the heap memory.
 	 */
 	virtual uintptr_t getPageFlags() = 0;
-	
+
 	virtual void *getHeapBase() = 0;
 	virtual void *getHeapTop() = 0;
 #if defined(OMR_GC_DOUBLE_MAP_ARRAYLETS)
-	virtual void *doubleMapArraylet(MM_EnvironmentBase *env, void* arrayletLeaves[], UDATA arrayletLeafCount, UDATA arrayletLeafSize, UDATA byteAmount, struct J9PortVmemIdentifier *newIdentifier, UDATA pageSize) = 0;
+	virtual void *doubleMapArraylet(MM_EnvironmentBase *env, void *arrayletLeaves[], UDATA arrayletLeafCount,
+	        UDATA arrayletLeafSize, UDATA byteAmount, struct J9PortVmemIdentifier *newIdentifier,
+	        UDATA pageSize) = 0;
 #endif /* defined(OMR_GC_DOUBLE_MAP_ARRAYLETS) */
 
 	virtual uintptr_t getMaximumPhysicalRange() = 0;
@@ -139,14 +139,16 @@ public:
 	void systemGarbageCollect(MM_EnvironmentBase *env, uint32_t gcCode);
 	void resetSpacesForGarbageCollect(MM_EnvironmentBase *env);
 
-	virtual bool heapAddRange(MM_EnvironmentBase *env, MM_MemorySubSpace *subspace, uintptr_t size, void *lowAddress, void *highAddress);
-	virtual bool heapRemoveRange(MM_EnvironmentBase *env, MM_MemorySubSpace *subspace, uintptr_t size, void *lowAddress, void *highAddress, void *lowValidAddress, void *highValidAddress);
+	virtual bool heapAddRange(MM_EnvironmentBase *env, MM_MemorySubSpace *subspace, uintptr_t size,
+	        void *lowAddress, void *highAddress);
+	virtual bool heapRemoveRange(MM_EnvironmentBase *env, MM_MemorySubSpace *subspace, uintptr_t size,
+	        void *lowAddress, void *highAddress, void *lowValidAddress, void *highValidAddress);
 
 	/**
 	 * Called after the heap geometry changes to allow any data structures dependent on this to be updated.
 	 * This call could be triggered by memory ranges being added to or removed from the heap or memory being
 	 * moved from one subspace to another.
-	 * @param env[in] The thread which performed the change in heap geometry 
+	 * @param env[in] The thread which performed the change in heap geometry
 	 */
 	virtual void heapReconfigured(MM_EnvironmentBase *env);
 
@@ -160,7 +162,7 @@ public:
 	 */
 	virtual bool initializeHeapRegionManager(MM_EnvironmentBase *env, MM_HeapRegionManager *manager) = 0;
 
-	struct MM_CommonGCData* initializeCommonGCData(MM_EnvironmentBase *env, struct MM_CommonGCData *data);
+	struct MM_CommonGCData *initializeCommonGCData(MM_EnvironmentBase *env, struct MM_CommonGCData *data);
 	void initializeCommonGCStartData(MM_EnvironmentBase *env, struct MM_CommonGCStartData *data);
 	void initializeCommonGCEndData(MM_EnvironmentBase *env, struct MM_CommonGCEndData *data);
 
@@ -169,20 +171,19 @@ public:
 	/**
 	 * Create a Heap object.
 	 */
-	MM_Heap(MM_EnvironmentBase *env, uintptr_t maximumMemorySize, MM_HeapRegionManager *regionManager) :
-		MM_BaseVirtual()
-		,_omrVM(env->getOmrVM())
-		,_portLibrary(env->getPortLibrary())
-		,_defaultMemorySpace(NULL)
-		,_memorySpaceList(NULL)
-		,_maximumMemorySize(maximumMemorySize)
-		,_heapResizeStats()
-		,_percolateStats()
-		,_heapRegionManager(regionManager)
+	MM_Heap(MM_EnvironmentBase *env, uintptr_t maximumMemorySize, MM_HeapRegionManager *regionManager)
+	        : MM_BaseVirtual()
+	        , _omrVM(env->getOmrVM())
+	        , _portLibrary(env->getPortLibrary())
+	        , _defaultMemorySpace(NULL)
+	        , _memorySpaceList(NULL)
+	        , _maximumMemorySize(maximumMemorySize)
+	        , _heapResizeStats()
+	        , _percolateStats()
+	        , _heapRegionManager(regionManager)
 	{
 		_typeId = __FUNCTION__;
 	}
 };
-
 
 #endif /* HEAP_HPP_ */

@@ -70,7 +70,8 @@ hashComparatorFn(struct J9AVLTree *tree, struct J9AVLTreeNode *leftNode, struct 
 	return (intptr_t)leftKey - (intptr_t)rightKey;
 }
 
-static uintptr_t dataOffset(uintptr_t startOffset, uintptr_t dataLength, uintptr_t i)
+static uintptr_t
+dataOffset(uintptr_t startOffset, uintptr_t dataLength, uintptr_t i)
 {
 	uintptr_t result;
 	if (startOffset == REVERSE) {
@@ -84,7 +85,8 @@ static uintptr_t dataOffset(uintptr_t startOffset, uintptr_t dataLength, uintptr
 }
 
 static BOOLEAN
-checkHashtableIntegrity(OMRPortLibrary *portLib, J9HashTable *table, const uintptr_t *data, uintptr_t dataLength, uintptr_t removeOffset, uintptr_t i)
+checkHashtableIntegrity(OMRPortLibrary *portLib, J9HashTable *table, const uintptr_t *data, uintptr_t dataLength,
+        uintptr_t removeOffset, uintptr_t i)
 {
 	uintptr_t count, j;
 	uintptr_t dup[256];
@@ -147,7 +149,8 @@ checkHashtableIntegrity(OMRPortLibrary *portLib, J9HashTable *table, const uintp
 }
 
 static int32_t
-runHashtableTests(OMRPortLibrary *portLib, J9HashTable *table, const uintptr_t *data, uintptr_t dataLength, uintptr_t removeOffset)
+runHashtableTests(OMRPortLibrary *portLib, J9HashTable *table, const uintptr_t *data, uintptr_t dataLength,
+        uintptr_t removeOffset)
 {
 	uintptr_t i = 0;
 	uintptr_t entry = 0;
@@ -204,29 +207,12 @@ allocateHashtable(OMRPortLibrary *portLib, HashtableInputData *inputData)
 	void *userData = (void *)(uintptr_t)inputData->forceCollisions;
 
 	if (TRUE == inputData->collisionResistant) {
-		hashtable = collisionResilientHashTableNew(portLib,
-				tableName,
-				tableSize,
-				entrySize,
-				flags,
-				OMRMEM_CATEGORY_VM,
-				inputData->listToTreeThreshold,
-				hashFn,
-				hashComparatorFn,
-				NULL,
-				userData);
+		hashtable = collisionResilientHashTableNew(portLib, tableName, tableSize, entrySize, flags,
+		        OMRMEM_CATEGORY_VM, inputData->listToTreeThreshold, hashFn, hashComparatorFn, NULL, userData);
 	} else {
-		hashtable = hashTableNew(portLib,
-				tableName,
-				tableSize,
-				entrySize,
-				sizeof(char *),
-				flags | J9HASH_TABLE_ALLOW_SIZE_OPTIMIZATION,
-				OMRMEM_CATEGORY_VM,
-				hashFn,
-				hashEqualFn,
-				NULL,
-				userData);
+		hashtable = hashTableNew(portLib, tableName, tableSize, entrySize, sizeof(char *),
+		        flags | J9HASH_TABLE_ALLOW_SIZE_OPTIMIZATION, OMRMEM_CATEGORY_VM, hashFn, hashEqualFn, NULL,
+		        userData);
 	}
 
 	return hashtable;

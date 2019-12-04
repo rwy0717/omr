@@ -44,7 +44,7 @@ checkTagSumCheck(J9MemTag *tagAddress, uint32_t eyeCatcher)
 	if (tagStoragePointer->eyeCatcher != eyeCatcher) {
 		return U_32_MAX;
 	}
-	slots = (uint32_t *) tagStoragePointer;
+	slots = (uint32_t *)tagStoragePointer;
 	/* Could be unrolled into chained xors with a OMR_ENV_DATA64 conditional on the extra 2 uint32_ts */
 	for (i = 0; i < (sizeof(J9MemTag) / sizeof(uint32_t)); i++) {
 		sum ^= *slots++;
@@ -52,7 +52,7 @@ checkTagSumCheck(J9MemTag *tagAddress, uint32_t eyeCatcher)
 #ifdef OMR_ENV_DATA64
 	sum ^= ((uint32_t)(((uintptr_t)tagAddress) >> 32)) ^ ((uint32_t)(((uintptr_t)tagAddress) & U_32_MAX));
 #else
-	sum ^= (uint32_t) tagAddress;
+	sum ^= (uint32_t)tagAddress;
 #endif
 	return sum;
 }
@@ -71,7 +71,7 @@ checkPadding(J9MemTag *headerTagAddress)
 
 	padding = omrmem_get_footer_padding(headerTagAddress);
 
-	while ((((uintptr_t) padding) & (ROUNDING_GRANULARITY - 1)) != 0) {
+	while ((((uintptr_t)padding) & (ROUNDING_GRANULARITY - 1)) != 0) {
 		if (*padding == J9MEMTAG_PADDING_BYTE) {
 			padding++;
 		} else {
@@ -122,7 +122,8 @@ omrmem_get_footer_tag(J9MemTag *headerEyeCatcherAddress)
 
 	headerTagStoragePointer = headerEyeCatcherAddress;
 
-	return (J9MemTag *)((uint8_t *)headerEyeCatcherAddress + ROUNDED_FOOTER_OFFSET(headerTagStoragePointer->allocSize));
+	return (J9MemTag *)((uint8_t *)headerEyeCatcherAddress
+	        + ROUNDED_FOOTER_OFFSET(headerTagStoragePointer->allocSize));
 }
 
 /**
@@ -134,4 +135,3 @@ omrmem_get_header_tag(void *memoryPointer)
 {
 	return (J9MemTag *)((uint8_t *)memoryPointer - sizeof(J9MemTag));
 }
-

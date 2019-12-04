@@ -24,8 +24,7 @@
 
 #include "ddr/ir/Type.hpp"
 
-class UDT : public Type
-{
+class UDT : public Type {
 public:
 	NamespaceUDT *_outerNamespace;
 	unsigned int const _lineNumber;
@@ -35,9 +34,9 @@ public:
 
 	virtual string getFullName() const;
 	virtual bool insertUnique(Symbol_IR *ir);
-	virtual NamespaceUDT * getNamespace();
+	virtual NamespaceUDT *getNamespace();
 
-	bool operator==(const Type & rhs) const;
+	bool operator==(const Type &rhs) const;
 	virtual bool compareToUDT(const UDT &) const;
 };
 

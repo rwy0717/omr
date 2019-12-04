@@ -29,30 +29,31 @@
 
 class CompileTest : public Tril::Test::JitTest {};
 
-TEST_F(CompileTest, Return3) {
-    auto trees = parseString("(method return=\"Int32\" (block (ireturn (iconst 3))))");
+TEST_F(CompileTest, Return3)
+{
+	auto trees = parseString("(method return=\"Int32\" (block (ireturn (iconst 3))))");
 
-    ASSERT_NOTNULL(trees);
+	ASSERT_NOTNULL(trees);
 
-    Tril::DefaultCompiler compiler(trees);
+	Tril::DefaultCompiler compiler(trees);
 
-    ASSERT_EQ(0, compiler.compile()) << "Compilation failed";
+	ASSERT_EQ(0, compiler.compile()) << "Compilation failed";
 
-    auto entry = compiler.getEntryPoint<int32_t (*)(void)>();
-    ASSERT_NOTNULL(entry) << "Entry point of compiled body cannot be null";
-    ASSERT_EQ(3, entry()) << "Compiled body did not return expected value";
+	auto entry = compiler.getEntryPoint<int32_t (*)(void)>();
+	ASSERT_NOTNULL(entry) << "Entry point of compiled body cannot be null";
+	ASSERT_EQ(3, entry()) << "Compiled body did not return expected value";
 }
 
+TEST_F(CompileTest, NoCodeGen)
+{
+	auto trees = parseString("(method return=\"Int32\" (block (ireturn (iconst 3))))");
 
-TEST_F(CompileTest, NoCodeGen) {
-    auto trees = parseString("(method return=\"Int32\" (block (ireturn (iconst 3))))");
+	ASSERT_NOTNULL(trees);
 
-    ASSERT_NOTNULL(trees);
+	Tril::DefaultCompiler compiler(trees);
+	TR::NoCodegenVerifier verifier(NULL);
 
-    Tril::DefaultCompiler compiler(trees);
-    TR::NoCodegenVerifier verifier(NULL); 
+	EXPECT_NE(0, compiler.compileWithVerifier(&verifier)) << "Compilation succeeded";
 
-    EXPECT_NE(0, compiler.compileWithVerifier(&verifier)) << "Compilation succeeded";
-
-    EXPECT_TRUE(verifier.hasRun());
+	EXPECT_TRUE(verifier.hasRun());
 }

@@ -22,13 +22,10 @@
 #include "ddr/ir/ClassUDT.hpp"
 
 ClassUDT::ClassUDT(size_t size, bool isClass, unsigned int lineNumber)
-	: ClassType(size, lineNumber), _superClass(NULL), _isClass(isClass)
-{
-}
+        : ClassType(size, lineNumber), _superClass(NULL), _isClass(isClass)
+{}
 
-ClassUDT::~ClassUDT()
-{
-}
+ClassUDT::~ClassUDT() {}
 
 const string &
 ClassUDT::getSymbolKindName() const
@@ -46,7 +43,7 @@ ClassUDT::acceptVisitor(const TypeVisitor &visitor)
 }
 
 bool
-ClassUDT::operator==(const Type & rhs) const
+ClassUDT::operator==(const Type &rhs) const
 {
 	return rhs.compareToClass(*this);
 }
@@ -54,6 +51,5 @@ ClassUDT::operator==(const Type & rhs) const
 bool
 ClassUDT::compareToClass(const ClassUDT &other) const
 {
-	return compareToClasstype(other)
-		&& (*_superClass == *other._superClass);
+	return compareToClasstype(other) && (*_superClass == *other._superClass);
 }

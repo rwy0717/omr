@@ -25,13 +25,12 @@
  * @ingroup GC_Modron_Standard
  */
 
-#include "omrcfg.h"
 #include "MemorySpacesAPI.h"
+#include "omrcfg.h"
 
 #if defined(OMR_GC_MODRON_STANDARD)
 
 #include "ConfigurationFlat.hpp"
-
 #include "EnvironmentBase.hpp"
 #include "MemoryPoolAddressOrderedList.hpp"
 #include "MemoryPoolLargeObjects.hpp"
@@ -41,12 +40,13 @@
 #include "PhysicalArenaVirtualMemory.hpp"
 #include "PhysicalSubArenaVirtualMemoryFlat.hpp"
 
-MM_Configuration*
-MM_ConfigurationFlat::newInstance(MM_EnvironmentBase* env)
+MM_Configuration *
+MM_ConfigurationFlat::newInstance(MM_EnvironmentBase *env)
 {
-	MM_ConfigurationFlat* configuration;
+	MM_ConfigurationFlat *configuration;
 
-	configuration = (MM_ConfigurationFlat*)env->getForge()->allocate(sizeof(MM_ConfigurationFlat), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
+	configuration = (MM_ConfigurationFlat *)env->getForge()->allocate(
+	        sizeof(MM_ConfigurationFlat), OMR::GC::AllocationCategory::FIXED, OMR_GET_CALLSITE());
 	if (NULL != configuration) {
 		new (configuration) MM_ConfigurationFlat(env);
 		if (!configuration->initialize(env)) {
@@ -57,20 +57,24 @@ MM_ConfigurationFlat::newInstance(MM_EnvironmentBase* env)
 	return configuration;
 }
 
-MM_MemorySpace*
-MM_ConfigurationFlat::createDefaultMemorySpace(MM_EnvironmentBase* env, MM_Heap* heap, MM_InitializationParameters* parameters)
+MM_MemorySpace *
+MM_ConfigurationFlat::createDefaultMemorySpace(
+        MM_EnvironmentBase *env, MM_Heap *heap, MM_InitializationParameters *parameters)
 {
-	MM_MemoryPool* memoryPool = NULL;
-	MM_MemorySubSpaceGeneric* memorySubSpaceGeneric = NULL;
-	MM_PhysicalSubArenaVirtualMemoryFlat* physicalSubArena = NULL;
-	MM_MemorySubSpaceFlat* memorySubSpaceFlat = NULL;
-	MM_PhysicalArenaVirtualMemory* physicalArena = NULL;
+	MM_MemoryPool *memoryPool = NULL;
+	MM_MemorySubSpaceGeneric *memorySubSpaceGeneric = NULL;
+	MM_PhysicalSubArenaVirtualMemoryFlat *physicalSubArena = NULL;
+	MM_MemorySubSpaceFlat *memorySubSpaceFlat = NULL;
+	MM_PhysicalArenaVirtualMemory *physicalArena = NULL;
 
 	if (NULL == (memoryPool = createMemoryPool(env, false))) {
 		return NULL;
 	}
 
-	if (NULL == (memorySubSpaceGeneric = MM_MemorySubSpaceGeneric::newInstance(env, memoryPool, NULL, false, parameters->_minimumSpaceSize, parameters->_initialOldSpaceSize, parameters->_maximumSpaceSize, MEMORY_TYPE_OLD, 0))) {
+	if (NULL
+	        == (memorySubSpaceGeneric = MM_MemorySubSpaceGeneric::newInstance(env, memoryPool, NULL, false,
+	                    parameters->_minimumSpaceSize, parameters->_initialOldSpaceSize,
+	                    parameters->_maximumSpaceSize, MEMORY_TYPE_OLD, 0))) {
 		return NULL;
 	}
 
@@ -79,7 +83,10 @@ MM_ConfigurationFlat::createDefaultMemorySpace(MM_EnvironmentBase* env, MM_Heap*
 		return NULL;
 	}
 
-	if (NULL == (memorySubSpaceFlat = MM_MemorySubSpaceFlat::newInstance(env, physicalSubArena, memorySubSpaceGeneric, true, parameters->_minimumSpaceSize, parameters->_initialOldSpaceSize, parameters->_maximumSpaceSize, MEMORY_TYPE_OLD, 0))) {
+	if (NULL
+	        == (memorySubSpaceFlat = MM_MemorySubSpaceFlat::newInstance(env, physicalSubArena,
+	                    memorySubSpaceGeneric, true, parameters->_minimumSpaceSize,
+	                    parameters->_initialOldSpaceSize, parameters->_maximumSpaceSize, MEMORY_TYPE_OLD, 0))) {
 		return NULL;
 	}
 
@@ -88,7 +95,8 @@ MM_ConfigurationFlat::createDefaultMemorySpace(MM_EnvironmentBase* env, MM_Heap*
 		return NULL;
 	}
 
-	return MM_MemorySpace::newInstance(env, heap, physicalArena, memorySubSpaceFlat, parameters, MEMORY_SPACE_NAME_FLAT, MEMORY_SPACE_DESCRIPTION_FLAT);
+	return MM_MemorySpace::newInstance(env, heap, physicalArena, memorySubSpaceFlat, parameters,
+	        MEMORY_SPACE_NAME_FLAT, MEMORY_SPACE_DESCRIPTION_FLAT);
 }
 
 #endif /* defined(OMR_GC_MODRON_STANDARD) */

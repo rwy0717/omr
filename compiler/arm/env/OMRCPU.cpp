@@ -24,8 +24,8 @@
 
 bool
 OMR::ARM::CPU::isTargetWithinBranchImmediateRange(intptrj_t targetAddress, intptrj_t sourceAddress)
-   {
-   intptrj_t range = targetAddress - sourceAddress;
-   return range <= self()->maxBranchImmediateForwardOffset() &&
-          range >= self()->maxBranchImmediateBackwardOffset();
-   }
+{
+	intptrj_t range = targetAddress - sourceAddress;
+	return range <= self()->maxBranchImmediateForwardOffset()
+	        && range >= self()->maxBranchImmediateBackwardOffset();
+}

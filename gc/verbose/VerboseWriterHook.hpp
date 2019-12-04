@@ -22,33 +22,34 @@
 
 #if !defined(VERBOSEWRITTERHOOK_HPP_)
 #define VERBOSEWRITTERHOOK_HPP_
- 
-#include "omrcfg.h"
 
 #include "VerboseWriter.hpp"
+#include "omrcfg.h"
 
 /**
  * Ouptut agent which directs verbosegc output to a tracepoint.
  */
-class MM_VerboseWriterHook : public MM_VerboseWriter
-{
+class MM_VerboseWriterHook : public MM_VerboseWriter {
 private:
-
 protected:
 	MM_VerboseWriterHook(MM_EnvironmentBase *env);
 
 	virtual bool initialize(MM_EnvironmentBase *env);
-	
+
 public:
 	static MM_VerboseWriterHook *newInstance(MM_EnvironmentBase *env);
 
-	virtual bool reconfigure(MM_EnvironmentBase *env, const char *filename, uintptr_t fileCount, uintptr_t iterations) { return true; };
-	
+	virtual bool reconfigure(
+	        MM_EnvironmentBase *env, const char *filename, uintptr_t fileCount, uintptr_t iterations)
+	{
+		return true;
+	};
+
 	virtual void endOfCycle(MM_EnvironmentBase *env);
-	
+
 	virtual void closeStream(MM_EnvironmentBase *env);
-	
-	virtual void outputString(MM_EnvironmentBase *env, const char* string);
+
+	virtual void outputString(MM_EnvironmentBase *env, const char *string);
 };
 
 #endif /* VERBOSEWRITTERHOOK_HPP_ */

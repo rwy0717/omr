@@ -20,7 +20,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
 /**
  * Description: An annotated extensible class is direct parent of
  *    of a class that is not annotated, which is not allowed as
@@ -29,6 +28,9 @@
 
 #define OMR_EXTENSIBLE __attribute__((annotate("OMR_Extensible")))
 
-namespace OMR { class OMR_EXTENSIBLE Class1Marked {}; }
-namespace IBM { class Class1Unmarked : public OMR::Class1Marked {}; }
-
+namespace OMR {
+class OMR_EXTENSIBLE Class1Marked {};
+} // namespace OMR
+namespace IBM {
+class Class1Unmarked : public OMR::Class1Marked {};
+} // namespace IBM

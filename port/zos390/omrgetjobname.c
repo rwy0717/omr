@@ -50,7 +50,7 @@ omrget_jobname(struct OMRPortLibrary *portLibrary, char *jobname, uintptr_t leng
 	if (NULL != tmp_jobname) {
 		char *ascname = NULL;
 		memset(tmp_jobname, '\0', J9_MAX_JOBNAME);
-		_JOBNAME(tmp_jobname);  /* requires <31bit address */
+		_JOBNAME(tmp_jobname); /* requires <31bit address */
 #if !defined(OMR_EBCDIC)
 		ascname = e2a_func(tmp_jobname, strlen(tmp_jobname));
 #else /* !defined(OMR_EBCDIC) */

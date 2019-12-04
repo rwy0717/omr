@@ -24,15 +24,11 @@
 
 #include "ilgen/OMRIlReference.hpp"
 
-namespace TR
-{
-   class IlReference : public OMR::IlReference
-      {
-      public:
-         IlReference(TR::SymbolReference *symRef)
-            : OMR::IlReference(symRef)
-            { }
-      };
+namespace TR {
+class IlReference : public OMR::IlReference {
+public:
+	IlReference(TR::SymbolReference *symRef) : OMR::IlReference(symRef) {}
+};
 
 } // namespace TR
 

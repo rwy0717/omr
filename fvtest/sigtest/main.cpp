@@ -30,7 +30,6 @@ int omr_main_entry(int argc, char **argv, char **envp);
 
 PortEnvironment *omrTestEnv;
 
-
 int
 omr_main_entry(int argc, char **argv, char **envp)
 {

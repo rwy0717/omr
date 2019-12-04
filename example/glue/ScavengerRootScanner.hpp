@@ -35,8 +35,7 @@
 
 #if defined(OMR_GC_MODRON_SCAVENGER)
 
-class MM_ScavengerRootScanner : public MM_Base
-{
+class MM_ScavengerRootScanner : public MM_Base {
 	/*
 	 * Member data and types
 	 */
@@ -45,34 +44,23 @@ private:
 
 protected:
 public:
-
 	/*
 	 * Member functions
 	 */
 private:
 protected:
 public:
-	MM_ScavengerRootScanner(MM_EnvironmentBase *env, MM_Scavenger *scavenger)
-		: MM_Base()
-		, _scavenger(scavenger)
-	{
-	};
+	MM_ScavengerRootScanner(MM_EnvironmentBase *env, MM_Scavenger *scavenger) : MM_Base(), _scavenger(scavenger){};
 
-	void
-	scavengeRememberedSet(MM_EnvironmentStandard *env)
+	void scavengeRememberedSet(MM_EnvironmentStandard *env)
 	{
-		MM_SublistFragment::flush((J9VMGC_SublistFragment*)&env->_scavengerRememberedSet);
+		MM_SublistFragment::flush((J9VMGC_SublistFragment *)&env->_scavengerRememberedSet);
 		_scavenger->scavengeRememberedSet(env);
 	}
 
-	void
-	pruneRememberedSet(MM_EnvironmentStandard *env)
-	{
-		_scavenger->pruneRememberedSet(env);
-	}
+	void pruneRememberedSet(MM_EnvironmentStandard *env) { _scavenger->pruneRememberedSet(env); }
 
-	void
-	scanRoots(MM_EnvironmentBase *env)
+	void scanRoots(MM_EnvironmentBase *env)
 	{
 		OMR_VM_Example *omrVM = (OMR_VM_Example *)env->getOmrVM()->_language_vm;
 		if (env->_currentTask->synchronizeGCThreadsAndReleaseSingleThread(env, UNIQUE_ID)) {
@@ -82,26 +70,29 @@ public:
 				RootEntry *rootEntry = (RootEntry *)hashTableStartDo(omrVM->rootTable, &state);
 				while (NULL != rootEntry) {
 					if (NULL != rootEntry->rootPtr) {
-						_scavenger->copyObjectSlot(envStd, (volatile omrobjectptr_t *) &rootEntry->rootPtr);
+						_scavenger->copyObjectSlot(
+						        envStd, (volatile omrobjectptr_t *)&rootEntry->rootPtr);
 					}
 					rootEntry = (RootEntry *)hashTableNextDo(&state);
 				}
 			}
 			OMR_VMThread *walkThread;
 			GC_OMRVMThreadListIterator threadListIterator(env->getOmrVM());
-			while((walkThread = threadListIterator.nextOMRVMThread()) != NULL) {
+			while ((walkThread = threadListIterator.nextOMRVMThread()) != NULL) {
 				if (NULL != walkThread->_savedObject1) {
-					_scavenger->copyObjectSlot(envStd, (volatile omrobjectptr_t *) &walkThread->_savedObject1);
+					_scavenger->copyObjectSlot(
+					        envStd, (volatile omrobjectptr_t *)&walkThread->_savedObject1);
 				}
 				if (NULL != walkThread->_savedObject2) {
-					_scavenger->copyObjectSlot(envStd, (volatile omrobjectptr_t *) &walkThread->_savedObject2);
+					_scavenger->copyObjectSlot(
+					        envStd, (volatile omrobjectptr_t *)&walkThread->_savedObject2);
 				}
 			}
 			env->_currentTask->releaseSynchronizedGCThreads(env);
 		}
 	}
 
-	void rescanThreadSlots(MM_EnvironmentStandard *env) { }
+	void rescanThreadSlots(MM_EnvironmentStandard *env) {}
 
 	void scanClearable(MM_EnvironmentBase *env)
 	{
@@ -130,7 +121,7 @@ public:
 		}
 	}
 
-	void flush(MM_EnvironmentStandard *env) { }
+	void flush(MM_EnvironmentStandard *env) {}
 };
 
 #endif /* defined(OMR_GC_MODRON_SCAVENGER) */

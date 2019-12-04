@@ -26,9 +26,9 @@
 
 #include "EnvironmentBase.hpp"
 #include "GCExtensionsBase.hpp"
+#include "HeapMapIterator.hpp"
 #include "MarkMap.hpp"
 #include "MarkingScheme.hpp"
-#include "HeapMapIterator.hpp"
 #include "ObjectModel.hpp"
 #include "ParallelGlobalGC.hpp"
 

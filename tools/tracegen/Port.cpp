@@ -41,7 +41,6 @@
 
 #include "Port.hpp"
 
-
 #if defined(OMR_OS_WINDOWS)
 RCType
 Port::omrfile_findfirst(const char *path, char **resultbuf, intptr_t *handle)
@@ -74,7 +73,7 @@ Port::omrfile_findfirst(const char *path, char **resultbuf, intptr_t *handle)
 	if (RC_OK != convertToUTF8(findFileData.cFileName, resultbuf)) {
 		goto failed;
 	}
-	*handle = (intptr_t) result;
+	*handle = (intptr_t)result;
 
 	if (unicodePath != unicodeBuffer) {
 		Port::omrmem_free((void **)&unicodePath);
@@ -92,7 +91,7 @@ RCType
 Port::omrfile_findclose(intptr_t findhandle)
 {
 	RCType rc = RC_FAILED;
-	if (0 != FindClose((HANDLE) findhandle)) {
+	if (0 != FindClose((HANDLE)findhandle)) {
 		rc = RC_OK;
 	}
 	return rc;
@@ -102,7 +101,7 @@ RCType
 Port::omrfile_findnext(intptr_t findhandle, char **resultbuf)
 {
 	WIN32_FIND_DATAW findFileData;
-	if (!FindNextFileW((HANDLE) findhandle, &findFileData)) {
+	if (!FindNextFileW((HANDLE)findhandle, &findFileData)) {
 		goto failed;
 	}
 
@@ -139,26 +138,32 @@ Port::file_get_unicode_path(const char *utf8Path, wchar_t *unicodeBuffer, unsign
 		size_t fullPathNameBufferSizeBytes;
 
 		/*
-		 * We need to prepend the path with "\\?\", but this format is only supported if the path is fully qualified.
+		 * We need to prepend the path with "\\?\", but this format is only supported if the path is fully
+		 * qualified.
 		 *
-		 * The only way to get the fully qualified path is using GetFullPathNameW. The MSDN docs for GetFullPathNameW state
-		 * that it should not be used in multi-threaded applications, but the docs are fairly clear that this is because the conversion from a
-		 * relative path to a fully qualified path depends on the current working directory (CWD), which is a process global that may change.
+		 * The only way to get the fully qualified path is using GetFullPathNameW. The MSDN docs for
+		 * GetFullPathNameW state that it should not be used in multi-threaded applications, but the docs are
+		 * fairly clear that this is because the conversion from a relative path to a fully qualified path
+		 * depends on the current working directory (CWD), which is a process global that may change.
 		 *
-		 * However, we can't simply limit the use of GetFullPathNameW to non-absolute paths, because all occurrences of "." and "..",
-		 * need to be removed. This includes the occurrences that don't simply prepend the path, in which case the CWD is not relevant and
-		 * where we assume the call to GetFullPathNameW is thread-safe.
+		 * However, we can't simply limit the use of GetFullPathNameW to non-absolute paths, because all
+		 * occurrences of "." and "..", need to be removed. This includes the occurrences that don't simply
+		 * prepend the path, in which case the CWD is not relevant and where we assume the call to
+		 * GetFullPathNameW is thread-safe.
 		 *
 		 */
 
 		/* find out how big a buffer we need */
-		fullPathNameLengthInWcharts = GetFullPathNameW(unicodePath, 0 /* zero means give us back the size we need */, NULL, NULL);
+		fullPathNameLengthInWcharts =
+		        GetFullPathNameW(unicodePath, 0 /* zero means give us back the size we need */, NULL, NULL);
 		if (0 == fullPathNameLengthInWcharts) {
 			pathName = NULL;
 			goto cleanup;
 		}
 
-		fullPathNameBufferSizeBytes = fullPathNameLengthInWcharts * sizeof(wchar_t) + wcslen(J9FILE_UNC_EXTENDED_LENGTH_PREFIX) * sizeof(wchar_t) + sizeof(wchar_t) /* null terminator */ ;
+		fullPathNameBufferSizeBytes = fullPathNameLengthInWcharts * sizeof(wchar_t)
+		        + wcslen(J9FILE_UNC_EXTENDED_LENGTH_PREFIX) * sizeof(wchar_t)
+		        + sizeof(wchar_t) /* null terminator */;
 
 		fullPathNameBuffer = (wchar_t *)Port::omrmem_malloc(fullPathNameBufferSizeBytes);
 		if (NULL == fullPathNameBuffer) {
@@ -166,19 +171,22 @@ Port::file_get_unicode_path(const char *utf8Path, wchar_t *unicodeBuffer, unsign
 			goto cleanup;
 		}
 
-		getFullPathNameRc = GetFullPathNameW(unicodePath, fullPathNameLengthInWcharts , fullPathNameBuffer, NULL);
+		getFullPathNameRc =
+		        GetFullPathNameW(unicodePath, fullPathNameLengthInWcharts, fullPathNameBuffer, NULL);
 		if (0 == getFullPathNameRc) {
 			pathName = NULL;
 			goto cleanup;
 		}
 
 		/*  now prepend the fullPathNameBuffer with "\\?\" */
-		memmove(fullPathNameBuffer + wcslen(J9FILE_UNC_EXTENDED_LENGTH_PREFIX), fullPathNameBuffer, fullPathNameLengthInWcharts * sizeof(wchar_t));
-		wcsncpy(fullPathNameBuffer, J9FILE_UNC_EXTENDED_LENGTH_PREFIX, wcslen(J9FILE_UNC_EXTENDED_LENGTH_PREFIX));
+		memmove(fullPathNameBuffer + wcslen(J9FILE_UNC_EXTENDED_LENGTH_PREFIX), fullPathNameBuffer,
+		        fullPathNameLengthInWcharts * sizeof(wchar_t));
+		wcsncpy(fullPathNameBuffer, J9FILE_UNC_EXTENDED_LENGTH_PREFIX,
+		        wcslen(J9FILE_UNC_EXTENDED_LENGTH_PREFIX));
 
 		pathName = fullPathNameBuffer;
 
-cleanup:
+	cleanup:
 		if (unicodeBuffer != unicodePath) {
 			Port::omrmem_free((void **)&unicodePath);
 		}
@@ -206,7 +214,9 @@ Port::convertFromUTF8(const char *string, wchar_t *unicodeBuffer, unsigned int u
 		}
 	}
 
-	if (0 == MultiByteToWideChar(OS_ENCODING_CODE_PAGE, OS_ENCODING_MB_FLAGS, string, -1, unicodeString, (int)length + 1)) {
+	if (0
+	        == MultiByteToWideChar(
+	                OS_ENCODING_CODE_PAGE, OS_ENCODING_MB_FLAGS, string, -1, unicodeString, (int)length + 1)) {
 		if (unicodeString != unicodeBuffer) {
 			Port::omrmem_free((void **)&unicodeString);
 		}
@@ -219,7 +229,8 @@ Port::convertFromUTF8(const char *string, wchar_t *unicodeBuffer, unsigned int u
 RCType
 Port::convertToUTF8(const wchar_t *unicodeString, char **utf8Buffer)
 {
-	int sizeNeeded = WideCharToMultiByte(OS_ENCODING_CODE_PAGE, OS_ENCODING_WC_FLAGS, unicodeString, -1, NULL, 0, NULL, NULL);
+	int sizeNeeded = WideCharToMultiByte(
+	        OS_ENCODING_CODE_PAGE, OS_ENCODING_WC_FLAGS, unicodeString, -1, NULL, 0, NULL, NULL);
 	if (0 == sizeNeeded) {
 		goto failed;
 	}
@@ -228,7 +239,9 @@ Port::convertToUTF8(const wchar_t *unicodeString, char **utf8Buffer)
 		goto failed;
 	}
 
-	if (0 == WideCharToMultiByte(OS_ENCODING_CODE_PAGE, OS_ENCODING_WC_FLAGS, unicodeString, -1, *utf8Buffer, sizeNeeded, NULL, NULL)) {
+	if (0
+	        == WideCharToMultiByte(OS_ENCODING_CODE_PAGE, OS_ENCODING_WC_FLAGS, unicodeString, -1, *utf8Buffer,
+	                sizeNeeded, NULL, NULL)) {
 		goto failed;
 	}
 	return RC_OK;
@@ -295,16 +308,16 @@ Port::omrfile_stat(const char *path, unsigned int flags, struct J9FileStat *buf)
 	}
 
 	if (result & FILE_ATTRIBUTE_READONLY) {
-		buf->perm.isUserWriteable  = 0;
+		buf->perm.isUserWriteable = 0;
 		buf->perm.isGroupWriteable = 0;
 		buf->perm.isOtherWriteable = 0;
 
 	} else {
-		buf->perm.isUserWriteable  = 1;
+		buf->perm.isUserWriteable = 1;
 		buf->perm.isGroupWriteable = 1;
 		buf->perm.isOtherWriteable = 1;
 	}
-	buf->perm.isUserReadable  = 1;
+	buf->perm.isUserReadable = 1;
 	buf->perm.isGroupReadable = 1;
 	buf->perm.isOtherReadable = 1;
 
@@ -313,20 +326,14 @@ Port::omrfile_stat(const char *path, unsigned int flags, struct J9FileStat *buf)
 
 		result = GetFullPathNameW(unicodePath, UNICODE_BUFFER_SIZE, driveBuffer, NULL);
 		if (result == 0 || result > UNICODE_BUFFER_SIZE) {
-			rc =  RC_FAILED;
+			rc = RC_FAILED;
 			goto cleanup;
 		}
 		driveBuffer[3] = '\0'; /* Chop off everything after the initial X:\ */
 		switch (GetDriveTypeW(driveBuffer)) {
-		case DRIVE_REMOVABLE:
-			buf->isRemovable = 1;
-			break;
-		case DRIVE_REMOTE:
-			buf->isRemote = 1;
-			break;
-		default:
-			buf->isFixed = 1;
-			break;
+		case DRIVE_REMOVABLE: buf->isRemovable = 1; break;
+		case DRIVE_REMOTE: buf->isRemote = 1; break;
+		default: buf->isFixed = 1; break;
 		}
 	}
 
@@ -450,24 +457,27 @@ Port::omrfile_realpath(const char *utf8Path)
 	/*
 	 * We need to prepend the path with "\\?\", but this format is only supported if the path is fully qualified.
 	 *
-	 * The only way to get the fully qualified path is using GetFullPathNameW. The MSDN docs for GetFullPathNameW state
-	 * that it should not be used in multi-threaded applications, but the docs are fairly clear that this is because the conversion from a
-	 * relative path to a fully qualified path depends on the current working directory (CWD), which is a process global that may change.
+	 * The only way to get the fully qualified path is using GetFullPathNameW. The MSDN docs for GetFullPathNameW
+	 * state that it should not be used in multi-threaded applications, but the docs are fairly clear that this is
+	 * because the conversion from a relative path to a fully qualified path depends on the current working
+	 * directory (CWD), which is a process global that may change.
 	 *
-	 * However, we can't simply limit the use of GetFullPathNameW to non-absolute paths, because all occurrences of "." and "..",
-	 * need to be removed. This includes the occurrences that don't simply prepend the path, in which case the CWD is not relevant and
-	 * where we assume the call to GetFullPathNameW is thread-safe.
+	 * However, we can't simply limit the use of GetFullPathNameW to non-absolute paths, because all occurrences of
+	 * "." and "..", need to be removed. This includes the occurrences that don't simply prepend the path, in which
+	 * case the CWD is not relevant and where we assume the call to GetFullPathNameW is thread-safe.
 	 *
 	 */
 
 	/* find out how big a buffer we need */
-	fullPathNameLengthInWcharts = GetFullPathNameW(unicodePath, 0 /* zero means give us back the size we need */, NULL, NULL);
+	fullPathNameLengthInWcharts =
+	        GetFullPathNameW(unicodePath, 0 /* zero means give us back the size we need */, NULL, NULL);
 	if (0 == fullPathNameLengthInWcharts) {
 		pathName = NULL;
 		goto cleanup;
 	}
 
-	fullPathNameBufferSizeBytes = fullPathNameLengthInWcharts * sizeof(wchar_t) + wcslen(J9FILE_UNC_EXTENDED_LENGTH_PREFIX) * sizeof(wchar_t) + sizeof(wchar_t) /* null terminator */ ;
+	fullPathNameBufferSizeBytes = fullPathNameLengthInWcharts * sizeof(wchar_t)
+	        + wcslen(J9FILE_UNC_EXTENDED_LENGTH_PREFIX) * sizeof(wchar_t) + sizeof(wchar_t) /* null terminator */;
 
 	fullPathNameBuffer = (wchar_t *)Port::omrmem_malloc(fullPathNameBufferSizeBytes);
 	if (NULL == fullPathNameBuffer) {
@@ -475,7 +485,7 @@ Port::omrfile_realpath(const char *utf8Path)
 		goto cleanup;
 	}
 
-	getFullPathNameRc = GetFullPathNameW(unicodePath, fullPathNameLengthInWcharts , fullPathNameBuffer, NULL);
+	getFullPathNameRc = GetFullPathNameW(unicodePath, fullPathNameLengthInWcharts, fullPathNameBuffer, NULL);
 	if (0 == getFullPathNameRc) {
 		pathName = NULL;
 		goto cleanup;
@@ -483,8 +493,10 @@ Port::omrfile_realpath(const char *utf8Path)
 	/* If the file name is longer than (the system-defined) EsMaxPath characters we need to prepend it with \\?\  */
 	if (pathLen * sizeof(wchar_t) > EsMaxPath) {
 		/*  now prepend the fullPathNameBuffer with "\\?\" */
-		memmove(fullPathNameBuffer + wcslen(J9FILE_UNC_EXTENDED_LENGTH_PREFIX), fullPathNameBuffer, fullPathNameLengthInWcharts * sizeof(wchar_t));
-		wcsncpy(fullPathNameBuffer, J9FILE_UNC_EXTENDED_LENGTH_PREFIX, wcslen(J9FILE_UNC_EXTENDED_LENGTH_PREFIX));
+		memmove(fullPathNameBuffer + wcslen(J9FILE_UNC_EXTENDED_LENGTH_PREFIX), fullPathNameBuffer,
+		        fullPathNameLengthInWcharts * sizeof(wchar_t));
+		wcsncpy(fullPathNameBuffer, J9FILE_UNC_EXTENDED_LENGTH_PREFIX,
+		        wcslen(J9FILE_UNC_EXTENDED_LENGTH_PREFIX));
 	}
 
 	pathName = fullPathNameBuffer;
@@ -688,12 +700,8 @@ Port::omrfile_stat(const char *path, unsigned int flags, struct J9FileStat *buf)
 	/* Detect remote filesystem types */
 	case 0x6969: /* NFS_SUPER_MAGIC */
 	case 0x517B: /* SMB_SUPER_MAGIC */
-	case 0xFF534D42: /* CIFS_MAGIC_NUMBER */
-		buf->isRemote = 1;
-		break;
-	default:
-		buf->isFixed = 1;
-		break;
+	case 0xFF534D42: /* CIFS_MAGIC_NUMBER */ buf->isRemote = 1; break;
+	default: buf->isFixed = 1; break;
 	}
 #elif defined(AIXPPC) && !defined(J9OS_I5)
 	if (statvfs(path, &statvfsbuf)) {
@@ -717,7 +725,7 @@ char *
 Port::omrfile_realpath(const char *path)
 {
 	char *result = NULL;
-	char *buffer = (char *) Port::omrmem_malloc(EsMaxPath);
+	char *buffer = (char *)Port::omrmem_malloc(EsMaxPath);
 	if (NULL != buffer) {
 		result = realpath(path, buffer);
 	}
@@ -731,7 +739,7 @@ Port::strncasecmp(const char *s1, const char *s2, size_t n)
 #if defined(OMR_OS_WINDOWS)
 	return ::_strnicmp(s1, s2, n);
 #elif defined(J9ZOS390)
-	return ::strncasecmp(s1, s2, (int) n);
+	return ::strncasecmp(s1, s2, (int)n);
 #else /* defined(OMR_OS_WINDOWS) */
 	return ::strncasecmp(s1, s2, n);
 #endif /* defined(OMR_OS_WINDOWS) */

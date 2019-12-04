@@ -45,22 +45,13 @@
 using std::map;
 using std::stack;
 
-Symbol_IR::OverrideInfo::OverrideInfo()
-	: opaqueTypeNames()
-	, fieldOverrides()
+Symbol_IR::OverrideInfo::OverrideInfo() : opaqueTypeNames(), fieldOverrides()
 {
-	static const char * const scalarTypes[] = {
-		"char",
-		"I8", "I_8", "U8", "U_8",
-		"I16", "I_16", "U16", "U_16",
-		"I32", "I_32", "U32", "U_32",
-		"I64", "I_64", "U64", "U_64",
-		"I128", "I_128", "U128", "U_128",
-		"IDATA", "intptr_t", "UDATA", "uintptr_t",
-		NULL
-	};
+	static const char *const scalarTypes[] = {"char", "I8", "I_8", "U8", "U_8", "I16", "I_16", "U16", "U_16", "I32",
+	        "I_32", "U32", "U_32", "I64", "I_64", "U64", "U_64", "I128", "I_128", "U128", "U_128", "IDATA",
+	        "intptr_t", "UDATA", "uintptr_t", NULL};
 
-	for (const char * const *cursor = scalarTypes; NULL != *cursor; ++cursor) {
+	for (const char *const *cursor = scalarTypes; NULL != *cursor; ++cursor) {
 		opaqueTypeNames.insert(*cursor);
 	}
 }
@@ -129,15 +120,18 @@ Symbol_IR::applyOverridesList(const char *overridesListFile)
 		}
 
 		/* Apply the type overrides. */
-		for (vector<FieldOverride>::const_iterator it = overrideInfo.fieldOverrides.begin(); it != overrideInfo.fieldOverrides.end(); ++it) {
+		for (vector<FieldOverride>::const_iterator it = overrideInfo.fieldOverrides.begin();
+		        it != overrideInfo.fieldOverrides.end(); ++it) {
 			const FieldOverride &type = *it;
 			/* Check if the structure to override exists. */
 			map<string, vector<Type *> >::const_iterator typeEntry = typeNames.find(type.structName);
 			if (typeNames.end() != typeEntry) {
 				Type *replacementType = NULL;
 				if (type.isTypeOverride) {
-					/* If the type for the override exists in the IR, use it. Otherwise, create it. */
-					map<string, vector<Type *> >::const_iterator overEntry = typeNames.find(type.overrideName);
+					/* If the type for the override exists in the IR, use it. Otherwise, create it.
+					 */
+					map<string, vector<Type *> >::const_iterator overEntry =
+					        typeNames.find(type.overrideName);
 					if (typeNames.end() != overEntry) {
 						replacementType = overEntry->second.front();
 					} else {
@@ -149,7 +143,8 @@ Symbol_IR::applyOverridesList(const char *overridesListFile)
 
 				/* Iterate over the types with a matching name for the override. */
 				const vector<Type *> &typesWithName = typeEntry->second;
-				for (vector<Type *>::const_iterator it2 = typesWithName.begin(); it2 != typesWithName.end(); ++it2) {
+				for (vector<Type *>::const_iterator it2 = typesWithName.begin();
+				        it2 != typesWithName.end(); ++it2) {
 					(*it2)->renameFieldsAndMacros(type, replacementType);
 				}
 			}
@@ -233,12 +228,9 @@ Symbol_IR::readOverridesFile(const char *overridesFile, OverrideInfo *overrideIn
 				continue;
 			}
 			/* Get the structure name, field name, and override name. Add to list to process. */
-			FieldOverride override = {
-					line.substr(0, dotPosition),
-					line.substr(dotPosition + 1, equalsPosition - dotPosition - 1),
-					line.substr(equalsPosition + 1),
-					isTypeOverride
-			};
+			FieldOverride override = {line.substr(0, dotPosition),
+			        line.substr(dotPosition + 1, equalsPosition - dotPosition - 1),
+			        line.substr(equalsPosition + 1), isTypeOverride};
 			overrideInfo->fieldOverrides.push_back(override);
 		}
 
@@ -260,18 +252,14 @@ Symbol_IR::removeDuplicates()
 	}
 }
 
-class MergeVisitor : public TypeVisitor
-{
+class MergeVisitor : public TypeVisitor {
 private:
-	Symbol_IR * const _ir;
-	Type * const _other;
+	Symbol_IR *const _ir;
+	Type *const _other;
 	vector<Type *> *const _merged;
 
 public:
-	MergeVisitor(Symbol_IR *ir, Type *other, vector<Type *> *merged)
-		: _ir(ir), _other(other), _merged(merged)
-	{
-	}
+	MergeVisitor(Symbol_IR *ir, Type *other, vector<Type *> *merged) : _ir(ir), _other(other), _merged(merged) {}
 
 	virtual DDR_RC visitType(Type *type) const;
 	virtual DDR_RC visitClass(ClassUDT *type) const;
@@ -362,9 +350,9 @@ MergeVisitor::visitUnion(UnionUDT *type) const
 	return visitComposite(type);
 }
 
-template<typename T> void
-Symbol_IR::mergeTypes(vector<T *> *source, vector<T *> *other,
-		NamespaceUDT *outerNamespace, vector<Type *> *merged)
+template <typename T>
+void
+Symbol_IR::mergeTypes(vector<T *> *source, vector<T *> *other, NamespaceUDT *outerNamespace, vector<Type *> *merged)
 {
 	if ((NULL != source) && (NULL != other)) {
 		for (typename vector<T *>::iterator it = other->begin(); it != other->end();) {
@@ -400,7 +388,7 @@ Symbol_IR::mergeFields(vector<Field *> *source, vector<Field *> *other, Type *ty
 	bool fieldsMerged = false;
 	for (vector<Field *>::iterator it = other->begin(); it != other->end();) {
 		/* Fields in the other list not in the source list are added. */
-		Field * field = *it;
+		Field *field = *it;
 		const string &fieldName = field->_name;
 		if (fieldNames.end() == fieldNames.find(fieldName)) {
 			it = other->erase(it);
@@ -427,7 +415,7 @@ Symbol_IR::mergeEnums(vector<EnumMember *> *source, vector<EnumMember *> *other)
 	}
 	for (vector<EnumMember *>::iterator it = other->begin(); it != other->end();) {
 		EnumMember *member = *it;
-		const string & memberName = (*it)->_name;
+		const string &memberName = (*it)->_name;
 		/* Fields in the other list not in the source list are added. */
 		if (enumNames.end() == enumNames.find(memberName)) {
 			it = other->erase(it);
@@ -439,16 +427,12 @@ Symbol_IR::mergeEnums(vector<EnumMember *> *source, vector<EnumMember *> *other)
 	}
 }
 
-class TypeReplaceVisitor : public TypeVisitor
-{
+class TypeReplaceVisitor : public TypeVisitor {
 private:
-	Symbol_IR * const _ir;
+	Symbol_IR *const _ir;
 
 public:
-	explicit TypeReplaceVisitor(Symbol_IR *ir)
-		: _ir(ir)
-	{
-	}
+	explicit TypeReplaceVisitor(Symbol_IR *ir) : _ir(ir) {}
 
 	virtual DDR_RC visitType(Type *type) const;
 	virtual DDR_RC visitClass(ClassUDT *type) const;
@@ -461,20 +445,14 @@ private:
 	DDR_RC visitComposite(ClassType *type) const;
 };
 
-class TypeCheck
-{
+class TypeCheck {
 private:
-    const Type * const _other;
+	const Type *const _other;
 
 public:
-    explicit TypeCheck(const Type *other)
-    	: _other(other)
-    {
-    }
+	explicit TypeCheck(const Type *other) : _other(other) {}
 
-    bool operator()(Type *compare) const {
-		return *compare == *_other;
-	}
+	bool operator()(Type *compare) const { return *compare == *_other; }
 };
 
 DDR_RC
@@ -516,7 +494,8 @@ TypeReplaceVisitor::visitComposite(ClassType *type) const
 	DDR_RC rc = visitNamespace(type);
 
 	if (DDR_RC_OK == rc) {
-		for (vector<Field *>::const_iterator it = type->_fieldMembers.begin(); it != type->_fieldMembers.end(); ++it) {
+		for (vector<Field *>::const_iterator it = type->_fieldMembers.begin(); it != type->_fieldMembers.end();
+		        ++it) {
 			rc = _ir->replaceTypeUsingMap(&(*it)->_fieldType, type);
 			if (DDR_RC_OK != rc) {
 				break;
@@ -554,15 +533,13 @@ Symbol_IR::replaceTypeUsingMap(Type **type, Type *outer)
 		if ((NULL != oldType) && (_typeSet.end() == _typeSet.find(oldType))) {
 			Type *replacementType = findTypeInMap(oldType);
 			if (NULL == replacementType) {
-				ERRMSG("Error replacing type '%s' in '%s'",
-						oldType->getFullName().c_str(),
-						outer->getFullName().c_str());
+				ERRMSG("Error replacing type '%s' in '%s'", oldType->getFullName().c_str(),
+				        outer->getFullName().c_str());
 				rc = DDR_RC_ERROR;
 			} else if (oldType == replacementType) {
 				/* don't create a cycle */
-				ERRMSG("Cycle found replacing type '%s' in '%s'",
-						oldType->getFullName().c_str(),
-						outer->getFullName().c_str());
+				ERRMSG("Cycle found replacing type '%s' in '%s'", oldType->getFullName().c_str(),
+				        outer->getFullName().c_str());
 				rc = DDR_RC_ERROR;
 				*type = NULL;
 			} else {
@@ -586,7 +563,8 @@ Symbol_IR::findTypeInMap(Type *typeToFind)
 			if (1 == matches.size()) {
 				returnType = *matches.begin();
 			} else if (1 < matches.size()) {
-				set<Type *>::const_iterator it = find_if(matches.begin(), matches.end(), TypeCheck(typeToFind));
+				set<Type *>::const_iterator it =
+				        find_if(matches.begin(), matches.end(), TypeCheck(typeToFind));
 				if (matches.end() != it) {
 					returnType = *it;
 				}
@@ -599,7 +577,7 @@ Symbol_IR::findTypeInMap(Type *typeToFind)
 void
 Symbol_IR::addTypeToMap(Type *type)
 {
-	Type * const startType = type;
+	Type *const startType = type;
 	stack<vector<UDT *>::const_iterator> itStack;
 	vector<UDT *> *subs = NULL;
 

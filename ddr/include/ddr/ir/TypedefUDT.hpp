@@ -25,8 +25,7 @@
 #include "ddr/ir/Modifiers.hpp"
 #include "ddr/ir/UDT.hpp"
 
-class TypedefUDT : public UDT
-{
+class TypedefUDT : public UDT {
 public:
 	Type *_aliasedType;
 	Modifiers _modifiers;
@@ -40,7 +39,7 @@ public:
 	virtual size_t getArrayDimensions();
 	virtual Type *getBaseType();
 
-	bool operator==(const Type & rhs) const;
+	bool operator==(const Type &rhs) const;
 	virtual bool compareToTypedef(const TypedefUDT &) const;
 };
 

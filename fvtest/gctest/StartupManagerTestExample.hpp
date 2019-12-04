@@ -24,17 +24,15 @@
 
 #include "gcTestHelpers.hpp"
 
-class MM_StartupManagerTestExample : public MM_StartupManagerImpl
-{
+class MM_StartupManagerTestExample : public MM_StartupManagerImpl {
 	/*
 	 * Data members
 	 */
 private:
 	const char *_configFile;
+
 protected:
-
 public:
-
 	/*
 	 * Function members
 	 */
@@ -49,10 +47,8 @@ protected:
 
 public:
 	MM_StartupManagerTestExample(OMR_VM *omrVM, const char *configFile)
-		: MM_StartupManagerImpl(omrVM)
-		, _configFile(configFile)
-	{
-	}
+	        : MM_StartupManagerImpl(omrVM), _configFile(configFile)
+	{}
 };
 
 #endif /* MM_STARTUPMANAGERTESTEXAMPLE_HPP_ */

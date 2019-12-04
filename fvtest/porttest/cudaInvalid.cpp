@@ -53,62 +53,62 @@ TEST_F(CudaDeviceTest, invalidDevices)
 	for (;;) {
 		int32_t rc = 0;
 
-#define DO_BAD_CALL(func, args)                    \
-		do {                                       \
-			rc = omrcuda_ ## func args;             \
-			ASSERT_EQ(expectedError, rc) << #func; \
-		} while (0)
+#define DO_BAD_CALL(func, args) \
+	do { \
+		rc = omrcuda_##func args; \
+		ASSERT_EQ(expectedError, rc) << #func; \
+	} while (0)
 
-		DO_BAD_CALL(deviceAlloc,                  (deviceId, ptrVal, &address));
-		DO_BAD_CALL(deviceCanAccessPeer,          (deviceId, u32Val, &boolVal));
-		DO_BAD_CALL(deviceDisablePeerAccess,      (deviceId, u32Val));
-		DO_BAD_CALL(deviceEnablePeerAccess,       (deviceId, u32Val));
-		DO_BAD_CALL(deviceFree,                   (deviceId, address));
-		DO_BAD_CALL(deviceGetAttribute,           (deviceId, deviceAttribute, &i32Val));
-		DO_BAD_CALL(deviceGetCacheConfig,         (deviceId, &cacheConfig));
-		DO_BAD_CALL(deviceGetLimit,               (deviceId, limit, &ptrVal));
-		DO_BAD_CALL(deviceGetMemInfo,             (deviceId, &ptrVal, &ptrVal));
-		DO_BAD_CALL(deviceGetName,                (deviceId, sizeof(name), name));
-		DO_BAD_CALL(deviceGetSharedMemConfig,     (deviceId, &sharedMemConfig));
+		DO_BAD_CALL(deviceAlloc, (deviceId, ptrVal, &address));
+		DO_BAD_CALL(deviceCanAccessPeer, (deviceId, u32Val, &boolVal));
+		DO_BAD_CALL(deviceDisablePeerAccess, (deviceId, u32Val));
+		DO_BAD_CALL(deviceEnablePeerAccess, (deviceId, u32Val));
+		DO_BAD_CALL(deviceFree, (deviceId, address));
+		DO_BAD_CALL(deviceGetAttribute, (deviceId, deviceAttribute, &i32Val));
+		DO_BAD_CALL(deviceGetCacheConfig, (deviceId, &cacheConfig));
+		DO_BAD_CALL(deviceGetLimit, (deviceId, limit, &ptrVal));
+		DO_BAD_CALL(deviceGetMemInfo, (deviceId, &ptrVal, &ptrVal));
+		DO_BAD_CALL(deviceGetName, (deviceId, sizeof(name), name));
+		DO_BAD_CALL(deviceGetSharedMemConfig, (deviceId, &sharedMemConfig));
 		DO_BAD_CALL(deviceGetStreamPriorityRange, (deviceId, &i32Val, &i32Val));
-		DO_BAD_CALL(deviceReset,                  (deviceId));
-		DO_BAD_CALL(deviceSetCacheConfig,         (deviceId, cacheConfig));
-		DO_BAD_CALL(deviceSetLimit,               (deviceId, limit, i32Val));
-		DO_BAD_CALL(deviceSetSharedMemConfig,     (deviceId, sharedMemConfig));
-		DO_BAD_CALL(deviceSynchronize,            (deviceId));
-		DO_BAD_CALL(eventCreate,                  (deviceId, i32Val, &event));
-		DO_BAD_CALL(eventDestroy,                 (deviceId, event));
-		DO_BAD_CALL(eventRecord,                  (deviceId, event, stream));
-		DO_BAD_CALL(funcGetAttribute,             (deviceId, function, functionAttribute, &i32Val));
-		DO_BAD_CALL(funcSetCacheConfig,           (deviceId, function, cacheConfig));
-		DO_BAD_CALL(funcSetSharedMemConfig,       (deviceId, function, sharedMemConfig));
-		DO_BAD_CALL(launchKernel,                 (deviceId, function, 1, 1, 1, 1, 1, 1, 0, NULL, NULL));
-		DO_BAD_CALL(linkerAddData,                (deviceId, linker, type, address, ptrVal, name, NULL));
-		DO_BAD_CALL(linkerComplete,               (deviceId, linker, &address, &ptrVal));
-		DO_BAD_CALL(linkerCreate,                 (deviceId, NULL, &linker));
-		DO_BAD_CALL(linkerDestroy,                (deviceId, linker));
-		DO_BAD_CALL(memcpyDeviceToDevice,         (deviceId, NULL, NULL, ptrVal));
-		DO_BAD_CALL(memcpyDeviceToHost,           (deviceId, NULL, NULL, ptrVal));
-		DO_BAD_CALL(memcpyHostToDevice,           (deviceId, NULL, NULL, ptrVal));
-		DO_BAD_CALL(memcpyPeer,                   (deviceId, NULL, u32Val, NULL, ptrVal));
-		DO_BAD_CALL(memset8,                      (deviceId, address, i32Val, ptrVal));
-		DO_BAD_CALL(memset16,                     (deviceId, address, i32Val, ptrVal));
-		DO_BAD_CALL(memset32,                     (deviceId, address, i32Val, ptrVal));
-		DO_BAD_CALL(moduleGetFunction,            (deviceId, module, name, &function));
-		DO_BAD_CALL(moduleGetGlobal,              (deviceId, module, name, &ptrVal, &ptrVal));
-		DO_BAD_CALL(moduleGetSurfaceRef,          (deviceId, module, name, &ptrVal));
-		DO_BAD_CALL(moduleGetTextureRef,          (deviceId, module, name, &ptrVal));
-		DO_BAD_CALL(moduleLoad,                   (deviceId, address, NULL, &module));
-		DO_BAD_CALL(moduleUnload,                 (deviceId, module));
-		DO_BAD_CALL(streamAddCallback,            (deviceId, stream, callback, 0));
-		DO_BAD_CALL(streamCreate,                 (deviceId, &stream));
-		DO_BAD_CALL(streamCreateWithPriority,     (deviceId, i32Val, i32Val, &stream));
-		DO_BAD_CALL(streamDestroy,                (deviceId, stream));
-		DO_BAD_CALL(streamGetFlags,               (deviceId, stream, &u32Val));
-		DO_BAD_CALL(streamGetPriority,            (deviceId, stream, &i32Val));
-		DO_BAD_CALL(streamQuery,                  (deviceId, stream));
-		DO_BAD_CALL(streamSynchronize,            (deviceId, stream));
-		DO_BAD_CALL(streamWaitEvent,              (deviceId, stream, event));
+		DO_BAD_CALL(deviceReset, (deviceId));
+		DO_BAD_CALL(deviceSetCacheConfig, (deviceId, cacheConfig));
+		DO_BAD_CALL(deviceSetLimit, (deviceId, limit, i32Val));
+		DO_BAD_CALL(deviceSetSharedMemConfig, (deviceId, sharedMemConfig));
+		DO_BAD_CALL(deviceSynchronize, (deviceId));
+		DO_BAD_CALL(eventCreate, (deviceId, i32Val, &event));
+		DO_BAD_CALL(eventDestroy, (deviceId, event));
+		DO_BAD_CALL(eventRecord, (deviceId, event, stream));
+		DO_BAD_CALL(funcGetAttribute, (deviceId, function, functionAttribute, &i32Val));
+		DO_BAD_CALL(funcSetCacheConfig, (deviceId, function, cacheConfig));
+		DO_BAD_CALL(funcSetSharedMemConfig, (deviceId, function, sharedMemConfig));
+		DO_BAD_CALL(launchKernel, (deviceId, function, 1, 1, 1, 1, 1, 1, 0, NULL, NULL));
+		DO_BAD_CALL(linkerAddData, (deviceId, linker, type, address, ptrVal, name, NULL));
+		DO_BAD_CALL(linkerComplete, (deviceId, linker, &address, &ptrVal));
+		DO_BAD_CALL(linkerCreate, (deviceId, NULL, &linker));
+		DO_BAD_CALL(linkerDestroy, (deviceId, linker));
+		DO_BAD_CALL(memcpyDeviceToDevice, (deviceId, NULL, NULL, ptrVal));
+		DO_BAD_CALL(memcpyDeviceToHost, (deviceId, NULL, NULL, ptrVal));
+		DO_BAD_CALL(memcpyHostToDevice, (deviceId, NULL, NULL, ptrVal));
+		DO_BAD_CALL(memcpyPeer, (deviceId, NULL, u32Val, NULL, ptrVal));
+		DO_BAD_CALL(memset8, (deviceId, address, i32Val, ptrVal));
+		DO_BAD_CALL(memset16, (deviceId, address, i32Val, ptrVal));
+		DO_BAD_CALL(memset32, (deviceId, address, i32Val, ptrVal));
+		DO_BAD_CALL(moduleGetFunction, (deviceId, module, name, &function));
+		DO_BAD_CALL(moduleGetGlobal, (deviceId, module, name, &ptrVal, &ptrVal));
+		DO_BAD_CALL(moduleGetSurfaceRef, (deviceId, module, name, &ptrVal));
+		DO_BAD_CALL(moduleGetTextureRef, (deviceId, module, name, &ptrVal));
+		DO_BAD_CALL(moduleLoad, (deviceId, address, NULL, &module));
+		DO_BAD_CALL(moduleUnload, (deviceId, module));
+		DO_BAD_CALL(streamAddCallback, (deviceId, stream, callback, 0));
+		DO_BAD_CALL(streamCreate, (deviceId, &stream));
+		DO_BAD_CALL(streamCreateWithPriority, (deviceId, i32Val, i32Val, &stream));
+		DO_BAD_CALL(streamDestroy, (deviceId, stream));
+		DO_BAD_CALL(streamGetFlags, (deviceId, stream, &u32Val));
+		DO_BAD_CALL(streamGetPriority, (deviceId, stream, &i32Val));
+		DO_BAD_CALL(streamQuery, (deviceId, stream));
+		DO_BAD_CALL(streamSynchronize, (deviceId, stream));
+		DO_BAD_CALL(streamWaitEvent, (deviceId, stream, event));
 
 #undef DO_BAD_CALL
 

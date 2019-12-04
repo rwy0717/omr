@@ -28,8 +28,7 @@
 using std::string;
 using std::vector;
 
-class Modifiers
-{
+class Modifiers {
 public:
 	vector<size_t> _arrayLengths;
 	uint8_t _modifierFlags;

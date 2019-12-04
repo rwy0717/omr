@@ -23,9 +23,10 @@
 #ifndef omrmemtag_checks_h
 #define omrmemtag_checks_h
 
-#define ROUNDING_GRANULARITY	8
-#define ROUNDED_FOOTER_OFFSET(number)	(((number) + (ROUNDING_GRANULARITY - 1) + sizeof(J9MemTag)) & ~(uintptr_t)(ROUNDING_GRANULARITY - 1))
-#define ROUNDED_BYTE_AMOUNT(number)		(ROUNDED_FOOTER_OFFSET(number) + sizeof(J9MemTag))
+#define ROUNDING_GRANULARITY 8
+#define ROUNDED_FOOTER_OFFSET(number) \
+	(((number) + (ROUNDING_GRANULARITY - 1) + sizeof(J9MemTag)) & ~(uintptr_t)(ROUNDING_GRANULARITY - 1))
+#define ROUNDED_BYTE_AMOUNT(number) (ROUNDED_FOOTER_OFFSET(number) + sizeof(J9MemTag))
 
 uint32_t checkPadding(J9MemTag *tagAddress);
 uint32_t checkTagSumCheck(J9MemTag *tagAddress, uint32_t eyeCatcher);

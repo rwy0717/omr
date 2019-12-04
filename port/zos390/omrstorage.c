@@ -58,8 +58,8 @@
  *
  */
 
-#pragma prolog(omrallocate_1M_pageable_pages_below_bar,"MYPROLOG")
-#pragma epilog(omrallocate_1M_pageable_pages_below_bar,"MYEPILOG")
+#pragma prolog(omrallocate_1M_pageable_pages_below_bar, "MYPROLOG")
+#pragma epilog(omrallocate_1M_pageable_pages_below_bar, "MYEPILOG")
 
 /*
  * Allocate 1MB pageable pages below 2GB bar using STORAGE system macro.
@@ -81,9 +81,10 @@ omrallocate_1M_pageable_pages_below_bar(long *numBytes, int *subpool)
 	length = *numBytes;
 	sp = *subpool;
 
-	__asm(" STORAGE OBTAIN,COND=YES,LOC=(31,PAGEFRAMESIZE1MB),"\
-			"LENGTH=(%2),RTCD=(%0),ADDR=(%1),SP=(%3)"\
-			:"=r"(rc),"=r"(addr):"r"(length),"r"(sp));
+	__asm(" STORAGE OBTAIN,COND=YES,LOC=(31,PAGEFRAMESIZE1MB),"
+	      "LENGTH=(%2),RTCD=(%0),ADDR=(%1),SP=(%3)"
+	        : "=r"(rc), "=r"(addr)
+	        : "r"(length), "r"(sp));
 
 	if (0 == rc) {
 		return (void *)addr;
@@ -92,8 +93,8 @@ omrallocate_1M_pageable_pages_below_bar(long *numBytes, int *subpool)
 	}
 }
 
-#pragma prolog(omrallocate_4K_pages_below_bar,"MYPROLOG")
-#pragma epilog(omrallocate_4K_pages_below_bar,"MYEPILOG")
+#pragma prolog(omrallocate_4K_pages_below_bar, "MYPROLOG")
+#pragma epilog(omrallocate_4K_pages_below_bar, "MYEPILOG")
 
 /*
  * Allocate 4K pages below 2GB bar using STORAGE system macro.
@@ -115,9 +116,10 @@ omrallocate_4K_pages_below_bar(long *numBytes, int *subpool)
 	length = *numBytes;
 	sp = *subpool;
 
-	__asm(" STORAGE OBTAIN,COND=YES,LOC=(31,64),BNDRY=PAGE,"\
-			"LENGTH=(%2),RTCD=(%0),ADDR=(%1),SP=(%3)"\
-			:"=r"(rc),"=r"(addr):"r"(length),"r"(sp));
+	__asm(" STORAGE OBTAIN,COND=YES,LOC=(31,64),BNDRY=PAGE,"
+	      "LENGTH=(%2),RTCD=(%0),ADDR=(%1),SP=(%3)"
+	        : "=r"(rc), "=r"(addr)
+	        : "r"(length), "r"(sp));
 
 	if (0 == rc) {
 		return (void *)addr;
@@ -126,8 +128,8 @@ omrallocate_4K_pages_below_bar(long *numBytes, int *subpool)
 	}
 }
 
-#pragma prolog(omrfree_memory_below_bar,"MYPROLOG")
-#pragma epilog(omrfree_memory_below_bar,"MYEPILOG")
+#pragma prolog(omrfree_memory_below_bar, "MYPROLOG")
+#pragma epilog(omrfree_memory_below_bar, "MYEPILOG")
 
 /*
  * Free memory allocated using STORAGE system macro.
@@ -148,9 +150,9 @@ omrfree_memory_below_bar(void *address, long *length, int *subpool)
 	len = *length;
 	sp = *subpool;
 
-	__asm(" STORAGE RELEASE,COND=YES,ADDR=(%1),LENGTH=(%2),SP=(%3),RTCD=(%0)"\
-			:"=r"(rc):"r"(addr),"r"(len),"r"(sp));
+	__asm(" STORAGE RELEASE,COND=YES,ADDR=(%1),LENGTH=(%2),SP=(%3),RTCD=(%0)"
+	        : "=r"(rc)
+	        : "r"(addr), "r"(len), "r"(sp));
 
 	return rc;
-
 }

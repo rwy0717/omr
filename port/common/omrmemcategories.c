@@ -26,7 +26,6 @@
  * @brief Memory category management
  */
 
-
 /*
  * This file contains the code for managing memory categories.
  *
@@ -47,14 +46,14 @@
 extern uintptr_t compareAndSwapUDATA(uintptr_t *location, uintptr_t oldValue, uintptr_t newValue);
 #endif /* _J9VMATOMICFUNCTIONS_ */
 
-
 /* Templates for categories that are copied into malloc'd memory in omrmem_startup_categories */
 OMRMEM_CATEGORY_NO_CHILDREN("Unknown", OMRMEM_CATEGORY_UNKNOWN);
 
 #if defined(OMR_ENV_DATA64)
 /* On 64 bit we define an additional special category to cover unused regions of allocate32 slabs. */
 OMRMEM_CATEGORY_NO_CHILDREN("Unused <32bit allocation regions", OMRMEM_CATEGORY_PORT_LIBRARY_UNUSED_ALLOCATE32_REGIONS);
-OMRMEM_CATEGORY_1_CHILD("Port Library", OMRMEM_CATEGORY_PORT_LIBRARY, OMRMEM_CATEGORY_PORT_LIBRARY_UNUSED_ALLOCATE32_REGIONS);
+OMRMEM_CATEGORY_1_CHILD(
+        "Port Library", OMRMEM_CATEGORY_PORT_LIBRARY, OMRMEM_CATEGORY_PORT_LIBRARY_UNUSED_ALLOCATE32_REGIONS);
 #else
 OMRMEM_CATEGORY_NO_CHILDREN("Port Library", OMRMEM_CATEGORY_PORT_LIBRARY);
 #endif /* OMR_ENV_DATA64 */
@@ -150,13 +149,13 @@ omrmem_get_category(struct OMRPortLibrary *portLibrary, uint32_t categoryCode)
 	J9PortControlData *portControl = &(portLibrary->portGlobals->control);
 	if (categoryCode < OMRMEM_LANGUAGE_CATEGORY_LIMIT) {
 		if (categoryCode < portControl->language_memory_categories.numberOfCategories
-			&& NULL != portControl->language_memory_categories.categories[categoryCode]) {
+		        && NULL != portControl->language_memory_categories.categories[categoryCode]) {
 			return portControl->language_memory_categories.categories[categoryCode];
 		}
 	} else if (categoryCode > OMRMEM_LANGUAGE_CATEGORY_LIMIT) {
 		uint32_t categoryIndex = OMRMEM_OMR_CATEGORY_INDEX_FROM_CODE(categoryCode);
 		if (categoryIndex < portControl->omr_memory_categories.numberOfCategories
-			&& NULL != portControl->omr_memory_categories.categories[categoryIndex]) {
+		        && NULL != portControl->omr_memory_categories.categories[categoryIndex]) {
 			return portControl->omr_memory_categories.categories[categoryIndex];
 		}
 	}
@@ -178,11 +177,11 @@ omrmem_get_category(struct OMRPortLibrary *portLibrary, uint32_t categoryCode)
 
 	/* No categories supplied by the application - map to unknown */
 	return &portLibrary->portGlobals->unknownMemoryCategory;
-
 }
 
 static uintptr_t
-_recursive_category_walk_children(struct OMRPortLibrary *portLibrary, OMRMemCategoryWalkState *state, OMRMemCategory *parent)
+_recursive_category_walk_children(
+        struct OMRPortLibrary *portLibrary, OMRMemCategoryWalkState *state, OMRMemCategory *parent)
 {
 	uint32_t i;
 	uintptr_t result;
@@ -190,7 +189,8 @@ _recursive_category_walk_children(struct OMRPortLibrary *portLibrary, OMRMemCate
 	for (i = 0; i < parent->numberOfChildren; i++) {
 		uint32_t childCode = parent->children[i];
 		OMRMemCategory *child = omrmem_get_category(portLibrary, childCode);
-		result = state->walkFunction(child->categoryCode, child->name, child->liveBytes, child->liveAllocations, FALSE, parent->categoryCode, state);
+		result = state->walkFunction(child->categoryCode, child->name, child->liveBytes, child->liveAllocations,
+		        FALSE, parent->categoryCode, state);
 
 		if (result == J9MEM_CATEGORIES_KEEP_ITERATING) {
 			result = _recursive_category_walk_children(portLibrary, state, child);
@@ -207,11 +207,13 @@ _recursive_category_walk_children(struct OMRPortLibrary *portLibrary, OMRMemCate
 }
 
 static uintptr_t
-_recursive_category_walk_root(struct OMRPortLibrary *portLibrary, OMRMemCategoryWalkState *state, OMRMemCategory *walkPoint)
+_recursive_category_walk_root(
+        struct OMRPortLibrary *portLibrary, OMRMemCategoryWalkState *state, OMRMemCategory *walkPoint)
 {
 	uintptr_t result;
 
-	result = state->walkFunction(walkPoint->categoryCode, walkPoint->name, walkPoint->liveBytes, walkPoint->liveAllocations, TRUE, 0, state);
+	result = state->walkFunction(walkPoint->categoryCode, walkPoint->name, walkPoint->liveBytes,
+	        walkPoint->liveAllocations, TRUE, 0, state);
 
 	if (result == J9MEM_CATEGORIES_KEEP_ITERATING) {
 		return _recursive_category_walk_children(portLibrary, state, walkPoint);
@@ -232,23 +234,26 @@ omrmem_walk_categories(struct OMRPortLibrary *portLibrary, OMRMemCategoryWalkSta
 {
 	/* User supplied categories are expected to include PORT_LIBRARY and UNKNOWN as part of their tree */
 	if (portLibrary->portGlobals->control.language_memory_categories.categories != NULL) {
-		_recursive_category_walk_root(portLibrary, state, portLibrary->portGlobals->control.language_memory_categories.categories[0]);
+		_recursive_category_walk_root(
+		        portLibrary, state, portLibrary->portGlobals->control.language_memory_categories.categories[0]);
 	} else {
-		uintptr_t result = _recursive_category_walk_root(portLibrary, state, &portLibrary->portGlobals->portLibraryMemoryCategory);
+		uintptr_t result = _recursive_category_walk_root(
+		        portLibrary, state, &portLibrary->portGlobals->portLibraryMemoryCategory);
 		if (result != J9MEM_CATEGORIES_KEEP_ITERATING) {
 			return;
 		}
 
-		result = _recursive_category_walk_root(portLibrary, state, &portLibrary->portGlobals->unknownMemoryCategory);
+		result = _recursive_category_walk_root(
+		        portLibrary, state, &portLibrary->portGlobals->unknownMemoryCategory);
 		if (result != J9MEM_CATEGORIES_KEEP_ITERATING) {
 			return;
 		}
 
 #if defined(OMR_ENV_DATA64)
-		_recursive_category_walk_root(portLibrary, state, &portLibrary->portGlobals->unusedAllocate32HeapRegionsMemoryCategory);
+		_recursive_category_walk_root(
+		        portLibrary, state, &portLibrary->portGlobals->unusedAllocate32HeapRegionsMemoryCategory);
 #endif
 	}
-
 }
 
 /**
@@ -270,10 +275,13 @@ omrmem_walk_categories(struct OMRPortLibrary *portLibrary, OMRMemCategoryWalkSta
 int32_t
 omrmem_startup_categories(struct OMRPortLibrary *portLibrary)
 {
-	memcpy(&portLibrary->portGlobals->unknownMemoryCategory, CATEGORY_TABLE_ENTRY(OMRMEM_CATEGORY_UNKNOWN), sizeof(OMRMemCategory));
-	memcpy(&portLibrary->portGlobals->portLibraryMemoryCategory, CATEGORY_TABLE_ENTRY(OMRMEM_CATEGORY_PORT_LIBRARY), sizeof(OMRMemCategory));
+	memcpy(&portLibrary->portGlobals->unknownMemoryCategory, CATEGORY_TABLE_ENTRY(OMRMEM_CATEGORY_UNKNOWN),
+	        sizeof(OMRMemCategory));
+	memcpy(&portLibrary->portGlobals->portLibraryMemoryCategory, CATEGORY_TABLE_ENTRY(OMRMEM_CATEGORY_PORT_LIBRARY),
+	        sizeof(OMRMemCategory));
 #if defined(OMR_ENV_DATA64)
-	memcpy(&portLibrary->portGlobals->unusedAllocate32HeapRegionsMemoryCategory, CATEGORY_TABLE_ENTRY(OMRMEM_CATEGORY_PORT_LIBRARY_UNUSED_ALLOCATE32_REGIONS), sizeof(OMRMemCategory));
+	memcpy(&portLibrary->portGlobals->unusedAllocate32HeapRegionsMemoryCategory,
+	        CATEGORY_TABLE_ENTRY(OMRMEM_CATEGORY_PORT_LIBRARY_UNUSED_ALLOCATE32_REGIONS), sizeof(OMRMemCategory));
 #endif
 	portLibrary->portGlobals->control.language_memory_categories.numberOfCategories = 0;
 	portLibrary->portGlobals->control.language_memory_categories.categories = NULL;
@@ -296,12 +304,14 @@ omrmem_shutdown_categories(struct OMRPortLibrary *portLibrary)
 	OMRPORT_ACCESS_FROM_OMRPORT(portLibrary);
 	/* Free any allocated memory categories data. */
 	if (NULL != portLibrary->portGlobals->control.language_memory_categories.categories) {
-		portLibrary->mem_free_memory(OMRPORTLIB, portLibrary->portGlobals->control.language_memory_categories.categories);
+		portLibrary->mem_free_memory(
+		        OMRPORTLIB, portLibrary->portGlobals->control.language_memory_categories.categories);
 		portLibrary->portGlobals->control.language_memory_categories.categories = NULL;
 		portLibrary->portGlobals->control.language_memory_categories.numberOfCategories = 0;
 	}
 	if (NULL != portLibrary->portGlobals->control.omr_memory_categories.categories) {
-		portLibrary->mem_free_memory(OMRPORTLIB, portLibrary->portGlobals->control.omr_memory_categories.categories);
+		portLibrary->mem_free_memory(
+		        OMRPORTLIB, portLibrary->portGlobals->control.omr_memory_categories.categories);
 		portLibrary->portGlobals->control.omr_memory_categories.categories = NULL;
 		portLibrary->portGlobals->control.omr_memory_categories.numberOfCategories = 0;
 	}

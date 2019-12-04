@@ -30,35 +30,35 @@ using namespace OMR::GC;
 
 TEST(TestHeapRegionStateTable, HeapRegionStateTable)
 {
-    uintptr_t heapBase = 0x100;
-    uintptr_t regionShift = 1;
-    uintptr_t regionCount = 3;
+	uintptr_t heapBase = 0x100;
+	uintptr_t regionShift = 1;
+	uintptr_t regionCount = 3;
 
-    Forge forge;
-    ASSERT_TRUE(forge.initialize(gcTestEnv->getPortLibrary()));
+	Forge forge;
+	ASSERT_TRUE(forge.initialize(gcTestEnv->getPortLibrary()));
 
-    HeapRegionStateTable table;
-    ASSERT_TRUE(table.initialize(&forge, heapBase, regionShift, regionCount));
+	HeapRegionStateTable table;
+	ASSERT_TRUE(table.initialize(&forge, heapBase, regionShift, regionCount));
 
-    EXPECT_EQ(table.getIndex((void *)0x100), 0);
-    EXPECT_EQ(table.getIndex((void *)0x101), 0);
-    EXPECT_EQ(table.getIndex((void *)0x102), 1);
-    EXPECT_EQ(table.getIndex((void *)0x103), 1);
-    EXPECT_EQ(table.getIndex((void *)0x104), 2);
-    EXPECT_EQ(table.getIndex((void *)0x105), 2);
+	EXPECT_EQ(table.getIndex((void *)0x100), 0);
+	EXPECT_EQ(table.getIndex((void *)0x101), 0);
+	EXPECT_EQ(table.getIndex((void *)0x102), 1);
+	EXPECT_EQ(table.getIndex((void *)0x103), 1);
+	EXPECT_EQ(table.getIndex((void *)0x104), 2);
+	EXPECT_EQ(table.getIndex((void *)0x105), 2);
 
-    EXPECT_EQ(table.getRegionState((void *)0x101), HEAP_REGION_STATE_NONE);
-    EXPECT_EQ(table.getRegionState((void *)0x102), HEAP_REGION_STATE_NONE);
-    EXPECT_EQ(table.getRegionState((void *)0x103), HEAP_REGION_STATE_NONE);
-    EXPECT_EQ(table.getRegionState((void *)0x104), HEAP_REGION_STATE_NONE);
-    
-    table.setRegionState((void *)0x103, HEAP_REGION_STATE_COPY_FORWARD);
+	EXPECT_EQ(table.getRegionState((void *)0x101), HEAP_REGION_STATE_NONE);
+	EXPECT_EQ(table.getRegionState((void *)0x102), HEAP_REGION_STATE_NONE);
+	EXPECT_EQ(table.getRegionState((void *)0x103), HEAP_REGION_STATE_NONE);
+	EXPECT_EQ(table.getRegionState((void *)0x104), HEAP_REGION_STATE_NONE);
 
-    EXPECT_EQ(table.getRegionState((void *)0x101), HEAP_REGION_STATE_NONE);
-    EXPECT_EQ(table.getRegionState((void *)0x102), HEAP_REGION_STATE_COPY_FORWARD);
-    EXPECT_EQ(table.getRegionState((void *)0x103), HEAP_REGION_STATE_COPY_FORWARD);
-    EXPECT_EQ(table.getRegionState((void *)0x104), HEAP_REGION_STATE_NONE);
+	table.setRegionState((void *)0x103, HEAP_REGION_STATE_COPY_FORWARD);
 
-    table.tearDown(&forge);
-    forge.tearDown();
+	EXPECT_EQ(table.getRegionState((void *)0x101), HEAP_REGION_STATE_NONE);
+	EXPECT_EQ(table.getRegionState((void *)0x102), HEAP_REGION_STATE_COPY_FORWARD);
+	EXPECT_EQ(table.getRegionState((void *)0x103), HEAP_REGION_STATE_COPY_FORWARD);
+	EXPECT_EQ(table.getRegionState((void *)0x104), HEAP_REGION_STATE_NONE);
+
+	table.tearDown(&forge);
+	forge.tearDown();
 }

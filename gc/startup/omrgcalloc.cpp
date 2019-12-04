@@ -20,34 +20,35 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-#include "omr.h"
-#include "omrgc.h"
-#include "objectdescription.h"
-
 #include "AllocateInitialization.hpp"
 #include "EnvironmentBase.hpp"
 #include "GCExtensionsBase.hpp"
 #include "Heap.hpp"
-#include "omrgcstartup.hpp"
 #include "ModronAssertions.h"
+#include "objectdescription.h"
+#include "omr.h"
+#include "omrgc.h"
+#include "omrgcstartup.hpp"
 
 omrobjectptr_t
-OMR_GC_AllocateObject(OMR_VMThread * omrVMThread, MM_AllocateInitialization *allocator)
+OMR_GC_AllocateObject(OMR_VMThread *omrVMThread, MM_AllocateInitialization *allocator)
 {
 	MM_EnvironmentBase *env = MM_EnvironmentBase::getEnvironment(omrVMThread);
-        Assert_MM_true(NULL != env->getExtensions()->getGlobalCollector());
+	Assert_MM_true(NULL != env->getExtensions()->getGlobalCollector());
 	return allocator->allocateAndInitializeObject(omrVMThread);
 }
 
 omrobjectptr_t
-OMR_GC_AllocateObject(OMR_VMThread * omrVMThread, uintptr_t allocationCategory, uintptr_t requiredSizeInBytes, uintptr_t allocationFlags)
+OMR_GC_AllocateObject(OMR_VMThread *omrVMThread, uintptr_t allocationCategory, uintptr_t requiredSizeInBytes,
+        uintptr_t allocationFlags)
 {
-	MM_AllocateInitialization allocator(MM_EnvironmentBase::getEnvironment(omrVMThread), allocationCategory, requiredSizeInBytes, allocationFlags);
+	MM_AllocateInitialization allocator(MM_EnvironmentBase::getEnvironment(omrVMThread), allocationCategory,
+	        requiredSizeInBytes, allocationFlags);
 	return OMR_GC_AllocateObject(omrVMThread, &allocator);
 }
 
 omr_error_t
-OMR_GC_SystemCollect(OMR_VMThread* omrVMThread, uint32_t gcCode)
+OMR_GC_SystemCollect(OMR_VMThread *omrVMThread, uint32_t gcCode)
 {
 	omr_error_t result = OMR_ERROR_NONE;
 	MM_EnvironmentBase *env = MM_EnvironmentBase::getEnvironment(omrVMThread);

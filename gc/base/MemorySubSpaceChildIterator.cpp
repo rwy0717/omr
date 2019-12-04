@@ -20,21 +20,19 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-
-#include "omrcfg.h"
+#include "MemorySubSpaceChildIterator.hpp"
 
 #include "Debug.hpp"
 #include "MemorySubSpace.hpp"
-
-#include "MemorySubSpaceChildIterator.hpp"
+#include "omrcfg.h"
 
 /**
  * Iterator states to maintain preorder traversal.
  */
-enum {
-	mm_msschild_iterator_current_subspace,  /**< Process the current subspace */
-	mm_msschild_iterator_children_subspace,  /**< Process the children of the current subspace */
-	mm_msschild_iterator_next_subspace  /**< Move to the next sibling (or parent if unavailable) of the current subspace */
+enum { mm_msschild_iterator_current_subspace, /**< Process the current subspace */
+	mm_msschild_iterator_children_subspace, /**< Process the children of the current subspace */
+	mm_msschild_iterator_next_subspace /**< Move to the next sibling (or parent if unavailable) of the current
+	                                      subspace */
 };
 
 /**
@@ -56,11 +54,11 @@ MM_MemorySubSpaceChildIterator::reset(MM_MemorySubSpace *memorySubSpace)
 MM_MemorySubSpace *
 MM_MemorySubSpaceChildIterator::nextSubSpace()
 {
-	while(NULL != _memorySubSpace) {
-		switch(_state) {
+	while (NULL != _memorySubSpace) {
+		switch (_state) {
 		case mm_msschild_iterator_current_subspace:
 			/* Process the current subspace */
-			if(NULL == _memorySubSpace) {
+			if (NULL == _memorySubSpace) {
 				/* How did we get here? */
 				assume0(0);
 				_state = mm_msschild_iterator_current_subspace;
@@ -71,7 +69,7 @@ MM_MemorySubSpaceChildIterator::nextSubSpace()
 			break;
 		case mm_msschild_iterator_children_subspace:
 			/* Process the children of the current subspace */
-			if(NULL == _memorySubSpace->getChildren()) {
+			if (NULL == _memorySubSpace->getChildren()) {
 				_state = mm_msschild_iterator_next_subspace;
 				break;
 			}
@@ -80,20 +78,20 @@ MM_MemorySubSpaceChildIterator::nextSubSpace()
 			break;
 		case mm_msschild_iterator_next_subspace:
 			/* Move to the next sibling (or parent if unavailable) of the current subspace */
-			if(NULL == _memorySubSpace) {
+			if (NULL == _memorySubSpace) {
 				/* How did we get here? */
 				assume0(0);
 				_state = mm_msschild_iterator_current_subspace;
 				break;
 			}
 			/* If the current subspace being processed is the base subspace, we are done */
-			if(_memorySubSpace == _memorySubSpaceBase) {
+			if (_memorySubSpace == _memorySubSpaceBase) {
 				_memorySubSpace = NULL;
 				_state = mm_msschild_iterator_current_subspace;
 				break;
 			}
 			/* Move to the next/parent subspace */
-			if(NULL == _memorySubSpace->getNext()) {
+			if (NULL == _memorySubSpace->getNext()) {
 				/* Moving to the parent means we will just find its next sibling in the list */
 				_memorySubSpace = _memorySubSpace->getParent();
 				break;
@@ -101,9 +99,8 @@ MM_MemorySubSpaceChildIterator::nextSubSpace()
 			_memorySubSpace = _memorySubSpace->getNext();
 			_state = mm_msschild_iterator_current_subspace;
 			break;
-		}			
+		}
 	}
 
 	return NULL;
 }
-

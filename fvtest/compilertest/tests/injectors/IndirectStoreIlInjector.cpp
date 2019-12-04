@@ -25,20 +25,19 @@
 #include "tests/injectors/IndirectStoreIlInjector.hpp"
 #include "tests/OpCodesTest.hpp"
 
-namespace TestCompiler
-{
+namespace TestCompiler {
 
 bool
 IndirectStoreIlInjector::injectIL()
-   {
-   if (!isOpCodeSupported())
-      return false;
+{
+	if (!isOpCodeSupported())
+		return false;
 
-   createBlocks(1);
-   TR::SymbolReference *storeSymRef = symRefTab()->findOrCreateArrayShadowSymbolRef(_dataType, parm(1));
-   genTreeTop(TR::Node::createWithSymRef(_opCode, 2, parm(1), parm(2), 0, storeSymRef));
-   returnNoValue();
-   return true;
-   }
+	createBlocks(1);
+	TR::SymbolReference *storeSymRef = symRefTab()->findOrCreateArrayShadowSymbolRef(_dataType, parm(1));
+	genTreeTop(TR::Node::createWithSymRef(_opCode, 2, parm(1), parm(2), 0, storeSymRef));
+	returnNoValue();
+	return true;
+}
 
 } // namespace TestCompiler

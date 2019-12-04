@@ -33,8 +33,7 @@ class BlobEnumerateVisitor;
 class Field;
 class Symbol_IR;
 
-class JavaBlobGenerator : public BlobGenerator
-{
+class JavaBlobGenerator : public BlobGenerator {
 private:
 	typedef struct BitField {
 		uint32_t x1 : 1;
@@ -83,8 +82,7 @@ private:
 		uint8_t data[2];
 	} J9UTF8;
 
-	class BuildBlobInfo
-	{
+	class BuildBlobInfo {
 		/* Data members */
 	public:
 		BlobHeader header;
@@ -100,18 +98,18 @@ private:
 		uint8_t *stringBuffer;
 		intptr_t fd;
 
-		BuildBlobInfo() :
-			stringHash(NULL),
-			fieldCount(0),
-			constCount(0),
-			blobStructs(NULL),
-			curBlobStruct(NULL),
-			blobFields(NULL),
-			curBlobField(NULL),
-			blobConsts(NULL),
-			curBlobConst(NULL),
-			stringBuffer(NULL),
-			fd(-1)
+		BuildBlobInfo()
+		        : stringHash(NULL)
+		        , fieldCount(0)
+		        , constCount(0)
+		        , blobStructs(NULL)
+		        , curBlobStruct(NULL)
+		        , blobFields(NULL)
+		        , curBlobField(NULL)
+		        , blobConsts(NULL)
+		        , curBlobConst(NULL)
+		        , stringBuffer(NULL)
+		        , fd(-1)
 		{
 			initBlobHeader();
 		}
@@ -126,13 +124,15 @@ private:
 	bool _printEmptyTypes;
 
 	void copyStringTable();
-	DDR_RC stringTableOffset(BlobHeader *blobHeader, J9HashTable *stringTable, const char *cString, uint32_t *offset);
+	DDR_RC stringTableOffset(
+	        BlobHeader *blobHeader, J9HashTable *stringTable, const char *cString, uint32_t *offset);
 	DDR_RC countStructsAndStrings(Symbol_IR *ir);
 	DDR_RC addFieldAndConstCount(bool addStructureCount, size_t fieldCount, size_t constCount);
 	DDR_RC buildBlobData(OMRPortLibrary *portLibrary, Symbol_IR *ir);
 	DDR_RC addBlobField(Field *field, uint32_t *fieldCount, size_t baseOffset, const string &prefix);
 	DDR_RC addBlobConst(const string &name, long long value, uint32_t *constCount);
-	DDR_RC addBlobStruct(const string &name, const string &superName, uint32_t constCount, uint32_t fieldCount, uint32_t size);
+	DDR_RC addBlobStruct(
+	        const string &name, const string &superName, uint32_t constCount, uint32_t fieldCount, uint32_t size);
 	DDR_RC formatFieldType(Field *field, string *fieldType);
 
 	friend class BlobBuildVisitor;

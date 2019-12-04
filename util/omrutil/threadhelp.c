@@ -31,7 +31,7 @@ static intptr_t failedToSetAttr(intptr_t rc);
  */
 intptr_t
 createThreadWithCategory(omrthread_t *handle, uintptr_t stacksize, uintptr_t priority, uintptr_t suspend,
-						 omrthread_entrypoint_t entrypoint, void *entryarg, uint32_t category)
+        omrthread_entrypoint_t entrypoint, void *entryarg, uint32_t category)
 {
 	omrthread_attr_t attr;
 	intptr_t rc = J9THREAD_SUCCESS;

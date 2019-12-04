@@ -31,9 +31,7 @@
 #include "codegen/RegisterConstants.hpp"
 #include "codegen/RegisterDependency.hpp"
 
-
-namespace TR
-{
+namespace TR {
 
 /**
  * @brief Creates a pre and post condition for the specified virtual and real register
@@ -47,24 +45,18 @@ namespace TR
  * @param[in] cg : CodeGenerator object
  */
 static inline void
-addDependency(
-      TR::RegisterDependencyConditions *dep,
-      TR::Register *vreg,
-      TR::RealRegister::RegNum rnum,
-      TR_RegisterKinds rk,
-      TR::CodeGenerator *cg)
-   {
-   if (vreg == NULL)
-      {
-      vreg = cg->allocateRegister(rk);
-      vreg->setPlaceholderReg();
-      }
+addDependency(TR::RegisterDependencyConditions *dep, TR::Register *vreg, TR::RealRegister::RegNum rnum,
+        TR_RegisterKinds rk, TR::CodeGenerator *cg)
+{
+	if (vreg == NULL) {
+		vreg = cg->allocateRegister(rk);
+		vreg->setPlaceholderReg();
+	}
 
-   dep->addPreCondition(vreg, rnum);
-   dep->addPostCondition(vreg, rnum);
-   }
-
+	dep->addPreCondition(vreg, rnum);
+	dep->addPostCondition(vreg, rnum);
 }
 
-#endif
+} // namespace TR
 
+#endif

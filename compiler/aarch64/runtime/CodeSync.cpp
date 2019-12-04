@@ -20,14 +20,15 @@
  *******************************************************************************/
 
 // make sure the code gets from the data cache to the instruction cache
-void arm64CodeSync(unsigned char *codeStart, unsigned int codeSize)
-   {
+void
+arm64CodeSync(unsigned char *codeStart, unsigned int codeSize)
+{
 #if defined(TR_HOST_ARM64)
 #if defined(__GNUC__)
-   // GCC built-in function
-   __builtin___clear_cache(codeStart, codeStart+codeSize);
+	// GCC built-in function
+	__builtin___clear_cache(codeStart, codeStart + codeSize);
 #else
 #error Not supported yet
 #endif
 #endif
-   }
+}

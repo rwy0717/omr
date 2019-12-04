@@ -25,7 +25,8 @@
 #include "omrutil.h"
 
 void *
-pool_portLibAlloc(OMRPortLibrary *portLibrary, uint32_t size, const char *callSite, uint32_t memoryCategory, uint32_t type, uint32_t *doInit)
+pool_portLibAlloc(OMRPortLibrary *portLibrary, uint32_t size, const char *callSite, uint32_t memoryCategory,
+        uint32_t type, uint32_t *doInit)
 {
 	return portLibrary->mem_allocate_memory(portLibrary, size, callSite, memoryCategory);
 }
@@ -37,11 +38,11 @@ pool_portLibFree(OMRPortLibrary *portLibrary, void *address, uint32_t type)
 	omrmem_free_memory(address);
 }
 
-
 #if defined(OMR_ENV_DATA64)
 
 void *
-pool_portLibAlloc32(OMRPortLibrary *portLibrary, uint32_t size, const char *callSite, uint32_t memoryCategory, uint32_t type, uint32_t *doInit)
+pool_portLibAlloc32(OMRPortLibrary *portLibrary, uint32_t size, const char *callSite, uint32_t memoryCategory,
+        uint32_t type, uint32_t *doInit)
 {
 	void *address = NULL;
 
@@ -53,7 +54,6 @@ pool_portLibAlloc32(OMRPortLibrary *portLibrary, uint32_t size, const char *call
 
 	return address;
 }
-
 
 void
 pool_portLibFree32(OMRPortLibrary *portLibrary, void *address, uint32_t type)

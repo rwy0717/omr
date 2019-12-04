@@ -105,7 +105,7 @@ getZFSClientCacheSize(uint64_t *clientCacheSizePtr)
 	configOptionPtr->co_ver = J9CO_VER_INITIAL;
 	configOptionPtr->co_len = (int16_t)sizeof(J9ZFSConfigOption);
 
-#if!defined(OMR_EBCDIC)
+#if !defined(OMR_EBCDIC)
 	fsName = a2e(J9ZFSNAME, strlen(J9ZFSNAME));
 #else /* !defined(OMR_EBCDIC) */
 	fsName = J9ZFSNAME;
@@ -115,22 +115,16 @@ getZFSClientCacheSize(uint64_t *clientCacheSizePtr)
 		return -1;
 	}
 	/* Invoke pfsctl() callable service */
-#if defined(_LP64)					/* AMODE 64-bit */
-	BPX4PCT(fsName,                 /* File system type: ZFS (in) */
-			J9ZFSCALL_CONFIG,       /* Command: Configuration operation (in) */
-			sizeof(configParam),    /* Argument length (in) */
-			(char *)&configParam,   /* Argument (in & out) */
-			&bpxrv,                 /* Return_value (out) */
-			&bpxrc,                 /* Return_code (out) */
-			&bpxrs);                /* Reason_code (out) */
-#else								/* AMODE 31-bit */
-	BPX1PCT(fsName,
-			J9ZFSCALL_CONFIG,
-			sizeof(configParam),
-			(char *)&configParam,
-			&bpxrv,
-			&bpxrc,
-			&bpxrs);
+#if defined(_LP64) /* AMODE 64-bit */
+	BPX4PCT(fsName, /* File system type: ZFS (in) */
+	        J9ZFSCALL_CONFIG, /* Command: Configuration operation (in) */
+	        sizeof(configParam), /* Argument length (in) */
+	        (char *)&configParam, /* Argument (in & out) */
+	        &bpxrv, /* Return_value (out) */
+	        &bpxrc, /* Return_code (out) */
+	        &bpxrs); /* Reason_code (out) */
+#else /* AMODE 31-bit */
+	BPX1PCT(fsName, J9ZFSCALL_CONFIG, sizeof(configParam), (char *)&configParam, &bpxrv, &bpxrc, &bpxrs);
 #endif /* defined(_LP64) */
 #if !defined(OMR_EBCDIC)
 	free(fsName);
@@ -146,7 +140,7 @@ getZFSClientCacheSize(uint64_t *clientCacheSizePtr)
 #if !defined(OMR_EBCDIC)
 	ascName = e2a_func(configParam.configOption.co_string, strlen(configParam.configOption.co_string));
 #else /* !defined(OMR_EBCDIC) */
-   ascName = configParam.configOption.co_string;
+	ascName = configParam.configOption.co_string;
 #endif /* !defined(OMR_EBCDIC) */
 	if (NULL == ascName) {
 		Trc_PRT_getZFSClientCacheSize_MallocFailure();
@@ -198,7 +192,7 @@ getZFSUserCacheUsed(uint64_t *userCacheUsedPtr)
 	 * structure
 	 */
 	fillSyscallParamList(&(statParam.syscallParamList), J9STATOP_USER_CACHE,
-						 (sizeof(J9ZFSSyscallParamList) + sizeof(J9ZFSStatApi)));
+	        (sizeof(J9ZFSSyscallParamList) + sizeof(J9ZFSStatApi)));
 
 	/* Initialize the statistics API query control fields */
 	memset(statApiPtr, 0, sizeof(J9ZFSStatApi));
@@ -218,7 +212,7 @@ getZFSUserCacheUsed(uint64_t *userCacheUsedPtr)
 
 	statApiPtr->sa_ver = J9SA_VER_INITIAL;
 	statApiPtr->sa_len = (int32_t)sizeof(J9ZFSStatUserCache);
-   
+
 #if !defined(OMR_EBCDIC)
 	fsName = a2e(J9ZFSNAME, strlen(J9ZFSNAME));
 #else /* !defined(OMR_EBCDIC) */
@@ -229,22 +223,16 @@ getZFSUserCacheUsed(uint64_t *userCacheUsedPtr)
 		return -1;
 	}
 	/* Invoke pfsctl() callable service */
-#if defined(_LP64)					/* AMODE 64-bit */
-	BPX4PCT(fsName,                 /* File system type: ZFS (in) */
-			J9ZFSCALL_STATS, 	    /* Command: Statistics operation (in) */
-			sizeof(statParam),    	/* Argument length (in) */
-			(char *)&statParam,    	/* Argument (in & out) */
-			&bpxrv,                 /* Return_value (out) */
-			&bpxrc,                 /* Return_code (out) */
-			&bpxrs);                /* Reason_code (out) */
-#else								/* AMODE 31-bit */
-	BPX1PCT(fsName,
-			J9ZFSCALL_STATS,
-			sizeof(statParam),
-			(char *)&statParam,
-			&bpxrv,
-			&bpxrc,
-			&bpxrs);
+#if defined(_LP64) /* AMODE 64-bit */
+	BPX4PCT(fsName, /* File system type: ZFS (in) */
+	        J9ZFSCALL_STATS, /* Command: Statistics operation (in) */
+	        sizeof(statParam), /* Argument length (in) */
+	        (char *)&statParam, /* Argument (in & out) */
+	        &bpxrv, /* Return_value (out) */
+	        &bpxrc, /* Return_code (out) */
+	        &bpxrs); /* Reason_code (out) */
+#else /* AMODE 31-bit */
+	BPX1PCT(fsName, J9ZFSCALL_STATS, sizeof(statParam), (char *)&statParam, &bpxrv, &bpxrc, &bpxrs);
 #endif /* defined(_LP64) */
 #if !defined(OMR_EBCDIC)
 	free(fsName);
@@ -303,7 +291,7 @@ getZFSMetaCacheSize(uint64_t *bufferCacheSizePtr)
 	 * structure
 	 */
 	fillSyscallParamList(&(metaStatParam.syscallParamList), J9STATOP_META_CACHE,
-						 (sizeof(J9ZFSSyscallParamList) + sizeof(J9ZFSStatApi)));
+	        (sizeof(J9ZFSSyscallParamList) + sizeof(J9ZFSStatApi)));
 
 	/* Initialize the statistics API query control fields */
 	memset(statApiPtr, 0, sizeof(J9ZFSStatApi));
@@ -333,22 +321,16 @@ getZFSMetaCacheSize(uint64_t *bufferCacheSizePtr)
 		return -1;
 	}
 	/* Invoke pfsctl() callable service */
-#if defined(_LP64)					/* AMODE 64-bit */
-	BPX4PCT(fsName,                 /* File system type: ZFS (in) */
-			J9ZFSCALL_STATS,        /* Command: Statistics operation (in) */
-			sizeof(metaStatParam), 	/* Argument length (in) */
-			(char *)&metaStatParam, /* Argument (in & out) */
-			&bpxrv,                 /* Return_value (out) */
-			&bpxrc,                 /* Return_code (out) */
-			&bpxrs);                /* Reason_code (out) */
-#else								/* AMODE 31-bit */
-	BPX1PCT(fsName,
-			J9ZFSCALL_STATS,
-			sizeof(metaStatParam),
-			(char *)&metaStatParam,
-			&bpxrv,
-			&bpxrc,
-			&bpxrs);
+#if defined(_LP64) /* AMODE 64-bit */
+	BPX4PCT(fsName, /* File system type: ZFS (in) */
+	        J9ZFSCALL_STATS, /* Command: Statistics operation (in) */
+	        sizeof(metaStatParam), /* Argument length (in) */
+	        (char *)&metaStatParam, /* Argument (in & out) */
+	        &bpxrv, /* Return_value (out) */
+	        &bpxrc, /* Return_code (out) */
+	        &bpxrs); /* Reason_code (out) */
+#else /* AMODE 31-bit */
+	BPX1PCT(fsName, J9ZFSCALL_STATS, sizeof(metaStatParam), (char *)&metaStatParam, &bpxrv, &bpxrc, &bpxrs);
 #endif /* defined(_LP64) */
 #if !defined(OMR_EBCDIC)
 	free(fsName);

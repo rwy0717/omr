@@ -30,7 +30,6 @@ reportOMRCommandLineError(OMRPortLibrary *portLibrary, const char *detailStr, va
 	omrstr_vprintf(buffer, sizeof(buffer), detailStr, args);
 
 	omrtty_err_printf("Error in trace %s\n", buffer);
-
 }
 
 /* Find the directory where the *TraceFormat.dat is located.
@@ -58,15 +57,14 @@ getTraceDatDir(intptr_t argc, const char **argv)
 
 void
 createThread(omrthread_t *newThread, uintptr_t suspend, omrthread_detachstate_t detachstate,
-			 omrthread_entrypoint_t entryProc, void *entryArg)
+        omrthread_entrypoint_t entryProc, void *entryArg)
 {
 	omrthread_attr_t attr = NULL;
 	intptr_t rc = 0;
 
 	ASSERT_EQ(J9THREAD_SUCCESS, omrthread_attr_init(&attr));
 	ASSERT_EQ(J9THREAD_SUCCESS, omrthread_attr_set_detachstate(&attr, detachstate));
-	EXPECT_EQ(J9THREAD_SUCCESS,
-			  rc = omrthread_create_ex(newThread, &attr, suspend, entryProc, entryArg));
+	EXPECT_EQ(J9THREAD_SUCCESS, rc = omrthread_create_ex(newThread, &attr, suspend, entryProc, entryArg));
 	if (rc & J9THREAD_ERR_OS_ERRNO_SET) {
 		printf("omrthread_create_ex() returned os_errno=%d\n", (int)omrthread_get_os_errno());
 	}

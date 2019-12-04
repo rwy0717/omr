@@ -65,7 +65,8 @@ errorMessage(struct OMRPortLibrary *portLibrary, int32_t errorCode)
 
 	ptBuffers = omrport_tls_peek(portLibrary);
 	if (0 == ptBuffers->errorMessageBufferSize) {
-		ptBuffers->errorMessageBuffer = portLibrary->mem_allocate_memory(portLibrary, J9ERROR_DEFAULT_BUFFER_SIZE, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
+		ptBuffers->errorMessageBuffer = portLibrary->mem_allocate_memory(
+		        portLibrary, J9ERROR_DEFAULT_BUFFER_SIZE, OMR_GET_CALLSITE(), OMRMEM_CATEGORY_PORT_LIBRARY);
 		if (NULL == ptBuffers->errorMessageBuffer) {
 			return "";
 		}
@@ -73,14 +74,15 @@ errorMessage(struct OMRPortLibrary *portLibrary, int32_t errorCode)
 	}
 	message = ptBuffers->errorMessageBuffer;
 
-	rc = FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, errorCode, 0, ubuffer, J9ERROR_DEFAULT_BUFFER_SIZE, NULL);
+	rc = FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, errorCode, 0, ubuffer,
+	        J9ERROR_DEFAULT_BUFFER_SIZE, NULL);
 	if (rc == 0) {
 		const char *format;
 		format = portLibrary->nls_lookup_message(portLibrary,
-				 J9NLS_DO_NOT_PRINT_MESSAGE_TAG | J9NLS_DO_NOT_APPEND_NEWLINE,
-				 J9NLS_PORT_ERROR_OPERATION_FAILED,
-				 "Operation Failed: %d (%s failed: %d)");
-		portLibrary->str_printf(portLibrary, message, ptBuffers->errorMessageBufferSize, format, errorCode, "FormatMessage", GetLastError());
+		        J9NLS_DO_NOT_PRINT_MESSAGE_TAG | J9NLS_DO_NOT_APPEND_NEWLINE, J9NLS_PORT_ERROR_OPERATION_FAILED,
+		        "Operation Failed: %d (%s failed: %d)");
+		portLibrary->str_printf(portLibrary, message, ptBuffers->errorMessageBufferSize, format, errorCode,
+		        "FormatMessage", GetLastError());
 		message[ptBuffers->errorMessageBufferSize - 1] = '\0';
 		return message;
 	}
@@ -125,4 +127,3 @@ errorMessage(struct OMRPortLibrary *portLibrary, int32_t errorCode)
 	}
 	return message;
 }
-

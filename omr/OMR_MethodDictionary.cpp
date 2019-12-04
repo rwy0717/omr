@@ -27,13 +27,13 @@
 #include "ut_omrti.h"
 
 omr_error_t
-omr_ras_initMethodDictionary(OMR_VM *vm, size_t numProperties, const char * const *propertyNames)
+omr_ras_initMethodDictionary(OMR_VM *vm, size_t numProperties, const char *const *propertyNames)
 {
 	omr_error_t rc = OMR_ERROR_NONE;
 	if (NULL == vm->_methodDictionary) {
 		OMRPORT_ACCESS_FROM_OMRVM(vm);
-		OMR_MethodDictionary *methodDictionary =
-			(OMR_MethodDictionary *)omrmem_allocate_memory(sizeof(*methodDictionary), OMRMEM_CATEGORY_OMRTI);
+		OMR_MethodDictionary *methodDictionary = (OMR_MethodDictionary *)omrmem_allocate_memory(
+		        sizeof(*methodDictionary), OMRMEM_CATEGORY_OMRTI);
 		if (NULL != methodDictionary) {
 			rc = methodDictionary->init(vm, numProperties, propertyNames);
 			if (OMR_ERROR_NONE == rc) {
@@ -70,7 +70,7 @@ omr_ras_insertMethodDictionary(OMR_VM *vm, OMR_MethodDictionaryEntry *entry)
 }
 
 omr_error_t
-OMR_MethodDictionary::init(OMR_VM *vm, size_t numProperties, const char * const *propertyNames)
+OMR_MethodDictionary::init(OMR_VM *vm, size_t numProperties, const char *const *propertyNames)
 {
 	_lock = NULL;
 	_hashTable = NULL;
@@ -86,9 +86,8 @@ OMR_MethodDictionary::init(OMR_VM *vm, size_t numProperties, const char * const 
 	omrthread_t self = NULL;
 	if (0 == omrthread_attach_ex(&self, J9THREAD_ATTR_DEFAULT)) {
 		OMRPORT_ACCESS_FROM_OMRVM(vm);
-		_hashTable = hashTableNew(
-			OMRPORTLIB, OMR_GET_CALLSITE(), 0, _sizeofEntry, 0, 0, OMRMEM_CATEGORY_OMRTI,
-			entryHash, entryEquals, NULL, NULL);
+		_hashTable = hashTableNew(OMRPORTLIB, OMR_GET_CALLSITE(), 0, _sizeofEntry, 0, 0, OMRMEM_CATEGORY_OMRTI,
+		        entryHash, entryEquals, NULL, NULL);
 		if (NULL != _hashTable) {
 			if (0 != omrthread_monitor_init_with_name(&_lock, 0, "omrVM->_methodDictionary")) {
 				rc = OMR_ERROR_FAILED_TO_ALLOCATE_MONITOR;
@@ -113,8 +112,8 @@ OMR_MethodDictionary::cleanup()
 	if (NULL != _vm) {
 		omrthread_t self = NULL;
 		if (0 == omrthread_attach_ex(&self, J9THREAD_ATTR_DEFAULT)) {
-			Trc_OMRPROF_methodDictionaryHighWaterMark(_maxBytes, _maxEntries, _sizeofEntry,
-				_maxBytes - (_maxEntries * _sizeofEntry));
+			Trc_OMRPROF_methodDictionaryHighWaterMark(
+			        _maxBytes, _maxEntries, _sizeofEntry, _maxBytes - (_maxEntries * _sizeofEntry));
 			if (NULL != _hashTable) {
 				hashTableForEachDo(_hashTable, OMR_MethodDictionary::cleanupEntryStrings, this);
 				hashTableFree(_hashTable);
@@ -130,7 +129,8 @@ OMR_MethodDictionary::cleanup()
 	}
 }
 void
-OMR_MethodDictionary::getProperties(size_t *numProperties, const char *const **propertyNames, size_t *sizeofSampledMethodDesc) const
+OMR_MethodDictionary::getProperties(
+        size_t *numProperties, const char *const **propertyNames, size_t *sizeofSampledMethodDesc) const
 {
 	*numProperties = _numProperties;
 	*propertyNames = _propertyNames;
@@ -145,7 +145,7 @@ OMR_MethodDictionary::insert(OMR_MethodDictionaryEntry *entry)
 	if (0 == omrthread_attach_ex(&self, J9THREAD_ATTR_DEFAULT)) {
 		if (0 == omrthread_monitor_enter_using_threadId(_lock, self)) {
 			OMR_MethodDictionaryEntry *newEntry =
-				(OMR_MethodDictionaryEntry *)hashTableAdd(_hashTable, entry);
+			        (OMR_MethodDictionaryEntry *)hashTableAdd(_hashTable, entry);
 			if (NULL == newEntry) {
 				rc = OMR_ERROR_OUT_OF_NATIVE_MEMORY;
 			} else {
@@ -190,8 +190,8 @@ OMR_MethodDictionary::insert(OMR_MethodDictionaryEntry *entry)
 
 omr_error_t
 OMR_MethodDictionary::getEntries(OMR_VMThread *vmThread, void **methodArray, size_t methodArrayCount,
-	OMR_SampledMethodDescription *methodDescriptions, char *nameBuffer, size_t nameBytes,
-	size_t *firstRetryMethod, size_t *nameBytesRemaining)
+        OMR_SampledMethodDescription *methodDescriptions, char *nameBuffer, size_t nameBytes, size_t *firstRetryMethod,
+        size_t *nameBytesRemaining)
 {
 	omr_error_t rc = OMR_ERROR_NONE;
 
@@ -209,7 +209,8 @@ OMR_MethodDictionary::getEntries(OMR_VMThread *vmThread, void **methodArray, siz
 		 */
 
 		for (size_t i = 0; i < methodArrayCount; i++) {
-			OMR_MethodDictionaryEntry searchEntryHdr; /* NOTE This is only an entry header, and can't hold any propertyValues */
+			OMR_MethodDictionaryEntry searchEntryHdr; /* NOTE This is only an entry header, and can't hold
+			                                             any propertyValues */
 			OMR_MethodDictionaryEntry *entry = NULL;
 
 			searchEntryHdr.key = methodArray[i];
@@ -253,7 +254,8 @@ OMR_MethodDictionary::getEntries(OMR_VMThread *vmThread, void **methodArray, siz
 					nameBytesRemainingLocal += nameBytesNeeded;
 				}
 			}
-			currentMthDesc = (OMR_SampledMethodDescription *)((uintptr_t)currentMthDesc + sizeof(OMR_SampledMethodDescription) + sizeof(const char *) * _numProperties);
+			currentMthDesc = (OMR_SampledMethodDescription *)((uintptr_t)currentMthDesc
+			        + sizeof(OMR_SampledMethodDescription) + sizeof(const char *) * _numProperties);
 		}
 		if (OMR_ERROR_RETRY == rc) {
 			if (NULL != firstRetryMethod) {
@@ -283,7 +285,8 @@ OMR_MethodDictionary::countEntryNameBytesNeeded(OMR_MethodDictionaryEntry *entry
 }
 
 void
-OMR_MethodDictionary::copyEntryNameBytes(OMR_MethodDictionaryEntry *entry, OMR_SampledMethodDescription *desc, char *nameBufferPos) const
+OMR_MethodDictionary::copyEntryNameBytes(
+        OMR_MethodDictionaryEntry *entry, OMR_SampledMethodDescription *desc, char *nameBufferPos) const
 {
 	for (size_t i = 0; i < _numProperties; ++i) {
 		if (NULL == entry->propertyValues[i]) {
@@ -393,7 +396,8 @@ OMR_MethodDictionary::formatEntryProperties(const OMR_MethodDictionaryEntry *ent
 		*str = NULL;
 	} else {
 		OMRPORT_ACCESS_FROM_OMRVM(_vm);
-		size_t buflen = _numProperties; /* space between each property + nul-terminator, might include some extra if we have nulls */
+		size_t buflen = _numProperties; /* space between each property + nul-terminator, might include some
+		                                   extra if we have nulls */
 		for (size_t i = 0; i < _numProperties; ++i) {
 			if (NULL != entry->propertyValues[i]) {
 				buflen += strlen(entry->propertyValues[i]);
@@ -406,7 +410,8 @@ OMR_MethodDictionary::formatEntryProperties(const OMR_MethodDictionaryEntry *ent
 			bufUsed += omrstr_printf(buf, (uintptr_t)buflen, "%s", entry->propertyValues[0]);
 			for (size_t i = 1; i < _numProperties; ++i) {
 				if (NULL != entry->propertyValues[i]) {
-					bufUsed += omrstr_printf(buf + bufUsed, (uintptr_t)buflen - bufUsed, " %s", entry->propertyValues[i]);
+					bufUsed += omrstr_printf(buf + bufUsed, (uintptr_t)buflen - bufUsed, " %s",
+					        entry->propertyValues[i]);
 				}
 			}
 		}

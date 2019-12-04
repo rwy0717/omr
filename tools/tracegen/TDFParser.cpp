@@ -76,7 +76,9 @@ TDFParser::parse()
 		 *   TracePerf-Exception (Unused)
 		 *   TraceAssert
 		 */
-		if (0 == strlen(line) || StringUtils::startsWithUpperLower(line, "//") || StringUtils::startsWithUpperLower(line, "\n") || StringUtils::startsWithUpperLower(line, "\r")) {
+		if (0 == strlen(line) || StringUtils::startsWithUpperLower(line, "//")
+		        || StringUtils::startsWithUpperLower(line, "\n")
+		        || StringUtils::startsWithUpperLower(line, "\r")) {
 			/* skip */
 		} else if (StringUtils::startsWithUpperLower(line, "Submodules=")) {
 			tdf->header.submodules = strdup(strrchr(line, '=') + 1);
@@ -107,7 +109,8 @@ TDFParser::parse()
 
 				tdf->lasttp = tdf->tracepoints;
 			} else {
-				tdf->lasttp->nexttp = (J9TDFTracepoint *)Port::omrmem_calloc(1, sizeof(J9TDFTracepoint));
+				tdf->lasttp->nexttp =
+				        (J9TDFTracepoint *)Port::omrmem_calloc(1, sizeof(J9TDFTracepoint));
 				if (NULL == tdf->lasttp->nexttp) {
 					eprintf("Failed to allocate memory\n");
 					goto failed;
@@ -117,13 +120,16 @@ TDFParser::parse()
 			}
 			tdf->lasttp->type = static_cast<TraceEventType>(type);
 
-			if (0 != processTracePointDetail(line, tdf->lasttp, tdf->header.executable, id++, _fileReader->_fileName, _fileReader->_lineNumber)) {
+			if (0
+			        != processTracePointDetail(line, tdf->lasttp, tdf->header.executable, id++,
+			                _fileReader->_fileName, _fileReader->_lineNumber)) {
 				FileUtils::printError("Failed to parse trace line %s\n", line);
 				Port::omrmem_free((void **)&line);
 				goto failed;
 			}
 		} else {
-			FileUtils::printError("Unsupported line: '%s' %s:%d\n", line, _fileReader->_fileName, _fileReader->_lineNumber);
+			FileUtils::printError("Unsupported line: '%s' %s:%d\n", line, _fileReader->_fileName,
+			        _fileReader->_lineNumber);
 		}
 		Port::omrmem_free((void **)&line);
 	}
@@ -145,7 +151,8 @@ failed:
 }
 
 RCType
-TDFParser::processTracePointDetail(const char *line, J9TDFTracepoint *tp, const char *module, unsigned int id, const char *fileName, unsigned int lineNumber)
+TDFParser::processTracePointDetail(const char *line, J9TDFTracepoint *tp, const char *module, unsigned int id,
+        const char *fileName, unsigned int lineNumber)
 {
 	RCType rc = RC_FAILED;
 	char *tok = NULL;
@@ -158,7 +165,7 @@ TDFParser::processTracePointDetail(const char *line, J9TDFTracepoint *tp, const 
 	/* read the first token */
 	tok = strtok(tokLine, " \t");
 	line = line + strlen(tok) + 1;
-	while ((' ' == *line  || '\t' == *line) && '\0' != *line) {
+	while ((' ' == *line || '\t' == *line) && '\0' != *line) {
 		line = line + 1;
 	}
 
@@ -174,7 +181,7 @@ TDFParser::processTracePointDetail(const char *line, J9TDFTracepoint *tp, const 
 			/* tp->isExplicit = true; */
 			FileUtils::printError("WARNING : obsolete keyword 'Explicit' in %s:%u\n", fileName, lineNumber);
 			line = line + strlen(tok);
-			while ((' ' == *line  || '\t' == *line) && '\0' != *line) {
+			while ((' ' == *line || '\t' == *line) && '\0' != *line) {
 				line = line + 1;
 			}
 			tok = strtok(NULL, " \t");
@@ -182,7 +189,7 @@ TDFParser::processTracePointDetail(const char *line, J9TDFTracepoint *tp, const 
 			/* tp->isSuffix = true; */
 			FileUtils::printError("WARNING : obsolete keyword 'Suffix' in %s:%u\n", fileName, lineNumber);
 			line = line + strlen(tok);
-			while ((' ' == *line  || '\t' == *line) && '\0' != *line) {
+			while ((' ' == *line || '\t' == *line) && '\0' != *line) {
 				line = line + 1;
 			}
 			tok = strtok(NULL, " \t");
@@ -190,15 +197,16 @@ TDFParser::processTracePointDetail(const char *line, J9TDFTracepoint *tp, const 
 			/* tp->isPrefix = true; */
 			FileUtils::printError("WARNING : obsolete keyword 'Prefix' in %s:%u\n", fileName, lineNumber);
 			line = line + strlen(tok);
-			while ((' ' == *line  || '\t' == *line) && '\0' != *line) {
+			while ((' ' == *line || '\t' == *line) && '\0' != *line) {
 				line = line + 1;
 			}
 			tok = strtok(NULL, " \t");
 		} else if (StringUtils::startsWithUpperLower(tok, "Exception")) {
 			/* tp->isException = true; */
-			FileUtils::printError("WARNING : obsolete keyword 'Exception' in %s:%u\n", fileName, lineNumber);
+			FileUtils::printError(
+			        "WARNING : obsolete keyword 'Exception' in %s:%u\n", fileName, lineNumber);
 			line = line + strlen(tok);
-			while ((' ' == *line  || '\t' == *line) && '\0' != *line) {
+			while ((' ' == *line || '\t' == *line) && '\0' != *line) {
 				line = line + 1;
 			}
 			tok = strtok(NULL, " \t");
@@ -206,38 +214,40 @@ TDFParser::processTracePointDetail(const char *line, J9TDFTracepoint *tp, const 
 			/* tp->isPrivate = true; */
 			FileUtils::printError("WARNING : obsolete keyword 'Private' in %s:%u\n", fileName, lineNumber);
 			line = line + strlen(tok);
-			while ((' ' == *line  || '\t' == *line) && '\0' != *line) {
+			while ((' ' == *line || '\t' == *line) && '\0' != *line) {
 				line = line + 1;
 			}
 			tok = strtok(NULL, " \t");
 		} else if (StringUtils::startsWithUpperLower(tok, "Test")) {
 			tp->test = true;
 			line = line + strlen(tok);
-			while ((' ' == *line  || '\t' == *line) && '\0' != *line) {
+			while ((' ' == *line || '\t' == *line) && '\0' != *line) {
 				line = line + 1;
 			}
 			tok = strtok(NULL, " \t");
 		} else if (StringUtils::startsWithUpperLower(tok, "NoEnv")) {
 			tp->hasEnv = false;
 			line = line + strlen(tok);
-			while ((' ' == *line  || '\t' == *line) && '\0' != *line) {
+			while ((' ' == *line || '\t' == *line) && '\0' != *line) {
 				line = line + 1;
 			}
 			tok = strtok(NULL, " \t");
 		} else if (StringUtils::startsWithUpperLower(tok, "Obsolete")) {
 			tp->obsolete = true;
 			line = line + strlen(tok);
-			while ((' ' == *line  || '\t' == *line) && '\0' != *line) {
+			while ((' ' == *line || '\t' == *line) && '\0' != *line) {
 				line = line + 1;
 			}
 			tok = strtok(NULL, " \t");
-		} else if (StringUtils::startsWithUpperLower(tok, (UT_ASSERT_TYPE == tp->type ? "Assert=" : "Template="))) {
+		} else if (StringUtils::startsWithUpperLower(
+		                   tok, (UT_ASSERT_TYPE == tp->type ? "Assert=" : "Template="))) {
 			tp->format = getTemplate(line, (UT_ASSERT_TYPE == tp->type ? "Assert=" : "Template="));
-			if (NULL == tp->format){
+			if (NULL == tp->format) {
 				goto failed;
 			}
-			line = line + strlen((UT_ASSERT_TYPE == tp->type ? "Assert=" : "Template=")) + (strlen(tp->format) + 2 /* two quotes */);
-			while ((' ' == *line  || '\t' == *line) && '\0' != *line) {
+			line = line + strlen((UT_ASSERT_TYPE == tp->type ? "Assert=" : "Template="))
+			        + (strlen(tp->format) + 2 /* two quotes */);
+			while ((' ' == *line || '\t' == *line) && '\0' != *line) {
 				line = line + 1;
 			}
 			Port::omrmem_free((void **)&tokLine);
@@ -249,7 +259,7 @@ TDFParser::processTracePointDetail(const char *line, J9TDFTracepoint *tp, const 
 				goto failed;
 			}
 			line = line + strlen(tok);
-			while ((' ' == *line  || '\t' == *line) && '\0' != *line) {
+			while ((' ' == *line || '\t' == *line) && '\0' != *line) {
 				line = line + 1;
 			}
 			Port::omrmem_free((void **)&tokLine);
@@ -261,7 +271,7 @@ TDFParser::processTracePointDetail(const char *line, J9TDFTracepoint *tp, const 
 				goto failed;
 			}
 			line = line + strlen(tok);
-			while ((' ' == *line  || '\t' == *line) && '\0' != *line) {
+			while ((' ' == *line || '\t' == *line) && '\0' != *line) {
 				line = line + 1;
 			}
 			Port::omrmem_free((void **)&tokLine);
@@ -270,7 +280,7 @@ TDFParser::processTracePointDetail(const char *line, J9TDFTracepoint *tp, const 
 		} else if (StringUtils::startsWithUpperLower(tok, "Group=")) {
 			tp->groups = getGroups(tok);
 			line = line + strlen(tok);
-			while ((' ' == *line  || '\t' == *line) && '\0' != *line) {
+			while ((' ' == *line || '\t' == *line) && '\0' != *line) {
 				line = line + 1;
 			}
 			Port::omrmem_free((void **)&tokLine);
@@ -279,7 +289,7 @@ TDFParser::processTracePointDetail(const char *line, J9TDFTracepoint *tp, const 
 			tok = strtok(tokLine, " \t");
 		} else {
 			line = line + strlen(tok);
-			while ((' ' == *line  || '\t' == *line) && '\0' != *line) {
+			while ((' ' == *line || '\t' == *line) && '\0' != *line) {
 				line = line + 1;
 			}
 			Port::omrmem_free((void **)&tokLine);
@@ -294,8 +304,8 @@ TDFParser::processTracePointDetail(const char *line, J9TDFTracepoint *tp, const 
 	}
 
 	if (NULL == tp->format) {
-		tp ->format = (char *)Port::omrmem_calloc(1, (strlen("null") + 1));
-		strcpy(tp ->format,  "null");
+		tp->format = (char *)Port::omrmem_calloc(1, (strlen("null") + 1));
+		strcpy(tp->format, "null");
 	}
 
 	if (UT_ASSERT_TYPE == tp->type) {
@@ -311,7 +321,17 @@ TDFParser::processTracePointDetail(const char *line, J9TDFTracepoint *tp, const 
 			pch = strpbrk(pch + 1, key);
 		}
 
-		size_t len = 5 /* \\\"\\\"\0 when no parameters specified */ + (percentSignCount * (strlen(TRACE_DATA_TYPE_STRING) + strlen(TRACE_DATA_TYPE_PRECISION))) /* TRACE_DATA_TYPE_STRING is the longest parameter string + precision specifier*/;
+		size_t len = 5 /* \\\"\\\"\0 when no parameters specified */
+		        + (percentSignCount
+		                * (strlen(TRACE_DATA_TYPE_STRING)
+		                        + strlen(TRACE_DATA_TYPE_PRECISION))) /* TRACE_DATA_TYPE_STRING
+		                                                                 is the
+		                                                                 longest
+		                                                                 parameter
+		                                                                 string +
+		                                                                 precision
+		                                                                 specifier*/
+		        ;
 		tp->parameters = (char *)Port::omrmem_calloc(1, len);
 		if (NULL == tp->parameters) {
 			FileUtils::printError("Failed to allocate memory\n");
@@ -344,7 +364,8 @@ TDFParser::getTemplate(const char *line, const char *key)
 	char *format = NULL;
 	size_t len = 0;
 	/*
-	 * Number of quotes in the string. Must be even when the string is fully parsed to ensure there is an opening and closing quote.
+	 * Number of quotes in the string. Must be even when the string is fully parsed to ensure there is an opening
+	 * and closing quote.
 	 */
 	int count = 0;
 
@@ -519,7 +540,8 @@ TDFParser::processAssertTemplate(const char *formatTemplate, unsigned int *count
  * str - a malloc'd buffer to hold the result
  */
 RCType
-TDFParser::processTemplate(const char *formatTemplate, char *str, unsigned int *count, const char *fileName, unsigned int lineNumber)
+TDFParser::processTemplate(
+        const char *formatTemplate, char *str, unsigned int *count, const char *fileName, unsigned int lineNumber)
 {
 	char *pos = (char *)formatTemplate;
 	RCType rc = RC_OK;
@@ -535,27 +557,27 @@ TDFParser::processTemplate(const char *formatTemplate, char *str, unsigned int *
 	 * required because we need to catch syntax errors now, rather than at
 	 * trace formatting time.
 	 */
-	char allowFromStates[] = { (char) 0xBE, /*
-											 * State 0 allows entry from
-											 * states 0, 2 - 6
-											 */
-							   (char) 0x80, /* State 1 allows entry from states 0 */
-							   (char) 0xE0, /* State 2 allows entry from states 1,2 */
-							   (char) 0xF0, /* State 3 allows entry from states 1,2,3 */
-							   (char) 0xF0, /* State 4 allows entry from states 1,2,3 */
-							   (char) 0x0c, /* State 5 allows entry from states 4,5 */
-							   (char) 0xF4, /* State 6 allows entry from states 1,2,3,5 */
-							   (char) 0xF6, /* State 7 allows entry from states 1,2,3,5,6 */
-							   (char) 0x41 /* State 8 allows entry from states 1,7 */
-							 };
+	char allowFromStates[] = {
+	        (char)0xBE, /*
+	                     * State 0 allows entry from
+	                     * states 0, 2 - 6
+	                     */
+	        (char)0x80, /* State 1 allows entry from states 0 */
+	        (char)0xE0, /* State 2 allows entry from states 1,2 */
+	        (char)0xF0, /* State 3 allows entry from states 1,2,3 */
+	        (char)0xF0, /* State 4 allows entry from states 1,2,3 */
+	        (char)0x0c, /* State 5 allows entry from states 4,5 */
+	        (char)0xF4, /* State 6 allows entry from states 1,2,3,5 */
+	        (char)0xF6, /* State 7 allows entry from states 1,2,3,5,6 */
+	        (char)0x41 /* State 8 allows entry from states 1,7 */
+	};
 
 	unsigned int state;
 	/*
 	 * State number to bit lookup table.
 	 */
-	char stateBits[] = { (char) 0x80, (char) 0x40, (char) 0x20,
-						 (char) 0x10, (char) 0x08, (char) 0x04, (char) 0x02, (char) 0x01
-					   };
+	char stateBits[] = {
+	        (char)0x80, (char)0x40, (char)0x20, (char)0x10, (char)0x08, (char)0x04, (char)0x02, (char)0x01};
 
 	strcat(str, "\"");
 
@@ -568,10 +590,8 @@ TDFParser::processTemplate(const char *formatTemplate, char *str, unsigned int *
 		 * Enter state 0 (Parsing specifier)
 		 */
 		state = 0;
-		while ((++pos < (formatTemplate + templateLength))
-			&& (0 != (stateBits[state] & allowFromStates[0]))
-			&& (RC_OK == rc)
-		) {
+		while ((++pos < (formatTemplate + templateLength)) && (0 != (stateBits[state] & allowFromStates[0]))
+		        && (RC_OK == rc)) {
 			/* printf("Parsing started for format specifier\n"); */
 			switch (*pos) {
 			/*
@@ -717,9 +737,7 @@ TDFParser::processTemplate(const char *formatTemplate, char *str, unsigned int *
 					/* Check for a long long */
 					if (formatTemplate + templateLength > pos + 1) {
 						switch (*(pos + 1)) {
-						case 'l':
-							pos++;
-							break;
+						case 'l': pos++; break;
 						/*
 						 * %ld, %li, %lx, %lX and %lu are not valid
 						 * modifiers.
@@ -730,10 +748,17 @@ TDFParser::processTemplate(const char *formatTemplate, char *str, unsigned int *
 						case 'X':
 						case 'u':
 							if (_treatWarningAsError) {
-								eprintf("ERROR : %%l is not valid modifier. (parameter %u in mutated format string %s). %s:%u", parmCount, formatTemplate, fileName, lineNumber);
+								eprintf("ERROR : %%l is not valid modifier. (parameter "
+								        "%u in mutated format string %s). %s:%u",
+								        parmCount, formatTemplate, fileName,
+								        lineNumber);
 								return RC_FAILED;
 							} else {
-								eprintf("WARNING : %%l is not valid modifier. (parameter %u in mutated format string %s). %s:%u", parmCount, formatTemplate, fileName, lineNumber);
+								eprintf("WARNING : %%l is not valid modifier. "
+								        "(parameter %u in mutated format string %s). "
+								        "%s:%u",
+								        parmCount, formatTemplate, fileName,
+								        lineNumber);
 							}
 						}
 					}
@@ -767,9 +792,7 @@ TDFParser::processTemplate(const char *formatTemplate, char *str, unsigned int *
 				}
 
 				switch (*pos) {
-				case 'c':
-					strcat(str, TRACE_DATA_TYPE_CHAR);
-					break;
+				case 'c': strcat(str, TRACE_DATA_TYPE_CHAR); break;
 				case 'X':
 					/* Fall through */
 				case 'x':
@@ -784,29 +807,22 @@ TDFParser::processTemplate(const char *formatTemplate, char *str, unsigned int *
 					}
 					switch (*modifier) {
 
-					case 'h':
-						strcat(str, TRACE_DATA_TYPE_SHORT);
-						break;
+					case 'h': strcat(str, TRACE_DATA_TYPE_SHORT); break;
 
 					case 'l':
-					case 'L':
-						strcat(str, TRACE_DATA_TYPE_INT64);
-						break;
+					case 'L': strcat(str, TRACE_DATA_TYPE_INT64); break;
 					case 'z':
-					case 'P':
-						strcat(str, TRACE_DATA_TYPE_POINTER);
-						break;
+					case 'P': strcat(str, TRACE_DATA_TYPE_POINTER); break;
 
 					default:
-						flagTdfSyntaxError("Invalid length modifier and type", parmCount, formatTemplate, fileName, lineNumber);
+						flagTdfSyntaxError("Invalid length modifier and type", parmCount,
+						        formatTemplate, fileName, lineNumber);
 						rc = RC_FAILED;
 					}
 					break;
 				case 'J': /* Java object reference. */
 					/* Fall through */
-				case 'p':
-					strcat(str, TRACE_DATA_TYPE_POINTER);
-					break;
+				case 'p': strcat(str, TRACE_DATA_TYPE_POINTER); break;
 				case 'e':
 				case 'E':
 				case 'f':
@@ -825,7 +841,8 @@ TDFParser::processTemplate(const char *formatTemplate, char *str, unsigned int *
 					} else if ('L' == *modifier) {
 						strcat(str, TRACE_DATA_TYPE_LONG_DOUBLE);
 					} else {
-						flagTdfSyntaxError("Invalid length modifier and type", parmCount, formatTemplate, fileName, lineNumber);
+						flagTdfSyntaxError("Invalid length modifier and type", parmCount,
+						        formatTemplate, fileName, lineNumber);
 						rc = RC_FAILED;
 					}
 					break;
@@ -840,13 +857,12 @@ TDFParser::processTemplate(const char *formatTemplate, char *str, unsigned int *
 				parmCount++;
 				state = 7;
 				break;
-			default:
-				rc = RC_FAILED;
-				break;
+			default: rc = RC_FAILED; break;
 			}
 		}
 		if ((RC_OK != rc) || (0 == (stateBits[state] & allowFromStates[8]))) {
-			flagTdfSyntaxError("Invalid template specifier", parmCount, formatTemplate, fileName, lineNumber);
+			flagTdfSyntaxError(
+			        "Invalid template specifier", parmCount, formatTemplate, fileName, lineNumber);
 			rc = RC_FAILED;
 		} else {
 			state = 1;
@@ -858,31 +874,21 @@ TDFParser::processTemplate(const char *formatTemplate, char *str, unsigned int *
 }
 
 void
-TDFParser::flagTdfSyntaxError(const char *message, unsigned int parmCount, const char *formatTemplate, const char *fileName, unsigned int lineNumber)
+TDFParser::flagTdfSyntaxError(const char *message, unsigned int parmCount, const char *formatTemplate,
+        const char *fileName, unsigned int lineNumber)
 {
 	/* Caller has not yet incremented parmCount to include the invalid parameter. */
-	eprintf("%s: in parameter %u of format string at %s:%u\n\tformatString: \"%s\"", message, parmCount + 1, fileName, lineNumber, formatTemplate);
+	eprintf("%s: in parameter %u of format string at %s:%u\n\tformatString: \"%s\"", message, parmCount + 1,
+	        fileName, lineNumber, formatTemplate);
 }
 
 RCType
 TDFParser::findTraceTypeIndex(const char *traceLine, int *result)
 {
 	RCType rc = RC_FAILED;
-	const char *TRACE_TYPES[] = {
-		"TraceEvent",
-		"TraceException",
-		"TraceEntry",
-		"TraceEntry-Exception",
-		"TraceExit",
-		"TraceExit-Exception",
-		"TraceMem",
-		"TraceMemException",
-		"TraceDebug",
-		"TraceDebug-Exception",
-		"TracePerf",
-		"TracePerf-Exception",
-		"TraceAssert"
-	};
+	const char *TRACE_TYPES[] = {"TraceEvent", "TraceException", "TraceEntry", "TraceEntry-Exception", "TraceExit",
+	        "TraceExit-Exception", "TraceMem", "TraceMemException", "TraceDebug", "TraceDebug-Exception",
+	        "TracePerf", "TracePerf-Exception", "TraceAssert"};
 
 	for (int type = 0; UT_MAX_TYPES > type; type++) {
 		const char *separator = strchr(traceLine, '=');

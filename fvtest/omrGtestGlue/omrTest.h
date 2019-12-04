@@ -30,11 +30,11 @@ extern int iconv_initialization(void);
 static int iconv_init_static_variable = iconv_initialization();
 #endif /* defined(J9ZOS390) && !defined(OMR_EBCDIC) */
 
-
 #if defined(J9ZOS390) && !defined(OMR_EBCDIC)
 /*  Gtest invokes xlocale, which has function definition for tolower and toupper.
- * This causes compilation issue since the a2e macros (tolower and toupper) automatically replace the function definitions.
- * So we explicitly include <ctype.h> and undefine the macros for gtest, after gtest we then define back the macros.
+ * This causes compilation issue since the a2e macros (tolower and toupper) automatically replace the function
+ * definitions. So we explicitly include <ctype.h> and undefine the macros for gtest, after gtest we then define back
+ * the macros.
  */
 #include <ctype.h>
 #undef toupper
@@ -42,8 +42,8 @@ static int iconv_init_static_variable = iconv_initialization();
 
 #include "gtest/gtest.h"
 
-#define toupper(c)     (islower(c) ? (c & _XUPPER_ASCII) : c)
-#define tolower(c)     (isupper(c) ? (c | _XLOWER_ASCII) : c)
+#define toupper(c) (islower(c) ? (c & _XUPPER_ASCII) : c)
+#define tolower(c) (isupper(c) ? (c | _XLOWER_ASCII) : c)
 
 #else
 #include "gtest/gtest.h"
@@ -51,10 +51,10 @@ static int iconv_init_static_variable = iconv_initialization();
 
 using namespace testing;
 
-class OMREventListener: public TestEventListener {
+class OMREventListener : public TestEventListener {
 
 protected:
-	TestEventListener* _eventListener;
+	TestEventListener *_eventListener;
 
 public:
 	bool _showTestCases;
@@ -62,41 +62,38 @@ public:
 	bool _showSuccess;
 	bool _showFailures;
 
-	OMREventListener(TestEventListener* theEventListener) :
-			_eventListener(theEventListener),
-			_showTestCases(true),
-			_showTests(true),
-			_showSuccess(true),
-			_showFailures(true)
-	{
-	}
+	OMREventListener(TestEventListener *theEventListener)
+	        : _eventListener(theEventListener)
+	        , _showTestCases(true)
+	        , _showTests(true)
+	        , _showSuccess(true)
+	        , _showFailures(true)
+	{}
 
-	virtual ~OMREventListener() {
-		delete _eventListener;
-	}
-	virtual void OnTestProgramStart(const UnitTest& unit_test) {
-		_eventListener->OnTestProgramStart(unit_test);
-	}
-	virtual void OnTestIterationStart(const UnitTest& unit_test, int iteration) {
+	virtual ~OMREventListener() { delete _eventListener; }
+	virtual void OnTestProgramStart(const UnitTest &unit_test) { _eventListener->OnTestProgramStart(unit_test); }
+	virtual void OnTestIterationStart(const UnitTest &unit_test, int iteration)
+	{
 		_eventListener->OnTestIterationStart(unit_test, iteration);
 	}
-	virtual void OnEnvironmentsSetUpStart(const UnitTest& unit_test) {}
-	virtual void OnEnvironmentsSetUpEnd(const UnitTest& unit_test) {}
+	virtual void OnEnvironmentsSetUpStart(const UnitTest &unit_test) {}
+	virtual void OnEnvironmentsSetUpEnd(const UnitTest &unit_test) {}
 
-	virtual void OnTestCaseStart(const TestCase& test_case) {
+	virtual void OnTestCaseStart(const TestCase &test_case)
+	{
 		if (_showTestCases) {
 			_eventListener->OnTestCaseStart(test_case);
 		}
 	}
-	virtual void OnTestStart(const TestInfo& test_info) {
+	virtual void OnTestStart(const TestInfo &test_info)
+	{
 		if (_showTests) {
 			_eventListener->OnTestStart(test_info);
 		}
 	}
-	virtual void OnTestPartResult(const TestPartResult& result) {
-		_eventListener->OnTestPartResult(result);
-	}
-	virtual void OnTestEnd(const TestInfo& test_info) {
+	virtual void OnTestPartResult(const TestPartResult &result) { _eventListener->OnTestPartResult(result); }
+	virtual void OnTestEnd(const TestInfo &test_info)
+	{
 		if (test_info.result()->Failed()) {
 			if (_showFailures) {
 				_eventListener->OnTestEnd(test_info);
@@ -107,31 +104,33 @@ public:
 			}
 		}
 	}
-	virtual void OnTestCaseEnd(const TestCase& test_case) {
+	virtual void OnTestCaseEnd(const TestCase &test_case)
+	{
 		if (_showTestCases) {
 			_eventListener->OnTestCaseEnd(test_case);
 		}
 	}
-	virtual void OnEnvironmentsTearDownStart(const UnitTest& unit_test) {}
-	virtual void OnEnvironmentsTearDownEnd(const UnitTest& unit_test) {}
-	virtual void OnTestIterationEnd(const UnitTest& unit_test, int iteration) {
+	virtual void OnEnvironmentsTearDownStart(const UnitTest &unit_test) {}
+	virtual void OnEnvironmentsTearDownEnd(const UnitTest &unit_test) {}
+	virtual void OnTestIterationEnd(const UnitTest &unit_test, int iteration)
+	{
 		_eventListener->OnTestIterationEnd(unit_test, iteration);
 	}
-	virtual void OnTestProgramEnd(const UnitTest& unit_test) {
-		_eventListener->OnTestProgramEnd(unit_test);
-	}
+	virtual void OnTestProgramEnd(const UnitTest &unit_test) { _eventListener->OnTestProgramEnd(unit_test); }
 
-	static void setDefaultTestListener(bool showTestCases = true, bool showTests = false, bool showSuccess = false, bool showFailures = true) {
-            if (!getenv("OMR_VERBOSE_TEST")) {
-		TestEventListeners& listeners = testing::UnitTest::GetInstance()->listeners();
-		TestEventListener* default_printer = listeners.Release(listeners.default_result_printer());
-		OMREventListener *listener = new OMREventListener(default_printer);
-		listener->_showTestCases = showTestCases;
-		listener->_showTests = showTests;
-		listener->_showSuccess = showSuccess;
-		listener->_showFailures = showFailures;
-		listeners.Append(listener);
-            }
+	static void setDefaultTestListener(
+	        bool showTestCases = true, bool showTests = false, bool showSuccess = false, bool showFailures = true)
+	{
+		if (!getenv("OMR_VERBOSE_TEST")) {
+			TestEventListeners &listeners = testing::UnitTest::GetInstance()->listeners();
+			TestEventListener *default_printer = listeners.Release(listeners.default_result_printer());
+			OMREventListener *listener = new OMREventListener(default_printer);
+			listener->_showTestCases = showTestCases;
+			listener->_showTests = showTests;
+			listener->_showSuccess = showSuccess;
+			listener->_showFailures = showFailures;
+			listeners.Append(listener);
+		}
 	}
 };
 
@@ -144,6 +143,5 @@ int omr_main_entry(int argc, char **argv, char **envp);
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
-
 
 #endif

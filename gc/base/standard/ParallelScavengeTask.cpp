@@ -24,12 +24,10 @@
 
 #if defined(OMR_GC_MODRON_SCAVENGER)
 
-#include "ModronAssertions.h"
-
 #include "EnvironmentStandard.hpp"
-#include "Scavenger.hpp"
-
+#include "ModronAssertions.h"
 #include "ParallelScavengeTask.hpp"
+#include "Scavenger.hpp"
 
 void
 MM_ParallelScavengeTask::run(MM_EnvironmentBase *envBase)
@@ -41,7 +39,8 @@ MM_ParallelScavengeTask::run(MM_EnvironmentBase *envBase)
 void
 MM_ParallelScavengeTask::masterSetup(MM_EnvironmentBase *env)
 {
-	uintptr_t calculatedAliasThreshold = (uintptr_t)(getThreadCount() * env->getExtensions()->aliasInhibitingThresholdPercentage);
+	uintptr_t calculatedAliasThreshold =
+	        (uintptr_t)(getThreadCount() * env->getExtensions()->aliasInhibitingThresholdPercentage);
 	_collector->setAliasThreshold(calculatedAliasThreshold);
 }
 

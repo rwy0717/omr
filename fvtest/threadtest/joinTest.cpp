@@ -35,7 +35,7 @@ typedef struct JoinThreadHelperData {
 } JoinThreadHelperData;
 
 static void createThread(omrthread_t *newThread, uintptr_t suspend, omrthread_detachstate_t detachstate,
-						 omrthread_entrypoint_t entryProc, void *entryArg);
+        omrthread_entrypoint_t entryProc, void *entryArg);
 static int J9THREAD_PROC doNothingHelper(void *entryArg);
 static int J9THREAD_PROC joinThreadHelper(void *entryArg);
 
@@ -66,7 +66,8 @@ TEST(JoinTest, createJoinableThread)
 	helperData.expectedRc = J9THREAD_INVALID_ARGUMENT;
 
 	omrthread_t helperThr = NULL;
-	ASSERT_NO_FATAL_FAILURE(createThread(&helperThr, FALSE, J9THREAD_CREATE_JOINABLE, joinThreadHelper, (void *)&helperData));
+	ASSERT_NO_FATAL_FAILURE(
+	        createThread(&helperThr, FALSE, J9THREAD_CREATE_JOINABLE, joinThreadHelper, (void *)&helperData));
 
 	/* .. and joins the new thread */
 	VERBOSE_JOIN(helperThr, J9THREAD_SUCCESS);
@@ -81,7 +82,8 @@ TEST(JoinTest, joinDetachedThread)
 	helperData.expectedRc = J9THREAD_INVALID_ARGUMENT;
 
 	omrthread_t helperThr = NULL;
-	ASSERT_NO_FATAL_FAILURE(createThread(&helperThr, FALSE, J9THREAD_CREATE_JOINABLE, joinThreadHelper, (void *)&helperData));
+	ASSERT_NO_FATAL_FAILURE(
+	        createThread(&helperThr, FALSE, J9THREAD_CREATE_JOINABLE, joinThreadHelper, (void *)&helperData));
 
 	VERBOSE_JOIN(helperThr, J9THREAD_SUCCESS);
 }
@@ -110,7 +112,8 @@ TEST(JoinTest, joinLiveThread)
 	/* create a thread to join on the suspended thread */
 	helperData.threadToJoin = suspendedThr;
 	helperData.expectedRc = J9THREAD_SUCCESS;
-	ASSERT_NO_FATAL_FAILURE(createThread(&joinHelperThr, FALSE, J9THREAD_CREATE_JOINABLE, joinThreadHelper, &helperData));
+	ASSERT_NO_FATAL_FAILURE(
+	        createThread(&joinHelperThr, FALSE, J9THREAD_CREATE_JOINABLE, joinThreadHelper, &helperData));
 
 	/* hopefully wait long enough for the join helper thread to start joining */
 	ASSERT_EQ(J9THREAD_SUCCESS, omrthread_sleep(3000));
@@ -139,17 +142,17 @@ TEST(JoinTest, joinCanceledThread)
 
 static void
 createThread(omrthread_t *newThread, uintptr_t suspend, omrthread_detachstate_t detachstate,
-			 omrthread_entrypoint_t entryProc, void *entryArg)
+        omrthread_entrypoint_t entryProc, void *entryArg)
 {
 	omrthread_attr_t attr = NULL;
 	intptr_t rc = 0;
 
 	ASSERT_EQ(J9THREAD_SUCCESS, omrthread_attr_init(&attr));
 	ASSERT_EQ(J9THREAD_SUCCESS, omrthread_attr_set_detachstate(&attr, detachstate));
-	EXPECT_EQ(J9THREAD_SUCCESS,
-			  rc = omrthread_create_ex(newThread, &attr, suspend, entryProc, entryArg));
+	EXPECT_EQ(J9THREAD_SUCCESS, rc = omrthread_create_ex(newThread, &attr, suspend, entryProc, entryArg));
 	if (rc & J9THREAD_ERR_OS_ERRNO_SET) {
-		omrTestEnv->log(LEVEL_ERROR, "omrthread_create_ex() returned os_errno=%d\n", (int)omrthread_get_os_errno());
+		omrTestEnv->log(
+		        LEVEL_ERROR, "omrthread_create_ex() returned os_errno=%d\n", (int)omrthread_get_os_errno());
 	}
 	ASSERT_EQ(J9THREAD_SUCCESS, omrthread_attr_destroy(&attr));
 }

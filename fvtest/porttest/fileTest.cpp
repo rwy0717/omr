@@ -33,11 +33,9 @@
 #include "omrport.h"
 #include "portTestHelpers.hpp"
 
-class PortFileTest: public ::testing::Test
-{
+class PortFileTest : public ::testing::Test {
 protected:
-	virtual void
-	SetUp()
+	virtual void SetUp()
 	{
 		::testing::Test::SetUp();
 #if defined(OMR_OS_WINDOWS)
@@ -48,17 +46,18 @@ protected:
 		ASSERT_EQ(0, wsaErr);
 #endif /* defined(OMR_OS_WINDOWS) */
 
-		/* generate machine specific file name to prevent conflict between multiple tests running on shared drive */
+		/* generate machine specific file name to prevent conflict between multiple tests running on shared
+		 * drive */
 		OMRPORT_ACCESS_FROM_OMRPORT(portTestEnv->getPortLibrary());
 		char hostname[512];
 		gethostname(hostname, 512);
 		const uintptr_t fileNameLen = 1024;
 		fileName = new char[fileNameLen];
-		omrstr_printf(fileName, fileNameLen, "TestFileFor%s%s", ::testing::UnitTest::GetInstance()->current_test_info()->name(), hostname);
+		omrstr_printf(fileName, fileNameLen, "TestFileFor%s%s",
+		        ::testing::UnitTest::GetInstance()->current_test_info()->name(), hostname);
 	}
 
-	virtual void
-	TearDown()
+	virtual void TearDown()
 	{
 		OMRPORT_ACCESS_FROM_OMRPORT(portTestEnv->getPortLibrary());
 		omrfile_close(fileDescriptor);
@@ -75,12 +74,7 @@ protected:
 	intptr_t fileDescriptor;
 
 public:
-	PortFileTest()
-		: ::testing::Test()
-		, fileName(NULL)
-		, fileDescriptor(-1)
-	{
-	}
+	PortFileTest() : ::testing::Test(), fileName(NULL), fileDescriptor(-1) {}
 };
 
 /**
@@ -229,7 +223,9 @@ TEST_F(PortFileTest, WriteRead)
 
 	/* having hopefully shoved this stuff onto file we need to read it back and check its as expected! */
 	int32_t rc = omrfile_close(fileDescriptor);
-	OMRTEST_ASSERT_TRUE((0 == rc), "omrfile_close() returned " << rc << " expected " << "0\n");
+	OMRTEST_ASSERT_TRUE((0 == rc),
+	        "omrfile_close() returned " << rc << " expected "
+	                                    << "0\n");
 
 	fileDescriptor = omrfile_open(fileName, EsOpenRead, 0444);
 	OMRTEST_ASSERT_TRUE((-1 != fileDescriptor), "omrfile_open \"" << fileName << "\" failed\n");
@@ -237,10 +233,13 @@ TEST_F(PortFileTest, WriteRead)
 	readBufPtr = omrfile_read_text(fileDescriptor, readBuf, sizeof(readBuf));
 	OMRTEST_ASSERT_TRUE((NULL != readBufPtr), "omrfile_read_text() returned NULL\n");
 
-	OMRTEST_ASSERT_TRUE((strlen(readBufPtr) == strlen(expectedResult)), "omrfile_read_text() returned " << strlen(readBufPtr) << " expected " << strlen(expectedResult) << "\n");
+	OMRTEST_ASSERT_TRUE((strlen(readBufPtr) == strlen(expectedResult)),
+	        "omrfile_read_text() returned " << strlen(readBufPtr) << " expected " << strlen(expectedResult)
+	                                        << "\n");
 
 	/* omrfile_read_text(): translation from IBM1047 to ASCII is done on zOS */
-	OMRTEST_ASSERT_TRUE((!strcmp(readBufPtr, expectedResult)), "omrfile_read_text() returned \"" << readBufPtr << "\" expected \"" << expectedResult << "\"\n");
+	OMRTEST_ASSERT_TRUE((!strcmp(readBufPtr, expectedResult)),
+	        "omrfile_read_text() returned \"" << readBufPtr << "\" expected \"" << expectedResult << "\"\n");
 }
 
 /**
@@ -279,7 +278,8 @@ TEST_F(PortFileTest, WriteAppendRead)
 
 	/* now lets write to it */
 	rc = omrfile_write(fileDescriptor, inputLine1, expectedReturnValue);
-	OMRTEST_ASSERT_TRUE((rc == expectedReturnValue), "omrfile_write() returned " << rc << " expected " << expectedReturnValue << "\n");
+	OMRTEST_ASSERT_TRUE((rc == expectedReturnValue),
+	        "omrfile_write() returned " << rc << " expected " << expectedReturnValue << "\n");
 
 	rc = omrfile_close(fileDescriptor);
 	OMRTEST_ASSERT_TRUE((0 == rc), "omrfile_close() failed\n");
@@ -290,7 +290,8 @@ TEST_F(PortFileTest, WriteAppendRead)
 	/* now lets write to it */
 	expectedReturnValue = sizeof(inputLine2) - 1; /* don't want the final 0x00 */
 	rc = omrfile_write(fileDescriptor, inputLine2, expectedReturnValue);
-	OMRTEST_ASSERT_TRUE((rc == expectedReturnValue), "omrfile_write() returned " << rc << ", expected " << expectedReturnValue << "\n");
+	OMRTEST_ASSERT_TRUE((rc == expectedReturnValue),
+	        "omrfile_write() returned " << rc << ", expected " << expectedReturnValue << "\n");
 
 	rc = omrfile_close(fileDescriptor);
 	OMRTEST_ASSERT_TRUE((0 == rc), "omrfile_close() failed\n");
@@ -302,9 +303,11 @@ TEST_F(PortFileTest, WriteAppendRead)
 	expectedReturnValue = 10;
 	rc = omrfile_read(fileDescriptor, outputLine, expectedReturnValue);
 
-	OMRTEST_ASSERT_TRUE((rc == expectedReturnValue), "omrfile_read() returned " << rc << ", expected " << expectedReturnValue << "\n");
+	OMRTEST_ASSERT_TRUE((rc == expectedReturnValue),
+	        "omrfile_read() returned " << rc << ", expected " << expectedReturnValue << "\n");
 
-	OMRTEST_ASSERT_TRUE((!strcmp(expectedOutput, outputLine)), "Read back data \"" << outputLine << "\" not matching expected data \"" << expectedOutput << "\"\n");
+	OMRTEST_ASSERT_TRUE((!strcmp(expectedOutput, outputLine)),
+	        "Read back data \"" << outputLine << "\" not matching expected data \"" << expectedOutput << "\"\n");
 
 	rc = omrfile_close(fileDescriptor);
 	OMRTEST_ASSERT_TRUE((0 == rc), "omrfile_close() failed\n");

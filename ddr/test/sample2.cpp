@@ -23,12 +23,10 @@
 #include <iostream>
 
 // 6. Nested type definitions (Definitions that are scoped inside another struct/class)
-class MyClass
-{
+class MyClass {
 private:
 	// - class
-	class MyNestedClass
-	{
+	class MyNestedClass {
 	public:
 		int d;
 	};
@@ -39,20 +37,10 @@ private:
 	// - enum
 	enum { ENUM1, ENUM2, ENUM3 } anonymousEnum;
 
-	enum InnerEnum
-	{
-		ENUM_A,
-		ENUM_B,
-		ENUM_C
-	};
+	enum InnerEnum { ENUM_A, ENUM_B, ENUM_C };
 	InnerEnum innerEnum;
 
-	enum
-	{
-		ENUM_A2,
-		ENUM_B2,
-		ENUM_C2
-	};
+	enum { ENUM_A2, ENUM_B2, ENUM_C2 };
 
 	// - struct
 	struct Z {
@@ -81,7 +69,7 @@ typedef struct S1 {
 	IDATA a;
 } T1;
 
-T1 instanceOfT1 = { 0 };
+T1 instanceOfT1 = {0};
 
 // - typedef where the name matches the struct tag
 typedef struct S2 {
@@ -89,14 +77,14 @@ typedef struct S2 {
 	S1 b2;
 } S2;
 
-S2 instanceOfS2 = { 0, { 0 } };
+S2 instanceOfS2 = {0, {0}};
 
 // - typedef there there is no struct tag
 typedef struct {
 	S2 c;
 } T2;
 
-T2 instanceOfT2 = { { 0, { 0 } } };
+T2 instanceOfT2 = {{0, {0}}};
 
 /* Type without struct name at beginning used as a field. */
 typedef S2 *T3;
@@ -106,17 +94,10 @@ typedef struct {
 	T3 f;
 } T4;
 
-T4 instanceOfT4 = { { { 0, { 0 } } }, { 0, { 0 } }, NULL };
+T4 instanceOfT4 = {{{0, {0}}}, {0, {0}}, NULL};
 
 // - typedef'ed enum
-typedef enum {
-	something1,
-	something2,
-	something3,
-	something4,
-	something5,
-	somethingN
-} MyEnum;
+typedef enum { something1, something2, something3, something4, something5, somethingN } MyEnum;
 
 MyEnum instanceOfEnum;
 
@@ -136,14 +117,15 @@ Ip instanceOfIp;
 // - public/private/protected fields
 // - fields qualified as volatile or const
 
-class BoxV2
-{
+class BoxV2 {
 protected:
 	volatile int64_t hashCode;
+
 private:
 	int64_t length;
 	int64_t width;
 	int64_t height;
+
 public:
 	int64_t getLength() { return length; }
 	int64_t getWidth() { return width; }
@@ -156,18 +138,17 @@ public:
 	int64_t getHashCode() { return hashCode; }
 };
 
-class Foo
-{
+class Foo {
 private:
 	static int staticTest;
 	uintptr_t data;
 	const int data2;
+
 public:
 	Foo(int x) : data(x), data2(4) {}
 };
 
-class Bar : public Foo
-{
+class Bar : public Foo {
 public:
 	Bar(int x) : Foo(x) {}
 };
@@ -204,7 +185,12 @@ HasUnionField instanceOfHasUnionField;
 #define DECREMENT(x) x--
 #define MULT(x, y) (x) * (y)
 #define ADD_FIVE(a) ((a) + 5)
-#define SWAP(a, b)  do { a ^= b; b ^= a; a ^= b; } while ( 0 )
+#define SWAP(a, b) \
+	do { \
+		a ^= b; \
+		b ^= a; \
+		a ^= b; \
+	} while (0)
 #define MAX(a, b) ((a) < (b) ? (b) : (a))
 
 void
@@ -272,6 +258,6 @@ sample2()
 	std::cout << "w: " << w << std::endl;
 	std::cout << "y: " << y << std::endl;
 	std::cout << "z: " << z << std::endl;
-	
+
 	std::cout << instanceOfMyClass.getData() << std::endl;
 }

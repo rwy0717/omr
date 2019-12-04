@@ -45,7 +45,6 @@
 #include "testHelpers.hpp"
 #include "omrport.h"
 
-
 static int J9THREAD_PROC nanoTimeDirectionTest(void *portLibrary);
 
 /**
@@ -147,7 +146,8 @@ TEST(PortTimeTest, time_test1)
 	OMRPORT_ACCESS_FROM_OMRPORT(portTestEnv->getPortLibrary());
 	const char *testName = "omrtime_test1";
 
-	/* get a thread so that we can use native time delays (the original solution would spin and fail on fast machines) */
+	/* get a thread so that we can use native time delays (the original solution would spin and fail on fast
+	 * machines) */
 	omrthread_t self;
 
 	reportTestEntry(OMRPORTLIB, testName);
@@ -178,24 +178,30 @@ TEST(PortTimeTest, time_test1)
 
 		/* print errors if any of these failed */
 		if (timeCheck == timeStart) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrtime_current_time_millis did not change after a half-second forced delay\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "omrtime_current_time_millis did not change after a half-second forced delay\n");
 		}
 		if (mtimeStart == mtimeCheck) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrtime_msec_clock did not change after a half-second forced delay\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "omrtime_msec_clock did not change after a half-second forced delay\n");
 		}
 		if (utimeStart == utimeCheck) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrtime_usec_clock did not change after a half-second forced delay\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "omrtime_usec_clock did not change after a half-second forced delay\n");
 		}
 		if (ntimeStart == ntimeCheck) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrtime_nano_time did not change after a half-second forced delay\n");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "omrtime_nano_time did not change after a half-second forced delay\n");
 		}
-		
+
 		if (success) {
 			if (nClocktimeStart == nClocktimeCheck) {
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrtime_current_time_nanos did not change after a half-second forced delay\n");
+				outputErrorMessage(PORTTEST_ERROR_ARGS,
+				        "omrtime_current_time_nanos did not change after a half-second forced delay\n");
 			}
 		} else {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrtime_current_time_nanos failed to return a valid time\n");
+			outputErrorMessage(
+			        PORTTEST_ERROR_ARGS, "omrtime_current_time_nanos failed to return a valid time\n");
 		}
 
 		/* see if we can run the high-res test */
@@ -215,18 +221,22 @@ TEST(PortTimeTest, time_test1)
 				omrthread_sleep(500);
 				hiresTimeCheck = omrtime_hires_clock();
 				if (hiresTimeCheck == hiresTimeStart) {
-					outputErrorMessage(PORTTEST_ERROR_ARGS, "omrtime_hires_clock has not advanced after a half-second forced delay\n");
+					outputErrorMessage(PORTTEST_ERROR_ARGS,
+					        "omrtime_hires_clock has not advanced after a half-second forced "
+					        "delay\n");
 				}
 			} else {
 				/* the timer advanced so don't even try to run the test */
 				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrtime_hires_frequency has advanced\n");
 			}
 		} else {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrtime_hires_frequency is 0, timer will not advance\n");
+			outputErrorMessage(
+			        PORTTEST_ERROR_ARGS, "omrtime_hires_frequency is 0, timer will not advance\n");
 		}
 	} else {
 		/* failure initializing thread library: we won't be able to test reliably */
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrthread_attach failed in omrtime_test1 so testing is not possible\n");
+		outputErrorMessage(
+		        PORTTEST_ERROR_ARGS, "omrthread_attach failed in omrtime_test1 so testing is not possible\n");
 	}
 
 	/* Verify that hires timer can advance */
@@ -258,7 +268,8 @@ TEST(PortTimeTest, time_test2)
 	/* start < stop */
 	simulatedValue = omrtime_hires_delta(0, expectedValue, omrtime_hires_frequency());
 	if (simulatedValue != expectedValue) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrtime_hires_delta returned %llu expected %llu\n", simulatedValue, expectedValue);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrtime_hires_delta returned %llu expected %llu\n",
+		        simulatedValue, expectedValue);
 	}
 
 	/* start > stop (add one to the expected value for 0, we can live with it ...*/
@@ -266,7 +277,8 @@ TEST(PortTimeTest, time_test2)
 	hiresTimeStop = 2 * omrtime_hires_frequency();
 	simulatedValue = omrtime_hires_delta(hiresTimeStart, hiresTimeStop, omrtime_hires_frequency());
 	if (simulatedValue != expectedValue + 1) {
-		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrtime_hires_delta returned %llu expected %llu\n", simulatedValue, expectedValue);
+		outputErrorMessage(PORTTEST_ERROR_ARGS, "omrtime_hires_delta returned %llu expected %llu\n",
+		        simulatedValue, expectedValue);
 	}
 
 	reportTestExit(OMRPORTLIB, testName);
@@ -305,9 +317,11 @@ TEST(PortTimeTest, time_test3)
 	reportTestEntry(OMRPORTLIB, testName);
 
 	if (1 == omrsysinfo_get_number_CPUs_by_type(OMRPORT_CPU_ONLINE)) {
-		/* one CPU means we have no chance of falling into the "difference CPUs have different times" trap.  Let the test begin */
+		/* one CPU means we have no chance of falling into the "difference CPUs have different times" trap.  Let
+		 * the test begin */
 		/*let's test the others vs current_time_millis*/
-		portTestEnv->log("%10s %10s %10s %10s %12s %12s\n", "millires", "millis", "msec", "usec", "hires msec ", "hires usec");
+		portTestEnv->log("%10s %10s %10s %10s %12s %12s\n", "millires", "millis", "msec", "usec", "hires msec ",
+		        "hires usec");
 		for (i = 0; i < J9TIME_REPEAT_TEST; i++) {
 			uintptr_t failed = 0;
 			uintptr_t success = 0;
@@ -327,7 +341,8 @@ TEST(PortTimeTest, time_test3)
 			ntimeStart = omrtime_current_time_nanos(&success);
 			if (!success) {
 				failed = 1;
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrtime_current_time_nanos failed to return a valid time\n");
+				outputErrorMessage(PORTTEST_ERROR_ARGS,
+				        "omrtime_current_time_nanos failed to return a valid time\n");
 			}
 			hiresTimeStart = omrtime_hires_clock();
 
@@ -341,33 +356,41 @@ TEST(PortTimeTest, time_test3)
 			ntimeStop = omrtime_current_time_nanos(&success);
 			if (!success) {
 				failed = 1;
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrtime_current_time_nanos failed to return a valid time\n");
+				outputErrorMessage(PORTTEST_ERROR_ARGS,
+				        "omrtime_current_time_nanos failed to return a valid time\n");
 			}
 			mtimeStop = omrtime_msec_clock();
-			utimeStop = omrtime_usec_clock();	/*higher-precision CLK should get presidence NaH!*/
+			utimeStop = omrtime_usec_clock(); /*higher-precision CLK should get presidence NaH!*/
 
-			hiresDeltaAsMillis = (uint32_t)omrtime_hires_delta(hiresTimeStart, hiresTimeStop, OMRPORT_TIME_DELTA_IN_MILLISECONDS);
-			hiresDeltaAsMicros = (uint32_t)omrtime_hires_delta(hiresTimeStart, hiresTimeStop, OMRPORT_TIME_DELTA_IN_MICROSECONDS);
+			hiresDeltaAsMillis = (uint32_t)omrtime_hires_delta(
+			        hiresTimeStart, hiresTimeStop, OMRPORT_TIME_DELTA_IN_MILLISECONDS);
+			hiresDeltaAsMicros = (uint32_t)omrtime_hires_delta(
+			        hiresTimeStart, hiresTimeStop, OMRPORT_TIME_DELTA_IN_MICROSECONDS);
 			ntimeDelta = ntimeStop - ntimeStart;
 			ntimeDeltaAsMillis = ntimeDelta / 1000000;
 			mtimeDelta = mtimeStop - mtimeStart;
 			utimeDelta = utimeStop - utimeStart;
 			timeDelta = newTime - oldTime;
 
-			portTestEnv->log("%10d %10d %10d %10d %12d %12d %12d\n",
-						  millires, (int32_t)timeDelta, (int32_t)mtimeDelta, (int32_t)utimeDelta, (int32_t)ntimeDelta, (int32_t)hiresDeltaAsMillis, (int32_t)hiresDeltaAsMicros);
+			portTestEnv->log("%10d %10d %10d %10d %12d %12d %12d\n", millires, (int32_t)timeDelta,
+			        (int32_t)mtimeDelta, (int32_t)utimeDelta, (int32_t)ntimeDelta,
+			        (int32_t)hiresDeltaAsMillis, (int32_t)hiresDeltaAsMicros);
 
-			hiresDeltaAsMillis = hiresDeltaAsMillis > mtimeDelta ? hiresDeltaAsMillis - mtimeDelta : mtimeDelta - hiresDeltaAsMillis;
+			hiresDeltaAsMillis = hiresDeltaAsMillis > mtimeDelta ? hiresDeltaAsMillis - mtimeDelta
+			                                                     : mtimeDelta - hiresDeltaAsMillis;
 			if (hiresDeltaAsMillis > (0.1 * mtimeDelta)) {
 				portTestEnv->log("\n");
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrtime_hires_clock() drift greater than 10%%\n");
+				outputErrorMessage(
+				        PORTTEST_ERROR_ARGS, "omrtime_hires_clock() drift greater than 10%%\n");
 				failed = 1;
 			}
-			
-			ntimeDeltaAsMillis = ntimeDeltaAsMillis > mtimeDelta ? ntimeDeltaAsMillis - mtimeDelta : mtimeDelta - ntimeDeltaAsMillis;
+
+			ntimeDeltaAsMillis = ntimeDeltaAsMillis > mtimeDelta ? ntimeDeltaAsMillis - mtimeDelta
+			                                                     : mtimeDelta - ntimeDeltaAsMillis;
 			if (ntimeDeltaAsMillis > (0.1 * mtimeDelta)) {
 				portTestEnv->log("\n");
-				outputErrorMessage(PORTTEST_ERROR_ARGS, "omrtime_current_time_nanos() drift greater than 10%%\n");
+				outputErrorMessage(
+				        PORTTEST_ERROR_ARGS, "omrtime_current_time_nanos() drift greater than 10%%\n");
 				failed = 1;
 			}
 			if (failed) {
@@ -375,9 +398,12 @@ TEST(PortTimeTest, time_test3)
 			}
 		}
 	} else {
-		/* test is invalid since this is a multi-way machine:  if we get the time on one CPU, then get rescheduled on a different one where we ask for the time,
+		/* test is invalid since this is a multi-way machine:  if we get the time on one CPU, then get
+		 * rescheduled on a different one where we ask for the time,
 		 * there is no reason why the time values need to be monotonically increasing */
-		portTestEnv->log(LEVEL_ERROR, "Test is invalid since the host machine reports more than one CPU (time may differ across CPUs - makes test results useless - re-enable if we develop thread affinity support)\n");
+		portTestEnv->log(LEVEL_ERROR,
+		        "Test is invalid since the host machine reports more than one CPU (time may differ across CPUs "
+		        "- makes test results useless - re-enable if we develop thread affinity support)\n");
 	}
 	portTestEnv->log("\n");
 
@@ -414,13 +440,13 @@ portGetNanos(struct OMRPortLibrary *portLibrary)
 }
 
 /* Disabled because
-		 * - generates way too much output
-		 * - the output is confusing and does not help to diagnose errors
-		 * - the test mostly does not actually test anything, because most of the time it detects:
-		 * 		"WARNING: Skipping check due to possible NTP daemon interference."
-		 * 		- this only adds to the confusion
-		 * - the test is known to not work on x86 because of the omrtime_hires_clock implementation
-		 */
+ * - generates way too much output
+ * - the output is confusing and does not help to diagnose errors
+ * - the test mostly does not actually test anything, because most of the time it detects:
+ * 		"WARNING: Skipping check due to possible NTP daemon interference."
+ * 		- this only adds to the confusion
+ * - the test is known to not work on x86 because of the omrtime_hires_clock implementation
+ */
 TEST(DISABLED_PortTimeTest, time_test4)
 {
 	OMRPORT_ACCESS_FROM_OMRPORT(portTestEnv->getPortLibrary());
@@ -453,7 +479,8 @@ TEST(DISABLED_PortTimeTest, time_test4)
 		milliStartInner = omrtime_current_time_millis();
 
 		if (0 != omrthread_sleep(SLEEP_TIME)) {
-			portTestEnv->log(LEVEL_WARN, "WARNING: Skipping check due to omrthread_sleep() returning non-zero.\n");
+			portTestEnv->log(
+			        LEVEL_WARN, "WARNING: Skipping check due to omrthread_sleep() returning non-zero.\n");
 			continue;
 		}
 
@@ -478,32 +505,38 @@ TEST(DISABLED_PortTimeTest, time_test4)
 		portTestEnv->log("milliDeltaOuter = %llu\n", milliDeltaOuter);
 
 		/* To avoid false positives, do a sanity check on all the millis values. */
-		if (!compareMillis(milliStartOuter, milliStartInner, EPSILON) ||
-			!compareMillis(SLEEP_TIME, milliDeltaInner, EPSILON) ||
-			!compareMillis(milliEndInner, milliEndOuter, EPSILON) ||
-			(milliDeltaOuter < milliDeltaInner)) {
-			portTestEnv->log(LEVEL_WARN, "WARNING: Skipping check due to possible NTP daemon interference.\n");
+		if (!compareMillis(milliStartOuter, milliStartInner, EPSILON)
+		        || !compareMillis(SLEEP_TIME, milliDeltaInner, EPSILON)
+		        || !compareMillis(milliEndInner, milliEndOuter, EPSILON)
+		        || (milliDeltaOuter < milliDeltaInner)) {
+			portTestEnv->log(
+			        LEVEL_WARN, "WARNING: Skipping check due to possible NTP daemon interference.\n");
 			continue;
 		}
 
-		delta = (milliDeltaOuter > nanoDeltaInMillis ? milliDeltaOuter - nanoDeltaInMillis : nanoDeltaInMillis - milliDeltaOuter);
+		delta = (milliDeltaOuter > nanoDeltaInMillis ? milliDeltaOuter - nanoDeltaInMillis
+		                                             : nanoDeltaInMillis - milliDeltaOuter);
 		if (delta > EPSILON) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "abs(milliDeltaOuter - nanoDeltaInMillis) > EPSILON (%llu)", delta);
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrtime_current_time_millis() is not consistent with omrtime_hires_clock()!");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "abs(milliDeltaOuter - nanoDeltaInMillis) > EPSILON (%llu)", delta);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "omrtime_current_time_millis() is not consistent with omrtime_hires_clock()!");
 			break;
 		}
 
-		delta = (nanoDeltaInMillis > milliDeltaInner ? nanoDeltaInMillis - milliDeltaInner : milliDeltaInner - nanoDeltaInMillis);
+		delta = (nanoDeltaInMillis > milliDeltaInner ? nanoDeltaInMillis - milliDeltaInner
+		                                             : milliDeltaInner - nanoDeltaInMillis);
 		if (delta > EPSILON) {
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "abs(nanoDeltaInMillis - milliDeltaInner) > EPSILON (%llu)", delta);
-			outputErrorMessage(PORTTEST_ERROR_ARGS, "omrtime_current_time_millis() is not consistent with omrtime_hires_clock()!");
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "abs(nanoDeltaInMillis - milliDeltaInner) > EPSILON (%llu)", delta);
+			outputErrorMessage(PORTTEST_ERROR_ARGS,
+			        "omrtime_current_time_millis() is not consistent with omrtime_hires_clock()!");
 			break;
 		}
 	}
 
 	reportTestExit(OMRPORTLIB, testName);
 }
-
 
 #define J9TIME_TEST_DIRECTION_TIMEOUT_MILLIS 60000 /* 1 minute */
 static uintptr_t omrtimeTestDirectionNumThreads = 0;
@@ -535,7 +568,10 @@ TEST(PortTimeTest, time_nano_time_direction)
 	{
 		LARGE_INTEGER i;
 		if (QueryPerformanceCounter(&i)) {
-			portTestEnv->log(LEVEL_WARN, "WARNING: Test is invalid since the host machine uses QueryPerformanceCounter() (time may differ across CPUs - makes test results useless - re-enable if we develop thread affinity support)\n");
+			portTestEnv->log(LEVEL_WARN,
+			        "WARNING: Test is invalid since the host machine uses QueryPerformanceCounter() (time "
+			        "may differ across CPUs - makes test results useless - re-enable if we develop thread "
+			        "affinity support)\n");
 			reportTestExit(OMRPORTLIB, testName);
 		}
 	}
@@ -554,15 +590,19 @@ TEST(PortTimeTest, time_nano_time_direction)
 			const uintptr_t threadToCPUFactor = 2;
 			omrthread_t *threads = NULL;
 
-			omrtimeTestDirectionNumThreads = omrsysinfo_get_number_CPUs_by_type(OMRPORT_CPU_ONLINE) * threadToCPUFactor;
-			threads = (omrthread_t *)omrmem_allocate_memory(omrtimeTestDirectionNumThreads * sizeof(omrthread_t), OMRMEM_CATEGORY_PORT_LIBRARY);
+			omrtimeTestDirectionNumThreads = omrsysinfo_get_number_CPUs_by_type(OMRPORT_CPU_ONLINE)
+			        * threadToCPUFactor;
+			threads = (omrthread_t *)omrmem_allocate_memory(
+			        omrtimeTestDirectionNumThreads * sizeof(omrthread_t), OMRMEM_CATEGORY_PORT_LIBRARY);
 
 			if (NULL != threads) {
 				if (0 == omrthread_monitor_enter(tds.monitor)) {
-					for (i = 0; i < omrtimeTestDirectionNumThreads ; i ++) {
-						intptr_t rc = omrthread_create(&threads[i], 128 * 1024, J9THREAD_PRIORITY_MAX, 0, &nanoTimeDirectionTest, &tds);
+					for (i = 0; i < omrtimeTestDirectionNumThreads; i++) {
+						intptr_t rc = omrthread_create(&threads[i], 128 * 1024,
+						        J9THREAD_PRIORITY_MAX, 0, &nanoTimeDirectionTest, &tds);
 						if (0 != rc) {
-							outputErrorMessage(PORTTEST_ERROR_ARGS, "Failed to create thread, rc=%zd, i=%zu", rc, i);
+							outputErrorMessage(PORTTEST_ERROR_ARGS,
+							        "Failed to create thread, rc=%zd, i=%zu", rc, i);
 						}
 					}
 
@@ -570,22 +610,28 @@ TEST(PortTimeTest, time_nano_time_direction)
 					portTestEnv->log("Threads that have finished running: ");
 
 					/* wait for all threads to finish */
-					while ((0 == waitRetVal) && (tds.finishedCount < omrtimeTestDirectionNumThreads)) {
-						waitRetVal = omrthread_monitor_wait_timed(tds.monitor, J9TIME_TEST_DIRECTION_TIMEOUT_MILLIS, 0);
+					while ((0 == waitRetVal)
+					        && (tds.finishedCount < omrtimeTestDirectionNumThreads)) {
+						waitRetVal = omrthread_monitor_wait_timed(
+						        tds.monitor, J9TIME_TEST_DIRECTION_TIMEOUT_MILLIS, 0);
 					}
 
 					portTestEnv->log("\n");
 
 					if (0 != waitRetVal) {
-						outputErrorMessage(PORTTEST_ERROR_ARGS, "omrthread_monitor_wait_timed() failed, waitRetVal=%zd", waitRetVal);
+						outputErrorMessage(PORTTEST_ERROR_ARGS,
+						        "omrthread_monitor_wait_timed() failed, waitRetVal=%zd",
+						        waitRetVal);
 					}
 
 					if (tds.failed) {
-						outputErrorMessage(PORTTEST_ERROR_ARGS, "omrtime_hires_clock() did not go forward in at least one of the launched threads");
+						outputErrorMessage(PORTTEST_ERROR_ARGS,
+						        "omrtime_hires_clock() did not go forward in at least one of "
+						        "the launched threads");
 					}
 
 					omrthread_monitor_exit(tds.monitor);
-				}  else {
+				} else {
 					outputErrorMessage(PORTTEST_ERROR_ARGS, "Failed to enter tds.monitor");
 				}
 
@@ -606,17 +652,16 @@ TEST(PortTimeTest, time_nano_time_direction)
 	reportTestExit(OMRPORTLIB, testName);
 }
 
-
-static int
-J9THREAD_PROC nanoTimeDirectionTest(void *arg)
+static int J9THREAD_PROC
+nanoTimeDirectionTest(void *arg)
 {
-	J9TimeTestDirectionStruct *tds = (J9TimeTestDirectionStruct *) arg;
+	J9TimeTestDirectionStruct *tds = (J9TimeTestDirectionStruct *)arg;
 	uintptr_t i = 0;
 	const uintptr_t numLoops = 500;
 	const I_64 sleepMillis = 20; /* 20*500 -> total thread execution time should be ~ 10 seconds */
 	OMRPORT_ACCESS_FROM_OMRPORT(tds->portLibrary);
 
-	for (i = 0 ; i < numLoops ; i++) {
+	for (i = 0; i < numLoops; i++) {
 		I_64 finish = 0;
 		I_64 start = omrtime_nano_time();
 
@@ -630,7 +675,9 @@ J9THREAD_PROC nanoTimeDirectionTest(void *arg)
 
 		finish = omrtime_nano_time();
 		if (finish <= start) {
-			portTestEnv->log(LEVEL_ERROR, "\tTime did not go forward after omrthread_sleep, start=%llu, finish=%llu\n", start, finish);
+			portTestEnv->log(LEVEL_ERROR,
+			        "\tTime did not go forward after omrthread_sleep, start=%llu, finish=%llu\n", start,
+			        finish);
 			omrthread_monitor_enter(tds->monitor);
 			tds->failed = TRUE;
 			omrthread_monitor_exit(tds->monitor);

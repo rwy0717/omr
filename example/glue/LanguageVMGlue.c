@@ -53,7 +53,7 @@ OMR_Glue_BindCurrentThread(OMR_VM *omrVM, const char *threadName, OMR_VMThread *
 			}
 			/* success */
 			*omrVMThread = newOMRThread;
-done:
+		done:
 			if (OMR_ERROR_NONE != rc) {
 				/* error cleanup */
 				omrthread_detach(self);
