@@ -214,6 +214,7 @@ set(OMR_PORT_ASYNC_HANDLER OFF CACHE BOOL "TODO: Document")
 set(OMR_NOTIFY_POLICY_CONTROL OFF CACHE BOOL "TODO: Document")
 
 set(OMR_ENV_GCC OFF CACHE BOOL "TODO: Document")
+set(OMR_ENV_MUSL OFF CACHE BOOL "Compiling against the MUSL standard C library")
 
 set(OMR_OPT_CUDA OFF CACHE BOOL "Enable CUDA support in OMR. See also: OMR_CUDA_HOME in FindOmrCuda.cmake")
 
