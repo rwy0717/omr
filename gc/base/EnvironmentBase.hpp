@@ -37,6 +37,7 @@
 #include "GCExtensionsBase.hpp"
 #include "LargeObjectAllocateStats.hpp"
 #include "MarkStats.hpp"
+#include "PtrMode.hpp"
 #include "RootScannerStats.hpp"
 #include "ScavengerStats.hpp"
 #include "SweepStats.hpp"
@@ -254,11 +255,27 @@ public:
 		return getExtensions()->getObjectAlignmentInBytes();
 	}
 
+	MMINLINE GC_PtrMode
+	ptrMode() const
+	{
+#if defined(OMR_GC_COMPRESSED_POINTERS)
+#if defined(OMR_GC_FULL_POINTERS)
+		compressObjectReferences() ? PTR_MODE_COMPRESSED : PTR_MODE_FULL;
+#else /* defined(OMR_GC_FULL_POINTERS) */
+		return PTR_MODE_COMPRESSED;
+#endif /* defined(OMR_GC_FULL_POINTERS) */
+#else /* defined(OMR_GC_COMPRESSED_POINTERS) */
+		return PTR_MODE_FULL;
+#endif /* defined(OMR_GC_COMPRESSED_POINTERS) */
+	}
+
 	/**
 	 * Return back true if object references are compressed
 	 * @return true, if object references are compressed
 	 */
-	MMINLINE bool compressObjectReferences() {
+	MMINLINE bool
+	compressObjectReferences() const
+	{
 #if defined(OMR_GC_COMPRESSED_POINTERS)
 #if defined(OMR_GC_FULL_POINTERS)
 		return _compressObjectReferences;

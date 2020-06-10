@@ -31,6 +31,7 @@
 #include "objectdescription.h"
 
 #include "AtomicOperations.hpp"
+#include "PtrMode.hpp"
 
 class GC_SlotObject
 {
@@ -254,4 +255,325 @@ public:
 #endif /* OMR_GC_COMPRESSED_POINTERS */
 	{}
 };
+
+/**
+ * A stand-in or proxy to a slot in an object. Through this class, an object's slot can be read or written.
+ */
+template <GC_PtrMode Mode>
+class GC_Slot;
+
+#if defined(OMR_GC_FULL_POINTERS)
+template <>
+class GC_Slot<PTR_MODE_FULL>
+{
+public:
+	/**
+	 * Read the value of a slot.
+	 *
+	 * @param[in] slotPtr the slot address
+	 * @param[in] compressed true if object to object references are compressed, false if not
+	 * @return the raw contents of the slot (NOT rebased/shifted for compressed references)
+	 */
+	MMINLINE static fomrobject_t readSlot(fomrobject_t *slotPtr)
+	{
+		return (fomrobject_t)*(uintptr_t*)slotPtr;
+	}
+
+	/**
+	 * Calculate the difference between two object slot addresses, in slots
+	 *
+	 * @param[in] p1 the value to be subtracted from
+	 * @param[in] p2 the value to be subtracted
+	 * @param[in] compressed true if object to object references are compressed, false if not
+	 * @return p1 - p2 in slots
+	 */
+	MMINLINE static intptr_t subtractSlotAddresses(fomrobject_t *p1, fomrobject_t *p2)
+	{
+		return (uintptr_t*)p1 - (uintptr_t*)p2;
+	}
+
+	/**
+	 * Calculate the addition of an integer to an object slot address
+	 *
+	 * @param[in] base the base slot address
+	 * @param[in] index the index to add
+	 * @param[in] compressed true if object to object references are compressed, false if not
+	 * @return the adjusted address
+	 */
+	MMINLINE static fomrobject_t *addToSlotAddress(fomrobject_t *base, intptr_t index)
+	{
+		return (fomrobject_t*)((uintptr_t*)base + index);
+	}
+
+	/**
+	 * Calculate the subtraction of an integer from an object slot address
+	 *
+	 * @param[in] base the base slot address
+	 * @param[in] index the index to subtract
+	 * @param[in] compressed true if object to object references are compressed, false if not
+	 * @return the adjusted address
+	 */
+	MMINLINE static fomrobject_t *subtractFromSlotAddress(fomrobject_t *base, intptr_t index)
+	{
+		return (fomrobject_t*)((uintptr_t*)base - index);
+	}
+
+	MMINLINE GC_Slot() : _slot(NULL) {}
+
+	MMINLINE explicit GC_Slot(volatile fomrobject_t* slot) : _slot(slot) {}
+
+	MMINLINE bool valid() const { return getSlotAddress() != NULL; }
+
+	MMINLINE bool invalid() const { return getSlotAddress() == NULL; }
+
+	/**
+	 * Read reference from slot
+	 * @return address of object slot reference to.
+	 */
+	MMINLINE omrobjectptr_t readReferenceFromSlot()
+	{
+		return (omrobjectptr_t)*(uintptr_t volatile *)_slot;
+	}
+
+	/**
+	 * Write reference to slot if it was changed only.
+	 * @param reference address of object should be written to slot
+	 */
+	MMINLINE void writeReferenceToSlot(omrobjectptr_t reference)
+	{
+		*(uintptr_t volatile *)_slot = (uintptr_t)reference;
+	}
+
+	/**
+	 * Atomically replace heap reference. It is accepted to fail - some other thread
+	 * might have raced us and put a more up to date value.
+	 * @return true if write succeeded
+	 */ 	
+	MMINLINE bool atomicWriteReferenceToSlot(omrobjectptr_t oldReference, omrobjectptr_t newReference)
+	{
+		/* Caller should ensure oldReference != newReference */
+		uintptr_t oldValue = (uintptr_t)oldReference;
+		uintptr_t newValue = (uintptr_t)newReference;
+		return (oldValue == MM_AtomicOperations::lockCompareExchange((uintptr_t volatile *)_slot, oldValue, newValue));
+	}
+
+	/**
+	 * Return slot address. This address must be used as read only
+	 * Created for compatibility with existing code
+	 * @return slot address
+	 */
+	MMINLINE fomrobject_t* getSlotAddress() const
+	{
+		return (fomrobject_t*)_slot;
+	}
+
+	/**
+	 *	Update of slot address.
+	 *	Must be used by friends only for fast address replacement
+	 *	@param slot slot address
+	 */
+	MMINLINE void setSlotAddress(fomrobject_t* slot)
+	{
+		_slot = slot;
+	}
+
+	/**
+	 * Advance the slot address by an integer offset
+	 *
+	 * @param[in] offset the offset to add
+	 */
+	MMINLINE void addToSlotAddress(intptr_t offset)
+	{
+		setSlotAddress(addToSlotAddress(getSlotAddress(), offset));
+	}
+
+	/**
+	 * Back up the slot address by an integer offset
+	 *
+	 * @param[in] offset the offset to subtract
+	 */
+	MMINLINE void subtractFromSlotAddress(intptr_t offset)
+	{
+		setSlotAddress(subtractFromSlotAddress(getSlotAddress(), offset));
+	}
+
+private:
+	/**
+	 * stored slot address (volatile, because in concurrent GC the mutator can change the value in _slot).
+	 */
+	volatile fomrobject_t* _slot;
+};
+
+typedef GC_Slot<PTR_MODE_FULL> GC_FullSlot;
+
+#endif /* defined(OMR_GC_FULL_POINTERS) */
+
+#if defined(OMR_GC_COMPRESSED_POINTERS)
+
+template <>
+class GC_Slot<PTR_MODE_COMPRESSED>
+{
+public:
+	/**
+	 * Read the value of a slot.
+	 *
+	 * @param[in] slotPtr the slot address
+	 * @param[in] compressed true if object to object references are compressed, false if not
+	 * @return the raw contents of the slot (NOT rebased/shifted for compressed references)
+	 */
+	MMINLINE static fomrobject_t readSlot(fomrobject_t *slotPtr)
+	{
+		return (fomrobject_t)*(uint32_t*)slotPtr;
+	}
+
+	/**
+	 * Calculate the difference between two object slot addresses, in slots
+	 *
+	 * @param[in] p1 the value to be subtracted from
+	 * @param[in] p2 the value to be subtracted
+	 * @param[in] compressed true if object to object references are compressed, false if not
+	 * @return p1 - p2 in slots
+	 */
+	MMINLINE static intptr_t subtractSlotAddresses(fomrobject_t *p1, fomrobject_t *p2)
+	{
+		return (uint32_t*)p1 - (uint32_t*)p2;
+	}
+
+	/**
+	 * Calculate the addition of an integer to an object slot address
+	 *
+	 * @param[in] base the base slot address
+	 * @param[in] index the index to add
+	 * @param[in] compressed true if object to object references are compressed, false if not
+	 * @return the adjusted address
+	 */
+	MMINLINE static fomrobject_t *addToSlotAddress(fomrobject_t *base, intptr_t index)
+	{
+		return (fomrobject_t*)((uint32_t*)base + index);
+	}
+
+	/**
+	 * Calculate the subtraction of an integer from an object slot address
+	 *
+	 * @param[in] base the base slot address
+	 * @param[in] index the index to subtract
+	 * @param[in] compressed true if object to object references are compressed, false if not
+	 * @return the adjusted address
+	 */
+	MMINLINE static fomrobject_t *subtractFromSlotAddress(fomrobject_t *base, intptr_t index)
+	{
+		return (fomrobject_t*)((uint32_t*)base - index);
+	}
+
+	MMINLINE GC_Slot() : _slot(NULL), _compressedPointersShift(0) {}
+
+	MMINLINE GC_Slot(volatile fomrobject_t* slot, uintptr_t compressedPointersShift)
+		: _slot(slot), _compressedPointersShift(compressedPointersShift) {}
+
+	MMINLINE bool valid() const { return getSlotAddress() != NULL; }
+
+	MMINLINE bool invalid() const { return getSlotAddress() == NULL; }
+
+	/**
+	 * Read reference from slot
+	 * @return address of object slot reference to.
+	 */
+	MMINLINE omrobjectptr_t readReferenceFromSlot()
+	{
+		return (omrobjectptr_t)(((uintptr_t)*(uint32_t volatile *)_slot) << _compressedPointersShift);
+	}
+
+	/**
+	 * Write reference to slot if it was changed only.
+	 * @param reference address of object should be written to slot
+	 */
+	MMINLINE void writeReferenceToSlot(omrobjectptr_t reference)
+	{
+		*(uint32_t volatile *)_slot = (uint32_t)((uintptr_t)reference >> _compressedPointersShift);
+	}
+
+	/**
+	 * Atomically replace heap reference. It is accepted to fail - some other thread
+	 * might have raced us and put a more up to date value.
+	 * @return true if write succeeded
+	 */ 	
+	MMINLINE bool atomicWriteReferenceToSlot(omrobjectptr_t oldReference, omrobjectptr_t newReference)
+	{
+		/* Caller should ensure oldReference != newReference */
+		uintptr_t oldValue = (uintptr_t)oldReference;
+		uintptr_t newValue = (uintptr_t)newReference;
+
+		uint32_t oldCompressed = (uint32_t)(oldValue >> _compressedPointersShift);
+		uint32_t newCompressed = (uint32_t)(newValue >> _compressedPointersShift);
+
+		return (oldCompressed == MM_AtomicOperations::lockCompareExchangeU32((uint32_t volatile *)_slot, oldCompressed, newCompressed));
+	}
+
+	/**
+	 * Return slot address. This address must be used as read only
+	 * Created for compatibility with existing code
+	 * @return slot address
+	 */
+	MMINLINE fomrobject_t* getSlotAddress() const
+	{
+		return (fomrobject_t*)_slot;
+	}
+
+	/**
+	 *	Update of slot address.
+	 *	Must be used by friends only for fast address replacement
+	 *	@param slot slot address
+	 */
+	MMINLINE void setSlotAddress(fomrobject_t* slot)
+	{
+		_slot = slot;
+	}
+
+	/**
+	 * Advance the slot address by an integer offset
+	 *
+	 * @param[in] offset the offset to add
+	 */
+	MMINLINE void addToSlotAddress(intptr_t offset)
+	{
+		setSlotAddress(addToSlotAddress(getSlotAddress(), offset));
+	}
+
+	/**
+	 * Back up the slot address by an integer offset
+	 *
+	 * @param[in] offset the offset to subtract
+	 */
+	MMINLINE void subtractFromSlotAddress(intptr_t offset)
+	{
+		setSlotAddress(subtractFromSlotAddress(getSlotAddress(), offset));
+	}
+
+private:
+	/**
+	 * Inlined version of converting a pointer to a compressed token
+	 */
+	MMINLINE fomrobject_t
+	convertTokenFromPointer(omrobjectptr_t pointer)
+	{
+		uintptr_t value = (uintptr_t)pointer;
+		value >>= _compressedPointersShift;
+		return (fomrobject_t)value;
+	}
+
+	/**
+	 * Stored slot address (volatile, because in concurrent GC the mutator can change the value in _slot)
+	 */
+	volatile fomrobject_t* _slot;
+
+	/**
+	 * The number of bits to shift by when converting between the compressed pointers heap and real heap
+	 */
+	uintptr_t _compressedPointersShift;
+};
+
+typedef GC_Slot<PTR_MODE_COMPRESSED> GC_CompressedSlot;
+
+#endif /* defined(OMR_GC_COMPRESSED_POINTERS) */
+
 #endif /* SLOTOBJECT_HPP_ */

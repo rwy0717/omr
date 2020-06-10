@@ -65,7 +65,10 @@ protected:
 #if defined(OMR_GC_COMPRESSED_POINTERS) && defined(OMR_GC_FULL_POINTERS)
 	bool const _compressObjectReferences;
 #endif /* defined(OMR_GC_COMPRESSED_POINTERS) && defined(OMR_GC_FULL_POINTERS) */
-	
+#if defined(OMR_GC_COMPRESSED_POINTERS)
+	uintptr_t _compressedReferencesShift;
+#endif /* defined(OMR_GC_COMPRESSED_POINTERS) */
+
 public:
 	/**
 	 *  Instantiation flags used to specialize scanner for specific scavenger operations
@@ -107,6 +110,9 @@ protected:
 #if defined(OMR_GC_COMPRESSED_POINTERS) && defined(OMR_GC_FULL_POINTERS)
 		, _compressObjectReferences(env->compressObjectReferences())
 #endif /* defined(OMR_GC_COMPRESSED_POINTERS) && defined(OMR_GC_FULL_POINTERS) */
+#if defined(OMR_GC_COMPRESSED_POINTERS)
+		, _compressedReferencesShift(env->getOmrVM()->_compressedPointersShift)
+#endif /* defined(OMR_GC_COMPRESSED_POINTERS) */
 	{
 		_typeId = __FUNCTION__;
 	}
@@ -172,6 +178,45 @@ public:
 	virtual fomrobject_t *getNextSlotMap(uintptr_t *scanMap, bool *hasNextSlotMap) = 0;
 
 	/**
+	 * Helper to build a slot object from an address. This is a trick to obscure the fact that, in order to construct a
+	 * GC_CompressedSlot, we have to pass in the shift. There are probably other, more elegant ways to achieve this.
+	 */
+	template <GC_PtrMode M>
+	MMINLINE GC_Slot<M> makeSlot(fomrobject_t *address);
+
+	template <GC_PtrMode M>
+	MMINLINE GC_Slot<M> next()
+	{
+		while (NULL != _scanPtr) {
+			/* while there is at least one bit-mapped slot, advance scan ptr to a non-NULL slot or end of map */
+			while ((0 != _scanMap) && ((0 == (1 & _scanMap)) || (0 == GC_Slot<M>::readSlot(_scanPtr)))) {
+				_scanPtr = GC_Slot<M>::addToSlotAddress(_scanPtr, 1);
+				_scanMap >>= 1;
+			}
+			if (0 != _scanMap) {
+				/* set up to return slot object for non-NULL slot at scan ptr and advance scan ptr */
+				_scanPtr = GC_Slot<M>::addToSlotAddress(_scanPtr, 1);
+				_scanMap >>= 1;
+				return makeSlot<M>(_scanPtr);
+			}
+
+			/* slot bit map is empty -- try to refresh it */
+			if (hasMoreSlots()) {
+				bool hasNextSlotMap;
+				_scanPtr = getNextSlotMap(&_scanMap, &hasNextSlotMap);
+				if (!hasNextSlotMap) {
+					setNoMoreSlots();
+				}
+			} else {
+				_scanPtr = NULL;
+				setNoMoreSlots();
+			}
+		}
+
+		return GC_Slot<M>();
+	}
+
+	/**
 	 * Get the next object slot if one is available.
 	 *
 	 * @return a pointer to a slot object encapsulating the next object slot, or NULL if no next object slot
@@ -203,6 +248,7 @@ public:
 				}
 			} else {
 				_scanPtr = NULL;
+				setNoMoreSlots();
 			}
 		}
 
@@ -241,6 +287,44 @@ public:
 	 * @return a pointer to the first slot mapped by the least significant bit of the map, or NULL if no more slots
 	 */
 	virtual fomrobject_t *getNextSlotMap(uintptr_t *scanMap, uintptr_t *leafMap, bool *hasNextSlotMap) = 0;
+
+	template <GC_PtrMode M>
+	MMINLINE GC_Slot<M>
+	next(bool *isLeafSlot)
+	{
+		while (NULL != _scanPtr) {
+			/* while there is at least one bit-mapped slot, advance scan ptr to a non-NULL slot or end of map */
+			while ((0 != _scanMap) && ((0 == (1 & _scanMap)) || (0 == GC_Slot<M>::readSlot(_scanPtr)))) {
+				_scanPtr = GC_Slot<M>::addToSlotAddress(_scanPtr, 1);
+				_scanMap >>= 1;
+				_leafMap >>= 1;
+			}
+			if (0 != _scanMap) {
+				/* set up to return slot object for non-NULL slot at scan ptr and advance scan ptr */
+				_scanPtr = GC_Slot<M>::addToSlotAddress(_scanPtr, 1);
+				_scanMap >>= 1;
+				_leafMap >>= 1;
+				*isLeafSlot = (0 != (1 & _leafMap));
+				return makeSlot<M>(_scanPtr);
+			}
+
+			/* slot bit map is empty -- try to refresh it */
+			if (hasMoreSlots()) {
+				bool hasNextSlotMap;
+				_scanPtr = getNextSlotMap(&_scanMap, &hasNextSlotMap);
+				if (!hasNextSlotMap) {
+					setNoMoreSlots();
+				}
+			} else {
+				*isLeafSlot = true;
+				_scanPtr = NULL;
+				setNoMoreSlots();
+			}
+		}
+
+		*isLeafSlot = true;
+		return GC_Slot<M>();
+	}
 
 	/**
 	 * Get the next object slot if one is available.
@@ -316,5 +400,23 @@ public:
 
 	MMINLINE bool isHeadObjectScanner() { return (0 != (headObjectScanner & _flags)); }
 };
+
+#if defined(OMR_GC_FULL_POINTERS)
+template <>
+MMINLINE GC_FullSlot
+GC_ObjectScanner::makeSlot<PTR_MODE_FULL>(fomrobject_t *address)
+{
+	return GC_FullSlot(address);
+}
+#endif /* defined(OMR_GC_FULL_POINTERS) */
+
+#if defined(OMR_GC_COMPRESSED_POINTERS)
+template <>
+MMINLINE GC_CompressedSlot
+GC_ObjectScanner::makeSlot<PTR_MODE_COMPRESSED>(fomrobject_t *address)
+{
+	return GC_CompressedSlot(address, _compressedReferencesShift);
+}
+#endif /* defined(OMR_GC_COMPRESSED_POINTERS) */
 
 #endif /* OBJECTSCANNER_HPP_ */

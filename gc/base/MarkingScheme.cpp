@@ -290,44 +290,40 @@ MM_MarkingScheme::setMarkBitsInRange(MM_EnvironmentBase *env, void *heapBase, vo
 /**
  * Private internal. Called exclusively from completeScan();
  */
-uintptr_t
-MM_MarkingScheme::scanObject(MM_EnvironmentBase *env, omrobjectptr_t objectPtr)
-{
-	uintptr_t sizeToDo = UDATA_MAX;
-	GC_ObjectScannerState objectScannerState;
-	GC_ObjectScanner *objectScanner = _delegate.getObjectScanner(env, objectPtr, &objectScannerState, SCAN_REASON_PACKET, &sizeToDo);
-	if (NULL != objectScanner) {
-		bool isLeafSlot = false;
-		GC_SlotObject *slotObject;
-#if defined(OMR_GC_LEAF_BITS)
-		while (NULL != (slotObject = objectScanner->getNextSlot(&isLeafSlot))) {
-#else /* OMR_GC_LEAF_BITS */
-		while (NULL != (slotObject = objectScanner->getNextSlot())) {
-#endif /* OMR_GC_LEAF_BITS */
-			fixupForwardedSlot(slotObject);
-
-			inlineMarkObjectNoCheck(env, slotObject->readReferenceFromSlot(), isLeafSlot);
-		}
-	}
-	return sizeToDo;
-}
-
 
 /**
  * Scan until there are no more work packets to be processed.
  * @note This is a joining scan: a thread will not exit this method until
  * all threads have entered and all work packets are empty.
  */
+template <GC_PtrMode M>
 void
-MM_MarkingScheme::completeScan(MM_EnvironmentBase *env)
+MM_MarkingScheme::completeScanHelper(MM_EnvironmentBase *env)
 {
 	do {
 		omrobjectptr_t objectPtr = NULL;
 		while (NULL != (objectPtr = (omrobjectptr_t )env->_workStack.pop(env))) {
-			env->_markStats._bytesScanned += scanObject(env, objectPtr);
+			env->_markStats._bytesScanned += scanObject<M>(env, objectPtr);
 			env->_markStats._objectsScanned += 1;
 		}
 	} while (_workPackets->handleWorkPacketOverflow(env));
+}
+
+void
+MM_MarkingScheme::completeScan(MM_EnvironmentBase *env)
+{
+	switch (env->ptrMode()) {
+#if defined(OMR_GC_FULL_POINTERS)
+	case PTR_MODE_FULL:
+		completeScanHelper<PTR_MODE_FULL>(env);
+		break;
+#endif
+#if defined(OMR_GC_COMPRESSED_POINTERS)
+	case PTR_MODE_COMPRESSED:
+		completeScanHelper<PTR_MODE_COMPRESSED>(env);
+		break;
+#endif
+	}
 }
 
 /****************************************
@@ -428,3 +424,39 @@ MM_MarkingScheme::fixupForwardedSlotOutline(GC_SlotObject *slotObject) {
 	}
 #endif /* OMR_GC_CONCURRENT_SCAVENGER */
 }
+
+template <GC_PtrMode M>
+MMINLINE void
+MM_MarkingScheme::fixupForwardedSlotOutlineHelper(GC_Slot<M> slot)
+{
+#if defined(OMR_GC_CONCURRENT_SCAVENGER)
+	bool const compressed = isCompressed(M);
+	if (_extensions->getGlobalCollector()->isStwCollectionInProgress()) {
+		MM_ForwardedHeader forwardHeader(slot.readReferenceFromSlot(), compressed);
+		omrobjectptr_t forwardPtr = forwardHeader.getNonStrictForwardedObject();
+		if (NULL != forwardPtr) {
+			if (forwardHeader.isSelfForwardedPointer()) {
+				forwardHeader.restoreSelfForwardedPointer();
+			} else {
+				slot.writeReferenceToSlot(forwardPtr);
+			}
+		}
+	}
+#endif /* OMR_GC_CONCURRENT_SCAVENGER */
+}
+
+#if defined(OMR_GC_FULL_POINTERS)
+void
+MM_MarkingScheme::fixupForwardedSlotOutline(GC_FullSlot slot)
+{
+	fixupForwardedSlotOutlineHelper(slot);
+}
+#endif /* defined(OMR_GC_FULL_POINTERS) */
+
+#if defined(OMR_GC_COMPRESSED_POINTERS)
+void
+MM_MarkingScheme::fixupForwardedSlotOutline(GC_CompressedSlot slot)
+{
+	fixupForwardedSlotOutlineHelper(slot);
+}
+#endif /* defined(OMR_GC_COMPRESSED_POINTERS) */

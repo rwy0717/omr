@@ -74,7 +74,27 @@ private:
 	/**
 	 * Private internal. Called exclusively from completeScan();
 	 */
-	MMINLINE uintptr_t scanObject(MM_EnvironmentBase *env, omrobjectptr_t objectPtr);
+	template <GC_PtrMode M>
+	MMINLINE uintptr_t
+	scanObject(MM_EnvironmentBase *env, omrobjectptr_t objectPtr)
+	{
+		uintptr_t sizeToDo = UDATA_MAX;
+		GC_ObjectScannerState objectScannerState;
+		GC_ObjectScanner *objectScanner = _delegate.getObjectScanner(env, objectPtr, &objectScannerState, SCAN_REASON_PACKET, &sizeToDo);
+		if (NULL != objectScanner) {
+			bool isLeafSlot = false;
+			GC_Slot<M> slot;
+#if defined(OMR_GC_LEAF_BITS)
+			while ((slot = objectScanner->next<M>(&isLeafSlot)).valid()) {
+#else /* OMR_GC_LEAF_BITS */
+			while ((slot = objectScanner->next<M>()).valid()) {
+#endif /* OMR_GC_LEAF_BITS */
+				fixupForwardedSlot(slot);
+				inlineMarkObjectNoCheck(env, slot.readReferenceFromSlot(), isLeafSlot);
+			}
+		}
+		return sizeToDo;
+	}
 
 	MM_WorkPackets *createWorkPackets(MM_EnvironmentBase *env);
 
@@ -214,8 +234,11 @@ public:
 	 * on the global work stack during marking. It calls scanObject() for every object in the work stack 
 	 * until the work stack is empty.
 	 */
+	template <GC_PtrMode M>
+	void completeScanHelper(MM_EnvironmentBase *env);
+
 	void completeScan(MM_EnvironmentBase *env);
-	
+
 	/**
 	 * Public object scanning method. Called from external context, eg concurrent GC. Scans object slots
 	 * and marks objects referenfced from specified object.
@@ -285,7 +308,6 @@ public:
 	 * during Scavenger aborted cycle to prevent duplicate copies). The fixup will be done after Scavenger Cycle is done, 
 	 * in the final phase of Concurrent GC when we scan Nursery. 
 	 */
-
 	void fixupForwardedSlot(GC_SlotObject *slotObject) {
 #if defined(OMR_GC_CONCURRENT_SCAVENGER)
 		if (_extensions->isConcurrentScavengerEnabled() && _extensions->isScavengerBackOutFlagRaised()) {
@@ -293,8 +315,28 @@ public:
 		}
 #endif /* OMR_GC_CONCURRENT_SCAVENGER */
 	}
-	
+
+	template <GC_PtrMode M>
+	void fixupForwardedSlot(GC_Slot<M> slot) {
+#if defined(OMR_GC_CONCURRENT_SCAVENGER)
+		if (_extensions->isConcurrentScavengerEnabled() && _extensions->isScavengerBackOutFlagRaised()) {
+			fixupForwardedSlotOutline(slot);
+		}
+#endif /* OMR_GC_CONCURRENT_SCAVENGER */
+	}
+
 	void fixupForwardedSlotOutline(GC_SlotObject *slotObject);
+
+	template <GC_PtrMode M>
+	void fixupForwardedSlotOutlineHelper(GC_Slot<M> slot);
+
+#if defined(OMR_GC_FULL_POINTERS)
+	void fixupForwardedSlotOutline(GC_FullSlot slot);
+#endif
+
+#if defined(OMR_GC_COMPRESSED_POINTERS)
+	void fixupForwardedSlotOutline(GC_CompressedSlot slot);
+#endif
 
 	/**
 	 * Create a MarkingScheme object.
