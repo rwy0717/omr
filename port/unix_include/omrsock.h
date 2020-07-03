@@ -40,6 +40,7 @@
 
 #include <sys/types.h> /* Some historical implementations need this file, POSIX.1-2001 does not. */
 #include <sys/socket.h>
+#include <netinet/in.h>
 #include <netinet/tcp.h>
 
 typedef struct sockaddr omr_os_sockaddr;
